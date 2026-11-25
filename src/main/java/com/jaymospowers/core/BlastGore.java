@@ -287,8 +287,12 @@ public final class BlastGore {
 		return at != null && at == target.level().getGameTime();
 	}
 
-	/** How bulky a body is: its box's width across both ways, times its height. */
-	private static double bulk(LivingEntity e) {
+	/** How bulky a body is: its box's width across both ways, times its height (or what an op set, times a man's). */
+	public static double bulk(LivingEntity e) {
+		Float set = com.jaymospowers.core.reader.GoreOverrides.weight(e.getType());
+		if (set != null) {
+			return set * MAN_BULK;
+		}
 		return (double) e.getBbWidth() * e.getBbWidth() * e.getBbHeight();
 	}
 

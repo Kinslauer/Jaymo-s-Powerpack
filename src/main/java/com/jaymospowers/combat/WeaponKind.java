@@ -4,7 +4,9 @@ import com.jaymospowers.compat.BetterCombatWeapons;
 import com.jaymospowers.core.ArmourKind;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Fractures;
+import com.jaymospowers.core.reader.GoreOverrides;
 import java.util.Locale;
+import java.util.Optional;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.ItemTags;
@@ -127,6 +129,11 @@ public enum WeaponKind {
 		return sum / blows.length;
 	}
 
+	/** The blows of this kind: a cut, a thrust, a blunt blow, or two of them. */
+	public Blow[] blows() {
+		return blows.clone();
+	}
+
 	/** The share of this kind's blow {@code piece}'s own material lets through ({@link ArmourDeflect}), its blows evened out. */
 	public float deflect(ItemStack piece) {
 		float sum = 0.0F;
@@ -143,6 +150,17 @@ public enum WeaponKind {
 
 	/** The kind of weapon {@code stack} is, or null if it isn't one. The same answer on both sides. */
 	public static @Nullable WeaponKind of(ItemStack stack) {
+		if (!stack.isEmpty()) {
+			Optional<WeaponKind> set = GoreOverrides.weapon(stack.getItem());
+			if (set != null) {
+				return set.orElse(null);
+			}
+		}
+		return guess(stack);
+	}
+
+	/** {@link #of} as the mod reads it, with no op's override: the one the reader screen shows as the guess. */
+	public static @Nullable WeaponKind guess(ItemStack stack) {
 		if (stack.isEmpty() || stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES)) {
 			return null;
 		}

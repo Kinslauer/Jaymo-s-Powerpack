@@ -2,6 +2,8 @@ package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.blood.BloodParticles;
+import com.jaymospowers.core.reader.BloodGuess;
+import com.jaymospowers.core.reader.GoreOverrides;
 import com.jaymospowers.core.blood.BloodTrail;
 import com.jaymospowers.core.blood.Bloodied;
 import java.util.ArrayList;
@@ -403,20 +405,36 @@ public final class BladeBlood {
 	/** Whether {@code target} has blood to spill. */
 	public static boolean bleeds(LivingEntity target) {
 		int own = own(target);
-		return own == NO_SAY ? bleeds(target.getType()) : own != NO_BLOOD;
+		if (own != NO_SAY) {
+			return own != NO_BLOOD;
+		}
+		Integer set = GoreOverrides.blood(target.getType());
+		return set != null ? set != NO_BLOOD : bleeds(target.getType()) && BloodGuess.guess(target) != NO_BLOOD;
 	}
 
 	/** (0.15.111) Whether this kind of creature has blood to spill. */
 	public static boolean bleeds(EntityType<?> type) {
-		return !type.builtInRegistryHolder().is(BLOODLESS);
+		Integer set = GoreOverrides.blood(type);
+		if (set != null) {
+			return set != NO_BLOOD;
+		}
+		return !type.builtInRegistryHolder().is(BLOODLESS) && BloodGuess.guess(type) != NO_BLOOD;
 	}
 
 	/** (0.15.93) {@code target}'s blood colour (RGB). */
 	public static int color(LivingEntity target) {
 		int own = own(target);
 		if (own == NO_SAY || own == NO_BLOOD) {
+			Integer set = GoreOverrides.blood(target.getType());
+			if (set != null && set != NO_BLOOD) {
+				return set;
+			}
 			// (0.21.50) any mod's zombie that is one in code bleeds rotten, tagged or not
-			return target instanceof net.minecraft.world.entity.monster.zombie.Zombie ? ROTTEN : color(target.getType());
+			if (target instanceof net.minecraft.world.entity.monster.zombie.Zombie) {
+				return ROTTEN;
+			}
+			int guess = BloodGuess.guess(target);
+			return guess != NO_SAY && guess != NO_BLOOD ? guess : color(target.getType());
 		}
 		return own;
 	}
@@ -459,6 +477,10 @@ public final class BladeBlood {
 
 	/** (0.15.111) This kind of creature's blood colour (RGB). */
 	public static int color(EntityType<?> entityType) {
+		Integer set = GoreOverrides.blood(entityType);
+		if (set != null && set != NO_BLOOD) {
+			return set;
+		}
 		var type = entityType.builtInRegistryHolder();
 		if (type.is(ENDER_BLOOD)) {
 			return ENDER;
@@ -479,7 +501,11 @@ public final class BladeBlood {
 		if (type.is(CREEPER_BLOOD)) {
 			return CREEPER;
 		}
-		return type.is(BUG_BLOOD) ? BUG : RED;
+		if (type.is(BUG_BLOOD)) {
+			return BUG;
+		}
+		int guess = BloodGuess.guess(entityType);
+		return guess != NO_SAY && guess != NO_BLOOD ? guess : RED;
 	}
 
 	/** A blade's blow just landed on {@code target} for {@code damage}: blood, more the harder it was. */
