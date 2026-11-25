@@ -188,7 +188,9 @@ public final class WebInhabit {
 		long until = host.getAttachedOrElse(HOST, now);
 		if (fierce(host)) {
 			// lashing at everything near (the black only for its needs, WebBehemoth#needs), and wasting away, faster toward the end
+			// (and, as it weakens, the frenzy, the roar and the Shroud: WebBehemoth#HURT_HASTE)
 			WebBehemoth.lash(level, host, now);
+			WebBehemoth.fury(level, host, host.getTarget(), now);
 			boolean hunting = false;
 			if (WebSymbioteStrains.of(host) == WebSymbioteStrain.RED && humanoid(host)) {
 				// the red one in a humanoid hunts all it can find (WebRedHunt), and wastes slower while it does
@@ -201,10 +203,15 @@ public final class WebInhabit {
 				until = host.getAttachedOrElse(HOST, until);
 			}
 			if (now >= until) {
-				host.kill(level);
+				if (webUser(host)) {
+					// a host made for it lives through it: it's let go, not killed
+					reject(level, host);
+				} else {
+					host.kill(level);
+				}
 				return;
 			}
-			if (host.tickCount % 20 == 0) {
+			if (host.tickCount % 20 == 0 && !webUser(host)) {
 				long left = until - now;
 				float urgency = 1.0F + 2.0F * (1.0F - Math.min(1.0F, left / (float)HOSTILE_MIN));
 				host.hurtServer(level, level.damageSources().magic(), host.getMaxHealth() * DECAY * FOREIGN_HOST_DPS_MULT * urgency
@@ -213,11 +220,11 @@ public final class WebInhabit {
 		} else if (now >= until) {
 			reject(level, host);
 			return;
-		} else if (host.tickCount % 20 == 0) {
+		} else if (host.tickCount % 20 == 0 && !webUser(host)) {
 			// it isn't made for this either: it wastes as it waits to be spat out
 			host.hurtServer(level, level.damageSources().magic(), host.getMaxHealth() * DECAY * FOREIGN_HOST_DPS_MULT * CALM_DECAY_SHARE);
 		}
-		if (WebSymbioteStrains.of(host) != WebSymbioteStrain.RED && host.tickCount % SEEK_EVERY == 0 && webHostNear(level, host)) {
+		if (WebSymbioteStrains.of(host) != WebSymbioteStrain.RED && !webUser(host) && host.tickCount % SEEK_EVERY == 0 && webHostNear(level, host)) {
 			// the black (and the white) only make do with a mob: a web slinger near with no symbiote of their own is the host
 			// it wants, and it drops off to go to them (WebSymbioteBlob goes for a web slinger first)
 			reject(level, host);
@@ -230,6 +237,15 @@ public final class WebInhabit {
 		if (Soundscape.due(host, "symbiote.inhabit", 85, 115)) {
 			Soundscape.play(level, host.position(), SoundSource.HOSTILE, HEARTBEAT);
 		}
+	}
+
+	/**
+	 * (Andy, 2026-11-25: "the symbiote should sap health from its host unless it is a player or web using npc".) Gifted
+	 * folk with the Web (com.jaymospowers.core.gifted.Gifted) are made for it: it never wastes them, and at the end it
+	 * lets them go alive.
+	 */
+	static boolean webUser(Mob host) {
+		return "web".equals(com.jaymospowers.core.gifted.Gifted.power(host));
 	}
 
 	/** A web slinger within {@code SEEK_RANGE} without a symbiote of their own. */

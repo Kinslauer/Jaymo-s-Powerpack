@@ -327,6 +327,13 @@ public final class WebSymbiote {
 	 * nothing after you within {@link #FLEE_SAFE}, no fire or blast near, not burning.
 	 */
 	public static final float TAKEOVER_RUN_HEALTH = 0.2F;
+	/**
+	 * (Andy, 2026-11-25: takeovers get the new MCA fighting AI's aggression.) Struck in a takeover's fight by something
+	 * other than its prey, within {@code TAKEOVER_TURN_ON_RANGE} blocks, while its prey is out of reach, it turns on
+	 * that one (a blow up to {@code TAKEOVER_TURN_ON_TICKS} ago).
+	 */
+	public static final double TAKEOVER_TURN_ON_RANGE = 6.0;
+	public static final int TAKEOVER_TURN_ON_TICKS = 10;
 	public static final int TAKEOVER_COOLDOWN = 900;
 	/**
 	 * Once it has the wheel it keeps it until it has done what it set out to (its prey dead, a look had, a kill carried
@@ -4209,6 +4216,13 @@ public final class WebSymbiote {
 		if (runsNow(player, live)) {
 			// too hurt, or fire or a blast: into the Shroud and away, and you back once it's safe
 			takeoverRun(player, live, now, prey);
+			return;
+		}
+		// (the fighting AI's aggression) struck by something else close while its prey is out of reach: it turns on that
+		if (!inReach && !live.slingerFight && live.feedStage == FEED_NONE && player.getLastHurtByMob() instanceof LivingEntity by
+			&& by != prey && by.isAlive() && player.tickCount - player.getLastHurtByMobTimestamp() <= TAKEOVER_TURN_ON_TICKS
+			&& by.distanceTo(player) <= TAKEOVER_TURN_ON_RANGE && player.hasLineOfSight(by)) {
+			retarget(player, live, by);
 			return;
 		}
 		if (takeoverMove(player, live, now, prey, inReach)) {
