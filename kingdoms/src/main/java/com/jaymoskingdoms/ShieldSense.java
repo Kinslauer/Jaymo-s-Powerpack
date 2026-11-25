@@ -97,8 +97,9 @@ public final class ShieldSense {
 		BEARERS.put(mob, mob.level().getGameTime());
 	}
 
+	/** A shield in the off hand, or (st-dodge) one on the back that comes to hand when it's shot at ({@link DualBlades#threat}). */
 	private static boolean bearer(Mob mob) {
-		return mob.isAlive() && !mob.isRemoved() && mob.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS);
+		return mob.isAlive() && !mob.isRemoved() && (mob.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS) || DualBlades.onBack(mob));
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -195,6 +196,8 @@ public final class ShieldSense {
 				}
 			}
 			if (front(bearer, path[t - 1], FRONT_MARGIN)) {
+				// (a shield on the back starts to come to hand: of no use for this shot)
+				DualBlades.threat(bearer);
 				MobShields.incoming(bearer, ticks, RISE_SPARE, AFTER_HIT);
 			}
 			return;
@@ -268,6 +271,14 @@ public final class ShieldSense {
 				}
 				continue;
 			}
+			if (DualBlades.onBack(m)) {
+				// (st-dodge) a shield on the back: someone aiming at it brings it to hand
+				looks++;
+				if (!Downed.isDowned(m) && shooter(level, m) != null) {
+					DualBlades.threat(m);
+				}
+				continue;
+			}
 			if (!MobShields.canRaise(m)) {
 				continue;
 			}
@@ -280,6 +291,7 @@ public final class ShieldSense {
 			}
 			LivingEntity shooter = shooter(level, m);
 			if (shooter != null) {
+				DualBlades.threat(m);
 				MobShields.watch(m, WATCH_EVERY + WATCH_HOLD);
 				if (m.distanceToSqr(foe) > MobShields.GUARD_RANGE * MobShields.GUARD_RANGE) {
 					// (its own foe not at hand, it turns its shield square to the one aiming)

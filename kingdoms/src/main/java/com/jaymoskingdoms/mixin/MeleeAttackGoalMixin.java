@@ -3,6 +3,7 @@ package com.jaymoskingdoms.mixin;
 import com.jaymoskingdoms.Blows;
 import com.jaymoskingdoms.MobCombat;
 import com.jaymoskingdoms.MobShields;
+import com.jaymoskingdoms.NpcDodge;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -22,6 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * taken on its shield (sh-counter), never sooner than its weapon's full charge, maybe from a jump's fall (ml-crit); it lands from
  * the game's own reach. After its blow it steps back toward its weapon's reach, never past where it can strike from (ml-reach;
  * every fighter the goal runs).
+ * <p>
+ * Fighting AI patch 7 (st-dodge): a bandit or assassin may roll out of the blow as it comes due ({@link NpcDodge#incoming}).
  */
 @Mixin(MeleeAttackGoal.class)
 abstract class MeleeAttackGoalMixin {
@@ -50,6 +53,12 @@ abstract class MeleeAttackGoalMixin {
 		}
 		// (ml-crit) never sooner than a full charge, and a heavy weapon's blow may wait for the fall of a jump
 		if (this.ticksUntilNextAttack <= 0 && Blows.holds(this.mob, target)) {
+			ci.cancel();
+			return;
+		}
+		// (st-dodge) a bandit or assassin it swings at may read the blow coming and roll out of it; one due now then misses
+		if (this.ticksUntilNextAttack <= NpcDodge.ROLL_LEAD && this.mob.isWithinMeleeAttackRange(target) && this.mob.getSensing().hasLineOfSight(target)
+			&& NpcDodge.incoming(target, this.mob, this.ticksUntilNextAttack) && this.ticksUntilNextAttack <= 0) {
 			ci.cancel();
 		}
 	}

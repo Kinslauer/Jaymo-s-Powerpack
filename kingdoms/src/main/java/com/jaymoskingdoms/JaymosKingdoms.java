@@ -833,6 +833,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Hiding.register();
 		PathProbes.register();
 		Disembark.register();
+		// (fighting AI patch 7) band styles: heavy blows and leaps, shield walls, a second arrow, rolls and two blades
+		BandStyles.register();
 		QuickOrders.register();
 		// (pawn picks patch 2) holding a foe or pinning you, a leg up, readying and ambushes, grabbing loot mid-fight
 		Grapples.register();

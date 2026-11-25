@@ -472,6 +472,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.goalSelector.addGoal(0, new RangedTactics.RepositionGoal(this));
 		// weapon sense: blade when rushed, the weapon's distance band, strafing and leaning, going for what was thrown
 		this.goalSelector.addGoal(0, new WeaponSense.SenseGoal(this));
+		// band styles: heavy blows and leaps, a shield wall's advance, a skilled archer's second arrow (BandStyles)
+		this.goalSelector.addGoal(0, new BandStyles.StyleGoal(this));
 		// badly hurt it breaks off, mends with what it carries and comes back; friends cover it (BreakOff)
 		this.goalSelector.addGoal(BreakOff.MendGoal.PRIORITY, new BreakOff.MendGoal(this));
 		// no way to a shooter: to cover a while (Hiding); no way to its foe: a way round (Detours)
@@ -904,6 +906,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			net.minecraft.world.entity.projectile.Projectile.spawnProjectileUsingShoot(arrow, level, arrowStack, xd, yd + distance * (crossbow ? 0.08F : 0.2F), zd, crossbow ? 2.6F : 1.6F, crossbow ? 1.0F : 4.0F);
 		}
 		this.playSound(bow.is(Items.CROSSBOW) ? net.minecraft.sounds.SoundEvents.CROSSBOW_SHOOT : net.minecraft.sounds.SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+		// (st-archers) a skilled archer's second arrow follows (BandStyles)
+		BandStyles.loosed(this, target);
 	}
 
 	/** An archer at its post: it stays put, faces its target, and looses an arrow every so often while it can see it. */
