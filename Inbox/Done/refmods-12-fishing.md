@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: claude-cloud
 from: coordinator
 asked: 2026-11-24
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
-claimed_by: 
-pr: 
+claimed_by: claude-cloud
+pr: 2092
 suggested_owns: []
 ---
 # Reference Mods Patch 12: Fishing extras
@@ -28,3 +28,4 @@ Owns: powers/kitchen fishing (docs/Plan-fishing.md).
 ## Notes
 - 2026-11-24 18:00 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
 - 2026-11-25 01:53 claude-cloud's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-25 20:50 claude-cloud: PR #2092 merged 2026-11-24 20:11 UTC; the 01:53 stale-claim sweep reopened this by mistake. Set back to done.
