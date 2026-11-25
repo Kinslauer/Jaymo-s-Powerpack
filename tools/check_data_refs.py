@@ -5,6 +5,9 @@
 - a loot table or predicate using a condition or function name 26.3 doesn't have (block_state_property, now match_block,
   did). The lists below are 26.3's own (LootItemConditionTypes, LootPredicates, LootItemFunctions, LootPoolEntries);
 - any data or asset JSON that doesn't parse at all;
+- a loot tag entry with "name" (26.3 reads "items": "#<tag>"), a shaped recipe whose pattern rows differ in width, or an
+  ore feature target whose "state" is {"Name": ...} (26.3 wants the block id as a string): the Fae Woods data had all
+  three (2026-11-25);
 - an equipment look (assets/<mod>/equipment) with no layers: 26.3 logs "Map must have contents" for it on every launch.
   An armour drawn by its own model needs no equipment file (the game then draws no layer), so leave the file out.
 An item exists if it has assets/<mod>/items/<id>.json or blockstates/<id>.json, or its id appears as a string in the
@@ -48,12 +51,25 @@ def loot_names(node, f):
 		for x in node:
 			loot_names(x, f)
 
+def tag_entries_26_3(node, f):
+	"""26.3's loot tag entry reads "items" (a holder set, "#<tag>"); "name" stops the server loading."""
+	if isinstance(node, dict):
+		if node.get('type') in ('minecraft:tag', 'tag') and 'items' not in node:
+			problems.append(f'{f}: a tag entry needs "items": "#<tag>" in 26.3, not "name"')
+		for v in node.values():
+			tag_entries_26_3(v, f)
+	elif isinstance(node, list):
+		for x in node:
+			tag_entries_26_3(x, f)
+
 def loot_tags(node, out=None):
 	"""The names of a loot table's tag entries (item tags, not items)."""
 	out = set() if out is None else out
 	if isinstance(node, dict):
-		if node.get('type') in ('minecraft:tag', 'tag') and isinstance(node.get('name'), str):
-			out.add(node['name'])
+		if node.get('type') in ('minecraft:tag', 'tag'):
+			for key in ('items', 'name'):
+				if isinstance(node.get(key), str):
+					out.add(node[key].lstrip('#'))
 		for v in node.values():
 			loot_tags(v, out)
 	elif isinstance(node, list):
@@ -70,6 +86,7 @@ for ns, root in MODS.items():
 		if any(f'/{sub}/' in f for sub in ('loot_table', 'predicate', 'item_modifier')):
 			try:
 				loot_names(json.loads(text), f)
+				tag_entries_26_3(json.loads(text), f)
 			except ValueError as e:
 				problems.append(f'{f}: not valid JSON ({e})')
 		if '/recipe/' in f:
@@ -82,6 +99,9 @@ for ns, root in MODS.items():
 			allowed = COOK if any(k in kind for k in ('smelting', 'blasting', 'smoking', 'campfire')) else CRAFT if kind.startswith('minecraft:crafting') else None
 			if cat is not None and allowed is not None and cat not in allowed:
 				problems.append(f'{f}: category "{cat}" isn\'t one of {sorted(allowed)}')
+			rows = d.get('pattern') if kind == 'minecraft:crafting_shaped' else None
+			if isinstance(rows, list) and len({len(r) for r in rows}) > 1:
+				problems.append(f'{f}: pattern rows must all be the same width (pad with spaces: "#  ", "## ", "###")')
 		tag_names = set()
 		if '/loot_table/' in f:
 			try:
@@ -104,6 +124,10 @@ for ns, root in MODS.items():
 		except ValueError as e:
 			problems.append(f'{f}: not valid JSON ({e})')
 			continue
+		if '/worldgen/feature/' in f and isinstance(d, dict) and d.get('type') in ('minecraft:ore', 'minecraft:scattered_ore'):
+			for t in d.get('targets') or []:
+				if isinstance(t, dict) and isinstance(t.get('state'), dict) and 'Name' in t['state']:
+					problems.append(f'{f}: an ore target\'s "state" is the block id as a string in 26.3, not {{"Name": ...}}')
 		if '/equipment/' in f and '/assets/' in f and isinstance(d, dict) and not d.get('layers'):
 			problems.append(f'{f}: equipment look with no layers (delete the file if the armour has its own model)')
 
