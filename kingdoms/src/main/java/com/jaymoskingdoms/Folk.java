@@ -935,7 +935,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				// (0.7.184) ready to shoot with nothing to shoot at: that is a failure too
 				RangedTactics.blocked(this.archer, target);
 			}
-			if (--this.cooldown <= 0 && sees) {
+			// (sh-busy) no shot with the shield up: a crossbowman reloads behind it and lowers it to fire (MobShields)
+			if (--this.cooldown <= 0 && sees && !MobShields.holdsFire(this.archer, true)) {
 				this.cooldown = Sorcery.isCaster(this.archer.role()) ? Sorcery.CAST_TICKS : ARCHER_INTERVAL;
 				this.archer.performRangedAttack(target, 1.0F);
 			}

@@ -276,7 +276,8 @@ public final class MobCombat {
 		}
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
-		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0) {
+		// ((fighting AI patch 3, ml-crit) and never sooner than its weapon's full charge after the last: no spam)
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || now - swing.lastSwing < Blows.fullCharge(mob)) {
 			return;
 		}
 		if (now - swing.endsAt > COMBO_RESET_TICKS) {
@@ -288,6 +289,8 @@ public final class MobCombat {
 			return;
 		}
 		start(level, mob, target, moves, move, red(mob, moves, move), swing, now);
+		// (ml-crit) a heavy weapon's blow may be timed to fall from a jump
+		Blows.plan(mob, target, swing.hitAt, now);
 	}
 
 	/**
@@ -349,7 +352,7 @@ public final class MobCombat {
 		}
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
-		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0) {
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || now - swing.lastSwing < Blows.fullCharge(mob)) {
 			return false;
 		}
 		Move heaviest = pick(mob, moves, 0);
@@ -384,7 +387,7 @@ public final class MobCombat {
 		}
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
-		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0) {
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || now - swing.lastSwing < Blows.fullCharge(mob)) {
 			return;
 		}
 		if (now - swing.endsAt > COMBO_RESET_TICKS) {
@@ -435,6 +438,7 @@ public final class MobCombat {
 
 	/** (0.7.283) The plain blow lands on its one target, if it's still in reach and sight; a miss is heard. */
 	private static void plainStrike(ServerLevel level, Mob mob, @Nullable LivingEntity target, boolean heavy) {
+		Blows.blown(mob);
 		if (target == null || !target.isAlive() || target.level() != level
 			|| gap(mob, target) > BASE_REACH + 0.25 + slack(target) && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, mob.getSoundSource(), 0.6F, 0.8F);
@@ -538,6 +542,12 @@ public final class MobCombat {
 	/** (0.7.267) A gun's ball or shot: nobody parries it (Jaymo's Powers' guard reads the tag); a shield still blocks it. */
 	static void unparryable(net.minecraft.world.entity.Entity shot) {
 		shot.addTag(UNPARRYABLE_TAG);
+	}
+
+	/** (sh-shooter) Whether this gunman has its gun up on a foe just now (its red glint, {@link #aimed}), the shot to come. */
+	static boolean aiming(Mob mob) {
+		Long fireAt = AIMS.get(mob);
+		return fireAt != null && mob.level().getGameTime() <= fireAt + AIM_STALE;
 	}
 
 	/** (0.7.267) Its next swing may start at once (a parry answered, {@link MobParry}). */
@@ -673,6 +683,7 @@ public final class MobCombat {
 		if (moves == null) {
 			return;
 		}
+		Blows.blown(mob);
 		double reach = moves.reach() * move.reachScale();
 		double half = switch (move.shape()) {
 			case 2 -> Math.max(STAB_HALF_ANGLE, move.angle() / 2.0);
