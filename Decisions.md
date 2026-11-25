@@ -1100,3 +1100,6 @@ Andy: "can you make one of these as an example?" Supplied Hand-built starts (adv
 - 2026-11-25 (Andy): the next pbdr starts a NEW WORLD, but only when Andy says go ("something else is coming to master").
 - 2026-11-25 (Andy): for that new-world pbdr, the current world can be deleted ("the current one can be deleted"), not kept as a backup. One-time ruling; the pbdr skill's never-delete rule stands otherwise.
 - 2026-11-25 (Andy): Deck cleanup: emptied Trash, deleted world-backup-2026-11-17-0835 and -11-22-2040, emptied ~/Downloads; kept the shader cache.
+- 2026-11-25 (Andy, red suit thread, PR #2164): approved the lore paragraph "Three colours, three names" (villagers tell black, red and white apart; white = the quiet warrior of the old songs; the red one hunts first and trusts its host into control).
+- 2026-11-25 (Andy, Reason Art thread "Pick Symbiote 1.1.3 ideas to adapt"): picked 49 of 54 rows from the Symbiote 1.1.3 jar pick page (ideas only, ARR); not picked: arm vein mining, longer reach, gear over shell, the graft, the lab. Plan: docs/Symbiote113-Plan.md.
+- 2026-11-25 (Andy, same thread, row notes): Carapace becomes the black strain's Shroud tile and Aegis the white's; big bodies congeal through doors and 1x2 gaps and form whole again; while you sleep the blob really leaves and roams the world during the night skip.
