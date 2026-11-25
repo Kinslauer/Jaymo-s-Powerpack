@@ -127,15 +127,27 @@ public final class TalkBusy {
 			mob.getLookControl().setLookAt(player);
 			McaCompat.hearts(mob, player, -SNAP_HEARTS);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 0.85F);
-			Speech.tell(level, mob, player, Component.translatable(why.snapKey() + "." + level.getRandom().nextInt(SNAP_LINES), player.getDisplayName()), Speech.WHITE);
+			tell(level, mob, player, why, Component.translatable(why.snapKey() + "." + level.getRandom().nextInt(SNAP_LINES), player.getDisplayName()));
 			return true;
 		}
 		Long last = LAST.get(player.getUUID());
 		if (last == null || now - last >= GAP || now < last) {
 			LAST.put(player.getUUID(), now);
-			Speech.tell(level, mob, player, Component.translatable(why.key() + "." + level.getRandom().nextInt(LINES), player.getDisplayName()), Speech.WHITE);
+			tell(level, mob, player, why, Component.translatable(why.key() + "." + level.getRandom().nextInt(LINES), player.getDisplayName()));
 		}
 		return true;
+	}
+
+	/**
+	 * {@code mob} tells {@code player} why they're busy; (refusal hints) one who doesn't share their tongue is shown it
+	 * instead ({@code talk_busy.jaymoskingdoms.gesture.<why>}), since words they don't know are no reason.
+	 */
+	private static void tell(ServerLevel level, PathfinderMob mob, ServerPlayer player, Why why, Component words) {
+		if (Languages.understands(player, mob)) {
+			Speech.tell(level, mob, player, words, Speech.WHITE);
+		} else {
+			Speech.sayPlainly(level, mob, player, Component.translatable("talk_busy.jaymoskingdoms.gesture." + why.name().toLowerCase(java.util.Locale.ROOT)), Speech.WHITE);
+		}
 	}
 
 	/**

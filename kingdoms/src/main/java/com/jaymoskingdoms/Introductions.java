@@ -446,11 +446,18 @@ public final class Introductions {
 		if (Recollections.refuses(villager, player)) {
 			// (0.7.490) an orc or goblin with a grudge refuses in its own dialect
 			// (asked again the same day, they've had enough of you: refusal)
-			return refusal(player, villager, () -> Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_refused"));
+			return refusal(player, villager, () -> {
+				// (refusal hints) the first no says why
+				RefusalHints.hintStanding(player, villager);
+				return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_refused");
+			});
 		}
 		if (!Outlaws.is(villager) && !ZFighterFolk.is(villager) && wary(player, villager)) {
 			// (0.7.504) one who minds you keeps their name until you've proven yourself
-			return refusal(player, villager, () -> waryLine(villager, player));
+			return refusal(player, villager, () -> {
+				RefusalHints.hintWary(player, villager);
+				return waryLine(villager, player);
+			});
 		}
 		if (Outlaws.is(villager)) {
 			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves
