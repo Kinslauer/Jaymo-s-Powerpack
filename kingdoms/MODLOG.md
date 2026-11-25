@@ -17415,3 +17415,10 @@ Andy: "the AI in these mods is exactly what our MCA and npcs have been missing."
 
 - Fear cries, "we know what you are" lines and gossip now have their own families for the **red** symbiote (the bloody one, the killer) and the **white** one (the quiet warrior of the old songs, in his white cloak), read from Powers' `symbiote_red` / `symbiote_white` tags; the black one keeps its lines (`Oddities.strain`, lang part `talk-odd-strains.json`).
 - Built; not played.
+
+## 0.12.88 (2026-11-25): tree debris only when a player brought the tree down (#2165)
+
+- Falling trees leave drops only when a player caused the fall: they cut it, a tree they cut (ours or Felled's) knocked it over, or they've taken an axe to it since (`FallingTree.byPlayer`, saved). Trees brought down by storms, fire, giants, tornadoes, loose wood or a woodcutter's stray knock leave nothing: no saplings, sticks or apples from their leaves, nothing from the leaves and blocks they smash on the way down. A woodcutter's own tree still goes into his bag.
+- A player's fallen tree still drops its leaves a few at a time as it lies, but those only give drops while a player is within 32 blocks (`DEBRIS_WATCH`); otherwise they wither to nothing.
+- Loose bare logs falling like sand no longer turn into item drops when they can't land as a block.
+- Fixes villages and forests filling with hundreds of item drops after a storm (lag). Built; not played.
