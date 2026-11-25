@@ -3,7 +3,7 @@ status: review
 task: Rebuild Hostile Humans' fighting AI ideas for our NPCs (all 39 picks)
 branch: claude/project-thread-jgzz4p
 with: claude-cloud (thread cmsg_017LSt6rWz6CzxSGvzDd41XWMdf5YpHehrtg8Waq6vJEPR)
-pr: 
+pr: 2159
 mods: kingdoms
 versions: 
 started: 2026-11-25
