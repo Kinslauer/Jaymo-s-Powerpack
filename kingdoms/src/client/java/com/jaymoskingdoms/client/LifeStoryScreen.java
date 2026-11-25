@@ -177,6 +177,8 @@ final class LifeStoryScreen extends Screen {
 	/** (0.7.417, Start Together) The party mates who took a road lately, as the server last told. */
 	private static List<LifeStory.Mate> mates = List.of();
 	private static long quietUntil;
+	/** Why the server refused the story last sent ({@link LifeStory.Refused}), shown on the story page till the next is sent (null: none). */
+	private static @Nullable String refused;
 	private static List<LifeStory.Realm> realms = List.of();
 	/** (0.7.419) The locked roads the server said this player can take whatever their past (a deed, ops, a road they took), and those ops shut (keys). */
 	private static List<String> unlockedRoads = List.of(), shutRoads = List.of();
@@ -225,12 +227,31 @@ final class LifeStoryScreen extends Screen {
 			}
 			context.client().gui.setScreen(new LifeStoryScreen(payload.forced()));
 		});
+		ClientPlayNetworking.registerGlobalReceiver(LifeStory.Refused.TYPE, (payload, context) -> {
+			// the screen comes straight back, at the first page that wants mending (a realm that fell is unnamed again)
+			refused = payload.reason();
+			quietUntil = 0L;
+			if (realmName(Question.RAISED) == null) {
+				draft.raisedRealm = -1;
+			}
+			if (realmName(Question.ROAD) == null) {
+				draft.roadRealm = -1;
+			}
+			List<Step> all = steps();
+			for (int i = 0; i < all.size(); i++) {
+				if (!answered(all.get(i))) {
+					draft.step = i;
+					break;
+				}
+			}
+		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!owed || minecraft.player == null) {
 				return;
 			}
 			if (done()) {
 				owed = false;
+				refused = null;
 				draft = new Draft();
 			} else if (tabbed()) {
 				// a skipped story waits for MCA's creator and its tab. Should the creator never come (or shut without the
@@ -250,6 +271,7 @@ final class LifeStoryScreen extends Screen {
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			owed = false;
+			refused = null;
 			creatorAhead = false;
 			mates = List.of();
 			unlockedRoads = List.of();
@@ -378,6 +400,10 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	private static @Nullable Answer picked(Question q) {
+		// the road waits for MCA's creator: one left over from before (an earlier page, an earlier open) isn't this story's yet
+		if (q == Question.ROAD && creatorAhead && !roadOnly()) {
+			return null;
+		}
 		int i = draft.answers[q.ordinal()];
 		// (0.7.356) on the road alone, the rest is the story told before MCA's creator
 		Minecraft minecraft = Minecraft.getInstance();
@@ -479,11 +505,18 @@ final class LifeStoryScreen extends Screen {
 			if (draft.explicit && McaCompat.LOADED && draft.gender < 0) {
 				return false;
 			}
+			// a realm the story names has to be one there is (it may have fallen since it was picked)
+			for (Question q : new Question[] {Question.RAISED, Question.ROAD}) {
+				Answer a = picked(q);
+				if (a != null && a.realm() && realmName(q) == null) {
+					return false;
+				}
+			}
 			Classes.PlayerClass cls = youthClass();
 			return cls == null || cls.options.isEmpty() || draft.option >= 0;
 		}
 		if (s.realm) {
-			return realmOf(s.question) >= 0;
+			return realmName(s.question) != null;
 		}
 		// (0.7.356) the carousel shows every road, open or not: only an open one goes on
 		Answer a = picked(s.question);
@@ -1180,6 +1213,7 @@ final class LifeStoryScreen extends Screen {
 				return;
 			}
 			Answer road = picked(Question.ROAD);
+			refused = null;
 			ClientPlayNetworking.send(new LifeStory.Road(draft.answers[Question.ROAD.ordinal()], road != null && road.realm() ? draft.roadRealm : -1, lookIndex(),
 				draft.tone));
 			quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
@@ -1195,6 +1229,7 @@ final class LifeStoryScreen extends Screen {
 		if (draft.explicit) {
 			settle();
 		}
+		refused = null;
 		ClientPlayNetworking.send(life(draft.gender));
 		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
 		onClose();
@@ -1204,7 +1239,8 @@ final class LifeStoryScreen extends Screen {
 	private static LifeStory.Live life(int gender) {
 		List<Integer> answers = new ArrayList<>();
 		for (Question q : Question.values()) {
-			answers.add(q.asked() ? draft.answers[q.ordinal()] : -1);
+			// (with MCA's creator to come the road is told after it: none is sent now, whatever the draft held)
+			answers.add(q.asked() && !(q == Question.ROAD && creatorAhead) ? draft.answers[q.ordinal()] : -1);
 		}
 		Answer raised = picked(Question.RAISED), road = picked(Question.ROAD);
 		return new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
@@ -2006,6 +2042,14 @@ final class LifeStoryScreen extends Screen {
 		int px = paneX(), pw = paneW(), textW = pw - 22;
 		int y = top() + HEADER + 4 - this.scroll;
 		int startY = y;
+		// the server refused the story last sent: why, over the tale
+		if (refused != null) {
+			for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.story.refused." + refused), textW)) {
+				graphics.text(this.font, line, px + 10, y, Ui.BAD);
+				y += Ui.LINE;
+			}
+			y += 4;
+		}
 		List<FormattedCharSequence> tale = this.font.split(tale(), textW);
 		for (FormattedCharSequence line : tale) {
 			graphics.text(this.font, line, px + 10, y, Ui.TEXT);
