@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 19:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 20:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2180 space pods fly: a climb through the sky, a piloted crossing, raiders, wrecks, rocks, a sling past the Maw, towing and Patrol posts (Powers, Kingdoms, 2026-11-25)
 - [ ] #2179 Fae Woods: shipped mods for the Blossom land, balloon gusts (Powers, Kingdoms, Kitchen, 2026-11-25)
 - [ ] #2178 Mordhau harness 2: the coif's cuts and the wrapper at the anvil, the champion's wreath (Powers, Kingdoms, 2026-11-25)
 - [ ] #2177 The Last Lantern: a second hand-built start example (Kingdoms, 2026-11-25)
@@ -82,8 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2121 Takeover pathing fixes: long tunnels, safe shafts, no stray weapon arm (Powers, 2026-11-24)
 - [ ] #2120 Scouter: hold to scan, full readings, marks and tracking (Powers, Kingdoms, 2026-11-24)
 - [ ] #2119 players' limbs twice as tough (Powers, Kitchen, 2026-11-24)
-- [ ] #2118 spiders in leaves leave you be by day (Powers, Kingdoms, 2026-11-24)
-- …and 566 older ones.
+- …and 567 older ones.
 
 ## Health
 
