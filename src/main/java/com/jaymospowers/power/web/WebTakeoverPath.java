@@ -1528,6 +1528,10 @@ final class WebTakeoverPath {
 		if (hardness < 0.0F || hardness > RIP_MAX_HARDNESS) {
 			return false;
 		}
+		if (state.getBlock() instanceof net.minecraft.world.level.block.DoorBlock door && !door.type().canOpenByHand()) {
+			// an iron door stops it
+			return false;
+		}
 		return player.mayInteract(level, pos) && !player.blockActionRestricted(level, pos, player.gameMode());
 	}
 
@@ -1615,6 +1619,26 @@ final class WebTakeoverPath {
 		route.ripping = null;
 		if (player.getAttached(WebSymbiote.RIPPING) != null) {
 			player.removeAttached(WebSymbiote.RIPPING);
+		}
+		// a wooden door comes off whole and drops, leaves are bitten through: neither flies off as a clump
+		for (int i = taken.size() - 1; i >= 0; i--) {
+			BlockPos pos = taken.get(i);
+			BlockState state = states.get(i);
+			boolean door = state.is(BlockTags.WOODEN_DOORS);
+			if (!door && !state.is(BlockTags.LEAVES)) {
+				continue;
+			}
+			if (level.getBlockState(pos).is(state.getBlock())) {
+				level.destroyBlock(pos, door, player, 512);
+				PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, player, pos, state, null);
+			}
+			route.ripped++;
+			taken.remove(i);
+			states.remove(i);
+		}
+		if (taken.isEmpty()) {
+			finishRip(player, route);
+			return;
 		}
 		BlockCluster chunk = BlockCluster.of(level, taken, route.ripDir.scale(-RIP_CLUMP_OUT), player);
 		if (chunk == null) {

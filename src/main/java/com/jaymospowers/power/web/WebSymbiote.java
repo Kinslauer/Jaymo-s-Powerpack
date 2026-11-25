@@ -106,6 +106,8 @@ public final class WebSymbiote {
 	 * is slot 11 of the cooldowns), {@link #STEED_TOGGLE} takes or lets go of the horse under you ({@link WebSymbioteSteed}).
 	 */
 	public static final int WINGS_TOGGLE = 10, CLEANSE = 11, STEED_TOGGLE = 12;
+	/** The menu's Lash chip: the tendrils' sweep ({@link WebLash}; its cooldown is slot {@code LASH} of the cooldowns). */
+	public static final int LASH = 13;
 	/** Cooldown of each ability after use, in ticks (toggles: after switching). */
 	public static final int[] COOLDOWN = {100, 200, 20, 160, 240, 600};
 	/** Satiety each ability costs. */
@@ -1216,6 +1218,8 @@ public final class WebSymbiote {
 		long escapeAt;
 		/** A weak bond's takeover on a whim; when it may next speak; the struggle against its hold (presses, fading), the last press, and whether it answered it. */
 		boolean feral;
+		/** The black one's night prowl ({@link WebSymbioteProwl}): a takeover to stalk and kill one hostile mob, then it gives the body back. */
+		boolean prowl;
 		long narrateAt;
 		float struggle;
 		long struggleAt;
@@ -1268,6 +1272,10 @@ public final class WebSymbiote {
 		});
 		// (0.13.4) nor lets a fall kill you: it pools over your legs and takes the landing
 		WebSymbioteCushion.register();
+		WebSymbioteReflexes.register();
+		WebSymbioteSleep.register();
+		WebSymbioteDoors.register();
+		WebSymbioteVillage.register();
 		WebSymbioteWings.register();
 		WebSymbioteJar.register();
 		WebSymbioteSteed.register();
@@ -1396,7 +1404,9 @@ public final class WebSymbiote {
 	 * there every one opens by the held bond; a web slinger's are {@link #UNLOCK_BOND}.
 	 */
 	public static int unlockBond(Player player, int ability) {
-		return Powers.has(player, WebPower.INSTANCE) ? UNLOCK_BOND[ability] : Math.min(UNLOCK_BOND[ability], WebSymbioteInfection.HOLD_BOND);
+		// (the white one's Aegis takes the Shroud tile from the Integrated stage)
+		int base = ability == SHROUD && state(player).kind() == WebSymbioteStrain.WHITE ? WebSymbioteMind.STAGE_AT[1] : UNLOCK_BOND[ability];
+		return Powers.has(player, WebPower.INSTANCE) ? base : Math.min(base, WebSymbioteInfection.HOLD_BOND);
 	}
 
 	/**
@@ -1601,7 +1611,7 @@ public final class WebSymbiote {
 		// (each strain speaks in its own colour: WebSymbioteStrains)
 		// (0.17.150) in a mood, a line of its commentary has a variant of its own where one was written
 		String line = WebSymbioteMind.voice(player, key);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + line, args)
+		WebSymbioteWords.say(player, Component.translatable("message.jaymospowers.web_symbiote." + line, args)
 			.withStyle(WebSymbioteStrains.voice(player), ChatFormatting.ITALIC));
 		// (0.17.202) its narration is spoken aloud too, where the line has a clip
 		WebSymbioteVoice.speak(player, line);
@@ -1617,6 +1627,9 @@ public final class WebSymbiote {
 	static float urgency(String key) {
 		if (key.startsWith("panic.")) {
 			return URGENCY_MAX;
+		}
+		if (key.startsWith("reflex.")) {
+			return key.startsWith("reflex.goodbye") || key.startsWith("reflex.arrow") ? URGENCY_MOOD : URGENCY_WARNING;
 		}
 		if (key.startsWith("harden")) {
 			return URGENCY_HARDEN;
@@ -1669,7 +1682,7 @@ public final class WebSymbiote {
 		if (to > from) {
 			for (int i = 0; i < ABILITIES; i++) {
 				if (from < unlockBond(player, i) && to >= unlockBond(player, i)) {
-					whisper(player, "unlock_" + ABILITY_NAMES[i]);
+					whisper(player, "unlock_" + (i == SHROUD && state(player).kind() == WebSymbioteStrain.WHITE ? "aegis" : ABILITY_NAMES[i]));
 					player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.2F, 0.8F);
 				}
 			}
@@ -1751,6 +1764,10 @@ public final class WebSymbiote {
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		// its blob is out walking while you sleep: nothing else of it runs (WebSymbioteSleep)
+		if (WebSymbioteSleep.tick(player, state, now)) {
+			return;
+		}
 		// (0.15.69) you went down: it gets you up and away (WebSymbioteRescue), and has the wheel till then
 		if (WebSymbioteRescue.tick(player, state, now)) {
 			return;
@@ -1771,9 +1788,15 @@ public final class WebSymbiote {
 		WebSymbioteCollect.tick(player, now);
 		// (0.17.150) its trust, mood, orders and requests (WebSymbioteMind)
 		WebSymbioteMind.tick(player, state, now);
+		// (the black one now and then takes you out to kill something at night: WebSymbioteProwl)
+		WebSymbioteProwl.tick(player, state, now);
+		// golems turn on a host whose symbiote shows, villagers shy from the black one (WebSymbioteVillage)
+		WebSymbioteVillage.tick(player, state, now);
 		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
 		WebSymbioteBond.tick(player, now);
 		WebSymbioteCushion.tick(player, now);
+		// the big bodies congeal through a 1x2 gap and form whole again (WebSymbioteDoors)
+		WebSymbioteDoors.tick(player);
 		WebSymbioteMend.tick(player, now);
 		boolean dormant = WebSymbioteBond.dormant(player);
 		WebSymbioteState next = state;
@@ -2028,7 +2051,7 @@ public final class WebSymbiote {
 		}
 
 		// wall crawl: hanging on a wall or ceiling is like being on a ladder
-		live.clinging = crawlTendrils(player) && !player.onGround() && touchingWall(player);
+		live.clinging = crawlTendrils(player) && !player.onGround() && touchingWall(player) && WebStamina.cling(player);
 		if (live.clinging) {
 			player.resetFallDistance();
 		}
@@ -2495,7 +2518,7 @@ public final class WebSymbiote {
 	/** Eating raw meat while bonded feeds it instead of you. Returns true if it took the meal. */
 	public static boolean feedOnMeat(ServerPlayer player, ItemStack stack, int nutrition) {
 		// (0.17.150) the white one won't touch carrion, and none of them eat when full: you eat it yourself then (WebSymbioteBody)
-		if (!isBonded(player) || !RAW_MEAT.contains(stack.getItem()) || WebSymbioteBody.turnsDown(player, stack)) {
+		if (!isBonded(player) || !(RAW_MEAT.contains(stack.getItem()) || stack.is(WebSymbioteMolt.MEAT)) || WebSymbioteBody.turnsDown(player, stack)) {
 			return false;
 		}
 		WebSymbioteState state = state(player);
@@ -2503,6 +2526,7 @@ public final class WebSymbiote {
 			.withStress(Math.max(0, state.stress() - 3));
 		next = hintOnce(player, next, HINT_MEAT, "meat");
 		set(player, next);
+		WebSymbioteMolt.eaten(player, stack);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 0.5F, 0.7F);
@@ -2698,6 +2722,8 @@ public final class WebSymbiote {
 				whisper(player, lines + "rival." + (1 + player.getRandom().nextInt(SAY_LINES)));
 			} else if (live.bloodlust) {
 				whisper(player, "red.hunt." + (1 + player.getRandom().nextInt(SAY_LINES)));
+			} else if (live.prowl) {
+				whisper(player, "prowl." + (1 + player.getRandom().nextInt(WebSymbioteProwl.LINES)));
 			} else if (live.feral && !live.curious && !live.hunting) {
 				// a different complaint each time
 				int line = player.getRandom().nextInt(NEGLECT_LINES - 1);
@@ -3184,6 +3210,12 @@ public final class WebSymbiote {
 		live.moveDeck = null;
 		live.hunting = false;
 		live.feral = false;
+		if (live.prowl) {
+			live.prowl = false;
+			if (player.isAlive()) {
+				whisper(player, "prowl.done." + (1 + player.getRandom().nextInt(WebSymbioteProwl.DONE_LINES)));
+			}
+		}
 		live.spree = false;
 		live.mending = false;
 		live.bloodlust = false;
@@ -3246,6 +3278,22 @@ public final class WebSymbiote {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.9F, 0.6F);
 			level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.3, 0.7, 0.3, 0.0);
 		}
+	}
+
+	/** The night prowl (see {@link WebSymbioteProwl}): it takes the wheel to stalk and kill {@code target}, for sport. */
+	static boolean prowl(ServerPlayer player, LivingEntity target) {
+		Live live = live(player);
+		long now = player.level().getGameTime();
+		if (!mindFree(player, live) || now < live.takeoverReadyAt) {
+			return false;
+		}
+		live.rampage = false;
+		live.curious = false;
+		live.feral = false;
+		live.prowl = true;
+		startTakeover(player, live, now, target);
+		live.prowl = live.takeoverTicks > 0;
+		return live.prowl;
 	}
 
 	/** An ignored request for a kill (or a night hunt): it takes the wheel for the nearest hostile, or any wild creature if none. */
@@ -4433,6 +4481,10 @@ public final class WebSymbiote {
 			WebSymbioteSteed.toggle(player);
 			return;
 		}
+		if (ability == LASH) {
+			WebLash.use(player);
+			return;
+		}
 		// (0.19.69) (taking it off always answers: a sulk or a lockout only stops it coming up a form)
 		boolean climbing = ability == ARMOR && isBonded(player) && (form(player) == FORM_SKIN || form(player) < topForm(player));
 		if (climbing && lockedOut(player)) {
@@ -4507,7 +4559,7 @@ public final class WebSymbiote {
 			case CONSUME -> consume(player);
 			// in the big body, the Spike Burst is a roar
 			case SPIKES -> bulked(player) ? startRoar(player, live, now, false, null) : spikes(player);
-			case SHROUD -> shroud(player);
+			case SHROUD -> shroudTile(player);
 			default -> false;
 		};
 		if (!done) {
@@ -4518,12 +4570,12 @@ public final class WebSymbiote {
 			letGo(player, live);
 		}
 		if (ability == SPIKES || ability == SHROUD) {
-			narrate(player, ability == SHROUD ? "shroud" : bulked(player) ? "roar" : "spikes");
+			narrate(player, ability == SHROUD ? shroudAct(player) : bulked(player) ? "roar" : "spikes");
 		}
 		int cooldown = COOLDOWN[ability];
 		if (ability == SHROUD) {
 			// its cooldown runs from when it wears off
-			cooldown += SHROUD_TICKS;
+			cooldown += shroudSpan(player);
 		} else if (ability == ARMOR) {
 			// out: it can be put away again soon; away: its cooldown starts now
 			if (state(player).has(WebSymbioteState.ARMOR)) {
@@ -4835,7 +4887,8 @@ public final class WebSymbiote {
 		}
 	}
 
-	private static void removeArmor(ServerPlayer player) {
+	static void removeArmor(ServerPlayer player) {
+		WebSymbioteDoors.clear(player);
 		AttributeInstance absorb = player.getAttribute(Attributes.MAX_ABSORPTION);
 		if (absorb != null && absorb.hasModifier(ARMOR_ABSORB_ID)) {
 			absorb.removeModifier(ARMOR_ABSORB_ID);
@@ -4854,6 +4907,11 @@ public final class WebSymbiote {
 	private static WebSymbioteState instinct(ServerPlayer player, Live live, WebSymbioteState state, long now) {
 		ServerLevel level = player.level();
 		var random = player.getRandom();
+		// (it saves you first: water, rock, snow, lava, ledges, your items and a meal)
+		WebSymbioteState saved = WebSymbioteReflexes.tick(player, state, now);
+		if (saved != state) {
+			return saved;
+		}
 		BlockPos fire = nearFire(player);
 		boolean burning = player.isOnFire() || fire != null;
 		Vec3 blast = explosiveNear(player);
@@ -6168,6 +6226,7 @@ public final class WebSymbiote {
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 20, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.05);
 		// (0.15.33) a player's body: the hotbar it held falls out
 		KitchenCompat.spill(food);
+		WebSymbioteMemory.ate(player, food);
 		food.discard();
 		feed(player, live.eatFeed, CONSUME_CALM);
 		// fed, it warms to you
@@ -6440,6 +6499,35 @@ public final class WebSymbiote {
 		level.sendParticles(ParticleTypes.EXPLOSION, hit.x, hit.y, hit.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, 10, 0.15, 0.15, 0.15, 0.4);
 		level.sendParticles(dust(1.3F), hit.x, hit.y, hit.z, (int)Math.min(20.0F, 6.0F + dealt), 0.2, 0.2, 0.2, 0.0);
+	}
+
+	/**
+	 * The Shroud tile by strain: the black one's Carapace ({@link WebCarapace}), the white one's Aegis ({@link WebAegis}),
+	 * the red one's own Shroud.
+	 */
+	private static boolean shroudTile(ServerPlayer player) {
+		return switch (state(player).kind()) {
+			case BLACK -> WebCarapace.harden(player);
+			case WHITE -> WebAegis.raise(player);
+			default -> shroud(player);
+		};
+	}
+
+	/** What it says of the Shroud tile ({@link #narrate}'s act) and how long the tile's move lasts, by strain. */
+	private static String shroudAct(ServerPlayer player) {
+		return switch (state(player).kind()) {
+			case BLACK -> "carapace";
+			case WHITE -> "aegis";
+			default -> "shroud";
+		};
+	}
+
+	private static int shroudSpan(ServerPlayer player) {
+		return switch (state(player).kind()) {
+			case BLACK -> WebCarapace.TICKS;
+			case WHITE -> WebAegis.TICKS;
+			default -> SHROUD_TICKS;
+		};
 	}
 
 	/** Shroud: the suit swallows the light; you vanish until you strike, or until it tires. */

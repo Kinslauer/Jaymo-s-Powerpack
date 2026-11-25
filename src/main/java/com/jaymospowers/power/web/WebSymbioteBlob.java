@@ -153,6 +153,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 	WebSymbioteLife.@Nullable Remains remains;
 	@Nullable BlockPos rampageSite;
 	int feast;
+	/** The host whose sleep it's walking through (see {@link WebSymbioteSleep}); not saved, nor is it. */
+	java.util.@Nullable UUID sleepOwner;
 
 	/** With no host this long (ticks; 5 minutes) it gives up and settles where it is as goo, a block, still and waiting. */
 	static final int SETTLE_TICKS = 6000;
@@ -393,6 +395,10 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
+		if (this.sleepOwner != null) {
+			WebSymbioteSleep.blobTick(this, level);
+			return;
+		}
 		// (0.17.150) feeding on what it killed; the things it keeps; rampaging round its crater
 		if (WebSymbioteLife.blobTick(this, level)) {
 			return;
@@ -475,6 +481,19 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (this.random.nextInt(240) == 0) {
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_AMBIENT, SoundSource.HOSTILE, 0.4F, 1.6F);
 		}
+	}
+
+	/** It's out of {@code host} while they sleep: it hunts for them (see {@link WebSymbioteSleep}) and nothing can hurt it. */
+	void sleepwalk(java.util.UUID host) {
+		this.sleepOwner = host;
+		this.setPermanentlyInvulnerable(true);
+		this.goalSelector.removeAllGoals(goal -> true);
+		this.goalSelector.addGoal(0, new FloatGoal(this));
+	}
+
+	@Override
+	public boolean shouldBeSaved() {
+		return this.sleepOwner == null && super.shouldBeSaved();
 	}
 
 	/** Its strain (black unless marked). */
@@ -684,7 +703,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 	}
 
 	/** The lash itself: a tendril (in its strain's colour) snapping out from {@code from} to {@code to}. */
-	private void tendril(ServerLevel level, Vec3 from, Vec3 to) {
+	void tendril(ServerLevel level, Vec3 from, Vec3 to) {
 		Vec3 step = to.subtract(from);
 		int n = Math.max(2, (int)(step.length() / 0.25));
 		for (int i = 0; i <= n; i++) {

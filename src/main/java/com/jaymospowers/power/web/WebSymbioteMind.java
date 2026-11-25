@@ -142,6 +142,15 @@ public final class WebSymbioteMind {
 	/** Mood-specific variants of each line: how many there are. */
 	static final int VARIANTS = 2;
 
+	// ===== temper ====================================================================================================
+	/** Its nature, rolled once at the first bond and kept with the symbiote through death and a new bond (0: not rolled yet). */
+	public static final int WATCHFUL = 1, SOUR = 2, WARM = 3, WARY = 4;
+	static final String[] TEMPER_NAMES = {"none", "watchful", "sour", "warm", "wary"};
+	/** Added to the stress that makes it anxious and coiled: the sour one frets sooner, the warm one later. */
+	static final int[] TEMPER_STRESS_SHIFT = {0, 0, -8, 10, -5};
+	/** Scales how long unfed it takes to be anxious from neglect: the watchful one notices an empty stomach sooner. */
+	static final float[] TEMPER_NEGLECT = {1.0F, 0.7F, 1.0F, 1.3F, 1.0F};
+
 	// ===== stages ====================================================================================================
 	/** The bond each stage starts at (from the abilities' unlocks: Wall Crawl 30, Living Armor 60, the big body 100). */
 	public static final int[] STAGE_AT = {0, 30, 60, WebSymbiote.BOND_MAX};
@@ -176,7 +185,7 @@ public final class WebSymbioteMind {
 	 * the Status page and the screen-edge tint. {@code reqEnd} is the game time the request runs out; {@code reqProg} the
 	 * ticks of it done (deep or worn); {@code nextReq} when it may ask again; {@code griefUntil} when its grief lifts.
 	 */
-	public record Mind(int trust, int order, int mood, int req, long reqEnd, int reqProg, long nextReq, long griefUntil) {
+	public record Mind(int trust, int order, int mood, int req, long reqEnd, int reqProg, long nextReq, long griefUntil, int temper, long flareUntil) {
 		public static final Codec<Mind> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.optionalFieldOf("trust", 0).forGetter(Mind::trust),
 				Codec.INT.optionalFieldOf("order", 0).forGetter(Mind::order),
@@ -185,7 +194,9 @@ public final class WebSymbioteMind {
 				Codec.LONG.optionalFieldOf("req_end", 0L).forGetter(Mind::reqEnd),
 				Codec.INT.optionalFieldOf("req_prog", 0).forGetter(Mind::reqProg),
 				Codec.LONG.optionalFieldOf("next_req", 0L).forGetter(Mind::nextReq),
-				Codec.LONG.optionalFieldOf("grief_until", 0L).forGetter(Mind::griefUntil))
+				Codec.LONG.optionalFieldOf("grief_until", 0L).forGetter(Mind::griefUntil),
+				Codec.INT.optionalFieldOf("temper", 0).forGetter(Mind::temper),
+				Codec.LONG.optionalFieldOf("flare_until", 0L).forGetter(Mind::flareUntil))
 			.apply(i, Mind::new));
 
 		public static final StreamCodec<ByteBuf, Mind> STREAM_CODEC = StreamCodec.of(
@@ -198,41 +209,51 @@ public final class WebSymbioteMind {
 				ByteBufCodecs.VAR_INT.encode(buf, mind.reqProg);
 				ByteBufCodecs.VAR_LONG.encode(buf, mind.nextReq);
 				ByteBufCodecs.VAR_LONG.encode(buf, mind.griefUntil);
+				ByteBufCodecs.VAR_INT.encode(buf, mind.temper);
+				ByteBufCodecs.VAR_LONG.encode(buf, mind.flareUntil);
 			},
 			buf -> new Mind(ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
 				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_LONG.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
-				ByteBufCodecs.VAR_LONG.decode(buf), ByteBufCodecs.VAR_LONG.decode(buf)));
+				ByteBufCodecs.VAR_LONG.decode(buf), ByteBufCodecs.VAR_LONG.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_LONG.decode(buf)));
 
 		public Mood moodNow() {
 			return Mood.of(mood);
 		}
 
+		Mind withTemper(int value) {
+			return new Mind(trust, order, mood, req, reqEnd, reqProg, nextReq, griefUntil, value, flareUntil);
+		}
+
+		Mind withFlare(long until) {
+			return new Mind(trust, order, mood, req, reqEnd, reqProg, nextReq, griefUntil, temper, until);
+		}
+
 		Mind withTrust(int value) {
-			return new Mind(Mth.clamp(value, 0, TRUST_MAX), order, mood, req, reqEnd, reqProg, nextReq, griefUntil);
+			return new Mind(Mth.clamp(value, 0, TRUST_MAX), order, mood, req, reqEnd, reqProg, nextReq, griefUntil, temper, flareUntil);
 		}
 
 		Mind withOrder(int value) {
-			return new Mind(trust, value, mood, req, reqEnd, reqProg, nextReq, griefUntil);
+			return new Mind(trust, value, mood, req, reqEnd, reqProg, nextReq, griefUntil, temper, flareUntil);
 		}
 
 		Mind withMood(int value) {
-			return new Mind(trust, order, value, req, reqEnd, reqProg, nextReq, griefUntil);
+			return new Mind(trust, order, value, req, reqEnd, reqProg, nextReq, griefUntil, temper, flareUntil);
 		}
 
 		Mind withRequest(int kind, long end, int progress) {
-			return new Mind(trust, order, mood, kind, end, progress, nextReq, griefUntil);
+			return new Mind(trust, order, mood, kind, end, progress, nextReq, griefUntil, temper, flareUntil);
 		}
 
 		Mind withProgress(int progress) {
-			return new Mind(trust, order, mood, req, reqEnd, progress, nextReq, griefUntil);
+			return new Mind(trust, order, mood, req, reqEnd, progress, nextReq, griefUntil, temper, flareUntil);
 		}
 
 		Mind withNext(long value) {
-			return new Mind(trust, order, mood, req, reqEnd, reqProg, value, griefUntil);
+			return new Mind(trust, order, mood, req, reqEnd, reqProg, value, griefUntil, temper, flareUntil);
 		}
 
 		Mind withGrief(long until) {
-			return new Mind(trust, order, mood, req, reqEnd, reqProg, nextReq, until);
+			return new Mind(trust, order, mood, req, reqEnd, reqProg, nextReq, until, temper, flareUntil);
 		}
 	}
 
@@ -304,7 +325,12 @@ public final class WebSymbioteMind {
 		// a new body is nobody's: no trust, no orders, no request
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			if (!alive) {
+				// (its nature goes with the symbiote: the rest of the mind starts over)
+				Mind old = oldPlayer.getAttached(MIND);
 				newPlayer.removeAttached(MIND);
+				if (old != null && old.temper != 0) {
+					newPlayer.setAttached(MIND, new Mind(0, ORDER_NONE, 0, REQ_NONE, 0L, 0, 0L, 0L, old.temper, 0L));
+				}
 				RUNS.remove(newPlayer.getUUID());
 			}
 		});
@@ -339,7 +365,7 @@ public final class WebSymbioteMind {
 	/** Its mind (a new bond's trust starts level with its bond). */
 	public static Mind mind(Player player) {
 		Mind mind = player.getAttached(MIND);
-		return mind != null ? mind : new Mind(Mth.clamp(WebSymbiote.state(player).bond(), 0, TRUST_MAX), standing(player), 0, REQ_NONE, 0L, 0, 0L, 0L);
+		return mind != null ? mind : new Mind(Mth.clamp(WebSymbiote.state(player).bond(), 0, TRUST_MAX), standing(player), 0, REQ_NONE, 0L, 0, 0L, 0L, 0, 0L);
 	}
 
 	/** Bonded to the red one (either side). */
@@ -372,6 +398,17 @@ public final class WebSymbioteMind {
 
 	public static Mood mood(Player player) {
 		return mind(player).moodNow();
+	}
+
+	/** Its temper's id ({@link #WATCHFUL}..{@link #WARY}; 0 while it hasn't rolled one). */
+	public static int temper(Player player) {
+		Mind mind = player.getAttached(MIND);
+		return mind == null ? 0 : Mth.clamp(mind.temper, 0, TEMPER_NAMES.length - 1);
+	}
+
+	/** The temper's lang name ({@code watchful}, {@code sour}, {@code warm}, {@code wary}; {@code none} before it rolls). */
+	public static String temperName(int temper) {
+		return TEMPER_NAMES[Mth.clamp(temper, 0, TEMPER_NAMES.length - 1)];
 	}
 
 	/** The stage's index for a bond (0-3). */
@@ -556,6 +593,7 @@ public final class WebSymbioteMind {
 			// fighting together
 			run.lastFightAt = now;
 			addTrust(player, TRUST_FIGHT);
+			WebSymbioteMemory.together(player);
 		}
 		Mind mind = mind(player);
 		if (mind.req == KILL && enemy || mind.req == NIGHT && enemy && nightUnderSky(player)) {
@@ -585,6 +623,11 @@ public final class WebSymbioteMind {
 		}
 	}
 
+	/** Its jealous flare: the screen's edge pulls red until {@code until} (game time; the client reads it off the synced mind). */
+	static void flare(ServerPlayer player, long until) {
+		write(player, mind(player).withFlare(until));
+	}
+
 	static void addTrust(ServerPlayer player, int delta) {
 		Mind mind = mind(player);
 		write(player, mind.withTrust(mind.trust + delta));
@@ -595,7 +638,7 @@ public final class WebSymbioteMind {
 	}
 
 	/** Stress up or down, on the state as it stands now (the tick's own copy may be a step behind). */
-	private static void addStress(ServerPlayer player, int delta) {
+	static void addStress(ServerPlayer player, int delta) {
 		WebSymbioteState state = WebSymbiote.state(player);
 		if (state.bonded()) {
 			int stress = Mth.clamp(state.stress() + delta, 0, WebSymbiote.STRESS_MAX);
@@ -667,9 +710,16 @@ public final class WebSymbioteMind {
 		Mind mind = player.getAttached(MIND);
 		boolean fresh = mind == null;
 		if (fresh) {
-			mind = new Mind(Mth.clamp(state.bond(), 0, TRUST_MAX), standing(player), 0, REQ_NONE, 0L, 0, 0L, 0L);
+			mind = new Mind(Mth.clamp(state.bond(), 0, TRUST_MAX), standing(player), 0, REQ_NONE, 0L, 0, 0L, 0L, 0, 0L);
 		}
 		Mind before = mind;
+		if (mind.temper == 0) {
+			// its nature, rolled once
+			mind = mind.withTemper(1 + player.getRandom().nextInt(TEMPER_NAMES.length - 1));
+		} else if (!fresh && mind.nextReq == 0L && mind.trust == 0 && run.stage < 0) {
+			// a new bond that kept only its nature: trust starts level with the bond again
+			mind = mind.withTrust(Mth.clamp(state.bond(), 0, TRUST_MAX));
+		}
 		boolean creative = player.isCreative();
 
 		// meals: the satiety jumped. Given by you: trust. Its own hunt (on the wheel): none, but it ends a forced hunt
@@ -678,6 +728,7 @@ public final class WebSymbioteMind {
 			run.lastMealAt = now;
 			if (!WebSymbiote.driving(player)) {
 				mind = mind.withTrust(mind.trust + TRUST_FEED);
+				WebSymbioteMemory.together(player);
 				if (mind.req == MEAT) {
 					write(player, mind);
 					complete(player, true);
@@ -794,10 +845,11 @@ public final class WebSymbioteMind {
 		Mood target;
 		if (now < mind.griefUntil) {
 			target = Mood.GRIEVING;
-		} else if (state.stress() >= COILED_STRESS || state.satiety() <= WebSymbiote.STARVING) {
+		} else if (state.stress() >= COILED_STRESS + TEMPER_STRESS_SHIFT[temperIndex(mind)] || state.satiety() <= WebSymbiote.STARVING) {
 			target = Mood.COILED;
-		} else if (state.stress() >= ANXIOUS_STRESS || state.satiety() < WebSymbiote.SELF_FEED_BELOW || state.bond() < WebSymbiote.NEGLECT_BOND
-			|| now - run.lastMealAt > NEGLECT_MEAL_TICKS || overdue(mind, now)) {
+		} else if (state.stress() >= ANXIOUS_STRESS + TEMPER_STRESS_SHIFT[temperIndex(mind)] || state.satiety() < WebSymbiote.SELF_FEED_BELOW
+			|| state.bond() < WebSymbiote.NEGLECT_BOND
+			|| now - run.lastMealAt > NEGLECT_MEAL_TICKS * TEMPER_NEGLECT[temperIndex(mind)] || overdue(mind, now)) {
 			target = Mood.ANXIOUS;
 		} else {
 			target = Mood.CONTENT;
@@ -828,6 +880,10 @@ public final class WebSymbioteMind {
 			}
 		}
 		return next;
+	}
+
+	private static int temperIndex(Mind mind) {
+		return Mth.clamp(mind.temper, 0, TEMPER_NAMES.length - 1);
 	}
 
 	private static boolean overdue(Mind mind, long now) {
@@ -942,7 +998,7 @@ public final class WebSymbioteMind {
 		if (!state.has(WebSymbioteState.SUIT) && WebSymbiote.suitAllowed(player) && !WebSymbiote.lockedOut(player)) {
 			options.add(WORN);
 		}
-		if (options.isEmpty()) {
+		if (options.isEmpty() || WebSymbioteSettings.off(player, WebSymbioteSettings.Setting.REQUESTS)) {
 			return mind.withNext(now + 1200L);
 		}
 		int kind = options.get(player.getRandom().nextInt(options.size()));
@@ -980,6 +1036,7 @@ public final class WebSymbioteMind {
 		}
 		write(player, next);
 		if (byYou) {
+			WebSymbioteMemory.together(player);
 			WebSymbiote.addBond(player, GRANTED_BOND);
 			relieve(player, GRANTED_RELIEF);
 			WebSymbiote.whisper(player, "req.thanks." + (1 + player.getRandom().nextInt(LINES)));
@@ -993,6 +1050,7 @@ public final class WebSymbioteMind {
 		addStress(player, IGNORED_STRESS);
 		run.progress = 0;
 		WebSymbiote.whisper(player, "req." + REQ_NAMES[kind] + ".ignored");
+		WebSymbioteMemory.remember(player, WebSymbioteMemory.IGNORED);
 		boolean white = state.kind() == WebSymbioteStrain.WHITE;
 		switch (kind) {
 			case MEAT -> {

@@ -57,6 +57,8 @@ public final class WebSymbioteCollect {
 	/** A first look: how long it studies the item, and when the hint comes. */
 	static final int INSPECT_TICKS = 120, HINT_AT = 70;
 	static final int LINES = 3, HINT_LINES = 2;
+	/** Experience orbs: it looks this often (ticks) and draws in at most this many orbs a look, from {@link #RANGE}. */
+	static final int ORB_EVERY = 10, ORB_MAX = 6;
 
 	/** Every kind of item it has studied (item ids): only one inspection per item, ever. Saved, kept through death. */
 	public static final AttachmentType<List<String>> SEEN = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_seen_items"),
@@ -111,6 +113,9 @@ public final class WebSymbioteCollect {
 
 	/** From the symbiote's tick (bonded, alive). */
 	static void tick(ServerPlayer player, long now) {
+		if (now % ORB_EVERY == 0 && active(player)) {
+			pullOrbs(player);
+		}
 		Fetch fetch = FETCHES.get(player.getUUID());
 		if (fetch != null) {
 			tickFetch(player, fetch, now);
@@ -135,6 +140,34 @@ public final class WebSymbioteCollect {
 		fetch.item = item.getId();
 		fetch.hand = hand;
 		FETCHES.put(player.getUUID(), fetch);
+	}
+
+	/**
+	 * Collect takes experience too: the orbs it can see within {@link #RANGE} are drawn to you on a thread of goo and taken
+	 * as if you had walked into them (Mending included), at most {@link #ORB_MAX} a look.
+	 */
+	private static void pullOrbs(ServerPlayer player) {
+		ServerLevel level = player.level();
+		int taken = 0;
+		for (net.minecraft.world.entity.ExperienceOrb orb : level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class,
+			player.getBoundingBox().inflate(RANGE), o -> o.isAlive() && player.hasLineOfSight(o))) {
+			if (taken >= ORB_MAX || orb.distanceToSqr(player) > RANGE * RANGE) {
+				break;
+			}
+			net.minecraft.world.phys.Vec3 from = orb.position();
+			net.minecraft.world.phys.Vec3 to = player.position().add(0.0, player.getBbHeight() * 0.6, 0.0);
+			for (int i = 1; i <= 4; i++) {
+				net.minecraft.world.phys.Vec3 at = from.lerp(to, i / 5.0);
+				level.sendParticles(WebSymbiote.dust(0.5F), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			}
+			player.takeXpDelay = 0;
+			orb.playerTouch(player);
+			taken++;
+		}
+		if (taken > 0) {
+			player.setAttached(WebSymbiote.TENDRILS_OUT, level.getGameTime() + WebSymbioteBody.ARM_OUT_TICKS);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.4F, 1.8F);
+		}
 	}
 
 	/** The nearest item on the ground it can see, that nobody just dropped and nothing holds. */

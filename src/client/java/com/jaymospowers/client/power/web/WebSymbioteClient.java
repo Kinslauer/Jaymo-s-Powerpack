@@ -403,7 +403,11 @@ public final class WebSymbioteClient {
 
 	static void init() {
 		WebTendrilBundle.init();
+		WebSymbioteFidget.init();
 		WebSymbioteBodyClient.init();
+		WebSymbioteHud.init();
+		WebShaderMarks.init();
+		WebArmScreen.installButton();
 		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.web_symbiote", InputConstants.KEY_X, JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			// worked out once a tick, not once per entity per frame
@@ -613,6 +617,7 @@ public final class WebSymbioteClient {
 		state.setData(MEAL_REACH, meal == null ? null : meal.reach());
 		state.setData(EATING, meal == null ? null : Math.max(0.0F, entity.level().getGameTime() - meal.start() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		state.setData(MEAL_BIG, meal != null && meal.big());
+		state.setData(WebBloom.OPEN, WebBloom.open(entity));
 		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.BULK)) {
 			// no cape poking out through the suit, and the armour engulfed by it (an elytra still spreads from it)
 			state.showCape = false;
@@ -1918,8 +1923,10 @@ public final class WebSymbioteClient {
 			return;
 		}
 		AABB box = player.getBoundingBox();
-		boolean wall = !player.level().noCollision(player, box.inflate(0.12, -0.1, 0.12));
-		boolean ceiling = !player.onGround() && !player.level().noCollision(player, box.move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05));
+		// (too tired to hold on, WebStamina: no wall or ceiling to cling to until it has rested)
+		boolean tired = com.jaymospowers.power.web.WebStamina.tired(player);
+		boolean wall = !tired && !player.level().noCollision(player, box.inflate(0.12, -0.1, 0.12));
+		boolean ceiling = !tired && !player.onGround() && !player.level().noCollision(player, box.move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05));
 		Input input = player.input.keyPresses;
 		Vec3 move = inputDirection(player, input);
 		boolean sneakPressed = input.shift() && !sneakWas;

@@ -24,9 +24,11 @@ import net.minecraft.util.Mth;
  * (server side); the lit button is the order it holds. Everything is read from the synced state and mind.
  */
 final class WebSymbioteStatusScreen extends Screen {
-	private static final int W = 250, BASE_H = 196, GRUDGE_ROW = 10, GRUDGE_HEAD = 14;
+	private static final int W = 250, BASE_H = 209 + 12, GRUDGE_ROW = 10, GRUDGE_HEAD = 14;
 	private static final int ACCENT = 0xFF8A5AB0;
 	private static final int ROW_H = 13;
+	/** The Settings button at the panel's bottom left. */
+	private static final int SETTINGS_W = 64, SETTINGS_H = 13;
 	private static final int BAR_W = 70, BAR_H = 4;
 	private static final int BUTTON_W = 56, BUTTON_H = 14, BUTTON_GAP = 5;
 	private static final int[] ORDERS = {WebSymbioteMind.PROTECT, WebSymbioteMind.HUNT, WebSymbioteMind.HIDE, WebSymbioteMind.ORDER_NONE};
@@ -37,7 +39,7 @@ final class WebSymbioteStatusScreen extends Screen {
 	private int panelHeight() {
 		LocalPlayer player = minecraft == null ? null : minecraft.player;
 		int grudges = player == null ? 0 : WebGrudges.book(player).entries().size();
-		return BASE_H + (grudges == 0 ? 0 : GRUDGE_HEAD + grudges * GRUDGE_ROW);
+		return BASE_H + (grudges == 0 ? 0 : GRUDGE_HEAD + 4 + grudges * GRUDGE_ROW);
 	}
 
 	WebSymbioteStatusScreen() {
@@ -76,11 +78,19 @@ final class WebSymbioteStatusScreen extends Screen {
 	}
 
 	private int buttonY() {
-		return top() + 34 + ROW_H * 8 + 18;
+		return top() + 34 + ROW_H * 9 + 18;
+	}
+
+	private int settingsY() {
+		return top() + panelHeight() - SETTINGS_H - 3;
 	}
 
 	@Override
 	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
+		if (UiStyle.over((int)event.x(), (int)event.y(), left() + 8, settingsY(), SETTINGS_W, SETTINGS_H)) {
+			minecraft.gui.setScreen(new WebSymbioteSettingsScreen(this));
+			return true;
+		}
 		for (int i = 0; i < ORDERS.length; i++) {
 			if (UiStyle.over((int)event.x(), (int)event.y(), buttonX(i), buttonY(), BUTTON_W, BUTTON_H)) {
 				ClientPlayNetworking.send(new WebSymbioteMind.Order(ORDERS[i]));
@@ -127,6 +137,8 @@ final class WebSymbioteStatusScreen extends Screen {
 		bar(graphics, row++, rowY, labelX, "trust", Component.translatable("gui.jaymospowers.web_symbiote.status.bond_value", mind.trust(), WebSymbioteMind.TRUST_MAX),
 			mind.trust() / (float)WebSymbioteMind.TRUST_MAX, 0xFF6AB08A, valueX);
 		row(graphics, row++, rowY, labelX, "mood", Component.translatable("gui.jaymospowers.web_symbiote.mood." + mood.key()), WebSymbioteMindUi.TEXT[mood.ordinal()], valueX);
+		row(graphics, row++, rowY, labelX, "temper", Component.translatable("gui.jaymospowers.web_symbiote.temper."
+			+ WebSymbioteMind.temperName(mind.temper())), UiStyle.TEXT, valueX);
 		bar(graphics, row++, rowY, labelX, "stress", Component.translatable("gui.jaymospowers.web_symbiote.status.bond_value", state.stress(), WebSymbiote.STRESS_MAX),
 			state.stress() / (float)WebSymbiote.STRESS_MAX, state.stress() >= WebSymbioteMind.COILED_STRESS ? 0xFFB02030 : 0xFFB09A5A, valueX);
 		bar(graphics, row++, rowY, labelX, "satiety", Component.translatable("gui.jaymospowers.web_symbiote.status.bond_value", state.satiety(), WebSymbiote.SATIETY_MAX),
@@ -149,7 +161,7 @@ final class WebSymbioteStatusScreen extends Screen {
 		row(graphics, row, rowY, labelX, "request", request, requestColor, valueX);
 
 		// the standing orders
-		int orderY = y + UiStyle.HEADER + ROW_H * 8 + 2;
+		int orderY = y + UiStyle.HEADER + ROW_H * 9 + 2;
 		UiStyle.rule(graphics, x + 6, x + W - 6, orderY);
 		UiStyle.line(graphics, font, Component.translatable("gui.jaymospowers.web_symbiote.status.orders"), x + 10, orderY + 4, W - 20, ACCENT);
 		hovered = -1;
@@ -181,10 +193,13 @@ final class WebSymbioteStatusScreen extends Screen {
 			? Component.translatable("gui.jaymospowers.web_symbiote.order." + WebSymbioteMind.orderName(ORDERS[hovered]) + ".tip")
 			: Component.translatable("gui.jaymospowers.web_symbiote.mood." + mood.key() + ".tip");
 		UiStyle.line(graphics, font, tip, x + 10, buttonY() + BUTTON_H + 5, W - 20, UiStyle.HINT);
+		// its nature, in a line
+		UiStyle.line(graphics, font, Component.translatable("gui.jaymospowers.web_symbiote.status.blurb." + state.kind().name().toLowerCase(Locale.ROOT)),
+			x + 10, buttonY() + BUTTON_H + 17, W - 20, UiStyle.DIM);
 		// what it remembers: who hurt you, and how much
 		var grudges = WebGrudges.book(player).entries();
 		if (!grudges.isEmpty()) {
-			int gy = buttonY() + BUTTON_H + 18;
+			int gy = buttonY() + BUTTON_H + 30;
 			UiStyle.rule(graphics, x + 6, x + W - 6, gy - 3);
 			UiStyle.line(graphics, font, Component.translatable("gui.jaymospowers.web_symbiote.status.grudges"), x + 10, gy, W - 20, ACCENT);
 			for (int i = 0; i < grudges.size(); i++) {
@@ -194,6 +209,8 @@ final class WebSymbioteStatusScreen extends Screen {
 				UiStyle.line(graphics, font, line, x + 14, gy + GRUDGE_HEAD - 2 + i * GRUDGE_ROW, W - 28, UiStyle.TEXT);
 			}
 		}
+		UiStyle.button(graphics, font, x + 8, settingsY(), SETTINGS_W, SETTINGS_H, Component.translatable("gui.jaymospowers.web_symbiote.status.settings"), ACCENT,
+			UiStyle.over(mouseX, mouseY, x + 8, settingsY(), SETTINGS_W, SETTINGS_H), true);
 		UiStyle.lineRight(graphics, font, Component.translatable("gui.jaymospowers.web_symbiote.status.close"), x + W - 8, y + h - 12, 60, UiStyle.HINT);
 	}
 

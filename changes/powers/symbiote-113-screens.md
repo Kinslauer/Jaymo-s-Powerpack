@@ -1,0 +1,10 @@
+# symbiote 1.1.3 screens: HUD pip, words plate, stamina, stage cards, settings, shader marks, arm screen
+- **HUD** (`WebSymbioteHud`): beside the hotbar, with the arm's chips, a small bond pip filled to the bond in the strain's colour with a socket lit in its mood's colour, its hunger bar, the tendrils' stamina bar and the icon of the standing order it holds. Goes with F1.
+- **Its words on a plate**: the symbiote's whispers are no longer on the action bar but low and centred on a dark plate, wrapped, fading in and out (`WebSymbioteWords` packet, drawn by `WebSymbioteHud`). A client without the mod still gets the action bar.
+- **Stamina** (`WebStamina`, saved and synced to you): Tendril Grab, Web Zip, Yank, the Lash and every tick of clinging to a wall (Wall Crawl or a parkour cling) spend it; it comes back at rest. Out of it those moves refuse with a line, and you let go of the wall. Numbers at the top of the class.
+- **Strain blurb**: the Status page has one hinting line for the black, the white and the red.
+- **Stage cards** (`WebStageCards`): reaching Attached, Integrated, Cooperative or Dominant slides in a card with a picture tinted in the strain's colours (`tools/gen_web_stage_cards.py` makes the four pictures).
+- **Settings** (`WebSymbioteSettingsScreen`, from a button on the Status page): switch off fidgets, jealousy, requests, hints and the edge membrane. Kept in `config/jaymospowers-symbiote.properties` and sent to the server (`WebSymbioteSettings.off(player, Setting)`); hints and the edge membrane already obey. Fidgets, jealousy and requests in `WebSymbioteMind`/`WebSymbioteMemory` still have to ask it.
+- **Shader markers** (`WebShaderMarks`): with an Iris shader pack on, small diamonds float over what the black scent and the red heartbeat sense pick up, where outlines often don't draw.
+- **Arm screen** (`WebArmScreen`): the arm's three slots and your pack in one screen, click two things to swap them, Shift-click to send one across; a button for it in the inventory once the arm is unlocked (`WebArmSwap` does the moving on the server).
+- Built; not played.

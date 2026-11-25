@@ -141,6 +141,7 @@ public final class WebSymbioteRescue {
 			WebSymbiote.standDown(player);
 			rescue.phase = WAITING;
 			rescue.phaseAt = now;
+			WebSymbioteMemory.remember(player, WebSymbioteMemory.HELD);
 			WebSymbiote.dread(player, BEAT_TICKS + 20, true, true);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 2.0F, 1.1F);
 			return true;
