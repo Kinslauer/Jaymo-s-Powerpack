@@ -27,9 +27,6 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.ClipContext;
@@ -186,13 +183,8 @@ final class WindBolts {
 	/** One bolt at {@code at}: a visual-only strike and lightning damage to the creatures at its foot. */
 	static void strike(ServerPlayer caster, Vec3 at, float damage, double reach) {
 		ServerLevel level = caster.level();
-		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
-		if (bolt != null) {
-			bolt.snapTo(at);
-			bolt.setVisualOnly(true);
-			bolt.setCause(caster);
-			level.addFreshEntity(bolt);
-		}
+		// (Hand of God's electrokinesis, ideas only) a branching bolt and the burn it leaves, in place of vanilla's
+		WindElectro.skyStrike(level, at);
 		DamageSource source = caster.damageSources().source(DamageTypes.LIGHTNING_BOLT, caster);
 		AABB area = new AABB(at.x - reach, at.y - 1.0, at.z - reach, at.x + reach, at.y + 4.0, at.z + reach);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area, e -> PickKit.foe(caster, e))) {
@@ -204,9 +196,7 @@ final class WindBolts {
 	}
 
 	static void zap(ServerLevel level, Vec3 from, Vec3 to) {
-		MagicFx.beam(level, from, to, 0.12F, BOLT, 5);
-		Vec3 mid = from.add(to).scale(0.5);
-		level.sendParticles(MagicFx.spark(BOLT, 0.9F), mid.x, mid.y, mid.z, 4, 0.3, 0.3, 0.3, 0.0);
+		WindElectro.zap(level, from, to);
 	}
 
 	/** The spot the player's gaze meets, a creature or a block, within {@code range}. */
@@ -408,7 +398,7 @@ final class WindBolts {
 				e.hurtServer(level, source, STEP_DAMAGE * sky(level));
 			}
 		}
-		MagicFx.beam(level, from, to, 0.25F, BOLT, 8);
+		MagicFx.bolt(level, from, to, 0.35F, BOLT, 8);
 		level.sendParticles(MagicFx.spark(BOLT, 1.2F), from.x, from.y, from.z, 8, 0.4, 0.6, 0.4, 0.0);
 		player.teleportTo(level, dest.x, dest.y, dest.z, Set.of(), player.getYRot(), player.getXRot(), false);
 		player.resetFallDistance();

@@ -35,9 +35,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -234,6 +231,7 @@ public final class WindModes {
 		if (mode(player) != NONE) {
 			player.removeAttached(MODE);
 			NEXT_FLASH.remove(player.getUUID());
+			WindElectro.stop(player);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_DEATH, SoundSource.PLAYERS, 0.6F, 1.4F);
 			return;
 		}
@@ -249,6 +247,8 @@ public final class WindModes {
 		player.setAttached(MODE, mode);
 		if (mode == BOTH) {
 			com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.SKYWARD, THUNDERHEAD_FILM_TICKS, THUNDERHEAD_DARK_RANGE);
+			// (electrokinesis) under the open sky the storm comes down round you, the last bolt into your hand
+			WindElectro.summon(player);
 			if (thunderPower(level) > 0.0F) {
 				thunderhead(player, level);
 			}
@@ -289,6 +289,7 @@ public final class WindModes {
 		int mode = mode(player);
 		if (mode == NONE) {
 			NEXT_FLASH.remove(player.getUUID());
+			WindElectro.stop(player);
 			return;
 		}
 		// a form that's gone (purified, say) takes its half of the mode with it
@@ -312,7 +313,9 @@ public final class WindModes {
 		player.causeFoodExhaustion(mode == BOTH ? THUNDERHEAD_EXHAUSTION : MODE_EXHAUSTION);
 		if (mode == BOTH) {
 			thunderheadTick(player, level);
+			WindElectro.tick(player, level);
 		} else {
+			WindElectro.stop(player);
 			NEXT_FLASH.remove(player.getUUID());
 		}
 		if ((mode & STORM) != 0 && player.tickCount % 20 == 0 && player.getRandom().nextFloat() < IDLE_ZAP_CHANCE) {
@@ -377,13 +380,7 @@ public final class WindModes {
 				return;
 			}
 			int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int)Math.floor(x), (int)Math.floor(z));
-			LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
-			if (bolt != null) {
-				bolt.snapTo(new Vec3(x, y, z));
-				bolt.setVisualOnly(true);
-				bolt.setCause(player);
-				level.addFreshEntity(bolt);
-			}
+			WindElectro.skyStrike(level, new Vec3(x, y, z));
 		} else {
 			// dry thunder: no bolt out of a clear sky, but the flash and the roll all the same
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 3.0F,
@@ -423,13 +420,7 @@ public final class WindModes {
 				return;
 			}
 			int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int)Math.floor(x), (int)Math.floor(z));
-			LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
-			if (bolt != null) {
-				bolt.snapTo(new Vec3(x, Math.min(y, player.getY() + 12.0), z));
-				bolt.setVisualOnly(true);
-				bolt.setCause(player);
-				level.addFreshEntity(bolt);
-			}
+			WindElectro.skyStrike(level, new Vec3(x, Math.min(y, player.getY() + 12.0), z));
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 6.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.2F, 0.5F);
@@ -521,13 +512,7 @@ public final class WindModes {
 
 	/** Enough static: it discharges through them, and they can't move at all for a while. */
 	private static void shock(ServerPlayer attacker, ServerLevel level, LivingEntity target) {
-		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
-		if (bolt != null) {
-			bolt.snapTo(target.position());
-			bolt.setVisualOnly(true);
-			bolt.setCause(attacker);
-			level.addFreshEntity(bolt);
-		}
+		WindElectro.skyStrike(level, target.position());
 		target.setInvulnerableTime(0);
 		target.hurtServer(level, attacker.damageSources().source(DamageTypes.LIGHTNING_BOLT, attacker), SHOCK_DAMAGE);
 		chargeCreeper(target);
@@ -610,13 +595,7 @@ public final class WindModes {
 		Vec3 end = eye.add(player.getLookAngle().scale(CALL_RANGE));
 		HitResult hit = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 		Vec3 at = hit.getType() == HitResult.Type.MISS ? end : hit.getLocation();
-		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
-		if (bolt != null) {
-			bolt.snapTo(at);
-			bolt.setVisualOnly(true);
-			bolt.setCause(player);
-			level.addFreshEntity(bolt);
-		}
+		WindElectro.skyStrike(level, at);
 		float damage = Mth.lerp(f, CALL_DAMAGE_MIN, CALL_DAMAGE_MAX) * scale;
 		DamageSource source = player.damageSources().source(DamageTypes.LIGHTNING_BOLT, player);
 		AABB area = new AABB(at, at).inflate(AbilityPower.size(player, CALL_RADIUS), AbilityPower.size(player, CALL_RADIUS) + 3.0, AbilityPower.size(player, CALL_RADIUS));

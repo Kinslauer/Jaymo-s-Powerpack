@@ -123,6 +123,7 @@ public final class WindPower implements Power {
 		com.jaymospowers.elemental.ElementalCorruption.register(INSTANCE, new WindWrath());
 		WindModes.register();
 		WindBolts.init();
+		WindElectro.init();
 		WindTempest.init();
 		// (Awakening pick) the Airless Dome, Wind's and Smoke's
 		AirlessDome.init();

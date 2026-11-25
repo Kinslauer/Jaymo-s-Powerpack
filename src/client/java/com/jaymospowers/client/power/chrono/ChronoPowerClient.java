@@ -101,6 +101,7 @@ public final class ChronoPowerClient implements PowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
 		ChronoTimeStopClient.init();
+		ChronoSlowLook.init();
 		ChronoCheatDeathClient.init();
 		ChronoStreak.init();
 		ChronoDecoyClient.init();
