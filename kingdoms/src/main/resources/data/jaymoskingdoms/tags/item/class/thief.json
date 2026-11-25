@@ -1,0 +1,121 @@
+{
+  "replace": false,
+  "values": [
+    "#jaymoskingdoms:light_blades",
+    "jaymoskingdoms:hidden_blade",
+    "jaymoskingdoms:lockpick",
+    "jaymoskingdoms:school_mask_knife",
+    "jaymoskingdoms:scoundrel_helmet",
+    "jaymoskingdoms:scoundrel_chestplate",
+    "jaymoskingdoms:scoundrel_leggings",
+    "jaymoskingdoms:scoundrel_boots",
+    {
+      "id": "rogues:rogue_armor_head",
+      "required": false
+    },
+    {
+      "id": "rogues:rogue_armor_chest",
+      "required": false
+    },
+    {
+      "id": "rogues:rogue_armor_legs",
+      "required": false
+    },
+    {
+      "id": "rogues:rogue_armor_feet",
+      "required": false
+    },
+    {
+      "id": "rogues:assassin_armor_head",
+      "required": false
+    },
+    {
+      "id": "rogues:assassin_armor_chest",
+      "required": false
+    },
+    {
+      "id": "rogues:assassin_armor_legs",
+      "required": false
+    },
+    {
+      "id": "rogues:assassin_armor_feet",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_assassin_armor_head",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_assassin_armor_chest",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_assassin_armor_legs",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_assassin_armor_feet",
+      "required": false
+    },
+    {
+      "id": "rogues:flint_dagger",
+      "required": false
+    },
+    {
+      "id": "rogues:iron_dagger",
+      "required": false
+    },
+    {
+      "id": "rogues:golden_dagger",
+      "required": false
+    },
+    {
+      "id": "rogues:diamond_dagger",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_dagger",
+      "required": false
+    },
+    {
+      "id": "rogues:ruby_dagger",
+      "required": false
+    },
+    {
+      "id": "rogues:aether_dagger",
+      "required": false
+    },
+    {
+      "id": "rogues:aeternium_dagger",
+      "required": false
+    },
+    {
+      "id": "rogues:iron_sickle",
+      "required": false
+    },
+    {
+      "id": "rogues:golden_sickle",
+      "required": false
+    },
+    {
+      "id": "rogues:diamond_sickle",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_sickle",
+      "required": false
+    },
+    {
+      "id": "rogues:ruby_sickle",
+      "required": false
+    },
+    {
+      "id": "rogues:aether_sickle",
+      "required": false
+    },
+    {
+      "id": "rogues:aeternium_sickle",
+      "required": false
+    }
+  ]
+}

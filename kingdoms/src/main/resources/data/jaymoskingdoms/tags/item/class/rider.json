@@ -1,0 +1,70 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "minecraft:saddle",
+      "required": false
+    },
+    "jaymoskingdoms:bridle",
+    "jaymoskingdoms:war_saddle",
+    "jaymoskingdoms:racing_saddle",
+    "jaymoskingdoms:chain_barding",
+    "jaymoskingdoms:plate_barding",
+    "jaymoskingdoms:horse_blanket",
+    "jaymoskingdoms:horseshoes",
+    "jaymoskingdoms:hoof_pick",
+    "jaymoskingdoms:horse_medkit",
+    "jaymoskingdoms:horse_handbook",
+    "jaymoskingdoms:glide_harness",
+    "jaymoskingdoms:oats",
+    "jaymoskingdoms:school_mask_spear",
+    {
+      "id": "minecraft:leather_horse_armor",
+      "required": false
+    },
+    {
+      "id": "minecraft:copper_horse_armor",
+      "required": false
+    },
+    {
+      "id": "minecraft:iron_horse_armor",
+      "required": false
+    },
+    {
+      "id": "minecraft:golden_horse_armor",
+      "required": false
+    },
+    {
+      "id": "minecraft:diamond_horse_armor",
+      "required": false
+    },
+    {
+      "id": "minecraft:netherite_horse_armor",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_lance",
+      "required": false
+    }
+  ]
+}
