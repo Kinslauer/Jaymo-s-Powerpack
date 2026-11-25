@@ -488,9 +488,11 @@ def packMods = [
 	// walls, tatami, dark cherry wood, lanterns, futons) and onsen water. Jaymo's Kingdoms' PsithurismCompat builds Blossom
 	// houses from its paper walls, tatami and dark cherry and sets onsen pools by the Blossom villages, by registry id only
 	// (never a compile dependency). Needs MModding Library (below). Not loaded in the dev game.
-	[dep: "curse.maven:psithurism-1533119:9374201", cf: [1533119, 9374201], dev: false],
+	// HELD BACK: Psithurism 1.4.0 (the only 26.3 build) needs Fabric Loader >=0.20.1 and Fabric API >=0.165.0, and the pack
+	// is on 0.19.5 / 0.164.0 (checkPackMods). Uncomment both lines once the pack moves up. Until then PsithurismCompat stays idle.
+	// [dep: "curse.maven:psithurism-1533119:9374201", cf: [1533119, 9374201], dev: false],
 	// MModding Library 0.9.2-alpha (MModding Team; same licence; curseforge.com/minecraft/mc-mods/mmodding-library): Psithurism's library.
-	[dep: "curse.maven:mmodding-library-694928:9374057", cf: [694928, 9374057], dev: false],
+	// [dep: "curse.maven:mmodding-library-694928:9374057", cf: [694928, 9374057], dev: false],
 	// Hot Air Balloons 0.0.30 (by Profet; all rights reserved, shipped as the untouched jar with credit and a link, never
 	// edited: curseforge.com/minecraft/mc-mods/hot-air-balloons): balloons you craft, dye, fuel and ride, drifting on wind at
 	// every height. Our own rough/HotAirBalloon is a separate balloon of ours with its own wind (also used by airships and ferries).
