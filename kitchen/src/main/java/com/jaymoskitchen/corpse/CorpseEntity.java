@@ -132,6 +132,9 @@ public class CorpseEntity extends Entity {
 		EntityDataSerializers.INT);
 	public static final int DRESSED_SKINNED = 1, DRESSED_GUTTED = 2;
 	/** (0.4.39) The game time it died (0 once reloaded): clients let a fresh body fall into place (see Flop). */
+	/** How the body has weathered, painted by clients (see {@link Wear}): charred, rotting, greyed, sunk, frozen, fading, squashed. */
+	private static final EntityDataAccessor<Integer> WEAR = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Long> BORN = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.LONG);
 	/**
@@ -196,6 +199,10 @@ public class CorpseEntity extends Entity {
 	/** A burning ghast corpse wails (its hurt sound) every this many ticks, this loud (1 is normal). */
 	private static final int GHAST_WAIL_EVERY = 25;
 	private static final float GHAST_WAIL_VOLUME = 4.0F;
+	/** A long burn leaves this many more ticks of bare bone before the ash. */
+	private static final int BONE_TICKS = 120;
+	/** A skeleton's body lies whole this long (ticks) after it dies, then its bones come apart. */
+	private static final int COLLAPSE_TICKS = 70;
 	/** In lava it goes much faster: this many ticks and it's gone. */
 	private static final int LAVA_BURN_TICKS = 30;
 	/** Bodies at least this big standing (the smaller of width and height; a ghast is 4) lie as big as they are. */
@@ -286,6 +293,13 @@ public class CorpseEntity extends Entity {
 	private long cutLast;
 	private int cutWork;
 	private int burnTicks;
+	/** Tied up on a fence post by a lead ({@link Strung}), and the side of the post it hangs on (radians). */
+	private @Nullable BlockPos strung;
+	private double hangSide;
+	/** It fell into lava: it burns away at once, with no bone stage. */
+	private boolean lavaBurn;
+	/** It has come apart into loose bones already (a skeleton, {@link #collapse}). */
+	private boolean collapsed;
 	/**
 	 * (0.5.51) Hung on a meat hook ({@link Hanging}): the hook (null: not hung), how far the butchering has got
 	 * ({@link Hanging#FRESH} on), the bleeding's length and ticks left, the blood put somewhere so far (grate levels),
@@ -973,6 +987,48 @@ public class CorpseEntity extends Entity {
 		return type != null && type.builtInRegistryHolder().is(Corpses.VILLAGERS);
 	}
 
+	/** How the body has weathered ({@link Wear}). */
+	public int wear() {
+		return this.entityData.get(WEAR);
+	}
+
+	void setWear(int wear) {
+		if (wear != this.entityData.get(WEAR)) {
+			this.entityData.set(WEAR, wear);
+		}
+	}
+
+	int age() {
+		return age;
+	}
+
+	int burnTicks() {
+		return burnTicks;
+	}
+
+	/** Ticks of burning before it is ash: the burn, then (unless it fell into lava) a stage of bare bone. */
+	int burnEnd() {
+		return lavaBurn ? BURN_TICKS : BURN_TICKS + BONE_TICKS;
+	}
+
+	/** How long (ticks) it has before it rots away, or gets up if it's one that does; 0 if it never does. */
+	int rotLimit() {
+		if (isMachine()) {
+			return 0;
+		}
+		if (rises()) {
+			return REANIMATE_TICKS;
+		}
+		return isHostile() && !rotsQuickly() ? HOSTILE_ROT_TICKS : ROT_TICKS;
+	}
+
+	/** Locks (1) or loosens (0) the joints of its ragdoll. */
+	void stiffen(float stiffness) {
+		if (ragdoll != null && ragdoll.body.stiffness() != stiffness) {
+			ragdoll.body.setStiffness(stiffness);
+		}
+	}
+
 	/** The parts the body lost (bits: head 1, right arm 2, left arm 4, right leg 8, left leg 16). */
 	public int missing() {
 		return this.entityData.get(MISSING);
@@ -1002,6 +1058,7 @@ public class CorpseEntity extends Entity {
 		builder.define(MISSING, 0);
 		builder.define(DRESSED, 0);
 		builder.define(BORN, 0L);
+		builder.define(WEAR, 0);
 		builder.define(SLUNG, -1);
 		builder.define(SLUNG_SLOT, 0);
 		builder.define(SLUNG_AT, 0L);
@@ -1093,6 +1150,48 @@ public class CorpseEntity extends Entity {
 		Vec3 hold = Hanging.holdPoint(at);
 		setPos(hold.x, hold.y - Math.max(0.5, getBbHeight()), hold.z);
 		setDeltaMovement(Vec3.ZERO);
+	}
+
+	/** The fence post it's tied up on ({@link Strung}), or null. */
+	public @Nullable BlockPos strung() {
+		return strung;
+	}
+
+	double hangSide() {
+		return hangSide;
+	}
+
+	/** Tied up on the fence post at {@code post}: out of anyone's hands, a ragdoll held there. */
+	void stringUp(BlockPos post) {
+		if (carrier() != null) {
+			setCarrier(null);
+		}
+		if (this.entityData.get(DRAGGER) >= 0) {
+			this.entityData.set(DRAGGER, -1);
+		}
+		unpin();
+		this.strung = post.immutable();
+		this.hangSide = Strung.sideOf(post, this);
+		this.entityData.set(HOOKED, true);
+		setWear(Wear.withFlag(wear(), Wear.STRUNG_BIT, true));
+		grabCooldown = GRAB_COOLDOWN;
+		ensureRagdoll();
+		if (ragdoll != null) {
+			ragdoll.body.wake();
+		}
+	}
+
+	/** Taken down: it falls as it hung. */
+	void unstring() {
+		if (strung != null) {
+			this.strung = null;
+			this.entityData.set(HOOKED, hook != null);
+			setWear(Wear.withFlag(wear(), Wear.STRUNG_BIT, false));
+			if (ragdoll != null) {
+				ragdoll.body.release();
+				ragdoll.body.wake();
+			}
+		}
 	}
 
 	/** Off the hook (taken down, or the hook's gone): it falls as it hung. */
@@ -1653,6 +1752,16 @@ public class CorpseEntity extends Entity {
 			serverTick(hookLevel);
 			return;
 		}
+		if (strung != null && level() instanceof ServerLevel strungLevel) {
+			// tied up on a fence post: a ragdoll held there by its wrists (or neck), swaying
+			ensureRagdoll();
+			Strung.tick(this, strungLevel, ragdoll.body);
+			if (ragdoll != null) {
+				ragdoll.tick(this, strungLevel);
+			}
+			serverTick(strungLevel);
+			return;
+		}
 		if (butcherStage == Hanging.BLEEDING && level() instanceof ServerLevel groundLevel) {
 			// (0.5.51) bled where it lies
 			Hanging.tickGround(this, groundLevel);
@@ -1891,6 +2000,20 @@ public class CorpseEntity extends Entity {
 		if (Keeping.kept(this, level)) {
 			// kept fresh (a priest's rite, a salt-and-herb wrap): its clock stands still, so it neither rots nor gets up
 			age--;
+		} else if (strung != null || Wear.frozen(wear())) {
+			// hung up, or frozen solid: it keeps, it doesn't rot
+			age--;
+		}
+		if (Wear.fading(wear())) {
+			Passing.fade(this, level);
+			return;
+		}
+		Decay.tick(this);
+		if (tickCount % 3 == 0) {
+			checkCrush(level);
+		}
+		if (kind == CorpseKind.SKELETON && !collapsed && age >= COLLAPSE_TICKS && carrier() == null && comesApart()) {
+			collapse(level);
 		}
 		if (!isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && roasts() && onLitCampfire(level)) {
 			// (0.5.77) a small animal laid on a campfire roasts instead of burning away
@@ -1921,6 +2044,7 @@ public class CorpseEntity extends Entity {
 		if (burns() && burnTicks < BURN_TICKS - LAVA_BURN_TICKS && isInLava()) {
 			// lava makes short work of it
 			burnTicks = BURN_TICKS - LAVA_BURN_TICKS;
+			lavaBurn = true;
 			play(level, SoundEvents.LAVA_EXTINGUISH, 0.8F);
 		}
 		if (isOnFire() && burns()) {
@@ -1949,7 +2073,7 @@ public class CorpseEntity extends Entity {
 				level.playSound(null, getX(), getY(), getZ(), SoundEvents.GHAST_HURT, SoundSource.HOSTILE, GHAST_WAIL_VOLUME,
 					0.8F + random.nextFloat() * 0.4F);
 			}
-			if (burnTicks >= BURN_TICKS) {
+			if (burnTicks >= burnEnd()) {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.2, getZ(), 20, 0.4, 0.2, 0.4, 0.02);
 				level.sendParticles(ParticleTypes.WHITE_ASH, getX(), getY() + 0.2, getZ(), 30, 0.4, 0.2, 0.4, 0.02);
 				play(level, SoundEvents.FIRE_EXTINGUISH, 1.0F);
@@ -2104,6 +2228,13 @@ public class CorpseEntity extends Entity {
 			return InteractionResult.SUCCESS;
 		}
 		ItemStack held = player.getItemInHand(hand);
+		if (Wear.fading(wear())) {
+			return InteractionResult.PASS;
+		}
+		InteractionResult tied = Strung.use(this, level, player, held);
+		if (tied != null) {
+			return tied;
+		}
 		if (dragger() != null) {
 			// (0.5.31) being dragged: let go of first
 			return InteractionResult.SUCCESS_SERVER;
@@ -3243,7 +3374,7 @@ public class CorpseEntity extends Entity {
 
 	/** Whether fire takes it: everything but a machine (an iron golem, a robot). */
 	public boolean burns() {
-		return kind.burns() && !isMachine();
+		return kind.burns() && !isMachine() && !Wear.frozen(wear());
 	}
 
 	/** Client: how far it has fallen apart, 0 (whole) to 1 (gone). */
@@ -4114,10 +4245,60 @@ public class CorpseEntity extends Entity {
 	/** (0.5.1) A blast of at least this much damage shreds the body; a weaker one only flings it. */
 	private static final float SHRED_DAMAGE = Gibs.SHRED_DAMAGE;
 
+	/** A falling block or anvil bears down on it from above (the box above a lying body this high, blocks). */
+	private static final double CRUSH_REACH = 0.6;
+	/** A falling block must be coming down at least this fast (blocks a tick) to crush a body. */
+	private static final double CRUSH_SPEED = 0.15;
+
+	/** How tall the mob it was stood (blocks). */
+	float bodyHeight() {
+		EntityType<?> type = sourceType();
+		return type == null ? getBbHeight() : type.getHeight();
+	}
+
+	/** Ice, all of it: shatters into shards, its loot spilling out, and is gone. */
+	private void shatter(ServerLevel level) {
+		EntityType<?> type = sourceType();
+		Gibs.shatter(level, position().add(0.0, 0.2, 0.0), type == null ? getBbWidth() : type.getWidth(), bodyHeight());
+		dropLoot(level);
+		discard();
+	}
+
+	/** A falling block coming down on a body lying here flattens it. */
+	private void checkCrush(ServerLevel level) {
+		if (Wear.crushed(wear()) || isMachine() || isFish() || isPassenger() || carrier() != null) {
+			return;
+		}
+		for (net.minecraft.world.entity.item.FallingBlockEntity falling : level.getEntitiesOfClass(
+			net.minecraft.world.entity.item.FallingBlockEntity.class, getBoundingBox().expandTowards(0.0, CRUSH_REACH, 0.0))) {
+			if (falling.getDeltaMovement().y < -CRUSH_SPEED) {
+				crush(level);
+				return;
+			}
+		}
+	}
+
+	/** Flattened, wide and thin, and what was in it sprayed out flat. */
+	void crush(ServerLevel level) {
+		if (Wear.crushed(wear())) {
+			return;
+		}
+		setWear(Wear.withFlag(wear(), Wear.CRUSHED_BIT, true));
+		Gibs.crushed(this, level);
+	}
+
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
-		if (isRemoved() || carrier() != null) {
+		if (isRemoved() || carrier() != null || Wear.fading(wear())) {
 			return false;
+		}
+		if (Wear.frozen(wear())) {
+			// an ice statue: any blow shatters it (fire and the cold only touch it)
+			if (source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE) || source.is(net.minecraft.tags.DamageTypeTags.IS_FREEZING)) {
+				return false;
+			}
+			shatter(level);
+			return true;
 		}
 		if (!source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) {
 			// (0.5.1) a blow or an arrow: it takes no harm, but the body is knocked about
@@ -4326,6 +4507,22 @@ public class CorpseEntity extends Entity {
 	 * otherwise knocked off". A skeleton's body as it drops: the skull and both arms come loose; the ribs and legs stay
 	 * together. Called before the body is in the world.
 	 */
+	/** A skeleton's bones come apart where it lies: what's left of its limbs and skull come loose, and loose bones scatter. */
+	private void collapse(ServerLevel level) {
+		collapsed = true;
+		boolean came = false;
+		for (int part : new int[] {PART_RIGHT_LEG, PART_LEFT_LEG, PART_RIGHT_ARM, PART_LEFT_ARM, PART_HEAD}) {
+			if ((missing() & part) == 0) {
+				shed(level, part, null, false);
+				came = true;
+			}
+		}
+		if (came) {
+			play(level, SoundEvents.SKELETON_HURT, 0.6F);
+			Gibs.looseBones(level, position().add(0.0, 0.2, 0.0), getBbWidth());
+		}
+	}
+
 	void fallToPieces(ServerLevel level) {
 		if (kind != CorpseKind.SKELETON || !comesApart()) {
 			return;
@@ -4464,6 +4661,14 @@ public class CorpseEntity extends Entity {
 		}
 		this.entityData.set(PINNED, input.getIntOr("Pinned", -1));
 		setHook(input.getLong("Hook").map(BlockPos::of).orElse(null));
+		this.entityData.set(WEAR, input.getIntOr("Wear", 0));
+		this.collapsed = input.getBooleanOr("Collapsed", false);
+		this.lavaBurn = input.getBooleanOr("LavaBurn", false);
+		this.strung = input.getLong("Strung").map(BlockPos::of).orElse(null);
+		this.hangSide = input.getDoubleOr("StrungSide", 0.0);
+		if (strung != null) {
+			this.entityData.set(HOOKED, true);
+		}
 		this.butcherStage = input.getIntOr("ButcherStage", 0);
 		this.bleedTotal = input.getIntOr("BleedTotal", 0);
 		this.bleedLeft = input.getIntOr("BleedLeft", 0);
@@ -4536,6 +4741,13 @@ public class CorpseEntity extends Entity {
 		}
 		if (hook != null) {
 			output.putLong("Hook", hook.asLong());
+		}
+		output.putInt("Wear", wear());
+		output.putBoolean("Collapsed", collapsed);
+		output.putBoolean("LavaBurn", lavaBurn);
+		if (strung != null) {
+			output.putLong("Strung", strung.asLong());
+			output.putDouble("StrungSide", hangSide);
 		}
 		if (butcherStage != 0) {
 			output.putInt("ButcherStage", butcherStage);

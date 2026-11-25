@@ -2,6 +2,7 @@ package com.jaymoskitchen.client.corpse;
 
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.corpse.CorpseEntity;
+import com.jaymoskitchen.corpse.Wear;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
@@ -38,6 +39,16 @@ public final class Dressed {
 	private static final int RIB_EVERY = 3;
 	/** Parts that are a body's trunk, in any case (Cube Animals' are Polish). */
 	private static final String[] TRUNKS = {"body", "torso", "tulow", "chest"};
+
+	/** Where a body's weathering ({@link Wear#PAINT_MASK}) sits in the dressed number. */
+	public static final int WEAR_SHIFT = 12;
+	/** Rot's darkest, bare bone, charcoal and ice, the colours a weathered body is painted toward. */
+	private static final int ROT = 0x4A4228, BONE = 0xE6DFCB, CHARCOAL = 0x1A1512, ICE = 0xD2EEFF;
+	/** How far toward charcoal each char level goes, and the greyest a body gets (share of its colour lost, at the last level). */
+	private static final float[] CHAR_SHARE = {0.25F, 0.5F, 0.75F, 0.9F};
+	private static final float GREY_MOST = 0.8F, ROT_SHARE = 0.6F, ICE_SHARE = 0.7F;
+	/** Blotches are cells this many pixels across. */
+	private static final int BLOTCH = 3;
 
 	/** Painted copies: per model, original texture and state to copy. */
 	private static final Map<Object, Map<String, Identifier>> DONE = new IdentityHashMap<>();
@@ -89,6 +100,9 @@ public final class Dressed {
 		} else if ((dressed & ROAST_BROWNING) != 0) {
 			roast(painted, ROAST, 0.35F);
 		}
+		if ((dressed >> WEAR_SHIFT & Wear.PAINT_MASK) != 0) {
+			weather(painted, dressed >> WEAR_SHIFT & Wear.PAINT_MASK);
+		}
 		Identifier id = JaymosKitchen.id("dressed/" + texture.getNamespace() + "/" + texture.getPath().replace(".png", "") + "_" + made++);
 		Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(id::toString, painted));
 		return id;
@@ -112,6 +126,55 @@ public final class Dressed {
 				int colour = hash(x / 2, y, 1) % FAT_ONE_IN == 0 ? FAT : hash(x, y / 2, 2) % DARK_ONE_IN == 0 ? DARK_MUSCLE : MUSCLE;
 				image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), Math.min(255, (int) ((colour >> 16 & 0xFF) * shade)),
 					Math.min(255, (int) ((colour >> 8 & 0xFF) * shade)), Math.min(255, (int) ((colour & 0xFF) * shade))));
+			}
+		}
+	}
+
+	/**
+	 * A body's weathering ({@link Wear}): bone where the rot has bared it (patches, the same cells that darkened first, so
+	 * the flesh falls away from where it went dark), dark rot-brown in patches, grey with age, charred, or frozen pale blue.
+	 */
+	private static void weather(NativeImage image, int wear) {
+		int charred = Wear.get(wear, Wear.CHAR), dark = Wear.get(wear, Wear.DARK), bare = Wear.get(wear, Wear.BARE), grey = Wear.get(wear, Wear.GREY);
+		boolean frozen = Wear.frozen(wear);
+		for (int y = 0; y < image.getHeight(); y++) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				int argb = image.getPixel(x, y);
+				if (ARGB.alpha(argb) == 0) {
+					continue;
+				}
+				float r = ARGB.red(argb), g = ARGB.green(argb), b = ARGB.blue(argb);
+				float lum = (r * 299 + g * 587 + b * 114) / 1000.0F;
+				float shade = 0.75F + 0.25F * lum / 255.0F;
+				float cell = hash(x / BLOTCH, y / BLOTCH, 7) % 1000 / 1000.0F;
+				if (grey > 0) {
+					float k = GREY_MOST * grey / Wear.LEVELS;
+					r += (lum - r) * k;
+					g += (lum - g) * k;
+					b += (lum - b) * k;
+				}
+				if (dark > 0 && cell < dark / (float) Wear.LEVELS) {
+					r += ((ROT >> 16 & 0xFF) * shade - r) * ROT_SHARE;
+					g += ((ROT >> 8 & 0xFF) * shade - g) * ROT_SHARE;
+					b += ((ROT & 0xFF) * shade - b) * ROT_SHARE;
+				}
+				if (bare > 0 && cell < bare / (float) Wear.LEVELS) {
+					r = (BONE >> 16 & 0xFF) * shade;
+					g = (BONE >> 8 & 0xFF) * shade;
+					b = (BONE & 0xFF) * shade;
+				}
+				if (charred > 0) {
+					float k = Math.min(1.0F, CHAR_SHARE[charred - 1] + (hash(x, y, 8) % 7 - 3) * 0.02F);
+					r += ((CHARCOAL >> 16 & 0xFF) * shade - r) * k;
+					g += ((CHARCOAL >> 8 & 0xFF) * shade - g) * k;
+					b += ((CHARCOAL & 0xFF) * shade - b) * k;
+				}
+				if (frozen) {
+					r += ((ICE >> 16 & 0xFF) * shade - r) * ICE_SHARE;
+					g += ((ICE >> 8 & 0xFF) * shade - g) * ICE_SHARE;
+					b += ((ICE & 0xFF) * shade - b) * ICE_SHARE;
+				}
+				image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), Math.min(255, (int) r), Math.min(255, (int) g), Math.min(255, (int) b)));
 			}
 		}
 	}

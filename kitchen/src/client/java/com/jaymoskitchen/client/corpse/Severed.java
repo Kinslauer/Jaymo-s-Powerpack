@@ -35,6 +35,14 @@ public final class Severed {
 		return missing == 0 ? null : missing;
 	}
 
+	/**
+	 * What a body is drawn without: the parts it lost ({@code missing}) and the parts it has faded from ({@code hidden}); with
+	 * streamer safe on, only the fading (the body isn't drawn torn).
+	 */
+	public static @Nullable Integer of(int missing, int hidden) {
+		return of(StreamerSafe.on() ? hidden : missing | hidden);
+	}
+
 	public static void hide(Model<?> model, Object state) {
 		if (!(state instanceof EntityRenderState renderState)) {
 			return;
