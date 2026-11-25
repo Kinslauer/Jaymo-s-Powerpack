@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 18:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 18:18). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -24,6 +24,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
 - [ ] #2179 Fae Woods: shipped mods for the Blossom land, balloon gusts (Powers, Kingdoms, Kitchen, 2026-11-25)
+- [ ] #2178 Mordhau harness 2: the coif's cuts and the wrapper at the anvil, the champion's wreath (Powers, Kingdoms, 2026-11-25)
 - [ ] #2176 The numpad's other keys stay quiet while the cleric's medallion board is up (Kingdoms, 2026-11-25)
 - [ ] #2175 Swinging while locked on no longer crashes the game (Powers, 2026-11-25)
 - [ ] #2174 class items show up in JEI under the class's name (Kingdoms, 2026-11-25)
@@ -68,26 +69,25 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2134 Hand of God effects: heat-vision Frost beam, Thunderhead electrokinesis, Chrono slow time, five Nadir moves (Powers, 2026-11-25)
 - [ ] #2133 Visceral gore: deeper wounds, hit reactions, armour holes, takedowns, gore reader (Powers, Kingdoms, Kitchen, 2026-11-25)
 - [ ] #2132 Villager screen opens into talk: everything is a spoke on the talk wheel, only Gift and Trade stay buttons (Kingdoms, 2026-11-25)
+- [ ] #2131 The Wither's own look, animations and voice (Kingdoms, 2026-11-25)
+- [ ] #2130 End plants no longer break End worldgen (Kitchen, 2026-11-25)
 - [ ] #2129 worn totems and villagers who carry one (Powers, 2026-11-25)
 - [ ] #2128 Gravity metal fixes: no dupes from torn chunks, no weapon minting (Powers, 2026-11-25)
+- [ ] #2127 three primitive hide sets, each with a dark make (Powers, Kingdoms, 2026-11-25)
 - [ ] #2126 weighty movement - the walk carries weight (Powers, 2026-11-25)
 - [ ] #2125 Gravity: iron answers first (the X-Men mod's Magnetism, worked in) (Powers, 2026-11-25)
 - [ ] #2122 Trade hats (Powers, Kingdoms, 2026-11-25)
 - [ ] #2110 Village mods patch 6: small structures (cairns, tree sites, mazes, wayside inns, cave gardens, plan plot outline) (Kingdoms, 2026-11-25)
 - [ ] #2121 Takeover pathing fixes: long tunnels, safe shafts, no stray weapon arm (Powers, 2026-11-24)
 - [ ] #2120 Scouter: hold to scan, full readings, marks and tracking (Powers, Kingdoms, 2026-11-24)
+- [ ] #2119 players' limbs twice as tough (Powers, Kitchen, 2026-11-24)
 - [ ] #2118 spiders in leaves leave you be by day (Powers, Kingdoms, 2026-11-24)
 - [ ] #2117 Blood Awakening upgrades your blood's held move; a Verdant's regrowth key (Powers, Kingdoms, 2026-11-24)
-- [ ] #2115 Takeovers dig straight to their prey and never stand stuck (Powers, 2026-11-24)
-- [ ] #2114 The first capital is found in seconds, not after an 11-minute wait (Kingdoms, 2026-11-24)
-- [ ] #2113 Village mods 4: board work (Kingdoms, 2026-11-24)
-- [ ] #2108 The Silk Deeps no longer generate (Kingdoms, 2026-11-24)
-- [ ] #2107 T opens chat again (Powers, Kingdoms, 2026-11-24)
-- …and 506 older ones.
+- …and 565 older ones.
 
 ## Health
 
-12 problems in the notes: [[Health]].
+13 problems in the notes: [[Health]].
 
 ## Last week
 
