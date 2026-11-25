@@ -1,16 +1,15 @@
 ---
-status: running
-task: Build Andy's 42 Visceral gore picks; PixelGore pick list waiting on picks
+status: in-review
+task: Build Andy's 42 Visceral + 16 PixelGore gore picks
 branch: claude/project-thread-9k4io3
 with: cloud thread (Reason Art project)
-pr:
+pr: 2133
 mods: powers, kitchen, kingdoms
 versions:
 started: 2026-11-24
 owns:
   - docs/Visceral-Plan.md
-  - Track 2 (hit reactions, stances, kill moment, MotionSettings) in worktree vis-track2
-  - Track 5 (core/blood, client/blood, BloodSettings, KitchenBlood) in worktree vis-track5
+  - all 8 tracks (done, in PR #2133)
 ---
 # Visceral gore picks
 
@@ -21,3 +20,5 @@ owns:
 
 ## Notes
 - Visceral picks: https://claude.ai/artifact/3NMtJdzmLuH1WyzbYV672f (db picks/andy).
+
+- 2026-11-25: all 8 tracks built, reviewed, fixed; PR #2133 opened. Not run in game. Kingdoms standalone runServer fails on pre-existing big_golem spawn entries (anvil_ruins, court_ruins).
