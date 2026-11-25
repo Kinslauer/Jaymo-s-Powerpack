@@ -1,10 +1,10 @@
 ---
-status: open
+status: in-review
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
 claimed_by: 
-pr: 
+pr: 2178
 ---
 # Mordhau harness 2: hoods, hats, crests and neck (Kingdoms)
 
