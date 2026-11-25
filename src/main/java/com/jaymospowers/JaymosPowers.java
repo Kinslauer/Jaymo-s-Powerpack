@@ -252,6 +252,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.backpack.Backpack.init();
 		// (0.17.184) Baubles-style accessory slots (amulet, two rings, belt, head, body, charm) and seven baubles to wear
 		com.jaymospowers.baubles.Baubles.init();
+		// a Totem of Undying works worn in the charm slot; now and then a villager or illager carries one
+		com.jaymospowers.baubles.WornTotems.init();
 		// arrowheads and fitted arrows, the belt of throwables, shield moves
 		com.jaymospowers.gear.GearPicks.init();
 		// (Clouds and Bits patch 6) pick your arrow by scrolling while drawing; keep some XP on death
@@ -363,7 +365,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.ember.BurningSteed", "power.heritage.HeritageMoves",
 			"elemental.ElementalCorruption", "power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.NpcClimb", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.BodyWeapons", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.NpcClimb", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.WornTotems", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.BodyWeapons", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
 			"water.Dives", "core.MagicMoves", "core.DreamCall", "core.RetiredPowers", "core.trials.PowerTrials", "bonebond.Boneiron",
 			"bits.SoulBurn", "alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.MettleDraught", "alchemy.picks.SizeDraughts", "alchemy.picks.Pacts",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",

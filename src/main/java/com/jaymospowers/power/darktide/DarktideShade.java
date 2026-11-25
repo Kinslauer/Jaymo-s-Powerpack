@@ -25,7 +25,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 /**
  * The shade: a Darktide user who dies at night comes back as their own shadow instead (once a night). The shade can't
@@ -80,7 +79,7 @@ final class DarktideShade {
 			return true;
 		}
 		if (!DarktideFlow.night(player.level()) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
-				|| player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)) {
+				|| com.jaymospowers.baubles.WornTotems.ready(player)) {
 			return true;
 		}
 		rise(player);

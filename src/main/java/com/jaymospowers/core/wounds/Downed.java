@@ -62,7 +62,6 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -918,7 +917,7 @@ public final class Downed {
 
 	/**
 	 * Whether this blow leaves anything to get up: not one that ignores invulnerability, nor a beheading (or a body already
-	 * headless). And a totem in hand is left to do its work (this event comes before it).
+	 * headless). And a totem in hand, worn or carried (WornTotems) is left to do its work (this event comes before it).
 	 */
 	static boolean spared(LivingEntity entity, DamageSource source) {
 		// ((survival picks) Andy: "the only time you arent downed is if a hit does enough damage to your head while you are
@@ -926,7 +925,7 @@ public final class Downed {
 		return !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.is(Dismember.DECAPITATION) && !Dismember.headless(entity)
 			&& !Wounds.headKilled(entity)
 			&& !entity.entityTags().contains(Dismember.tag(Dismember.HEAD))
-			&& !entity.getMainHandItem().is(Items.TOTEM_OF_UNDYING) && !entity.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
+			&& !com.jaymospowers.baubles.WornTotems.ready(entity)
 			// (0.17.183) Kingdoms' Will: No Mercy for the weaker ({@link WillSkill#noMercy})
 			&& !WillSkill.noMercy(entity, source);
 	}
