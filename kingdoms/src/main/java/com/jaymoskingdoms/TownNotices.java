@@ -510,6 +510,11 @@ final class TownNotices {
 			return theirs;
 		}
 		RandomSource random = level.getRandom();
+		// (after many errands, this may be the rare one: the way into a ruin, in the giver's book)
+		Boolean rare = ErrandBooks.rare(level, player, giver, f, random);
+		if (rare != null) {
+			return rare;
+		}
 		String job = giver instanceof Villager v
 			? BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath() : "";
 		int count = Mth.nextInt(random, n.min(), n.max());
@@ -535,6 +540,7 @@ final class TownNotices {
 			return false;
 		}
 		BoardTerms.taken(level, player, q, key, "plain", also);
+		ErrandBooks.give(player, q, giver, f, false);
 		return true;
 	}
 }

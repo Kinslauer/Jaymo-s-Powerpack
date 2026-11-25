@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/door_bottom_right",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "bottom": "jaymoskingdoms:block/glowcap_door_bottom",
+    "top": "jaymoskingdoms:block/glowcap_door_top"
+  }
+}

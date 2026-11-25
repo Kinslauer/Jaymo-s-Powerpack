@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "jaymoskingdoms:block/bouncecap_hyphae",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "jaymoskingdoms:block/bouncecap_hyphae"
+    },
+    "axis=z": {
+      "model": "jaymoskingdoms:block/bouncecap_hyphae",
+      "x": 90
+    }
+  }
+}

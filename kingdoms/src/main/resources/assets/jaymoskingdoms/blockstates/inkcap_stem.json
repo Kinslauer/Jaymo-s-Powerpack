@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "jaymoskingdoms:block/inkcap_stem",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "jaymoskingdoms:block/inkcap_stem"
+    },
+    "axis=z": {
+      "model": "jaymoskingdoms:block/inkcap_stem",
+      "x": 90
+    }
+  }
+}

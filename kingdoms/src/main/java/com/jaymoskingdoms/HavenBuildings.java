@@ -215,6 +215,18 @@ final class HavenBuildings {
 	/** A tree house: a 9-square platform on a trunk and four posts, a ladder up its front, the house on it, leaves over all. */
 	static Blueprint treehouse(Buildings.Kit k) {
 		Palette p = k.p;
+		BlockState woodStairs = k.woodStairs;
+		Block door = k.door;
+		// some are built from the haven's fungal wood (the glow-woods)
+		com.jaymoskingdoms.glowwood.FungusWood fungal = com.jaymoskingdoms.glowwood.FungusWood.byId(k.fungus);
+		if (fungal != null) {
+			com.jaymoskingdoms.glowwood.GlowWoods.WoodSet set = com.jaymoskingdoms.glowwood.GlowWoods.WOOD.get(fungal);
+			p = new Palette(p.wall(), p.mossy(), p.cracked(), p.floor(), p.trim(), p.stairs(), p.slab(), p.fortified(), p.path(),
+				set.stem().defaultBlockState(), set.planks().defaultBlockState(), set.slab().defaultBlockState(), set.fence().defaultBlockState(),
+				set.trapdoor().defaultBlockState());
+			woodStairs = set.stairs().defaultBlockState();
+			door = set.door();
+		}
 		int w = 9, d = 10, floor = BOUGH, top = floor + 4;
 		Buildings.Sketch s = new Buildings.Sketch("house", w, d, top + 8);
 		int mid = w / 2, zm = 5;
@@ -257,10 +269,10 @@ final class HavenBuildings {
 				}
 			}
 		}
-		s.door(mid, floor + 1, z0, Direction.NORTH, k.door);
+		s.door(mid, floor + 1, z0, Direction.NORTH, door);
 		s.set(x0, floor + 2, zm, k.pane);
 		s.set(x1, floor + 2, zm, k.pane);
-		s.gable(x0, x1, z0, z1, top, k.woodStairs, p.woodSlab(), p.planks());
+		s.gable(x0, x1, z0, z1, top, woodStairs, p.woodSlab(), p.planks());
 		// the crown: leaves over the roof and round the trunk's top
 		for (int x = 0; x < w; x++) {
 			for (int z = 1; z < d; z++) {
@@ -426,6 +438,13 @@ final class HavenBuildings {
 				}
 			}
 			s.set(w / 2, 1, 0, Blocks.COMPOSTER.defaultBlockState());
+			// two straw skeps (bee boxes; GlowWoodHavens gives them bees) beside the flowers the bees work
+			s.set(1, 1, 1, Buildings.Sketch.facing(Blocks.BEEHIVE, Direction.SOUTH));
+			s.set(w - 2, 1, 1, Buildings.Sketch.facing(Blocks.BEEHIVE, Direction.SOUTH));
+			s.set(3, 1, 1, Blocks.CORNFLOWER.defaultBlockState());
+			s.set(5, 1, 1, Blocks.DANDELION.defaultBlockState());
+			s.set(7, 1, 1, Blocks.OXEYE_DAISY.defaultBlockState());
+			s.set(9, 1, 1, Blocks.POPPY.defaultBlockState());
 		} else {
 			for (int x = 0; x < w; x++) {
 				for (int z = 0; z < d; z++) {

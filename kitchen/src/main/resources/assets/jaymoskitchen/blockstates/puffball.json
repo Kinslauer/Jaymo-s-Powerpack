@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskitchen:block/forage/puffball"
+      },
+      {
+        "model": "jaymoskitchen:block/forage/puffball",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/forage/puffball",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/forage/puffball",
+        "y": 270
+      }
+    ]
+  }
+}

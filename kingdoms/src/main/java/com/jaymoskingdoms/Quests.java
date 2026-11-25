@@ -599,6 +599,7 @@ public final class Quests {
 			QuestJobs.handIn(level, player, giver, q);
 		}
 		remove(player, q.id());
+		ErrandBooks.finished(player, q);
 		if (q.kind() >= Quest.PACK) {
 			// (board work: what it put in the world is cleared, and the board's name grows)
 			QuestJobs.over(level, player, q);

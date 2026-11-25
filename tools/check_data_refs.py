@@ -48,6 +48,19 @@ def loot_names(node, f):
 		for x in node:
 			loot_names(x, f)
 
+def loot_tags(node, out=None):
+	"""The names of a loot table's tag entries (item tags, not items)."""
+	out = set() if out is None else out
+	if isinstance(node, dict):
+		if node.get('type') in ('minecraft:tag', 'tag') and isinstance(node.get('name'), str):
+			out.add(node['name'])
+		for v in node.values():
+			loot_tags(v, out)
+	elif isinstance(node, list):
+		for x in node:
+			loot_tags(x, out)
+	return out
+
 for ns, root in MODS.items():
 	for f in glob.glob(f'{root}/main/resources/data/**/*.json', recursive=True):
 		if '/tags/' in f or '/worldgen/' in f:
@@ -69,7 +82,16 @@ for ns, root in MODS.items():
 			allowed = COOK if any(k in kind for k in ('smelting', 'blasting', 'smoking', 'campfire')) else CRAFT if kind.startswith('minecraft:crafting') else None
 			if cat is not None and allowed is not None and cat not in allowed:
 				problems.append(f'{f}: category "{cat}" isn\'t one of {sorted(allowed)}')
+		tag_names = set()
+		if '/loot_table/' in f:
+			try:
+				tag_names = loot_tags(json.loads(text))
+			except ValueError:
+				pass
 		for m in REF.finditer(text):
+			if f'{m.group(1)}:{m.group(2)}' in tag_names:
+				# a loot entry of type tag names an item tag, not an item
+				continue
 			if m.group(2) not in known[m.group(1)]:
 				problems.append(f'{f}: {m.group(1)}:{m.group(2)} isn\'t an item or block of ours')
 

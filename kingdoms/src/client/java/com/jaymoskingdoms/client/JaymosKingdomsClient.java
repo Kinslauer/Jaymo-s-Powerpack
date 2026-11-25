@@ -49,6 +49,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
 		TierHidingClient.register();
+		// sparkles in the glow-woods at night
+		GlowSparkles.register();
+		com.jaymoskingdoms.client.glowwood.GlowCreaturesClient.register();
 		LocksClient.register();
 		BoardTermsClient.register();
 		// (ff-kit) Peterwolf's firefighter readout on our HUD layout, only while carrying the kit
@@ -126,6 +129,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.reaped.ReapedClient.register();
 		com.jaymoskingdoms.client.illagers.IllagerKindsClient.register();
 		com.jaymoskingdoms.client.creatures.CreaturesClient.register();
+		com.jaymoskingdoms.client.deep.DeepBeastRenderer.register();
 		// 0.7.131: the Hornkin of the Nether
 		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
 		com.jaymoskingdoms.client.nether.ImpRenderer.register();
@@ -232,6 +236,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		FamiliarClient.register();
 		// the hanging tree's crows, in the familiar raven's coat
 		EntityRenderers.register(com.jaymoskingdoms.Crow.TYPE, CrowRenderer::new);
+		com.jaymoskingdoms.client.harvest.HarvestClient.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
 		com.jaymoskingdoms.client.forms.FormsClient.register();

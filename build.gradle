@@ -483,6 +483,21 @@ def packMods = [
 	[dep: "maven.modrinth:qraftyfied:cpRes8NL", cf: [1005868, 8916149]],
 	// VillagersTradingPlus (GPL-3.0): the trading library VillagersPlus needs (packModsNoCf).
 	[dep: "maven.modrinth:villagerstradingplus:uut3GStm", cf: [1635301, 9346754]],
+	// Psithurism 1.4.0 (by the MModding Team; code PolyForm Shield 1.0.0, art all rights reserved, shipped as the untouched
+	// jar with credit, never edited or taken apart; curseforge.com/minecraft/mc-mods/psithurism): Japanese deco blocks (paper
+	// walls, tatami, dark cherry wood, lanterns, futons) and onsen water. Jaymo's Kingdoms' PsithurismCompat builds Blossom
+	// houses from its paper walls, tatami and dark cherry and sets onsen pools by the Blossom villages, by registry id only
+	// (never a compile dependency). Needs MModding Library (below). Not loaded in the dev game.
+	// HELD BACK: Psithurism 1.4.0 (the only 26.3 build) needs Fabric Loader >=0.20.1 and Fabric API >=0.165.0, and the pack
+	// is on 0.19.5 / 0.164.0 (checkPackMods). Uncomment both lines once the pack moves up. Until then PsithurismCompat stays idle.
+	// [dep: "curse.maven:psithurism-1533119:9374201", cf: [1533119, 9374201], dev: false],
+	// MModding Library 0.9.2-alpha (MModding Team; same licence; curseforge.com/minecraft/mc-mods/mmodding-library): Psithurism's library.
+	// [dep: "curse.maven:mmodding-library-694928:9374057", cf: [694928, 9374057], dev: false],
+	// Hot Air Balloons 0.0.30 (by Profet; all rights reserved, shipped as the untouched jar with credit and a link, never
+	// edited: curseforge.com/minecraft/mc-mods/hot-air-balloons): balloons you craft, dye, fuel and ride, drifting on wind at
+	// every height. Our own rough/HotAirBalloon is a separate balloon of ours with its own wind (also used by airships and ferries).
+	// Fantasy Mounts is NOT shipped: its author has not agreed yet (docs/FaeWoods-Plan.md, Andy's answer 3).
+	[dep: "curse.maven:hot-air-balloons-1776121:9405501", cf: [1776121, 9405501], dev: false],
 ]
 // on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest
 // can't list them: the CurseForge import zip carries the jars themselves (overrides/mods), and they're in modpack/mods

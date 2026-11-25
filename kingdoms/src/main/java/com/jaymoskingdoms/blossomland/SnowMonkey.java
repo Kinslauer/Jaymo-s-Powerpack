@@ -46,6 +46,8 @@ public class SnowMonkey extends BlossomAnimal {
 	static final long FED_TICKS = 24000L, RAID_TICKS = 6000L;
 	static final double SHARE_RANGE = 10.0, ALARM_RANGE = 12.0;
 	static final int ALARM_EVERY = 100, SOAK_TICKS = 1200;
+	/** How far (blocks) a troop looks for a hot spring in winter, and how often (ticks). */
+	static final int ONSEN_RANGE = 32, ONSEN_EVERY = 400;
 	static final Set<Item> FOOD = Set.of(Items.APPLE, Items.SWEET_BERRIES, Items.GLOW_BERRIES, Items.MELON_SLICE, Items.CARROT, Items.POTATO,
 		Items.BEETROOT, Items.BREAD, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS);
 
@@ -99,6 +101,23 @@ public class SnowMonkey extends BlossomAnimal {
 			@Override
 			protected boolean matches(ServerLevel level, BlockPos pos, BlockState state) {
 				return level.getFluidState(pos).is(FluidTags.WATER) && level.getBlockState(pos.above()).isAir() && level.getFluidState(pos.below()).isEmpty();
+			}
+
+			@Override
+			protected void arrive(ServerLevel level, BlockPos pos) {
+				SnowMonkey.this.soakUntil = SnowMonkey.this.tickCount + SOAK_TICKS;
+			}
+		});
+		// a hot spring beyond the village's fields (Psithurism's onsen water, set by PsithurismCompat) is worth a longer walk in winter
+		this.goalSelector.addGoal(5, new SeekBlock(ONSEN_RANGE, 4, ONSEN_EVERY, 1.0, 1.2) {
+			@Override
+			protected boolean wants() {
+				return winter(SnowMonkey.this.level()) && SnowMonkey.this.soakUntil < SnowMonkey.this.tickCount;
+			}
+
+			@Override
+			protected boolean matches(ServerLevel level, BlockPos pos, BlockState state) {
+				return com.jaymoskingdoms.PsithurismCompat.onsenWater(state) && level.getBlockState(pos.above()).isAir();
 			}
 
 			@Override

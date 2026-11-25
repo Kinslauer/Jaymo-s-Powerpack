@@ -92,6 +92,7 @@ public final class Afflictions {
 	}
 
 	static void register() {
+		Mycosis.register();
 		ServerTickEvents.END_SERVER_TICK.register(Afflictions::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> TOLD.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TOLD.clear());
@@ -177,6 +178,7 @@ public final class Afflictions {
 
 	/** {@code stack} (as it was before) was eaten or drunk by {@code player}: honey, milk, the Potion of Cleansing, water, raw garlic. */
 	public static void consumed(ServerPlayer player, ItemStack stack) {
+		Mycosis.consumed(player, stack);
 		if (stack.is(Items.HONEY_BOTTLE) || stack.is(com.jaymospowers.core.wounds.herbs.Herbs.WILD_GARLIC)) {
 			// Kingdoms' blight sickness eases with the same remedies
 			com.jaymospowers.compat.KingdomsCompat.easeBlight(player);

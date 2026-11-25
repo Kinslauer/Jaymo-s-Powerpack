@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskitchen:morel",
+    "jaymoskitchen:chanterelle",
+    "jaymoskitchen:deathcap",
+    "jaymoskitchen:frostcap",
+    "jaymoskitchen:emberstool",
+    "jaymoskitchen:puffball",
+    "minecraft:red_mushroom",
+    "minecraft:brown_mushroom",
+    "minecraft:red_mushroom_block",
+    "minecraft:brown_mushroom_block",
+    "minecraft:mushroom_stem"
+  ]
+}

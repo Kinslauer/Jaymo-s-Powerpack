@@ -61,6 +61,8 @@ public class HotAirBalloon extends Entity {
 	static final int BURN = 2;
 	/** The wind: a layer's depth (blocks), how fast it blows (blocks a tick), how quickly the balloon takes it up (a share a tick). */
 	static final double LAYER = 28.0, WIND_SPEED = 0.07, PICKUP = 0.02;
+	/** Gusts: how much harder than steady a gust blows (a share), how long one lasts (ticks), and how far across it reaches (blocks). */
+	static final double GUST = 0.45, GUST_TICKS = 700.0, GUST_REACH = 90.0;
 	/** How high the balloon can climb above the build limit's reach before the air is too thin for the burner. */
 	static final int CEILING_GAP = 8;
 
@@ -95,6 +97,17 @@ public class HotAirBalloon extends Entity {
 		double hours = level.getGameTime() / 9000.0;
 		Vec3 a = heading(low, hours), b = heading(low + 1, hours);
 		return a.scale(1.0 - between).add(b.scale(between));
+	}
+
+	/**
+	 * The wind at a place: the layer's wind ({@link #wind(Level, double)}) with a gust in it, a patch of harder wind that
+	 * sweeps across (0 to {@link #GUST} more than steady, and a lull in between). Airships and sky ferries read it too
+	 * (Jaymo's Kingdoms' {@code Winds.aloft}, by reflection), so everything in the air feels the same sky.
+	 */
+	public static Vec3 wind(Level level, double x, double y, double z) {
+		double t = level.getGameTime() / GUST_TICKS;
+		double gust = 0.5 + 0.5 * Math.sin(t * Math.PI * 2.0 + (x * 0.8 + z * 0.6) / GUST_REACH + y / (LAYER * 3.0));
+		return wind(level, y).scale(1.0 - GUST * 0.5 + GUST * gust);
 	}
 
 	private static Vec3 heading(int layer, double hours) {
@@ -157,7 +170,7 @@ public class HotAirBalloon extends Entity {
 				vy = Math.max(-(vent ? DOWN_MAX : DOWN_MAX * 0.4), vy - (vent ? VENT : SINK));
 			}
 			// the wind of this height, taken up slowly
-			Vec3 want = onGround() ? Vec3.ZERO : wind(level, getY()).scale(WIND_SPEED);
+			Vec3 want = onGround() ? Vec3.ZERO : wind(level, getX(), getY(), getZ()).scale(WIND_SPEED);
 			double vx = Mth.lerp(PICKUP, motion.x, want.x), vz = Mth.lerp(PICKUP, motion.z, want.z);
 			setDeltaMovement(vx, vy, vz);
 			move(MoverType.SELF, getDeltaMovement());

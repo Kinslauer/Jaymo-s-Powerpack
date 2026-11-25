@@ -181,6 +181,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Firefighting.register();
 		// Peterwolf's Forest Fire (when it's in the pack): its fire runs our wildfires, its wind follows ours
 		ForestFireCompat.register();
+		// Psithurism (when it's in the pack): a soak in its onsen water lifts the winter cold
+		PsithurismCompat.register();
 		// 0.7.31: disasters strike settlements: news, repairs, tempers, relief quests
 		DisasterRelief.register();
 		// 0.5.23: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
@@ -274,6 +276,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		GuardMeals.register();
 		GuardKicks.register();
 		AlarmBells.register();
+		com.jaymoskingdoms.deep.Deeps.register();
 		RaidBeasts.register();
 		WitchRaids.register();
 		GolemPathing.register();
@@ -491,6 +494,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spoils.register();
 		HavenGates.register();
 		HavenWares.register();
+		// the glow-woods: giant fungi, fungal woods and fairy rings (ported from Spore & Stem), and the Sylvan havens' share
+		com.jaymoskingdoms.glowwood.GlowWoods.register();
+		GlowWoodHavens.register();
+		// their creatures: sporelings, trufflers, glowmoths, the old woods' mimicaps and bloatshrooms, the spore-rot's shamblers and the Myceliarch
+		com.jaymoskingdoms.glowwood.creatures.GlowCreatures.register();
+		GlowHavenLife.register();
 		// (0.7.490) Havens expand: their works, land and sworn order
 		HavenGrowth.register();
 		// (0.7.490) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
@@ -629,6 +638,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// village mods 6, small structures: the tree sites (the hollow oak's hermit, the lookout's bandits, the hanging
 		// tree's crows) and the changing maze under a necromancer's crypt (their attachments load with them)
 		TreeSites.register();
+		FieldCrows.register();
+		com.jaymoskingdoms.harvest.WickedHarvest.register();
 		CryptMaze.register();
 		// and the druids' cave gardens, tended while their druid lives
 		CaveGardens.register();
