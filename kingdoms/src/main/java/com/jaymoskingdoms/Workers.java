@@ -149,6 +149,10 @@ public final class Workers {
 			// (0.7.294) a realm's driver in the saddle: the drive is his
 			return true;
 		}
+		if (DangerSense.brainStep(mob)) {
+			// out of fire or lava, to water, or out of the water after a fight: its brain waits
+			return true;
+		}
 		if (BreakOff.brainStep(mob)) {
 			// badly hurt it has broken off (or a friend is stepping in front of one who has): its brain waits
 			return true;
@@ -159,6 +163,10 @@ public final class Workers {
 		}
 		if (Blows.brainStep(mob)) {
 			// a melee fighter just after its blow steps back to its weapon's reach: its brain waits
+			return true;
+		}
+		if (Hiding.brainStep(mob) || Detours.brainStep(mob)) {
+			// no way to the shooter (gone to cover a while) or to its foe (a way round): its brain waits
 			return true;
 		}
 		if (mob.tickCount % Standing.EVERY == 0 && (w.role() == Folk.GUARD || Rulers.leaderRole(w.role()) || mob.hasAttached(Standing.LINES))) {

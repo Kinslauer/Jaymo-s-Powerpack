@@ -1,6 +1,8 @@
 package com.jaymoskingdoms.mixin;
 
+import com.jaymoskingdoms.Climbing;
 import com.jaymoskingdoms.GapJumps;
+import com.jaymoskingdoms.Passages;
 import com.jaymoskingdoms.Unstick;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
@@ -15,7 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Hands every mob's walking to {@link Unstick} after each step, so one that makes no headway works itself loose, and
- * (0.7.533) to {@link GapJumps}, so a humanoid whose path stops at the edge of a gap jumps it.
+ * (0.7.533) to {@link GapJumps}, so a humanoid whose path stops at the edge of a gap jumps it; and to {@link Climbing} and
+ * {@link Passages}, so a fighter climbs the ladders and opens the doors its path goes through.
  */
 @Mixin(PathNavigation.class)
 abstract class PathNavigationMixin {
@@ -36,5 +39,8 @@ abstract class PathNavigationMixin {
 	private void jaymoskingdoms$unstick(CallbackInfo ci) {
 		Unstick.tick(this.mob, (PathNavigation) (Object) this, this.jaymoskingdoms$unstick, this.speedModifier, this.reachRange);
 		GapJumps.tick(this.mob, (PathNavigation) (Object) this, this.jaymoskingdoms$gapJumps, this.speedModifier);
+		// a fighter climbs the ladder its path takes, and opens the doors on it
+		Climbing.tick(this.mob, (PathNavigation) (Object) this, this.speedModifier);
+		Passages.tick(this.mob, (PathNavigation) (Object) this);
 	}
 }

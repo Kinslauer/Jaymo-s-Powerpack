@@ -353,7 +353,7 @@ public final class BreakOff {
 	}
 
 	/** Lava or fire on the spot or next to it, or a magma floor. */
-	private static boolean harmful(ServerLevel level, BlockPos at) {
+	static boolean harmful(ServerLevel level, BlockPos at) {
 		if (level.getBlockState(at.below()).is(Blocks.MAGMA_BLOCK)) {
 			return true;
 		}

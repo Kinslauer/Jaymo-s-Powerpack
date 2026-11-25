@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -19,7 +20,9 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.vehicle.minecart.MinecartTNT;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -38,10 +41,16 @@ import org.jspecify.annotations.Nullable;
  * The run is a goal ahead of every other move goal on each mob ({@link #PRIORITY}), added as the mob loads (as
  * {@link Stalkers} does for creepers); a mob with a walking brain (villagers, piglins, goats) is sent through its walk
  * target instead, as {@link Herds} does. Hissing creepers are looked for every {@link #EVERY} ticks.
+ * <p>
+ * Lit charges too (the fighting AI's danger sense, {@link DangerSense}): anyone near primed TNT (a block or a minecart's,
+ * {@link #TNT_RANGE}) or a lit stick of dynamite (ours or WeaponMod's, {@link #STICK_RANGE}) runs clear of it the same way,
+ * whoever lit it, friend or foe.
  */
 final class CreeperFlight {
 	/** How near a hissing creeper a mob runs from it (blocks); a charged creeper's blast reaches twice as far. */
 	static final double RANGE = 8.0, CHARGED_RANGE = 14.0;
+	/** How near primed TNT (blocks) a mob runs from it, and a lit stick of dynamite (its burst, and a little more). */
+	static final double TNT_RANGE = 8.0, STICK_RANGE = 5.0;
 	/** How far past the edge of the blast they aim to stop (blocks). */
 	static final double CLEAR = 3.0;
 	/** Mobs with at least this much max health hold their ground: a plain creeper's blast can't kill them. */
@@ -55,10 +64,12 @@ final class CreeperFlight {
 	/** Tries at a spot clear of the blast before taking the farthest one found. */
 	static final int TRIES = 6;
 
-	private record Threat(Creeper creeper, long until) {
+	private record Threat(Entity from, long until) {
 	}
 
 	private static final Set<Creeper> CREEPERS = new HashSet<>();
+	/** Lit TNT, TNT minecarts and dynamite sticks loaded just now. */
+	private static final Set<Entity> CHARGES = new HashSet<>();
 	private static final Map<PathfinderMob, Threat> THREATS = new WeakHashMap<>();
 
 	private CreeperFlight() {
@@ -69,6 +80,9 @@ final class CreeperFlight {
 			if (entity instanceof Creeper creeper) {
 				CREEPERS.add(creeper);
 			}
+			if (charge(entity)) {
+				CHARGES.add(entity);
+			}
 			if (entity instanceof PathfinderMob mob && !(entity instanceof Creeper)) {
 				mob.getGoalSelector().addGoal(PRIORITY, new Run(mob));
 			}
@@ -77,10 +91,12 @@ final class CreeperFlight {
 			if (entity instanceof Creeper creeper) {
 				CREEPERS.remove(creeper);
 			}
+			CHARGES.remove(entity);
 		});
 		ServerTickEvents.END_SERVER_TICK.register(CreeperFlight::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			CREEPERS.clear();
+			CHARGES.clear();
 			THREATS.clear();
 		});
 	}
@@ -90,12 +106,38 @@ final class CreeperFlight {
 		return creeper.isAlive() && !creeper.isRemoved() && (creeper.getSwellDir() > 0 || creeper.isIgnited());
 	}
 
-	static double range(Creeper creeper) {
-		return creeper.isPowered() ? CHARGED_RANGE : RANGE;
+	/** A charge that can be lit: TNT (as a block set off, or in a minecart) or a stick of dynamite, ours or WeaponMod's. */
+	private static boolean charge(Entity e) {
+		return e instanceof PrimedTnt || e instanceof MinecartTNT || e instanceof Dynamite
+			|| BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).equals(Dynamite.BALKON);
+	}
+
+	/** About to blow: a hissing creeper, or a charge with its fuse burning (ours and WeaponMod's sticks burn until they go, or water puts them out). */
+	static boolean live(Entity e) {
+		if (e instanceof Creeper creeper) {
+			return hissing(creeper);
+		}
+		if (!e.isAlive() || e.isRemoved()) {
+			return false;
+		}
+		if (e instanceof PrimedTnt tnt) {
+			return tnt.getFuse() > 0;
+		}
+		if (e instanceof MinecartTNT cart) {
+			return cart.isPrimed();
+		}
+		return !e.isInWater();
+	}
+
+	static double range(Entity e) {
+		if (e instanceof Creeper creeper) {
+			return creeper.isPowered() ? CHARGED_RANGE : RANGE;
+		}
+		return e instanceof PrimedTnt || e instanceof MinecartTNT ? TNT_RANGE : STICK_RANGE;
 	}
 
 	private static void tick(MinecraftServer server) {
-		if (CREEPERS.isEmpty() || server.getTickCount() % EVERY != 0) {
+		if (CREEPERS.isEmpty() && CHARGES.isEmpty() || server.getTickCount() % EVERY != 0) {
 			return;
 		}
 		for (Creeper creeper : CREEPERS.toArray(new Creeper[0])) {
@@ -105,19 +147,26 @@ final class CreeperFlight {
 				warn(level, creeper);
 			}
 		}
+		for (Entity charge : CHARGES.toArray(new Entity[0])) {
+			if (charge.isRemoved()) {
+				CHARGES.remove(charge);
+			} else if (live(charge) && charge.level() instanceof ServerLevel level) {
+				warn(level, charge);
+			}
+		}
 	}
 
-	/** Everyone near {@code creeper} who can run is told to. */
-	private static void warn(ServerLevel level, Creeper creeper) {
-		double r = range(creeper);
+	/** Everyone near {@code from} (a hissing creeper or a lit charge) who can run is told to. */
+	private static void warn(ServerLevel level, Entity from) {
+		double r = range(from);
 		long until = level.getGameTime() + HOLD;
-		for (PathfinderMob mob : level.getEntitiesOfClass(PathfinderMob.class, creeper.getBoundingBox().inflate(r),
-			m -> m != creeper && m.distanceToSqr(creeper) <= r * r && runs(m))) {
+		for (PathfinderMob mob : level.getEntitiesOfClass(PathfinderMob.class, from.getBoundingBox().inflate(r),
+			m -> m != from && m.distanceToSqr(from) <= r * r && runs(m))) {
 			Threat was = THREATS.get(mob);
-			// the nearest hissing creeper is the one to run from
-			if (was == null || was.creeper() == creeper || !hissing(was.creeper())
-				|| mob.distanceToSqr(creeper) < mob.distanceToSqr(was.creeper())) {
-				THREATS.put(mob, new Threat(creeper, until));
+			// the nearest one about to blow is the one to run from
+			if (was == null || was.from() == from || !live(was.from())
+				|| mob.distanceToSqr(from) < mob.distanceToSqr(was.from())) {
+				THREATS.put(mob, new Threat(from, until));
 			}
 		}
 	}
@@ -132,28 +181,28 @@ final class CreeperFlight {
 		return !(rider instanceof Player);
 	}
 
-	/** The creeper {@code mob} is running from, if any. */
-	private static @Nullable Creeper threat(PathfinderMob mob) {
+	/** The creeper or charge {@code mob} is running from, if any. */
+	private static @Nullable Entity threat(PathfinderMob mob) {
 		Threat t = THREATS.get(mob);
 		if (t == null) {
 			return null;
 		}
-		if (!hissing(t.creeper()) || mob.level().getGameTime() > t.until() || t.creeper().level() != mob.level()) {
+		if (!live(t.from()) || mob.level().getGameTime() > t.until() || t.from().level() != mob.level()) {
 			THREATS.remove(mob);
 			return null;
 		}
-		return t.creeper();
+		return t.from();
 	}
 
-	/** Whether {@code mob} is running from a hissing creeper just now ({@link CoinToss} leaves its legs alone). */
+	/** Whether {@code mob} is running from a hissing creeper or a lit charge just now ({@link CoinToss} leaves its legs alone). */
 	static boolean fleeing(PathfinderMob mob) {
 		return !THREATS.isEmpty() && threat(mob) != null;
 	}
 
-	/** The run: it takes the mob's legs while a creeper near it hisses. */
+	/** The run: it takes the mob's legs while a creeper near it hisses or a charge burns. */
 	private static final class Run extends Goal {
 		private final PathfinderMob mob;
-		private @Nullable Creeper from;
+		private @Nullable Entity from;
 		private @Nullable Vec3 to;
 
 		Run(PathfinderMob mob) {
@@ -172,7 +221,7 @@ final class CreeperFlight {
 
 		@Override
 		public boolean canContinueToUse() {
-			Creeper c = threat(this.mob);
+			Entity c = threat(this.mob);
 			if (c != null) {
 				this.from = c;
 			}
@@ -237,7 +286,7 @@ final class CreeperFlight {
 
 		/** Picks (or keeps) a spot clear of the blast and heads for it. */
 		private void aim() {
-			Creeper c = this.from;
+			Entity c = this.from;
 			if (c == null) {
 				return;
 			}
