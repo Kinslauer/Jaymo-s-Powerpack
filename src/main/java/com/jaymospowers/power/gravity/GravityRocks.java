@@ -418,8 +418,8 @@ public final class GravityRocks {
 				}
 				net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
 				if (shatters(state) && level.mayInteract(owner, pos) && owner.mayBuild()) {
-					com.jaymospowers.core.TerrainReturn.record(level, pos);
-					level.destroyBlock(pos.immutable(), true, owner);
+					boolean returns = com.jaymospowers.core.TerrainReturn.record(level, pos);
+					level.destroyBlock(pos.immutable(), !returns, owner);
 				}
 			}
 		}

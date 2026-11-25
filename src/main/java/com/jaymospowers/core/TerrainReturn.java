@@ -112,16 +112,20 @@ public final class TerrainReturn {
 		return enabled;
 	}
 
-	/** Records the block at {@code pos}, about to be broken by a power, so it comes back; nothing if the switch is off or it isn't ground. */
-	public static void record(ServerLevel level, BlockPos pos) {
+	/**
+	 * Records the block at {@code pos}, about to be broken by a power, so it comes back; nothing if the switch is off or it isn't
+	 * ground. True when it was recorded: the caller then breaks it without drops, since the block grows back (Andy, 2026-11-25:
+	 * ground that returns drops nothing, or it could be farmed).
+	 */
+	public static boolean record(ServerLevel level, BlockPos pos) {
 		if (!enabled) {
-			return;
+			return false;
 		}
 		BlockState state = level.getBlockState(pos);
 		if (!worth(level, pos, state)) {
-			return;
+			return false;
 		}
-		hold(level, pos, state, level.getGameTime() + DELAY + (long)(pos.getY() - level.getMinY()) * PER_HEIGHT + level.getRandom().nextInt(JITTER));
+		return hold(level, pos, state, level.getGameTime() + DELAY + (long)(pos.getY() - level.getMinY()) * PER_HEIGHT + level.getRandom().nextInt(JITTER));
 	}
 
 	/**
@@ -143,13 +147,15 @@ public final class TerrainReturn {
 			&& state.getDestroySpeed(level, pos) >= 0.0F && state.isCollisionShapeFullBlock(level, pos);
 	}
 
-	private static void hold(ServerLevel level, BlockPos pos, BlockState state, long at) {
+	/** False when it couldn't be kept (the level's records are full, or the spot is already waiting for a block). */
+	private static boolean hold(ServerLevel level, BlockPos pos, BlockState state, long at) {
 		Store store = store(level);
 		if (store.queue.size() >= MAX_RECORDS || !store.spots.add(pos.asLong())) {
-			return;
+			return false;
 		}
 		store.queue.add(new Held(pos.immutable(), state, at));
 		store.dirty = true;
+		return true;
 	}
 
 	private static Store store(ServerLevel level) {

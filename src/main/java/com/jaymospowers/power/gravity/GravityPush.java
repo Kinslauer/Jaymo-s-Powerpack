@@ -115,8 +115,8 @@ final class GravityPush {
 					float hardness = state.getDestroySpeed(level, pos);
 					if (hardness >= 0.0F && hardness <= LOOSE_HARDNESS && !state.hasBlockEntity()) {
 						// shoved out of the way
-						com.jaymospowers.core.TerrainReturn.record(level, pos);
-						level.destroyBlock(pos, true, pusher);
+						boolean returns = com.jaymospowers.core.TerrainReturn.record(level, pos);
+						level.destroyBlock(pos, !returns, pusher);
 						push.left -= BLOCK_COST;
 						push.speed *= BLOCK_SLOW;
 					} else {
