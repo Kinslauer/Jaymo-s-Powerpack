@@ -83,6 +83,15 @@ public interface Power {
 		return com.jaymospowers.core.Fate.isAscended(player) || ultimateWhenCorrupted() && com.jaymospowers.core.Fate.isCorrupted(player);
 	}
 
+	/**
+	 * Whether this power's ultimate is a single press that can be held charged and loosed on release ({@code core.UltimateHold}:
+	 * a quick tap still casts at once). Only for an ultimate that does everything on the press and nothing on the release or
+	 * while the key is down; a held ultimate (a channel, a beam) says false.
+	 */
+	default boolean ultimateHeld(Player player) {
+		return false;
+	}
+
 	default void onUltimate(ServerPlayer player, boolean down) {
 	}
 

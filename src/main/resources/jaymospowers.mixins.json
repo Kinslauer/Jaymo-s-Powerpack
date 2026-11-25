@@ -91,6 +91,7 @@
 		"DismemberMobMixin",
 		"DismemberGameEventMixin",
 		"ExplosionLogMixin",
+		"ExplosionReturnMixin",
 		"DownedMobMixin",
 		"PredatorEatMixin",
 		"DownedHealMixin",

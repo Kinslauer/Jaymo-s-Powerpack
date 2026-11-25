@@ -164,6 +164,7 @@ public final class Mana {
 		ManaSickness.register();
 		ManaFolk.register();
 		ManaWand.register();
+		MageWand.register();
 		// (their attachments, registered as the classes load)
 		JaymosKingdoms.LOGGER.debug("mana attachments: {} {}", ManaSickness.SICK, ManaAlchemy.ATTUNING);
 		// (Andy, 2026-11-22) amethyst struck in the world attunes one with the knack for it

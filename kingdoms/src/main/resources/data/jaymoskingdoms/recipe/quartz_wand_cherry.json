@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "F": "minecraft:quartz",
+    "P": "minecraft:cherry_planks",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "  F",
+    " P ",
+    "S  "
+  ],
+  "result": {
+    "id": "jaymoskingdoms:quartz_wand",
+    "components": {
+      "minecraft:custom_data": {
+        "jaymoskingdoms_wand_wood": "cherry"
+      }
+    }
+  }
+}
