@@ -12,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffects;
@@ -377,6 +378,23 @@ public final class Blows {
 		}
 		for (int dy = 0; dy <= 1; dy++) {
 			if (level.getFluidState(at.below(dy)).is(FluidTags.LAVA)) {
+				return false;
+			}
+		}
+		return !level.getBlockState(at.below()).getCollisionShape(level, at.below()).isEmpty()
+			|| !level.getBlockState(at.below(2)).getCollisionShape(level, at.below(2)).isEmpty();
+	}
+
+	/**
+	 * A spot to come down on from a leap or a roll ({@code at}, the block its feet land in): room to stand, floor under it no more than
+	 * two blocks down (no fall past a safe one), no lava or fire there or under it.
+	 */
+	static boolean landing(ServerLevel level, BlockPos at) {
+		if (!level.getBlockState(at).getCollisionShape(level, at).isEmpty() || !level.getBlockState(at.above()).getCollisionShape(level, at.above()).isEmpty()) {
+			return false;
+		}
+		for (int dy = 0; dy <= 1; dy++) {
+			if (level.getFluidState(at.below(dy)).is(FluidTags.LAVA) || level.getBlockState(at.below(dy)).is(BlockTags.FIRE)) {
 				return false;
 			}
 		}

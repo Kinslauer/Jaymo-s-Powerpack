@@ -284,14 +284,17 @@ public final class MobCombat {
 		if (moves == null || moves.attacks().isEmpty()) {
 			return;
 		}
-		// ((st-dodge) two blades go hand after hand: the off hand's turn swings its own blade's moves, if Better Combat knows it)
+		// ((st-dodge) two blades go hand after hand: the off hand's turn swings its own blade's moves, if Better Combat knows it;
+		// else a plain blow of the off arm's)
 		boolean offHand = false;
 		if (DualBlades.offNext(mob)) {
 			Moves off = BetterCombatBridge.moves(mob.getOffhandItem());
-			if (off != null && !off.attacks().isEmpty()) {
-				moves = off;
-				offHand = true;
+			if (off == null || off.attacks().isEmpty()) {
+				plainBlow(mob, target);
+				return;
 			}
+			moves = off;
+			offHand = true;
 		}
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
@@ -427,11 +430,13 @@ public final class MobCombat {
 			length = redLength(length, PLAIN_UPSWING);
 		}
 		int upswing = small(target) ? MIN_UPSWING_TICKS : Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * PLAIN_UPSWING));
+		// ((st-dodge) two blades go hand after hand: the off hand's turn is the game's off-arm swing)
+		boolean offHand = DualBlades.offNext(mob);
 		swing.target = target;
 		swing.move = null;
 		swing.plain = true;
 		swing.red = red;
-		swing.offHand = false;
+		swing.offHand = offHand;
 		swing.hitAt = now + Math.min(upswing, length - 1);
 		tell(level, mob, red, (int) (swing.hitAt - now));
 		PowersCompat.tellIncoming(mob, target, (int) (swing.hitAt - now), red);
@@ -443,14 +448,14 @@ public final class MobCombat {
 		swing.combo++;
 		MobSwing packet = new MobSwing(mob.getId(), animation, length, (float) PLAIN_UPSWING);
 		boolean animated = false;
-		for (ServerPlayer player : PlayerLookup.tracking(mob)) {
+		for (ServerPlayer player : offHand ? List.<ServerPlayer>of() : PlayerLookup.tracking(mob)) {
 			if (ServerPlayNetworking.canSend(player, MobSwing.TYPE)) {
 				ServerPlayNetworking.send(player, packet);
 				animated = true;
 			}
 		}
 		if (!animated) {
-			mob.swingForAttack(net.minecraft.world.InteractionHand.MAIN_HAND);
+			mob.swingForAttack(offHand ? net.minecraft.world.InteractionHand.OFF_HAND : net.minecraft.world.InteractionHand.MAIN_HAND);
 		}
 		mob.setAggressive(true);
 	}
@@ -462,8 +467,14 @@ public final class MobCombat {
 	}
 
 	/** (0.7.283) The plain blow lands on its one target, if it's still in reach and sight; a miss is heard. */
-	private static void plainStrike(ServerLevel level, Mob mob, @Nullable LivingEntity target, boolean heavy) {
+	private static void plainStrike(ServerLevel level, Mob mob, @Nullable LivingEntity target, boolean heavy, boolean offHand) {
 		Blows.blown(mob);
+		// ((st-dodge) the blow is this hand's: an off hand's strikes with its own blade, DualBlades)
+		DualBlades.swung(mob, offHand);
+		// ((st-dodge) a bandit or assassin who rolled out of it is missed)
+		if (target != null && NpcDodge.dodged(target, mob)) {
+			target = null;
+		}
 		if (target == null || !target.isAlive() || target.level() != level
 			|| gap(mob, target) > BASE_REACH + 0.25 + slack(target) && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, mob.getSoundSource(), 0.6F, 0.8F);
@@ -685,7 +696,7 @@ public final class MobCombat {
 			if (swing.hitAt >= 0 && now >= swing.hitAt) {
 				swing.hitAt = -1;
 				if (swing.plain) {
-					plainStrike(level, mob, swing.target, swing.red);
+					plainStrike(level, mob, swing.target, swing.red, swing.offHand);
 				} else if (swing.move != null && !(swing.offHand ? mob.getOffhandItem() : mob.getMainHandItem()).isEmpty()) {
 					strike(level, mob, swing.move, swing.target, swing.red, swing.offHand);
 				}
@@ -723,7 +734,9 @@ public final class MobCombat {
 		float yaw = mob.getYHeadRot();
 		Vec3 facing = Vec3.directionFromRotation(0.0F, yaw);
 		List<LivingEntity> hits = new ArrayList<>();
-		if (primary != null && primary.isAlive() && gap(mob, primary) <= reach + 0.25 + slack(primary) && mob.getSensing().hasLineOfSight(primary)) {
+		// ((st-dodge) a bandit or assassin who rolled out of it is missed)
+		boolean dodged = primary != null && NpcDodge.dodged(primary, mob);
+		if (primary != null && !dodged && primary.isAlive() && gap(mob, primary) <= reach + 0.25 + slack(primary) && mob.getSensing().hasLineOfSight(primary)) {
 			hits.add(primary);
 		}
 		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(reach + 1.0),
@@ -830,8 +843,8 @@ public final class MobCombat {
 		if (!(entity instanceof Mob mob) || !(entity.level() instanceof ServerLevel level)) {
 			return true;
 		}
-		if (NpcDodge.dodger(mob)) {
-			// (st-dodge) a bandit or assassin rolls out of blows instead (NpcDodge)
+		if (NpcDodge.dodger(mob) || Assassins.is(mob)) {
+			// (st-dodge) a bandit or assassin rolls out of blows instead (NpcDodge); one still in disguise takes it, and is found out
 			return true;
 		}
 		Folk folk = mob instanceof Folk f && f.combatant() ? f : null;

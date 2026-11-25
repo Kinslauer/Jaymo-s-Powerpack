@@ -5,9 +5,13 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -20,18 +24,23 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Patch 7 of the fighting AI (band styles, st-dodge; the ideas are Hostile Humans', none of its code): bandits and assassins roll out of
- * a blow. Our own roll for NPCs, after the player's dodge in Jaymo's Powers: no NPC roll pose exists (Powers' tumble is drawn on players
- * only), so the roll is shown as what it is: a quick low hop to the side and back, crouched, with a whoosh and a puff of dust.
+ * a blow. Our own roll for NPCs, after the player's dodge in Jaymo's Powers (whose tumble is drawn on players only): a quick low hop to
+ * the side and back, crouched, with a whoosh and a puff of dust, the body drawn tumbling over sideways through it (the client's
+ * {@code NpcRollPose}, sent as a {@link MobCombat.MobSwing} of {@link #ROLL_ANIMATION}).
  * <ul>
  * <li><b>Who</b> ({@link #dodger}): a bandit ({@link #bandit}: a bandit camp's raider or chief, or anyone in a bandit's mask) or an
- * assassin ({@link Assassins#is}), in no plate ({@link MobCombat#light}), on its feet and on the ground.</li>
+ * assassin with his cloak off ({@link Assassins#revealed}: a disguised one takes the blow and is found out), in no plate
+ * ({@link MobCombat#light}), on its feet and on the ground.</li>
  * <li><b>A blow it sees coming</b> ({@link #incoming}): an NPC's swing winding up at it (Better Combat's, a plain blow) or the game's melee
  * blow coming due ({@code MeleeAttackGoalMixin}, MCA's melee task): if the swinger is in front of it ({@link #SEEN_ANGLE}) it reads
  * the blow {@link #READ_CHANCE} of the time and rolls {@link #ROLL_LEAD} ticks before it lands, out of its reach. A blow that comes at
  * once is rolled out of as it comes (and misses).</li>
  * <li><b>A player's blow</b> has no wind-up to read, so it is rolled out of as it lands (no damage), on the same rules.</li>
- * <li>One roll every {@link #ROLL_COOLDOWN} ticks, only where there's ground to land on (never off a drop or into lava). Never while
- * its shield is up, mid-swing, drawing a bow, carried, in water, downed or making an arrest.</li>
+ * <li>One roll every {@link #ROLL_COOLDOWN} ticks, only where there's ground all the way it's carried ({@link #ROLL_REACH}: never off
+ * a drop, into lava or fire; a wall stops it short). Never while its shield is up, mid-swing, drawing a bow, carried, in water, downed
+ * or making an arrest.</li>
+ * <li>The blow it rolled out of is spent ({@link #dodged}): the swinger's blow goes by, and its next waits a full recovery. The one who
+ * swung is the one it turns on, as if struck.</li>
  * </ul>
  * The old sidestep in {@link MobCombat} leaves dodgers to this.
  */
@@ -46,11 +55,20 @@ public final class NpcDodge {
 	static final double ROLL_SPEED = 0.7, ROLL_UP = 0.25, ROLL_BACK = 0.6;
 	/** It stays low this long (ticks); the least time between two rolls (ticks). */
 	static final int ROLL_TICKS = 7, ROLL_COOLDOWN = 70;
+	/** How far the push carries it, the landing's slide with it (blocks); a wall closer than this stops a roll too short to take. */
+	static final double ROLL_REACH = 4.5, ROLL_LEAST = 2.0;
+	/** A blow due this long (ticks) after its swinger's target rolled out of it is the one rolled out of ({@link #dodged}). */
+	static final int DODGED_TICKS = ROLL_LEAD + 2;
+	/** The roll's look for those watching ({@link MobCombat.MobSwing}; mirrored for a roll to its left). */
+	public static final String ROLL_ANIMATION = "jaymoskingdoms:npc_roll";
 
 	private static final class State {
 		long ready, poseUntil, rollAt;
 		@Nullable LivingEntity readOf, rollFrom;
 		long readUntil;
+		/** The blow it last rolled out of: whose, and when (game time). */
+		@Nullable LivingEntity rolledFrom;
+		long rolledAt;
 	}
 
 	private static final Map<Mob, State> STATES = new WeakHashMap<>();
@@ -80,7 +98,7 @@ public final class NpcDodge {
 
 	/** One who rolls out of blows: a bandit or an assassin, in no plate. */
 	public static boolean dodger(Mob mob) {
-		return (Assassins.is(mob) || bandit(mob)) && MobCombat.light(mob);
+		return (Assassins.revealed(mob) || bandit(mob)) && MobCombat.light(mob);
 	}
 
 	/** Whether it can roll just now. */
@@ -147,6 +165,19 @@ public final class NpcDodge {
 		return !roll(level, dodger, player, now);
 	}
 
+	/**
+	 * (the game's melee goal, MCA's melee task, {@link MobCombat}'s blow as it falls) {@code target} has just rolled out of
+	 * {@code attacker}'s blow: the blow coming due now is that one, and goes by. Once for each roll.
+	 */
+	public static boolean dodged(LivingEntity target, Mob attacker) {
+		State s = target instanceof Mob m ? STATES.get(m) : null;
+		if (s == null || s.rolledFrom != attacker || target.level().getGameTime() - s.rolledAt > DODGED_TICKS) {
+			return false;
+		}
+		s.rolledFrom = null;
+		return true;
+	}
+
 	// ---- the roll --------------------------------------------------------------------------------------------------------
 
 	/** Rolls {@code dodger} out of {@code from}'s blow: to a side with ground to land on, and back. False (no roll) if there's none. */
@@ -157,7 +188,7 @@ public final class NpcDodge {
 		Vec3[] ways = {side.add(away.scale(ROLL_BACK)).normalize(), side.reverse().add(away.scale(ROLL_BACK)).normalize(), away};
 		Vec3 dir = null;
 		for (Vec3 way : ways) {
-			if (Blows.footing(level, dodger, way) && Blows.footing(level, dodger, way.scale(2.0))) {
+			if (clearRun(level, dodger, way)) {
 				dir = way;
 				break;
 			}
@@ -170,6 +201,10 @@ public final class NpcDodge {
 		s.poseUntil = now + ROLL_TICKS;
 		s.rollAt = 0;
 		s.rollFrom = null;
+		s.rolledFrom = from;
+		s.rolledAt = now;
+		// (it knows who swung at it, as if struck: it turns on them, and a disguise would be off)
+		dodger.setLastHurtByMob(from);
 		dodger.getNavigation().stop();
 		dodger.setDeltaMovement(dir.x * ROLL_SPEED, ROLL_UP, dir.z * ROLL_SPEED);
 		dodger.syncVelocity = true;
@@ -179,6 +214,31 @@ public final class NpcDodge {
 		level.playSound(null, dodger.getX(), dodger.getY(), dodger.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, dodger.getSoundSource(), 0.9F, 1.4F);
 		level.playSound(null, dodger.getX(), dodger.getY(), dodger.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), dodger.getSoundSource(), 0.7F, 1.3F);
 		level.sendParticles(ParticleTypes.POOF, dodger.getX(), dodger.getY() + 0.1, dodger.getZ(), 8, 0.35, 0.05, 0.35, 0.02);
+		// (drawn tumbling over toward the side it goes: its right faces the swinger's left)
+		Vec3 right = new Vec3(away.z, 0.0, -away.x);
+		MobCombat.MobSwing packet = new MobCombat.MobSwing(dodger.getId(), ROLL_ANIMATION, ROLL_TICKS, 0.0F, dir.dot(right) < 0.0);
+		for (ServerPlayer player : PlayerLookup.tracking(dodger)) {
+			if (ServerPlayNetworking.canSend(player, MobCombat.MobSwing.TYPE)) {
+				ServerPlayNetworking.send(player, packet);
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Ground all along the way the roll carries it ({@link #ROLL_REACH}): no drop past a safe one, no lava or fire, each half block of
+	 * it; a wall on the way stops it there, which is only a roll if it's {@link #ROLL_LEAST} off.
+	 */
+	private static boolean clearRun(ServerLevel level, Mob dodger, Vec3 way) {
+		for (double d = 0.5; d <= ROLL_REACH; d += 0.5) {
+			BlockPos at = BlockPos.containing(dodger.getX() + way.x * d, dodger.getY(), dodger.getZ() + way.z * d);
+			if (!level.getBlockState(at).getCollisionShape(level, at).isEmpty() || !level.getBlockState(at.above()).getCollisionShape(level, at.above()).isEmpty()) {
+				return d > ROLL_LEAST;
+			}
+			if (!Blows.landing(level, at)) {
+				return false;
+			}
+		}
 		return true;
 	}
 

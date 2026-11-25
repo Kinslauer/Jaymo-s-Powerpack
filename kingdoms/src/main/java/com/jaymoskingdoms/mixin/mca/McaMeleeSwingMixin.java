@@ -4,11 +4,15 @@ import com.jaymoskingdoms.Blows;
 import com.jaymoskingdoms.MobCombat;
 import com.jaymoskingdoms.MobShields;
 import com.jaymoskingdoms.NpcDodge;
+import net.conczin.mca.entity.VillagerLike;
 import net.conczin.mca.entity.ai.brain.tasks.ExtendedMeleeAttackTask;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,6 +32,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(ExtendedMeleeAttackTask.class)
 abstract class McaMeleeSwingMixin {
+	@Shadow
+	@Final
+	private int interval;
+
 	@Shadow
 	private LivingEntity getTarget(Mob mob) {
 		throw new AssertionError();
@@ -50,9 +58,12 @@ abstract class McaMeleeSwingMixin {
 			if (Blows.holds(mob, target)) {
 				ci.cancel();
 				BehaviorUtils.lookAtEntity(mob, target);
-			} else if (NpcDodge.incoming(target, mob, 0)) {
-				// (st-dodge) a bandit or assassin rolled out of it: the blow misses
+			} else if (NpcDodge.incoming(target, mob, 0) | NpcDodge.dodged(target, mob)) {
+				// (st-dodge) a bandit or assassin rolled out of it (now, or just before): the blow misses, swung at the air, and is
+				// spent (its full recovery)
 				ci.cancel();
+				mob.swingForAttack(mob instanceof VillagerLike<?> villager ? villager.getDominantHand() : InteractionHand.MAIN_HAND);
+				mob.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_COOLING_DOWN, true, this.interval);
 			}
 			return;
 		}

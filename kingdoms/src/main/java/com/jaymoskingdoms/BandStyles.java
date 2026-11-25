@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -268,6 +269,11 @@ public final class BandStyles {
 		double cover = flat - (mob.getBbWidth() + foe.getBbWidth()) / 2.0 - LEAP_SHORT;
 		double carry = Math.clamp(cover * LEAP_CARRY_PER_BLOCK, LEAP_LEAST, LEAP_MOST);
 		Vec3 dir = to.scale(1.0 / flat);
+		// (where it comes down, a block short of the foe: ground to land on, no drop, no lava or fire)
+		double landX = mob.getX() + dir.x * Math.max(0.0, cover), landZ = mob.getZ() + dir.z * Math.max(0.0, cover);
+		if (!Blows.landing(level, BlockPos.containing(landX, foe.getY(), landZ)) && !Blows.landing(level, BlockPos.containing(landX, mob.getY(), landZ))) {
+			return;
+		}
 		mob.getNavigation().stop();
 		float yaw = (float) Math.toDegrees(Math.atan2(-dir.x, dir.z));
 		mob.setYRot(yaw);
@@ -341,11 +347,13 @@ public final class BandStyles {
 		if (instance == null) {
 			return;
 		}
+		AttributeModifier on = instance.getModifier(id);
 		if (amount == 0.0) {
-			if (instance.hasModifier(id)) {
+			if (on != null) {
 				instance.removeModifier(id);
 			}
-		} else {
+		} else if (on == null || on.amount() != amount || on.operation() != op) {
+			// (only when it changes: an update marks the attribute for sending)
 			instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, op));
 		}
 	}
@@ -380,6 +388,9 @@ public final class BandStyles {
 			if (shooter instanceof Folk folk) {
 				// (its own shot spends its own arrow)
 				folk.performRangedAttack(foe, 1.0F);
+			} else if (McaCompat.isMca(shooter) && shooter instanceof RangedAttackMob archer) {
+				// (an MCA villager's shot spends its own arrow too, and its arrow is left to be picked up: McaShieldFireMixin, MobAmmo)
+				archer.performRangedAttack(foe, 1.0F);
 			} else if (shooter instanceof RangedAttackMob archer && MobAmmo.spend(shooter, MobAmmo.Kind.ARROWS)) {
 				List<AbstractArrow> before = arrows(level, shooter);
 				archer.performRangedAttack(foe, 1.0F);

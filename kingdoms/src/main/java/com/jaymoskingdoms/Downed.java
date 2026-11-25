@@ -270,9 +270,13 @@ public final class Downed {
 		return ours(body) || !(body instanceof net.minecraft.world.entity.OwnableEntity owned && owned.getOwner() != null);
 	}
 
-	/** Whether {@code body} still has anything to take: something in either hand, or arrows ({@link MobAmmo#quiver}). */
+	/**
+	 * Whether {@code body} still has anything to take: something in either hand, a shield or blade on its back
+	 * ({@link DualBlades#backGear}), or arrows ({@link MobAmmo#quiver}).
+	 */
 	private static boolean armed(Mob body) {
-		return !body.getMainHandItem().isEmpty() || !body.getOffhandItem().isEmpty() || MobAmmo.quiver(body) > 0;
+		return !body.getMainHandItem().isEmpty() || !body.getOffhandItem().isEmpty() || DualBlades.backGear(body.getItemBySlot(EquipmentSlot.BODY))
+			|| MobAmmo.quiver(body) > 0;
 	}
 
 	/** Someone of the settlement is tending {@code body} just now ({@link FieldMedics} leaves them to it). */
@@ -544,8 +548,9 @@ public final class Downed {
 	}
 
 	/**
-	 * {@code player} takes the weapons out of a downed one's hands, and the arrows it carries (Andy, 2026-11-19: "you
-	 * should be able to take their bows"), and a folk's belt pouch ({@link BeltPouch}); nothing else.
+	 * {@code player} takes the weapons out of a downed one's hands and off its back (a shield or a stowed blade,
+	 * {@link DualBlades#backGear}), and the arrows it carries (Andy, 2026-11-19: "you should be able to take their bows"), and a
+	 * folk's belt pouch ({@link BeltPouch}); nothing else.
 	 */
 	private static void disarm(Player player, Mob body) {
 		boolean took = false;
@@ -554,9 +559,9 @@ public final class Downed {
 		if (IllagerTongue.speaker(body) && !body.getMainHandItem().isEmpty()) {
 			body.addTag(IllagerTalk.ARMED_TAG);
 		}
-		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND}) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND, EquipmentSlot.BODY}) {
 			ItemStack held = body.getItemBySlot(slot);
-			if (held.isEmpty()) {
+			if (held.isEmpty() || slot == EquipmentSlot.BODY && !DualBlades.backGear(held)) {
 				continue;
 			}
 			if (!WornGear.pickedUp(body, slot)) {

@@ -48,7 +48,8 @@ import org.jspecify.annotations.Nullable;
  * for free any more (the players' side is Powers' {@code compat/SpellThrows}).
  * <ul>
  * <li><b>What they carry</b> ({@link #AMMO}, saved on the mob): arrows (skeletons in their {@link #TATTERED_QUIVER},
- * pillagers, piglins, illusioners, the folk's archers, crewmen, Scalebane archers, the Gorgon), javelins (a guard's
+ * pillagers, piglins, illusioners, the folk's archers, MCA's archers, guards and crewmen with a bow or crossbow, Scalebane
+ * archers, the Gorgon), javelins (a guard's
  * javelins, tridents or rocks) and shot (muskets and pistols). Each kind is filled once, the first time it's asked
  * for ({@link #full}), and every shot or throw spends one ({@link #spend}). With none left the mob can't loose that kind:
  * skeletons and pillagers fight with what's in their hands, the folk draw their blades.</li>
@@ -92,7 +93,10 @@ public final class MobAmmo {
 
 	/** Arrows in a skeleton's tattered quiver, a pillager's, a piglin's, an illusioner's: least and most. */
 	static final int[] SKELETON_ARROWS = {6, 12}, PILLAGER_BOLTS = {8, 14}, PIGLIN_BOLTS = {6, 10}, ILLUSIONER_ARROWS = {12, 18};
-	/** The folk's archers and crewmen, a Scalebane archer, the Gorgon (her volleys come out of it too), anyone else. */
+	/**
+	 * The folk's archers; crewmen and every other villager with a bow or crossbow (MCA's archers and guards draw the crewmen's quiver);
+	 * a Scalebane archer; the Gorgon (her volleys come out of it too); anyone else.
+	 */
 	static final int[] FOLK_ARROWS = {12, 20}, CREW_ARROWS = {10, 16}, SCALEBANE_ARROWS = {16, 24}, GORGON_ARROWS = {60, 80},
 		OTHER_ARROWS = {8, 14};
 	/**
@@ -335,7 +339,9 @@ public final class MobAmmo {
 	private static final Set<Mob> ARMED = java.util.Collections.newSetFromMap(new WeakHashMap<>());
 
 	/**
-	 * The game's own bowmen's arrows and the drowned's tridents lie where they land to be picked up again; a pillager out
+	 * The game's own bowmen's arrows, MCA's villagers' (each spent from their quiver: {@code McaShieldFireMixin}) and the drowned's
+	 * tridents lie where they land to be picked up again (a multishot crossbow's extra bolts stay unpickable, as they were never
+	 * counted); a pillager out
 	 * of bolts clubs with its crossbow (a skeleton out of arrows already fights with its bow: {@code SkeletonQuiverMixin}).
 	 */
 	private static void loaded(Entity entity, ServerLevel level) {
@@ -355,6 +361,8 @@ public final class MobAmmo {
 		}
 		if (entity instanceof AbstractArrow arrow && arrow.getOwner() instanceof Mob owner && (owner instanceof AbstractSkeleton
 			|| owner instanceof Pillager || owner instanceof Piglin || owner instanceof Illusioner || owner instanceof Drowned)) {
+			arrow.pickup = AbstractArrow.Pickup.ALLOWED;
+		} else if (entity instanceof AbstractArrow arrow && arrow.pickup == AbstractArrow.Pickup.DISALLOWED && McaCompat.isMca(arrow.getOwner())) {
 			arrow.pickup = AbstractArrow.Pickup.ALLOWED;
 		}
 	}

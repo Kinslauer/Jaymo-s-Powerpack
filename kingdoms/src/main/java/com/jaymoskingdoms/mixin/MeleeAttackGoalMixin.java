@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Blows;
 import com.jaymoskingdoms.MobCombat;
 import com.jaymoskingdoms.MobShields;
 import com.jaymoskingdoms.NpcDodge;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -24,7 +25,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * the game's own reach. After its blow it steps back toward its weapon's reach, never past where it can strike from (ml-reach;
  * every fighter the goal runs).
  * <p>
- * Fighting AI patch 7 (st-dodge): a bandit or assassin may roll out of the blow as it comes due ({@link NpcDodge#incoming}).
+ * Fighting AI patch 7 (st-dodge): a bandit or assassin may roll out of the blow as it comes due ({@link NpcDodge#incoming}); the blow
+ * rolled out of is spent ({@link NpcDodge#dodged}).
  */
 @Mixin(MeleeAttackGoal.class)
 abstract class MeleeAttackGoalMixin {
@@ -34,6 +36,9 @@ abstract class MeleeAttackGoalMixin {
 
 	@Shadow
 	private int ticksUntilNextAttack;
+
+	@Shadow
+	protected abstract void resetAttackCooldown();
 
 	@Inject(method = "checkAndPerformAttack", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$weaponMoves(LivingEntity target, CallbackInfo ci) {
@@ -56,9 +61,14 @@ abstract class MeleeAttackGoalMixin {
 			ci.cancel();
 			return;
 		}
-		// (st-dodge) a bandit or assassin it swings at may read the blow coming and roll out of it; one due now then misses
-		if (this.ticksUntilNextAttack <= NpcDodge.ROLL_LEAD && this.mob.isWithinMeleeAttackRange(target) && this.mob.getSensing().hasLineOfSight(target)
-			&& NpcDodge.incoming(target, this.mob, this.ticksUntilNextAttack) && this.ticksUntilNextAttack <= 0) {
+		// (st-dodge) a bandit or assassin it swings at may read the blow coming and roll out of it
+		if (this.ticksUntilNextAttack <= NpcDodge.ROLL_LEAD && this.mob.isWithinMeleeAttackRange(target) && this.mob.getSensing().hasLineOfSight(target)) {
+			NpcDodge.incoming(target, this.mob, this.ticksUntilNextAttack);
+		}
+		// the blow it rolled out of goes by, swung at the air, and is spent: the next waits its full recovery
+		if (this.ticksUntilNextAttack <= 0 && NpcDodge.dodged(target, this.mob)) {
+			this.resetAttackCooldown();
+			this.mob.swingForAttack(InteractionHand.MAIN_HAND);
 			ci.cancel();
 		}
 	}
