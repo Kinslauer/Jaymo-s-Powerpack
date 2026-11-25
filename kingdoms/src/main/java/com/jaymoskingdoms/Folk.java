@@ -107,6 +107,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	/** An archer's reach, and how often they loose (ticks). */
 	static final double ARCHER_RANGE = 28.0;
 	static final int ARCHER_INTERVAL = 30;
+	/** (sh-shooter) An archer counts as drawing on its foe for this long (ticks) before its arrow looses. */
+	static final int ARCHER_DRAW = 12;
 	/** How far from the capital they wander. */
 	static final int HOME_RADIUS = 24;
 	/** The king's second wind: at this share of his health he rallies (strength, resistance, his guards called in). */
@@ -318,6 +320,15 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			&& (this.level().isClientSide() || MobAmmo.has(this, MobAmmo.Kind.ARROWS));
 	}
 
+	/** (sh-shooter) When its next arrow looses (game time), while it shoots ({@link Shoot}); 0 when it isn't shooting. */
+	private long loosesAt;
+
+	/** (sh-shooter) An archer (not a caster) about to loose at {@code at}: its foe, its next arrow within {@link #ARCHER_DRAW}. */
+	public boolean drawing(LivingEntity at) {
+		long now = this.level().getGameTime();
+		return this.loosesAt >= now && this.loosesAt - now <= ARCHER_DRAW && this.getTarget() == at && !Sorcery.isCaster(this.role()) && this.shooting();
+	}
+
 	/** An archer (or a goblin slinger, or a caster): it keeps its post and shoots. */
 	public boolean ranged() {
 		return this.role() == ARCHER || Goblins.ranged(this.role()) || Orcs.ranged(this.role()) || Sorcery.isCaster(this.role());
@@ -460,7 +471,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// weapon sense: blade when rushed, the weapon's distance band, strafing and leaning, going for what was thrown
 		this.goalSelector.addGoal(0, new WeaponSense.SenseGoal(this));
 		// badly hurt it breaks off, mends with what it carries and comes back; friends cover it (BreakOff)
-		this.goalSelector.addGoal(0, new BreakOff.MendGoal(this));
+		this.goalSelector.addGoal(BreakOff.MendGoal.PRIORITY, new BreakOff.MendGoal(this));
 		this.goalSelector.addGoal(1, new Shoot(this));
 		// (0.7.85) disarmed, it goes for a weapon before anything else (Rearm)
 		this.goalSelector.addGoal(1, new Rearm.Fetch(this));
@@ -940,6 +951,12 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				this.cooldown = Sorcery.isCaster(this.archer.role()) ? Sorcery.CAST_TICKS : ARCHER_INTERVAL;
 				this.archer.performRangedAttack(target, 1.0F);
 			}
+			this.archer.loosesAt = this.archer.level().getGameTime() + Math.max(0, this.cooldown);
+		}
+
+		@Override
+		public void stop() {
+			this.archer.loosesAt = 0L;
 		}
 	}
 

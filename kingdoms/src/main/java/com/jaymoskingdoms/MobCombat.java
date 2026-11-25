@@ -277,7 +277,7 @@ public final class MobCombat {
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
 		// ((fighting AI patch 3, ml-crit) and never sooner than its weapon's full charge after the last: no spam)
-		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || now - swing.lastSwing < Blows.fullCharge(mob)) {
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || !Blows.charged(mob, now - swing.lastSwing)) {
 			return;
 		}
 		if (now - swing.endsAt > COMBO_RESET_TICKS) {
@@ -352,7 +352,7 @@ public final class MobCombat {
 		}
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
-		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || now - swing.lastSwing < Blows.fullCharge(mob)) {
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || !Blows.charged(mob, now - swing.lastSwing)) {
 			return false;
 		}
 		Move heaviest = pick(mob, moves, 0);
@@ -387,7 +387,7 @@ public final class MobCombat {
 		}
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
-		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || now - swing.lastSwing < Blows.fullCharge(mob)) {
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || !Blows.charged(mob, now - swing.lastSwing)) {
 			return;
 		}
 		if (now - swing.endsAt > COMBO_RESET_TICKS) {
