@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LL",
+    "LL"
+  ],
+  "key": {
+    "L": "minecraft:lily_pad"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:big_lily_pad"
+  }
+}

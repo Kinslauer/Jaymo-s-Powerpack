@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "jaymoskingdoms:block/toadstool_stem"
+    },
+    "axis=z": {
+      "model": "jaymoskingdoms:block/toadstool_stem_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "jaymoskingdoms:block/toadstool_stem_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "GLG",
+    " G "
+  ],
+  "key": {
+    "S": "minecraft:string",
+    "G": "minecraft:glass_pane",
+    "L": "minecraft:glow_lichen"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:swamp_lantern"
+  }
+}

@@ -5982,5 +5982,29 @@
 			"jaymoskingdoms:item/fruiting_heart/use1"
 		],
 		"subtitle": "subtitles.jaymoskingdoms.item.fruiting_heart.use"
+	},
+	"goblin_band.drum": {
+		"subtitle": "subtitles.jaymoskingdoms.goblin_band.drum",
+		"sounds": [
+			"jaymoskingdoms:goblin_band/drum"
+		]
+	},
+	"goblin_band.flute": {
+		"subtitle": "subtitles.jaymoskingdoms.goblin_band.flute",
+		"sounds": [
+			"jaymoskingdoms:goblin_band/flute"
+		]
+	},
+	"goblin_band.shaker": {
+		"subtitle": "subtitles.jaymoskingdoms.goblin_band.shaker",
+		"sounds": [
+			"jaymoskingdoms:goblin_band/shaker"
+		]
+	},
+	"goblin_band.jug": {
+		"subtitle": "subtitles.jaymoskingdoms.goblin_band.jug",
+		"sounds": [
+			"jaymoskingdoms:goblin_band/jug"
+		]
 	}
 }

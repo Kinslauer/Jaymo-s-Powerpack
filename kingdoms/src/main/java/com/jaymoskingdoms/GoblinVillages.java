@@ -91,7 +91,9 @@ final class GoblinVillages {
 		long now = level.getGameTime();
 		// (its data first: everything after asks what kind of camp it is)
 		Camps.putData(server, id, new Camps.CampData(fire, gate, now, now, Production.day(server), -1L, List.of(), 0L, Map.of(), KIND, 0, 0));
-		GoblinBuildings.Layout layout = GoblinBuildings.build(level, center, floor, gate);
+		// (in a swamp it stands on stilts over the water: SwampGoblins)
+		boolean swamp = SwampGoblins.swamp(level, center);
+		GoblinBuildings.Layout layout = swamp ? SwampGoblins.build(level, center, floor, gate) : GoblinBuildings.build(level, center, floor, gate);
 		Storage.register(server, id, layout.storage(), layout.depot());
 		Faction stocked = Factions.get(server, id);
 		Storage.put(level, stocked, Items.SPRUCE_LOG, START_LOGS);
@@ -107,6 +109,11 @@ final class GoblinVillages {
 		// slingers on the lookout and up the gate towers, drinkers in the tavern, the rest about the fire
 		spawn(level, id, Goblins.SLINGER, layout.lookout(), layout.lookout(), SLINGER_RADIUS);
 		for (int i = 1; i < START_SLINGERS; i++) {
+			if (swamp) {
+				// (a stilt village has no gate towers: its slingers all keep the lookout)
+				spawn(level, id, Goblins.SLINGER, layout.lookout(), layout.lookout(), SLINGER_RADIUS);
+				continue;
+			}
 			int side = i % 2 == 1 ? 1 : -1;
 			BlockPos tower = new CampBuildings.Placer(fire, gate, 0)
 				.at(side * (GoblinBuildings.GATE_HALF + 2), GoblinBuildings.TOWER_HIGH + 1, -GoblinBuildings.RING_RADIUS + 1);
@@ -222,6 +229,10 @@ final class GoblinVillages {
 			int role = slingers * SLINGER_EVERY < goblins(now) ? Goblins.SLINGER : Goblins.GOBLIN;
 			spawn(level, village.id(), role, spot(level, fire, random), fire, Hordes.homeRadius(server, village.id(), GoblinBuildings.HOME_RADIUS));
 		}
+		// a swamp village's own goods (caps, pads, lanterns, eels, shakers)
+		if (SwampGoblins.is(level, fire)) {
+			SwampGoblins.day(level, village, days);
+		}
 		// (0.7.475) and it may move up a tier
 		Hordes.day(level, village.id());
 	}
@@ -258,6 +269,12 @@ final class GoblinVillages {
 		GreenMarket.tick(level, village, data);
 		// (goblin extras) its engineer, and a round at its tavern
 		DrunkGoblins.look(level, village, data);
+		// its band round the fire of an evening, and a swamp village's gardeners, homes and hedge witch
+		GoblinBands.tick(level, village, data);
+		boolean swamp = SwampGoblins.is(level, data.center());
+		if (swamp) {
+			SwampGoblins.tick(level, village, data);
+		}
 		// (0.7.475) past its first stockade: its tier's wall and band
 		if (Hordes.tick(level, village, data, force)) {
 			return;
@@ -272,7 +289,7 @@ final class GoblinVillages {
 		if (!force && Raids.playerNear(level, where, BUILD_HIDE_RANGE)) {
 			return;
 		}
-		if (!clear(level, spot, data.center(), data.gate())) {
+		if (!swamp && !clear(level, spot, data.center(), data.gate())) {
 			// (something's in the way: that one is skipped)
 			Camps.updateData(server, village.id(), d -> d.withBuilt(d.built() + 1));
 			return;
@@ -284,7 +301,11 @@ final class GoblinVillages {
 		for (var e : cost.entrySet()) {
 			Storage.take(level, village, e.getKey(), e.getValue());
 		}
-		GoblinBuildings.place(level, spot, data.center(), data.gate());
+		if (swamp) {
+			SwampGoblins.raise(level, spot, data.center(), data.gate());
+		} else {
+			GoblinBuildings.place(level, spot, data.center(), data.gate());
+		}
 		Camps.updateData(server, village.id(), d -> d.withBuilt(d.built() + 1));
 		JaymosKingdoms.LOGGER.debug("{} raised a {}", village.name(), spot.id());
 	}

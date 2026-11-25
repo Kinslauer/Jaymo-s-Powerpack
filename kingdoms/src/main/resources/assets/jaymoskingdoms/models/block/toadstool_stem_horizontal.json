@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "side": "jaymoskingdoms:block/toadstool_stem",
+    "end": "jaymoskingdoms:block/toadstool_stem_top"
+  }
+}
