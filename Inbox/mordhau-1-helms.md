@@ -29,3 +29,6 @@ pr:
 - **mh-spectacle** Spectacle helm (M, new): Viking Helmet, Rus spectacle helmet (P24). A 10th c. Gjermundbu-type round helm with an iron spectacle guard round the eyes and nose and a mail curtain. Ours: HEAD: new model (rounded skull with a ridge, spectacle mask, mail curtain). Fixed face.
 - **mh-skullcap** Skullcap (cervelliere) (M, new): Skullcaps (P24), Mail Skullcap (P25). A plain round iron cap worn alone or over a mail coif, crusade era. Ours: HEAD: new small model (open, sight 1). With mail_coif (HOOD) it gives the mail skullcap.
 - **mh-turban-helm** Turban helm (S, variant): Turban Helmet, Turban Helmet With Nasal Guard (P25), Sultan set helm (P24), Eastern Helmet (+ Nasal Guard, datamined). A tall, fluted, bulbous Ottoman/Mamluk helm with a spike, a nasal and a mail aventail. Ours: HEAD: variant of veiled_helm (spiked helm with mail veil). The bulbous fluted bowl and a nasal in place of the veil would be a re-cut.
+
+## Notes
+- 2026-11-24 20:22 Question for Andy (from the helms worker): the 15 new helms are forgeable at the smithing anvil, and the kettle comes in each realm's cut on its soldiers; no guard is issued the others yet (GuardKit is Andy's wardrobe list). Should guards wear any of them (turban helm for the sands' soldiers, spectacle or gallowglass helm in the north, archer's sallet for archers, skullcap for militia)?
