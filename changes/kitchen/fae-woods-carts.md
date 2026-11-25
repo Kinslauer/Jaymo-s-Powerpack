@@ -1,0 +1,4 @@
+# carts have weight (drive model after the Cars mod)
+- **Pulled carts roll on a pole, not a rigid bar**: `CartPhysics` (new), the drive model of Cars: Drive, Drift & Force Feedback (MIT, by Pokato; licence in `licenses/cars/`) rewritten for a cart. The pole is a spring with a pull limit, so a cart gathers speed slowly and coasts; its heading turns at a limited rate that falls with speed (no instant turns); side-slip is scrubbed by a saturating tyre curve scaled by the block's slipperiness, so on ice it slides on and hardly turns; a smoothed slope reading slows it uphill and speeds it downhill; and a horse (not a player) that hauls it feels a small pull back. A hard leash keeps it from falling far behind. Tuning is in `static final` constants at the top of `CartPhysics`. `CartEntity.follow` uses it.
+- No cars are added (that is a later patch).
+- Built; not played or tuned in game.
