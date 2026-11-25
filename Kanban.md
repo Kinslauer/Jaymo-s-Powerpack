@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 16:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 16:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,24 +20,20 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · open
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
+- [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · 💻 Odysseus · claimed
-- [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · 💻 Odysseus · claimed
-- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · mordhau-3-body · claimed
 - [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · mordhau-4-legs · claimed
-- [ ] [[Agents/claude-cloud-village-mods-7-9|claude-cloud-village-mods-7-9]] · 💻 Odysseus · running
 
 
 ## In review
 
-- [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · #2183 · in-review
-- [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · #2183 · in-review
-- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · #2183 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -45,6 +41,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
+- [ ] [[Agents/claude-cloud-village-mods-7-9|claude-cloud-village-mods-7-9]] · 💻 Odysseus · #2183 · stalled
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 - [ ] [[Agents/symbiote-113-picks|symbiote-113-picks]] · 💻 Odysseus · stalled
