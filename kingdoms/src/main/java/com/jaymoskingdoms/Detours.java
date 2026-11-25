@@ -36,7 +36,10 @@ import org.jspecify.annotations.Nullable;
  * remembered for {@link #FORGET} and not tried again meanwhile.
  * <p>
  * The cost is bounded: at most {@link #PATHS_PER_TRY} paths a try, {@link #TRIES_PER_TICK} tries a tick for all fighters
- * together, and a fighter tries again no sooner than {@link #STUCK_TICKS} after. Folk and illagers through
+ * together (and the trial paths shared with hiding and danger sense, {@link PathProbes}), and a fighter tries again no
+ * sooner than {@link #STUCK_TICKS} after. The way found is walked from the goal's start (a move made while the goals are
+ * being picked is undone when the melee goal it replaces stops), and worked out again, {@link #REPATHS} times at most, if
+ * the walk ends short of it. Folk and illagers through
  * {@link DetourGoal}, MCA's villagers through {@link #brainStep}. Shooters keep to {@link RangedTactics}; never while
  * falling back, out of danger, hiding from a shooter, or making an arrest.
  */
@@ -58,6 +61,8 @@ public final class Detours {
 	/** A way round is walked this long at most (ticks), at this speed; it's there this near (blocks). */
 	static final int WAY_LONGEST = 200;
 	static final double SPEED = 1.1, THERE = 1.5;
+	/** A walk that ends short of the way round is worked out again at most this many times. */
+	static final int REPATHS = 2;
 
 	private record Failed(BlockPos at, long until) {
 	}
@@ -68,6 +73,9 @@ public final class Detours {
 		long markTime, nextTry;
 		boolean failing;
 		@Nullable BlockPos way;
+		/** The way's path, found and not yet walked (it's walked from the goal's start, or at once for a villager). */
+		@Nullable Path pending;
+		int repaths;
 		long wayStart;
 		Vec3 wayMark;
 		long wayMarkTime;
@@ -160,7 +168,7 @@ public final class Detours {
 			stuck = fails && s.failing;
 			s.failing = fails;
 		}
-		if (!stuck || now < s.nextTry || triesThisTick >= TRIES_PER_TICK) {
+		if (!stuck || now < s.nextTry || triesThisTick >= TRIES_PER_TICK || !PathProbes.room(1)) {
 			return false;
 		}
 		triesThisTick++;
@@ -171,6 +179,7 @@ public final class Detours {
 			return false;
 		}
 		s.way = way;
+		s.repaths = 0;
 		s.wayStart = now;
 		s.wayMark = m.position();
 		s.wayMarkTime = now;
@@ -186,6 +195,10 @@ public final class Detours {
 	/** Walking the way round: true while it still has the legs. */
 	private static boolean walk(ServerLevel level, Mob m, State s, long now) {
 		BlockPos way = s.way;
+		if (s.pending != null) {
+			// found, not yet set walking
+			return true;
+		}
 		boolean there = m.position().distanceTo(Vec3.atBottomCenterOf(way)) < THERE;
 		boolean nowhere = false;
 		if (m.position().distanceTo(s.wayMark) > HEADWAY) {
@@ -194,12 +207,18 @@ public final class Detours {
 		} else if (now - s.wayMarkTime >= STUCK_TICKS) {
 			nowhere = true;
 		}
+		if (!there && !nowhere && m.getNavigation().isDone() && s.repaths < REPATHS && PathProbes.take()) {
+			// its walk ended short of the way: worked out again from here
+			s.repaths++;
+			m.getNavigation().moveTo(way.getX() + 0.5, way.getY(), way.getZ() + 0.5, 1, SPEED);
+		}
 		if (there || nowhere || now - s.wayStart >= WAY_LONGEST || m.getNavigation().isDone() && !there) {
 			if (!there) {
 				// it got nowhere that way: not tried again for a while
 				s.failed.add(new Failed(way, now + FORGET));
 			}
 			s.way = null;
+			s.pending = null;
 			mark(s, m, s.markDist, now);
 			m.getNavigation().stop();
 			return false;
@@ -207,7 +226,7 @@ public final class Detours {
 		return true;
 	}
 
-	/** A spot round the rings it has a whole, safe path to (walking it, from now); null if none was found in this try. */
+	/** A spot round the rings it has a whole, safe path to (kept as the state's pending path); null if none was found in this try. */
 	private static @Nullable BlockPos wayRound(ServerLevel level, Mob m, LivingEntity foe, State s, long now) {
 		Vec3 here = m.position();
 		Vec3 to = foe.position().subtract(here);
@@ -224,12 +243,12 @@ public final class Detours {
 			}
 			spots.sort((a, b) -> Double.compare(Vec3.atBottomCenterOf(a).distanceToSqr(foe.position()), Vec3.atBottomCenterOf(b).distanceToSqr(foe.position())));
 			for (BlockPos spot : spots) {
-				if (paths++ >= PATHS_PER_TRY) {
+				if (paths++ >= PATHS_PER_TRY || !PathProbes.take()) {
 					return null;
 				}
-				Path path = m.getNavigation().createPath(spot, 1);
+				Path path = PathProbes.to(m, spot, 1);
 				if (path != null && path.canReach() && safe(path)) {
-					m.getNavigation().moveTo(path, SPEED);
+					s.pending = path;
 					return spot;
 				}
 				s.failed.add(new Failed(spot, now + FORGET));
@@ -266,10 +285,23 @@ public final class Detours {
 			return false;
 		}
 		boolean took = step(level, mob);
-		if (took && mob instanceof Villager v) {
-			v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+		if (took) {
+			go(mob);
+			if (mob instanceof Villager v) {
+				v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+			}
 		}
 		return took;
+	}
+
+	/** Sets it walking the way round it found, if it hasn't yet. */
+	private static void go(Mob mob) {
+		State s = STATES.get(mob);
+		if (s != null && s.way != null && s.pending != null) {
+			Path path = s.pending;
+			s.pending = null;
+			PathProbes.follow(mob, path, 1, SPEED);
+		}
 	}
 
 	/** Detours for a mob with goals (folk, illagers): ahead of its melee, it takes the legs while it walks a way round. */
@@ -297,9 +329,14 @@ public final class Detours {
 		}
 
 		@Override
+		public void start() {
+			go(this.mob);
+		}
+
+		@Override
 		public void tick() {
-			if (this.mob.level() instanceof ServerLevel level) {
-				step(level, this.mob);
+			if (this.mob.level() instanceof ServerLevel level && step(level, this.mob)) {
+				go(this.mob);
 			}
 		}
 
@@ -308,6 +345,7 @@ public final class Detours {
 			State s = STATES.get(this.mob);
 			if (s != null && s.way != null) {
 				s.way = null;
+				s.pending = null;
 				this.mob.getNavigation().stop();
 			}
 		}

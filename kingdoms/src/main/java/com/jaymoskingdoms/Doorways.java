@@ -107,7 +107,10 @@ public final class Doorways {
 		return !level.getEntitiesOfClass(LivingEntity.class, new AABB(at).expandTowards(0.0, 1.0, 0.0), LivingEntity::isAlive).isEmpty();
 	}
 
-	/** Opens the shut wooden door or fence gate at {@code at}: true if there was one. */
+	/**
+	 * Opens the shut wooden door or fence gate at {@code at}: true if it opened one (one already open is left as it is, and
+	 * isn't shut after: someone else left it so).
+	 */
 	private static boolean open(ServerLevel level, PathfinderMob mob, BlockPos at) {
 		// (0.7.497) a locked door or gate they've no key to stays shut; fence gates skip DoorBlock.setOpen
 		if (Locks.barred(level, at, mob)) {
@@ -115,17 +118,19 @@ public final class Doorways {
 		}
 		BlockState s = level.getBlockState(at);
 		if (s.is(BlockTags.MOB_INTERACTABLE_DOORS) && s.getBlock() instanceof DoorBlock door) {
-			if (!door.isOpen(s)) {
-				door.setOpen(mob, level, s, at, true);
+			if (door.isOpen(s)) {
+				return false;
 			}
+			door.setOpen(mob, level, s, at, true);
 			return true;
 		}
 		if (s.is(BlockTags.FENCE_GATES) && s.hasProperty(FenceGateBlock.OPEN)) {
-			if (!s.getValue(FenceGateBlock.OPEN)) {
-				level.setBlock(at, s.setValue(FenceGateBlock.OPEN, true), 10);
-				level.playSound(null, at, SoundEvents.FENCE_GATE_OPEN, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
-				level.gameEvent(mob, GameEvent.BLOCK_OPEN, at);
+			if (s.getValue(FenceGateBlock.OPEN)) {
+				return false;
 			}
+			level.setBlock(at, s.setValue(FenceGateBlock.OPEN, true), 10);
+			level.playSound(null, at, SoundEvents.FENCE_GATE_OPEN, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
+			level.gameEvent(mob, GameEvent.BLOCK_OPEN, at);
 			return true;
 		}
 		return false;

@@ -34,17 +34,18 @@ import org.jspecify.annotations.Nullable;
  * animals, pets, monsters, raiders. They stop when the creeper is gone (blown or killed) or calms down.
  * <p>
  * Who stays put: other creepers (so a pack still comes on together), the downed and the bound (they can't), anyone
- * riding or being carried, a mount someone is steering, mobs without AI, and the big ones that can take a blast
+ * riding or being carried, a mount someone is steering, mobs without AI, and the big ones that can take a creeper's blast
  * ({@link #STEADY_HEALTH} max health or more: iron golems, ravagers, bosses), so a golem still smashes the creeper.
  * A sleeper wakes; a pet told to sit gets up and runs, and sits again after.
  * <p>
- * The run is a goal ahead of every other move goal on each mob ({@link #PRIORITY}), added as the mob loads (as
+ * The run is a goal ahead of every other move goal on each mob ({@link #PRIORITY}: ahead of danger sense's way out of fire
+ * or water and of breaking off to mend too), added as the mob loads (as
  * {@link Stalkers} does for creepers); a mob with a walking brain (villagers, piglins, goats) is sent through its walk
  * target instead, as {@link Herds} does. Hissing creepers are looked for every {@link #EVERY} ticks.
  * <p>
  * Lit charges too (the fighting AI's danger sense, {@link DangerSense}): anyone near primed TNT (a block or a minecart's,
  * {@link #TNT_RANGE}) or a lit stick of dynamite (ours or WeaponMod's, {@link #STICK_RANGE}) runs clear of it the same way,
- * whoever lit it, friend or foe.
+ * whoever lit it, friend or foe; the big ones too, as a charge's blast is more than a creeper's.
  */
 final class CreeperFlight {
 	/** How near a hissing creeper a mob runs from it (blocks); a charged creeper's blast reaches twice as far. */
@@ -53,14 +54,17 @@ final class CreeperFlight {
 	static final double TNT_RANGE = 8.0, STICK_RANGE = 5.0;
 	/** How far past the edge of the blast they aim to stop (blocks). */
 	static final double CLEAR = 3.0;
-	/** Mobs with at least this much max health hold their ground: a plain creeper's blast can't kill them. */
+	/** Mobs with at least this much max health hold their ground against a creeper: its blast can't kill them. */
 	static final float STEADY_HEALTH = 100.0F;
 	/** How fast they run (a speed multiplier on their walk). */
 	static final double SPEED = 1.6;
 	/** How often hissing creepers are looked for; how long a mob keeps running after the last sighting (ticks). */
 	static final int EVERY = 2, HOLD = 10;
-	/** Ahead of every other goal, including priority-0 ones (it takes only the legs, so floating still works). */
-	static final int PRIORITY = -1;
+	/**
+	 * Ahead of every other goal, including danger sense's ({@code DangerSense.DangerGoal}, -2) and breaking off to mend
+	 * ({@code BreakOff.MendGoal}, -1): it takes only the legs, so floating still works.
+	 */
+	static final int PRIORITY = -3;
 	/** Tries at a spot clear of the blast before taking the farthest one found. */
 	static final int TRIES = 6;
 
@@ -161,7 +165,7 @@ final class CreeperFlight {
 		double r = range(from);
 		long until = level.getGameTime() + HOLD;
 		for (PathfinderMob mob : level.getEntitiesOfClass(PathfinderMob.class, from.getBoundingBox().inflate(r),
-			m -> m != from && m.distanceToSqr(from) <= r * r && runs(m))) {
+			m -> m != from && m.distanceToSqr(from) <= r * r && runs(m, from))) {
 			Threat was = THREATS.get(mob);
 			// the nearest one about to blow is the one to run from
 			if (was == null || was.from() == from || !live(was.from())
@@ -171,10 +175,10 @@ final class CreeperFlight {
 		}
 	}
 
-	/** Whether {@code mob} runs from a blast at all (see the class note for who stays put). */
-	static boolean runs(PathfinderMob mob) {
+	/** Whether {@code mob} runs from {@code from}'s blast at all (see the class note for who stays put). */
+	static boolean runs(PathfinderMob mob, Entity from) {
 		if (!mob.isAlive() || mob.isNoAi() || mob instanceof Creeper || mob.isPassenger()
-			|| mob.getMaxHealth() >= STEADY_HEALTH || Downed.isDowned(mob) || Captives.bound(mob)) {
+			|| from instanceof Creeper && mob.getMaxHealth() >= STEADY_HEALTH || Downed.isDowned(mob) || Captives.bound(mob)) {
 			return false;
 		}
 		Entity rider = mob.getControllingPassenger();
@@ -216,7 +220,7 @@ final class CreeperFlight {
 				return false;
 			}
 			this.from = threat(this.mob);
-			return this.from != null && runs(this.mob);
+			return this.from != null && runs(this.mob, this.from);
 		}
 
 		@Override
@@ -225,7 +229,7 @@ final class CreeperFlight {
 			if (c != null) {
 				this.from = c;
 			}
-			return c != null && runs(this.mob);
+			return c != null && runs(this.mob, c);
 		}
 
 		@Override

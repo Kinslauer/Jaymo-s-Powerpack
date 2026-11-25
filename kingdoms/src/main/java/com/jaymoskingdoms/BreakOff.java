@@ -834,7 +834,8 @@ public final class BreakOff {
 	 * tick, this having its body.
 	 */
 	public static boolean brainStep(Mob mob) {
-		if (!(mob.level() instanceof ServerLevel level)) {
+		if (!(mob.level() instanceof ServerLevel level) || mob instanceof net.minecraft.world.entity.PathfinderMob pm && CreeperFlight.fleeing(pm)) {
+			// (running from a blast: CreeperFlight walks it through its walk target, which this would erase)
 			return false;
 		}
 		consider(level, mob);

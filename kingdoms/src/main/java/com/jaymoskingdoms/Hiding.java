@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -29,8 +30,11 @@ import org.jspecify.annotations.Nullable;
  * fighter shot at ({@link #UNDER_FIRE}) by a shooter it has no way to (no path that gets there: up on a wall, across water)
  * goes to a spot within {@link #COVER_REACH} where something stands between the shooter and its head and middle
  * ({@link Cover#hideSpot}), crouches there for {@link #WAIT}, then tries again: its fight takes it on, and it isn't sent to
- * hide again for {@link #AGAIN}. Out of cover before then if the shooter is down or gone. Folk and illagers through
- * {@link HideGoal}, MCA's villagers through {@link #brainStep}; never while falling back, out of danger or arresting.
+ * hide again for {@link #AGAIN}. Out of cover before then if the shooter is down or gone. Only a foe's shots count (not
+ * one of its own side's). The way to cover is walked from the goal's start, and worked out again ({@link #REPATHS} at most)
+ * if the walk ends short of it; its trial paths share {@link PathProbes}' budget. Folk and illagers through
+ * {@link HideGoal}, MCA's villagers through {@link #brainStep}; never while falling back, out of danger, running from a
+ * blast or arresting.
  */
 public final class Hiding {
 	/** Shot within this long (ticks): under fire. */
@@ -44,6 +48,8 @@ public final class Hiding {
 	static final int WAIT = 40, AGAIN = 60;
 	/** Looked at this often (ticks). */
 	static final int LOOK = 10;
+	/** A walk to cover that ends short of it is worked out again at most this many times. */
+	static final int REPATHS = 2;
 
 	private record Shot(LivingEntity by, long at) {
 	}
@@ -53,6 +59,9 @@ public final class Hiding {
 		final BlockPos spot;
 		final long start;
 		long thereAt = -1L;
+		/** The way to cover, found and not yet walked (walked from the goal's start, or at once for a villager). */
+		@Nullable Path pending;
+		int repaths;
 
 		State(LivingEntity shooter, BlockPos spot, long start) {
 			this.shooter = shooter;
@@ -72,7 +81,8 @@ public final class Hiding {
 	static void register() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (entity instanceof Mob m && Temperaments.humanoid(m) && source.is(DamageTypeTags.IS_PROJECTILE) && source.getEntity() instanceof LivingEntity by
-				&& by != m) {
+				&& by != m && !m.isAlliedTo(by) && !Comrades.side(by).equals(Comrades.side(m))) {
+				// (a foe's shot: not a friend's stray arrow)
 				SHOTS.put(m, new Shot(by, m.level().getGameTime()));
 			}
 		});
@@ -98,7 +108,7 @@ public final class Hiding {
 	private static boolean able(Mob m) {
 		return m.isAlive() && !m.isNoAi() && !m.isPassenger() && !m.isBaby() && Temperaments.humanoid(m) && !Downed.isDowned(m)
 			&& m.getNavigation() instanceof GroundPathNavigation && !Comrades.ranged(m) && !BreakOff.away(m) && !DangerSense.running(m)
-			&& !Arrests.busy(m) && !Comrades.busy(m);
+			&& !Arrests.busy(m) && !Comrades.busy(m) && !(m instanceof PathfinderMob pm && CreeperFlight.fleeing(pm));
 	}
 
 	private static boolean standing(@Nullable LivingEntity e, Mob m) {
@@ -119,11 +129,13 @@ public final class Hiding {
 			SHOTS.remove(m);
 			return;
 		}
-		if (Comrades.target(m) == null || !able(m)) {
+		if (Comrades.target(m) == null || !able(m) || !PathProbes.room(2)) {
+			// (out of trial paths this tick: looked at again next time)
 			return;
 		}
 		LivingEntity shooter = shot.by();
-		Path to = m.getNavigation().createPath(shooter, 1);
+		PathProbes.take();
+		Path to = PathProbes.to(m, shooter, 1);
 		if (to != null && to.canReach()) {
 			// it can get to the shooter: it goes for it as it would (and isn't asked again for a second)
 			NOT_BEFORE.put(m, now + 2 * LOOK);
@@ -134,12 +146,14 @@ public final class Hiding {
 		if (spot == null) {
 			return;
 		}
-		Path path = m.getNavigation().createPath(spot, 0);
+		PathProbes.take();
+		Path path = PathProbes.to(m, spot, 0);
 		if (path == null || !path.canReach()) {
 			return;
 		}
-		m.getNavigation().moveTo(path, SPEED);
-		STATES.put(m, new State(shooter, spot, now));
+		State s = new State(shooter, spot, now);
+		s.pending = path;
+		STATES.put(m, s);
 	}
 
 	/** One tick: true if this has {@code m}'s legs (going to cover, or behind it). */
@@ -157,8 +171,17 @@ public final class Hiding {
 			end(m, now);
 			return false;
 		}
+		if (s.pending != null) {
+			// found, not yet set walking
+			return true;
+		}
 		boolean there = m.position().distanceTo(Vec3.atBottomCenterOf(s.spot)) < THERE;
 		if (s.thereAt < 0L) {
+			if (!there && m.getNavigation().isDone() && !Cover.hides(level, m, s.shooter, m.position()) && s.repaths < REPATHS && PathProbes.take()) {
+				// its walk ended short of cover: worked out again from here
+				s.repaths++;
+				m.getNavigation().moveTo(s.spot.getX() + 0.5, s.spot.getY(), s.spot.getZ() + 0.5, 0, SPEED);
+			}
 			if (there || m.getNavigation().isDone() && Cover.hides(level, m, s.shooter, m.position())) {
 				s.thereAt = now;
 				m.getNavigation().stop();
@@ -194,10 +217,23 @@ public final class Hiding {
 			return false;
 		}
 		boolean took = step(level, mob);
-		if (took && mob instanceof Villager v) {
-			v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+		if (took) {
+			go(mob);
+			if (mob instanceof Villager v) {
+				v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+			}
 		}
 		return took;
+	}
+
+	/** Sets it walking to the cover it found, if it hasn't yet. */
+	private static void go(Mob mob) {
+		State s = STATES.get(mob);
+		if (s != null && s.pending != null) {
+			Path path = s.pending;
+			s.pending = null;
+			PathProbes.follow(mob, path, 0, SPEED);
+		}
 	}
 
 	/** Cover from shooters for a mob with goals (folk, illagers): ahead of its melee, it takes the legs and the eyes while it hides. */
@@ -225,9 +261,14 @@ public final class Hiding {
 		}
 
 		@Override
+		public void start() {
+			go(this.mob);
+		}
+
+		@Override
 		public void tick() {
-			if (this.mob.level() instanceof ServerLevel level) {
-				step(level, this.mob);
+			if (this.mob.level() instanceof ServerLevel level && step(level, this.mob)) {
+				go(this.mob);
 			}
 		}
 

@@ -49,12 +49,18 @@ import org.jspecify.annotations.Nullable;
  * makes for water within {@link #WATER_REACH} along a path with no lava or fire on it. Paths never go into lava (the
  * pathfinder won't), and the ones made here are checked node by node.</li>
  * <li><b>Water</b>: deep in water in a fight, it swims on at its foe while it has a way to it (or the foe is in the water too),
- * else it heads for the bank nearest its foe; after the fight ({@link #AFTER_FIGHT}) it heads for the nearest bank, and
- * {@code Unstick.wadeOut} heaves it up the bank on its path.</li>
+ * else it heads for the bank nearest its foe; after the fight it keeps heading for the nearest bank till it's out (giving up
+ * after {@link #LEAVE_LONGEST}, or once {@link #BANK_MISSES} looks find no way out), and {@code Unstick.wadeOut} heaves it
+ * up the bank on its path. A villager that came ashore from a foe it has no way to across the water stays on the bank for
+ * {@link #ASHORE_HOLD} (its brain would walk it back in), unless a way opens, the foe comes near or into the water, or it's
+ * hurt.</li>
  * <li><b>Webs</b>: stuck in a cobweb with a blade or a sword in hand, it cuts the web after {@link #WEB_CUT}. Only the web goes,
  * and nothing drops (and not at all with mob griefing off).</li>
  * </ul>
- * Never for the downed, the bound or the held, and never a guard making an arrest.
+ * Never for the downed, the bound or the held, and never a guard making an arrest. Running from a blast ({@link CreeperFlight})
+ * comes before all of this: while it runs, this lets go of the legs. A way to water or a bank is walked from the goal's start
+ * (a move made while the goals are picked is undone when the goal it replaces stops), and worked out again
+ * ({@link #REPATHS} at most) if the walk ends short; its trial paths share {@link PathProbes}' budget.
  */
 public final class DangerSense {
 	/** A creeper this near (blocks), not yet hissing, coming at the fighter or its side (or this near at all), is struck first. */
@@ -69,12 +75,18 @@ public final class DangerSense {
 	static final int OUT_REACH = 2;
 	/** A path made here is at most this long (nodes). */
 	static final int PATH_NODES = 28;
-	/** Banks are looked for this far (blocks) along this many ways, this often (ticks); a fighter leaves the water this long after its fight (ticks). */
+	/** Banks are looked for this far (blocks) along this many ways, this often (ticks); out of the water it's let be this long after its fight (ticks). */
 	static final int BANK_REACH = 10, BANK_WAYS = 16, BANK_LOOK = 20, AFTER_FIGHT = 200;
 	/** Water this high up its body (a share of its height) is deep: it swims. */
 	static final double DEEP = 0.5;
 	/** In a web this long (ticks) with a blade in hand, it cuts it. */
 	static final int WEB_CUT = 12;
+	/** After a fight it heads for a bank for this long at most (ticks), and gives up once this many looks find no way out. */
+	static final int LEAVE_LONGEST = 1200, BANK_MISSES = 3;
+	/** A villager come ashore from a foe it can't get to across the water is kept on the bank this long (ticks). */
+	static final int ASHORE_HOLD = 200;
+	/** A walk to water or a bank that ends short of it is worked out again at most this many times. */
+	static final int REPATHS = 2;
 	/** How fast it gets out of fire and to water, and to a bank (a share of its walk). */
 	static final double FIRE_SPEED = 1.35, BANK_SPEED = 1.1;
 	/** A run to water or a bank is given up after this long (ticks). */
@@ -83,15 +95,23 @@ public final class DangerSense {
 	static final String[] EDGES = {"sword", "blade", "knife", "dagger", "katana", "machete", "sabre", "saber", "cutlass", "scimitar", "rapier"};
 
 	enum Run {
-		NONE, OUT_OF_FIRE, TO_WATER, TO_BANK
+		NONE, OUT_OF_FIRE, TO_WATER, TO_BANK, ASHORE
 	}
 
 	private static final class State {
 		Run run = Run.NONE;
 		@Nullable BlockPos dest;
-		long runStart, nextWaterLook, nextBankLook;
+		long runStart, nextWaterLook, nextBankLook, nextCreeperLook;
 		long lastFought = Long.MIN_VALUE / 2;
-		int inWeb;
+		/** When it was first in the web it's in (game time), or -1. */
+		long webSince = -1L;
+		/** The way to water or a bank, found and not yet walked (walked from the goal's start, or at once for a villager). */
+		@Nullable Path pending;
+		double pendingSpeed;
+		int pendingReach, repaths, bankMisses;
+		/** The foe it went ashore from (no way to it across the water); the hold on the bank, and its next look for a way. */
+		@Nullable LivingEntity bankedFrom, ashoreFoe;
+		long ashoreUntil, nextAshoreLook;
 		/** A creeper it went for: gone back for once it calms. */
 		@Nullable Creeper struck;
 	}
@@ -154,14 +174,18 @@ public final class DangerSense {
 		}
 		if (foe != null) {
 			s.lastFought = now;
+			s.bankMisses = 0;
 		}
-		web(level, m, s);
-		creeper(level, m, s, foe);
-		boolean legs = fire(level, m, s, now) || water(level, m, s, foe, now);
+		web(level, m, s, now);
+		creeper(level, m, s, foe, now);
+		// running from a blast comes first: CreeperFlight has the legs meanwhile
+		boolean blast = m instanceof PathfinderMob pm && CreeperFlight.fleeing(pm);
+		boolean legs = !blast && (fire(level, m, s, now) || water(level, m, s, foe, now) || ashore(m, s, foe, now));
 		if (!legs) {
 			s.run = Run.NONE;
 			s.dest = null;
-			if (foe == null && s.struck == null && s.inWeb == 0 && now - s.lastFought > AFTER_FIGHT && !m.isOnFire() && !m.isInWater()) {
+			s.pending = null;
+			if (foe == null && s.struck == null && s.webSince < 0L && now - s.lastFought > AFTER_FIGHT && !m.isOnFire() && !m.isInWater()) {
 				STATES.remove(m);
 			}
 		}
@@ -174,9 +198,40 @@ public final class DangerSense {
 		return s != null && s.run != Run.NONE;
 	}
 
+	/** Sets it walking the way to water or a bank it found, if it hasn't yet. */
+	private static void go(Mob m) {
+		State s = STATES.get(m);
+		if (s != null && s.pending != null && s.run != Run.NONE) {
+			Path path = s.pending;
+			s.pending = null;
+			PathProbes.follow(m, path, s.pendingReach, s.pendingSpeed);
+		}
+	}
+
+	/** Its walk to {@code s.dest} ended short: worked out again from here (at most {@link #REPATHS} times a run). */
+	private static boolean repath(ServerLevel level, Mob m, State s, double speed) {
+		if (s.dest == null || s.repaths >= REPATHS || !PathProbes.take()) {
+			return false;
+		}
+		s.repaths++;
+		Path path = PathProbes.to(m, s.dest, s.pendingReach);
+		return path != null && clean(level, path) && PathProbes.follow(m, path, s.pendingReach, speed);
+	}
+
+	/** A way to {@code dest} found: kept to be walked ({@link #go}). */
+	private static void found(State s, Run run, BlockPos dest, Path path, int reach, double speed, long now) {
+		s.pending = path;
+		s.pendingReach = reach;
+		s.pendingSpeed = speed;
+		s.run = run;
+		s.dest = dest;
+		s.runStart = now;
+		s.repaths = 0;
+	}
+
 	// ---- creepers ----------------------------------------------------------------------------------------------------
 
-	private static void creeper(ServerLevel level, Mob m, State s, @Nullable LivingEntity foe) {
+	private static void creeper(ServerLevel level, Mob m, State s, @Nullable LivingEntity foe, long now) {
 		if (m instanceof PathfinderMob pm && CreeperFlight.fleeing(pm)) {
 			// backing out of the blast (CreeperFlight has the legs); a villager's brain would walk it back in at its foe
 			if (m instanceof Villager && foe != null) {
@@ -187,9 +242,11 @@ public final class DangerSense {
 			}
 			return;
 		}
-		if ((m.tickCount + m.getId()) % LOOK != 0) {
+		// (by game time: its goal's checks run every other tick)
+		if (now < s.nextCreeperLook) {
 			return;
 		}
+		s.nextCreeperLook = now + LOOK;
 		Creeper was = s.struck;
 		if (was != null) {
 			if (!was.isAlive() || was.isRemoved() || was.level() != m.level() || was.distanceToSqr(m) > STRUCK_KEPT * STRUCK_KEPT) {
@@ -252,10 +309,12 @@ public final class DangerSense {
 		if (m.isInWater()) {
 			return false;
 		}
-		if (s.run == Run.TO_WATER && !m.getNavigation().isDone() && now - s.runStart < RUN_LONGEST) {
+		if (s.run == Run.TO_WATER && now - s.runStart < RUN_LONGEST
+			&& (s.pending != null || !m.getNavigation().isDone() || repath(level, m, s, FIRE_SPEED))) {
 			return true;
 		}
-		if (now < s.nextWaterLook) {
+		if (now < s.nextWaterLook || !PathProbes.room(1)) {
+			// (out of trial paths this tick: looked for again next tick)
 			return false;
 		}
 		s.nextWaterLook = now + WATER_LOOK;
@@ -263,14 +322,12 @@ public final class DangerSense {
 		if (water == null) {
 			return false;
 		}
-		Path path = m.getNavigation().createPath(water, 1);
+		PathProbes.take();
+		Path path = PathProbes.to(m, water, 1);
 		if (path == null || !clean(level, path)) {
 			return false;
 		}
-		m.getNavigation().moveTo(path, FIRE_SPEED);
-		s.run = Run.TO_WATER;
-		s.dest = water;
-		s.runStart = now;
+		found(s, Run.TO_WATER, water, path, 1, FIRE_SPEED, now);
 		return true;
 	}
 
@@ -366,19 +423,29 @@ public final class DangerSense {
 		boolean deep = m.isInWater() && m.getFluidHeight(FluidTags.WATER) >= m.getBbHeight() * DEEP;
 		if (!deep) {
 			// (wading up the bank's shallows it keeps on till it's out)
-			return s.run == Run.TO_BANK && m.isInWater() && !m.getNavigation().isDone() && now - s.runStart < RUN_LONGEST;
+			boolean wading = s.run == Run.TO_BANK && m.isInWater() && (s.pending != null || !m.getNavigation().isDone()) && now - s.runStart < RUN_LONGEST;
+			if (!wading && s.run == Run.TO_BANK && foe != null && s.bankedFrom == foe && m instanceof Villager && !Comrades.ranged(m)) {
+				// ashore from a foe it has no way to across the water: kept on the bank a while (its brain would walk it back in)
+				s.ashoreUntil = now + ASHORE_HOLD;
+				s.ashoreFoe = foe;
+				s.nextAshoreLook = now + BANK_LOOK;
+			}
+			return wading;
 		}
-		if (foe == null && now - s.lastFought > AFTER_FIGHT && s.run != Run.TO_BANK) {
+		if (foe == null && s.run != Run.TO_BANK && (now - s.lastFought > LEAVE_LONGEST || s.bankMisses >= BANK_MISSES)) {
+			// never in a fight, or it has tried long enough to get out
 			return false;
 		}
 		if (m.getFluidHeight(FluidTags.WATER) > m.getFluidJumpThreshold()) {
 			// head up: it swims
 			m.getJumpControl().jump();
 		}
-		if (s.run == Run.TO_BANK && !m.getNavigation().isDone() && now - s.runStart < RUN_LONGEST) {
+		if (s.run == Run.TO_BANK && now - s.runStart < RUN_LONGEST
+			&& (s.pending != null || !m.getNavigation().isDone() || repath(level, m, s, BANK_SPEED))) {
 			return true;
 		}
-		if (now < s.nextBankLook) {
+		if (now < s.nextBankLook || !PathProbes.room(foe != null ? 2 : 1)) {
+			// (out of trial paths this tick: looked for again next tick)
 			return false;
 		}
 		s.nextBankLook = now + BANK_LOOK;
@@ -386,24 +453,52 @@ public final class DangerSense {
 			if (foe.isInWater() || m.distanceToSqr(foe) < 9.0) {
 				return false;
 			}
-			Path to = m.getNavigation().createPath(foe, 0);
+			PathProbes.take();
+			Path to = PathProbes.to(m, foe, 0);
 			if (to != null && to.canReach()) {
 				// a way to it: swim on and fight
 				return false;
 			}
 		}
 		BlockPos bank = bank(level, m, foe);
-		if (bank == null) {
+		Path path = null;
+		if (bank != null) {
+			PathProbes.take();
+			path = PathProbes.to(m, bank, 0);
+		}
+		if (bank == null || path == null || !clean(level, path)) {
+			if (foe == null) {
+				s.bankMisses++;
+			}
 			return false;
 		}
-		Path path = m.getNavigation().createPath(bank, 0);
-		if (path == null || !clean(level, path)) {
+		found(s, Run.TO_BANK, bank, path, 0, BANK_SPEED, now);
+		s.bankedFrom = foe;
+		return true;
+	}
+
+	/** A villager kept on the bank it came out on, facing the foe across the water it has no way to: true while held. */
+	private static boolean ashore(Mob m, State s, @Nullable LivingEntity foe, long now) {
+		if (now >= s.ashoreUntil) {
 			return false;
 		}
-		m.getNavigation().moveTo(path, BANK_SPEED);
-		s.run = Run.TO_BANK;
-		s.dest = bank;
-		s.runStart = now;
+		if (foe == null || foe != s.ashoreFoe || m.isInWater() || foe.isInWater() || m.hurtTime > 0 || m.distanceToSqr(foe) < 9.0) {
+			s.ashoreUntil = 0L;
+			return false;
+		}
+		if (now >= s.nextAshoreLook && PathProbes.take()) {
+			s.nextAshoreLook = now + BANK_LOOK;
+			Path to = PathProbes.to(m, foe, 0);
+			if (to != null && to.canReach()) {
+				// a way round to it after all: its brain takes it on
+				s.ashoreUntil = 0L;
+				return false;
+			}
+		}
+		s.run = Run.ASHORE;
+		s.dest = null;
+		m.getNavigation().stop();
+		m.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		return true;
 	}
 
@@ -462,20 +557,24 @@ public final class DangerSense {
 		return false;
 	}
 
-	private static void web(ServerLevel level, Mob m, State s) {
+	private static void web(ServerLevel level, Mob m, State s, long now) {
 		if (!webbed(level, m)) {
-			s.inWeb = 0;
+			s.webSince = -1L;
 			return;
 		}
 		InteractionHand hand = edged(m.getMainHandItem()) ? InteractionHand.MAIN_HAND : edged(m.getOffhandItem()) ? InteractionHand.OFF_HAND : null;
 		if (hand == null || !level.getGameRules().get(GameRules.MOB_GRIEFING)) {
-			s.inWeb = 0;
+			s.webSince = -1L;
 			return;
 		}
-		if (++s.inWeb < WEB_CUT) {
+		// (by game time: this can run twice a tick, or every other tick, as its goal is picked and run)
+		if (s.webSince < 0L) {
+			s.webSince = now;
+		}
+		if (now - s.webSince < WEB_CUT) {
 			return;
 		}
-		s.inWeb = 0;
+		s.webSince = -1L;
 		m.swing(hand, SwingAnimation.DEFAULT, true);
 		for (BlockPos p : new BlockPos[] {m.blockPosition(), m.blockPosition().above()}) {
 			if (level.getBlockState(p).is(Blocks.COBWEB)) {
@@ -495,9 +594,13 @@ public final class DangerSense {
 		if (!(mob.level() instanceof ServerLevel level)) {
 			return false;
 		}
+		// (while it runs from a blast step lets go: CreeperFlight walks it through its walk target, which this would erase)
 		boolean took = step(level, mob);
-		if (took && mob instanceof Villager v) {
-			v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+		if (took) {
+			go(mob);
+			if (mob instanceof Villager v) {
+				v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+			}
 		}
 		return took;
 	}
@@ -518,7 +621,13 @@ public final class DangerSense {
 
 		@Override
 		public boolean canContinueToUse() {
-			return running(this.mob);
+			// (a blast to run from: CreeperFlight's run, ahead of this, takes the legs)
+			return running(this.mob) && !(this.mob instanceof PathfinderMob pm && CreeperFlight.fleeing(pm));
+		}
+
+		@Override
+		public void start() {
+			go(this.mob);
 		}
 
 		@Override
@@ -528,14 +637,20 @@ public final class DangerSense {
 
 		@Override
 		public void tick() {
-			if (this.mob.level() instanceof ServerLevel level) {
-				step(level, this.mob);
+			if (this.mob.level() instanceof ServerLevel level && step(level, this.mob)) {
+				go(this.mob);
 			}
 		}
 
 		@Override
 		public void stop() {
 			this.mob.getNavigation().stop();
+			State s = STATES.get(this.mob);
+			if (s != null) {
+				s.run = Run.NONE;
+				s.dest = null;
+				s.pending = null;
+			}
 		}
 	}
 }

@@ -134,7 +134,7 @@ public final class Climbing {
 			if (s.getFluidState().is(FluidTags.LAVA)) {
 				return false;
 			}
-			if (hatch(s) && !s.getValue(TrapDoorBlock.OPEN) && !Locks.barred(mob.level(), q, mob)) {
+			if (hatch(s) && !s.getValue(TrapDoorBlock.OPEN) && mob.level().isLoaded(q) && !Locks.barred(mob.level(), q, mob)) {
 				continue;
 			}
 			for (AABB box : s.getCollisionShape(ctx.level(), q).toAabbs()) {
@@ -170,8 +170,9 @@ public final class Climbing {
 		if (next.getY() > mob.getY() + 0.05) {
 			// up: jumping on a ladder climbs it
 			mob.getJumpControl().jump();
-		} else if (!column && next.getY() < mob.getY() - LET_GO) {
-			// down, with the way off lower still: it keeps to the ladder till it's down there
+		} else if (!column && next.getY() < mob.getY() - LET_GO && !mob.onGround() && climber(mob)) {
+			// down, with the way off lower still: a fighter hanging on the ladder keeps to it till it's down there (one on its
+			// feet in a ladder's or a vine's block just walks on)
 			mob.getMoveControl().setWantedPosition(mob.getBlockX() + 0.5, mob.getY(), mob.getBlockZ() + 0.5, speed);
 		}
 	}
