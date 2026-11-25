@@ -26,6 +26,8 @@ public class JaymosPowers implements ModInitializer {
 		// (the sling's use on a horse comes before Carry's, which would otherwise lift a horse a Gravity user can carry)
 		com.jaymospowers.core.Sling.init();
 		com.jaymospowers.core.Carry.init();
+		// grab and take down (or throw) a standing mob by hand: sneak + hold use, empty hands
+		com.jaymospowers.core.Wrestle.init();
 		// (Andy, 2026-11-20) a tap of use on a body opens what can be done to it
 		com.jaymospowers.core.BodyMenu.init();
 		com.jaymospowers.core.Perch.init();
@@ -83,6 +85,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.combat.ClashFx.init();
 		// sparks off a blow, a strike or an arrow that lands on metal armour, a metal body or a metal block
 		com.jaymospowers.combat.MetalHits.init();
+		// hit and break sounds by what a body is made of: bone, metal, slime, flesh
+		com.jaymospowers.combat.HitSounds.init();
 		// blades keep an edge: dulled by use, put right at a grindstone
 		com.jaymospowers.combat.Edge.init();
 		// every magic effect's type: beam, blast, ring, orb, sigil, mote, miasma

@@ -1,9 +1,12 @@
 package com.jaymospowers.core;
 
+import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.core.wounds.DownedLie;
 import com.jaymospowers.power.xenoform.XenoformState;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -11,6 +14,9 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -105,6 +111,58 @@ public final class LimbBoxes {
 		}
 	}
 
+	/** The downed lie their length along the ground: the head this far (of the standing height) from the middle, the feet this far the other way (as {@code Finishers}). */
+	static final double LYING_HEAD = 0.32, LYING_FEET = 0.555;
+
+	/**
+	 * Whether {@code entity} is someone downed lying on the ground (not carried, not sat against a wall), whose hit shape
+	 * is laid along the ground ({@link #of}) and stretches past its standing box ({@link #lyingHit}).
+	 */
+	public static boolean lying(Entity entity) {
+		return entity instanceof LivingEntity living && applies(entity) && Downed.isDowned(living) && !Carry.isCarried(living)
+			&& !DownedLie.satAgainst(living);
+	}
+
+	/**
+	 * The first of {@code entity}'s lying parts the line {@code from}→{@code to} (given in full, not as a share) crosses:
+	 * the share along it (0-1), or -1 if it passes over the body.
+	 */
+	public static double lyingClip(Entity entity, Vec3 from, Vec3 to) {
+		double first = -1.0;
+		for (Box box : of(entity)) {
+			double at = box.clip(from, to);
+			if (at >= 0.0 && (first < 0.0 || at < first)) {
+				first = at;
+			}
+		}
+		return first;
+	}
+
+	/**
+	 * The nearest of {@code current} (what the game's own box test found: a lying body in it is dropped, as it's judged by
+	 * its parts instead) and the lying bodies in {@code area} whose parts {@code from}→{@code to} crosses: for the crosshair
+	 * and for arrows, which would otherwise aim at a body standing where the downed no longer is. Not further than
+	 * {@code maxSqr} squared blocks (negative: no limit).
+	 */
+	public static @Nullable EntityHitResult lyingHit(Level level, @Nullable Entity skip, Vec3 from, Vec3 to, AABB area,
+		Predicate<Entity> filter, @Nullable EntityHitResult current, double maxSqr) {
+		EntityHitResult best = current != null && lying(current.getEntity()) ? null : current;
+		double bestSqr = best == null ? Double.MAX_VALUE : from.distanceToSqr(best.getLocation());
+		for (Entity e : level.getEntities(skip, area.inflate(2.0), e -> e instanceof LivingEntity && lying(e) && filter.test(e))) {
+			double at = lyingClip(e, from, to);
+			if (at < 0.0) {
+				continue;
+			}
+			Vec3 where = from.add(to.subtract(from).scale(at));
+			double sqr = from.distanceToSqr(where);
+			if (sqr < bestSqr && (maxSqr < 0.0 || sqr <= maxSqr)) {
+				best = new EntityHitResult(e, where);
+				bestSqr = sqr;
+			}
+		}
+		return best;
+	}
+
 	/** Whether {@code entity} is hit by its parts rather than its box right now. */
 	public static boolean applies(Entity entity) {
 		if (!(entity instanceof LivingEntity living) || !Dismember.canLoseParts(living) || living.isSleeping()
@@ -131,6 +189,26 @@ public final class LimbBoxes {
 		Vec3 right = Vec3.directionFromRotation(0.0F, living.yBodyRot + 90.0F);
 		Vec3 feet = living.position();
 		Pose pose = living.getPose();
+
+		if (lying(living)) {
+			// downed on the ground: along its facing, head ahead if it crawls (face down), else behind (on its back); the
+			// layout is the standing one turned flat, a pixel for a pixel, resting on the floor
+			Vec3 along = forward.scale(Downed.crawls(living) ? 1.0 : -1.0);
+			Vec3[] axes = {right, up, along};
+			double px = standing / MODEL_PX;
+			// (standing height in pixels → distance toward the head, the head's centre at 28 px being LYING_HEAD of the height out)
+			double headAt = LYING_HEAD * MODEL_PX;
+			Vec3 flat = feet;
+			add(boxes, missing, Dismember.HEAD, flat.add(along.scale(headAt * px)).add(0.0, 4.0 * px, 0.0), axes, 4.0 * px, 4.0 * px, 4.0 * px);
+			add(boxes, missing, TORSO, flat.add(along.scale((18.0 - 28.0 + headAt) * px)).add(0.0, 2.0 * px, 0.0), axes, 4.0 * px, 2.0 * px, 6.0 * px);
+			Vec3 arm = flat.add(along.scale((18.0 - 28.0 + headAt) * px)).add(0.0, 2.0 * px, 0.0);
+			add(boxes, missing, Dismember.RIGHT_ARM, arm.add(right.scale(6.0 * px)), axes, 2.0 * px, 2.0 * px, 6.0 * px);
+			add(boxes, missing, Dismember.LEFT_ARM, arm.add(right.scale(-6.0 * px)), axes, 2.0 * px, 2.0 * px, 6.0 * px);
+			Vec3 leg = flat.add(along.scale((6.0 - 28.0 + headAt) * px)).add(0.0, 2.0 * px, 0.0);
+			add(boxes, missing, Dismember.RIGHT_LEG, leg.add(right.scale(2.0 * px)), axes, 2.0 * px, 2.0 * px, 6.0 * px);
+			add(boxes, missing, Dismember.LEFT_LEG, leg.add(right.scale(-2.0 * px)), axes, 2.0 * px, 2.0 * px, 6.0 * px);
+			return boxes;
+		}
 
 		if (pose == Pose.SWIMMING || pose == Pose.FALL_FLYING) {
 			// lying along the body's facing: head first, legs behind, centred on the box

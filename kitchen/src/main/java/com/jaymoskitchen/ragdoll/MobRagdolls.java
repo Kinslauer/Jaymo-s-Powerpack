@@ -183,15 +183,30 @@ public final class MobRagdolls {
 		return ready == null || mob.level().getGameTime() >= ready;
 	}
 
-	/** Knocks {@code mob} limp: standing as it stood, toppled away from the blow, carried on by its knockback. */
+	/**
+	 * Floors {@code mob} from a grapple (Jaymo's Powers' takedown): limp as a blow would leave it, toppled away from
+	 * {@code from} (null: any way). False if it can't be knocked limp just now.
+	 */
+	public static boolean floor(Mob mob, @Nullable Vec3 from) {
+		if (!mob.isAlive() || isLimp(mob) || !may(mob)) {
+			return false;
+		}
+		knock(mob, from);
+		return true;
+	}
+
 	private static void knock(Mob mob, DamageSource source) {
+		knock(mob, source.getSourcePosition());
+	}
+
+	/** Knocks {@code mob} limp: standing as it stood, toppled away from {@code from}, carried on by its knockback. */
+	private static void knock(Mob mob, @Nullable Vec3 from) {
 		if (mob.isPassenger()) {
 			mob.stopRiding();
 		}
 		EntityDimensions size = mob.getDimensions(Pose.STANDING);
 		RagdollRig rig = RagdollShapes.rig(mob.getType(), size.width(), size.height());
 		RagdollBody body = RagdollBody.standing(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot);
-		Vec3 from = source.getSourcePosition();
 		double dx = from == null ? 0.0 : mob.getX() - from.x, dz = from == null ? 0.0 : mob.getZ() - from.z;
 		double flat = Math.hypot(dx, dz);
 		double fx = 0.0, fz = 0.0;
