@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: claude-cloud
 from: tiv (Discord, Hotspot / parthenon / Airstrip thread, 2026-11-23)
 asked: 2026-11-23
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
-claimed_by: claude-cloud
+claimed_by: 
 pr:
 suggested_owns:
   - E:/Jaymo Vault Live/Lore.md
@@ -28,3 +28,4 @@ suggested_owns:
 ## Notes
 - 2026-11-24 09:05 quill's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-24 17:59 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
+- 2026-11-25 01:53 claude-cloud's claim had no sign of work for 30 min: handed back as open.

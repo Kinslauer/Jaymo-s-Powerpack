@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: changes
 for: claude-cloud
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
-claimed_by: claude-cloud
+claimed_by: 
 pr: research
 suggested_owns: []
 writer: hermes-writer
@@ -91,3 +91,4 @@ Tools produce Minecraft-appropriate 16x16 textures. Main constraint: maintaining
 ### Next Steps
 Prototype a few item textures using mc-asset and pixelgen, compare output quality against existing pack textures, and document the reusable pipeline steps for future pack additions.
 - 2026-11-24 18:00 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
+- 2026-11-25 01:53 claude-cloud's claim had no sign of work for 30 min: handed back as changes.
