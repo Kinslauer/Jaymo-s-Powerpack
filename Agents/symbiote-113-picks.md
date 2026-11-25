@@ -1,5 +1,5 @@
 ---
-status: running
+status: merged
 task: Build Andy's 49 picks from the Symbiote 1.1.3 jar pick page
 branch: claude/project-thread-bh6g0g
 with: Claude (Reason Art thread "Pick Symbiote 1.1.3 ideas to adapt")
