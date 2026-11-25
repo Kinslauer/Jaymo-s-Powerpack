@@ -8049,3 +8049,9 @@ Ideas from the Hand of God mod (All Rights Reserved: nothing of it copied, all b
 
 - Andy (2026-11-25): "if it cannot be opened or has nothing left the context hint for that button should disappear". The hint by the crosshair on a body only shows "search the body" while a tap will open its loot screen (Kitchen's `Corpses.SHARE_TAP`). A picked-clean skeleton shows "take a bone"; a body with arrows still in it shows "pull out an arrow" (a tap pulls one before the loot screen opens). Lift, drag and pick-up lines are unchanged.
 - Built; not played.
+
+## 0.27.32 (2026-11-25): Tectonic leaves the pack (#2138)
+
+- **Tectonic 3.0.32** is out of `packModsNoCf` (Andy, 2026-11-25: it broke the caves and the climate map), so it leaves the pack zip, the CurseForge export and the testers' pack. Its Fabric mod id is in `removedIdsFromProfile`, so the next build moves its jar out of the CurseForge profile into `removed-mods`. Jaymo's Kingdoms' own terrain comes back (see the Kingdoms note).
+- Lithostitched stays (other mods need it). Dynamic Waters' Tectonic compat stays in its port; it only turns on when Tectonic is loaded.
+- Not played: needs a new world.
