@@ -503,7 +503,7 @@ public final class Gibs {
 	 * One piece of {@code kind} (offal, intestines, brain matter: an {@link OffalPileBlock}) falls from {@code from} onto the
 	 * first ground under it: a new pile, or onto one of its kind lying there.
 	 */
-	private static void layPile(ServerLevel level, BlockPos from, Block kind) {
+	static boolean layPile(ServerLevel level, BlockPos from, Block kind) {
 		BlockState pile = kind.defaultBlockState();
 		BlockPos.MutableBlockPos pos = from.mutable();
 		for (int fallen = 0; fallen <= ENTRAILS_DROP && level.isLoaded(pos); fallen++, pos.move(Direction.DOWN)) {
@@ -512,17 +512,19 @@ public final class Gibs {
 				int pieces = there.getValue(OffalPileBlock.PIECES);
 				if (pieces < OffalPileBlock.MAX) {
 					level.setBlock(pos, there.setValue(OffalPileBlock.PIECES, pieces + 1), Block.UPDATE_ALL);
+					return true;
 				}
-				return;
+				return false;
 			}
 			if (!there.isAir()) {
-				return;
+				return false;
 			}
 			if (pile.canSurvive(level, pos)) {
 				level.setBlock(pos, pile, Block.UPDATE_ALL);
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	/** A crushed skull's pieces of bone and lumps of brain thrown (for a man's head; a bigger or smaller one more or fewer). */

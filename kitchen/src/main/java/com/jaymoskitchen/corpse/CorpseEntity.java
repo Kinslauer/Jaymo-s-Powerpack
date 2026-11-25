@@ -131,6 +131,8 @@ public class CorpseEntity extends Entity {
 	private static final EntityDataAccessor<Integer> DRESSED = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
 	public static final int DRESSED_SKINNED = 1, DRESSED_GUTTED = 2;
+	/** Where the belly cut's strokes so far (0 to {@link Gutting#CUT_STROKES}) sit in the dressed number (three bits). */
+	public static final int DRESSED_CUT_SHIFT = 2, DRESSED_CUT_MASK = 7;
 	/** (0.4.39) The game time it died (0 once reloaded): clients let a fresh body fall into place (see Flop). */
 	/** How the body has weathered, painted by clients (see {@link Wear}): charred, rotting, greyed, sunk, frozen, fading, squashed. */
 	private static final EntityDataAccessor<Integer> WEAR = SynchedEntityData.defineId(CorpseEntity.class,
@@ -311,6 +313,12 @@ public class CorpseEntity extends Entity {
 	private int skinStrokes;
 	/** Its guts are out (the step after skinning, {@link Hanging}). */
 	private boolean gutted;
+	/** Gutting by hand ({@link Gutting}): strokes made, work done toward the next, who is at it and when they last were. */
+	private int gutStrokes, gutWork;
+	private java.util.@Nullable UUID gutBy;
+	private long gutLast;
+	/** What it gives has been worked out from what's left of it ({@link Yield}), so it isn't done twice. */
+	private boolean yielded;
 	/** How it died, if that cost it hide or meat ({@link CleanKill}), and whether whoever's working it has been told. */
 	private String death = CleanKill.CLEAN;
 	private boolean deathTold;
@@ -1280,6 +1288,54 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(DRESSED, dressed() | how);
 	}
 
+	int gutStrokes() {
+		return gutStrokes;
+	}
+
+	/** One more stroke of the gutting made; how many that makes. */
+	int addGutStroke() {
+		return ++gutStrokes;
+	}
+
+	/** Use held at it by {@code player} at game time {@code now}: the work done toward the next stroke, a repeat's worth more. */
+	int addGutWork(Player player, long now) {
+		boolean same = player.getUUID().equals(gutBy) && now - gutLast <= HOLD_GRACE;
+		gutWork = (same ? gutWork : 0) + (same ? (int) Math.min(now - gutLast, USE_REPEAT) : USE_REPEAT);
+		gutBy = player.getUUID();
+		gutLast = now;
+		return gutWork;
+	}
+
+	void resetGutWork() {
+		gutWork = 0;
+	}
+
+	/** The belly cut is {@code strokes} strokes long on the body clients draw. */
+	void setCut(int strokes) {
+		int now = dressed() & ~(DRESSED_CUT_MASK << DRESSED_CUT_SHIFT);
+		this.entityData.set(DRESSED, now | (Math.min(DRESSED_CUT_MASK, strokes) << DRESSED_CUT_SHIFT));
+	}
+
+	/**
+	 * A scavenger has eaten this share (0 to 1) of it: the flesh falls away in patches down to bare bone, as it does when
+	 * rot bares it ({@link Wear#BARE}). Never less than it was.
+	 */
+	void eaten(float share) {
+		int level = Math.min(Wear.LEVELS, (int) (share * (Wear.LEVELS + 1)));
+		if (level > Wear.get(wear(), Wear.BARE)) {
+			setWear(Wear.with(wear(), Wear.BARE, level));
+		}
+	}
+
+	/** What it gives is worked out from what's left of it, the first time it's worked on ({@link Yield}). */
+	void settleYield() {
+		if (yielded || !(level() instanceof ServerLevel level)) {
+			return;
+		}
+		yielded = true;
+		Yield.settle(this, level, loot);
+	}
+
 	/** One more knife stroke at its skin; how many that makes. */
 	int addSkinStroke() {
 		return ++skinStrokes;
@@ -2081,6 +2137,12 @@ public class CorpseEntity extends Entity {
 				if (kind == CorpseKind.SKELETON && bones > 0) {
 					spawnAtLocation(level, new ItemStack(Items.BONE, bones), 0.2F);
 				}
+				// what a mob wore and held doesn't burn with it: it lies in the ash, unless the body went into lava
+				if (!lavaBurn && !isInLava() && !isPlayerCorpse()) {
+					for (ItemStack piece = takeGearPiece(); !piece.isEmpty(); piece = takeGearPiece()) {
+						spawnAtLocation(level, piece, 0.3F);
+					}
+				}
 				leaveAshPile(level);
 				// a player's things don't burn with them: left lying in the ash for good (as when the body's eaten)
 				for (ItemStack stack : takeHotbar()) {
@@ -2565,6 +2627,11 @@ public class CorpseEntity extends Entity {
 				return InteractionResult.SUCCESS_SERVER;
 			}
 		}
+		// a sword or a dagger held on it guts it, a stroke at a time
+		InteractionResult gutting = Gutting.use(this, level, player, held);
+		if (gutting != null) {
+			return gutting;
+		}
 		InteractionResult step = Hanging.use(this, level, player, held);
 		if (step != null) {
 			return step;
@@ -2862,6 +2929,7 @@ public class CorpseEntity extends Entity {
 	 * last (a click adds one repeat's worth), and each full piece of work takes one piece off it.
 	 */
 	private InteractionResult cutUp(ServerLevel level, Player player, ItemStack tool) {
+		settleYield();
 		long now = level.getGameTime();
 		boolean same = player.getUUID().equals(cutBy) && now - cutLast <= HOLD_GRACE;
 		cutWork += same ? (int) Math.min(now - cutLast, USE_REPEAT) : USE_REPEAT;
@@ -3048,6 +3116,7 @@ public class CorpseEntity extends Entity {
 		if (isMachine()) {
 			return;
 		}
+		settleYield();
 		// (0.5.51) never bled: its raw meat spoils in a few days (Spoilage)
 		boolean unbled = butcherStage < Hanging.DRAINED || entityTags().contains(com.jaymoskitchen.rats.Rats.GNAWED_TAG);
 		long day = level.getOverworldClockTime() / 24000L;
@@ -3094,6 +3163,7 @@ public class CorpseEntity extends Entity {
 
 	/** (0.4.32) Everything a proper job on a butcher block gets out of it (its loot and the extras), without dropping any of it. */
 	public List<ItemStack> butcheredDrops() {
+		settleYield();
 		List<ItemStack> drops = new ArrayList<>();
 		for (ItemStack stack : loot) {
 			drops.add(stack.copy());
@@ -3189,6 +3259,7 @@ public class CorpseEntity extends Entity {
 	void eatPart(ServerLevel level, int part) {
 		setMissing(missing() | part);
 		dropHeld(level, part, partPosition(part));
+		dropWorn(level, part, partPosition(part));
 		bites = 0;
 	}
 
@@ -4412,6 +4483,7 @@ public class CorpseEntity extends Entity {
 		Vec3 at = partPosition(part);
 		setMissing(missing() | part);
 		dropHeld(level, part, at);
+		dropWorn(level, part, at);
 		java.util.function.BiConsumer<Entity, Object[]> hook = onPart;
 		if (hook != null) {
 			try {
@@ -4481,6 +4553,33 @@ public class CorpseEntity extends Entity {
 			return;
 		}
 		String slot = (part == PART_RIGHT_ARM) != tag.getBooleanOr("LeftHanded", false) ? "mainhand" : "offhand";
+		dropGear(level, tag, slot, at);
+	}
+
+	/**
+	 * What a (mob's) body wore on a part it has lost falls where the part was, whole: the helmet with the head, the boots with
+	 * the first leg and the leggings with the second. It is never lost with the part (only lava takes it).
+	 */
+	private void dropWorn(ServerLevel level, int part, Vec3 at) {
+		if (isPlayerCorpse()) {
+			return;
+		}
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return;
+		}
+		if (part == PART_HEAD) {
+			dropGear(level, tag, "head", at);
+		} else if (part == PART_RIGHT_LEG || part == PART_LEFT_LEG) {
+			dropGear(level, tag, "feet", at);
+			if ((missing() & (PART_RIGHT_LEG | PART_LEFT_LEG)) == (PART_RIGHT_LEG | PART_LEFT_LEG)) {
+				dropGear(level, tag, "legs", at);
+			}
+		}
+	}
+
+	/** What's worn or held in {@code slot} of {@code tag} (its look) comes off the body and falls at {@code at}. */
+	private void dropGear(ServerLevel level, CompoundTag tag, String slot, Vec3 at) {
 		CompoundTag gear = tag.getCompoundOrEmpty("equipment");
 		if (!gear.contains(slot)) {
 			return;
@@ -4676,6 +4775,8 @@ public class CorpseEntity extends Entity {
 		this.spilt = input.getIntOr("Spilt", 0);
 		this.skinStrokes = input.getIntOr("SkinStrokes", 0);
 		this.gutted = input.getBooleanOr("Gutted", false);
+		this.gutStrokes = input.getIntOr("GutStrokes", 0);
+		this.yielded = input.getBooleanOr("Yielded", false);
 		this.entityData.set(DRESSED, input.getIntOr("Dressed", 0));
 		this.death = input.getStringOr("Death", CleanKill.CLEAN);
 		syncKill();
@@ -4749,7 +4850,9 @@ public class CorpseEntity extends Entity {
 			output.putLong("Strung", strung.asLong());
 			output.putDouble("StrungSide", hangSide);
 		}
-		if (butcherStage != 0) {
+		if (butcherStage != 0 || gutStrokes != 0 || yielded) {
+			output.putInt("GutStrokes", gutStrokes);
+			output.putBoolean("Yielded", yielded);
 			output.putInt("ButcherStage", butcherStage);
 			output.putInt("BleedTotal", bleedTotal);
 			output.putInt("BleedLeft", bleedLeft);

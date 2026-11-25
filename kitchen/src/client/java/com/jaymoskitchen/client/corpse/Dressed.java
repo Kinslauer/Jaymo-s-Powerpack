@@ -37,6 +37,8 @@ public final class Dressed {
 	/** The hollow and its ribs; a rib every this many pixels along a face's long side. */
 	private static final int HOLLOW = 0x54121A, RIB = 0xCEBCA2;
 	private static final int RIB_EVERY = 3;
+	/** The belly cut (its deep line and the raw lips either side) and the insides spilling out of an opened body (pink, darker pink). */
+	private static final int CUT = 0x5E0F14, CUT_LIP = 0xB03038, GUT = 0xB86A72, GUT_DARK = 0x7E3F4A;
 	/** Parts that are a body's trunk, in any case (Cube Animals' are Polish). */
 	private static final String[] TRUNKS = {"body", "torso", "tulow", "chest"};
 
@@ -92,6 +94,8 @@ public final class Dressed {
 		}
 		if ((dressed & CorpseEntity.DRESSED_GUTTED) != 0) {
 			ribs(painted, trunkFaces(model.root()));
+		} else if ((dressed >> CorpseEntity.DRESSED_CUT_SHIFT & CorpseEntity.DRESSED_CUT_MASK) != 0) {
+			cut(painted, trunkFaces(model.root()), dressed >> CorpseEntity.DRESSED_CUT_SHIFT & CorpseEntity.DRESSED_CUT_MASK);
 		}
 		if ((dressed & ROAST_CHARRED) != 0) {
 			roast(painted, CHAR, 0.8F);
@@ -216,6 +220,52 @@ public final class Dressed {
 					boolean edge = x == rect[0] || x == rect[2] - 1 || y == rect[1] || y == rect[3] - 1;
 					int along = wide ? x - rect[0] : y - rect[1];
 					int colour = !end && !edge && along % RIB_EVERY == 1 ? RIB : HOLLOW + (hash(x, y, 3) % 5 * 4 << 16);
+					// the insides slump out along the lower side of the opening
+					boolean low = (wide ? y - rect[1] : x - rect[0]) * 5 >= (wide ? rect[3] - rect[1] : rect[2] - rect[0]) * 3;
+					if (!end && !edge && low && colour != RIB && hash(x / 2, y, 9) % 3 != 0) {
+						colour = (x + y) % 3 == 0 ? GUT_DARK : GUT;
+					}
+					image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), colour >> 16 & 0xFF, colour >> 8 & 0xFF, colour & 0xFF));
+				}
+			}
+		}
+	}
+
+	/**
+	 * The cut along the belly after {@code strokes} strokes of {@link com.jaymoskitchen.corpse.Gutting#CUT_STROKES}: a dark line
+	 * along the middle of the long side of each face of the trunk's box (but its two ends), with a raw lip each side, as long
+	 * as the strokes made so far.
+	 */
+	private static void cut(NativeImage image, List<float[]> faces, int strokes) {
+		float reach = Math.min(1.0F, strokes / (float) com.jaymoskitchen.corpse.Gutting.CUT_STROKES);
+		int smallest = Integer.MAX_VALUE;
+		List<int[]> rects = new ArrayList<>();
+		for (float[] face : faces) {
+			int[] rect = {Math.max(0, Math.round(face[0] * image.getWidth())), Math.max(0, Math.round(face[1] * image.getHeight())),
+				Math.min(image.getWidth(), Math.round(face[2] * image.getWidth())), Math.min(image.getHeight(), Math.round(face[3] * image.getHeight()))};
+			if (rect[2] > rect[0] && rect[3] > rect[1]) {
+				rects.add(rect);
+				smallest = Math.min(smallest, (rect[2] - rect[0]) * (rect[3] - rect[1]));
+			}
+		}
+		for (int[] rect : rects) {
+			if ((rect[2] - rect[0]) * (rect[3] - rect[1]) <= smallest) {
+				continue;
+			}
+			boolean wide = rect[2] - rect[0] >= rect[3] - rect[1];
+			int length = wide ? rect[2] - rect[0] : rect[3] - rect[1];
+			int mid = wide ? (rect[1] + rect[3]) / 2 : (rect[0] + rect[2]) / 2;
+			for (int along = 0; along < Math.round(length * reach); along++) {
+				for (int across = -1; across <= 1; across++) {
+					int x = wide ? rect[0] + along : mid + across, y = wide ? mid + across : rect[1] + along;
+					if (x < rect[0] || x >= rect[2] || y < rect[1] || y >= rect[3]) {
+						continue;
+					}
+					int argb = image.getPixel(x, y);
+					if (ARGB.alpha(argb) == 0) {
+						continue;
+					}
+					int colour = across == 0 ? CUT : CUT_LIP;
 					image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), colour >> 16 & 0xFF, colour >> 8 & 0xFF, colour & 0xFF));
 				}
 			}
