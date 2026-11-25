@@ -3,7 +3,7 @@ status: running
 task: Work the X-Men mod's Magnetism power into Gravity
 branch: claude/project-thread-m8uaao
 with: Claude (project thread)
-pr: 
+pr: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2125
 mods: powers
 versions: 
 started: 2026-11-24
@@ -25,3 +25,4 @@ owns:
 
 ## Done
 - 2026-11-24 19:12 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- PR #2125 open: Tear Loose (sneak + right click on a held creature), heavy metal rips, scrap with the rocks. Lore "Iron answers first" (new). Waiting on Andy: disarm players? Forge as a follow-up? Not played; CI build only.
