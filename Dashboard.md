@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 07:35). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 09:33). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -14,9 +14,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-written-start-example|codex-written-start-example]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/mordhau-2-hoods-crests|mordhau-2-hoods-crests]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/symbiote-113-picks|symbiote-113-picks]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
 
 ## On the board
@@ -27,6 +27,12 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2174 class items show up in JEI under the class's name (Kingdoms, 2026-11-25)
+- [ ] #2173 No Subtle Effects error on a dedicated server's start (Powers, Kingdoms, 2026-11-25)
+- [ ] #2172 The game starts again (the symbiote HUD crashed it on launch) (Powers, 2026-11-25)
+- [ ] #2171 Waking villages into kingdoms no longer freezes the server (Kingdoms, 2026-11-25)
+- [ ] #2170 Rig leg kick: taekwondo side kick and combo roundhouse (Powers, 2026-11-25)
+- [ ] #2169 The symbiote saves you (Powers, Kingdoms, 2026-11-25)
 - [ ] #2167 space pod: sit in the cockpit under a glass canopy, new icon and flight picture (Powers, 2026-11-25)
 - [ ] #2166 the Verdant World is land again; pod landings and pads keep off the sea, and no second pod (Powers, 2026-11-25)
 - [ ] #2165 tree debris only when a player brought the tree down (Kingdoms, 2026-11-25)
@@ -81,13 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2108 The Silk Deeps no longer generate (Kingdoms, 2026-11-24)
 - [ ] #2107 T opens chat again (Powers, Kingdoms, 2026-11-24)
 - [ ] #2106 A new host can struggle out of the red one's hunt (Powers, 2026-11-24)
-- [ ] #2105 Alex's Caves joins the pack; its Magnetic Caves in the Aether's magnetic stone, its neodymium in our colours (Powers, Kingdoms, 2026-11-24)
-- [ ] #2104 patron colossus brings a natural disaster on each walk (Kingdoms, 2026-11-24)
-- [ ] #2103 patron colossus: the strike and the hunt for commandment breakers (Kingdoms, 2026-11-24)
-- [ ] #2102 Vanilla+ picks: Incendium back, demon start in the Forbidden Castle, back slot, pinned advancements, Stellarity End and the Beneath (Powers, Kingdoms, Kitchen, 2026-11-24)
-- [ ] #2101 Ruin Keepers tell their city's story (Kingdoms, 2026-11-24)
-- [ ] #2098 Illagers speak the Cave Tablets' tongue (Kingdoms, 2026-11-24)
-- …and 553 older ones.
+- …and 559 older ones.
 
 ## Health
 
