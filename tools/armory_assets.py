@@ -81,12 +81,16 @@ FORGED_SINGLES = ("iron_quarterstaff", "harpoon", "kunai", "throwing_star")
 # stone and metal ones), and so are the throwing stick and the wooden quarterstaff (Andy: "this is ok").
 WOODEN_SINGLES = ("wooden_cudgel",)
 
-ARMOR = [
-    ("caveman_helmet", "Caveman Hood", "head_armor", ["LBL", "L L"]),
-    ("caveman_chestplate", "Caveman Tunic", "chest_armor", ["L L", "LBL", "LLL"]),
-    ("caveman_leggings", "Caveman Pants", "leg_armor", ["LBL", "L L", "L L"]),
-    ("caveman_boots", "Caveman Boots", "foot_armor", ["L L", "B B"]),
+# the primitive hide sets (Armory.HIDE_SETS): set id, its four names, the accent (X) its recipes take. Their art is
+# our own (tools/vanilla_style/hide_sets.py), not AoW's. Each has a dark make: the same recipe with darker hides in
+# the leather's place (#jaymospowers:dark_hides), or a light piece smoked over charcoal (crafting_transmute).
+HIDE_SETS = [
+    ("caveman", ["Caveman Hood", "Caveman Tunic", "Caveman Pants", "Caveman Boots"], "minecraft:bone"),
+    ("trapper", ["Trapper's Hood", "Trapper's Coat", "Trapper's Leggings", "Trapper's Boots"], "minecraft:string"),
+    ("barbarian", ["Barbarian Hood", "Barbarian Mantle", "Barbarian Loincloth", "Barbarian Wraps"], "#c:hides"),
 ]
+ARMOR = [("helmet", "head_armor", ["LXL", "L L"]), ("chestplate", "chest_armor", ["L L", "LXL", "LLL"]),
+         ("leggings", "leg_armor", ["LXL", "L L", "L L"]), ("boots", "foot_armor", ["L L", "X X"])]
 
 NOTICE = """The textures in this folder (and the hand poses of the Armory's item models) come from
 Age of Weapons - Reforged by XxRexRaptorxX (RexRaptor), https://www.curseforge.com/minecraft/mc-mods/age-of-weapons,
@@ -300,16 +304,22 @@ def main(aow):
     bow(aow)
     lang[f"item.{NS}.recurve_bow"] = "Recurve Bow"
     shaped("recurve_bow", [" BC", "S C", " BC"], KEYS)
-    for item, name, tag, pattern in ARMOR:
-        lang[f"item.{NS}.{item}"] = name
-        copy_texture(aow, f"item/stone_age/{item}", f"item/armory/{item}")
-        handheld(aow, item, item, parent="minecraft:item/generated")
-        tags[tag].append(f"{NS}:{item}")
-        shaped(item, pattern, KEYS)
-    copy_texture(aow, "models/armor/caveman_layer_1", "entity/equipment/humanoid/caveman")
-    copy_texture(aow, "models/armor/caveman_layer_2", "entity/equipment/humanoid_leggings/caveman")
-    write(os.path.join(ASSETS, "equipment", "caveman.json"), {"layers": {
-        "humanoid": [{"texture": f"{NS}:caveman"}], "humanoid_leggings": [{"texture": f"{NS}:caveman"}]}})
+    for style, names, accent in HIDE_SETS:
+        for dark in (False, True):
+            hide_set = ("dark_" if dark else "") + style
+            for (piece, tag, pattern), name in zip(ARMOR, names):
+                item = f"{hide_set}_{piece}"
+                lang[f"item.{NS}.{item}"] = ("Dark " if dark else "") + name
+                handheld(aow, item, item, parent="minecraft:item/generated")
+                tags[tag].append(f"{NS}:{item}")
+                if dark:
+                    pattern = [row.replace("L", "D") for row in pattern]
+                    write(os.path.join(DATA, "recipe", "armory", item + "_smoked.json"), {
+                        "type": "minecraft:crafting_transmute", "category": "equipment",
+                        "input": f"{NS}:{style}_{piece}", "material": "#minecraft:coals", "result": {"id": f"{NS}:{item}"}})
+                shaped(item, pattern, dict(KEYS, X=accent, D=f"#{NS}:dark_hides"))
+            write(os.path.join(ASSETS, "equipment", hide_set + ".json"), {"layers": {
+                "humanoid": [{"texture": f"{NS}:{hide_set}"}], "humanoid_leggings": [{"texture": f"{NS}:{hide_set}"}]}})
     lang["entity.jaymospowers.thrown_weapon"] = "Thrown Weapon"
     lang["item.jaymospowers.lance.charge"] = "Couched on horseback, hits harder the faster you ride"
     # (0.13.7) the bomb glider (its art: tools/gen_bomb_glider.py; recipe and model are hand-written)

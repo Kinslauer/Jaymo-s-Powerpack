@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskitchen:bear_fur",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:hardened_leather",
+      "required": false
+    },
+    {
+      "id": "naturalist:bear_fur",
+      "required": false
+    }
+  ]
+}
