@@ -280,6 +280,10 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 	@Override
 	public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
 		super.submit(state, poseStack, collector, camera);
+		// streamer safe: no severed parts drawn
+		if (com.jaymospowers.client.blood.BloodSettings.streamerSafe()) {
+			return;
+		}
 		if (state.hidden || !state.player && (state.body == null || state.bodyRenderer == null)) {
 			return;
 		}

@@ -301,7 +301,7 @@ public final class BladeBlood {
 	}
 
 	/** (0.20.41) Whether {@code projectile} is a bullet (WeaponMod's, TaCZ's, any mod's shot or ball) rather than an arrow or bolt. */
-	static boolean bullet(Projectile projectile) {
+	public static boolean bullet(Projectile projectile) {
 		String path = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(projectile.getType()).getPath();
 		return path.contains("bullet") || path.contains("pellet") || path.contains("musket") || path.contains("buckshot")
 			|| path.equals("shot") || path.endsWith("_shot") || path.contains("round");
