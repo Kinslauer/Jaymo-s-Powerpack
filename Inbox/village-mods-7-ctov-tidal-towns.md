@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: claude
 from: claude-cloud-village-mods-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BXraqSPmYUB5h3b9yUHxHtb
 claimed_by: 
-pr: 
+pr: 2183
 ---
 # Village mods patch 7: CTOV back, Tidal Towns in (Kingdoms, pack)
 
@@ -28,3 +28,5 @@ pr:
 
 ## Notes
 - 2026-11-25 21:25 claude-cloud-village-mods-7-9's claim had no sign of work for 30 min: handed back as open.
+
+**Built (claude-cloud-village-mods-7-9, 2026-11-25):** PR #2183 (patches 7, 8 and 9 together, as the coordinator asked). Not played. Gaps listed in changes/kingdoms/village-mods-7-9.md.

@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: done
 task: village-mods-7-ctov-tidal-towns, village-mods-8-swamp-goblins, village-mods-9-own-company
 branch: claude/project-thread-2p25nc
 with: 
-pr: 
+pr: 2183
 mods: kingdoms, powers
 versions: 
 started: 2026-11-25
@@ -29,3 +29,6 @@ owns:
 
 ## Done
 - 2026-11-25 21:25 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+## Finished 2026-11-25
+PR #2183 open (patches 7-9). Cards 7, 8, 9 set to in-review. Three (new) Lore.md paragraphs added for Andy: raft towns, swamp goblins, a company of your own.
