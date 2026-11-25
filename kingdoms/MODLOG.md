@@ -17572,3 +17572,9 @@ Realm troops can draw their kettle cut, a regional helm, or a third helm suited 
 - Recipes for every cloth piece and crest; the new pieces count as cloth, mail or plate for Jaymo's Powers.
 - `HeraldryArmour` (registrations, `SECOND_COLOUR`, `regaliaCrown`), `Harness.slotOf`, `HeraldryLayer`.
 - Built and previewed off the game's files; not played.
+
+## 0.13.5 (2026-11-25): The Last Lantern: a second hand-built start example (#2177)
+
+- A Hearthkeeper's stone shelter with a pitched spruce roof, a covered porch, a cold hearth, a cot and a stocked cellar behind an iron trapdoor. Uses the written-start system; each newcomer gets their own copy and only the supplies placed in its containers.
+- Read the keeper's note to open the hatch, find the packing slip below, keep a short night watch, wait for daylight and find town. Leaving during the watch leads straight to the road.
+- Drawn by tools/last_lantern.py; start and tale are separate editable JSON files. Not played in game.
