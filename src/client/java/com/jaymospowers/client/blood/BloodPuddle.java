@@ -17,6 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.jaymospowers.core.blood.BloodBurn;
 import com.jaymospowers.core.blood.BloodParticles;
 import com.jaymospowers.core.blood.BloodTrail;
 import java.util.List;
@@ -254,6 +255,12 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 
 	/** (0.20.54) How often a passing pool checks for rain on it (ticks), and how long it then takes to wash away. */
 	static final int RAIN_CHECK = 20, RAIN_WASH = 100;
+	/** A passing pool beside fire or lava burns away over this many ticks. */
+	static final int BURN_AWAY = 20;
+	/** A pool on a stair or slab runs down to the step below this often (ticks, by chance), at most this many times. */
+	static final int STEP_EVERY = 12, STEPS = 4;
+	static final float STEP_CHANCE = 0.6F;
+	private int stepsLeft = STEPS;
 
 	/** Whether water stands or runs at this spot (a bucket poured over it, a flood): it washes the blood that's only for show away. */
 	static boolean underWater(ClientLevel level, double x, double y, double z) {
@@ -296,6 +303,18 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			&& (rainedOn(this.level, this.x, this.y + 0.5, this.z) || underWater(this.level, this.x, this.y + 0.05, this.z))) {
 			this.lifetime = this.age + RAIN_WASH;
 			this.quickFade = RAIN_WASH;
+		}
+		// fire or lava beside it burns a passing pool away (a lasting stain is burned by the server, BloodTrail.wash)
+		if (!this.wet && !this.stain && this.age % RAIN_CHECK == 0 && this.lifetime - this.age > BURN_AWAY
+			&& BloodBurn.near(this.level, net.minecraft.core.BlockPos.containing(this.x, this.y + 0.1, this.z))) {
+			this.lifetime = this.age + BURN_AWAY;
+			this.quickFade = BURN_AWAY;
+			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, this.x, this.y + 0.1, this.z, 0.0, 0.03, 0.0);
+		}
+		// a pool lying on a stair or slab runs down to the step below
+		if (this.stepsLeft > 0 && this.round && !this.wet && !this.print && this.quickFade == 0 && this.age % STEP_EVERY == 0
+			&& this.random.nextFloat() < STEP_CHANCE && BloodWallMark.stepDown(this.level, this.x, this.y, this.z, this.baseSize, this.color)) {
+			this.stepsLeft--;
 		}
 		// a fresh pool on a thin floor drips through from its underside
 		if (this.soakThrough != null && this.age < BloodSurfaces.SOAK_TICKS && !this.magma
@@ -450,7 +469,10 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			light = glow(light, age);
 		}
 		this.drawAlpha = alpha;
-		this.shown = shade(this.color, age, this.stain);
+		this.shown = shade(this.color, this.magma ? age : age * this.surface.dry, this.stain);
+		if (this.surface.pink && !this.magma) {
+			this.shown = ARGB.srgbLerp(BloodSurfaces.PINK_MIX, this.shown, BloodSurfaces.PINK) & 0xFFFFFF;
+		}
 		if (thick > 0.0F && !this.magma) {
 			float dark = Mth.lerp(thick, 1.0F, THICK_DARK);
 			this.shown = ARGB.color(0, Math.round(red(this.shown) * dark * 255.0F), Math.round(green(this.shown) * dark * 255.0F),
