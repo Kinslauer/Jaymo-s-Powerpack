@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.jaymoskingdoms.client.ui.FlatButton;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -61,6 +62,8 @@ final class JournalScreen extends Screen {
 	static final int COLOR_ENDED = COLOR_DONE, COLOR_ENDED_BADLY = COLOR_HATED;
 
 	private static int lastPage = QUESTS, lastZoom = DEFAULT_ZOOM;
+	/** Xaero's World Map is installed: the map tab opens it ({@link XaeroJournalMap}) and our own map is the fallback. */
+	static final boolean XAERO_MAP = FabricLoader.getInstance().isModLoaded("xaeroworldmap");
 
 	private final Journal.Book book;
 	private final KeyMapping key;
@@ -86,6 +89,10 @@ final class JournalScreen extends Screen {
 		super(Component.translatable("item.jaymoskingdoms.journal"));
 		this.book = book;
 		this.key = key;
+		if (XAERO_MAP && page == MAP) {
+			// (the map tab opens Xaero's map, so the journal itself opens on the quests)
+			page = QUESTS;
+		}
 	}
 
 	@Override
@@ -276,6 +283,10 @@ final class JournalScreen extends Screen {
 		int mouseX = (int)event.x(), mouseY = (int)event.y();
 		int tab = tabAt(mouseX, mouseY);
 		if (tab >= 0) {
+			if (tab == MAP && XAERO_MAP && XaeroJournalMap.open(this)) {
+				click();
+				return true;
+			}
 			if (tab != page) {
 				show(tab);
 				click();

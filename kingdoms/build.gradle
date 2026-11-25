@@ -121,6 +121,9 @@ dependencies {
 	compileOnly "curse.maven:peterwolfs-forest-fire-firefighting-1658918:8681320"
 	compileOnly xaeroMinimap
 	compileOnly files(xaeroLibDir.map { it.file("xaerolib.jar") }).builtBy(xaeroLib)
+	// Xaero's World Map (all rights reserved, thexaero; in Powers' pack): the journal's map page opens it in place of our
+	// own map (client/XaeroJournalMap). Compiled against the pack's version, never required.
+	compileOnly "maven.modrinth:xaeros-world-map:VM8lNSSM"
 }
 
 // lang lives in small part files, lang/parts/*.json (tools/lang_split.py made them); they're merged into en_us.json here
