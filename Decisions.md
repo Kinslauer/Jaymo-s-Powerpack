@@ -1075,3 +1075,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-25 (Andy, Hand of God thread): merged PR #2134 (Frostborn heat-vision beam, Thunderhead electrokinesis, Chrono slow time fx, five Nadir moves).
 - 2026-11-25 (Andy): approved the lore paragraph "What the void's hand can do" (Nadir's Hand of God moves).
 - 2026-11-24 11:20 PM (Andy): explorer-map crash fix: hold for round 3 (ancient city maps, village-map draw winner) rather than ship round 2 first.
+- 2026-11-25 12:16 AM (Andy): yes to a temporary one-shot stack-trace log for the server's 'Invalid entity rotation: NaN' spam, to find its source.
+- 2026-11-25 12:40 AM (Andy, symbiote, non-web hosts): "the blob should give you all the abilities that it has" without the Web Slinger power (no web power needed for the suit ladder up to the big body). "i dont think you should be able to pull the suit off manually without web. it will fight you off everytime you try. the most you can get is the mask."
