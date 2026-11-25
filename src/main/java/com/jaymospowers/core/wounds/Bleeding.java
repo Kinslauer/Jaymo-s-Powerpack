@@ -150,6 +150,10 @@ public final class Bleeding {
 	private static final Set<LivingEntity> TRACKED = new HashSet<>();
 	/** When each open cut opened (game time, by ordinal). Not saved: after a reload a cut counts from then. */
 	private static final Map<LivingEntity, long[]> CUT_SINCE = new WeakHashMap<>();
+	/** Who opened each part's cut (by part ordinal), so a death by bleeding is theirs: the kill, its loot and advancements. */
+	private static final Map<LivingEntity, java.util.UUID[]> OPENED_BY = new WeakHashMap<>();
+	/** The one whose blow is opening a cut right now ({@link #onHit}); else the last to hurt the body counts. */
+	private static @Nullable Entity opening;
 	/** A dressing's heal left, and its heal per {@link #DRESS_STEP}, by ordinal. Not saved: a reload ends it. */
 	private static final Map<LivingEntity, float[][]> DRESSING = new WeakHashMap<>();
 	/** Until when each part stays clean (game time, by ordinal). Not saved. */
@@ -248,7 +252,12 @@ public final class Bleeding {
 		if (index >= 0 && was[index] > now[index] && source.getDirectEntity() != null && source.getDirectEntity().entityTags().contains(TEARS)
 			&& !turnsPoints(victim, landed)) {
 			// a tearing head opens whatever bare or padded flesh it hurts at all
-			open(victim, landed, false);
+			opening = source.getEntity();
+			try {
+				open(victim, landed, false);
+			} finally {
+				opening = null;
+			}
 			return;
 		}
 		if (index < 0 || was[index] - now[index] < bleedFrom) {
@@ -264,7 +273,12 @@ public final class Bleeding {
 		if (!blade && !claws && !(direct instanceof Projectile)) {
 			return;
 		}
-		open(victim, landed, by instanceof Zombie);
+		opening = by;
+		try {
+			open(victim, landed, by instanceof Zombie);
+		} finally {
+			opening = null;
+		}
 	}
 
 	/** Whether mail or plate lies over {@code part} of {@code victim} (points that tear slide off it). */
@@ -296,6 +310,7 @@ public final class Bleeding {
 			return;
 		}
 		set(entity, BLEEDING, mask | bit);
+		creditOpener(entity, part);
 		if (entity instanceof Player player) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.bleeding", part.displayName()).withStyle(ChatFormatting.RED));
 		}
@@ -308,7 +323,28 @@ public final class Bleeding {
 			return;
 		}
 		set(entity, BLEEDING, bleeding(entity) | Breaks.bit(part));
+		creditOpener(entity, part);
 		TRACKED.add(entity);
+	}
+
+	/** Notes who opened the cut on {@code part}: the blow opening it, else whoever last hurt the body. */
+	private static void creditOpener(LivingEntity entity, BodyPart part) {
+		Entity by = opening != null ? opening : entity.getLastHurtByMob();
+		if (by == null || by == entity) {
+			OPENED_BY.computeIfPresent(entity, (e, ids) -> {
+				ids[part.ordinal()] = null;
+				return ids;
+			});
+			return;
+		}
+		OPENED_BY.computeIfAbsent(entity, e -> new java.util.UUID[PARTS])[part.ordinal()] = by.getUUID();
+	}
+
+	/** Whoever opened the cut on {@code part} of {@code body}, if they're still about: the one a bleed-out is credited to. */
+	private static @Nullable Entity opener(ServerLevel level, LivingEntity body, BodyPart part) {
+		java.util.UUID[] ids = OPENED_BY.get(body);
+		java.util.UUID id = ids == null ? null : ids[part.ordinal()];
+		return id == null ? null : level.getEntity(id);
 	}
 
 	/**
@@ -690,7 +726,7 @@ public final class Bleeding {
 			if ((mask & Breaks.bit(part)) == 0 || !body.isAlive() || Downed.isDowned(body)) {
 				continue;
 			}
-			Wounds.hurtPart(body, part, (Breaks.missing(body, part) || held(body, part) ? STUMP_BLEED : BLEED_DAMAGE) * harmed, null, BLEEDING_DAMAGE);
+			Wounds.hurtPart(body, part, (Breaks.missing(body, part) || held(body, part) ? STUMP_BLEED : BLEED_DAMAGE) * harmed, opener(level, body, part), BLEEDING_DAMAGE);
 		}
 	}
 

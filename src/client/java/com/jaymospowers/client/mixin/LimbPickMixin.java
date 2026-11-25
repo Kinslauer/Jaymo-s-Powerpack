@@ -19,6 +19,8 @@ abstract class LimbPickMixin {
 	@WrapOperation(method = "pick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/ProjectileUtil;getEntityHitResult(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;D)Lnet/minecraft/world/phys/EntityHitResult;"))
 	private static EntityHitResult jaymospowers$limbPick(Entity viewer, Vec3 from, Vec3 to, AABB area, Predicate<Entity> canPick, double range,
 		Operation<EntityHitResult> original) {
-		return original.call(viewer, from, to, area, canPick.and(e -> LimbBoxes.crosses(e, from, to)), range);
+		EntityHitResult found = original.call(viewer, from, to, area, canPick.and(e -> !LimbBoxes.lying(e) && LimbBoxes.crosses(e, from, to)), range);
+		// (the downed lie along the ground, past the standing box the game tests)
+		return LimbBoxes.lyingHit(viewer.level(), viewer, from, to, area, canPick, found, range);
 	}
 }

@@ -4389,5 +4389,82 @@
 			"jaymospowers:dino/dart_hit"
 		],
 		"subtitle": "subtitles.jaymospowers.dino.dart_hit"
+	},
+	"wound.hit.flesh": {
+		"subtitle": "subtitles.jaymospowers.wound.hit.flesh",
+		"sounds": [
+			{
+				"name": "minecraft:block.moss.break",
+				"type": "event",
+				"volume": 0.9,
+				"pitch": 0.7
+			}
+		]
+	},
+	"wound.hit.bone": {
+		"subtitle": "subtitles.jaymospowers.wound.hit.bone",
+		"sounds": [
+			{
+				"name": "minecraft:block.bone_block.hit",
+				"type": "event",
+				"volume": 1.0,
+				"pitch": 0.8
+			}
+		]
+	},
+	"wound.hit.metal": {
+		"subtitle": "subtitles.jaymospowers.wound.hit.metal",
+		"sounds": [
+			{
+				"name": "minecraft:block.chain.hit",
+				"type": "event",
+				"volume": 1.0,
+				"pitch": 0.7
+			}
+		]
+	},
+	"wound.hit.slime": {
+		"subtitle": "subtitles.jaymospowers.wound.hit.slime",
+		"sounds": [
+			{
+				"name": "minecraft:block.slime_block.hit",
+				"type": "event",
+				"volume": 1.0,
+				"pitch": 0.9
+			}
+		]
+	},
+	"wound.break.bone": {
+		"subtitle": "subtitles.jaymospowers.wound.break.bone",
+		"sounds": [
+			{
+				"name": "minecraft:block.bone_block.break",
+				"type": "event",
+				"volume": 1.0,
+				"pitch": 0.6
+			}
+		]
+	},
+	"wound.break.metal": {
+		"subtitle": "subtitles.jaymospowers.wound.break.metal",
+		"sounds": [
+			{
+				"name": "minecraft:block.anvil.land",
+				"type": "event",
+				"volume": 0.6,
+				"pitch": 1.4
+			}
+		]
+	},
+	"wound.disarm": {
+		"subtitle": "subtitles.jaymospowers.wound.disarm",
+		"sounds": [
+			{
+				"name": "minecraft:item.shield.break",
+				"type": "event",
+				"volume": 0.5,
+				"pitch": 1.6
+			}
+		]
 	}
 }

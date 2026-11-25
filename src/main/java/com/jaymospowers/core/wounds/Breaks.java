@@ -31,8 +31,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -536,7 +534,7 @@ public final class Breaks {
 			if (limb != 0 && plan == BodyPlan.HUMANOID) {
 				Fractures.crack(level, entity, limb);
 			} else {
-				level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.0F, 0.6F);
+				com.jaymospowers.combat.HitSounds.broke(level, entity, entity.position());
 			}
 			if ((part == BodyPart.LEFT_ARM || part == BodyPart.RIGHT_ARM) && entity.getRandom().nextFloat() < ARM_DROP_CHANCE) {
 				// (Dismember's: the stack leaves the hand before it's dropped, so nothing is doubled)
