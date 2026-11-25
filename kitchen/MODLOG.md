@@ -2822,3 +2822,16 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
 
 - **Fix**: the four End plants (voidpepper, ethereal saffron, amberveil, chorusflame) now generate in the last decoration step instead of the vegetal one. Where Enderscape and Stellarity biomes share one End, Enderscape adds its own plants to the same biomes later, and the clash made the server log "Feature order cycle found" and fail to generate End chunks.
 - Not tested in game (CI build only).
+
+## 0.6.86 (2026-11-25): Visceral gore: corpses that wear, rot, freeze, feed and get gutted (#2133)
+
+- **Corpse wear**: bodies char in fire, rot to bone over days, stiffen, sink in water, and freeze into statues that shatter. Endermen fade away and slimes melt into goo. Skeletons shed loose bones, and a corpse can be strung up to a fence with a lead.
+- **Piñata**: bodies that burst apart in Alex's Caves' Candy Cavity burst into sweets. Gamerule `jaymoskitchen:pinata` makes this happen everywhere.
+- **Crushing**: falling weight crushes bodies flat. Spider legs bounce.
+- **Ragdoll budget**: past `jaymoskitchen:ragdoll_cap` (24), the farthest ragdolls go still.
+- **Feeding**: zombies that eat from a corpse stop hunting for a while unless hurt, and the body goes to bone where they bite.
+- **Gutting**: hold use with a sword, dagger or knife on an animal carcass to open it stroke by stroke. Each stroke shows the cut, then the ribs, and lays the insides beside the body. Gutting from the hook uses the same strokes.
+- **Yield**: lost limbs, bare bone and rot cut a carcass's meat and hide. A burned body gives cooked meat and no hide.
+- **Gear**: worn and held gear stays in the ash when a body burns, except in lava. A mob's body that loses its head or legs drops what it wore there.
+- Classes: Decay, Wear, Passing, Goo, Strung, GoreRules, RagdollBudget, StreamerSafe, Gutting, Yield, ScavengerFedMixin.
+- Built and compiled; not played.
