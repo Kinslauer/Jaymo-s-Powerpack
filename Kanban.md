@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 05:23). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 07:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,14 +25,14 @@ kanban-plugin: board
 - [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · for 💻 Odysseus · open
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
 - [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · for 💻 Odysseus · open
+- [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · for 💻 Odysseus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · 💻 Odysseus · #2160 · claimed
-- [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · 💻 Odysseus · claimed
-- [ ] [[Agents/codex-written-start-example|codex-written-start-example]] · 💻 Odysseus · running
+- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · for 💻 Odysseus · #2160 · changes · fixing review notes
+- [ ] [[Agents/symbiote-113-picks|symbiote-113-picks]] · 💻 Odysseus · running
 
 
 ## In review
@@ -45,6 +45,7 @@ kanban-plugin: board
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
+- [ ] [[Agents/codex-written-start-example|codex-written-start-example]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 - [ ] [[Agents/wither-model|wither-model]] · 💻 Odysseus · blocked
 
