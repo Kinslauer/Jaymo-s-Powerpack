@@ -358,9 +358,10 @@ def orle(b):
 	b.cube(h, (1.8, 33, -1.8), (3.2, 34.5, 1.8), "cloth", faces_paint=O)
 
 
-# the crown's ring, sized to stand clear of every helm's skull (the widest, the veiled helm, is 5.0 each side) at the
+# the crown's ring, sized to stand clear of every helm's skull (the widest, the veiled helm, is 5.0 each side; the
+# visored barbute's visor reaches 6.4 before) at the
 # same height on all of them; it isn't lifted as a torse is
-CROWN_SIDE, CROWN_FRONT, CROWN_BACK, CROWN_LOW, CROWN_HIGH = 5.1, -6.1, 5.3, 31.0, 32.6
+CROWN_SIDE, CROWN_FRONT, CROWN_BACK, CROWN_LOW, CROWN_HIGH = 5.1, -6.5, 5.3, 31.0, 32.6
 
 
 def crest_crown(b):
@@ -416,10 +417,10 @@ def crest_mantling(b):
 # Any crown can be worn over a helm in the crest's place (Andy, 2026-11-25: "you should be able to wear any crown"): the
 # rulers' crowns (Regalia, gen_regalia.py) are painted on the humanoid armour layer's head, a band in the top four rows of
 # each side, so one box drawn with whichever crown's own sheet carries any of them. It is the head's box made wider and
-# deeper than every helm (the veiled helm is 5.0 each side and reaches 6.0 before) and raised so the band rings the
+# deeper than every helm (the veiled helm is 5.0 each side; the visored barbute reaches 6.4 before) and raised so the band rings the
 # helm's crown, its points above it.
 REGALIA = ("royal_crown", "jeweled_crown", "iron_crown", "laurel_crown", "tiara", "circlet", "coronet")
-OVER_HELM_FROM, OVER_HELM_TO = (-5.2, 26.6, -6.2), (5.2, 35.4, 5.4)
+OVER_HELM_FROM, OVER_HELM_TO = (-5.2, 26.6, -6.6), (5.2, 35.4, 5.4)
 
 
 def regalia_sheet(name):
@@ -635,7 +636,7 @@ def main(argv):
 # the helms a crest is shown on, and how far the game lifts a torse-borne crest on each (HeraldryArmour's crestRise)
 SHOWN_ON = {"orle": [("great_helm", 0.0), ("armet", 0.9)], "crest_mantling": [("great_helm", 0.0), ("close_helm", 1.0)],
 	"crest_crown": [("armet", 0.0), ("great_helm", 0.0), ("veiled_helm", 0.0), ("kettle_hat", 0.0), ("houndskull_bascinet", 0.0)],
-	"crest_antlers": [("sallet", 0.0)], "armet_wrapper": [("armet", 0.0)], "ventailed_mail_coif": [(None, 0)]}
+	"crest_antlers": [("sallet", 0.0)], "armet_wrapper": [("armet", 0.0)], "ventailed_mail_coif": [(None, 0)], "arming_cap": [(None, 0), ("kettle_hat", 0.0), ("barbute", 0.0)]}
 LIFTED = ("orle", "crest_mantling")
 
 

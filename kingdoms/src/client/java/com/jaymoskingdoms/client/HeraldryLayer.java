@@ -152,7 +152,7 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 					draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_" + piece.name(), DYED_CRESTS.contains(piece.name()) ? dye : -1);
 				}
 			} else if (slot == Harness.Slot.HOOD && HATS.contains(piece.name()) && !state.headEquipment.isEmpty()
-				|| slot == Harness.Slot.NECK && sallet(state.headEquipment)) {
+				|| (piece.name().equals("bevor") || piece.name().equals("armet_wrapper")) && sallet(state.headEquipment)) {
 				// a hat isn't worn under a helm, and the sallet has its own bevor
 				continue;
 			} else {
