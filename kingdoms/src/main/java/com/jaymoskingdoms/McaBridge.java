@@ -914,7 +914,7 @@ final class McaBridge {
 				villager.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
 					level.registryAccess(), self));
 			} catch (RuntimeException e) {
-				JaymosKingdoms.LOGGER.warn("A Hollow captain's body only partly loaded: {}", e.toString());
+				JaymosKingdoms.LOGGER.warn("A Pallid captain's body only partly loaded: {}", e.toString());
 			}
 			villager.setUUID(java.util.UUID.randomUUID());
 			villager.entityTags().removeIf(t -> t.contains("downed"));

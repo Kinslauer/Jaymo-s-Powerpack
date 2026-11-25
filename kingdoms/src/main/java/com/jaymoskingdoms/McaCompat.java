@@ -618,7 +618,7 @@ public final class McaCompat {
 		return LOADED ? McaBridge.escort(level, f, at, yaw, task, radius) : null;
 	}
 
-	/** With MCA, a Hollow captain's body ({@link HollowCaptains}): the man saved as {@code face}, or a new one; not yet in the world. Null without MCA. */
+	/** With MCA, a Pallid captain's body ({@link HollowCaptains}): the man saved as {@code face}, or a new one; not yet in the world. Null without MCA. */
 	static net.minecraft.world.entity.@Nullable PathfinderMob hollowBody(ServerLevel level, net.minecraft.world.phys.Vec3 at, float yaw, int role,
 		net.minecraft.nbt.@Nullable CompoundTag face) {
 		return LOADED ? McaBridge.hollowBody(level, at, yaw, role, face) : null;

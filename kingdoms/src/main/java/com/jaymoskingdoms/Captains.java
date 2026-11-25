@@ -891,7 +891,7 @@ public final class Captains {
 	/**
 	 * (0.7.614, Rivals) The raised dead fear nothing: their captains are Deathless, every one. A new one fights as the dead he
 	 * rose from (Andy: "they should fight the same as their counterparts at default only learning as they progress"): no
-	 * strengths or moves yet, only what he gains as he climbs ({@link HollowCaptains}).
+	 * strengths or moves yet, only what he gains as he climbs (a Pallid leading them or one of the dead with a title, {@link HollowCaptains}).
 	 */
 	static Captain raisedDead(Captain c) {
 		List<String> traits = new ArrayList<>(c.traits());
@@ -945,10 +945,14 @@ public final class Captains {
 		// (a new one of the raised starts at the bottom: he climbs as he goes, HollowCaptains)
 		Captain c = Captain.of(newId(random), ladder, rollName(ladder, random), raised ? 1 : Rivals.startRank(server, random), roll(server, random), -1, null,
 			false);
+		boolean leads = false;
 		if (raised) {
 			c = raisedDead(c);
-			// (a Hollow man gets up in the dead one's place)
-			mob = HollowCaptains.riseOr(level, mob, null);
+			// (most often a Pallid gets up in the dead one's place to lead them; else the dead one takes the title himself)
+			leads = HollowCaptains.live() && random.nextFloat() < HollowCaptains.PALLID_LEAD;
+			if (leads) {
+				mob = HollowCaptains.riseOr(level, mob, null);
+			}
 		}
 		put(server, c);
 		Map<String, Long> fresh = new HashMap<>(risen);
@@ -956,6 +960,7 @@ public final class Captains {
 		Factions.level(server).setAttached(RISEN, Map.copyOf(fresh));
 		embodyIn(level, c, mob);
 		HollowCaptains.keep(server, c.id(), mob);
+		HollowCaptains.muster(level, c, mob);
 	}
 
 	/** One rank more on {@code mob}'s build. */
@@ -1690,9 +1695,7 @@ public final class Captains {
 		// ((0.7.619) a Bane always comes back, unless (0.7.620) its own marks ended it or it was sworn to its owner)
 		boolean ended = Banes.ending(c);
 		boolean bane = Rivals.side(c.tribe()).bane() && !wasSworn && !ended;
-		// (the raised, Hollow men, always get up again unless finished, beheaded or burned, as the Pallid do: HollowCaptains)
-		boolean returns = bane || !ended && !wasSworn && !honoured && !finished && !burned && !c.chief()
-			&& (Rivals.side(c.tribe()) == Rivals.Side.RAISED || random.nextFloat() < RETURN_CHANCE);
+		boolean returns = bane || !ended && !wasSworn && !honoured && !finished && !burned && !c.chief() && random.nextFloat() < RETURN_CHANCE;
 		boolean raised = !bane && !ended && !returns && !c.chief() && !c.has(Trait.DEATHLESS) && random.nextFloat() < RAISED_CHANCE;
 		if (raised) {
 			// (Andy) back from anything, by corrupted magic or a necromancer: no fear left in him
@@ -1853,10 +1856,6 @@ public final class Captains {
 			boolean chief = killer instanceof Worker w && Greenskins.chief(w.role());
 			String own = killer.hasCustomName() || killer instanceof Worker ? killer.getName().getString() : Rivals.rollName(tribe, random);
 			String name = chief || roams != null && !killer.hasCustomName() ? own : own + " " + Rivals.byname(tribe, random);
-			if (roams == Rivals.Side.RAISED && killer instanceof PathfinderMob dead) {
-				// (a Hollow man gets up in the dead one's place, HollowCaptains)
-				killer = HollowCaptains.riseOr(level, dead, null);
-			}
 			c = Captain.of(newId(random), tribe, name, 1, roll(server, random), roams != null ? -1 : camp, killer.getUUID(), chief);
 			if (roams == Rivals.Side.RAISED) {
 				c = raisedDead(c);
@@ -1883,7 +1882,6 @@ public final class Captains {
 		Meeting m = c.met().get(player.getStringUUID());
 		c = c.met(player.getUUID(), new Meeting(m == null ? 1 : m.times() + 1, "killed", now));
 		bind(level, c, killer, false);
-		HollowCaptains.keep(server, c.id(), killer);
 		// (his head, at the height of the scene: orcs always, anyone else now and then)
 		boolean takes = Rivals.side(c.tribe()) == Rivals.Side.ORC || random.nextFloat() < HEAD_TAKING;
 		scene(level, killer, player, c.id(), risen, takes ? player.getUUID() : null);
