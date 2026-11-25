@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: mordhau-4-legs
 branch: claude/mordhau-4-legs
 with: claude (T3 thread, Sonnet 5.5)
-pr: 
+pr: 2186
 mods: kingdoms, powers
 versions: 
 started: 2026-11-25
@@ -30,7 +30,8 @@ owns:
 - Same method as track 3: gen_heraldry_legs.py, a row table and worn previews in Assets/mordhau-4-legs/.
 
 ## Notes
-- Queued behind mordhau-3-body in the same T3 thread.
+- Stacked on claude/mordhau-3-body (#2185): PR base is that branch; retarget to master after #2185 merges.
 
 ## Done
 - 2026-11-25 4:54 PM Queued behind track 3 in the same thread; starts when track 3's PR is up.
+- 2026-11-25 5:10 PM Draft PR #2186. 15 rows: 27 new pieces + the HOSE place (last Slot, hose layer in UnderArmourLayer, slot on the harness screen). Lore: 2 (new) paragraphs. Not played; Java compiled only by CI.
