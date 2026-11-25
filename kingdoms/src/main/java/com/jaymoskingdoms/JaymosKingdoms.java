@@ -734,6 +734,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// village mods 6: an inn halfway along each long King's Road (and its attachment)
 		LOGGER.debug("wayside inn attachment: {}", WaysideInns.INNS);
 		WaysideInns.register();
+		// (Andy 2026-11-25) starts built by hand, as an adventure map is (and their attachment)
+		LOGGER.debug("written start attachment: {}", WrittenStarts.PLACED);
+		WrittenStarts.register();
 		// 0.7.103: roads are quicker going, sand, snow and leaves slower
 		RoadPace.register();
 		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
