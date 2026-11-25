@@ -17463,3 +17463,12 @@ Andy: "the AI in these mods is exactly what our MCA and npcs have been missing."
 - Now the block also sits where a binding is read: while the board is up, every binding but the nine marks (and the medallion key) that sits on the numpad reads as not held and its presses are thrown away, however they arrived. Presses left waiting on those bindings are cleared each tick too, so nothing fires the moment the board is lowered.
 - With the board down the numpad works as before for everything bound to it.
 - Built in the cloud; not played.
+
+## 0.12.94 (2026-11-25): Written starts: hand-built starts like an adventure map, and the Hearthkeeper's way-hut (#2153)
+
+- **New road, "Brought in from the dark"** (open from day one): you wake in a place built by hand, raised for you out in the wild on level ground, at least 96 blocks from any settlement, from your own setting-out point. A party mate who takes it after you wakes in yours. Never in the Aether; its land is made behind the loading screen.
+- **Write your own** (`docs/WrittenStarts.md`): build it in creative with the chests filled exactly as you want, mark it with Data structure blocks (`spawn`, `place:<key>`, `gate:<key>`), save it with a structure block, and add a start JSON (`data/<ns>/written_starts/`) and a tale (`"start": {"by": "written"}`). The tale's places `"at": "written"` are the build's marks; a step's `"opens"` opens its gates (doors, trapdoors and fence gates swing open, bars and rubble are taken away). `"bare": true` wakes you with only what the build and the tale give.
+- **Shared starts** (Andy: "both, chosen per start"): `"shared": true` raises the build once for the whole world and every newcomer who draws it wakes there, each with their own tale; `"at": [x, z]` or `[x, y, z]` puts it exactly where you say, unturned. Its chests aren't refilled.
+- **The way-hut** (the first one, `tools/written_starts.py`): a Hearthkeeper's stone hut with a cold hearth, a cot and the keeper's chest. Read the keeper's slate, and the iron trapdoor to the store under the floor opens; go down; keep the hut through your first night; find the nearest town.
+- `WrittenStarts`, `LifeStory` (the road), `Tales.written` and `opens`, `RoadLocks`, `tools/tale_check.py`; lore placement "Way-huts" in Lore.md for Andy to approve.
+- Built in the cloud; not played. The build's placement, gates and the tale were not run in a game.
