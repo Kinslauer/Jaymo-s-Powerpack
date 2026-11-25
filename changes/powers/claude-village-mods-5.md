@@ -1,0 +1,3 @@
+# Trade hats
+- **Trade hats**: seven hats of the village trades, ported from PinkGoosik's Villager Hats (MIT, notice in `docs/licenses/Villager-Hats-MIT.txt`): Farmer's Hat, Fletcher's Cap, Fisherman's Hat, Armorer's Mask, Shepherd's Hat, Librarian's Cap and Butcher's Headband. Worn in the head bauble slot and drawn on the head (over a helmet too), cut from the game's own villager textures. No crafting recipe: a zombie villager of that trade drops its hat (35% when a player kills it), and tailors sew them (Jaymo's Kingdoms). (`TradeHats`, `TradeHatLayer`)
+- Built by CI only; not played. Not checked in game: how the hats sit on the head and look in the inventory.

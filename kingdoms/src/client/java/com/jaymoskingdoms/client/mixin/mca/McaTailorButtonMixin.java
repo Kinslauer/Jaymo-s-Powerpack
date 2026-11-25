@@ -21,7 +21,7 @@ abstract class McaTailorButtonMixin {
 	@Inject(method = "<init>", at = @At("TAIL"))
 	private void jaymoskingdoms$tailorsOnly(MCAButton apiButton, AbstractDynamicScreen screen, CallbackInfo ci) {
 		String id = apiButton.identifier();
-		boolean costume = id.equals("gui.button.costume") || id.equals("gui.button.costume_table");
+		boolean costume = id.equals("gui.button.costume") || id.equals("gui.button.costume_table") || id.equals("gui.button.trade_hat");
 		if (!id.equals("gui.button.tailor") && !costume) {
 			return;
 		}

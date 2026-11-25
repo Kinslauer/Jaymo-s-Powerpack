@@ -1136,6 +1136,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
 		BoardTerms.register(); // (village mods 4) notice terms, the held notice, hand-in at the board
+		// (village mods 5) a town's gift of a house, what the town is doing, each land's known goods, the wandering pilgrim
+		LOGGER.debug("town life attachments: {} {}", GiftHouses.GIFTS, KnownGoods.TRADES);
+		GiftHouses.register();
+		TownDoings.register();
+		Pilgrims.register();
 		MerchantOrders.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)
 		Gloom.register();

@@ -1,0 +1,120 @@
+{
+  "title": "The Pilgrim's Road",
+  "start": {
+    "by": "found",
+    "weight": 1
+  },
+  "first": "telling",
+  "steps": {
+    "telling": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Hear the pilgrim out",
+      "say": [
+        "The road's kind to you, I hope. I walk to the old temples. The ones that were the patrons' before they were ever the realms'.",
+        "The Lantern Warden's are the stepped tombs out in the sands. The Hearthkeeper's stand on the plains, open on every side. The Crowned Sun's are the long halls and the mounds up in the north. And among the blossom there's a walled palace that was the Ash Whisperer's, all doors that open the wrong way.",
+        "Stand at the altar in four of them and you've walked the old road, as their own people did. Leave the tombs shut. And lay nothing on the stones unless you mean it."
+      ],
+      "journal": "{giver}, a pilgrim on the road, told me of the old peoples' temples and the old road between them: four altars, stood at.",
+      "replies": [
+        {
+          "say": "I'll walk it.",
+          "then": "first"
+        },
+        {
+          "say": "Not for me. Walk well.",
+          "then": "end:declined"
+        }
+      ]
+    },
+    "first": {
+      "do": "await",
+      "who": "giver",
+      "goal": "Stand at an old temple's altar (none of four yet)",
+      "noted": {
+        "pilgrim_sunstep": "I stood at the altar of a stepped tomb in the sands. The Lantern Warden's, the pilgrim said.",
+        "pilgrim_pillared": "I stood at the altar of a columned temple on the plains, open on every side. The Hearthkeeper's.",
+        "pilgrim_mound": "I stood at the altar of a long hall in the north, among the mounds. The Crowned Sun's.",
+        "pilgrim_court": "I stood at the altar of the walled palace among the blossom. The Ash Whisperer's.",
+        "pilgrim_anvil": "I stood at the altar of a hall cut down into the mountain, where the first seams were opened.",
+        "pilgrim_deep": "I stood at the altar of a drowned court on the sea floor, its lamps still lit.",
+        "pilgrim_grove": "I stood at the altar of a ring of stones in the deep woods, antler and bone on the shrine."
+      },
+      "then": "second"
+    },
+    "second": {
+      "do": "await",
+      "who": "giver",
+      "goal": "Stand at another old temple's altar (one of four)",
+      "noted": {
+        "pilgrim_sunstep": "I stood at the altar of a stepped tomb in the sands. The Lantern Warden's, the pilgrim said.",
+        "pilgrim_pillared": "I stood at the altar of a columned temple on the plains, open on every side. The Hearthkeeper's.",
+        "pilgrim_mound": "I stood at the altar of a long hall in the north, among the mounds. The Crowned Sun's.",
+        "pilgrim_court": "I stood at the altar of the walled palace among the blossom. The Ash Whisperer's.",
+        "pilgrim_anvil": "I stood at the altar of a hall cut down into the mountain, where the first seams were opened.",
+        "pilgrim_deep": "I stood at the altar of a drowned court on the sea floor, its lamps still lit.",
+        "pilgrim_grove": "I stood at the altar of a ring of stones in the deep woods, antler and bone on the shrine."
+      },
+      "then": "third"
+    },
+    "third": {
+      "do": "await",
+      "who": "giver",
+      "goal": "Stand at another old temple's altar (two of four)",
+      "noted": {
+        "pilgrim_sunstep": "I stood at the altar of a stepped tomb in the sands. The Lantern Warden's, the pilgrim said.",
+        "pilgrim_pillared": "I stood at the altar of a columned temple on the plains, open on every side. The Hearthkeeper's.",
+        "pilgrim_mound": "I stood at the altar of a long hall in the north, among the mounds. The Crowned Sun's.",
+        "pilgrim_court": "I stood at the altar of the walled palace among the blossom. The Ash Whisperer's.",
+        "pilgrim_anvil": "I stood at the altar of a hall cut down into the mountain, where the first seams were opened.",
+        "pilgrim_deep": "I stood at the altar of a drowned court on the sea floor, its lamps still lit.",
+        "pilgrim_grove": "I stood at the altar of a ring of stones in the deep woods, antler and bone on the shrine."
+      },
+      "then": "fourth"
+    },
+    "fourth": {
+      "do": "await",
+      "who": "giver",
+      "goal": "Stand at one more old temple's altar (three of four)",
+      "noted": {
+        "pilgrim_sunstep": "I stood at the altar of a stepped tomb in the sands. The Lantern Warden's, the pilgrim said.",
+        "pilgrim_pillared": "I stood at the altar of a columned temple on the plains, open on every side. The Hearthkeeper's.",
+        "pilgrim_mound": "I stood at the altar of a long hall in the north, among the mounds. The Crowned Sun's.",
+        "pilgrim_court": "I stood at the altar of the walled palace among the blossom. The Ash Whisperer's.",
+        "pilgrim_anvil": "I stood at the altar of a hall cut down into the mountain, where the first seams were opened.",
+        "pilgrim_deep": "I stood at the altar of a drowned court on the sea floor, its lamps still lit.",
+        "pilgrim_grove": "I stood at the altar of a ring of stones in the deep woods, antler and bone on the shrine."
+      },
+      "then": "word"
+    },
+    "word": {
+      "do": "wait",
+      "days": [
+        1,
+        3
+      ],
+      "wake": "letter",
+      "goal": "Rest from the road",
+      "letter": {
+        "from": "{giver}, on the road",
+        "lines": [
+          "Word goes along the old road the way it always did, from one walker to the next. I heard you stood at four altars.",
+          "Then you've walked it. Nobody will say so to you, and nobody needs to. Keep the tombs shut."
+        ]
+      },
+      "journal": "Word found me from {giver}, the pilgrim. They had heard I walked the old road.",
+      "then": "end:walked"
+    }
+  },
+  "endings": {
+    "walked": {
+      "text": "I stood at four of the old altars, the way their own people did before the long defence. The old road is walked. Nobody was there to see it, which I think was the point.",
+      "reward": {
+        "coins": 12
+      }
+    },
+    "declined": {
+      "text": "{giver} asked me to walk the old road to the temples, and I let them walk it alone."
+    }
+  }
+}

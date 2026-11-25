@@ -98,6 +98,11 @@ public final class Careers {
 	public static final int JOURNEYMAN_XP = 100, MASTER_XP = 350;
 	/** Experience and reputation an order earns. */
 	static final int ORDER_XP = 10, ORDER_REPUTATION = 3;
+	/**
+	 * (Village mods patch 5) Wearing your job's trade hat ({@link TailorHats#HATS}): this much more of any good name a town
+	 * gives you (at least one point more).
+	 */
+	static final float HAT_SHARE = 0.1F;
 	/** (0.7.498) An order pays this much by rank (Apprentice, Journeyman, Master), and the least a poor town pays one: in emeralds' worth, paid in the town's coin. */
 	static final int[] WAGES = {2, 3, 5};
 	static final int WAGE_FLOOR = 1;
@@ -549,6 +554,35 @@ public final class Careers {
 	/** The experience the next rank needs, or -1 at Master. */
 	public static int nextRankXp(int rank) {
 		return rank == APPRENTICE ? JOURNEYMAN_XP : rank == JOURNEYMAN ? MASTER_XP : -1;
+	}
+
+	/**
+	 * (Village mods patch 5, Andy's pick "your job's hat counts") A rise in reputation {@code by} is a little more for one
+	 * who holds a job and wears its trade hat in the head slot (Jaymo's Powers): the town sees the trade and warms to it.
+	 * A fall is untouched.
+	 */
+	static int hatBonus(ServerPlayer player, int by) {
+		if (by <= 0) {
+			return by;
+		}
+		List<ItemStack> worn = PowersCompat.baubles(player);
+		if (worn.isEmpty()) {
+			return by;
+		}
+		for (Post p : of(player).posts()) {
+			for (TailorHats.Hat hat : TailorHats.HATS) {
+				if (hat.job() == null || hat.job() != p.kind()) {
+					continue;
+				}
+				Identifier id = Identifier.fromNamespaceAndPath("jaymospowers", hat.id());
+				for (ItemStack stack : worn) {
+					if (!stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(id)) {
+						return by + Math.max(1, Math.round(by * HAT_SHARE));
+					}
+				}
+			}
+		}
+		return by;
 	}
 
 	/** {@code player}'s rank in {@code job} while they hold it, or -1. */
