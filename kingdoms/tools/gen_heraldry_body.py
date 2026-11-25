@@ -7,7 +7,7 @@ that can be covered, which they write afresh):
 
 - padding (PADDING, drawn as a sheet on the under-armour layer, UnderArmourLayer): the chequered gambeson (two colours in
   squares), the linen shirt, the wool tunic (with a short skirt), the cloth vest, the leather jack, the slashed doublet (a
-  second colour showing through its slits);
+  second colour showing through its slits, and puffed sleeves hung with the sheet as the slashed hose's puffs are);
 - mail (MAIL): the long hauberk (full sleeves on the sheet, its skirt to the knee a model), mail with plates, the scale
   shirt, and the quilted coat's sheet and long skirt (it was drawn as a haubergeon till now);
 - cuirasses (the chest slot): the Gothic (waisted, cusped plackart, fan fluting), the kastenbrust (a box chest and a long
@@ -419,6 +419,24 @@ def quilted_skirt(b):
 	both(b, "armor{}Leg", (-0.3, 3.6, -2.45), (4.3, 10.4, 2.45), "cloth", faces_paint={**on_sides(quilting), "down": quilting})
 
 
+def slashed(img, rect):
+	h.slashes(img, rect)
+
+
+def puffed_sleeves(b):
+	"""The slashed doublet's puffed sleeves (the slashed hose's thigh puffs, on the arms): the sleeve puffed out from the shoulder to
+	above the elbow and slashed through, the second colour pulled through the slits from a lining inside, gathered in at both ends in
+	that colour; the left one a size fuller."""
+	bones(b, "arms")
+	arm = "armor{}Arm"
+	for side, s, grow in (("Right", 1, 0.0), ("Left", -1, 0.35)):
+		x0, x1 = sorted(((3.0 - grow) * s, (9.0 + grow) * s))
+		b.cube(arm.format(side), (x0, 17.8, -3.2 - grow), (x1, 23.4, 3.2 + grow), "cloth", faces_paint={**on_sides(slashed), "up": pleats})
+		b.cube(arm.format(side), (x0 + 0.4, 18.0, -2.7 - grow), (x1 - 0.4, 23.2, 2.7 + grow), SECOND_MAT, faces_paint=on_sides(pleats))
+		b.cube(arm.format(side), (x0 - 0.05, 22.6, -3.25 - grow), (x1 + 0.05, 23.6, 3.25 + grow), SECOND_MAT, faces_paint=on_sides(pleats))
+		b.cube(arm.format(side), (x0 - 0.05, 17.6, -3.25 - grow), (x1 + 0.05, 18.4, 3.25 + grow), SECOND_MAT, faces_paint=on_sides(pleats))
+
+
 # ---- sheets on the under-armour layer (64x32: body from (16,16), the arm from (40,16)) ----------------------------
 
 def sheet(paint, sleeves=True, until=32, arm_until=32):
@@ -585,8 +603,8 @@ UNDYED = {"chequered_gambeson": (0x8E2B2B, 0xE8E0CC), "linen_shirt": (0xECE6D6, 
 	"landsknecht_doublet": (0x2B4A8E, 0xD8B034), "quilted_coat": (0xCEBE96, None), "surcoat": (0x2B4A8E, None), "torn_surcoat": (0x5A5246, None),
 	"monks_robe": (0x5A4632, None), "kaftan": (0x2F5A7A, None), "jesters_motley": (0xB02E26, 0xE8C83A), "sash": (0xB02E26, None),
 	"ailettes": (0x2B4A8E, None), "brigandine_coat": (0x7A2E2A, None)}
-# the model skirts hung with a sheet piece
-SKIRTS = {"mail_hauberk": hauberk_skirt, "wool_tunic": tunic_skirt, "quilted_coat": quilted_skirt}
+# the models hung with a sheet piece (skirts, and the slashed doublet's puffed sleeves)
+SKIRTS = {"mail_hauberk": hauberk_skirt, "wool_tunic": tunic_skirt, "quilted_coat": quilted_skirt, "landsknecht_doublet": puffed_sleeves}
 
 
 def shirt_icon(out, paint, sleeves=True):
@@ -747,7 +765,11 @@ def main(argv):
 	for name, build in SKIRTS.items():
 		b, model = g.make(build, 128)
 		g.bake(model, ASSETS, "heraldry_" + name)
-		g.entity_texture(b.img, "heraldry_" + name)
+		if SECOND_MAT in h.mats_of(b):
+			# (two colours: the dyed cloth and the second colour's, each in a sheet of its own)
+			write_cloth_sheets(name, b, name)
+		else:
+			g.entity_texture(b.img, "heraldry_" + name)
 	# crafting
 	for name, ingredients in RECIPES.items():
 		h.recipe(name, ingredients)
@@ -928,6 +950,9 @@ def previews(out):
 			# (the skirt's cloth takes the piece's dye)
 			cloth = g.tinted(h.split(b, DYED_MATS), UNDYED[name][0]).crop((0, 32, b.img.width, b.img.height))
 			img.alpha_composite(cloth, (0, 32))
+			if SECOND_MAT in h.mats_of(b):
+				second = g.tinted(h.split(b, (SECOND_MAT,)), UNDYED[name][1]).crop((0, 32, b.img.width, b.img.height))
+				img.alpha_composite(second, (0, 32))
 		preview_png(b, name, out, img)
 	# the two flat-top looks Andy asked this track for
 	def royal(b):

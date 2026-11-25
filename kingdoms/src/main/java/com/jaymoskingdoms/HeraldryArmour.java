@@ -260,7 +260,8 @@ public final class HeraldryArmour {
 		part("wool_tunic", Harness.Slot.PADDING, 0, 0.0F, 0, false, null, "wool_tunic");
 		part("cloth_vest", Harness.Slot.PADDING, 0, 0.0F, 0, false, null, null);
 		part("leather_jack", Harness.Slot.PADDING, 1, 0.0F, 200, false, Items.LEATHER, null);
-		part("landsknecht_doublet", Harness.Slot.PADDING, 1, 0.0F, 160, false, Items.STRING, null);
+		// (its puffed sleeves are a model hung with the sheet, as the wool tunic's skirt is)
+		part("landsknecht_doublet", Harness.Slot.PADDING, 1, 0.0F, 160, false, Items.STRING, "landsknecht_doublet");
 		part("mail_hauberk", Harness.Slot.MAIL, 3, 0.0F, 340, false, Items.IRON_INGOT, "mail_hauberk");
 		part("plated_mail", Harness.Slot.MAIL, 3, 0.5F, 320, false, Items.IRON_INGOT, null);
 		part("scale_shirt", Harness.Slot.MAIL, 2, 0.0F, 280, false, Items.IRON_INGOT, null);
