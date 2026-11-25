@@ -30,7 +30,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "data", "jaymoskingdoms")
 NS = "jaymoskingdoms"
 DATA_VERSION = 5023
-SOURCES = "E:/mcsrc-26.3/common/net/minecraft/world/level/block/Blocks.java"
+SOURCES = "E:/mcsrc-26.3/common/net/minecraft/references"
 PREVIEWS = "E:/Jaymo Vault Live/Assets/village-mods-6"
 
 _spec = importlib.util.spec_from_file_location("illager_sites_port", os.path.join(os.path.dirname(os.path.abspath(__file__)), "illager_sites_port.py"))
@@ -93,11 +93,25 @@ def template(g):
     }
 
 
+DYES = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue",
+        "brown", "green", "red", "black"]
+
+
 def known_blocks():
-    if not os.path.exists(SOURCES):
+    """Every 26.3 block id: the names in references/BlockIds.java and BlockItemIds.java, and each colour of their coloured
+    collections (createSimpleColored("bed") is white_bed ... black_bed)."""
+    files = [os.path.join(SOURCES, f) for f in ("BlockIds.java", "BlockItemIds.java")]
+    if not all(os.path.exists(f) for f in files):
         return None
-    with open(SOURCES, encoding="utf8") as f:
-        return {m.lower() for m in re.findall(r"public static final Block (\w+)\s*=", f.read())}
+    names = set()
+    for path in files:
+        with open(path, encoding="utf8") as f:
+            text = f.read()
+        names |= set(re.findall(r'create\("([a-z0-9_]+)"', text))
+        for base in re.findall(r'createSimpleColored\("([a-z0-9_]+)"\)', text):
+            names |= {c + "_" + base for c in DYES}
+    names.add("air")
+    return names
 
 
 # ---- the pictures -----------------------------------------------------------------------------------------------------
@@ -179,9 +193,11 @@ def picture(g, path, title, ground_layer, scale=12):
 # worldgen (None: placed by our own code).
 
 class Site:
-    def __init__(self, name, variants, ground, worldgen=None, template=True):
-        """template False: a picture only (a design our own code lays out each time, like the mazes: one sample)."""
+    def __init__(self, name, variants, ground, worldgen=None, template=True, weights=None):
+        """template False: a picture only (a design our own code lays out each time, like the mazes: one sample).
+        weights: {variant: pool weight} (1 if not given)."""
         self.name, self.variants, self.ground, self.worldgen, self.template = name, variants, ground, worldgen, template
+        self.weights = weights or {}
 
 
 SITES = []
@@ -219,7 +235,7 @@ def write_site(s, known, previews):
         "name": pool,
         "fallback": "minecraft:empty",
         "elements": [{"element": {"element_type": "minecraft:single_pool_element", "processors": "minecraft:empty",
-                                  "projection": "rigid", "location": f"{NS}:smalls/{v}"}, "weight": 1} for v in s.variants],
+                                  "projection": "rigid", "location": f"{NS}:smalls/{v}"}, "weight": s.weights.get(v, 1)} for v in s.variants],
     })
     nbt.write_json(os.path.join(DATA, "worldgen", "structure_set", "smalls", s.name + "s.json"), {
         "structures": [{"structure": f"{NS}:smalls/{s.name}", "weight": 1}],
