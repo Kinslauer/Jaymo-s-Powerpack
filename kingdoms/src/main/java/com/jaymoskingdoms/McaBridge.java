@@ -1111,6 +1111,11 @@ final class McaBridge {
 			villager.setItemSlot(EquipmentSlot.OFFHAND, offhand.copy());
 			villager.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 		}
+		// (a bandit's shield on his back, DualBlades)
+		if (!folk.getItemBySlot(EquipmentSlot.BODY).isEmpty()) {
+			villager.setItemSlot(EquipmentSlot.BODY, folk.getItemBySlot(EquipmentSlot.BODY).copy());
+			villager.setDropChance(EquipmentSlot.BODY, 0.0F);
+		}
 		// and the raider's pieces over it (a torn hood or cloak, the horned crest: GuardKit#raider)
 		List<net.minecraft.world.item.ItemStack> harness = new java.util.ArrayList<>();
 		for (Harness.Slot slot : Harness.Slot.values()) {

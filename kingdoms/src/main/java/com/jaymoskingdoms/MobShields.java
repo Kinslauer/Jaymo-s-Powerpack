@@ -69,10 +69,11 @@ public final class MobShields {
 
 	/**
 	 * Per mob: guarding until, resting until, knocked aside until, last seen fighting, raised at, held for a shot on its way
-	 * until, held for a watching shooter (or a reload) until, lowered to shoot at, countering until, last shot (game time).
+	 * until, held for a watching shooter (or a reload) until, lowered to shoot at, countering until, last shot, advancing behind it until
+	 * (game time).
 	 */
 	private static final Map<Mob, long[]> STATE = new WeakHashMap<>();
-	private static final int GUARD = 0, REST = 1, DISABLED = 2, SEEN = 3, RAISED = 4, HARD = 5, SOFT = 6, FIRED = 7, COUNTER = 8, SHOT = 9;
+	private static final int GUARD = 0, REST = 1, DISABLED = 2, SEEN = 3, RAISED = 4, HARD = 5, SOFT = 6, FIRED = 7, COUNTER = 8, SHOT = 9, ADVANCE = 10;
 	/** Those with a shield held for a shot on its way: kept up every tick, whatever their own brain or goal does with their hands. */
 	private static final Map<Mob, Boolean> HELD = new WeakHashMap<>();
 
@@ -87,7 +88,7 @@ public final class MobShields {
 	}
 
 	private static long[] state(Mob mob) {
-		return STATE.computeIfAbsent(mob, m -> new long[] {0L, 0L, 0L, 0L, 0L, 0L, 0L, Long.MIN_VALUE / 2, 0L, Long.MIN_VALUE / 2});
+		return STATE.computeIfAbsent(mob, m -> new long[] {0L, 0L, 0L, 0L, 0L, 0L, 0L, Long.MIN_VALUE / 2, 0L, Long.MIN_VALUE / 2, 0L});
 	}
 
 	/**
@@ -132,6 +133,17 @@ public final class MobShields {
 				raise(mob, hand, s, now, (int) (s[HARD] - now));
 			}
 			return true;
+		}
+		// (st-shield) advancing behind the shield (BandStyles): up while it closes; its foe in reach, down to swing
+		if (now < s[ADVANCE]) {
+			if (!strikes(mob, target)) {
+				if (!raised) {
+					raise(mob, hand, s, now, (int) (s[ADVANCE] - now));
+				}
+				return true;
+			}
+			s[ADVANCE] = now;
+			return raised && !lowerHeld(mob, s, now);
 		}
 		// (its foe in reach to strike: that comes first, whatever it holds or draws)
 		boolean aimedAt = !strikes(mob, target) && aiming(target, mob) && mob.distanceToSqr(target) <= ARROW_RANGE * ARROW_RANGE;
@@ -398,6 +410,43 @@ public final class MobShields {
 			return;
 		}
 		raise(mob, InteractionHand.OFF_HAND, s, now, ticks);
+	}
+
+	/**
+	 * (st-shield, from {@link BandStyles}) A realm's shield-bearer closing on its foe advances behind its shield: up (or kept up) now and
+	 * held {@code ticks} more, each tick it's asked. Never when it can't be raised ({@link #canRaise}: its foe in reach of its blow, knocked
+	 * aside, busy with something else), just after its own shot, or in the counter after a block. True if it's up for it.
+	 */
+	static boolean advance(Mob mob, int ticks) {
+		if (!canRaise(mob)) {
+			return false;
+		}
+		long now = mob.level().getGameTime();
+		long[] s = state(mob);
+		if (now < s[COUNTER] || now < s[FIRED] + FIRE_TICKS) {
+			return false;
+		}
+		s[ADVANCE] = now + ticks;
+		s[SEEN] = now;
+		if (guarding(mob)) {
+			s[GUARD] = Math.max(s[GUARD], now + ticks);
+		} else {
+			raise(mob, InteractionHand.OFF_HAND, s, now, ticks);
+		}
+		return true;
+	}
+
+	/** (st-shield, from {@link BandStyles}) The advance is over (its foe in reach, or the fight): a shield up for it comes down. */
+	static void endAdvance(Mob mob) {
+		long[] s = STATE.get(mob);
+		if (s == null || s[ADVANCE] == 0L) {
+			return;
+		}
+		long now = mob.level().getGameTime();
+		s[ADVANCE] = 0L;
+		if (guarding(mob) && now >= s[HARD] && now >= s[SOFT]) {
+			lowerHeld(mob, s, now);
+		}
 	}
 
 	/**

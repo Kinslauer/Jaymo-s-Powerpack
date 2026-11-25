@@ -274,6 +274,16 @@ public final class Blows {
 		return false;
 	}
 
+	/**
+	 * (st-heavy, {@link BandStyles}) A heavy hitter has just leapt in to strike: the leap counts as a jump for its blow (the blow waits
+	 * for the fall, and a heavy weapon's lands as a falling critical), and for the jumps' cooldown.
+	 */
+	static void leapt(Mob mob, long now) {
+		State s = state(mob);
+		s.jumpedAt = now;
+		s.nextJump = now + JUMP_COOLDOWN;
+	}
+
 	/** Whether {@code mob}'s blow now is a falling one from a jump for it. */
 	private static boolean falling(Mob mob, State s, long now) {
 		return now - s.jumpedAt <= JUMP_WINDOW && (s.critAt < s.jumpedAt || s.critAt == now) && !mob.onGround() && mob.getDeltaMovement().y < 0.0
@@ -360,7 +370,7 @@ public final class Blows {
 	}
 
 	/** A step of a block along {@code dir}: room to stand, floor under it no more than a block down, no lava. */
-	private static boolean footing(ServerLevel level, Mob mob, Vec3 dir) {
+	static boolean footing(ServerLevel level, Mob mob, Vec3 dir) {
 		BlockPos at = BlockPos.containing(mob.getX() + dir.x, mob.getY(), mob.getZ() + dir.z);
 		if (!level.getBlockState(at).getCollisionShape(level, at).isEmpty() || !level.getBlockState(at.above()).getCollisionShape(level, at.above()).isEmpty()) {
 			return false;

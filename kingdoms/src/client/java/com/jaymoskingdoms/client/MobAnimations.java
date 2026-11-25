@@ -40,7 +40,7 @@ public final class MobAnimations {
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(MobCombat.MobSwing.TYPE, (payload, context) -> {
 			if (PAL) {
-				PalMobAnimator.play(payload.entityId(), payload.animation(), payload.length());
+				PalMobAnimator.play(payload.entityId(), payload.animation(), payload.length(), payload.mirror());
 			}
 		});
 		if (PAL) {

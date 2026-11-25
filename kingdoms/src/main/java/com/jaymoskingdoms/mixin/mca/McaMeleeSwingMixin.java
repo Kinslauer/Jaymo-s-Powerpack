@@ -3,6 +3,7 @@ package com.jaymoskingdoms.mixin.mca;
 import com.jaymoskingdoms.Blows;
 import com.jaymoskingdoms.MobCombat;
 import com.jaymoskingdoms.MobShields;
+import com.jaymoskingdoms.NpcDodge;
 import net.conczin.mca.entity.ai.brain.tasks.ExtendedMeleeAttackTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -49,6 +50,9 @@ abstract class McaMeleeSwingMixin {
 			if (Blows.holds(mob, target)) {
 				ci.cancel();
 				BehaviorUtils.lookAtEntity(mob, target);
+			} else if (NpcDodge.incoming(target, mob, 0)) {
+				// (st-dodge) a bandit or assassin rolled out of it: the blow misses
+				ci.cancel();
 			}
 			return;
 		}

@@ -880,6 +880,10 @@ final class IllagerSites {
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.MAINHAND}) {
 			mob.setDropChance(slot, 0.0F);
 		}
+		if (masked) {
+			// (fighting AI patch 7, st-dodge) a bandit's shield on his back, and maybe a second blade (DualBlades)
+			DualBlades.arm(mob, false);
+		}
 	}
 
 	/** Prisoners where the place penned someone (or its thralls stood), else a few about the seat. */

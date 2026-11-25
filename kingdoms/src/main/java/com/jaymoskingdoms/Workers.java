@@ -116,6 +116,10 @@ public final class Workers {
 			// captains', caravans' and crews' own steps, so they break off too (rulers and the like BreakOff leaves out itself)
 			return true;
 		}
+		if (BandStyles.brainStep(mob)) {
+			// (fighting AI patch 7) its band's style in a fight; rolling out of a blow (a bandit, an assassin), its brain waits
+			return true;
+		}
 		if (SwornCaptains.free(mob)) {
 			// (0.7.433) a captain sworn to a player: at their side, his brain his own (and never taken onto a roster)
 			return SwornCaptains.step(level, w);
