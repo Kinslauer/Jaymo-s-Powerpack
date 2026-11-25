@@ -402,7 +402,8 @@ public final class RangedTactics {
 	// ---- the plans -----------------------------------------------------------------------------------------------------
 
 	private static void choose(ServerLevel level, Mob shooter, LivingEntity target, State s, long now) {
-		boolean sees = shooter.getSensing().hasLineOfSight(target);
+		// (a clear line to where it aims: a shoulder showing round a wall is noticed, not shot at, so it goes to find a better line)
+		boolean sees = NpcEyes.clearShot(shooter, target);
 		double gap = shooter.distanceTo(target);
 		// what to try, in order: each failure after the last plan moves one down the list
 		List<Plan> order = new ArrayList<>();
@@ -611,7 +612,7 @@ public final class RangedTactics {
 		if (s.ducking) {
 			s.ducking = false;
 			mob.setShiftKeyDown(false);
-			LivingEntity target = mob.getTarget();
+			LivingEntity target = Comrades.target(mob);
 			if (target != null && mob.level() instanceof ServerLevel level) {
 				Lean.lean(mob, Cover.corner(level, mob, target, mob.position()));
 			}
@@ -626,7 +627,8 @@ public final class RangedTactics {
 			return false;
 		}
 		long now = mob.level().getGameTime();
-		LivingEntity target = mob.getTarget();
+		// (its goals' target, or an MCA villager's brain's)
+		LivingEntity target = Comrades.target(mob);
 		if (target == null || !target.isAlive() || now >= s.planEnds || mob.isPassenger() || Downed.isDowned(mob)) {
 			finish(mob, s);
 			return false;
@@ -634,7 +636,7 @@ public final class RangedTactics {
 		mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
 		Vec3 d = s.dest;
 		boolean there = mob.distanceToSqr(d.x, d.y, d.z) < 2.25 || mob.tickCount % 10 == 0 && mob.getNavigation().isDone() && now - s.planStarted > 10;
-		boolean sees = mob.getSensing().hasLineOfSight(target);
+		boolean sees = NpcEyes.clearShot(mob, target);
 		if (s.plan == Plan.COVER || s.plan == Plan.TAKE_COVER) {
 			if (there && !s.holding) {
 				s.holding = true;

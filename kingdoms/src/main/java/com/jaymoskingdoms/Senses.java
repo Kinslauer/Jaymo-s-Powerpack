@@ -653,9 +653,10 @@ public final class Senses {
 				this.track.searching = false;
 				this.track.spot = null;
 				this.track.lure = 0.0;
-				// (Hearing) drawn off by a sound, it goes back to where it was
-				Vec3 home = this.track.home;
+				// (Hearing) drawn off by a sound, it goes back to where it was; one that lost its foe, back to its leader or its post
+				Vec3 home = this.track.home != null ? this.track.home : back(this.mob);
 				if (home != null && this.mob.position().distanceToSqr(home) > RETURN_MIN * RETURN_MIN) {
+					this.track.home = home;
 					this.track.returning = true;
 					this.track.walkLeft = WALK_TICKS;
 				} else {
@@ -665,8 +666,15 @@ public final class Senses {
 		}
 	}
 
-	/** Drops {@code foe}; {@code mob} goes to where it last saw them. */
+	/**
+	 * Drops {@code foe}; {@code mob} goes to where it last saw them (and back to its leader or its post after, {@link #back}). A guard
+	 * at a post and a companion told to wait don't leave their place: they turn and look there instead. A guard making an arrest
+	 * keeps after the crook and is never called off it ({@link Arrests}).
+	 */
 	static void lose(Mob mob, Track track, LivingEntity foe) {
+		if (Arrests.busy(mob)) {
+			return;
+		}
 		Comrades.stand(mob);
 		if (mob instanceof NeutralMob neutral) {
 			neutral.stopBeingAngry();
@@ -674,6 +682,21 @@ public final class Senses {
 		mob.setLastHurtByMob(null);
 		mob.getNavigation().stop();
 		track.blind = 0;
+		if (keepsPlace(mob)) {
+			long now = mob.level().getGameTime();
+			track.searching = false;
+			track.spot = null;
+			track.home = null;
+			track.returning = false;
+			if (track.seen != null) {
+				track.heedAt = track.seen;
+				track.heedWho = foe instanceof Player ? foe.getUUID() : null;
+				track.heedSince = now;
+				track.heedLeft = HEED_TICKS;
+				track.heedUntil = now + HEED_MEMORY;
+			}
+			return;
+		}
 		track.searching = true;
 		track.started = false;
 		track.spot = track.seen;
@@ -682,6 +705,36 @@ public final class Senses {
 		track.lure = LOST_LURE;
 		track.home = null;
 		track.returning = false;
+	}
+
+	/** {@code mob} keeps its place: a companion told to wait ({@link Followers#STAND}), or a guard at a post (the hall, the gate, the wall). */
+	static boolean keepsPlace(Mob mob) {
+		if (standing(mob)) {
+			return true;
+		}
+		if (!(mob.level() instanceof ServerLevel level) || !(mob instanceof Worker w) || !(mob instanceof net.minecraft.world.entity.PathfinderMob body)) {
+			return false;
+		}
+		if (mob instanceof Folk folk && WallArchers.posted(level, folk)) {
+			return true;
+		}
+		// (a villager wall archer or gunner is held within a block of his post)
+		return HallWatch.post(level, body, w) != null || !(mob instanceof Folk) && w.role() == Folk.ARCHER && mob.hasHome() && mob.getHomeRadius() <= 1;
+	}
+
+	/** A companion told to wait ({@link Followers#STAND}). */
+	static boolean standing(Mob mob) {
+		return mob instanceof net.minecraft.world.entity.npc.villager.Villager v && v.getAttached(Followers.ORDER) instanceof Followers.Order order
+			&& order.kind() == Followers.STAND;
+	}
+
+	/** Where {@code mob} goes back to after searching for a foe it lost: its leader, if it follows one; else its post, if it has strayed from it; else nowhere. */
+	static @Nullable Vec3 back(Mob mob) {
+		if (mob instanceof net.minecraft.world.entity.npc.villager.Villager v && v.getAttached(Followers.ORDER) instanceof Followers.Order order
+			&& (order.kind() == Followers.FOLLOW || order.kind() == Followers.FIGHT) && mob.level().getPlayerByUUID(order.by()) instanceof Player leader) {
+			return leader.position();
+		}
+		return mob.hasHome() && !mob.isWithinHome() ? Vec3.atBottomCenterOf(mob.getHomePosition()) : null;
 	}
 
 	/** Whoever {@code mob} is set on (its goals' target, or its brain's attack target), or null. */
@@ -713,7 +766,9 @@ public final class Senses {
 
 		@Override
 		public boolean canUse() {
-			return (this.track.searching && this.track.spot != null || this.track.returning && this.track.home != null) && foeOf(this.mob) == null;
+			// (never during an arrest, nor for a companion told to wait: it starts nothing)
+			return (this.track.searching && this.track.spot != null || this.track.returning && this.track.home != null) && foeOf(this.mob) == null
+				&& !Arrests.busy(this.mob) && !standing(this.mob);
 		}
 
 		@Override
@@ -819,7 +874,8 @@ public final class Senses {
 
 		@Override
 		public boolean canUse() {
-			return this.track.turnLeft > 0 && this.track.turnAt != null && this.mob.isAlive() && !Downed.isDowned(this.mob);
+			// (a guard making an arrest doesn't stop chasing or beating the crook to turn: Arrests)
+			return this.track.turnLeft > 0 && this.track.turnAt != null && this.mob.isAlive() && !Downed.isDowned(this.mob) && !Arrests.busy(this.mob);
 		}
 
 		@Override

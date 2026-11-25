@@ -167,6 +167,11 @@ public final class Cover {
 	 * clears the wall, with room for the head out there. The foe more than five blocks off.
 	 */
 	public static int corner(ServerLevel level, LivingEntity shooter, LivingEntity foe, Vec3 base) {
+		return corner(level, shooter, foe, base, 0);
+	}
+
+	/** {@link #corner}, trying the side {@code prefer} (-1, 1; 0 either) first: a shooter already leaning one way keeps to it while it works. */
+	public static int corner(ServerLevel level, LivingEntity shooter, LivingEntity foe, Vec3 base, int prefer) {
 		if (base.distanceTo(foe.position()) <= 5.0) {
 			return 0;
 		}
@@ -175,7 +180,7 @@ public final class Cover {
 			return 0;
 		}
 		double yaw = Math.toDegrees(Math.atan2(target.z - eye.z, target.x - eye.x)) - 90.0;
-		int first = shooter.getRandom().nextBoolean() ? 1 : -1;
+		int first = prefer != 0 ? Integer.signum(prefer) : shooter.getRandom().nextBoolean() ? 1 : -1;
 		for (int side : new int[] {first, -first}) {
 			Vec3 out = eye.add(Lean.offset(yaw, side * Lean.REACH));
 			if (!blocked(level, shooter, eye, out) && !blocked(level, shooter, out, target)) {

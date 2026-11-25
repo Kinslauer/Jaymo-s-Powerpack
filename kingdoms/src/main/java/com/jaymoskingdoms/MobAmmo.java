@@ -483,15 +483,16 @@ public final class MobAmmo {
 
 	/**
 	 * The nearest thrown weapon of {@code mob}'s (a javelin, trident or boomerang) lying at rest within {@link #FETCH_RANGE} of it
-	 * that it could pick up, or null. For a fighter going back for what it threw while its foe is not on top of it
-	 * ({@link WeaponSense}).
+	 * that it could pick up, of a kind it carries (so it would pick it up when it gets there), or null. For a fighter going back for
+	 * what it threw while its foe is not on top of it ({@link WeaponSense}).
 	 */
 	static @Nullable Entity nearestThrown(ServerLevel level, Mob mob) {
 		Entity nearest = null;
 		double best = Double.MAX_VALUE;
+		boolean javelins = carries(mob, Kind.JAVELINS), boomerangs = carries(mob, Kind.BOOMERANGS);
 		for (Entity e : level.getEntities(mob, mob.getBoundingBox().inflate(FETCH_RANGE), e -> e instanceof ItemEntity || e instanceof AbstractArrow)) {
 			ItemStack stack = stackOf(e);
-			if (stack == null || !(is(stack, Kind.JAVELINS) && !stack.is(Items.COBBLESTONE) || is(stack, Kind.BOOMERANGS))) {
+			if (stack == null || !(javelins && is(stack, Kind.JAVELINS) && !stack.is(Items.COBBLESTONE) || boomerangs && is(stack, Kind.BOOMERANGS))) {
 				continue;
 			}
 			double d = mob.distanceToSqr(e);

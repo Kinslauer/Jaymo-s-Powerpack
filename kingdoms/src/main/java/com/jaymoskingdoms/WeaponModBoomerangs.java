@@ -29,4 +29,13 @@ final class WeaponModBoomerangs {
 		boomerang.setPickupStatus(EntityProjectile.PickupStatus.DISALLOWED);
 		return boomerang;
 	}
+
+	/**
+	 * Throws {@code boomerang} (made by {@link #create}) from {@code thrower} at {@code xRot} and {@code yRot} degrees, and adds it to the
+	 * world. WeaponMod's boomerang takes the strength it flies, strikes and comes back with only from {@code shootFromRotation}: launched
+	 * any other way it has none, so it neither hurts what it hits nor returns.
+	 */
+	static void launch(ServerLevel level, LivingEntity thrower, Projectile boomerang, float xRot, float yRot, float speed, float spread) {
+		Projectile.spawnProjectile(boomerang, level, ItemStack.EMPTY, b -> b.shootFromRotation(thrower, xRot, yRot, 0.0F, speed, spread));
+	}
 }

@@ -33,6 +33,8 @@ final class Boomerangs {
 	static final int CATCH_AFTER = 8, LIFETIME = 400;
 	/** What each kind of carrier's boomerang is made of (WeaponMod's materials). */
 	static final String BANDIT_MATERIAL = "iron", RANGER_MATERIAL = "wood", ORC_MATERIAL = "stone";
+	/** On a bandit (saved with it): whether it is a desert bandit with boomerangs, decided once, the first time it is asked. */
+	static final String BANDIT_TAG = "jaymoskingdoms_boomerangs", NO_BOOMERANGS_TAG = "jaymoskingdoms_no_boomerangs";
 
 	/** A boomerang in the air and who threw it. */
 	private record Flight(Projectile boomerang, Mob thrower, long since) {
@@ -56,10 +58,17 @@ final class Boomerangs {
 			return ORC_MATERIAL;
 		}
 		if (Bandits.wears(mob)) {
-			Palette land = Palette.at(level, mob.blockPosition());
-			if (land == Palette.DESERT || land == Palette.BADLANDS) {
+			// (the land it stood on when first asked, its camp's as a rule, and kept: not the ground it chases a foe over now)
+			if (mob.entityTags().contains(BANDIT_TAG)) {
 				return BANDIT_MATERIAL;
 			}
+			if (mob.entityTags().contains(NO_BOOMERANGS_TAG)) {
+				return null;
+			}
+			Palette land = Palette.at(level, mob.blockPosition());
+			boolean arid = land == Palette.DESERT || land == Palette.BADLANDS;
+			mob.addTag(arid ? BANDIT_TAG : NO_BOOMERANGS_TAG);
+			return arid ? BANDIT_MATERIAL : null;
 		}
 		return null;
 	}
@@ -85,12 +94,14 @@ final class Boomerangs {
 		MobAmmo.spend(mob, MobAmmo.Kind.BOOMERANGS);
 		MobAmmo.canBePickedUp(thrown);
 		Javelins.mark(thrown);
-		double dx = foe.getX() - mob.getX(), dz = foe.getZ() - mob.getZ();
+		// straight at the middle of the body: thrown hard, a boomerang flies without falling till its strength is spent
+		double dx = foe.getX() - thrown.getX(), dz = foe.getZ() - thrown.getZ();
 		double dy = foe.getY(0.5) - thrown.getY();
 		double flat = Math.sqrt(dx * dx + dz * dz);
+		float yRot = (float) (Math.toDegrees(Math.atan2(dz, dx)) - 90.0), xRot = (float) -Math.toDegrees(Math.atan2(dy, flat));
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		Projectile.spawnProjectileUsingShoot(thrown, level, net.minecraft.world.item.ItemStack.EMPTY, dx, dy + flat * 0.05, dz, SPEED, SPREAD);
+		WeaponModBoomerangs.launch(level, mob, thrown, xRot, yRot, SPEED, SPREAD);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.TRIDENT_THROW.value(), SoundSource.HOSTILE, 0.8F, 1.3F + level.getRandom().nextFloat() * 0.2F);
 		FLIGHTS.add(new Flight(thrown, mob, now));
 		return true;

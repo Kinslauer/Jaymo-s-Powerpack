@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.illager.Pillager;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -29,6 +31,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
@@ -39,13 +42,17 @@ import org.jspecify.annotations.Nullable;
  * really holds and carries. One {@link #step} a tick for every NPC fighter that shoots or throws: folk and pillagers through
  * {@link SenseGoal}, MCA's villagers through {@link RangedTactics#brainStep}.
  * <ul>
- * <li><b>Pick</b> ({@link #arm}): a loaded gun first ({@link MobAmmo.Kind#SHOT}), then a bow or crossbow with arrows, then a throwing
- * weapon (javelins, a boomerang), then its best melee weapon. Re-picked as ammo runs out and as the range changes. Mobs with one
- * weapon (a skeleton's bow) keep it and are not touched.</li>
+ * <li><b>Pick</b> ({@link #pick}): from what its hands hold (and an MCA villager's pack), a loaded gun first ({@link MobAmmo.Kind#SHOT}),
+ * then a bow or crossbow with arrows, then a throwing weapon (javelins, a boomerang, thrown from what it carries, so the hands stay as
+ * they are), then its best melee weapon, and that goes into its hand. Re-picked as ammo runs out and as the range changes ({@link #arm}
+ * names what the hand holds then). Mobs with one weapon (a skeleton's bow, a pillager's crossbow) keep it and are not touched.</li>
  * <li><b>Blade when rushed</b>: a shooter with a melee weapon (in the off hand, in an MCA villager's pack, or a folk archer's belt
- * sidearm, {@link Rearm#SIDEARM}) swaps to it when a foe is inside {@link #RUSHED} blocks ({@link #RUSHED_LOADED} for a crossbow
- * already loaded) and back to the bow once the foe is past {@link #CLEAR} blocks. Both hands change (bow to the off hand, blade to
- * the main) and it takes {@link #SWAP_TICKS} before it can shoot. The WeaponMod boomerang is thrown from {@link Boomerangs}.</li>
+ * sidearm, {@link Rearm#SIDEARM}, once a life) swaps to it when a foe is inside {@link #RUSHED} blocks ({@link #RUSHED_LOADED} for a
+ * crossbow already loaded) and back to the bow once the foe is past {@link #CLEAR} blocks, it has stepped clear (the foe is after
+ * someone else), or the fight is over. Worked out from what the hands hold, so it holds across a reload. A folk's hands change (bow
+ * to the off hand, blade to the main, each with its own drop chance); an MCA villager's hand takes the pack's own stack, as MCA's
+ * arming does, so nothing is copied or lost, and MCA's re-arming leaves it be for the fight ({@link #keeps}). It takes
+ * {@link #SWAP_TICKS} before it can shoot. The WeaponMod boomerang is thrown from {@link Boomerangs}.</li>
  * <li><b>Distance bands</b> ({@link Arm}): each weapon has the range it likes. Too close it backs off, too far it closes in
  * ({@link RangedTactics.Plan#BAND}), to a spot that is a wall corner it can lean round ({@link Cover#corner}) first, else low cover
  * ({@link Cover#works}), else any clear line; never to a spot beside lava, and only along a path that exists.</li>
@@ -98,17 +105,25 @@ public final class WeaponSense {
 	static final float POTION_POWER = 0.6F, POTION_STRAY = 2.0F;
 	/** Going for a thrown weapon needs the foe at least this far (blocks) from the thrower. */
 	static final double FETCH_FOE_GAP = 6.0;
-	/** A vanilla pillager walks up to this far (blocks) from its foe before it stops to shoot, in place of 8 ({@code CrossbowGoalAmmoMixin}). */
-	public static final float CROSSBOW_STOP = 22.0F;
+	/**
+	 * A vanilla pillager walks up to this far (blocks) from its foe before it stops to shoot, in place of 8 ({@code CrossbowGoalAmmoMixin}):
+	 * the far end of the crossbow's band, so one at a corner spot anywhere in the band stands and shoots.
+	 */
+	public static final float CROSSBOW_STOP = 26.0F;
+
+	/** Where a weapon to pick is: in the main hand already, nowhere, the off hand, a folk's belt sidearm; 0 and up, a pack slot. */
+	private static final int MAIN = -4, NONE = -2, OFF = -1, BELT = -3;
 
 	private static final class State {
-		/** Holding its blade because a foe rushed it. */
+		/** Holding its blade because a foe rushed it (worked out from its hands each look). */
 		boolean rushed;
 		long swapUntil, nextBand, nextPotion, flipAt;
 		boolean side, out;
 		Arm arm = Arm.MELEE;
 		/** The lean side this spot offers (0 none), looked at every step. */
 		int corner;
+		/** An MCA villager's: the pack stack it took in hand for this fight (MCA's re-arming leaves it be, {@link #keeps}). */
+		@Nullable ItemStack held;
 	}
 
 	private static final Map<Mob, State> STATES = new WeakHashMap<>();
@@ -128,8 +143,11 @@ public final class WeaponSense {
 				&& !WallArchers.posted(level, folk);
 		}
 		if (mob instanceof Villager villager) {
-			return !villager.isBaby() && !(villager instanceof Enlisted e && e.role() == Folk.ARCHER)
-				&& (Downed.isGuard(villager) || Barbarians.isCampVillager(villager) || villager instanceof Worker w && Pirates.isPirate(w.role()));
+			// (a wall archer or a gunner kept to his post, home within a block of it, shoots from there with MCA's archer brain;
+			// any other enlisted archer, a guard, a camp's or a ship's fighter, or a forest ranger is a fighter, never a civilian)
+			boolean posted = villager instanceof Enlisted e && e.role() == Folk.ARCHER && villager.hasHome() && villager.getHomeRadius() <= 1;
+			return !villager.isBaby() && !posted && (Downed.isGuard(villager) || Barbarians.isCampVillager(villager)
+				|| villager instanceof Worker w && Pirates.isPirate(w.role()) || villager.entityTags().contains(ForestRangers.TAG));
 		}
 		return mob instanceof Pillager;
 	}
@@ -180,12 +198,6 @@ public final class WeaponSense {
 		return s != null && s.swapUntil > mob.level().getGameTime();
 	}
 
-	/** It holds its blade because a foe rushed it (Orcs' range-keyed bow and crossbow wait). */
-	static boolean rushed(Mob mob) {
-		State s = STATES.get(mob);
-		return s != null && s.rushed;
-	}
-
 	/** Spears and tridents in hand put a thrower in the spear thrower's band. */
 	private static boolean spear(ItemStack stack) {
 		return stack.is(net.minecraft.tags.ItemTags.SPEARS) || stack.is(Items.TRIDENT);
@@ -200,10 +212,9 @@ public final class WeaponSense {
 		}
 		LivingEntity foe = Rulers.target(mob);
 		State s = STATES.get(mob);
-		if (foe == null || !foe.isAlive() || Downed.isDowned(foe) || !applies(mob)) {
-			if (s != null) {
-				release(mob, s);
-			}
+		boolean over = foe == null || !foe.isAlive() || Downed.isDowned(foe);
+		if (over || !applies(mob)) {
+			release(level, mob, s, over);
 			return;
 		}
 		if (s == null) {
@@ -218,17 +229,20 @@ public final class WeaponSense {
 			return;
 		}
 		if (!swapping(mob)) {
-			swapHands(level, mob, s, d, now);
+			pick(level, mob, foe, s, d, now);
 		}
 		s.arm = arm(mob, d);
-		s.corner = s.arm.ranged() && sees ? Cover.corner(level, mob, foe, mob.position()) : 0;
+		// (looked for whether or not it sees the foe: at a corner the wall hides it till it leans out, which is the point)
+		s.corner = s.arm.ranged() ? Cover.corner(level, mob, foe, mob.position(), s.corner) : 0;
 		if (swapping(mob) || RangedTactics.melee(mob)) {
 			return;
 		}
-		if (sees && throwPotion(level, mob, foe, s, now, d)) {
+		// (a throw needs a clear line to where it is aimed, not a shoulder showing round a wall: NpcEyes)
+		boolean clear = sees && NpcEyes.clearShot(mob, foe);
+		if (clear && throwPotion(level, mob, foe, s, now, d)) {
 			return;
 		}
-		if (s.arm == Arm.THROWN && sees && d >= Arm.THROWN.least && d <= Arm.THROWN.most && Boomerangs.armed(mob)) {
+		if (s.arm == Arm.THROWN && clear && d >= Arm.THROWN.least && d <= Arm.THROWN.most && Boomerangs.armed(mob)) {
 			Boomerangs.throwAt(level, mob, foe);
 		}
 		if (fetch(level, mob, foe, d)) {
@@ -237,116 +251,193 @@ public final class WeaponSense {
 		hold(level, mob, foe, s, now, d);
 	}
 
-	/** It has no foe or isn't a fighter any more: upright, and the blade rule forgotten (the hands are left as they are). */
-	private static void release(Mob mob, State s) {
-		if (s.out || s.corner != 0) {
-			Lean.lean(mob, 0);
+	/**
+	 * It has no foe or isn't a fighter any more: upright, and the blade rule forgotten. A fight that is {@code over} puts a folk
+	 * shooter's bow back in hand (from what its hands hold, so after a reload too); an MCA villager's hands are MCA's again.
+	 */
+	private static void release(ServerLevel level, Mob mob, @Nullable State s, boolean over) {
+		if (s != null) {
+			if (s.out || s.corner != 0) {
+				Lean.lean(mob, 0);
+			}
+			s.out = false;
+			s.corner = 0;
+			s.rushed = false;
+			s.arm = Arm.MELEE;
+			s.held = null;
 		}
-		s.out = false;
-		s.corner = 0;
-		s.rushed = false;
-		s.arm = Arm.MELEE;
+		if (over && !(mob instanceof Villager) && !(mob instanceof Pillager) && mob.isAlive() && !Downed.isDowned(mob) && !swapping(mob)
+			&& Rearm.isMelee(mob.getMainHandItem()) && drawn(mob.getOffhandItem()) && MobAmmo.has(mob, MobAmmo.Kind.ARROWS)) {
+			exchange(level, mob, OFF, level.getGameTime());
+		}
 	}
 
 	// ---- blade or bow ----------------------------------------------------------------------------------------------------
 
-	/** The ranged weapon in the main hand that the blade rule is about: a bow or a crossbow (a gun keeps its bayonet). */
+	/** A bow or a crossbow, what the blade rule is about (a gun keeps its bayonet). */
 	private static boolean drawn(ItemStack stack) {
 		return stack.getItem() instanceof BowItem || stack.getItem() instanceof CrossbowItem && !stack.is(Muskets.musket());
 	}
 
-	/** Where a blade could come from: -2 none, -1 the off hand, otherwise the index in a villager's pack. */
-	private static int blade(Mob mob, State s) {
-		if (Rearm.isMelee(mob.getOffhandItem())) {
-			return -1;
+	/** A gun: an early gun's rung, or a musket. */
+	private static boolean gun(ItemStack stack) {
+		return !stack.isEmpty() && (EarlyGuns.Rung.of(stack) != null || stack.is(Muskets.musket()));
+	}
+
+	/** The stack at {@code at} (as {@link #MAIN}, {@link #OFF} or a pack slot), or empty. */
+	private static ItemStack at(Mob mob, int at) {
+		if (at == MAIN) {
+			return mob.getMainHandItem();
+		}
+		if (at == OFF) {
+			return mob.getOffhandItem();
+		}
+		return at >= 0 && mob instanceof Villager v && at < v.getInventory().getContainerSize() ? v.getInventory().getItem(at) : ItemStack.EMPTY;
+	}
+
+	/** Where else than the main hand {@code mob} has a weapon {@code kind} likes: the off hand, else an MCA villager's pack; {@link #NONE} if nowhere. */
+	private static int find(Mob mob, java.util.function.Predicate<ItemStack> kind) {
+		if (kind.test(mob.getOffhandItem())) {
+			return OFF;
 		}
 		if (mob instanceof Villager v) {
 			SimpleContainer pack = v.getInventory();
 			for (int i = 0; i < pack.getContainerSize(); i++) {
-				if (Rearm.isMelee(pack.getItem(i))) {
-					return i;
-				}
-			}
-			return -2;
-		}
-		// (a folk archer's belt sidearm, as Rearm's: a stone sword in an empty off hand)
-		return mob instanceof Folk f && f.ranged() && mob.getOffhandItem().isEmpty() ? -3 : -2;
-	}
-
-	/** A ranged weapon (with arrows to loose) in the off hand or the pack, to go back to: its place as {@link #blade}'s. */
-	private static int bow(Mob mob) {
-		if (drawn(mob.getOffhandItem()) && MobAmmo.has(mob, MobAmmo.Kind.ARROWS)) {
-			return -1;
-		}
-		if (mob instanceof Villager v && MobAmmo.has(mob, MobAmmo.Kind.ARROWS)) {
-			SimpleContainer pack = v.getInventory();
-			for (int i = 0; i < pack.getContainerSize(); i++) {
-				if (drawn(pack.getItem(i))) {
+				if (kind.test(pack.getItem(i))) {
 					return i;
 				}
 			}
 		}
-		return -2;
+		return NONE;
 	}
 
-	private static void swapHands(ServerLevel level, Mob mob, State s, double d, long now) {
-		ItemStack main = mob.getMainHandItem();
-		if (drawn(main) && !(mob instanceof Pillager)) {
-			double near = main.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(main) ? RUSHED_LOADED : RUSHED;
-			if (d < near) {
-				int from = blade(mob, s);
-				if (from != -2 && exchange(level, mob, from, now)) {
-					s.rushed = true;
-				}
-			}
-		} else if (Rearm.isMelee(main) && d > CLEAR && (s.rushed || mob instanceof Villager)) {
-			// back to the bow once the foe is past the clear range (an MCA guard with a bow in the pack draws it for a far foe too)
-			int from = bow(mob);
-			if (from != -2 && exchange(level, mob, from, now)) {
-				s.rushed = false;
+	/** Its best blade other than the main hand's: the hardest-hitting in the off hand or the pack, else a folk shooter's belt sidearm ({@link #BELT}) while it has it. */
+	private static int bestBlade(Mob mob) {
+		int best = NONE;
+		double most = -1.0;
+		int size = mob instanceof Villager v ? v.getInventory().getContainerSize() : 0;
+		for (int i = OFF; i < size; i++) {
+			ItemStack stack = at(mob, i);
+			double hits = Rearm.isMelee(stack) ? stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY)
+				.compute(Attributes.ATTACK_DAMAGE, 0.0, EquipmentSlot.MAINHAND) : -1.0;
+			if (hits > most) {
+				most = hits;
+				best = i;
 			}
 		}
-		if (s.rushed && !Rearm.isMelee(mob.getMainHandItem()) && !drawn(mob.getMainHandItem())) {
-			s.rushed = false;
+		if (best == NONE && mob instanceof Folk f && f.ranged() && mob.getOffhandItem().isEmpty() && Rearm.sidearmLeft(mob)) {
+			best = BELT;
 		}
+		return best;
+	}
+
+	/** It will throw from what it carries at {@code d} blocks (javelins, a boomerang): the hand it holds stays as it is. */
+	private static boolean throwing(Mob mob, double d) {
+		if (d < Arm.THROWN.least - MARGIN) {
+			return false;
+		}
+		boolean javelins = mob instanceof Folk f ? Javelins.thrower(f) : mob instanceof Worker w && Javelins.thrower(w);
+		return Boomerangs.armed(mob) || javelins && MobAmmo.has(mob, MobAmmo.Kind.JAVELINS);
 	}
 
 	/**
-	 * Takes the weapon from {@code from} ({@link #blade}: -1 off hand, -3 a belt sidearm, else a pack slot) into the main hand, and
-	 * the main hand's into the off hand (or the pack if a shield is there). False, nothing changed, if there is no room.
+	 * ws-pick and ws-swap: the weapon {@code mob} should hold just now, from its hands (and an MCA villager's pack): a gun with shot,
+	 * else a bow or crossbow with arrows, else (thrown from what it carries) whatever it holds, else its best blade; and its blade
+	 * in place of the bow while a foe is on top of it. Into the hand it goes. Ammo is only asked of a kind it has the weapon for.
+	 */
+	private static void pick(ServerLevel level, Mob mob, LivingEntity foe, State s, double d, long now) {
+		s.rushed = false;
+		if (mob instanceof Pillager) {
+			// (one weapon: the crossbow)
+			return;
+		}
+		ItemStack main = mob.getMainHandItem();
+		if (gun(main) && MobAmmo.has(mob, MobAmmo.Kind.SHOT)) {
+			return;
+		}
+		boolean shooting = !RangedTactics.melee(mob);
+		int ranged = NONE;
+		int gunAt = find(mob, WeaponSense::gun);
+		if (gunAt != NONE && MobAmmo.has(mob, MobAmmo.Kind.SHOT)) {
+			ranged = gunAt;
+		} else if (shooting && drawn(main) && MobAmmo.has(mob, MobAmmo.Kind.ARROWS)) {
+			ranged = MAIN;
+		} else if (shooting) {
+			int bow = find(mob, WeaponSense::drawn);
+			if (bow != NONE && MobAmmo.has(mob, MobAmmo.Kind.ARROWS)) {
+				ranged = bow;
+			}
+		}
+		int blade = Rearm.isMelee(main) ? MAIN : bestBlade(mob);
+		int want;
+		if (ranged != NONE && drawn(at(mob, ranged))) {
+			ItemStack bow = at(mob, ranged);
+			double near = bow.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(bow) ? RUSHED_LOADED : RUSHED;
+			// (holding its blade already it keeps it till the foe is past the clear range or it has stepped clear)
+			boolean onTop = d < near || blade == MAIN && d <= CLEAR && !steppedClear(mob, foe, d);
+			s.rushed = onTop && blade != NONE;
+			want = s.rushed ? blade : ranged;
+		} else if (ranged != NONE) {
+			want = ranged;
+		} else if (throwing(mob, d)) {
+			want = MAIN;
+		} else {
+			want = blade;
+		}
+		if (want != MAIN && want != NONE) {
+			exchange(level, mob, want, now);
+		}
+	}
+
+	/** Out of a rush: the foe is beyond {@link #RUSHED} and after someone else (a player is always taken to be after it). */
+	private static boolean steppedClear(Mob mob, LivingEntity foe, double d) {
+		return d > RUSHED && foe instanceof Mob m && Comrades.target(m) != mob;
+	}
+
+	/**
+	 * Takes the weapon at {@code from} ({@link #OFF}, {@link #BELT}, or a pack slot) into the main hand. Hands change places, each
+	 * with the drop chance it had (a weapon picked up off the ground always drops, {@link Rearm}); the belt sidearm is drawn once a
+	 * life, the bow going to the empty off hand. An MCA villager's hand takes the pack's own stack, as MCA's own arming does: what
+	 * it held stays in the pack (or goes into it, if it came from nowhere), so nothing is copied or lost. False, nothing changed, if
+	 * there is no room.
 	 */
 	private static boolean exchange(ServerLevel level, Mob mob, int from, long now) {
-		ItemStack displaced = mob.getMainHandItem().copy();
-		ItemStack off = mob.getOffhandItem().copy();
-		SimpleContainer pack = mob instanceof Villager v ? v.getInventory() : null;
-		ItemStack take;
-		if (from == -1) {
-			take = off;
-			off = ItemStack.EMPTY;
-		} else if (from == -3) {
-			take = new ItemStack(Rearm.SIDEARM);
-		} else if (pack != null) {
-			take = pack.getItem(from).copy();
-			pack.setItem(from, ItemStack.EMPTY);
+		ItemStack main = mob.getMainHandItem(), off = mob.getOffhandItem();
+		float mainDrop = mob.getDropChances().byEquipment(EquipmentSlot.MAINHAND), offDrop = mob.getDropChances().byEquipment(EquipmentSlot.OFFHAND);
+		if (from == OFF) {
+			mob.setItemSlot(EquipmentSlot.MAINHAND, off);
+			mob.setItemSlot(EquipmentSlot.OFFHAND, main);
+			mob.setDropChance(EquipmentSlot.MAINHAND, offDrop);
+			mob.setDropChance(EquipmentSlot.OFFHAND, mainDrop);
+		} else if (from == BELT) {
+			if (!off.isEmpty() || !Rearm.drawSidearm(mob)) {
+				return false;
+			}
+			mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Rearm.SIDEARM));
+			mob.setItemSlot(EquipmentSlot.OFFHAND, main);
+			// (Rearm's sidearm never drops)
+			mob.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+			mob.setDropChance(EquipmentSlot.OFFHAND, mainDrop);
+		} else if (from >= 0 && mob instanceof Villager v) {
+			SimpleContainer pack = v.getInventory();
+			ItemStack take = pack.getItem(from);
+			if (take.isEmpty()) {
+				return false;
+			}
+			if (!main.isEmpty() && !inPack(pack, main)) {
+				if (!pack.canAddItem(main)) {
+					return false;
+				}
+				pack.addItem(main);
+			}
+			mob.setItemSlot(EquipmentSlot.MAINHAND, take);
 		} else {
 			return false;
 		}
-		if (off.isEmpty()) {
-			off = displaced;
-		} else if (pack == null || !pack.addItem(displaced).isEmpty()) {
-			// (something else is in the off hand, a shield say, and the pack has no room: nothing changes)
-			if (from >= 0) {
-				pack.setItem(from, take);
-			}
-			return false;
-		}
-		mob.setItemSlot(EquipmentSlot.MAINHAND, take);
-		mob.setItemSlot(EquipmentSlot.OFFHAND, off);
-		mob.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
-		mob.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 		State s = STATES.get(mob);
 		if (s != null) {
 			s.swapUntil = now + SWAP_TICKS;
+			s.held = mob instanceof Villager ? mob.getMainHandItem() : null;
 		}
 		mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		mob.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
@@ -354,12 +445,32 @@ public final class WeaponSense {
 		return true;
 	}
 
+	/** {@code stack} is one of {@code pack}'s own (the very stack, as MCA's hands hold them). */
+	private static boolean inPack(SimpleContainer pack, ItemStack stack) {
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			if (pack.getItem(i) == stack) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * ({@code McaEquipmentMixin}) MCA's re-arming leaves {@code villager}'s {@code slot} be: its main hand holds the pack stack weapon
+	 * sense picked for this fight (an archer's blade for a foe on top of it, a guard's bow for a far one).
+	 */
+	public static boolean keeps(Mob villager, EquipmentSlot slot) {
+		State s = STATES.get(villager);
+		return slot == EquipmentSlot.MAINHAND && s != null && s.held != null && villager.getMainHandItem() == s.held;
+	}
+
 	// ---- the band and the strafe -----------------------------------------------------------------------------------------
 
 	/** Keeps its weapon's band: too close backs off, too far closes in, to a corner if it can find one. */
 	private static void hold(ServerLevel level, Mob mob, LivingEntity foe, State s, long now, double d) {
 		Arm arm = s.arm;
-		boolean kites = arm.ranged() && !s.rushed && (arm != Arm.THROWN && arm != Arm.SPEAR_THROWER || Boomerangs.armed(mob));
+		// (a javelin or spear thrower too, while it has throws left: arm names it a thrower only then; out of them it fights hand to hand)
+		boolean kites = arm.ranged() && !s.rushed;
 		if (!kites || now < s.nextBand || RangedTactics.active(mob)) {
 			return;
 		}
@@ -431,9 +542,15 @@ public final class WeaponSense {
 		return false;
 	}
 
-	/** While it aims it sidesteps (a side every {@link #STRAFE_LEAST} to {@link #STRAFE_MOST} ticks); at a corner it leans out and in instead. */
+	/**
+	 * While it aims it sidesteps (a side every {@link #STRAFE_LEAST} to {@link #STRAFE_MOST} ticks). At a corner (the wall hides the
+	 * foe from where it stands upright) it leans out past it instead and stays out while it aims, standing where it is: no goal walks it
+	 * out into the open (a pillager's crossbow goal would, not seeing its foe upright). It comes back in when it ducks to cover
+	 * ({@link RangedTactics}) or stops aiming.
+	 */
 	private static void strafe(ServerLevel level, Mob mob, LivingEntity foe, State s, long now, boolean sees, double d) {
-		boolean aiming = s.arm.ranged() && sees && !s.rushed && d >= s.arm.least - MARGIN && !swapping(mob) && !RangedTactics.active(mob) && !mob.isBlocking();
+		boolean aiming = s.arm.ranged() && (sees || s.corner != 0) && !s.rushed && d >= s.arm.least - MARGIN && !swapping(mob) && !RangedTactics.active(mob)
+			&& !mob.isBlocking();
 		if (!aiming) {
 			if (s.out) {
 				s.out = false;
@@ -442,11 +559,12 @@ public final class WeaponSense {
 			return;
 		}
 		if (s.corner != 0) {
-			if (now >= s.flipAt) {
-				s.flipAt = now + STRAFE_LEAST + mob.getRandom().nextInt(STRAFE_MOST - STRAFE_LEAST + 1);
-				s.out = !s.out;
-				Lean.lean(mob, s.out ? s.corner : 0);
+			if (!s.out || Lean.dir(mob) != s.corner) {
+				s.out = true;
+				Lean.lean(mob, s.corner);
 			}
+			mob.getNavigation().stop();
+			mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 			return;
 		}
 		if (s.out) {
@@ -487,9 +605,10 @@ public final class WeaponSense {
 			RangedTactics.cancel(mob);
 			return false;
 		}
-		boolean carries = MobAmmo.carries(mob, MobAmmo.Kind.JAVELINS) || MobAmmo.carries(mob, MobAmmo.Kind.BOOMERANGS);
-		if (!carries || d < FETCH_FOE_GAP || RangedTactics.active(mob) || MobAmmo.has(mob, MobAmmo.Kind.JAVELINS) && MobAmmo.carries(mob, MobAmmo.Kind.JAVELINS)
-			|| MobAmmo.has(mob, MobAmmo.Kind.BOOMERANGS) && MobAmmo.carries(mob, MobAmmo.Kind.BOOMERANGS)) {
+		// (counted without filling: asking MobAmmo whether it "has" a kind it never carried would hand it a stock of them)
+		boolean javelins = MobAmmo.carries(mob, MobAmmo.Kind.JAVELINS), boomerangs = MobAmmo.carries(mob, MobAmmo.Kind.BOOMERANGS);
+		if (!javelins && !boomerangs || d < FETCH_FOE_GAP || RangedTactics.active(mob) || javelins && MobAmmo.left(mob, MobAmmo.Kind.JAVELINS) > 0
+			|| boomerangs && MobAmmo.left(mob, MobAmmo.Kind.BOOMERANGS) > 0) {
 			return false;
 		}
 		Entity lying = MobAmmo.nearestThrown(level, mob);
@@ -550,7 +669,7 @@ public final class WeaponSense {
 	/** A friend of {@code mob}'s, or any player it isn't fighting, stands where the splash would reach. */
 	private static boolean splashesFriends(ServerLevel level, Mob mob, LivingEntity foe) {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, foe.getBoundingBox().inflate(SPLASH), e -> e != foe && e != mob && e.isAlive())) {
-			if (RangedTactics.friendly(mob, e) || e instanceof Player && mob.getTarget() != e || e instanceof Folk f && mob instanceof Folk m && m.sameSide(f)) {
+			if (RangedTactics.friendly(mob, e) || e instanceof Player && Rulers.target(mob) != e || e instanceof Folk f && mob instanceof Folk m && m.sameSide(f)) {
 				return true;
 			}
 		}

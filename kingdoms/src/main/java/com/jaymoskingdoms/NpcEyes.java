@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -25,6 +27,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -44,13 +47,13 @@ import org.jspecify.annotations.Nullable;
  * {@code getVisibilityPercent}, so this one hook covers both; the fighters' own pick of a foe ({@code Comrades#candidates}) is
  * filtered by {@link #sees}.</li>
  * <li><b>Any part of the body</b> ({@link #bodyVisible}, from {@code LivingEntitySightMixin}): a sight check that fails to the
- * eyes tries the chest, the shoulders and the feet, within {@link #BODY_RANGE} blocks and {@link #BODY_RAYS_PER_TICK} rays a
- * tick.</li>
+ * eyes tries the chest, the shoulders and the feet, within {@link #BODY_RANGE} blocks and {@link #BODY_RAYS_PER_MOB} rays a
+ * tick for each mob. That is for noticing: a shot is aimed only along a clear line ({@link #clearShot}, {@link #aimAtWhatShows}).</li>
  * <li><b>Feet</b> ({@link #atFeet}, used by {@link Senses#inCone}): something low in front of the body within {@link #FEET_RANGE}
  * blocks at foot height is in view though far below the look.</li>
  * <li><b>A blow from behind</b> ({@link #struck}, {@link Senses.TurnGoal}): a fighter hit by a foe it didn't see stops and turns
  * to it for up to {@link #TURN_TICKS}; one it still can't see after is let go ({@link Senses#lose}).</li>
- * <li><b>A sighting passed on</b> ({@link #share}): a fighter who sees its foe tells up to {@link #SHARE_MAX} friends of its
+ * <li><b>A sighting passed on</b> ({@link #share}): a fighter who sees its foe tells up to {@link #SHARE_MAX} fighters of its
  * side within {@link #SHARE_RANGE} blocks; they know where it is for {@link #SHARE_TICKS} ({@link Senses#knows}), and the
  * idle ones go to look; they never pass it on.</li>
  * <li><b>The dev view</b> ({@link View}): a spectator who is an operator (or in a dev game) and looks at an NPC is sent what it
@@ -59,9 +62,14 @@ import org.jspecify.annotations.Nullable;
  */
 public final class NpcEyes {
 	// ---- tuning ----
-	/** (ey-body) How far (blocks) the body's other points are tried, and the most rays a tick, all mobs together. */
+	/**
+	 * (ey-body) How far (blocks) the body's other points are tried, and the most rays a tick each mob may cast for them (its own
+	 * allowance, so what one mob sees never hangs on which mobs ticked before it).
+	 */
 	static final double BODY_RANGE = 40.0;
-	static final int BODY_RAYS_PER_TICK = 160;
+	static final int BODY_RAYS_PER_MOB = 12;
+	/** A shot is turned to the part of the body that shows only if it starts this close to its shooter's eye (blocks, squared), so a shot loaded from disk is left be. */
+	static final double NEAR_EYE_SQR = 2.25;
 	/** (ey-body) Chest, feet and shoulders, as shares of the body's height; the shoulders sit out at the body's edge (half its width). */
 	static final double CHEST = 0.6, FEET = 0.1, SHOULDER = 0.82;
 	/** (ey-feet) Within this many blocks, a foe whose feet are no higher than {@link #FEET_LEVEL} over the looker's feet and whose eyes are under {@link #LOW_SHARE} of its height, in front of its body. */
@@ -131,9 +139,8 @@ public final class NpcEyes {
 
 	/** Spectator → the mob they were last sent (so the end of a look is sent once). */
 	private static final Map<UUID, Integer> VIEWING = new HashMap<>();
-	/** The tick the body rays below were counted in, and how many have gone. */
-	private static long rayTick = Long.MIN_VALUE;
-	private static int rays;
+	/** Each mob's body rays: the tick they were counted in, and how many it has cast in it. */
+	private static final Map<Mob, long[]> RAYS = new WeakHashMap<>();
 
 	private NpcEyes() {
 	}
@@ -141,6 +148,11 @@ public final class NpcEyes {
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(View.TYPE, View.CODEC);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> struck(entity, source));
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof Projectile shot && shot.tickCount == 0) {
+				aimAtWhatShows(shot);
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(NpcEyes::tickView);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> VIEWING.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> VIEWING.clear());
@@ -158,7 +170,8 @@ public final class NpcEyes {
 		if (!(target instanceof Mob foe) || !Senses.humanoid(foe) || !(Senses.sighted(looker) || Senses.humanoid(looker))) {
 			return 1.0;
 		}
-		if (Senses.knows(looker, foe) || Senses.foeOf(looker) == foe && looker.hasLineOfSight(foe)) {
+		// (its own foe, or one fighting it)
+		if (Senses.knows(looker, foe) || (Senses.foeOf(looker) == foe || Senses.foeOf(foe) == looker) && looker.hasLineOfSight(foe)) {
 			return 1.0;
 		}
 		double dist = target.distanceTo(looker);
@@ -220,39 +233,98 @@ public final class NpcEyes {
 	 * ({@link NightLights#makesOut}).
 	 */
 	public static boolean bodyVisible(LivingEntity looker, Entity target) {
-		if (!(looker instanceof Mob mob) || !(target instanceof LivingEntity foe) || !(mob.level() instanceof ServerLevel level) || mob.distanceToSqr(foe) > BODY_RANGE * BODY_RANGE
-			|| !(Senses.sighted(mob) || Senses.humanoid(mob))) {
+		if (!(looker instanceof Mob mob) || !(target instanceof LivingEntity foe) || !(mob.level() instanceof ServerLevel level) || foe.level() != mob.level()
+			|| mob.distanceToSqr(foe) > BODY_RANGE * BODY_RANGE || !(Senses.sighted(mob) || Senses.humanoid(mob))) {
 			return false;
 		}
 		long now = level.getGameTime();
-		if (now != rayTick) {
-			rayTick = now;
-			rays = 0;
+		long[] rays = RAYS.computeIfAbsent(mob, m -> new long[2]);
+		if (rays[0] != now) {
+			rays[0] = now;
+			rays[1] = 0;
 		}
-		Vec3 from = mob.getEyePosition();
-		if (Lean.dir(mob) != 0) {
-			from = from.add(Lean.shift(mob, 1.0));
+		Vec3 from = eye(mob);
+		for (Vec3 to : points(from, foe)) {
+			if (rays[1] >= BODY_RAYS_PER_MOB) {
+				return false;
+			}
+			rays[1]++;
+			if (clear(mob, from, to)) {
+				return NightLights.makesOut(mob, foe);
+			}
 		}
+		return false;
+	}
+
+	/** The chest, both shoulders (out at the body's edge, as seen from {@code from}) and the feet of {@code foe}. */
+	private static Vec3[] points(Vec3 from, LivingEntity foe) {
 		double dx = foe.getX() - from.x, dz = foe.getZ() - from.z, len = Math.sqrt(dx * dx + dz * dz);
 		double side = foe.getBbWidth() * 0.5;
 		double ax = len < 1.0E-4 ? 0.0 : -dz / len * side, az = len < 1.0E-4 ? 0.0 : dx / len * side;
 		double h = foe.getBbHeight();
-		Vec3[] points = {
+		return new Vec3[] {
 			new Vec3(foe.getX(), foe.getY() + h * CHEST, foe.getZ()),
 			new Vec3(foe.getX() + ax, foe.getY() + h * SHOULDER, foe.getZ() + az),
 			new Vec3(foe.getX() - ax, foe.getY() + h * SHOULDER, foe.getZ() - az),
 			new Vec3(foe.getX(), foe.getY() + h * FEET, foe.getZ())
 		};
-		for (Vec3 to : points) {
-			if (rays >= BODY_RAYS_PER_TICK) {
-				return false;
-			}
-			rays++;
-			if (level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob)).getType() == HitResult.Type.MISS) {
-				return NightLights.makesOut(mob, foe);
+	}
+
+	/** {@code mob}'s eye, out where it has leaned to if it leans. */
+	private static Vec3 eye(Mob mob) {
+		Vec3 eye = mob.getEyePosition();
+		return Lean.dir(mob) != 0 ? eye.add(Lean.shift(mob, 1.0)) : eye;
+	}
+
+	private static boolean clear(Mob mob, Vec3 from, Vec3 to) {
+		return mob.level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob)).getType() == HitResult.Type.MISS;
+	}
+
+	/**
+	 * Whether {@code shooter} has a clear line, from its eye (leaned out, if it leans), to where a shot is aimed: {@code target}'s head
+	 * or the middle of its body. Body-point sight ({@link #bodyVisible}) is for noticing: a shoulder showing round a wall is seen, not a
+	 * mark to loose at, so a shooter without this line goes to find one ({@link RangedTactics}) and throws nothing ({@link WeaponSense}).
+	 */
+	public static boolean clearShot(Mob shooter, LivingEntity target) {
+		if (target.level() != shooter.level()) {
+			return false;
+		}
+		Vec3 from = eye(shooter);
+		return clear(shooter, from, target.getBoundingBox().getCenter()) || clear(shooter, from, target.getEyePosition());
+	}
+
+	/**
+	 * A shot an NPC has just loosed at its foe (an arrow, a bolt, a javelin, a ball) when the line to the foe's middle and head is
+	 * blocked and only another part of the body shows (it was seen by {@link #bodyVisible}): turned, its speed and arc kept, toward the
+	 * part that shows, so it isn't loosed into the wall. Leaning shooters' shots start from the leaned eye ({@link Lean}).
+	 */
+	private static void aimAtWhatShows(Projectile shot) {
+		if (!(shot.getOwner() instanceof Mob shooter) || !(shot.level() instanceof ServerLevel) || !(Senses.sighted(shooter) || Senses.humanoid(shooter))
+			|| shot.position().distanceToSqr(shooter.getEyePosition()) > NEAR_EYE_SQR) {
+			return;
+		}
+		LivingEntity foe = Comrades.target(shooter);
+		if (foe == null || foe.level() != shot.level() || shooter.distanceToSqr(foe) > BODY_RANGE * BODY_RANGE) {
+			return;
+		}
+		// (where it leaves from, whether or not the lean has moved it out yet)
+		Vec3 from = new Vec3(shooter.getX(), shot.getY(), shooter.getZ()).add(Lean.shift(shooter, 1.0));
+		Vec3 middle = foe.getBoundingBox().getCenter();
+		if (clear(shooter, from, middle) || clear(shooter, from, foe.getEyePosition())) {
+			return;
+		}
+		Vec3 v = shot.getDeltaMovement();
+		double speed = v.length();
+		if (speed < 1.0E-4) {
+			return;
+		}
+		for (Vec3 to : points(from, foe)) {
+			if (clear(shooter, from, to)) {
+				Vec3 turn = to.subtract(from).normalize().subtract(middle.subtract(from).normalize());
+				shot.setDeltaMovement(v.scale(1.0 / speed).add(turn).normalize().scale(speed));
+				return;
 			}
 		}
-		return false;
 	}
 
 	// ---- ey-feet -----------------------------------------------------------------------------------------------------------------
@@ -301,7 +373,7 @@ public final class NpcEyes {
 
 	/**
 	 * {@code mob} has {@code foe} in sight (from {@link Senses.WatchGoal}): every {@link #SHARE_EVERY} ticks it tells up to
-	 * {@link #SHARE_MAX} friends of its side within {@link #SHARE_RANGE} blocks, the nearest first. They know where the foe is
+	 * {@link #SHARE_MAX} fighters of its side ({@link #fighter}) within {@link #SHARE_RANGE} blocks, the nearest first. They know where the foe is
 	 * for {@link #SHARE_TICKS} (a friend who knows only that never tells on), and one that is after no one goes to look.
 	 */
 	static void share(Mob mob, LivingEntity foe) {
@@ -311,7 +383,7 @@ public final class NpcEyes {
 		String side = Comrades.side(mob);
 		List<Mob> friends = level.getEntitiesOfClass(Mob.class, mob.getBoundingBox().inflate(SHARE_RANGE),
 			f -> f != mob && f.isAlive() && f.distanceToSqr(mob) <= SHARE_RANGE * SHARE_RANGE && Senses.track(f) != null && Senses.foeOf(f) != foe && !Downed.isDowned(f)
-				&& Comrades.side(f).equals(side));
+				&& fighter(f) && Comrades.side(f).equals(side));
 		friends.sort(Comparator.comparingDouble(f -> f.distanceToSqr(mob)));
 		long until = level.getGameTime() + SHARE_TICKS;
 		UUID who = foe instanceof ServerPlayer player ? player.getUUID() : null;
@@ -328,6 +400,24 @@ public final class NpcEyes {
 				Senses.lure(friend, foe.position(), who, Senses.LOST_LURE);
 			}
 		}
+	}
+
+	/**
+	 * Whether {@code f} is one of its side's fighters, to be told of a foe: a grown fighter of the folk, a guard, a camp's or a ship's
+	 * fighter, or a villager with a weapon in hand; never a child, nor a farmer or a townsman with nothing to fight with. Monsters and
+	 * the like are all fighters.
+	 */
+	private static boolean fighter(Mob f) {
+		if (f.isBaby()) {
+			return false;
+		}
+		if (f instanceof Folk folk) {
+			return folk.combatant();
+		}
+		if (f instanceof net.minecraft.world.entity.npc.villager.Villager) {
+			return Downed.isGuard(f) || Barbarians.isCampVillager(f) || f instanceof Worker w && Pirates.isPirate(w.role()) || Rearm.isWeapon(f.getMainHandItem());
+		}
+		return true;
 	}
 
 	// ---- ey-dev ------------------------------------------------------------------------------------------------------------------

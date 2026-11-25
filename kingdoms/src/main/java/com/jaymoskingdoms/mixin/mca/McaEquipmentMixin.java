@@ -58,7 +58,9 @@ abstract class McaEquipmentMixin {
 	@Redirect(method = {"equipBestWeapon", "equipBestRanged"}, at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$gunStays(VillagerEntityMCA villager, EquipmentSlot slot, ItemStack stack) {
 		// (and a ranked recruit's issue, a soldier's shield or standard: Ranks)
-		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)) {
+		// (and the pack's blade or bow it took in hand for this fight: WeaponSense)
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)
+			&& !com.jaymoskingdoms.WeaponSense.keeps(villager, slot)) {
 			// (a recruit is armed only from their pack: Ranks; a settlement's guard with the blade it paid for: GuardKit)
 			// (and one a player disarmed only from their pack too: Downed)
 			villager.setItemSlot(slot, Downed.owned(villager, slot, com.jaymoskingdoms.Ranks.owned(villager, com.jaymoskingdoms.GuardKit.weapon(villager, slot, stack))));

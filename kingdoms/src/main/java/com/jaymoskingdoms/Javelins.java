@@ -119,7 +119,8 @@ final class Javelins {
 	private static void tick(ServerLevel level, PathfinderMob folk, int faction) {
 		// ((0.7.292) a villager's foe is its brain's)
 		LivingEntity foe = Rulers.target(folk);
-		if (foe == null || !foe.isAlive() || Downed.isDowned(foe) || folk.isPassenger() || Downed.isDowned(folk)) {
+		// (nor from a guard making an arrest: Arrests)
+		if (foe == null || !foe.isAlive() || Downed.isDowned(foe) || folk.isPassenger() || Downed.isDowned(folk) || Arrests.busy(folk)) {
 			return;
 		}
 		long now = level.getGameTime();
