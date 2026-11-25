@@ -179,7 +179,7 @@ public final class WebBehemoth {
 	/** The symbiote pours itself into a risen body: it swells into the big body and goes hunting. */
 	static void possess(ServerLevel level, Mob host) {
 		host.setAttached(HOST, level.getGameTime());
-		com.jaymospowers.core.Oddities.mark(host, com.jaymospowers.core.Oddities.SYMBIOTE);
+		WebSymbioteStrains.oddMark(host, WebSymbioteStrains.of(host));
 		boost(host, Attributes.MAX_HEALTH, "behemoth_health", HEALTH_BONUS, AttributeModifier.Operation.ADD_VALUE);
 		boost(host, Attributes.ATTACK_DAMAGE, "behemoth_damage", DAMAGE_BONUS, AttributeModifier.Operation.ADD_VALUE);
 		boost(host, Attributes.SCALE, "behemoth_scale", SCALE_BONUS, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
@@ -517,7 +517,7 @@ public final class WebBehemoth {
 	private static void afterDeath(LivingEntity entity, DamageSource source) {
 		if (isHost(entity) && entity.level() instanceof ServerLevel level) {
 			entity.removeAttached(HOST);
-			com.jaymospowers.core.Oddities.unmark(entity, com.jaymospowers.core.Oddities.SYMBIOTE);
+			WebSymbioteStrains.oddUnmark(entity);
 			WebSymbioteStrains.mark(WebSymbioteBlob.release(level, entity.position()), WebSymbioteStrains.of(entity));
 		}
 	}

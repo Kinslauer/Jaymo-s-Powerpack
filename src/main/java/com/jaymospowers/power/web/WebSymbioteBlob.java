@@ -552,8 +552,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 			}
 			this.bondWith(player, this.position());
 		} else if (host instanceof Mob mob && KitchenCompat.isZombiePlayer(mob)) {
-			WebBehemoth.possess(level, mob);
 			WebSymbioteStrains.mark(mob, this.strain());
+			WebBehemoth.possess(level, mob);
 		} else if (host instanceof Mob mob && this.rampageSite == null && WebInhabit.takeable(mob) && !this.spurned.contains(mob.getUUID())) {
 			WebInhabit.inhabit(level, mob, this.strain());
 		} else {

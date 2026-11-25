@@ -158,19 +158,26 @@ final class WebSymbioteStatusScreen extends Screen {
 			int by = buttonY();
 			boolean over = UiStyle.over(mouseX, mouseY, bx, by, BUTTON_W, BUTTON_H);
 			boolean held = mind.order() == ORDERS[i];
+			// (the red one's Protect Me and At ease stay shut until it trusts you enough: WebSymbioteMind.RED_EASE_TRUST)
+			boolean locked = mind.trust() < WebSymbioteMind.orderTrust(player, ORDERS[i]);
 			if (over) {
 				hovered = i;
 			}
 			graphics.fill(bx, by, bx + BUTTON_W, by + BUTTON_H, over ? UiStyle.ROW_HOVER : held ? UiStyle.ROW_PICKED : UiStyle.ROW);
-			graphics.outline(bx, by, BUTTON_W, BUTTON_H, held ? ACCENT : 0x40FFFFFF);
+			graphics.outline(bx, by, BUTTON_W, BUTTON_H, held ? ACCENT : locked ? 0x18FFFFFF : 0x40FFFFFF);
 			Component label = Component.translatable("gui.jaymospowers.web_symbiote.order." + WebSymbioteMind.orderName(ORDERS[i]));
-			graphics.text(font, label, bx + BUTTON_W / 2 - font.width(label) / 2, by + 3, held ? UiStyle.TEXT : UiStyle.DIM);
+			graphics.text(font, label, bx + BUTTON_W / 2 - font.width(label) / 2, by + 3, held ? UiStyle.TEXT : locked ? UiStyle.HINT : UiStyle.DIM);
 			if (held) {
 				graphics.fill(bx + 3, by + BUTTON_H - 3, bx + BUTTON_W - 3, by + BUTTON_H - 1, ACCENT);
 			}
 		}
 		// what the hovered button (or, failing that, the mood) means
-		Component tip = hovered >= 0
+		int opens = hovered >= 0 ? WebSymbioteMind.orderTrust(player, ORDERS[hovered]) : 0;
+		Component tip = hovered >= 0 && mind.trust() < opens
+			? Component.translatable("gui.jaymospowers.web_symbiote.order.red_locked", opens)
+			: hovered >= 0 && WebSymbioteMind.red(player)
+			? Component.translatable("gui.jaymospowers.web_symbiote.order." + WebSymbioteMind.orderName(ORDERS[hovered]) + ".red_tip")
+			: hovered >= 0
 			? Component.translatable("gui.jaymospowers.web_symbiote.order." + WebSymbioteMind.orderName(ORDERS[hovered]) + ".tip")
 			: Component.translatable("gui.jaymospowers.web_symbiote.mood." + mood.key() + ".tip");
 		UiStyle.line(graphics, font, tip, x + 10, buttonY() + BUTTON_H + 5, W - 20, UiStyle.HINT);
