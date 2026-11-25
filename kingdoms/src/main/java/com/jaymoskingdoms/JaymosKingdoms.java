@@ -618,6 +618,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// tree's crows) and the changing maze under a necromancer's crypt (their attachments load with them)
 		TreeSites.register();
 		CryptMaze.register();
+		// and the druids' cave gardens, tended while their druid lives
+		CaveGardens.register();
 		EpicTowns.register();
 		TownWakes.register();
 		// 0.5: seats in the world's buildings (and their attachment); fiefdoms and camps in Grim Kingdoms' ruins (only with
@@ -717,6 +719,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
 		LOGGER.debug("road attachment: {}", Roads.ROADS);
 		Roads.register();
+		// village mods 6: an inn halfway along each long King's Road (and its attachment)
+		LOGGER.debug("wayside inn attachment: {}", WaysideInns.INNS);
+		WaysideInns.register();
 		// 0.7.103: roads are quicker going, sand, snow and leaves slower
 		RoadPace.register();
 		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);

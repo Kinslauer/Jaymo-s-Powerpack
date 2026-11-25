@@ -269,11 +269,8 @@ def inn(api):
 
 # The tool's name check reads `public static final Block X =` lines from Blocks.java; the coloured beds are made by
 # Blocks.BED (a ColorCollection), so they are named here to pass it (26.3: ColorCollection.registerBlocks(BlockItemIds.BED)).
-BEDS = {c + "_bed" for c in ("white", "red", "blue")}
 
 
 def sites(api):
-    plain = api.write_site
-    api.write_site = lambda s, known, previews: plain(s, known | BEDS if known else known, previews)
     print("  wayside inn spots: sign", SIGN, "board", BOARD, "keeper", KEEPER, "size", (W, H, D))
     return [api.Site("wayside_inn", {"wayside_inn": inn(api)}, ground=0, worldgen=None)]

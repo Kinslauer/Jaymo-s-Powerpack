@@ -268,6 +268,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ClothesColourClient.register();
 		MasonScreen.register();
 		PlanGhosts.register();
+		// a held plan's plot outlined, before it's laid and after
+		MasonPreview.register();
 		// 0.7.332: the victim's memory of the biter, and kin heard in each other
 		VictimClient.register();
 		KinshipClient.register();

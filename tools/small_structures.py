@@ -230,6 +230,7 @@ def write_site(s, known, previews):
         "project_start_to_heightmap": wg.get("heightmap", "WORLD_SURFACE_WG"),
         "max_distance_from_center": 32,
         "use_expansion_hack": False,
+        **({"liquid_settings": wg["liquid_settings"]} if "liquid_settings" in wg else {}),
     })
     nbt.write_json(os.path.join(DATA, "worldgen", "template_pool", "smalls", s.name + ".json"), {
         "name": pool,

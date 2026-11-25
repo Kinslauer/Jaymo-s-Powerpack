@@ -546,6 +546,10 @@ public final class Bounties {
 		if (here == null) {
 			here = Factions.near(server, pos, 96.0);
 		}
+		if (here == null) {
+			// a wayside inn's board, far from either town: the nearer end of its road
+			here = WaysideInns.owner(server, pos, 40.0);
+		}
 		return court(server, here);
 	}
 
