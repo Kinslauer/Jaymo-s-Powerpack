@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 10:17). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 15:54). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -20,12 +20,16 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-17 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
+14 waiting for a bot, 4 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2180 space pods fly: a climb through the sky, a piloted crossing, raiders, wrecks, rocks, a sling past the Maw, towing and Patrol posts (Powers, Kingdoms, 2026-11-25)
+- [ ] #2179 Fae Woods: shipped mods for the Blossom land, balloon gusts (Powers, Kingdoms, Kitchen, 2026-11-25)
+- [ ] #2178 Mordhau harness 2: the coif's cuts and the wrapper at the anvil, the champion's wreath (Powers, Kingdoms, 2026-11-25)
+- [ ] #2177 The Last Lantern: a second hand-built start example (Kingdoms, 2026-11-25)
 - [ ] #2176 The numpad's other keys stay quiet while the cleric's medallion board is up (Kingdoms, 2026-11-25)
 - [ ] #2175 Swinging while locked on no longer crashes the game (Powers, 2026-11-25)
 - [ ] #2174 class items show up in JEI under the class's name (Kingdoms, 2026-11-25)
@@ -41,12 +45,14 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2163 severed limbs lie where they are and look like the body they came off (Powers, Kitchen, 2026-11-25)
 - [ ] #2162 symbiote, ape and mob-host takeovers fight with their whole kit (Powers, Kingdoms, 2026-11-25)
 - [ ] #2161 Penguins no longer flood the server log with NaN rotation errors (Powers, 2026-11-25)
+- [ ] #2160 Smithing anvil: the new harness helms, the barbute and spangenhelm, painted barbutes (Powers, Kingdoms, 2026-11-25)
 - [ ] #2159 fighting AI - weapon sense, breaking off to mend, shields, NPC eyes, danger sense, getting there, band styles (Kingdoms, 2026-11-25)
 - [ ] #2158 symbiote in hosts without the Web - every ability, a fight for the suit, a duel with the slinger (Powers, 2026-11-25)
 - [ ] #2157 Hearth's hit cap no longer softens the blow that downs you (Kingdoms, 2026-11-25)
 - [ ] #2156 NaN rotation diagnostic (Powers, 2026-11-25)
 - [ ] #2155 Toughness: Grit and gear let you take more hits (Kingdoms, 2026-11-25)
 - [ ] #2154 silver blades sear monsters, and the twin harness on the back (Powers, 2026-11-25)
+- [ ] #2153 Written starts: hand-built starts like an adventure map, and the Hearthkeeper's way-hut (Kingdoms, 2026-11-25)
 - [ ] #2152 The symbiote's meeting film no longer disconnects the client (Powers, 2026-11-25)
 - [ ] #2151 Bounty boards against a wall; plains towns always have a working windmill, a butcher and an infirmary (Kingdoms, 2026-11-25)
 - [ ] #2150 faints can be mashed out of (Powers, Kingdoms, 2026-11-25)
@@ -80,13 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2121 Takeover pathing fixes: long tunnels, safe shafts, no stray weapon arm (Powers, 2026-11-24)
 - [ ] #2120 Scouter: hold to scan, full readings, marks and tracking (Powers, Kingdoms, 2026-11-24)
 - [ ] #2119 players' limbs twice as tough (Powers, Kitchen, 2026-11-24)
-- [ ] #2118 spiders in leaves leave you be by day (Powers, Kingdoms, 2026-11-24)
-- [ ] #2117 Blood Awakening upgrades your blood's held move; a Verdant's regrowth key (Powers, Kingdoms, 2026-11-24)
-- [ ] #2115 Takeovers dig straight to their prey and never stand stuck (Powers, 2026-11-24)
-- [ ] #2114 The first capital is found in seconds, not after an 11-minute wait (Kingdoms, 2026-11-24)
-- [ ] #2113 Village mods 4: board work (Kingdoms, 2026-11-24)
-- [ ] #2108 The Silk Deeps no longer generate (Kingdoms, 2026-11-24)
-- …and 561 older ones.
+- …and 567 older ones.
 
 ## Health
 
