@@ -298,12 +298,42 @@ public final class WebSymbiote {
 	public static final double TAKEOVER_RANGE = 12.0;
 	public static final double TAKEOVER_REACH = 3.0;
 	public static final int TAKEOVER_ATTACK_TICKS = 20;
+	/** Each of a takeover's moves pulses the dark over your screen for {@code TAKEOVER_STRIKE_DREAD} ticks. */
+	public static final int TAKEOVER_STRIKE_DREAD = 20;
 	/**
-	 * At its prey it also seizes it with the tendrils (a counter's own moves: impale, whiplash, hurl, constrict) every
-	 * {@code TAKEOVER_SEIZE_EVERY} ticks (at this offset in them, so it isn't the plain blow's tick), and each strike or
-	 * seize pulses the dark over your screen for {@code TAKEOVER_STRIKE_DREAD} ticks.
+	 * (Andy, 2026-11-25: "they should rotate through their whole entire move suite, countering as their health lowers
+	 * and ultimately shrouding to run away and return control when safe, or if it encounters fire or explosions".)
+	 * In a takeover's fight the tendrils lash on their own the whole time (tickStrikes), and over them it works through
+	 * its moves as a shuffled deck ({@code TAKEOVER_DECK}: the weapon arm twice, a seize twice (any of its nine counter
+	 * moves, the big suit's catch too), a spat glob, a Spike Burst, a tendril snatch), the next one {@code TAKEOVER_MOVE_GAP}
+	 * ticks after the last has played out; a move that can't be used just now (out of range, cooling down) is skipped.
+	 * The plain punch is only for when it has none of them to hand.
 	 */
-	public static final int TAKEOVER_SEIZE_EVERY = 80, TAKEOVER_SEIZE_AT = 10, TAKEOVER_STRIKE_DREAD = 20;
+	public static final int TAKEOVER_MOVE_GAP = 6;
+	static final int MOVE_WEAPON = 0, MOVE_SEIZE = 1, MOVE_SPIT = 2, MOVE_SPIKES = 3, MOVE_SNATCH = 4;
+	static final int[] TAKEOVER_DECK = {MOVE_WEAPON, MOVE_SEIZE, MOVE_WEAPON, MOVE_SEIZE, MOVE_SPIT, MOVE_SPIKES, MOVE_SNATCH};
+	/** A glob is spat from this far (blocks) and no closer (it's close enough to strike). */
+	public static final double TAKEOVER_SPIT_MIN = 3.5, TAKEOVER_SPIT_MAX = 16.0;
+	/**
+	 * Struck in a takeover's fight, it counters (one of its counter moves at the attacker, within WebCounter#REACH): a
+	 * {@code TAKEOVER_COUNTER_HEALTHY} chance at full health, rising to {@code TAKEOVER_COUNTER_HURT} as yours runs
+	 * out, at most once every {@code TAKEOVER_COUNTER_EVERY} ticks.
+	 */
+	public static final float TAKEOVER_COUNTER_HEALTHY = 0.15F, TAKEOVER_COUNTER_HURT = 0.9F;
+	public static final int TAKEOVER_COUNTER_EVERY = 15;
+	/**
+	 * At or under {@code TAKEOVER_RUN_HEALTH} of your health in a takeover's fight, or with fire or something about to
+	 * blow near (or burnt or blasted), it goes into the Shroud and runs with you, and hands you back once it's safe:
+	 * nothing after you within {@link #FLEE_SAFE}, no fire or blast near, not burning.
+	 */
+	public static final float TAKEOVER_RUN_HEALTH = 0.2F;
+	/**
+	 * (Andy, 2026-11-25: takeovers get the new MCA fighting AI's aggression.) Struck in a takeover's fight by something
+	 * other than its prey, within {@code TAKEOVER_TURN_ON_RANGE} blocks, while its prey is out of reach, it turns on
+	 * that one (a blow up to {@code TAKEOVER_TURN_ON_TICKS} ago).
+	 */
+	public static final double TAKEOVER_TURN_ON_RANGE = 6.0;
+	public static final int TAKEOVER_TURN_ON_TICKS = 10;
 	public static final int TAKEOVER_COOLDOWN = 900;
 	/**
 	 * Once it has the wheel it keeps it until it has done what it set out to (its prey dead, a look had, a kill carried
@@ -1138,6 +1168,16 @@ public final class WebSymbiote {
 		int fleeHits;
 		long fleeStartAt;
 		boolean emergencyUsed;
+		/** (A takeover's fight, see TAKEOVER_DECK) its shuffled moves, the next one's place, when it may go, its last seize. */
+		int[] moveDeck;
+		int moveAt;
+		long nextMoveAt;
+		int lastSeize = -1;
+		/** A takeover's fight: when it may counter again; fire or a blast touched it (it runs: see TAKEOVER_RUN_HEALTH). */
+		long counterReadyAt;
+		boolean scorched;
+		/** Running from fire or a blast: it isn't safe until those are behind it too. */
+		boolean fleeDanger;
 		int lastPanic = -1;
 		/** When it can shove you from fire again; the last stress band it spoke up about (0-4). */
 		long fleeReadyAt;
@@ -1256,6 +1296,15 @@ public final class WebSymbiote {
 			}
 			if (entity instanceof ServerPlayer victim && damageTaken > 0.0F && victim.getAttached(LIVE) instanceof Live live && live.fleeing) {
 				live.fleeHits++;
+			}
+			// (in a takeover's fight) burnt or blasted, it runs (see TAKEOVER_RUN_HEALTH); struck, it may counter
+			if (entity instanceof ServerPlayer victim && damageTaken > 0.0F && victim.getAttached(LIVE) instanceof Live live
+				&& fightingTakeover(victim, live)) {
+				if (source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE) || source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) {
+					live.scorched = true;
+				} else if (source.getEntity() instanceof LivingEntity attacker && attacker != victim) {
+					counterHit(victim, attacker);
+				}
 			}
 		});
 		// either black suit (the suit, or Living Armor and the big body) takes no fall damage at all; (0.15.33) nor, bare,
@@ -1862,12 +1911,17 @@ public final class WebSymbiote {
 			removeArmor(player);
 		}
 		// the tendrils (out on their own, or with the big body): they strike on their own
+		// (Andy, 2026-11-25: "they should primarily use tendril attacks": a takeover's tendrils are always out, so they
+		// tear into its prey in the plain suit too, not only in Living Armor or the big body)
 		if (armor) {
 			live.armorTicks++;
 			tickStrikes(player, live, now);
 			if (player.tickCount % INSTINCT_CHECK_TICKS == 0 && live.takeoverTicks <= 0) {
 				catapult(player, live, now);
 			}
+		} else if (live.takeoverTicks > 0 && armored(player)) {
+			live.armorTicks = 0;
+			tickStrikes(player, live, now);
 		} else {
 			live.armorTicks = 0;
 			// (a counter's tendril strike is out without the armour: WebCounter ends it)
@@ -2877,14 +2931,178 @@ public final class WebSymbiote {
 		return true;
 	}
 
-	/** The tendrils seize {@code prey} (see {@link #TAKEOVER_SEIZE_EVERY}); the dark pulses over your screen. False if a counter's already running. */
-	private static boolean seize(ServerPlayer player, LivingEntity prey) {
-		int[] moves = {WebCounter.IMPALE, WebCounter.WHIPLASH, WebCounter.HURL, WebCounter.CONSTRICT};
-		if (!WebCounter.seize(player, prey, moves[player.getRandom().nextInt(moves.length)])) {
+	/**
+	 * One of its counter moves at {@code prey}, with no dodge to open it: any of the nine (never the same twice running),
+	 * and in the big suit the catch and slam on anything small enough. False if a counter's already running.
+	 */
+	private static boolean seize(ServerPlayer player, Live live, LivingEntity prey) {
+		int kind;
+		if (bulked(player) && WebCounter.catchable(prey) && player.getRandom().nextFloat() < WebCounter.CATCH_SHARE) {
+			kind = WebCounter.CATCH_SLAM;
+		} else {
+			do {
+				kind = WebCounter.WEB_COUNTERS + player.getRandom().nextInt(WebCounter.CATCH_SLAM - WebCounter.WEB_COUNTERS);
+			} while (kind == live.lastSeize);
+		}
+		if (!WebCounter.seize(player, prey, kind)) {
 			return false;
 		}
-		dread(player, TAKEOVER_STRIKE_DREAD, false);
+		live.lastSeize = kind;
 		return true;
+	}
+
+	/** A takeover's fight (not a look, a tour, a run, a mend, nor its own kill being carried off). */
+	private static boolean fightingTakeover(ServerPlayer player, Live live) {
+		return live.takeoverTicks > 0 && live.takeoverTarget != player.getId() && !live.curious && !live.touring && !live.fleeing
+			&& !live.mending;
+	}
+
+	/**
+	 * The next of its moves it can use at {@code prey} (see {@link #TAKEOVER_DECK}), used; false while the last is still
+	 * playing out (a counter, the weapon arm), before {@link #TAKEOVER_MOVE_GAP}, or when none of them will do just now.
+	 */
+	private static boolean takeoverMove(ServerPlayer player, Live live, long now, LivingEntity prey, boolean inReach) {
+		if (now < live.nextMoveAt || player.getAttached(WebCounter.ACTIVE) != null || player.getAttached(WebMorph.CHARGE) != null
+			|| player.getAttached(WebMorph.MORPH) != null || WebTendrilCombos.active(player) || WebPower.ragdolled(player)) {
+			return false;
+		}
+		int[] deck = live.moveDeck;
+		if (deck == null) {
+			deck = live.moveDeck = TAKEOVER_DECK.clone();
+			live.moveAt = deck.length;
+		}
+		for (int tries = 0; tries < deck.length; tries++) {
+			if (live.moveAt >= deck.length) {
+				// a fresh shuffle, not starting on the one it just ended on
+				int last = deck[deck.length - 1];
+				for (int i = deck.length - 1; i > 0; i--) {
+					int j = player.getRandom().nextInt(i + 1);
+					int swap = deck[i];
+					deck[i] = deck[j];
+					deck[j] = swap;
+				}
+				if (deck[0] == last) {
+					int j = 1 + player.getRandom().nextInt(deck.length - 1);
+					deck[0] = deck[j];
+					deck[j] = last;
+				}
+				live.moveAt = 0;
+			}
+			int move = deck[live.moveAt++];
+			if (useMove(player, live, now, prey, inReach, move)) {
+				live.nextMoveAt = now + TAKEOVER_MOVE_GAP;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean useMove(ServerPlayer player, Live live, long now, LivingEntity prey, boolean inReach, int move) {
+		double dist = player.distanceTo(prey);
+		boolean seen = player.hasLineOfSight(prey);
+		switch (move) {
+			case MOVE_WEAPON -> {
+				// the charged weapon arm (WebMorph): formed, then swung at it
+				return inReach && WebMorph.drivenStrike(player, prey);
+			}
+			case MOVE_SEIZE -> {
+				return seen && dist <= WebCounter.REACH && seize(player, live, prey);
+			}
+			case MOVE_SPIT -> {
+				return seen && dist >= TAKEOVER_SPIT_MIN && dist <= TAKEOVER_SPIT_MAX && WebSpit.spitAt(player, prey);
+			}
+			case MOVE_SPIKES -> {
+				WebSymbioteState.Cooldowns cooldowns = player.getAttachedOrElse(COOLDOWNS, WebSymbioteState.Cooldowns.NONE);
+				if (now < cooldowns.end(SPIKES) || dist > SPIKE_RADIUS + prey.getBbWidth() * 0.5 || !spikes(player)) {
+					return false;
+				}
+				player.setAttached(COOLDOWNS, cooldowns.with(SPIKES, now + COOLDOWN[SPIKES], ABILITIES));
+				return true;
+			}
+			case MOVE_SNATCH -> {
+				if (!seen || dist <= 1.5 || dist > TENDRIL_RANGE || WebTendrils.freeHand(player) < 0 || !WebTendrils.grabbable(player, prey)) {
+					return false;
+				}
+				// a tendril whips out, snatches it, and hurls it
+				WebTendrils.snatch(player, prey);
+				narrate(player, "snatch");
+				return true;
+			}
+			default -> {
+				return false;
+			}
+		}
+	}
+
+	/** Struck in a takeover's fight: the lower you are, the likelier it counters (see {@link #TAKEOVER_COUNTER_HEALTHY}). */
+	private static void counterHit(ServerPlayer player, LivingEntity attacker) {
+		Live live = player.getAttached(LIVE);
+		if (live == null || !fightingTakeover(player, live) || !player.isAlive() || !attacker.isAlive()
+			|| attacker.distanceTo(player) > WebCounter.REACH || player.getAttached(WebCounter.ACTIVE) != null || WebPower.ragdolled(player)) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		if (now < live.counterReadyAt) {
+			return;
+		}
+		float lost = 1.0F - Mth.clamp(player.getHealth() / Math.max(1.0F, player.getMaxHealth()), 0.0F, 1.0F);
+		if (player.getRandom().nextFloat() >= Mth.lerp(lost, TAKEOVER_COUNTER_HEALTHY, TAKEOVER_COUNTER_HURT)) {
+			return;
+		}
+		// (a weapon still forming melts back for it)
+		WebMorph.endDriven(player);
+		if (seize(player, live, attacker)) {
+			live.counterReadyAt = now + TAKEOVER_COUNTER_EVERY;
+			live.nextMoveAt = Math.max(live.nextMoveAt, now + TAKEOVER_MOVE_GAP);
+			dread(player, TAKEOVER_STRIKE_DREAD, false);
+		}
+	}
+
+	/** Fire or something about to blow near you, or you burning. */
+	private static boolean inDanger(ServerPlayer player) {
+		return player.isOnFire() || nearFire(player) != null || explosiveNear(player) != null;
+	}
+
+	/** In a takeover's fight: too hurt to go on, or fire or a blast has found it (see {@link #TAKEOVER_RUN_HEALTH}). */
+	private static boolean runsNow(ServerPlayer player, Live live) {
+		if (player.isCreative()) {
+			return false;
+		}
+		if (live.scorched || inDanger(player)) {
+			return true;
+		}
+		// (fighting a web slinger, WebSymbioteInfection says when its host has had enough)
+		return !live.slingerFight && lowHealth(player, TAKEOVER_RUN_HEALTH);
+	}
+
+	/** Into the Shroud and away from {@code from} with you; it gives you back once it's safe (see tickTakeover's run). */
+	private static void takeoverRun(ServerPlayer player, Live live, long now, LivingEntity from) {
+		boolean danger = live.scorched || inDanger(player);
+		boolean protecting = live.protecting;
+		abortFeeding(player, live);
+		endTakeover(player, live);
+		live.fleeing = true;
+		live.protecting = protecting;
+		live.fleeDanger = danger;
+		live.fleeHits = 0;
+		live.fleeStartAt = now;
+		live.emergencyUsed = false;
+		int line = player.getRandom().nextInt(PANIC_LINES - 1);
+		live.lastPanic = line >= live.lastPanic && live.lastPanic >= 0 ? line + 1 : line;
+		whisper(player, "panic." + (1 + live.lastPanic));
+		vignette(player, danger ? FIRE_VIGNETTE : PROTECT_VIGNETTE);
+		shroud(player);
+		startTakeover(player, live, now, from);
+		live.takeoverTicks = RUN_TICKS;
+		ServerPlayNetworking.send(player, new WebNet.Takeover(from.getId(), RUN_TICKS, true));
+		// the first leap: away from the fire or the blast if that's what it's running from, else from them
+		BlockPos fire = nearFire(player);
+		Vec3 blast = explosiveNear(player);
+		Vec3 source = blast != null ? blast : fire != null ? Vec3.atCenterOf(fire) : from.position();
+		Vec3 away = player.position().subtract(source).horizontal();
+		away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal().reverse() : away;
+		away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away;
+		ServerPlayNetworking.send(player, new WebNet.Nudge(away.normalize().scale(LEAP_SPEED).add(0.0, LEAP_UP, 0.0)));
 	}
 
 	/** Last ditch, still hurt or cornered: it hardens into a shell of absorption, once per escape. */
@@ -2934,6 +3152,9 @@ public final class WebSymbiote {
 		live.rampage = false;
 		live.curious = false;
 		live.fleeing = false;
+		live.fleeDanger = false;
+		live.scorched = false;
+		live.moveDeck = null;
 		live.hunting = false;
 		live.feral = false;
 		live.spree = false;
@@ -3873,7 +4094,13 @@ public final class WebSymbiote {
 		if (live.fleeing) {
 			// running: until nothing's after it any more, or it's far enough off
 			LivingEntity threat = threat(player);
-			if (--live.takeoverTicks <= 0 || threat == null || threat.distanceTo(player) > FLEE_SAFE) {
+			boolean chased = threat != null && threat.distanceTo(player) <= FLEE_SAFE;
+			// (running from fire or a blast: not safe while there's still fire or a blast near, or it's burning)
+			boolean hot = live.fleeDanger && inDanger(player);
+			if (!chased && hot && target instanceof LivingEntity foe && foe.isAlive() && foe != player) {
+				threat = foe;
+			}
+			if (--live.takeoverTicks <= 0 || threat == null || !chased && !hot) {
 				endTakeover(player, live);
 			} else {
 				if (threat != target && threat.getId() != live.takeoverTarget) {
@@ -3983,28 +4210,46 @@ public final class WebSymbiote {
 			// (a blow on a downed player can kill: it stops, and WebSymbioteInfection binds to them)
 			return;
 		}
-		if (inReach && live.takeoverTicks % TAKEOVER_SEIZE_EVERY == TAKEOVER_SEIZE_AT && target instanceof LivingEntity seized && seize(player, seized)) {
-			// the tendrils take it: impale, whip, hurl or squeeze (a counter's own moves)
-		} else if (live.takeoverTicks % TAKEOVER_ATTACK_TICKS == 0 && inReach) {
-			if (target instanceof LivingEntity struck && WebMorph.drivenStrike(player, struck)) {
-				// the weapon arm forms and strikes
-				dread(player, TAKEOVER_STRIKE_DREAD, false);
-			} else {
-				player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-				player.attack(target);
+		if (!(target instanceof LivingEntity prey)) {
+			return;
+		}
+		if (runsNow(player, live)) {
+			// too hurt, or fire or a blast: into the Shroud and away, and you back once it's safe
+			takeoverRun(player, live, now, prey);
+			return;
+		}
+		// (the fighting AI's aggression) struck by something else close while its prey is out of reach: it turns on that
+		if (!inReach && !live.slingerFight && live.feedStage == FEED_NONE && player.getLastHurtByMob() instanceof LivingEntity by
+			&& by != prey && by.isAlive() && player.tickCount - player.getLastHurtByMobTimestamp() <= TAKEOVER_TURN_ON_TICKS
+			&& by.distanceTo(player) <= TAKEOVER_TURN_ON_RANGE && player.hasLineOfSight(by)) {
+			retarget(player, live, by);
+			return;
+		}
+		if (takeoverMove(player, live, now, prey, inReach)) {
+			dread(player, TAKEOVER_STRIKE_DREAD, false);
+			if (inReach) {
+				rampageBite(player, live, prey);
 			}
-			if (live.rampage && target instanceof LivingEntity living && living.isAlive()) {
-				if (living instanceof Player && ++live.rampageStrikes % RAMPAGE_BITE_EVERY == 0) {
-					// it bites: tearing into them (it feeds on nothing living: only on what it kills, carried)
-					living.hurtServer(player.level(), player.level().damageSources().playerAttack(player), bonded(player, RAMPAGE_BITE_DAMAGE));
-					ServerLevel level = player.level();
-					level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
-					level.sendParticles(ParticleTypes.SQUID_INK, living.getX(), living.getY() + 1.0, living.getZ(), 15, 0.3, 0.4, 0.3, 0.05);
-				}
-			}
+		} else if (live.takeoverTicks % TAKEOVER_ATTACK_TICKS == 0 && inReach && !WebMorph.drivenBusy(player)
+			&& player.getAttached(STRIKE) == null && player.getAttached(WebCounter.ACTIVE) == null && now >= live.nextMoveAt) {
+			// a plain blow only when it has nothing better to hand (a hand full, every move cooling, no tendril mid-strike)
+			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			player.attack(prey);
+			rampageBite(player, live, prey);
 		}
 		if (live.takeoverTicks % 5 == 0) {
 			player.level().sendParticles(dust(1.0F), player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.3, 0.6, 0.3, 0.0);
+		}
+	}
+
+	/** In a rampage, every {@link #RAMPAGE_BITE_EVERY}th blow on a player is a bite as well. */
+	private static void rampageBite(ServerPlayer player, Live live, Entity target) {
+		if (live.rampage && target instanceof Player living && living.isAlive() && ++live.rampageStrikes % RAMPAGE_BITE_EVERY == 0) {
+			// it bites: tearing into them (it feeds on nothing living: only on what it kills, carried)
+			living.hurtServer(player.level(), player.level().damageSources().playerAttack(player), bonded(player, RAMPAGE_BITE_DAMAGE));
+			ServerLevel level = player.level();
+			level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
+			level.sendParticles(ParticleTypes.SQUID_INK, living.getX(), living.getY() + 1.0, living.getZ(), 15, 0.3, 0.4, 0.3, 0.05);
 		}
 	}
 

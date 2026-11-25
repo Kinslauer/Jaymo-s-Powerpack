@@ -67,6 +67,14 @@ public final class WebBehemoth {
 	static final float SHROUD_BELOW = 0.25F;
 	static final int SHROUD_TICKS = 100, SHROUD_EVERY = 1200, SHROUD_REGEN = 2;
 	static final double SHROUD_LEAP = 1.4;
+	/**
+	 * (Andy, 2026-11-25: "mobs being taken over should use more and more of the moveset as they lower on health".) Any
+	 * mob it has (a behemoth, or a fierce host: WebInhabit) lashes and slams faster the more of its health is gone: its
+	 * tendrils' rests and the wait for the next slam shrink by up to {@code HURT_HASTE} (at no health left). A fierce
+	 * host also comes into the behemoth's moves as it weakens: the frenzy and the roar under {@code FRENZY_BELOW}, the
+	 * Shroud under {@code SHROUD_BELOW} (a behemoth roars at any health, as ever).
+	 */
+	static final float HURT_HASTE = 0.6F;
 	/** It sees prey this far off (in line of sight), and picks new prey this often (ticks). */
 	static final double SIGHT = 24.0;
 	static final int RETARGET_EVERY = 10;
@@ -226,17 +234,27 @@ public final class WebBehemoth {
 		}
 	}
 
-	/** Under half its health a behemoth is in a frenzy. */
+	/** Under half its health a behemoth (or a fierce host, WebInhabit) is in a frenzy. */
 	static boolean frenzied(Mob host) {
-		return isHost(host) && host.getHealth() < host.getMaxHealth() * FRENZY_BELOW;
+		return (isHost(host) || WebInhabit.isHost(host)) && host.getHealth() < host.getMaxHealth() * FRENZY_BELOW;
 	}
 
-	/** The roar and the Shroud (the frenzy is in its lashes). */
-	private static void fury(ServerLevel level, Mob host, LivingEntity target, long now) {
+	/** How much of its health is gone (0 whole, 1 none left). */
+	static float hurt(Mob host) {
+		return 1.0F - net.minecraft.util.Mth.clamp(host.getHealth() / Math.max(1.0F, host.getMaxHealth()), 0.0F, 1.0F);
+	}
+
+	/** A wait of {@code ticks}, shorter the more it's hurt (see {@link #HURT_HASTE}). */
+	private static int hasted(Mob host, int ticks) {
+		return Math.max(1, Math.round(ticks * (1.0F - HURT_HASTE * hurt(host))));
+	}
+
+	/** The roar and the Shroud (the frenzy is in its lashes); a fierce host (WebInhabit) only roars once under half. */
+	static void fury(ServerLevel level, Mob host, LivingEntity target, long now) {
 		long[] fury = FURY.computeIfAbsent(host, h -> new long[] {now + ROAR_EVERY, 0L, 0L, 0L});
 		float health = host.getHealth() / host.getMaxHealth();
-		boolean near = !level.getEntitiesOfClass(LivingEntity.class, host.getBoundingBox().inflate(WebSymbiote.ROAR_RADIUS), e -> prey(host, e)).isEmpty();
-		boolean roar = near && now >= fury[0];
+		boolean near = !level.getEntitiesOfClass(LivingEntity.class, host.getBoundingBox().inflate(WebSymbiote.ROAR_RADIUS), e -> prey(host, e) && (isHost(host) || needs(host, e))).isEmpty();
+		boolean roar = near && now >= fury[0] && (isHost(host) || health < FRENZY_BELOW);
 		if (health < 0.5F && fury[1] == 0L) {
 			fury[1] = 1L;
 			roar = true;
@@ -261,7 +279,8 @@ public final class WebBehemoth {
 		double radius = WebSymbiote.ROAR_RADIUS * Math.max(1.0, host.getScale() * 0.8);
 		host.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.RESISTANCE, ROAR_RESIST_TICKS, ROAR_RESISTANCE,
 			false, false));
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, host.getBoundingBox().inflate(radius), e -> prey(host, e))) {
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, host.getBoundingBox().inflate(radius),
+			e -> prey(host, e) && (isHost(host) || needs(host, e)))) {
 			Vec3 to = living.getBoundingBox().getCenter().subtract(center);
 			if (to.length() > radius + living.getBbWidth() * 0.5) {
 				continue;
@@ -334,7 +353,7 @@ public final class WebBehemoth {
 			if (t >= STRIKE_TICKS || strike.tendril() < 0 || strike.tendril() >= TENDRILS) {
 				if (strike.tendril() >= 0 && strike.tendril() < TENDRILS) {
 					int gap = STRIKE_GAP_MIN + host.getRandom().nextInt(STRIKE_GAP_MAX - STRIKE_GAP_MIN + 1);
-					next[strike.tendril()] = now + (frenzied(host) ? gap / 2 : gap);
+					next[strike.tendril()] = now + hasted(host, frenzied(host) ? Math.max(1, gap / 2) : gap);
 				}
 				continue;
 			}
@@ -394,7 +413,7 @@ public final class WebBehemoth {
 				return;
 			}
 			host.setAttached(SLAM, new Slam(prey.getId(), now));
-			live.next = now + SLAM_EVERY_MIN + host.getRandom().nextInt(SLAM_EVERY_MAX - SLAM_EVERY_MIN + 1);
+			live.next = now + hasted(host, SLAM_EVERY_MIN + host.getRandom().nextInt(SLAM_EVERY_MAX - SLAM_EVERY_MIN + 1));
 			level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.HOSTILE, 1.2F, 0.5F);
 			return;
 		}

@@ -1521,6 +1521,8 @@ public final class WebSymbioteClient {
 			endBound();
 			sprint(player, false);
 			turnToward(player, target.getBoundingBox().getCenter().subtract(player.getEyePosition()), TAKEOVER_TURN, true);
+		} else if (boundCoil < 0 && boundFlight < 0 && leapCoil < 0 && com.jaymospowers.client.TakeoverDodge.dodge(player)) {
+			// a shot at it: it sidesteps (the fighting AI's eye for arrows in flight)
 		} else if (tickBound(player, target)) {
 			// coiled, or in the air
 		} else if (pounce(player, target, away)) {

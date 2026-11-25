@@ -83,6 +83,9 @@ public final class WebSymbioteInfection {
 				tick(player);
 				WebSymbiote.tick(player);
 				WebTendrils.tick(player);
+				// (a takeover forms the weapon arm and plays its counter moves in a host too: WebMorph#drivenStrike, WebCounter#seize)
+				WebMorph.tick(player);
+				WebCounter.tick(player);
 			}
 		});
 	}
