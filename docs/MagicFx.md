@@ -17,6 +17,8 @@ looked up at run time, old dust if Powers is missing). Textures: `tools/gen_magi
 | Wave | `MagicFx.wave(level, from, direction, distance, width, color, ticks)` | A wall of streaked water, half as high as it is wide (1 to 4 blocks), pale at the crest, that rises, rolls, curls and breaks; the ground it crossed stays marked, spray flies off the crest | Power rolling over the ground: a tide, a landslide of force, a wall of flame |
 | Stroke | `MagicFx.stroke(level, from, to, width, color)`; bent: `stroke(level, from, to, bend, width, color, ticks)`, `slash(level, center, from, to, ...)`, `swing(level, center, forward, side, radius, degrees, ...)` | One brush mark facing the eye, heavy where it starts and dry where it ends, with a thin wet edge; painted in fast, held, then fades | A cut made visible: any blade or claw swing. Where the vanilla sweep or a dotted arc was |
 | Pool | `MagicFx.pool(level, at, radius, color, ticks)` | A flat sheet with a lapping rim, turning slowly, pale ripples running out over it | Power lying on the ground: water, shadow, a slick, a mirror |
+| Bolt | `MagicFx.bolt(level, from, to, width, color, ticks)` | A jagged lightning channel with forks running off it, white-hot core in a glow; flashes wide as it strikes, jumps to a new path every 2 ticks, flickers out | Lightning, arcs, anything that jumps between two points (a beam is steady power, a bolt jumps) |
+| Scorch | `MagicFx.scorch(level, at, normal, radius, color, cool, ticks)` | Our ragged burn mark lying on the face `normal` points out of, glowing `color` at first and cooling to `cool`, then fading | What power leaves on a surface: a lightning burn (glow to char), a frost burn (white to rime), a seared mark |
 | Mote | `MagicFx.mote(color, size)` (a particle) | A four-point glint, full bright | Loose power in the air; where a redstone dust was |
 | Miasma | `MagicFx.miasma(color, size)` (a particle) | A soft puff lit by the world | Dark or heavy power, gas, smoke, blight |
 | Spark | `MagicFx.spark(color, size)` (a particle) | A short jagged fork that jumps shape every tick, full bright | Lightning, crackle, charge, static |
@@ -93,3 +95,12 @@ Added for the Darktide overhaul (Andy picked "new effect types" on its picklist)
   on beasts and squid, parry and clash sparks (`MobParry`, `BladeClash`, `AttackTells`, the clash thread's), horses,
   MCA villagers' everyday marks, souls, crits, totems, sonic booms.
 - The symbiote's goo specks (`power/web`), Hive, Rubber-folk and Bio-built body specks: not magic, left as they are.
+
+## Fourth pass: bolt and scorch (2026-11-25)
+
+Added for the Hand of God borrowing (Andy: its heat vision is the look of Frostborn's beam, its electrokinesis is what
+he wants from the Thunderhead; the mod is All Rights Reserved, so nothing of it is used, only the ideas).
+- **Bolt**: the storm side's zaps (`WindBolts.zap`, so Stormbound and Thunderhead both), Bolt Step's line, the Thunderhead's
+  arcs and its summoning strikes.
+- **Scorch**: where the storm side's strikes land, where a Frost-born's beam rests (rime), where a vampire's eye laser
+  lands (a burn).
