@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 02:49). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 03:47). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2136 Riders no longer start with a spare saddle (Kingdoms, 2026-11-25)
+- [ ] #2135 journal map page shows Xaero's minimap, World map button (Kingdoms, 2026-11-25)
 - [ ] #2134 Hand of God effects: heat-vision Frost beam, Thunderhead electrokinesis, Chrono slow time, five Nadir moves (Powers, 2026-11-25)
 - [ ] #2132 Villager screen opens into talk: everything is a spoke on the talk wheel, only Gift and Trade stay buttons (Kingdoms, 2026-11-25)
 - [ ] #2131 The Wither's own look, animations and voice (Kingdoms, 2026-11-25)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2066 JEI shows stone tools, hammer and light armour recipes on a server (Powers, Kingdoms, Kitchen, 2026-11-24)
 - [ ] #2065 The key clash pop-up comes per key, on its first press (Kingdoms, 2026-11-24)
 - [ ] #2064 the life aim page is a torn scrap on rough starts, headed by who you are (Kingdoms, 2026-11-24)
-- [ ] #2063 Your coin at a glance, and money bags in chests (Kingdoms, 2026-11-24)
-- [ ] #2062 Adrenaline kicks in once, going down included (Powers, 2026-11-24)
-- …and 521 older ones.
+- …and 523 older ones.
 
 ## Health
 
