@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
-claimed_by: claude (PC coordinator thread, worker)
+claimed_by: 
 pr: 
 ---
 # Mordhau harness 3: body (padding, mail, cuirasses, over-garments, shoulders, arms, hands) (Kingdoms)
@@ -57,3 +57,6 @@ pr:
 - **mh-arm-harness** Arm harness (S, have): Cuirassier arms (patch notes); the arm pieces of every plate set. Upper and lower cannons with a couter. Ours: ARMS: have plate_arm_harness.
 ### Hands (HANDS)
 - **mh-mitten-gauntlet** Mitten gauntlet (S, variant): Italian gauntlets (patch notes). The 15th c. Italian mitten gauntlet: one set of lames over all four fingers, a long flared cuff. Ours: HANDS: variant of plate_gauntlets (fingers merged into lames).
+
+## Notes
+- 2026-11-25 07:33 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.

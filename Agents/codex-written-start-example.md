@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Andy asked for an example of the attached hand-built starts idea.
 branch: codex/written-start-example
 pr:
@@ -23,3 +23,4 @@ owns:
 ## Notes
 - Worktree: E:/codex-worktrees/written-start-example.
 - Base: 7a9c15a6e9d3ba8ed9ab474138494e864e8013da (PR #2153).
+- 2026-11-25 07:33 No sign of work for 30 min: marked stalled (whoever ran it stopped).

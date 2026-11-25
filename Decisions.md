@@ -1095,3 +1095,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 ## 2026-11-25 - Codex: hand-built start example
 Andy: "can you make one of these as an example?" Supplied Hand-built starts (adventure-map style).md. Applies to a concrete example using the written-start system in PR #2153.
+
+- 2026-11-25 (Andy): fix the penguin NaN log spam (Ambient Creatures' Penguin.travel), "if that would help yes" -> PR #2161, merged.
+- 2026-11-25 (Andy): the next pbdr starts a NEW WORLD, but only when Andy says go ("something else is coming to master").
+- 2026-11-25 (Andy): for that new-world pbdr, the current world can be deleted ("the current one can be deleted"), not kept as a backup. One-time ruling; the pbdr skill's never-delete rule stands otherwise.
+- 2026-11-25 (Andy): Deck cleanup: emptied Trash, deleted world-backup-2026-11-17-0835 and -11-22-2040, emptied ~/Downloads; kept the shader cache.
