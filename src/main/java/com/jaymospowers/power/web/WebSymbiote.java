@@ -106,6 +106,8 @@ public final class WebSymbiote {
 	 * is slot 11 of the cooldowns), {@link #STEED_TOGGLE} takes or lets go of the horse under you ({@link WebSymbioteSteed}).
 	 */
 	public static final int WINGS_TOGGLE = 10, CLEANSE = 11, STEED_TOGGLE = 12;
+	/** The menu's Lash chip: the tendrils' sweep ({@link WebLash}; its cooldown is slot {@code LASH} of the cooldowns). */
+	public static final int LASH = 13;
 	/** Cooldown of each ability after use, in ticks (toggles: after switching). */
 	public static final int[] COOLDOWN = {100, 200, 20, 160, 240, 600};
 	/** Satiety each ability costs. */
@@ -1396,7 +1398,9 @@ public final class WebSymbiote {
 	 * there every one opens by the held bond; a web slinger's are {@link #UNLOCK_BOND}.
 	 */
 	public static int unlockBond(Player player, int ability) {
-		return Powers.has(player, WebPower.INSTANCE) ? UNLOCK_BOND[ability] : Math.min(UNLOCK_BOND[ability], WebSymbioteInfection.HOLD_BOND);
+		// (the white one's Aegis takes the Shroud tile from the Integrated stage)
+		int base = ability == SHROUD && state(player).kind() == WebSymbioteStrain.WHITE ? WebSymbioteMind.STAGE_AT[1] : UNLOCK_BOND[ability];
+		return Powers.has(player, WebPower.INSTANCE) ? base : Math.min(base, WebSymbioteInfection.HOLD_BOND);
 	}
 
 	/**
@@ -1669,7 +1673,7 @@ public final class WebSymbiote {
 		if (to > from) {
 			for (int i = 0; i < ABILITIES; i++) {
 				if (from < unlockBond(player, i) && to >= unlockBond(player, i)) {
-					whisper(player, "unlock_" + ABILITY_NAMES[i]);
+					whisper(player, "unlock_" + (i == SHROUD && state(player).kind() == WebSymbioteStrain.WHITE ? "aegis" : ABILITY_NAMES[i]));
 					player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.2F, 0.8F);
 				}
 			}
@@ -4433,6 +4437,10 @@ public final class WebSymbiote {
 			WebSymbioteSteed.toggle(player);
 			return;
 		}
+		if (ability == LASH) {
+			WebLash.use(player);
+			return;
+		}
 		// (0.19.69) (taking it off always answers: a sulk or a lockout only stops it coming up a form)
 		boolean climbing = ability == ARMOR && isBonded(player) && (form(player) == FORM_SKIN || form(player) < topForm(player));
 		if (climbing && lockedOut(player)) {
@@ -4507,7 +4515,7 @@ public final class WebSymbiote {
 			case CONSUME -> consume(player);
 			// in the big body, the Spike Burst is a roar
 			case SPIKES -> bulked(player) ? startRoar(player, live, now, false, null) : spikes(player);
-			case SHROUD -> shroud(player);
+			case SHROUD -> shroudTile(player);
 			default -> false;
 		};
 		if (!done) {
@@ -4518,12 +4526,12 @@ public final class WebSymbiote {
 			letGo(player, live);
 		}
 		if (ability == SPIKES || ability == SHROUD) {
-			narrate(player, ability == SHROUD ? "shroud" : bulked(player) ? "roar" : "spikes");
+			narrate(player, ability == SHROUD ? shroudAct(player) : bulked(player) ? "roar" : "spikes");
 		}
 		int cooldown = COOLDOWN[ability];
 		if (ability == SHROUD) {
 			// its cooldown runs from when it wears off
-			cooldown += SHROUD_TICKS;
+			cooldown += shroudSpan(player);
 		} else if (ability == ARMOR) {
 			// out: it can be put away again soon; away: its cooldown starts now
 			if (state(player).has(WebSymbioteState.ARMOR)) {
@@ -6440,6 +6448,35 @@ public final class WebSymbiote {
 		level.sendParticles(ParticleTypes.EXPLOSION, hit.x, hit.y, hit.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, 10, 0.15, 0.15, 0.15, 0.4);
 		level.sendParticles(dust(1.3F), hit.x, hit.y, hit.z, (int)Math.min(20.0F, 6.0F + dealt), 0.2, 0.2, 0.2, 0.0);
+	}
+
+	/**
+	 * The Shroud tile by strain: the black one's Carapace ({@link WebCarapace}), the white one's Aegis ({@link WebAegis}),
+	 * the red one's own Shroud.
+	 */
+	private static boolean shroudTile(ServerPlayer player) {
+		return switch (state(player).kind()) {
+			case BLACK -> WebCarapace.harden(player);
+			case WHITE -> WebAegis.raise(player);
+			default -> shroud(player);
+		};
+	}
+
+	/** What it says of the Shroud tile ({@link #narrate}'s act) and how long the tile's move lasts, by strain. */
+	private static String shroudAct(ServerPlayer player) {
+		return switch (state(player).kind()) {
+			case BLACK -> "carapace";
+			case WHITE -> "aegis";
+			default -> "shroud";
+		};
+	}
+
+	private static int shroudSpan(ServerPlayer player) {
+		return switch (state(player).kind()) {
+			case BLACK -> WebCarapace.TICKS;
+			case WHITE -> WebAegis.TICKS;
+			default -> SHROUD_TICKS;
+		};
 	}
 
 	/** Shroud: the suit swallows the light; you vanish until you strike, or until it tires. */
