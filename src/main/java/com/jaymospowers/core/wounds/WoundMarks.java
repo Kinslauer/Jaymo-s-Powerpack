@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
 public final class WoundMarks {
 	/** The kinds of mark, and how long each lasts at most (ticks). */
 	public enum Kind {
-		CUT(12000), CLAW(12000), STAB(12000), BRUISE(7200), BLAST(9600), SCORCH(9600);
+		CUT(12000), CLAW(12000), STAB(12000), BRUISE(7200), BLAST(9600), SCORCH(9600), HOLE(12000);
 
 		public final int life;
 
@@ -71,11 +71,19 @@ public final class WoundMarks {
 	public static final int MENDED_AGE = 600;
 	/** How often the server tidies marks (ticks). */
 	static final int TIDY_EVERY = 20;
+	/** A mark whose part has healed further than its age shows is moved on to match once it is this much of its life ahead. */
+	static final float HEAL_STEP = 0.1F;
+	/** A mark's part must have been hurt at least this much (share) for its healing to be measured. */
+	static final float HEAL_MEASURED_FROM = 0.1F;
+	/** A bullet's exit hole sits this far (of 255) from the entry across and down, at most. */
+	static final int EXIT_STRAY = 40;
 
 	/**
 	 * One mark. {@code shape} packs, from the bottom: the part (its {@link BodyPart#ordinal()}, 4 bits), the kind (3), the
 	 * side (2), where on that side across and down (8 and 8, 0 to 255) and its angle (8, 0 to 255 for a half turn), and 16
-	 * bits of seed for its own small shape. {@code laid} is the game time it was made.
+	 * bits of seed for its own small shape, then its depth ({@link CutDepth}, 2 bits), whether it is a bullet's exit hole
+	 * (1) and how hurt its part was when it was made (4 bits, 0 whole to 15 gone: what its healing is measured against).
+	 * {@code laid} is the game time it was made.
 	 */
 	public record Mark(long shape, long laid) {
 		public static final StreamCodec<io.netty.buffer.ByteBuf, Mark> STREAM_CODEC = StreamCodec.composite(
@@ -85,6 +93,32 @@ public final class WoundMarks {
 			long s = part.ordinal() & 0xF | (long) (kind.ordinal() & 0x7) << 4 | (long) (side & 0x3) << 7 | (long) (across & 0xFF) << 9
 				| (long) (down & 0xFF) << 17 | (long) (angle & 0xFF) << 25 | (long) (seed & 0xFFFF) << 33;
 			return new Mark(s, laid);
+		}
+
+		/** This mark with its depth ({@link CutDepth}), whether it is an exit hole, and how hurt the part was (0 to 1). */
+		public Mark with(int depth, boolean exit, float hurt) {
+			long s = this.shape & ~(0x3L << 49 | 0x1L << 51 | 0xFL << 52);
+			s |= (long) (depth & 0x3) << 49 | (exit ? 1L << 51 : 0L) | (long) Mth.clamp(Math.round(hurt * 15.0F), 0, 15) << 52;
+			return new Mark(s, this.laid);
+		}
+
+		/** This mark as if it were made at {@code when}. */
+		public Mark laidAt(long when) {
+			return new Mark(this.shape, when);
+		}
+
+		public int depth() {
+			return (int) (this.shape >> 49 & 0x3);
+		}
+
+		/** Whether it is a bullet's exit hole: bigger and ragged, on the far side. */
+		public boolean exit() {
+			return (this.shape >> 51 & 0x1) != 0;
+		}
+
+		/** How hurt its part was when it was made, 0 to 1. */
+		public float hurt() {
+			return (this.shape >> 52 & 0xF) / 15.0F;
 		}
 
 		public BodyPart part() {
@@ -169,6 +203,14 @@ public final class WoundMarks {
 			}
 		}
 		int side = side(victim, source.getSourcePosition(), random);
+		// a blade's depth, and the line of the swing that made a cut
+		int depth = CutDepth.NORMAL, angle = -1;
+		if (kind == Kind.CUT) {
+			depth = CutDepth.of(level, source.getWeaponItem());
+			if (source.getEntity() instanceof LivingEntity attacker) {
+				angle = SwingCuts.angle(attacker, now);
+			}
+		}
 		List<Mark> marks = new ArrayList<>(marks(victim));
 		if (kind == Kind.BLAST) {
 			List<BodyPart> parts = new ArrayList<>();
@@ -177,11 +219,22 @@ public final class WoundMarks {
 			}
 			Collections.shuffle(parts, new java.util.Random(random.nextLong()));
 			for (int i = 0; i < Math.min(BLAST_PARTS, parts.size()); i++) {
-				marks.add(make(parts.get(i), kind, side, random, now));
+				marks.add(make(victim, parts.get(i), kind, side, random, now, depth, -1, false, -1, -1));
 			}
 		} else {
 			BodyPart part = landed != null && plan.index(landed) >= 0 ? landed : BodyPart.BODY;
-			marks.add(make(part, kind, side, random, now));
+			Mark entry = make(victim, part, kind, side, random, now, depth, angle, false, -1, -1);
+			marks.add(entry);
+			if (kind == Kind.HOLE) {
+				// the bullet's way out: the far side of the same part, a little off the entry
+				int across = Mth.clamp(Math.round(entry.across() * 255.0F) + random.nextInt(2 * EXIT_STRAY + 1) - EXIT_STRAY, 40, 215);
+				int down = Mth.clamp(Math.round(entry.down() * 255.0F) + random.nextInt(2 * EXIT_STRAY + 1) - EXIT_STRAY, 30, 225);
+				marks.add(make(victim, part, kind, (side + 2) & 3, random, now, depth, -1, true, across, down));
+			}
+			if (kind == Kind.CUT || kind == Kind.CLAW) {
+				// (cuts on one limb add up, and may tear it off)
+				CutTotals.add(victim, plan, landed, loss, depth, source, now);
+			}
 		}
 		while (marks.size() > MOST) {
 			marks.remove(0);
@@ -190,10 +243,20 @@ public final class WoundMarks {
 		MARKED.put(victim, Boolean.TRUE);
 	}
 
-	private static Mark make(BodyPart part, Kind kind, int side, RandomSource random, long now) {
+	/** A mark on {@code part} of {@code victim}; {@code angle}, {@code across} and {@code down} (0 to 255) are picked at random when under 0. */
+	private static Mark make(LivingEntity victim, BodyPart part, Kind kind, int side, RandomSource random, long now, int depth, int angle, boolean exit,
+		int across, int down) {
 		// (kept off the very edges of the side, so the mark isn't cut in half by a seam)
-		int across = 40 + random.nextInt(176), down = 30 + random.nextInt(196);
-		return Mark.of(part, kind, side, across, down, random.nextInt(256), random.nextInt(65536), now);
+		if (across < 0) {
+			across = 40 + random.nextInt(176);
+		}
+		if (down < 0) {
+			down = 30 + random.nextInt(196);
+		}
+		if (angle < 0) {
+			angle = random.nextInt(256);
+		}
+		return Mark.of(part, kind, side, across, down, angle, random.nextInt(65536), now).with(depth, exit, 1.0F - Wounds.fraction(victim, part));
 	}
 
 	/** What a hit from {@code source} marks, or null for one that leaves none (magic, drowning, hunger). */
@@ -206,7 +269,8 @@ public final class WoundMarks {
 			return Kind.SCORCH;
 		}
 		if (source.is(DamageTypeTags.IS_PROJECTILE)) {
-			return Kind.STAB;
+			// a bullet leaves a hole in and a bigger one out; an arrow or bolt a puncture
+			return source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.Projectile shot && BladeBlood.bullet(shot) ? Kind.HOLE : Kind.STAB;
 		}
 		if (source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypes.FLY_INTO_WALL) || source.is(DamageTypes.FALLING_BLOCK)
 			|| source.is(DamageTypes.FALLING_ANVIL)) {
@@ -277,7 +341,16 @@ public final class WoundMarks {
 			long now = level.getGameTime();
 			if (tidy) {
 				List<Mark> kept = new ArrayList<>(marks.size());
+				boolean moved = false;
 				for (Mark mark : marks) {
+					// a mark closes as its part heals: moved on to where its part's healing puts it, if that is further than its age
+					if (body.isAlive() && mark.hurt() >= HEAL_MEASURED_FROM && Wounds.plan(body) != null && Wounds.plan(body).index(mark.part()) >= 0) {
+						float heal = Mth.clamp(1.0F - (1.0F - Wounds.fraction(body, mark.part())) / mark.hurt(), 0.0F, 1.0F);
+						if (heal > mark.age(now) + HEAL_STEP) {
+							mark = mark.laidAt(now - (long) (heal * mark.kind().life));
+							moved = true;
+						}
+					}
 					boolean old = now - mark.laid() >= mark.kind().life;
 					boolean mended = now - mark.laid() >= MENDED_AGE && body.isAlive() && Wounds.plan(body) != null
 						&& Wounds.plan(body).index(mark.part()) >= 0 && Wounds.fraction(body, mark.part()) >= MENDED;
@@ -285,7 +358,7 @@ public final class WoundMarks {
 						kept.add(mark);
 					}
 				}
-				if (kept.size() != marks.size()) {
+				if (kept.size() != marks.size() || moved) {
 					if (kept.isEmpty()) {
 						body.removeAttached(MARKS);
 						MARKED.remove(body);
@@ -313,7 +386,7 @@ public final class WoundMarks {
 		Mark fresh = null;
 		for (Mark mark : marks) {
 			Kind kind = mark.kind();
-			if ((kind == Kind.CUT || kind == Kind.CLAW || kind == Kind.STAB) && now - mark.laid() < DRIP_TICKS
+			if ((kind == Kind.CUT || kind == Kind.CLAW || kind == Kind.STAB || kind == Kind.HOLE) && now - mark.laid() < DRIP_TICKS
 				&& ((Bleeding.bleeding(body) | Bleeding.bandaged(body) | Bleeding.wrapped(body)) & Breaks.bit(mark.part())) == 0
 				&& (fresh == null || mark.laid() > fresh.laid())) {
 				fresh = mark;

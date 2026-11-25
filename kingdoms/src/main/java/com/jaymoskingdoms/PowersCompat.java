@@ -3534,6 +3534,13 @@ public final class PowersCompat {
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the class trees' extras (older Powers?)", e);
 		}
+		try {
+			// a Brute wrestles mobs down (and throws them) from the start, whatever their brawn (Wrestle)
+			java.util.function.Predicate<net.minecraft.world.entity.player.Player> wrestler = WarExtras::wrestles;
+			Class.forName("com.jaymospowers.core.Wrestle").getField("granted").set(null, wrestler);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the Brute's wrestling (older Powers?)", e);
+		}
 	}
 
 	/**

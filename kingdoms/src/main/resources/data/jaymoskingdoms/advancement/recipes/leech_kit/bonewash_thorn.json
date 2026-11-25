@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_corroding_thorn": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "jaymoskingdoms:corroding_thorn"
+          }
+        ]
+      }
+    },
+    "has_stripping_thorn": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "jaymoskingdoms:stripping_thorn"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": "jaymoskingdoms:bonewash_thorn"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_corroding_thorn",
+      "has_stripping_thorn",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "jaymoskingdoms:bonewash_thorn"
+    ]
+  }
+}

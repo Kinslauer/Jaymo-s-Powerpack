@@ -1,0 +1,12 @@
+{
+  "subtitles.jaymospowers.wound.hit.flesh": "Flesh cut",
+  "subtitles.jaymospowers.wound.hit.bone": "Bones rattle",
+  "subtitles.jaymospowers.wound.hit.metal": "Metal clangs",
+  "subtitles.jaymospowers.wound.hit.slime": "Slime squelches",
+  "subtitles.jaymospowers.wound.break.bone": "Bone snaps",
+  "subtitles.jaymospowers.wound.break.metal": "Metal buckles",
+  "subtitles.jaymospowers.wound.disarm": "Weapon knocked loose",
+  "message.jaymospowers.wounds.disarmed": "The blow knocks your weapon from your hand!",
+  "message.jaymospowers.takedown.too_strong": "%s is too strong to take down.",
+  "bar.jaymospowers.takedown": "Taking down %s"
+}

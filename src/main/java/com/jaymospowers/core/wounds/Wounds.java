@@ -191,6 +191,7 @@ public final class Wounds {
 		UndeadFortitude.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();
+		Pellets.register();
 		// bleeding, broken bones and lost limbs shown like potions
 		WoundSigns.register();
 		WoundMarks.register();
@@ -844,7 +845,14 @@ public final class Wounds {
 				LockOnRegions.onAimedHit(victim, source, landed, loss);
 			}
 			// a mark of what made it, where it landed
-			WoundMarks.onHit(victim, plan, source, landed, loss);
+			// (a shotgun blast's pellets are laid as one wound and one shove at the tick's end: Pellets)
+			if (!Pellets.gather(victim, plan, source, landed, loss)) {
+				WoundMarks.onHit(victim, plan, source, landed, loss);
+				// the part struck flinches, a light mob is shoved, a hurt mob takes its stance
+				com.jaymospowers.core.HitReactions.onHit(victim, source, landed, loss);
+			}
+			// a hard blow to the hand may knock its weapon loose
+			Disarms.onHit(victim, source, landed, loss);
 		}
 		if (victim.isAlive() && blacked(victim, was, points, plan)) {
 			// (survival picks) only a blow that landed on the head and blacked it out kills outright, and not from full health

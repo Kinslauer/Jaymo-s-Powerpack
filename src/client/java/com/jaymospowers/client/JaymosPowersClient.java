@@ -117,6 +117,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.web.WebbedLook.register();
 		com.jaymospowers.client.power.web.WebbedView.register();
 		com.jaymospowers.client.blood.Flies.register();
+		com.jaymospowers.client.blood.BloodScreen.init();
 		com.jaymospowers.client.blood.WeaponDrips.register();
 		com.jaymospowers.client.sound.SpotSounds.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
@@ -154,6 +155,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.ember.RunningHotClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
+		// (Visceral track 8) the ops-only gore reader
+		com.jaymospowers.client.reader.GoreReaderScreen.register();
 		// mixed slabs: the two slabs of one block, drawn by their block entity
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.buildblocks.MixedSlabs.ENTITY,
 			com.jaymospowers.client.buildblocks.MixedSlabRenderer::new);
@@ -326,6 +329,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.costume.CorpseCostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
 		HitStopClient.init();
+		HitReactionsClient.init();
+		KillMomentClient.init();
 		com.jaymospowers.client.hud.HudArrange.register();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.gear.GearClient.init();

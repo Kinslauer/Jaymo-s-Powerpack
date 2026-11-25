@@ -41,6 +41,8 @@ import org.jspecify.annotations.Nullable;
  * <p>(0.20.41, Hematic's idea) Whoever walks through a fresh pool carries it on their feet for a few steps
  * ({@link #print}): a line of footprints, left and right, pointing the way they went, fainter as it wears off. The prints
  * are the walker's (tracked like their blood).
+ * <p>Fire and lava on or beside a stain burn it away ({@link BloodBurn}); rain that runs a pool over the edge of its block
+ * carries part of it down to the ground below as a pool there.
  * <p>(0.20.54) Andy: "rain should wash away blood". A stain out in the rain shrinks by {@link #RAIN_WASH} each sync
  * ({@link #wash}), so a big pool is gone in about half a minute, a drip's in a few seconds; under a roof or the trees it
  * stays. A washed stain stops being a trail to follow.
@@ -65,6 +67,11 @@ public final class BloodTrail {
 	static final float DRIED_SCRUB = 0.5F;
 	/** How often players are sent the stains near them (ticks), and how near (blocks). */
 	static final int SYNC_TICKS = 10;
+	/**
+	 * Fire or lava on or beside a stain scrubs this much of its size each {@link #SYNC_TICKS}. Rain running a pool over the edge
+	 * of its block carries this many times what it would wash to the ground below, this share of it landing as a pool there.
+	 */
+	static final float BURN_WASH = 0.5F, RAIN_CARRY = 4.0F, CARRY_KEPT = 0.8F;
 	static final double SYNC_RANGE = 64.0;
 	/** Blood landing this close (blocks across, and up or down) to a stain soaks into it, which grows this much, to this size. */
 	static final double MERGE = 0.45, MERGE_UP = 0.5;
@@ -656,6 +663,7 @@ public final class BloodTrail {
 	 */
 	private static void wash(ServerLevel level, Marks marks, long now, boolean raining) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		List<Carry> carried = new ArrayList<>();
 		for (Mark mark : marks.order) {
 			if (mark.scale <= 0.0F || now < mark.showFrom) {
 				continue;
@@ -665,12 +673,23 @@ public final class BloodTrail {
 				continue;
 			}
 			float washed;
-			if (level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)) {
+			boolean rain = false;
+			if (BloodBurn.near(level, pos)) {
+				washed = BURN_WASH;
+			} else if (level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)) {
 				washed = WATER_WASH;
 			} else if (raining && level.isRainingAt(pos.set(mark.x, mark.y + 0.5, mark.z))) {
 				washed = RAIN_WASH;
+				rain = true;
 			} else {
 				continue;
+			}
+			if (rain && mark.shape == BloodParticles.Puddle.ROUND) {
+				Vec3 over = ledge(level, mark);
+				if (over != null) {
+					washed = Math.min(mark.scale, washed * RAIN_CARRY);
+					carried.add(new Carry(mark, over, washed * CARRY_KEPT));
+				}
 			}
 			mark.scale -= washed;
 			if (mark.scale < DRAWN_DRY) {
@@ -679,6 +698,43 @@ public final class BloodTrail {
 			}
 			mark.version++;
 		}
+		// rain ran the pool over the edge of its block: what it washed lands as a pool on the ground below
+		for (Carry carry : carried) {
+			lay(level, carry.mark.by, carry.mark.color, carry.at.x, carry.at.y + 0.5, carry.at.z, carry.scale, 0);
+		}
+
+	}
+
+	/** What rain carries off a stain: from {@code mark}, this much, to land at {@code at}. */
+	private record Carry(Mark mark, Vec3 at, float scale) {
+	}
+
+	/**
+	 * Where rain runs {@code mark} over a ledge: just past the edge of the whole block it lies on, on the side its pool
+	 * reaches, if there's nothing solid beside that edge and the ground is lower; null if it stays.
+	 */
+	private static @Nullable Vec3 ledge(ServerLevel level, Mark mark) {
+		BlockPos under = BlockPos.containing(mark.x, mark.y - 0.02, mark.z);
+		if (Math.abs(mark.y - (under.getY() + 1.0)) > 0.02 || !level.getBlockState(under).isCollisionShapeFullBlock(level, under)) {
+			return null;
+		}
+		double half = mark.scale * RADIUS;
+		for (net.minecraft.core.Direction face : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+			double edge = switch (face) {
+				case EAST -> under.getX() + 1.0 - mark.x;
+				case WEST -> mark.x - under.getX();
+				case SOUTH -> under.getZ() + 1.0 - mark.z;
+				default -> mark.z - under.getZ();
+			};
+			if (edge > half * 0.85) {
+				continue;
+			}
+			BlockPos beyond = under.relative(face);
+			if (level.getBlockState(beyond).getCollisionShape(level, beyond).isEmpty() && level.getFluidState(beyond).isEmpty()) {
+				return new Vec3(mark.x + face.getStepX() * (edge + 0.3), mark.y, mark.z + face.getStepZ() * (edge + 0.3));
+			}
+		}
+		return null;
 	}
 
 	/** Sends {@code player} the stains near it it hasn't seen yet (or seen smaller). */

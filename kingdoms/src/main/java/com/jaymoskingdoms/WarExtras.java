@@ -138,6 +138,11 @@ public final class WarExtras {
 		return victim instanceof Player player ? 1.0 - (1.0 - SKULL) * Math.min(1.0F, ClassTrees.power(player, SKULL_KEY)) : 1.0;
 	}
 
+	/** A Brute takes mobs down and throws them from the start, whatever their brawn (Jaymo's Powers' Wrestle). */
+	static boolean wrestles(Player player) {
+		return Classes.is(player, Classes.PlayerClass.BRUTE);
+	}
+
 	/** Scar Tissue: what the time {@code body}'s wounds take to close by themselves is multiplied by. */
 	static double closing(LivingEntity body) {
 		return body instanceof Player player ? 1.0 - (1.0 - SCAR_CLOSES) * Math.min(1.0F, ClassTrees.power(player, SCAR)) : 1.0;

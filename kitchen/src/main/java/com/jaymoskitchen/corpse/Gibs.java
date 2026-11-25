@@ -350,7 +350,7 @@ public final class Gibs {
 	}
 
 	/** One of a body's insides thrown out from {@code at}, mostly along {@code away}, {@code speed} times as hard as a chunk. */
-	private static void throwPiece(ServerLevel level, Vec3 at, Vec3 away, double width, int piece, Insides insides, float size, int life,
+	private static Gib throwPiece(ServerLevel level, Vec3 at, Vec3 away, double width, int piece, Insides insides, float size, int life,
 		double speed) {
 		RandomSource random = level.getRandom();
 		double angle = random.nextDouble() * Math.PI * 2.0;
@@ -366,6 +366,115 @@ public final class Gibs {
 		}
 		gib.setPiece(piece, insides.soft() ? insides.blood() : KitchenBlood.RED);
 		level.addFreshEntity(gib);
+		return gib;
+	}
+
+	/** Candy colours a piñata's sweets are, RGB: strawberry, lemon, mint, grape, orange, sky, bubblegum. */
+	static final int[] SWEETS = {0xFF5A7A, 0xFFE24D, 0x5BE3A0, 0xA05CE8, 0xFF9A3C, 0x55B8FF, 0xFF8FD8};
+	/** Sweets a man-sized body bursts into, at random between these (a bigger or smaller one more or fewer). */
+	static final int SWEETS_MIN = 8, SWEETS_MAX = 12;
+	/** Shards of ice a man-sized frozen body shatters into, at random between these; how hard they fly. */
+	static final int SHARDS_ICE_MIN = 8, SHARDS_ICE_MAX = 12;
+	static final double ICE_SPEED = 0.8;
+	static final int ICE_COLOUR = 0xCFEBFF;
+	/** A body that comes apart into loose bones: this many (a man's), and the bones' speed. */
+	static final int LOOSE_BONES_MIN = 3, LOOSE_BONES_MAX = 5;
+	/** Pieces a body flattened under a falling block sprays (a man's, more or fewer for a bigger or smaller one), and how gently. */
+	static final int FLAT_MIN = 3, FLAT_MAX = 5;
+	static final double FLAT_SPEED = 0.5;
+
+	/** One tinted, clean piece ({@code piece}, {@code rgb}) thrown from {@code at}, away from {@code away}. */
+	private static Gib throwTinted(ServerLevel level, Vec3 at, Vec3 away, double width, int piece, int rgb, float size, int life, double speed) {
+		Gib gib = throwPiece(level, at, away, width, piece, Insides.NONE, size, life, speed);
+		gib.setPiece(piece, rgb);
+		return gib;
+	}
+
+	/** A piñata's body bursts into sweets (candy-coloured pieces) instead of gore. */
+	private static void pinata(ServerLevel level, Vec3 at, Vec3 away, double width) {
+		RandomSource random = level.getRandom();
+		float size = goreSize(width);
+		for (int i = scaled(SWEETS_MIN + random.nextInt(SWEETS_MAX - SWEETS_MIN + 1), width); i > 0; i--) {
+			throwTinted(level, at, away, width, Gib.CANDY, SWEETS[random.nextInt(SWEETS.length)], size, life(random), 1.0);
+		}
+		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, at.x, at.y, at.z, 12, width * 0.4, 0.3, width * 0.4, 0.2);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.HOSTILE, 1.0F, 1.4F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_BLOCK_BREAK, SoundSource.HOSTILE, 0.6F, 1.6F);
+	}
+
+	/** A frozen body shatters: shards of ice fly out of it in all directions, and the frost hangs in the air. */
+	static void shatter(ServerLevel level, Vec3 at, double width, double height) {
+		RandomSource random = level.getRandom();
+		float size = goreSize(width);
+		Vec3 middle = at.add(0.0, Math.min(height, 2.0) * 0.4, 0.0);
+		for (int i = scaled(SHARDS_ICE_MIN + random.nextInt(SHARDS_ICE_MAX - SHARDS_ICE_MIN + 1), width); i > 0; i--) {
+			throwTinted(level, middle, Vec3.ZERO, width, Gib.ICE, ICE_COLOUR, size, life(random), ICE_SPEED);
+		}
+		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.ICE.defaultBlockState()), middle.x, middle.y, middle.z, 30,
+			width * 0.4, 0.4, width * 0.4, 0.2);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 1.0F, 0.8F);
+	}
+
+	/** A skeleton's body comes apart: a few loose bones tumble out of it. */
+	static void looseBones(ServerLevel level, Vec3 at, double width) {
+		RandomSource random = level.getRandom();
+		Insides bones = new Insides(KitchenBlood.NONE, true, false, "", "");
+		float size = goreSize(width);
+		for (int i = scaled(LOOSE_BONES_MIN + random.nextInt(LOOSE_BONES_MAX - LOOSE_BONES_MIN + 1), width); i > 0; i--) {
+			throwPiece(level, at, Vec3.ZERO, width, i % 3 == 0 ? Gib.RIBS : i % 3 == 1 ? Gib.BONE : Gib.SPINE, bones, size, life(random), REMAINS_SPEED);
+		}
+	}
+
+	/**
+	 * A falling block or anvil came down on {@code corpse}: flattened pieces of what it was (its chunks and insides, drawn wide
+	 * and thin) squirt out along the ground, and its blood spreads.
+	 */
+	static void crushed(CorpseEntity corpse, ServerLevel level) {
+		EntityType<?> type = corpse.sourceType();
+		double width = type == null ? corpse.getBbWidth() : type.getWidth() * corpse.bodyScale();
+		RandomSource random = level.getRandom();
+		Vec3 at = corpse.position().add(0.0, 0.15, 0.0);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_BLOCK_BREAK, SoundSource.HOSTILE, 1.0F, 0.5F);
+		if (Corpses.isMachine(type) || corpse.kind() == CorpseKind.FISH) {
+			return;
+		}
+		boolean sweets = GoreRules.pinata(level, corpse.blockPosition());
+		Insides insides = sweets ? Insides.NONE : Insides.of(corpse);
+		float size = goreSize(width);
+		int pieces = scaled(FLAT_MIN + random.nextInt(FLAT_MAX - FLAT_MIN + 1), width);
+		for (int i = 0; i < pieces; i++) {
+			Gib gib;
+			if (sweets) {
+				gib = throwTinted(level, at, Vec3.ZERO, width, Gib.CANDY, SWEETS[random.nextInt(SWEETS.length)], size, life(random), FLAT_SPEED);
+			} else if (insides.soft() && i % 2 == 0) {
+				gib = throwPiece(level, at, Vec3.ZERO, width, i % 4 == 0 ? Gib.ORGAN : Gib.GUTS, insides, size, life(random), FLAT_SPEED);
+			} else if (insides.bones() && i % 2 == 1) {
+				gib = throwPiece(level, at, Vec3.ZERO, width, Gib.BONE, insides, size, life(random), FLAT_SPEED);
+			} else {
+				// a flattened chunk of its own model
+				gib = new Gib(GIB, level);
+				gib.snapTo(at.x, at.y, at.z, random.nextFloat() * 360.0F, 0.0F);
+				double angle = random.nextDouble() * Math.PI * 2.0;
+				double out = GIB_SPEED * FLAT_SPEED * (0.4 + random.nextDouble() * 0.6);
+				gib.setDeltaMovement(Math.cos(angle) * out, GIB_HOP * 0.3, Math.sin(angle) * out);
+				gib.setUp(corpse.look(), size, life(random));
+				level.addFreshEntity(gib);
+			}
+			gib.setFlat();
+		}
+		if (!sweets && !ON_BURST.isEmpty() && corpse.level() instanceof ServerLevel) {
+			DamageSource source = level.damageSources().fallingBlock(null);
+			Map.Entry<DamageSource, Float> blow = Map.entry(source, 4.0F);
+			for (var hook : ON_BURST) {
+				try {
+					hook.accept(corpse, blow);
+				} catch (RuntimeException e) {
+					JaymosKitchen.LOGGER.warn("A blown-apart hook failed: {}", e.toString());
+				}
+			}
+		} else if (!sweets && insides.soft()) {
+			KitchenBlood.send(level, corpse, at.x, at.y, at.z, 24, width * 0.5, 0.1, width * 0.5, 0.2);
+		}
 	}
 
 	/**
@@ -394,7 +503,7 @@ public final class Gibs {
 	 * One piece of {@code kind} (offal, intestines, brain matter: an {@link OffalPileBlock}) falls from {@code from} onto the
 	 * first ground under it: a new pile, or onto one of its kind lying there.
 	 */
-	private static void layPile(ServerLevel level, BlockPos from, Block kind) {
+	static boolean layPile(ServerLevel level, BlockPos from, Block kind) {
 		BlockState pile = kind.defaultBlockState();
 		BlockPos.MutableBlockPos pos = from.mutable();
 		for (int fallen = 0; fallen <= ENTRAILS_DROP && level.isLoaded(pos); fallen++, pos.move(Direction.DOWN)) {
@@ -403,17 +512,19 @@ public final class Gibs {
 				int pieces = there.getValue(OffalPileBlock.PIECES);
 				if (pieces < OffalPileBlock.MAX) {
 					level.setBlock(pos, there.setValue(OffalPileBlock.PIECES, pieces + 1), Block.UPDATE_ALL);
+					return true;
 				}
-				return;
+				return false;
 			}
 			if (!there.isAir()) {
-				return;
+				return false;
 			}
 			if (pile.canSurvive(level, pos)) {
 				level.setBlock(pos, pile, Block.UPDATE_ALL);
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	/** A crushed skull's pieces of bone and lumps of brain thrown (for a man's head; a bigger or smaller one more or fewer). */
@@ -478,7 +589,10 @@ public final class Gibs {
 		Vec3 away = from == null ? Vec3.ZERO : at.subtract(from).multiply(1.0, 0.0, 1.0);
 		away = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize();
 		double reach = width * 0.35;
-		for (int i = 0; i < count; i++) {
+		EntityType<?> bodyType = body instanceof CorpseEntity corpse ? corpse.sourceType() : body.getType();
+		// a piñata (a rule, or the Candy Cavity): sweets, no chunks, no gore, no blood
+		boolean sweets = !Corpses.isMachine(bodyType) && GoreRules.pinata(level, body.blockPosition());
+		for (int i = 0; i < (sweets ? 0 : count); i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double cos = Math.cos(angle), sin = Math.sin(angle);
 			Gib gib = new Gib(GIB, level);
@@ -490,7 +604,11 @@ public final class Gibs {
 			gib.setUp(look, size, LIFE_MIN + random.nextInt(LIFE_MAX - LIFE_MIN + 1));
 			level.addFreshEntity(gib);
 		}
-		gore(level, at.add(0.0, body.getBbHeight() * 0.4, 0.0), away, width, insides);
+		if (sweets) {
+			pinata(level, at.add(0.0, body.getBbHeight() * 0.4, 0.0), away, width);
+		} else {
+			gore(level, at.add(0.0, body.getBbHeight() * 0.4, 0.0), away, width, insides);
+		}
 		for (ItemStack stack : loot) {
 			if (!stack.isEmpty()) {
 				ItemEntity item = new ItemEntity(level, at.x, at.y + 0.3, at.z, stack);
@@ -505,6 +623,9 @@ public final class Gibs {
 			level.sendParticles(debris, at.x, at.y + 0.4, at.z, 40, width * 0.4, 0.3, width * 0.4, 0.3);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_GOLEM_DEATH, SoundSource.HOSTILE, 1.0F, 0.8F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_BREAK, SoundSource.HOSTILE, 1.0F, 0.6F);
+			return;
+		}
+		if (sweets) {
 			return;
 		}
 		if (ON_BURST.isEmpty() || source == null) {

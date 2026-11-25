@@ -94,7 +94,22 @@ public final class KitchenBlood {
 				bodyBlood = null;
 			}
 		}
-		return RED;
+		return kind(body.getType());
+	}
+
+	/**
+	 * What a kind of body bleeds without Jaymo's Powers to say, matching Powers' {@code BladeBlood.color}: a creeper's
+	 * green, an enderman's purple, a slime's green, a magma cube's orange, nothing from bones and golems; red otherwise.
+	 */
+	private static int kind(net.minecraft.world.entity.EntityType<?> type) {
+		return switch (BuiltInRegistries.ENTITY_TYPE.getKey(type).getPath()) {
+			case "creeper" -> 0x4FA13A;
+			case "enderman" -> 0x800D80;
+			case "slime" -> 0x76BE6D;
+			case "magma_cube" -> 0xFF5A0A;
+			case "skeleton", "wither_skeleton", "stray", "bogged", "iron_golem" -> NONE;
+			default -> RED;
+		};
 	}
 
 	/** Sends {@code count} of it at {@code x, y, z} as {@code sendParticles} would (nothing without Powers). */

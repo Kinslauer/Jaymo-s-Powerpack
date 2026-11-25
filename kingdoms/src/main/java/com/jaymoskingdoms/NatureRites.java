@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
  * </ul>
  */
 public final class NatureRites {
-	public static final Set<String> SPELLS = Set.of("plant_growth", "control_weather", "moonbeam", "heroes_feast");
+	public static final Set<String> SPELLS = Set.of("plant_growth", "control_weather", "moonbeam", "heroes_feast", GreenReturn.SPELL);
 	/** Plant growth: how far from the spot it reaches (blocks) across and up and down, how many times a plant is coaxed. */
 	static final int GROW_RADIUS = 12, GROW_UP = 3, GROW_DOWN = 2, COAXINGS = 6;
 	/** The sky's rite: how long the new weather lasts (ticks), and how long the rite takes (ticks). */
@@ -56,6 +56,7 @@ public final class NatureRites {
 			case "plant_growth" -> grow(level, caster);
 			case "moonbeam" -> Moonbeam.cast(level, caster, power);
 			case "heroes_feast" -> HeroesFeast.cast(level, caster);
+			case GreenReturn.SPELL -> GreenReturn.cast(level, caster);
 			default -> weather(level, caster);
 		};
 	}

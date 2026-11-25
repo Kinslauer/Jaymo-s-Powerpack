@@ -26,9 +26,13 @@ public class JaymosPowers implements ModInitializer {
 		// (the sling's use on a horse comes before Carry's, which would otherwise lift a horse a Gravity user can carry)
 		com.jaymospowers.core.Sling.init();
 		com.jaymospowers.core.Carry.init();
+		// grab and take down (or throw) a standing mob by hand: sneak + hold use, empty hands
+		com.jaymospowers.core.Wrestle.init();
 		// (Andy, 2026-11-20) a tap of use on a body opens what can be done to it
 		com.jaymospowers.core.BodyMenu.init();
 		com.jaymospowers.core.Perch.init();
+		// (Visceral track 8) the ops-only reader of how mobs and weapons are read, and its overrides file
+		com.jaymospowers.core.reader.GoreReader.init();
 		com.jaymospowers.core.Kneel.init();
 		com.jaymospowers.core.Crawl.init();
 		// (0.18.57) Sneak + the wheel steps through the stances
@@ -83,6 +87,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.combat.ClashFx.init();
 		// sparks off a blow, a strike or an arrow that lands on metal armour, a metal body or a metal block
 		com.jaymospowers.combat.MetalHits.init();
+		// hit and break sounds by what a body is made of: bone, metal, slime, flesh
+		com.jaymospowers.combat.HitSounds.init();
 		// blades keep an edge: dulled by use, put right at a grindstone
 		com.jaymospowers.combat.Edge.init();
 		// every magic effect's type: beam, blast, ring, orb, sigil, mote, miasma
@@ -111,6 +117,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.OffhandLanterns.init();
 		com.jaymospowers.core.Shakes.register();
 		com.jaymospowers.core.HitStop.register();
+		com.jaymospowers.core.HitReactions.register();
+		com.jaymospowers.core.KillMoment.register();
 		com.jaymospowers.core.GroundCracks.register();
 		com.jaymospowers.core.UltimateFilm.register();
 		com.jaymospowers.core.Soundscape.register();
@@ -302,6 +310,8 @@ public class JaymosPowers implements ModInitializer {
 		// wet and soaked, rust on metal armour, scrubbing with a straw wisp or sand
 		com.jaymospowers.core.wet.Wet.init();
 		com.jaymospowers.core.wet.Rust.init();
+		// holes worn into armour by hard blows (core/ArmourHoles), wiped by a repair
+		com.jaymospowers.core.ArmourHoles.init();
 		com.jaymospowers.core.wet.ArmourOil.init();
 		com.jaymospowers.core.wet.Scrubbing.init();
 		com.jaymospowers.moving.PullRiders.init();
@@ -331,7 +341,7 @@ public class JaymosPowers implements ModInitializer {
 		String[] holders = {
 			"boxing.PressurePoints", "core.wounds.LastHold", "mutation.ConjoinedTwins", "fishing.LureDepth",
 			"core.OneHolder", "costume.MaskMotion",
-			"core.Affinity", "divine.DivineSense", "dogs.Dogs", "core.wet.Smell", "compat.HomesteadsCompat", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.Sling", "core.CarryBlock", "core.Perch", "core.Crawl", "core.Dismember", "core.Prosthetics", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.ProneHaul", "core.LockOn", "core.Mastery", "core.Meditate", "core.Powers", "core.Stance", "core.SwallowedPower", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Stubborn", "core.wounds.DownedLie", "core.wounds.DownedStruggle", "core.wounds.Mortality", "core.wounds.Revival", "core.wounds.Limbo", "core.wounds.OutOfBody", "core.wounds.Karma", "core.wounds.Afflictions", "core.wounds.Scars", "core.wounds.Breaks", "core.wounds.Adrenaline", "core.wounds.Fainting", "core.wounds.Exhaustion", "core.wounds.SpinDizzy", "core.wounds.Bleeding", "core.wounds.Treatment", "core.wounds.WoundMarks", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tripped", "core.wounds.LegFell", "core.wounds.Tending", "core.wounds.HeartCrystals", "core.blood.Bloodied", "core.wet.ArmourGrime", "core.wet.Wet", "core.blood.BleedOut", "core.finisher.Finishers", "core.finisher.Prompts", "core.gifted.Gifted", "core.gifted.GiftedCostume", "core.mobs.BlightMobs", "combat.Guard", "combat.PassiveBlocks", "combat.HitStreak", "combat.Armed", "combat.BladeStyle", "armory.Twinblade",
+			"core.Affinity", "divine.DivineSense", "dogs.Dogs", "core.wet.Smell", "compat.HomesteadsCompat", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.Sling", "core.CarryBlock", "core.Perch", "core.Crawl", "core.Dismember", "core.Prosthetics", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.ProneHaul", "core.LockOn", "core.Mastery", "core.Meditate", "core.Powers", "core.Stance", "core.SwallowedPower", "core.wounds.Wounds", "core.MobHurtStances", "core.wounds.Downed", "core.wounds.Stubborn", "core.wounds.DownedLie", "core.wounds.DownedStruggle", "core.wounds.Mortality", "core.wounds.Revival", "core.wounds.Limbo", "core.wounds.OutOfBody", "core.wounds.Karma", "core.wounds.Afflictions", "core.wounds.Scars", "core.wounds.Breaks", "core.wounds.Adrenaline", "core.wounds.Fainting", "core.wounds.Exhaustion", "core.wounds.SpinDizzy", "core.wounds.Bleeding", "core.wounds.Treatment", "core.wounds.WoundMarks", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tripped", "core.wounds.LegFell", "core.wounds.Tending", "core.wounds.HeartCrystals", "core.blood.Bloodied", "core.wet.ArmourGrime", "core.wet.Wet", "core.blood.BleedOut", "core.finisher.Finishers", "core.finisher.Prompts", "core.gifted.Gifted", "core.gifted.GiftedCostume", "core.mobs.BlightMobs", "combat.Guard", "combat.PassiveBlocks", "combat.HitStreak", "combat.Armed", "combat.BladeStyle", "armory.Twinblade",
 			"power.arsenal.ArsenalArmory", "power.arsenal.GlassGauntlet", "power.arsenal.ArsenalAnywhere", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.ArsenalEmber", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons", "power.arsenal.ArsenalWing", "power.arsenal.ArsenalWingMoves", "power.arsenal.ArsenalGift", "power.arsenal.ArsenalStorm", "power.arsenal.ArsenalRide", "power.arsenal.ArsenalChains", "power.arsenal.ArsenalPlaces", "power.arsenal.ArsenalStanding",
