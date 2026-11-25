@@ -44,7 +44,6 @@ final class WebSymbioteHud {
 
 	private static Component words;
 	private static long wordsAt;
-	private static final ItemStack SHIELD = new ItemStack(Items.SHIELD), SWORD = new ItemStack(Items.IRON_SWORD), CARPET = new ItemStack(Items.ENDER_EYE);
 
 	private WebSymbioteHud() {
 	}
@@ -110,14 +109,15 @@ final class WebSymbioteHud {
 		return WebSymbioteMindUi.TEXT[WebSymbioteMind.mood(player).ordinal()];
 	}
 
+	/** Made when drawn: an ItemStack made while the class loads, before the items' components are bound, crashed the game on start. */
 	private static ItemStack orderIcon(LocalPlayer player) {
 		if (player.getAttached(WebSymbioteMind.MIND) == null) {
 			return null;
 		}
 		return switch (WebSymbioteMind.mind(player).order()) {
-			case WebSymbioteMind.PROTECT -> SHIELD;
-			case WebSymbioteMind.HUNT -> SWORD;
-			case WebSymbioteMind.HIDE -> CARPET;
+			case WebSymbioteMind.PROTECT -> new ItemStack(Items.SHIELD);
+			case WebSymbioteMind.HUNT -> new ItemStack(Items.IRON_SWORD);
+			case WebSymbioteMind.HIDE -> new ItemStack(Items.ENDER_EYE);
 			default -> null;
 		};
 	}
