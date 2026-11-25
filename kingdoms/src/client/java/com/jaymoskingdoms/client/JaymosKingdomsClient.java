@@ -315,6 +315,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		MoonClient.register();
 		// the Wither's night: the sky stays dark while one lives
 		WitherNightClient.register();
+		// the Wither's own look, animations and glow
+		com.jaymoskingdoms.client.wither.WitherRenderer.register();
 		HordeDaysClient.register();
 		// the real night sky: the HYG catalog's stars and the 88 constellation figures,
 		// drawn as camera-centred sky geometry at night (never replaces the vanilla sky renderer)

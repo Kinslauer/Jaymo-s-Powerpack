@@ -181,3 +181,8 @@ cryptbound_revenant.png (bbmodels/cryptbound_revenant.json): the cryptbound reve
 bombardier_beetle.png (bbmodels/bombardier_beetle.json): the bombardier beetle
   The crystal beetle above, remodelled: its crystals taken off and its shell repainted rust and blue-black
   (kingdoms/tools/gen_labyrinth_craft.py). "Crystal Beetle" by yair (@yairtalmy2111), CC BY 4.0.
+
+wither.png, wither_glow.png, wither_pale.png (bbmodels/wither.json, wither_armor.json): the Wither's own look
+  Our own model, skin and animations, made from nothing by tools/gen_wither.py (editable: kingdoms/art/wither.bbmodel).
+  Wither: Reincarnated (All Rights Reserved) gave ideas only; nothing of its art. The half-health shield draws vanilla's
+  own wither_armor swirl.
