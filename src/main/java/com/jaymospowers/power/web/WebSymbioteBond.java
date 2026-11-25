@@ -126,6 +126,10 @@ public final class WebSymbioteBond {
 
 	/** Still settling in: none of its abilities answer (never in creative). Synced to the owner only. */
 	public static boolean dormant(Player player) {
+		if (WebSymbioteSleep.out(player)) {
+			// (its symbiote is out walking while it sleeps: unsuited, nothing answers)
+			return true;
+		}
 		Integer left = player.getAttached(DORMANT);
 		return left != null && left > 0 && !player.isCreative();
 	}

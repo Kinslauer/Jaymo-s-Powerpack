@@ -1218,6 +1218,8 @@ public final class WebSymbiote {
 		long escapeAt;
 		/** A weak bond's takeover on a whim; when it may next speak; the struggle against its hold (presses, fading), the last press, and whether it answered it. */
 		boolean feral;
+		/** The black one's night prowl ({@link WebSymbioteProwl}): a takeover to stalk and kill one hostile mob, then it gives the body back. */
+		boolean prowl;
 		long narrateAt;
 		float struggle;
 		long struggleAt;
@@ -1271,6 +1273,9 @@ public final class WebSymbiote {
 		// (0.13.4) nor lets a fall kill you: it pools over your legs and takes the landing
 		WebSymbioteCushion.register();
 		WebSymbioteReflexes.register();
+		WebSymbioteSleep.register();
+		WebSymbioteDoors.register();
+		WebSymbioteVillage.register();
 		WebSymbioteWings.register();
 		WebSymbioteJar.register();
 		WebSymbioteSteed.register();
@@ -1759,6 +1764,10 @@ public final class WebSymbiote {
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		// its blob is out walking while you sleep: nothing else of it runs (WebSymbioteSleep)
+		if (WebSymbioteSleep.tick(player, state, now)) {
+			return;
+		}
 		// (0.15.69) you went down: it gets you up and away (WebSymbioteRescue), and has the wheel till then
 		if (WebSymbioteRescue.tick(player, state, now)) {
 			return;
@@ -1779,9 +1788,15 @@ public final class WebSymbiote {
 		WebSymbioteCollect.tick(player, now);
 		// (0.17.150) its trust, mood, orders and requests (WebSymbioteMind)
 		WebSymbioteMind.tick(player, state, now);
+		// (the black one now and then takes you out to kill something at night: WebSymbioteProwl)
+		WebSymbioteProwl.tick(player, state, now);
+		// golems turn on a host whose symbiote shows, villagers shy from the black one (WebSymbioteVillage)
+		WebSymbioteVillage.tick(player, state, now);
 		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
 		WebSymbioteBond.tick(player, now);
 		WebSymbioteCushion.tick(player, now);
+		// the big bodies congeal through a 1x2 gap and form whole again (WebSymbioteDoors)
+		WebSymbioteDoors.tick(player);
 		WebSymbioteMend.tick(player, now);
 		boolean dormant = WebSymbioteBond.dormant(player);
 		WebSymbioteState next = state;
@@ -2706,6 +2721,8 @@ public final class WebSymbiote {
 				whisper(player, lines + "rival." + (1 + player.getRandom().nextInt(SAY_LINES)));
 			} else if (live.bloodlust) {
 				whisper(player, "red.hunt." + (1 + player.getRandom().nextInt(SAY_LINES)));
+			} else if (live.prowl) {
+				whisper(player, "prowl." + (1 + player.getRandom().nextInt(WebSymbioteProwl.LINES)));
 			} else if (live.feral && !live.curious && !live.hunting) {
 				// a different complaint each time
 				int line = player.getRandom().nextInt(NEGLECT_LINES - 1);
@@ -3192,6 +3209,12 @@ public final class WebSymbiote {
 		live.moveDeck = null;
 		live.hunting = false;
 		live.feral = false;
+		if (live.prowl) {
+			live.prowl = false;
+			if (player.isAlive()) {
+				whisper(player, "prowl.done." + (1 + player.getRandom().nextInt(WebSymbioteProwl.DONE_LINES)));
+			}
+		}
 		live.spree = false;
 		live.mending = false;
 		live.bloodlust = false;
@@ -3254,6 +3277,22 @@ public final class WebSymbiote {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.9F, 0.6F);
 			level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.3, 0.7, 0.3, 0.0);
 		}
+	}
+
+	/** The night prowl (see {@link WebSymbioteProwl}): it takes the wheel to stalk and kill {@code target}, for sport. */
+	static boolean prowl(ServerPlayer player, LivingEntity target) {
+		Live live = live(player);
+		long now = player.level().getGameTime();
+		if (!mindFree(player, live) || now < live.takeoverReadyAt) {
+			return false;
+		}
+		live.rampage = false;
+		live.curious = false;
+		live.feral = false;
+		live.prowl = true;
+		startTakeover(player, live, now, target);
+		live.prowl = live.takeoverTicks > 0;
+		return live.prowl;
 	}
 
 	/** An ignored request for a kill (or a night hunt): it takes the wheel for the nearest hostile, or any wild creature if none. */
@@ -4847,7 +4886,8 @@ public final class WebSymbiote {
 		}
 	}
 
-	private static void removeArmor(ServerPlayer player) {
+	static void removeArmor(ServerPlayer player) {
+		WebSymbioteDoors.clear(player);
 		AttributeInstance absorb = player.getAttribute(Attributes.MAX_ABSORPTION);
 		if (absorb != null && absorb.hasModifier(ARMOR_ABSORB_ID)) {
 			absorb.removeModifier(ARMOR_ABSORB_ID);

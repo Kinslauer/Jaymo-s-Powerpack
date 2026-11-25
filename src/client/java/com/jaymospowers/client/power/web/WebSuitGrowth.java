@@ -103,6 +103,17 @@ public final class WebSuitGrowth {
 	 * ({@link com.jaymospowers.power.web.WebSymbioteCushion}), or null. Only drawn bare of the suit (the suit takes no
 	 * fall damage).
 	 */
+	/**
+	 * On a player's render state while their big body congeals through a gap ({@link com.jaymospowers.power.web.WebSymbioteDoors}):
+	 * how far through the squeeze it is (0-1), else null. Its real size shrinks with it (the server cuts the scale), so the
+	 * models stretch back up to the height they had (and a little past) and narrow to {@code SQUEEZE_NARROW} less across:
+	 * a tall thin body poured through a slot, then it reforms.
+	 */
+	public static final RenderStateDataKey<Float> SQUEEZE = RenderStateDataKey.create(() -> "jaymospowers:web_suit_squeeze");
+	private static final Map<Model<?>, Boolean> SQUEEZED = new WeakHashMap<>();
+	static final float SQUEEZE_NARROW = 0.45F, SQUEEZE_STRETCH = 0.12F;
+	/** A model's root: its feet sit this far (model pixels) below its origin. */
+	static final float FEET = 24.0F;
 	public static final RenderStateDataKey<Float> CUSHION = RenderStateDataKey.create(() -> "jaymospowers:web_suit_cushion");
 	/** How much wider than the leg the goo pools at the foot, and how hard its surface ripples. */
 	static final float CUSHION_SPREAD = 0.22F, CUSHION_RIPPLE = 0.06F;
@@ -152,6 +163,8 @@ public final class WebSuitGrowth {
 	static void extract(Player player, AvatarRenderState state, float partialTicks) {
 		int now = level(player);
 		state.setData(CUSHION, cushion(player, partialTicks));
+		float squeeze = com.jaymospowers.power.web.WebSymbioteDoors.share(player);
+		state.setData(SQUEEZE, squeeze > 0.0F ? squeeze : null);
 		long[] change = CHANGES.get(player.getId());
 		// game time, not the player's own age: a respawned player's age starts over, which would hold a change
 		// (the suit falling away at death) part-done until it caught up
@@ -293,6 +306,7 @@ public final class WebSuitGrowth {
 			mcaUnder(model, covered(avatar) && !bared(avatar), faceShown(avatar));
 			return;
 		}
+		squeeze(model, avatar.getData(SQUEEZE));
 		float k = hulkness(avatar);
 		boolean slender = slender(avatar);
 		if (model instanceof net.minecraft.client.model.HumanoidModel<?> humanoid) {
@@ -365,6 +379,32 @@ public final class WebSuitGrowth {
 		if (WebSymbioteClient.ownFirstPerson(avatar)) {
 			player.head.visible = false;
 		}
+	}
+
+	/**
+	 * The squeeze on a model (every one drawn for the wearer, so they stay together): its root stretched back to the full
+	 * height (and a touch more) and narrowed, its feet kept where they were. Set from the model's own start each time.
+	 */
+	private static void squeeze(Model<?> model, @org.jspecify.annotations.Nullable Float share) {
+		net.minecraft.client.model.geom.ModelPart root = model.root();
+		if (share == null) {
+			if (SQUEEZED.remove(model) != null) {
+				// (reformed: a model that isn't re-posed every frame mustn't keep the squeeze)
+				root.xScale = 1.0F;
+				root.yScale = 1.0F;
+				root.zScale = 1.0F;
+				root.y = root.getInitialPose().y();
+			}
+			return;
+		}
+		SQUEEZED.put(model, Boolean.TRUE);
+		float undo = 1.0F / (1.0F - com.jaymospowers.power.web.WebSymbioteDoors.CUT * share);
+		float up = undo * (1.0F + SQUEEZE_STRETCH * share);
+		float across = undo * (1.0F - SQUEEZE_NARROW * share);
+		root.xScale = across;
+		root.zScale = across;
+		root.yScale = up;
+		root.y = root.getInitialPose().y() + FEET * (1.0F - up);
 	}
 
 	/** Moves a model drawn outside the usual passes (a layer reading the body's parts) out to the big body's frame. */
