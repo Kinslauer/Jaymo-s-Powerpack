@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: waterskin-redesign
 branch: claude/waterskin-redesign
 with: Claude Opus 5.5 (T3 Code), Codex as one of the artists
-pr: 
+pr: 2124
 mods: kitchen
 versions: 
 started: 2026-11-24
@@ -25,3 +25,6 @@ recoloured, though two are called canteens.
 - Dragon Canteen kept as a vessel of dragon's breath (its recipe), not hide or bone, so no new lore claim.
 
 ## Done
+PR #2124. A judge scored the sets (Claude artists: C 39/50, A 34, B 34; Codex 32), I applied six of its pixel fixes after
+checking them. A player sees a stitched hide bag, a round iron canteen and a glowing two-bulb flask of dragon's
+breath. Textures only. Not checked in game. Runner-up sets in the session scratchpad.

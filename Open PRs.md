@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-24 19:00
+updated: 2026-11-24 19:10
 ---
 # Open PRs
 
-3 open, as of 2026-11-24 19:00. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-24 19:10. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2110](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2110) Village mods patch 6: small structures (Kingdoms) (draft)
@@ -16,7 +16,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** [[village-mods-5]]
 
-## [#2123](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2123) Cave band: four hide skins of their own
-- **Branch:** `claude/project-thread-dzutw2` · **Updated:** 2026-11-25 (today)
+## [#2124](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2124) Kitchen: redesign the waterskins (leather bag, round iron canteen, dragon's-breath flask)
+- **Branch:** `claude/waterskin-redesign` · **Updated:** 2026-11-25 (today)
 - **Checks:** ⏳ 3 of 4 running
-- **Agent:** no agent note
+- **Agent:** [[waterskin-redesign]]

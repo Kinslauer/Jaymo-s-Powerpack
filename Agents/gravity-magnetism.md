@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Work the X-Men mod's Magnetism power into Gravity
 branch: claude/project-thread-m8uaao
 with: Claude (project thread)
@@ -24,3 +24,4 @@ owns:
 - Magnetism in the video: Magnetic Bolt, Force Field, Magnetic Shockwave, Magnetic Cannon, Rip Away, Gravity Squeeze (ult), Metal Grasp, Disarm, Polarity, Magnetic Flight, Metallic Curtain, Magnetic Forge, Metal Prison, Collapse, Scrap Barrage.
 
 ## Done
+- 2026-11-24 19:12 No sign of work for 30 min: marked stalled (whoever ran it stopped).
