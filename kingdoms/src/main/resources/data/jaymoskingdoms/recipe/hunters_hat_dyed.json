@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_dye",
+  "dye": "#minecraft:dyes",
+  "group": "dyed_armor",
+  "result": {
+    "id": "jaymoskingdoms:hunters_hat"
+  },
+  "target": "jaymoskingdoms:hunters_hat"
+}

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "ingredients": [
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "minecraft:feather",
+    "minecraft:feather",
+    "minecraft:light_gray_dye"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:landsknecht_bonnet",
+    "components": {
+      "jaymoskingdoms:second_colour": 11250603
+    }
+  }
+}

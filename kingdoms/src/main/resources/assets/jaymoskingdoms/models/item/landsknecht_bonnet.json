@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/landsknecht_bonnet",
+    "layer1": "jaymoskingdoms:item/landsknecht_bonnet_trim"
+  }
+}
