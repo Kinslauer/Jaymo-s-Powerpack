@@ -3,7 +3,7 @@ status: stalled
 task: Andy's thread "Borrow Hand of God power effects"
 branch: claude/project-thread-pht3yb
 with: Claude (cloud thread)
-pr: 
+pr: 2134
 mods: powers
 versions: 
 started: 2026-11-25
