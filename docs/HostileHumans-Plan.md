@@ -138,4 +138,23 @@ the behaviour spec, and the code, names and numbers below are ours. Credit both 
 
 ## As built
 
-(filled in as each patch lands)
+All 39 rows are built: one commit per patch, then one review-fix commit per pair, after an independent check of each
+patch (66 issues found and fixed). What a player sees is in `changes/kingdoms/claude-project-thread-jgzz4p.md`.
+Main classes: `WeaponSense`, `Boomerangs`, `BreakOff`, `BeltPouch`, `ShieldSense`, `Blows`, `NpcEyes`, `DangerSense`,
+`Detours`, `Hiding`, `Passages`, `Climbing`, `Disembark`, `PathProbes`, `BandStyles`, `NpcDodge`, `DualBlades`.
+
+Where the build differs from the rows above, or stops short:
+- `bm-heal`: Folk had no pack, so fighting Folk carry a 3-slot `BeltPouch`, filled the first time it's looked in.
+  With nothing to mend with, a fighter falls back once a fight, then fights on hurt (the rows didn't say).
+- `PackUse`'s older band "draught" (40% from nothing, once a day) still runs; Andy is deciding.
+- `ws-bands`: guards who carry a few javelins hold the javelin band only while they have throws left.
+- `sh-busy`: vanilla and MCA crossbowmen charge with the shield down (one item in use at a time) and wait loaded
+  behind it; Folk crossbowmen reload fully behind it.
+- `ml-reach`: spacing only; vanilla hit reach is unchanged.
+- `pt-doors`, `pt-ladders`, `pt-detour`, danger sense: humanoid fighters with a foe (Folk, illagers, MCA
+  villagers, piglins for paths); zombies, skeletons and witches don't get them (undead already seek shade, and
+  climbing zombies would raid bases). Everyone runs from TNT. Raiders can work gates, hatches and an iron door's
+  near-side switch; `Locks` keeps them out.
+- `st-dodge`: Powers' roll pose draws players only, so NPCs have their own (`NpcRollPose`).
+- MCA archers used to shoot free arrows; they now spend from `MobAmmo` like everyone else.
+- Nothing has been played. Mixins are checked with javap and compile, not seen applying at runtime.
