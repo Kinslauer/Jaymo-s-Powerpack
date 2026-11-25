@@ -39,6 +39,8 @@
 		"ItemLayerRenderStateAccessor",
 		"BloodItemOverlayMixin",
 		"BloodVideoSettingsMixin",
+		"MotionVideoSettingsMixin",
+		"HitPoseModelFeatureRendererMixin",
 		"BloodDebugLineMixin",
 		"FaceLivingEntityRendererMixin",
 		"TerrainParticleWaterMixin",

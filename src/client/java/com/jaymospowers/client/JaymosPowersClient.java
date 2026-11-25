@@ -326,6 +326,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.costume.CorpseCostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
 		HitStopClient.init();
+		HitReactionsClient.init();
+		KillMomentClient.init();
 		com.jaymospowers.client.hud.HudArrange.register();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.gear.GearClient.init();

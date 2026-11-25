@@ -845,6 +845,8 @@ public final class Wounds {
 			}
 			// a mark of what made it, where it landed
 			WoundMarks.onHit(victim, plan, source, landed, loss);
+			// the part struck flinches, a light mob is shoved, a hurt mob takes its stance
+			com.jaymospowers.core.HitReactions.onHit(victim, source, landed, loss);
 		}
 		if (victim.isAlive() && blacked(victim, was, points, plan)) {
 			// (survival picks) only a blow that landed on the head and blacked it out kills outright, and not from full health
