@@ -17587,3 +17587,7 @@ Realm troops can draw their kettle cut, a regional helm, or a third helm suited 
 
 - A stargazer's "Ask about the stars" now has a line to give a pinch of Powers' stardust (caught from a falling star in a glass bottle) for a hint of where in the sky to look for a world not yet on the pod's map. Reflection only; without Powers' stardust nothing changes.
 - Built; not played.
+
+## 0.13.8 (2026-11-25): Fae Woods mobs drop their forage and the cap stairs can be crafted (#2182)
+
+The loot of the bloatshroom, mimicap, shambler and truffler and the bouncecap, glowcap and inkcap stairs recipes were written in a form 26.3 does not read, which stopped the server starting. They now load: the mobs drop their mushrooms and the stairs craft as usual.
