@@ -62,8 +62,10 @@ final class JournalScreen extends Screen {
 	static final int COLOR_ENDED = COLOR_DONE, COLOR_ENDED_BADLY = COLOR_HATED;
 
 	private static int lastPage = QUESTS, lastZoom = DEFAULT_ZOOM;
-	/** Xaero's World Map is installed: the map tab opens it ({@link XaeroJournalMap}) and our own map is the fallback. */
-	static final boolean XAERO_MAP = FabricLoader.getInstance().isModLoaded("xaeroworldmap");
+	/** Xaero's Minimap is installed: the map page shows it ({@link XaeroJournalMinimap}), our own map is the fallback. */
+	static final boolean XAERO_MINIMAP = FabricLoader.getInstance().isModLoaded("xaerominimap");
+	/** Xaero's World Map is installed: the map page has a button that opens it ({@link XaeroJournalMap}). */
+	static final boolean XAERO_WORLD_MAP = FabricLoader.getInstance().isModLoaded("xaeroworldmap");
 
 	private final Journal.Book book;
 	private final KeyMapping key;
@@ -89,10 +91,6 @@ final class JournalScreen extends Screen {
 		super(Component.translatable("item.jaymoskingdoms.journal"));
 		this.book = book;
 		this.key = key;
-		if (XAERO_MAP && page == MAP) {
-			// (the map tab opens Xaero's map, so the journal itself opens on the quests)
-			page = QUESTS;
-		}
 	}
 
 	@Override
@@ -114,6 +112,17 @@ final class JournalScreen extends Screen {
 
 	private int top() {
 		return Math.max(4 + MenuCompat.STRIP, (this.height - panelH()) / 2);
+	}
+
+	/** Xaero's minimap's width when the map page shows it, else -1 (our own map). */
+	private int xaeroWidth() {
+		return XAERO_MINIMAP ? XaeroJournalMinimap.width() : -1;
+	}
+
+	/** The map box's width on the map page: Xaero's minimap's, or our own map's. */
+	private int shownMapSize() {
+		int xaero = xaeroWidth();
+		return xaero > 0 ? xaero : mapSize();
 	}
 
 	private int mapSize() {
@@ -207,13 +216,21 @@ final class JournalScreen extends Screen {
 		}
 		int fy = top() + panelH() - FOOTER + 4;
 		if (page == MAP) {
-			int bx = left() + 12 + mapSize() + 12;
-			Button in = FlatButton.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
-			Button out = FlatButton.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
-			in.active = zoom > 0;
-			out.active = zoom < ZOOMS.length - 1;
-			addRenderableWidget(in);
-			addRenderableWidget(out);
+			int bx = left() + 12 + shownMapSize() + 12;
+			boolean ours = xaeroWidth() <= 0;
+			if (ours) {
+				Button in = FlatButton.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
+				Button out = FlatButton.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
+				in.active = zoom > 0;
+				out.active = zoom < ZOOMS.length - 1;
+				addRenderableWidget(in);
+				addRenderableWidget(out);
+			}
+			if (XAERO_WORLD_MAP) {
+				int wx = ours ? bx + 48 : bx;
+				addRenderableWidget(FlatButton.builder(Component.translatable("journal.jaymoskingdoms.world_map"), b -> XaeroJournalMap.open(this))
+					.bounds(wx, top() + BODY_Y, Math.min(90, left() + panelW() - 9 - wx), 16).build());
+			}
 		}
 		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + panelW() - 66, fy, 60, 16).build());
 		// ((0.7.618, Rivals patch 3) the ladders of captains you know of)
@@ -244,7 +261,7 @@ final class JournalScreen extends Screen {
 	@Override
 	public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
 		if (page == MAP) {
-			if (scrollY != 0) {
+			if (scrollY != 0 && xaeroWidth() <= 0) {
 				zoom(scrollY > 0 ? -1 : 1);
 			}
 			return true;
@@ -283,10 +300,6 @@ final class JournalScreen extends Screen {
 		int mouseX = (int)event.x(), mouseY = (int)event.y();
 		int tab = tabAt(mouseX, mouseY);
 		if (tab >= 0) {
-			if (tab == MAP && XAERO_MAP && XaeroJournalMap.open(this)) {
-				click();
-				return true;
-			}
 			if (tab != page) {
 				show(tab);
 				click();
@@ -331,7 +344,8 @@ final class JournalScreen extends Screen {
 		Ui.line(graphics, this.font, this.title, x + 28, y + 8, w - 36, COLOR_GOLD);
 		long rated = book.places().stream().filter(Journal.Place::rated).count();
 		Component sub = switch (page) {
-			case MAP -> Component.translatable("journal.jaymoskingdoms.sub.map", mapSize() * ZOOMS[zoom] / CELL);
+			case MAP -> xaeroWidth() > 0 ? Component.translatable("journal.jaymoskingdoms.sub.map_xaero")
+				: Component.translatable("journal.jaymoskingdoms.sub.map", mapSize() * ZOOMS[zoom] / CELL);
 			case REPUTATION -> Component.translatable("journal.jaymoskingdoms.sub.reputation", rated);
 			case STORIES -> {
 				long open = book.stories().stream().filter(s -> s.state() == 0).count();
@@ -346,7 +360,7 @@ final class JournalScreen extends Screen {
 		tabs(graphics, mouseX, mouseY);
 		int bodyTop = y + BODY_Y;
 		switch (page) {
-			case MAP -> map(graphics, x + 12, bodyTop, mouseX, mouseY);
+			case MAP -> map(graphics, x + 12, bodyTop, mouseX, mouseY, a);
 			case REPUTATION -> reputation(graphics, x, bodyTop, mouseX, mouseY);
 			case STORIES -> stories(graphics, x, bodyTop, mouseX, mouseY);
 			case PAST -> past(graphics, x, bodyTop, mouseX, mouseY);
@@ -683,10 +697,17 @@ final class JournalScreen extends Screen {
 
 	// ---- map -------------------------------------------------------------------------------------------------------------
 
-	private void map(GuiGraphicsExtractor graphics, int x, int y, int mouseX, int mouseY) {
+	private void map(GuiGraphicsExtractor graphics, int x, int y, int mouseX, int mouseY, float partial) {
 		LocalPlayer player = this.minecraft.player;
 		ClientLevel level = this.minecraft.level;
 		if (player == null || level == null) {
+			return;
+		}
+		int xaero = xaeroWidth();
+		if (xaero > 0 && XaeroJournalMinimap.draw(graphics, x, y, partial)) {
+			// (Xaero's minimap draws you, the land and its waypoints; beside it, where you stand)
+			int lx = x + xaero + 12, ly = y + 24;
+			graphics.text(this.font, Component.translatable("journal.jaymoskingdoms.at", player.getBlockX(), player.getBlockZ()), lx, ly, COLOR_DIM);
 			return;
 		}
 		int size = mapSize();

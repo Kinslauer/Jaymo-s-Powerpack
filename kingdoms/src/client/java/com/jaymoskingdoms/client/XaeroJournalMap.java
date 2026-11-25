@@ -6,9 +6,9 @@ import xaero.map.WorldMapSession;
 import xaero.map.gui.GuiMap;
 
 /**
- * The traveller's journal's map page when Xaero's World Map is installed: its map, opened the way its own key opens it,
- * with the journal behind it, so closing it (Escape, or its map key) goes back to the journal. Loaded only when the World
- * Map is ({@link JournalScreen#XAERO_MAP}); without it the journal draws its own map.
+ * The journal map page's "World map" button when Xaero's World Map is installed: its full map, opened the way its own key
+ * opens it, with the journal behind it, so closing it (Escape, or its map key) goes back to the journal. Loaded only when
+ * the World Map is ({@link JournalScreen#XAERO_WORLD_MAP}).
  */
 final class XaeroJournalMap {
 	private XaeroJournalMap() {
