@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,6 +32,8 @@ kanban-plugin: board
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · 💻 Odysseus · claimed
+- [ ] [[Agents/Hand of God effects|Hand of God effects]] · 💻 Odysseus · running
+- [ ] [[Agents/Visceral gore picks|Visceral gore picks]] · 💻 Odysseus · running
 
 
 ## In review
@@ -42,22 +44,22 @@ kanban-plugin: board
 
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
-- [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
+- [ ] [[Agents/wither-model|wither-model]] · 💻 Odysseus · blocked
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/wither-model|wither-model]]
+- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
+- [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
+- [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
 - [x] [[Inbox/Done/village-mods-6-small-structures|village-mods-6-small-structures]]
 - [x] [[Inbox/Done/village-mods-5-town-life-hats|village-mods-5-town-life-hats]]
 - [x] [[Inbox/Done/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]]
 - [x] [[Inbox/Done/refmods-13-body-anim-stations|refmods-13-body-anim-stations]]
-- [x] [[Inbox/Done/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]]
-- [x] [[Inbox/Done/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]]
-- [x] [[Inbox/Done/refmods-09-village-styles|refmods-09-village-styles]]
-- [x] [[Inbox/Done/refmods-08-vampire-villager|refmods-08-vampire-villager]]
 
 
 %% kanban:settings
