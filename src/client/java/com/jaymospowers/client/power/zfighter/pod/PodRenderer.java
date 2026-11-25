@@ -40,6 +40,8 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		int damaged;
 		boolean finished;
 		int grade;
+		/** How far the canopy is tilted open (degrees). */
+		float open;
 	}
 
 	public PodRenderer(EntityRendererProvider.Context context) {
@@ -54,8 +56,8 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 
 	@Override
 	protected AABB getBoundingBoxForCulling(PodEntity entity, float partialTicks) {
-		// the fins reach past its box
-		return entity.getBoundingBox().inflate(SUBMARINE ? 1.2 : 0.6, 0.2, SUBMARINE ? 1.2 : 0.6);
+		// the fins (and the submarine's thrusters, bow and motor) reach past its box
+		return entity.getBoundingBox().inflate(SUBMARINE ? 1.6 : 0.6, 0.2, SUBMARINE ? 1.6 : 0.6);
 	}
 
 	@Override
@@ -66,6 +68,7 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		state.damaged = entity.damagedMask();
 		state.finished = entity.finished();
 		state.grade = entity.grade();
+		state.open = SUBMARINE ? entity.canopyOpen(partialTicks) * PodSubmarine.OPEN : 0.0F;
 	}
 
 	@Override
@@ -75,7 +78,8 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		if (SUBMARINE) {
 			// Alex's submarine, taken apart into the pod's pieces (PodSubmarine)
-			PodSubmarine.submit(collector, poseStack, state.lightCoords, state.filled, state.damaged, state.finished);
+			PodSubmarine.submit(collector, poseStack, state.lightCoords, state.filled, state.damaged, state.finished,
+				state.open);
 			poseStack.popPose();
 			super.submit(state, poseStack, collector, camera);
 			return;

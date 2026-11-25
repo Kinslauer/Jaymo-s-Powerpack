@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jaymospowers:block/space_pod"
+    "model": "jaymospowers:item/space_pod"
   }
 }

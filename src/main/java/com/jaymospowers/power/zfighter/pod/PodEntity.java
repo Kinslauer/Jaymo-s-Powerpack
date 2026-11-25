@@ -5,6 +5,7 @@ import com.jaymospowers.power.zfighter.ZFighterPatrol;
 import com.jaymospowers.power.zfighter.ZFighterPodTrip;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -69,6 +70,18 @@ public class PodEntity extends Entity {
 	public static final double SEAT = 1.1;
 	/** (0.18.51) With two seated, how far (blocks) each sits from the middle. */
 	static final double SEAT_APART = 0.4;
+	/**
+	 * Andy (2026-11-25): "you should be sitting in that cockpit". Drawn as Alex's Caves' submarine (client PodSubmarine),
+	 * the pilot sits in its seat under the glass: this high above the pod's feet (the seat's top, 1.0 blocks up, less a
+	 * seated body's 0.625 from its feet to the underside of its thighs), this far forward of the middle, and two this far
+	 * apart. Read on both sides, so the server puts the pilot where the client draws the seat.
+	 */
+	static final boolean SUBMARINE = FabricLoader.getInstance().isModLoaded("alexscaves");
+	public static final double SUB_SEAT = 0.38, SUB_SEAT_FORWARD = 0.31, SUB_SEAT_APART = 0.3;
+	/** A seated pilot can look this far round (degrees) from the pod's heading; their body keeps to it, legs under the panel. */
+	static final float LOOK_ROUND = 105.0F;
+	/** The canopy (client only): ticks to tilt open, when it starts to shut, and when it is shut, after someone gets in or out. */
+	static final int CANOPY_OPENED = 6, CANOPY_SHUTS = 18, CANOPY_SHUT = 30;
 	/** Settling: gravity a tick, the share of fall speed kept, and how often (ticks) a pod at rest checks its footing. */
 	static final double GRAVITY = 0.06, DRAG = 0.98;
 	static final int REST_CHECK = 10;
@@ -79,6 +92,9 @@ public class PodEntity extends Entity {
 
 	/** Server: held up by a trip or a flying Patrol pod (it does not settle). Not saved. */
 	private boolean hovering;
+	/** Client: how many sat in it last tick (-1 before its first), and the tick that changed, for the canopy. */
+	private int canopyRiders = -1;
+	private int canopyMoved = -CANOPY_SHUT;
 
 	public PodEntity(EntityType<? extends PodEntity> type, Level level) {
 		super(type, level);
@@ -154,7 +170,18 @@ public class PodEntity extends Entity {
 	@Override
 	public void tick() {
 		super.tick();
-		if (level().isClientSide() || hovering) {
+		if (level().isClientSide()) {
+			// someone got in or out: the canopy tilts up and shuts after (a pod first seen with a pilot in is just shut)
+			int riders = getPassengers().size();
+			if (riders != canopyRiders) {
+				if (canopyRiders >= 0) {
+					canopyMoved = tickCount;
+				}
+				canopyRiders = riders;
+			}
+			return;
+		}
+		if (hovering) {
 			return;
 		}
 		// it settles onto the ground and stays: a pod at rest only checks its footing now and then
@@ -173,15 +200,56 @@ public class PodEntity extends Entity {
 		return passenger instanceof Player && getPassengers().size() < seats();
 	}
 
+	/**
+	 * Client: how far open the canopy is, 0 (shut) to 1, tilting up as someone gets in or out and shutting after: up over
+	 * {@link #CANOPY_OPENED} ticks, held while they climb, down by {@link #CANOPY_SHUT}.
+	 */
+	public float canopyOpen(float partialTicks) {
+		float t = tickCount - canopyMoved + partialTicks;
+		if (t < 0.0F || t >= CANOPY_SHUT) {
+			return 0.0F;
+		}
+		if (t < CANOPY_OPENED) {
+			return ease(t / CANOPY_OPENED);
+		}
+		return t < CANOPY_SHUTS ? 1.0F : 1.0F - ease((t - CANOPY_SHUTS) / (CANOPY_SHUT - CANOPY_SHUTS));
+	}
+
+	private static float ease(float t) {
+		return t * t * (3.0F - 2.0F * t);
+	}
+
 	/** The pilot sits inside the hull; with a second seat (grade II) the two sit side by side. */
 	@Override
 	protected void positionRider(Entity passenger, Entity.MoveFunction moveFunction) {
+		double apart = SUBMARINE ? SUB_SEAT_APART : SEAT_APART;
 		double side = 0.0;
 		if (getPassengers().size() > 1) {
-			side = getPassengers().indexOf(passenger) == 0 ? -SEAT_APART : SEAT_APART;
+			side = getPassengers().indexOf(passenger) == 0 ? -apart : apart;
 		}
+		double forward = SUBMARINE ? SUB_SEAT_FORWARD : 0.0;
 		float radians = getYRot() * Mth.DEG_TO_RAD;
-		moveFunction.accept(passenger, getX() + -Mth.cos(radians) * side, getY() + SEAT, getZ() + -Mth.sin(radians) * side);
+		float sin = Mth.sin(radians), cos = Mth.cos(radians);
+		// forward is (-sin, cos), the right hand (-cos, -sin)
+		moveFunction.accept(passenger, getX() - cos * side - sin * forward, getY() + (SUBMARINE ? SUB_SEAT : SEAT),
+			getZ() - sin * side + cos * forward);
+		if (SUBMARINE && passenger instanceof LivingEntity living) {
+			living.setYBodyRot(getYRot());
+		}
+	}
+
+	/** Seated in the cockpit, the pilot's body faces the way the pod does and they can look about {@link #LOOK_ROUND} degrees. */
+	@Override
+	public void onPassengerTurned(Entity passenger) {
+		if (!SUBMARINE) {
+			return;
+		}
+		passenger.setYBodyRot(getYRot());
+		float off = Mth.wrapDegrees(passenger.getYRot() - getYRot());
+		float kept = Mth.clamp(off, -LOOK_ROUND, LOOK_ROUND);
+		passenger.yRotO += kept - off;
+		passenger.setYRot(passenger.getYRot() + kept - off);
+		passenger.setYHeadRot(passenger.getYRot());
 	}
 
 	@Override

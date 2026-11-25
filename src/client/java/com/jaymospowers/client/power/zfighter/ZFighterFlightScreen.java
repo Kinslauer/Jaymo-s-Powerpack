@@ -1,11 +1,14 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.power.zfighter.ZFighterPodTrip;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
 import com.jaymospowers.power.zfighter.ZFighterSpaceMissions;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -14,12 +17,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
  * (0.18.4, Andy) The pod's flight, shown while the server holds you up past the clouds ({@link ZFighterPodTrip}): deep space, the
- * world you left sliding away behind, the pod (the pod item, drawn big) riding its fire across a field of stars that stream past
+ * world you left sliding away behind, the pod (drawn side on, {@link #POD}) riding its fire across a field of stars that stream past
  * faster as it gets going and slow again near the end, and the world ahead growing until it fills the right side. Under it, where
  * you are going and how long is left. After a first trip, Space (or a click) skips it. It closes itself when the pod drops
  * into the landing (the pod you ride changes) or the world changes under it, or a little after its time runs out.
@@ -52,7 +54,16 @@ public class ZFighterFlightScreen extends Screen {
 	private @Nullable Entity vehicle;
 	/** How far the stars have streamed (pixels at the slowest layer). */
 	private float travelled;
-	private final ItemStack pod = new ItemStack(ZFighterSpace.POD_ITEM);
+	/**
+	 * (Andy, 2026-11-25) The pod seen side on, as it stands in game (Alex's Caves' submarine under our glass canopy, the
+	 * pilot's head in it), facing the way it flies: tools/vanilla_style/space_pod.py draws it. Its size, and how much
+	 * bigger it is drawn.
+	 */
+	private static final Identifier POD = JaymosPowers.id("textures/gui/space_pod_flight.png");
+	private static final int POD_W = 48, POD_H = 34;
+	private static final float POD_SCALE = 1.5F;
+	/** Where its motor is on the picture (picture pixels), so the fire comes out of it. */
+	private static final float MOTOR_X = 3.0F, MOTOR_Y = 19.0F;
 
 	public ZFighterFlightScreen(int to, int ticks, boolean skippable, int from, boolean lens, boolean ki) {
 		super(Component.translatable("screen.jaymospowers.zfighter_flight"));
@@ -169,17 +180,19 @@ public class ZFighterFlightScreen extends Screen {
 		// the pod on its fire, bobbing a little, a touch off the middle
 		float bob = (float)Math.sin((this.age + a) * 0.25F) * 2.0F;
 		float podX = w * (0.38F + 0.08F * ease(p)), podY = h * 0.5F + bob;
-		trail(graphics, podX, podY, fast, a);
 		if (this.ki) {
+			trail(graphics, podX - 14.0F, podY + 6.0F, fast, a);
 			// their own light: a bright core in a ki glow
 			ZFighterSpaceArt.disc(graphics, podX, podY + 6.0F, 14.0F, 0x40A0D0FF);
 			ZFighterSpaceArt.disc(graphics, podX, podY + 6.0F, 9.0F, 0x90C0E8FF);
 			ZFighterSpaceArt.disc(graphics, podX, podY + 6.0F, 5.0F, 0xFFFFFFFF);
 		} else {
+			float left = podX - POD_W * POD_SCALE / 2.0F, top = podY - POD_H * POD_SCALE / 2.0F;
+			trail(graphics, left + MOTOR_X * POD_SCALE, top + MOTOR_Y * POD_SCALE, fast, a);
 			graphics.pose().pushMatrix();
-			graphics.pose().translate(podX - 24.0F, podY - 24.0F);
-			graphics.pose().scale(3.0F, 3.0F);
-			graphics.item(this.pod, 0, 0);
+			graphics.pose().translate(left, top);
+			graphics.pose().scale(POD_SCALE, POD_SCALE);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, POD, 0, 0, 0.0F, 0.0F, POD_W, POD_H, POD_W, POD_H);
 			graphics.pose().popMatrix();
 		}
 		// where to and how long
@@ -262,17 +275,17 @@ public class ZFighterFlightScreen extends Screen {
 		}
 	}
 
-	/** The pod's fire behind it: flickering flame cells, longer at speed. */
+	/** The pod's fire behind it, streaming back from ({@code x}, {@code y}): flickering flame cells, longer at speed. */
 	private void trail(GuiGraphicsExtractor graphics, float x, float y, float fast, float a) {
 		int n = 10 + Math.round(fast * 14.0F);
 		long tick = this.age;
 		for (int k = 0; k < n; k++) {
-			float back = 14.0F + k * (2.0F + fast * 1.6F);
+			float back = k * (2.0F + fast * 1.6F);
 			int jitter = ZFighterSpaceArt.hash(k, (int)tick, 9) % 7 - 3;
 			int size = Math.max(1, 6 - k / 4);
 			int colour = this.ki ? (k < 4 ? 0xFFFFFFFF : k < 10 ? 0xE0C0E8FF : k < 18 ? 0xA080B8FF : 0x506080C0)
 				: k < 4 ? 0xFFFFF0A0 : k < 10 ? 0xE0FFB040 : k < 18 ? 0xA0FF6020 : 0x50A0A0A0;
-			int fx = Math.round(x - back), fy = Math.round(y + 6 + jitter * (k / 6.0F) * 0.6F);
+			int fx = Math.round(x - back), fy = Math.round(y + jitter * (k / 6.0F) * 0.6F);
 			graphics.fill(fx - size / 2, fy - size / 2, fx + (size + 1) / 2, fy + (size + 1) / 2, colour);
 		}
 	}
