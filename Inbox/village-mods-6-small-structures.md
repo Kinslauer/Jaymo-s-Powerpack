@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-village-mods-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BXraqSPmYUB5h3b9yUHxHtb
 claimed_by: 
-pr: 
+pr: 2110
 ---
 # Village mods patch 6: Small structures (Kingdoms)
 
