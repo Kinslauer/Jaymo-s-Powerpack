@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 10:02). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 13:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,7 +30,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · for 💻 Odysseus · #2160 · changes · fixing review notes
 
 
 ## In review
@@ -53,6 +52,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/mordhau-1-helms|mordhau-1-helms]]
 - [x] [[Inbox/Done/wither-model|wither-model]]
 - [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
 - [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
@@ -60,7 +60,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/village-mods-6-small-structures|village-mods-6-small-structures]]
 - [x] [[Inbox/Done/village-mods-5-town-life-hats|village-mods-5-town-life-hats]]
 - [x] [[Inbox/Done/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]]
-- [x] [[Inbox/Done/refmods-13-body-anim-stations|refmods-13-body-anim-stations]]
 
 
 %% kanban:settings
