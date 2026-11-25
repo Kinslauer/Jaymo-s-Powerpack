@@ -2503,7 +2503,7 @@ public final class WebSymbiote {
 	/** Eating raw meat while bonded feeds it instead of you. Returns true if it took the meal. */
 	public static boolean feedOnMeat(ServerPlayer player, ItemStack stack, int nutrition) {
 		// (0.17.150) the white one won't touch carrion, and none of them eat when full: you eat it yourself then (WebSymbioteBody)
-		if (!isBonded(player) || !RAW_MEAT.contains(stack.getItem()) || WebSymbioteBody.turnsDown(player, stack)) {
+		if (!isBonded(player) || !(RAW_MEAT.contains(stack.getItem()) || stack.is(WebSymbioteMolt.MEAT)) || WebSymbioteBody.turnsDown(player, stack)) {
 			return false;
 		}
 		WebSymbioteState state = state(player);
@@ -2511,6 +2511,7 @@ public final class WebSymbiote {
 			.withStress(Math.max(0, state.stress() - 3));
 		next = hintOnce(player, next, HINT_MEAT, "meat");
 		set(player, next);
+		WebSymbioteMolt.eaten(player, stack);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 0.5F, 0.7F);

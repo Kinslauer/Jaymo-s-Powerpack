@@ -60,6 +60,7 @@ public final class WebArmSwap {
 			inventory.setItem(inv, held);
 			arm = arm.with(slot, mine);
 		}
+		WebSymbioteArm.pried(player, slot);
 		if (arm.isEmpty() && arm.selected() == 0 && !arm.using()) {
 			player.removeAttached(WebSymbioteBody.ARM);
 		} else {

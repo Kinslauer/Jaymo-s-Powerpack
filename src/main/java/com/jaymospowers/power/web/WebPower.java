@@ -338,6 +338,11 @@ public final class WebPower implements Power {
 		WebSymbioteMind.register();
 		WebSymbioteMemory.register();
 		WebSymbioteBody.register();
+		WebSymbioteArm.register();
+		WebSymbioteChests.register();
+		WebSymbioteMolt.register();
+		WebSymbioteStride.register();
+		WebSymbioteBloom.register();
 		WebStamina.register();
 		WebSymbioteSettings.register();
 		WebSymbioteWords.register();
