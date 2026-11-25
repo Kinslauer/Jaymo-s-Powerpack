@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · open
 - [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
-- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · for 💻 Odysseus · open
@@ -33,12 +32,13 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · 💻 Odysseus · #2122 · claimed
+- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · 💻 Odysseus · claimed
 - [ ] [[Agents/gravity-magnetism|gravity-magnetism]] · 💻 Odysseus · running
 
 
 ## In review
 
+- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · 💻 Odysseus · #2122 · in-review
 
 
 ## Needs Andy
