@@ -65,6 +65,11 @@ public final class Warmth {
 	/** Damp air near the sea: how much colder it makes cold air feel and hotter hot air, at the most, and how far (blocks) round you it is read. */
 	static final float DAMP_COLD = 8.0F, DAMP_HEAT = 6.0F;
 	static final int DAMP_REACH = 24;
+	/**
+	 * Jaymo's Kingdoms is here, so the overworld's lands follow its climate map (cold poles to the north, the hot belt to
+	 * the south): the lands' own warmth already grows colder northward, and {@link #north} isn't added on top.
+	 */
+	static final boolean CLIMATE_MAP = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
 
 	public static HearthBlock HEARTH_BLOCK;
 	public static HearthBlock ICEBOX_BLOCK;
@@ -269,9 +274,10 @@ public final class Warmth {
 	/**
 	 * Damp's push on the air, in body heat: near the sea, on the shore and in a river's valley the air is wet, and wet air
 	 * takes the heat out of cold ({@link #DAMP_COLD}, "a damp cold gets into the bones") and clings to hot ({@link #DAMP_HEAT},
-	 * "muggy"); only under the open sky, and half again as much in rain. {@code land} is the dry land's push.
+	 * "muggy"); only under the open sky, and half again as much with rain or snow falling there. {@code land} is the dry
+	 * land's push.
 	 */
-	static float damp(ServerLevel level, BlockPos at, boolean sky, float land) {
+	static float damp(ServerLevel level, BlockPos at, boolean sky, boolean raining, float land) {
 		if (!sky) {
 			return 0.0F;
 		}
@@ -279,7 +285,7 @@ public final class Warmth {
 		if (damp <= 0.0F) {
 			return 0.0F;
 		}
-		if (level.isRaining()) {
+		if (raining) {
 			damp = Math.min(1.0F, damp * 1.5F);
 		}
 		return land > 0.0F ? DAMP_HEAT * damp : -DAMP_COLD * damp;
