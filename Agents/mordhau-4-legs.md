@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: mordhau-4-legs
 branch: claude/mordhau-4-legs
 with: claude (T3 thread, Sonnet 5.5)
@@ -33,3 +33,4 @@ owns:
 - Queued behind mordhau-3-body in the same T3 thread.
 
 ## Done
+- 2026-11-25 16:53 No sign of work for 30 min: marked stalled (whoever ran it stopped).

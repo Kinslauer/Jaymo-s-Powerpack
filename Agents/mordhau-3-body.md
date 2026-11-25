@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: mordhau-3-body
 branch: claude/mordhau-3-body
 with: claude (T3 thread, Sonnet 5.5)
@@ -41,3 +41,4 @@ made the way the harness makes its pieces. Mordhau's meshes, textures and names 
 - Local builds: Andy plays on this PC, so no Gradle here. The generators (Python) run here; CI compiles.
 
 ## Done
+- 2026-11-25 16:53 No sign of work for 30 min: marked stalled (whoever ran it stopped).
