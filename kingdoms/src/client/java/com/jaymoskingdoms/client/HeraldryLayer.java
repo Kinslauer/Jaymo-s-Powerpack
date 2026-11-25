@@ -67,7 +67,8 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		Map.entry("clerics_mantle", 0x8E2B2B), Map.entry("arming_cap", 0xD8CCB0), Map.entry("linen_coif", 0xECE6D6), Map.entry("bag_hat", 0x6E7F4A),
 		Map.entry("archers_cap", 0x3F6B3A), Map.entry("hunters_hat", 0x5E4A32), Map.entry("landsknecht_bonnet", 0xA02828), Map.entry("turban", 0xE8E0CC),
 		Map.entry("veiled_turban", 0x3A5A8E), Map.entry("jesters_hood", 0xB02E26));
-	private static final Map<String, Integer> SECOND_UNDYED = Map.of("landsknecht_bonnet", 0xF0C838, "jesters_hood", 0xE8C83A, "jesters_motley", 0xE8C83A, "embroidered_skirt", 0xE8C83A, "landsknecht_hose", 0xD8B034);
+	private static final Map<String, Integer> SECOND_UNDYED = Map.of("landsknecht_bonnet", 0xF0C838, "jesters_hood", 0xE8C83A, "jesters_motley", 0xE8C83A, "embroidered_skirt", 0xE8C83A, "landsknecht_hose", 0xD8B034,
+		"landsknecht_doublet", 0xD8B034);
 	/** (Mordhau harness 3) The body's cloth models' undyed colours (gen_heraldry_body.py's UNDYED), and the colour a covered plate piece shows undyed. */
 	private static final Map<String, Integer> BODY_UNDYED = Map.ofEntries(Map.entry("wool_tunic", 0x6B5A44), Map.entry("quilted_coat", 0xCEBE96),
 		Map.entry("surcoat", 0x2B4A8E), Map.entry("torn_surcoat", 0x5A5246), Map.entry("monks_robe", 0x5A4632), Map.entry("kaftan", 0x2F5A7A),
@@ -75,7 +76,8 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		// (Mordhau harness 4, gen_heraldry_legs.py's UNDYED) the waist's and the legs' cloth
 		Map.entry("coat_of_plates_skirt", 0x7A2E2A), Map.entry("padded_skirt", 0xD8CCB0), Map.entry("cloth_skirt", 0x6B5A44), Map.entry("short_skirt", 0x6E7F4A),
 		Map.entry("long_skirt", 0x4A5568), Map.entry("apron", 0xCEBE96), Map.entry("pleated_base", 0x8E2B2B), Map.entry("embroidered_skirt", 0x2B4A8E),
-		Map.entry("leg_wraps", 0xB8A878), Map.entry("baggy_breeches", 0x7A6A48), Map.entry("landsknecht_hose", 0x2B4A8E));
+		Map.entry("leg_wraps", 0xB8A878), Map.entry("baggy_breeches", 0x7A6A48), Map.entry("landsknecht_hose", 0x2B4A8E),
+		Map.entry("landsknecht_doublet", 0x2B4A8E));
 	private static final int COVERED_UNDYED = 0x7A2E3A;
 	/** Dyed pieces with parts drawn as they are painted (feathers, bells, gilt: heraldry_PIECE_fixed). */
 	private static final Set<String> TRIMMED = Set.of("clerics_mantle", "archers_cap", "hunters_hat", "landsknecht_bonnet", "turban", "veiled_turban",
