@@ -12,6 +12,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -27,6 +29,7 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.feline.Cat;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -40,6 +43,10 @@ import org.jspecify.annotations.Nullable;
  * a field) and sends it away when the reason is gone. Each carries a {@link #life} that runs down whatever happens, so
  * nothing piles up, and is cheap: no persistence, a one-point health, no goals beyond walking about and keeping out of
  * the way.
+ *
+ * <p>Andy: "you should be able to pickup maggots as an item for bait". A tap of use on a maggot takes it off the body alive,
+ * as one of Jaymo's Powers' maggots for the hook ({@link #MAGGOT_BAIT}); a stomp still bursts it (SpiderSquash). Without
+ * Powers there's no bait to take, and use does nothing.
  */
 public class Critter extends PathfinderMob {
 	/** The seven kinds: the size of their body, whether they fly, how many coats (textures) each has, and its health. */
@@ -63,6 +70,9 @@ public class Critter extends PathfinderMob {
 			this.health = health;
 		}
 	}
+
+	/** A maggot taken alive becomes this bait (Jaymo's Powers' fishing, looked up by its id). */
+	static final String MAGGOT_BAIT = "jaymospowers:maggots";
 
 	/** How long one lasts at most (ticks) unless the world keeps it; the movement speeds. */
 	static final int LIFE_TICKS = 12000;
@@ -178,6 +188,24 @@ public class Critter extends PathfinderMob {
 	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, @Nullable SpawnGroupData groupData) {
 		this.setCoat(this.random.nextInt(this.kind.coats));
 		return super.finalizeSpawn(level, difficulty, reason, groupData);
+	}
+
+	@Override
+	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+		if (this.kind != Kind.MAGGOT || hand != InteractionHand.MAIN_HAND || !this.isAlive()) {
+			return super.mobInteract(player, hand);
+		}
+		var bait = net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.parse(MAGGOT_BAIT));
+		if (bait.isEmpty()) {
+			return super.mobInteract(player, hand);
+		}
+		if (this.level() instanceof ServerLevel level) {
+			// picked off the body between finger and thumb, still wriggling, into the bait in your pack
+			player.getInventory().placeItemBackInInventory(new ItemStack(bait.get()), net.minecraft.util.Prediction.SERVER_ONLY);
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SLIME_SQUISH_SMALL, this.getSoundSource(), 0.5F, 1.6F);
+			this.discard();
+		}
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override

@@ -157,6 +157,7 @@ public final class FishingReal {
         Skipjack.init();
         // (0.21.64) Track B: rods, baits, lures and the rest of the tackle box
         Tackle.init();
+        LooseMaggots.init();
         FishingGear.init();
         Crates.init();
         FishTackle.init();
