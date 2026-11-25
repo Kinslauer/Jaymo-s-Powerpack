@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: mordhau-1-helms
 branch: claude/mordhau-1-helms
 with: claude (PC worker, Opus 5.5)
@@ -56,3 +56,4 @@ the turban helm, the spectacle helm. Not tested in game: fit on MCA bodies, viso
 heights on the pointed helms. Waiting on Andy: previews, and whether guards should wear any of the other new helms.
 
 - Codex joined for the guard-issue follow-up; owns the GuardKit helm selection and its change note.
+- 2026-11-25 13:11 PR #2160 is merged into master; moved to Agents/Done.

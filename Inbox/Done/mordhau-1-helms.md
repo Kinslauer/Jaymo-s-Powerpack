@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
@@ -38,3 +38,4 @@ pr: 2160
 
 - Andy answered 2026-11-25: three helm choices per realm. The three helm lore entries are approved.
 - 2026-11-25: Andy signed off on the helm previews: "helms look incredible".
+- 2026-11-25 13:11 PR #2160 is merged into master; moved to Inbox/Done.
