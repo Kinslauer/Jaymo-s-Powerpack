@@ -148,6 +148,12 @@ public final class Dismembered {
 		ModelPart root = model.root();
 		Integer only = renderState.getData(ONLY);
 		if (only != null) {
+			// Andy: "limbs from dead zombies are constantly floating". Back to rest first, pivots and all, the parts it
+			// hangs from too: Fresh Animations (and the like) move pivots as well as turning them, so the part was drawn
+			// away from the middle the severed part's renderer puts on the ground, worked out from the rest pose
+			for (ModelPart part : root.getAllParts()) {
+				part.resetPose();
+			}
 			// every part but the severed one (and what hangs off it) draws nothing of its own
 			java.util.Set<ModelPart> keep = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
 			for (String name : names(only)) {
@@ -178,6 +184,10 @@ public final class Dismembered {
 			walk(root, living, gait, broken == null ? 0 : broken);
 		}
 		Integer missing = renderState.getData(MISSING);
+		// streamer safe: living bodies are drawn whole
+		if (com.jaymospowers.client.blood.BloodSettings.streamerSafe()) {
+			return;
+		}
 		// (0.18.82) a wooden or iron limb's own model draws exactly the limb that is missing
 		if (missing == null || com.jaymospowers.client.wounds.ProstheticLayer.owns(model)) {
 			return;
@@ -207,7 +217,7 @@ public final class Dismembered {
 			return;
 		}
 		Integer only = renderState.getData(ONLY);
-		Integer missing = renderState.getData(MISSING);
+		Integer missing = com.jaymospowers.client.blood.BloodSettings.streamerSafe() ? null : renderState.getData(MISSING);
 		if (only == null && missing == null) {
 			return;
 		}

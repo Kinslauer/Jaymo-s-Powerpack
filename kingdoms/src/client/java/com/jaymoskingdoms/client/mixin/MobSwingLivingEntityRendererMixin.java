@@ -27,11 +27,14 @@ abstract class MobSwingLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymoskingdoms$swingState(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		MobAnimations.extract(entity, state, partialTicks);
+		// (fighting AI patch 7) a bandit or assassin rolling out of a blow
+		com.jaymoskingdoms.client.NpcRollPose.extract(entity, state, partialTicks);
 		PullerPose.extract(entity, state, partialTicks);
 		// the lasso: whirled overhead, tying, or hogtied
 		com.jaymoskingdoms.client.forms.LassoPose.extract(entity, state, partialTicks);
 		PickpocketPose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.BioAbsorbPose.extract(entity, state, partialTicks);
+		com.jaymoskingdoms.client.TreePushPose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.BloodGrabPose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.RubberEngulf.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.HandshakePose.extract(entity, state, partialTicks);
@@ -50,6 +53,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
 		// (gb-capes) a realm cape's cloth
 		com.jaymoskingdoms.client.CapeLayer.extract(entity, state, partialTicks);
+		// (fighting AI patch 7) a shield or blade carried on the back
+		com.jaymoskingdoms.client.BackGearLayer.extract(entity, state);
 		// (0.7.641) a stake in a vampire
 		com.jaymoskingdoms.client.StakeLayer.extract(entity, state);
 		com.jaymoskingdoms.client.StakeStruggle.extract(entity, state, partialTicks);
@@ -74,6 +79,14 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.bb.BbBodies.extract(entity, state, partialTicks);
 	}
 
+	/** (fighting AI patch 7) A dodger's roll turns the whole body over (NpcRollPose). */
+	@Inject(
+		method = "setupRotations(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;FF)V",
+		at = @At("TAIL"))
+	private void jaymoskingdoms$rollOver(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
+		com.jaymoskingdoms.client.NpcRollPose.rotate(state, poseStack, entityScale);
+	}
+
 	@Inject(
 		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/EntityModel;setupAnim(Ljava/lang/Object;)V", shift = At.Shift.AFTER))
@@ -82,6 +95,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		PullerPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		PickpocketPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.BioAbsorbPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymoskingdoms.client.TreePushPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.BloodGrabPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.RubberEngulf.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.BioForms.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
@@ -94,6 +108,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.StakeStruggle.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		HiddenBladeClient.pose(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymoskingdoms.client.NpcRollPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.forms.LassoPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		// (0.7.321) last: a goblin's body is the goblin's (so held items and the parts on it follow)
 		com.jaymoskingdoms.client.GoblinBody.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);

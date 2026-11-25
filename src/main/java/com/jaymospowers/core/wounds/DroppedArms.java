@@ -76,22 +76,30 @@ public final class DroppedArms {
 	 */
 	public static ItemStack knock(ServerLevel level, LivingEntity entity, @Nullable Vec3 from) {
 		for (InteractionHand hand : InteractionHand.values()) {
-			ItemStack held = entity.getItemInHand(hand);
-			if (!weapon(held)) {
-				continue;
+			ItemStack held = knock(level, entity, hand, from);
+			if (!held.isEmpty()) {
+				return held;
 			}
-			entity.setItemInHand(hand, ItemStack.EMPTY);
-			Vec3 away = from == null ? entity.getLookAngle() : entity.position().subtract(from);
-			away = away.multiply(1.0, 0.0, 1.0);
-			away = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize();
-			RandomSource random = level.getRandom();
-			ItemEntity item = new ItemEntity(level, entity.getX(), entity.getY(0.6), entity.getZ(), held,
-				away.x * KNOCK_FLING + (random.nextDouble() - 0.5) * 0.15, KNOCK_UP, away.z * KNOCK_FLING + (random.nextDouble() - 0.5) * 0.15);
-			item.setPickUpDelay(PICKUP_DELAY);
-			level.addFreshEntity(item);
-			return held;
 		}
 		return ItemStack.EMPTY;
+	}
+
+	/** As {@link #knock(ServerLevel, LivingEntity, Vec3)}, for what's in {@code hand} only: an empty stack if that isn't a weapon. */
+	public static ItemStack knock(ServerLevel level, LivingEntity entity, InteractionHand hand, @Nullable Vec3 from) {
+		ItemStack held = entity.getItemInHand(hand);
+		if (!weapon(held)) {
+			return ItemStack.EMPTY;
+		}
+		entity.setItemInHand(hand, ItemStack.EMPTY);
+		Vec3 away = from == null ? entity.getLookAngle() : entity.position().subtract(from);
+		away = away.multiply(1.0, 0.0, 1.0);
+		away = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize();
+		RandomSource random = level.getRandom();
+		ItemEntity item = new ItemEntity(level, entity.getX(), entity.getY(0.6), entity.getZ(), held,
+			away.x * KNOCK_FLING + (random.nextDouble() - 0.5) * 0.15, KNOCK_UP, away.z * KNOCK_FLING + (random.nextDouble() - 0.5) * 0.15);
+		item.setPickUpDelay(PICKUP_DELAY);
+		level.addFreshEntity(item);
+		return held;
 	}
 
 	private static void fling(ServerLevel level, LivingEntity entity, ItemStack stack) {

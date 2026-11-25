@@ -181,6 +181,7 @@ public final class InteractActions {
 			}
 			case RITE -> {
 				if (McaBridge.heartsOf((Villager)v, player) < Directions.REFUSE_HEARTS) {
+					RefusalHints.hint(player, v, RefusalHints.Cause.DISLIKE);
 					return Component.translatable("talk.jaymoskingdoms.rite.refuse");
 				}
 				Rites.offer(player, (Villager)v);

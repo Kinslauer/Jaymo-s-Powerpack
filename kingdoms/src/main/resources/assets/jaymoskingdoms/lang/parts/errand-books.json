@@ -1,0 +1,15 @@
+{
+  "item.jaymoskingdoms.errand_book": "Errand: %s",
+  "item.jaymoskingdoms.errand_book.rare": "Not for the board: %s",
+  "errand_book.page.ask": "%1$s, of %2$s, asks this of you in their own hand:\n\n%3$s\n\nWhen it is done, bring it to me, and to no one else. I will see you paid.",
+  "errand_book.page.rare": "%1$s, of %2$s.\n\nI would not nail this up where anyone may read it. My people kept the way into a ruin the hill has swallowed, an old people's, from before the long defence. It lies near %3$s, %4$s. Dig for what they left, and bring it to me.",
+  "errand_book.page.where": "You will find %5$s at about %1$s, %2$s: some %3$s blocks %4$s of where you took this. They go back there when the day is done. The errand ends with them.",
+  "errand_book.dir.0": "north",
+  "errand_book.dir.1": "north-east",
+  "errand_book.dir.2": "east",
+  "errand_book.dir.3": "south-east",
+  "errand_book.dir.4": "south",
+  "errand_book.dir.5": "south-west",
+  "errand_book.dir.6": "west",
+  "errand_book.dir.7": "north-west"
+}

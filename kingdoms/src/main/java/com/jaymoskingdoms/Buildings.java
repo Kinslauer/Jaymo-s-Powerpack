@@ -111,6 +111,8 @@ final class Buildings {
 		VpBuildings.register();
 		// the buildings only the masons' pattern books have: the chapel, the windmill and the barn ({@link Library})
 		Library.registerOwn();
+		// a working windmill, raised only where a plains town has none ({@link TownNeeds})
+		TownNeeds.registerCatalogue();
 		// the song stone, where a capital's firsts are cut ({@link Firsts})
 		realm(FactionType.KINGDOM, "song_stone", Buildings::songStone, 1, 18);
 		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})
@@ -1502,6 +1504,8 @@ final class Buildings {
 		final boolean dry;
 		/** (0.7.441) the haven it's built for: "" none, "mixed", or a blood's key ({@link HavenBuildings}) */
 		String haven = "";
+		/** the fungal wood (a glow-wood's id) this Sylvan house is built from, or "" for plain timber ({@link GlowWoodHavens}) */
+		String fungus = "";
 		final int salt;
 		private final List<String> colours;
 		private final RandomSource r;
@@ -1599,6 +1603,7 @@ final class Buildings {
 			}
 			Kit kit = of(level, faction, land, village, colour, materials, details);
 			kit.haven = Havens.of(level.getServer(), faction);
+			kit.fungus = GlowWoodHavens.houseWood(faction, materials);
 			return kit;
 		}
 

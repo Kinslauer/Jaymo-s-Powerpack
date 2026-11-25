@@ -74,6 +74,13 @@ public final class Fairies {
 	// ---- tuning ----
 	/** How often (ticks) each player out in fairy country may come upon one, and the odds against it each time. */
 	static final int SPAWN_EVERY = 200, SPAWN_ODDS = 550;
+	/**
+	 * Over a fairy ring (Jaymo's Kingdoms' ring of small mushrooms, read by block tag so Powers never needs Kingdoms): the odds
+	 * against her coming fall by this share, from a ring this near (blocks); a ring is this many of its blocks within the search.
+	 */
+	static final int RING_ODDS_DIVIDER = 5, RING_SEARCH = 16, RING_LEAST = 6;
+	static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> FAIRY_RING = net.minecraft.tags.TagKey.create(Registries.BLOCK,
+		net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskingdoms", "fairy_ring"));
 	/** How far round a fairy no other may come (blocks). */
 	static final double ALONE = 128.0;
 	/** Where she turns up: this near and this far from the player, at a flower; tries to find one. */
@@ -145,12 +152,49 @@ public final class Fairies {
 		}
 		RandomSource random = level.getRandom();
 		for (ServerPlayer player : level.players()) {
-			if (player.isSpectator() || random.nextInt(SPAWN_ODDS) != 0 || !fairyCountry(level.getBiome(player.blockPosition()))
-				|| !level.getEntities(PINK_FAIRY, player.getBoundingBox().inflate(ALONE), fairy -> true).isEmpty()) {
+			if (player.isSpectator() || !level.getEntities(PINK_FAIRY, player.getBoundingBox().inflate(ALONE), fairy -> true).isEmpty()) {
+				continue;
+			}
+			// a ring of mushrooms nearby draws her: likelier, and anywhere there's one
+			BlockPos ring = ringNear(level, player.blockPosition());
+			if (random.nextInt(ring != null ? SPAWN_ODDS / RING_ODDS_DIVIDER : SPAWN_ODDS) != 0
+				|| ring == null && !fairyCountry(level.getBiome(player.blockPosition()))) {
+				continue;
+			}
+			if (ring != null) {
+				PinkFairy fairy = PINK_FAIRY.create(level, EntitySpawnReason.EVENT);
+				if (fairy != null) {
+					fairy.snapTo(ring.getX() + 0.5, ring.getY() + 0.8 + random.nextDouble(), ring.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+					level.addFreshEntity(fairy);
+				}
 				continue;
 			}
 			comeUpon(level, player, random);
 		}
+	}
+
+	/** The middle of a fairy ring (at least {@link #RING_LEAST} of its blocks) within {@link #RING_SEARCH} of {@code at}, or null. */
+	private static BlockPos ringNear(ServerLevel level, BlockPos at) {
+		if (!com.jaymospowers.core.Loaded.made(level, at)) {
+			return null;
+		}
+		int n = 0, sx = 0, sy = 0, sz = 0;
+		for (int dx = -RING_SEARCH; dx <= RING_SEARCH; dx++) {
+			for (int dz = -RING_SEARCH; dz <= RING_SEARCH; dz++) {
+				int x = at.getX() + dx, z = at.getZ() + dz;
+				if (!com.jaymospowers.core.Loaded.made(level, new BlockPos(x, 0, z))) {
+					continue;
+				}
+				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
+				if (level.getBlockState(top).is(FAIRY_RING)) {
+					n++;
+					sx += x;
+					sy += top.getY();
+					sz += z;
+				}
+			}
+		}
+		return n >= RING_LEAST ? new BlockPos(sx / n, sy / n, sz / n) : null;
 	}
 
 	/** Forests (birch, dark, flower, old growth...), meadows and cherry groves. */

@@ -1,5 +1,6 @@
 package com.jaymospowers.client.hud;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.jaymospowers.JaymosPowers;
 import java.io.IOException;
 import java.io.Reader;
@@ -71,7 +72,7 @@ public final class AdvancementPins {
 			}
 			// a shift-click on the advancement: no key of its own to clash with the many already bound
 			ScreenMouseEvents.allowMouseClick(screen).register((s, event) ->
-				event.button() != 0 || !event.hasShiftDown() || !toggleHovered(Minecraft.getInstance()));
+				event.button() != InputConstants.MOUSE_BUTTON_LEFT || !event.hasShiftDown() || !toggleHovered(Minecraft.getInstance()));
 			ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> hint(graphics, s));
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosPowers.id("advancement_pins"), AdvancementPins::draw);

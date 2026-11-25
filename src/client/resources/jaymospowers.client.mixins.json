@@ -39,6 +39,8 @@
 		"ItemLayerRenderStateAccessor",
 		"BloodItemOverlayMixin",
 		"BloodVideoSettingsMixin",
+		"MotionVideoSettingsMixin",
+		"HitPoseModelFeatureRendererMixin",
 		"BloodDebugLineMixin",
 		"FaceLivingEntityRendererMixin",
 		"TerrainParticleWaterMixin",
@@ -153,6 +155,7 @@
 		"FangGauntletsFirstPersonMixin",
 		"FangGauntletsItemInHandLayerMixin",
 		"FangGauntletsModelFeatureRendererMixin",
+		"HandWoundsAvatarRendererMixin",
 		"TitleCardMixin"
 	],
 	"injectors": { "defaultRequire": 1 }

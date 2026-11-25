@@ -112,7 +112,7 @@ public final class SoulJars {
 	}
 
 	/** The kind of soul in a full jar, or null. */
-	static @Nullable EntityType<?> soulIn(ItemStack stack) {
+	public static @Nullable EntityType<?> soulIn(ItemStack stack) {
 		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
 		if (!stack.is(FULL_SOUL_JAR) || data == null) {
 			return null;

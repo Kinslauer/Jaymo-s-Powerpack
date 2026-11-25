@@ -1,0 +1,8 @@
+{
+	"effect.jaymospowers.mycosis": "Spore-Rot",
+	"effect.jaymospowers.spore_ward": "Spore Ward",
+	"item.jaymospowers.antifungal_tonic": "Antifungal Tonic",
+	"tooltip.jaymospowers.antifungal_tonic": "Cures the spore-rot and wards against it for three minutes.",
+	"jei.jaymospowers.medicine.antifungal.1": "Cures the spore-rot",
+	"jei.jaymospowers.medicine.antifungal.2": "Spore ward for %s min"
+}

@@ -19,9 +19,11 @@ import org.jspecify.annotations.Nullable;
 public final class RigMoves {
 	/** {@link Move} kinds. */
 	public static final int PALM = 1, LAUNCHER = 2, UNIBEAM = 3;
-	/** The one-knee landing ({@link RigLanding}) and a Rig prosthetic leg's kick ({@link RigLimbs}). */
-	public static final int KNEE = 4, KICK = 5;
-	public static final int KNEE_TICKS = 26, KICK_TICKS = 12;
+	/** The one-knee landing ({@link RigLanding}) and a Rig prosthetic leg's kick ({@link RigLimbs}): the side kick, and in a combo the spinning roundhouse. */
+	public static final int KNEE = 4, KICK = 5, ROUNDHOUSE = 26;
+	public static final int KNEE_TICKS = 26, KICK_TICKS = 12, ROUNDHOUSE_TICKS = 17;
+	/** The kicks' wind-ups: ticks from the key to the side kick's flick landing, and to the roundhouse's shin coming round. */
+	public static final int KICK_FIRE = 4, ROUNDHOUSE_FIRE = 9;
 	/**
 	 * The take-off (a crouch, then the thrusters fire), and three quiet gestures: a scan (fingers to the helm), a suit call
 	 * (arms out, feet planted while it builds) and the wrist table (a glance at the forearm).
@@ -83,6 +85,7 @@ public final class RigMoves {
 			case LAUNCHER -> LAUNCHER_TICKS;
 			case KNEE -> KNEE_TICKS;
 			case KICK -> KICK_TICKS;
+			case ROUNDHOUSE -> ROUNDHOUSE_TICKS;
 			case TAKEOFF -> TAKEOFF_TICKS;
 			case SCAN -> SCAN_TICKS;
 			case CALL -> CALL_TICKS;

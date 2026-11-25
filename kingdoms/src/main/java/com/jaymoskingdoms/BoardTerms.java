@@ -244,6 +244,7 @@ public final class BoardTerms {
 			m.remove(id);
 			player.setAttached(TERMS, Map.copyOf(m));
 		}
+		ErrandBooks.forget(player, id);
 		Inventory inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize(); i++) {
 			ItemStack s = inv.getItem(i);

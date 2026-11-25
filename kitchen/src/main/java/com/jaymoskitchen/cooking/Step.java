@@ -174,6 +174,17 @@ public enum Step {
 	SHULKER_MEAT(() -> com.jaymoskitchen.delight.EnderDelight.SHULKER_MOLLUSK, null, "shulker_meat"),
 	ENDERMAN_SIGHT(() -> com.jaymoskitchen.delight.EnderDelight.ENDERMAN_SIGHT, null, "enderman_sight"),
 	ENDER_SHARD(() -> com.jaymoskitchen.delight.EnderDelight.ENDER_SHARD, null, "ender_shard"),
+	// the forager's mushrooms and truffle (forage/Forage, by id) and Jaymo's Kingdoms' glowcap and bouncecap; Psithurism's soy and fish
+	MOREL(() -> own("morel"), null),
+	CHANTERELLE(() -> own("chanterelle"), null),
+	FROSTCAP(() -> own("frostcap"), null),
+	EMBERSTOOL(() -> own("emberstool"), null),
+	TRUFFLE(() -> own("truffle"), null),
+	FORAGED(() -> own("morel"), null, "foraged"),
+	GLOWCAP(() -> kingdoms("glowcap"), null, "glowcaps"),
+	BOUNCECAP(() -> kingdoms("bouncecap"), null, "bouncecaps"),
+	SOYBEANS(() -> psithurism("soybeans"), null),
+	FUGU(() -> psithurism("fugu"), null),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),
@@ -228,6 +239,10 @@ public enum Step {
 
 	private static Item enderscape(String path) {
 		return OptionalItems.item(OptionalItems.ENDERSCAPE, path);
+	}
+
+	private static Item psithurism(String path) {
+		return OptionalItems.item(OptionalItems.PSITHURISM, path);
 	}
 
 	private static Item powers(String path) {

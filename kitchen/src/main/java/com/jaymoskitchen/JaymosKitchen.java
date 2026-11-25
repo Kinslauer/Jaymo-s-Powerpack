@@ -64,6 +64,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.corpse.Reanimation.register();
 		com.jaymoskitchen.archery.StuckArrows.register();
 		Corpses.register();
+		com.jaymoskitchen.corpse.GoreRules.register();
 		// (0.5.18) spiders crushed flat leave loose legs, not a corpse
 		com.jaymoskitchen.corpse.SpiderCrush.register();
 		// (0.5.21) bodies blown apart by blasts leave flying chunks, not a corpse
@@ -92,6 +93,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.delight.DelightDishes.register();
 		// (0.5.33) Farmer's Delight's tomatoes, onions, rope, wild crops, rich soil, compost, mushroom colonies, villages
 		com.jaymoskitchen.delight.DelightFarm.register();
+		// the forager: wild mushrooms, truffles, mycelial soil, cultivation logs and the knife; the Harvest Hive and Bee Jar
+		com.jaymoskitchen.forage.Forage.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
 		com.jaymoskitchen.cooking.ExplodingPot.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();

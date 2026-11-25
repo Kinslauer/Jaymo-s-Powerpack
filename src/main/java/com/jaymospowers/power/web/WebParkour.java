@@ -157,7 +157,7 @@ public final class WebParkour {
 		int kind = move.kind();
 		Direction side = move.face() >= 0 && move.face() < Direction.values().length ? Direction.from3DDataValue(move.face()) : null;
 		boolean wallMove = kind == CLING || kind == WALL_JUMP;
-		if (kind == CLING && !canCling(player) || kind == WALL_JUMP && !canWallJump(player) && !clinging(player)) {
+		if (kind == CLING && !canCling(player) || kind == WALL_JUMP && !canWallJump(player) && !clinging(player) || kind == CLING && !WebStamina.canCling(player)) {
 			stop(player);
 			return;
 		}
@@ -221,7 +221,8 @@ public final class WebParkour {
 			};
 			Direction side = doing.face() >= 0 ? Direction.from3DDataValue(doing.face()) : null;
 			boolean lost = doing.kind() == CLING && (player == null || player.onGround() || side == null || !WebWallRun.wallAt(player.level(), player, side, 0.8));
-			if (player == null || !player.isAlive() || doing.ticks() >= max || lost || !Powers.has(player, WebPower.INSTANCE)) {
+			boolean tired = !lost && player != null && doing.kind() == CLING && !WebStamina.cling(player);
+			if (player == null || !player.isAlive() || doing.ticks() >= max || lost || tired || !Powers.has(player, WebPower.INSTANCE)) {
 				it.remove();
 				if (player != null) {
 					player.removeAttached(MOVE);

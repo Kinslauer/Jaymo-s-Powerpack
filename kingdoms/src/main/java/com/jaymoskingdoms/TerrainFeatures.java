@@ -43,15 +43,15 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 /**
- * Four pieces of land the Tectonic trial asked for (Reference Mods patch 11), each a placed feature (data/jaymoskingdoms/worldgen)
- * over a feature written here. None needs Tectonic: they read the ground the game made, whoever made it, and Tectonic's own
- * underground rivers, jungle pillars and lava tunnels give them more to work on.
+ * Four pieces of land from Reference Mods patch 11, each a placed feature (data/jaymoskingdoms/worldgen) over a feature written
+ * here. They read the ground the game made (our continents' shape and the game's own caves). Tectonic, which that patch tried
+ * in the pack, left it again (Andy, 2026-11-25: it broke the caves and the climate map); these stayed, as none needed it.
  * <ul>
- * <li><b>Smugglers' lanterns</b> ({@link SmugglersCache}): under a roof, over still deep water (a flooded cave, or one of
- * Tectonic's rivers under its mountains), a few chained lanterns and a barrel of goods on the bank. The back rooms'
+ * <li><b>Smugglers' lanterns</b> ({@link SmugglersCache}): under a roof, over still deep water (a flooded cave or an
+ * underground lake), a few chained lanterns and a barrel of goods on the bank. The back rooms'
  * runners (the speakeasies' fences) bring their goods by the water the watch doesn't walk.</li>
- * <li><b>Pillar crowns</b> ({@link PillarCrown}): in jungles, on a pillar standing clear of the ground round it (one of Tectonic's, or
- * one raised here where there is none), a flat top with a nest, a hoard and broken walls. Left by the forgotten hands that raised
+ * <li><b>Pillar crowns</b> ({@link PillarCrown}): in jungles, on a pillar standing clear of the ground round it (one the land made,
+ * or one raised here where there is none), a flat top with a nest, a hoard and broken walls. Left by the forgotten hands that raised
  * the jungle temples; who they were is left unnamed.</li>
  * <li><b>Volcanic islands</b> ({@link VolcanicIsland}): in warm, shallow seas, a cone of basalt with a crater of lava, black sand
  * and ash beaches. They are the mountains that wake ({@code disasters/Volcanoes}) standing in the sea.</li>
@@ -233,7 +233,7 @@ public final class TerrainFeatures {
 
 	/**
 	 * Where: jungles, one chunk in a few dozen, on a pillar of stone standing {@link #PILLAR_DROP} blocks over the ground on every side (one
-	 * of Tectonic's), or on one raised here where there is none. Why: the jungle temples' builders left their marks on the heights.
+	 * the land made), or on one raised here where there is none. Why: the jungle temples' builders left their marks on the heights.
 	 */
 	public record PillarCrown() implements Feature {
 		public static final MapCodec<PillarCrown> CODEC = MapCodec.unit(PillarCrown::new);
@@ -409,7 +409,7 @@ public final class TerrainFeatures {
 
 	/**
 	 * Where: the bottom of the world (the placed feature keeps to the lowest thirty blocks), in any cave with lava for a floor, which is
-	 * what Tectonic's lava tunnels and the game's own deep lava lakes are. Why: the deep ores lie there; a miner finds them by the glow and
+	 * what the game's own deep lava lakes and lava-floored caves are. Why: the deep ores lie there; a miner finds them by the glow and
 	 * pays for them in burns.
 	 */
 	public record LavaTunnel() implements Feature {

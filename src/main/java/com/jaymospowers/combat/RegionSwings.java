@@ -210,7 +210,11 @@ public final class RegionSwings {
 		return out.isEmpty() ? attacks : out.toArray(WeaponAttributes.Attack[]::new);
 	}
 
-	/** {@code base} swung with {@code animation} instead, its hitbox shaped for the motion. */
+	/**
+	 * {@code base} swung with {@code animation} instead, its hitbox shaped for the motion. Trail particles are an empty list,
+	 * never null: Better Combat reads {@code trailParticles().isEmpty()} on every upswing (null crashed the client, locked on
+	 * fighting zombies 2026-11-25), and empty lets it pick its own trail for the new animation rather than the old motion's.
+	 */
 	private static WeaponAttributes.Attack made(WeaponAttributes.Attack base, String animation, Motion motion) {
 		return MADE.computeIfAbsent(base, b -> Collections.synchronizedMap(new HashMap<>())).computeIfAbsent(animation, name -> {
 			WeaponAttributes.HitBoxShape shape = switch (motion) {
@@ -220,7 +224,7 @@ public final class RegionSwings {
 			};
 			double angle = motion == Motion.THRUST ? 0.0 : base.angle() > 0.0 ? Math.min(base.angle(), 120.0) : 90.0;
 			return new WeaponAttributes.Attack(base.conditions(), shape, base.damageMultiplier(), base.movementSpeedMultiplier(),
-				base.rangeMultiplier(), angle, base.upswing(), name, base.swingSound(), base.impactSound(), null);
+				base.rangeMultiplier(), angle, base.upswing(), name, base.swingSound(), base.impactSound(), List.of());
 		});
 	}
 }

@@ -44,6 +44,8 @@
 		"OvenMenuMixin",
 		"PlayerMixin",
 		"ProjectileWeaponItemMixin",
+		"ScavengerFedMixin",
+		"RottenPumpkinMixin",
 		"ScavengerSightMixin",
 		"SignBlockEntityMixin",
 		"SlowGrowthMixin",

@@ -618,6 +618,24 @@ public final class McaCompat {
 		return LOADED ? McaBridge.escort(level, f, at, yaw, task, radius) : null;
 	}
 
+	/** With MCA, a Pallid captain's body ({@link HollowCaptains}): the man saved as {@code face}, or a new one; not yet in the world. Null without MCA. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob hollowBody(ServerLevel level, net.minecraft.world.phys.Vec3 at, float yaw, int role,
+		net.minecraft.nbt.@Nullable CompoundTag face) {
+		return LOADED ? McaBridge.hollowBody(level, at, yaw, role, face) : null;
+	}
+
+	/** With MCA, {@code mob}'s whole saved self, to make it again with {@link #hollowBody}; null if it isn't one of MCA's. */
+	static net.minecraft.nbt.@Nullable CompoundTag saved(net.minecraft.world.entity.LivingEntity mob) {
+		return LOADED ? McaBridge.saved(mob) : null;
+	}
+
+	/** With MCA, {@code mob} is out of MCA's family tree. */
+	static void untree(ServerLevel level, net.minecraft.world.entity.LivingEntity mob) {
+		if (LOADED) {
+			McaBridge.untree(level, mob);
+		}
+	}
+
 	/** (0.7.295) With MCA, a stranger of no settlement in {@code role} (a looter), kept to {@code radius} of {@code home}; or null. */
 	static net.minecraft.world.entity.@Nullable PathfinderMob stranger(ServerLevel level, net.minecraft.core.BlockPos at, float yaw, int role,
 		net.minecraft.core.BlockPos home, int radius) {

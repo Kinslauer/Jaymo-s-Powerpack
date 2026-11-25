@@ -5567,5 +5567,420 @@
 			"jaymoskingdoms:illagers/mob/sorcerer/completecast"
 		],
 		"subtitle": "subtitles.jaymoskingdoms.illager.sorcerer.complete_cast"
+	},
+	"wither.beam_charge": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.beam_charge",
+		"sounds": [
+			"jaymoskingdoms:wither/beam_charge"
+		]
+	},
+	"wither.beam_fire": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.beam_fire",
+		"sounds": [
+			"jaymoskingdoms:wither/beam_fire"
+		]
+	},
+	"wither.charge_roar": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.charge_roar",
+		"sounds": [
+			"jaymoskingdoms:wither/charge_roar"
+		]
+	},
+	"wither.charge_rush": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.charge_rush",
+		"sounds": [
+			"jaymoskingdoms:wither/charge_rush"
+		]
+	},
+	"wither.stun": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.stun",
+		"sounds": [
+			"jaymoskingdoms:wither/stun"
+		]
+	},
+	"block.bouncecap.bounce": {
+		"sounds": [
+			"jaymoskingdoms:block/bouncecap/bounce1",
+			"jaymoskingdoms:block/bouncecap/bounce2",
+			"jaymoskingdoms:block/bouncecap/bounce3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.block.bouncecap.bounce"
+	},
+	"entity.bloatshroom.ambient": {
+		"sounds": [
+			"jaymoskingdoms:entity/bloatshroom/ambient1",
+			"jaymoskingdoms:entity/bloatshroom/ambient2",
+			"jaymoskingdoms:entity/bloatshroom/ambient3",
+			"jaymoskingdoms:entity/bloatshroom/ambient4"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.bloatshroom.ambient"
+	},
+	"entity.bloatshroom.burst": {
+		"sounds": [
+			"jaymoskingdoms:entity/bloatshroom/burst1",
+			"jaymoskingdoms:entity/bloatshroom/burst2",
+			"jaymoskingdoms:entity/bloatshroom/burst3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.bloatshroom.burst"
+	},
+	"entity.bloatshroom.death": {
+		"sounds": [
+			"jaymoskingdoms:entity/bloatshroom/death1",
+			"jaymoskingdoms:entity/bloatshroom/death2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.bloatshroom.death"
+	},
+	"entity.bloatshroom.hurt": {
+		"sounds": [
+			"jaymoskingdoms:entity/bloatshroom/hurt1",
+			"jaymoskingdoms:entity/bloatshroom/hurt2",
+			"jaymoskingdoms:entity/bloatshroom/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.bloatshroom.hurt"
+	},
+	"entity.bloatshroom.swell": {
+		"sounds": [
+			"jaymoskingdoms:entity/bloatshroom/swell1",
+			"jaymoskingdoms:entity/bloatshroom/swell2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.bloatshroom.swell"
+	},
+	"entity.glowmoth.ambient": {
+		"sounds": [
+			"jaymoskingdoms:entity/glowmoth/ambient1",
+			"jaymoskingdoms:entity/glowmoth/ambient2",
+			"jaymoskingdoms:entity/glowmoth/ambient3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.glowmoth.ambient"
+	},
+	"entity.glowmoth.death": {
+		"sounds": [
+			"jaymoskingdoms:entity/glowmoth/death1",
+			"jaymoskingdoms:entity/glowmoth/death2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.glowmoth.death"
+	},
+	"entity.glowmoth.hurt": {
+		"sounds": [
+			"jaymoskingdoms:entity/glowmoth/hurt1",
+			"jaymoskingdoms:entity/glowmoth/hurt2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.glowmoth.hurt"
+	},
+	"entity.mimicap.ambient": {
+		"sounds": [
+			"jaymoskingdoms:entity/mimicap/ambient1",
+			"jaymoskingdoms:entity/mimicap/ambient2",
+			"jaymoskingdoms:entity/mimicap/ambient3",
+			"jaymoskingdoms:entity/mimicap/ambient4"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.mimicap.ambient"
+	},
+	"entity.mimicap.bite": {
+		"sounds": [
+			"jaymoskingdoms:entity/mimicap/bite1",
+			"jaymoskingdoms:entity/mimicap/bite2",
+			"jaymoskingdoms:entity/mimicap/bite3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.mimicap.bite"
+	},
+	"entity.mimicap.death": {
+		"sounds": [
+			"jaymoskingdoms:entity/mimicap/death1",
+			"jaymoskingdoms:entity/mimicap/death2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.mimicap.death"
+	},
+	"entity.mimicap.hurt": {
+		"sounds": [
+			"jaymoskingdoms:entity/mimicap/hurt1",
+			"jaymoskingdoms:entity/mimicap/hurt2",
+			"jaymoskingdoms:entity/mimicap/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.mimicap.hurt"
+	},
+	"entity.mimicap.step": {
+		"sounds": [
+			"jaymoskingdoms:entity/mimicap/step1",
+			"jaymoskingdoms:entity/mimicap/step2",
+			"jaymoskingdoms:entity/mimicap/step3",
+			"jaymoskingdoms:entity/mimicap/step4"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.mimicap.step"
+	},
+	"entity.mimicap.wake": {
+		"sounds": [
+			"jaymoskingdoms:entity/mimicap/wake1",
+			"jaymoskingdoms:entity/mimicap/wake2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.mimicap.wake"
+	},
+	"entity.myceliarch.ambient": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/ambient1",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/ambient2",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/ambient3",
+				"attenuation_distance": 48
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.myceliarch.ambient"
+	},
+	"entity.myceliarch.death": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/death1",
+				"attenuation_distance": 96
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.myceliarch.death"
+	},
+	"entity.myceliarch.emerge": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/emerge1",
+				"attenuation_distance": 96
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.myceliarch.emerge"
+	},
+	"entity.myceliarch.hurt": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/hurt1",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/hurt2",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/hurt3",
+				"attenuation_distance": 48
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.myceliarch.hurt"
+	},
+	"entity.myceliarch.roar": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/roar1",
+				"attenuation_distance": 96
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/roar2",
+				"attenuation_distance": 96
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.myceliarch.roar"
+	},
+	"entity.myceliarch.root_erupt": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/root_erupt1",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/root_erupt2",
+				"attenuation_distance": 48
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.myceliarch.root_erupt"
+	},
+	"entity.myceliarch.slam": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/slam1",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/slam2",
+				"attenuation_distance": 48
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.myceliarch.slam"
+	},
+	"entity.myceliarch.spore_nova": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/spore_nova1",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/spore_nova2",
+				"attenuation_distance": 48
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.myceliarch.spore_nova"
+	},
+	"entity.myceliarch.step": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/step1",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/step2",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymoskingdoms:entity/myceliarch/step3",
+				"attenuation_distance": 48
+			}
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.myceliarch.step"
+	},
+	"entity.root_spike.erupt": {
+		"sounds": [
+			"jaymoskingdoms:entity/root_spike/erupt1",
+			"jaymoskingdoms:entity/root_spike/erupt2",
+			"jaymoskingdoms:entity/root_spike/erupt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.root_spike.erupt"
+	},
+	"entity.shambler.ambient": {
+		"sounds": [
+			"jaymoskingdoms:entity/shambler/ambient1",
+			"jaymoskingdoms:entity/shambler/ambient2",
+			"jaymoskingdoms:entity/shambler/ambient3",
+			"jaymoskingdoms:entity/shambler/ambient4"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.shambler.ambient"
+	},
+	"entity.shambler.attack": {
+		"sounds": [
+			"jaymoskingdoms:entity/shambler/attack1",
+			"jaymoskingdoms:entity/shambler/attack2",
+			"jaymoskingdoms:entity/shambler/attack3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.shambler.attack"
+	},
+	"entity.shambler.death": {
+		"sounds": [
+			"jaymoskingdoms:entity/shambler/death1",
+			"jaymoskingdoms:entity/shambler/death2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.shambler.death"
+	},
+	"entity.shambler.hurt": {
+		"sounds": [
+			"jaymoskingdoms:entity/shambler/hurt1",
+			"jaymoskingdoms:entity/shambler/hurt2",
+			"jaymoskingdoms:entity/shambler/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.shambler.hurt"
+	},
+	"entity.shambler.rise": {
+		"sounds": [
+			"jaymoskingdoms:entity/shambler/rise1",
+			"jaymoskingdoms:entity/shambler/rise2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.shambler.rise"
+	},
+	"entity.spore_glob.splat": {
+		"sounds": [
+			"jaymoskingdoms:entity/spore_glob/splat1",
+			"jaymoskingdoms:entity/spore_glob/splat2",
+			"jaymoskingdoms:entity/spore_glob/splat3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.spore_glob.splat"
+	},
+	"entity.sporeling.ambient": {
+		"sounds": [
+			"jaymoskingdoms:entity/sporeling/ambient1",
+			"jaymoskingdoms:entity/sporeling/ambient2",
+			"jaymoskingdoms:entity/sporeling/ambient3",
+			"jaymoskingdoms:entity/sporeling/ambient4"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.sporeling.ambient"
+	},
+	"entity.sporeling.death": {
+		"sounds": [
+			"jaymoskingdoms:entity/sporeling/death1",
+			"jaymoskingdoms:entity/sporeling/death2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.sporeling.death"
+	},
+	"entity.sporeling.happy": {
+		"sounds": [
+			"jaymoskingdoms:entity/sporeling/happy1",
+			"jaymoskingdoms:entity/sporeling/happy2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.sporeling.happy"
+	},
+	"entity.sporeling.hurt": {
+		"sounds": [
+			"jaymoskingdoms:entity/sporeling/hurt1",
+			"jaymoskingdoms:entity/sporeling/hurt2",
+			"jaymoskingdoms:entity/sporeling/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.sporeling.hurt"
+	},
+	"entity.sporeling.sneeze": {
+		"sounds": [
+			"jaymoskingdoms:entity/sporeling/sneeze1",
+			"jaymoskingdoms:entity/sporeling/sneeze2",
+			"jaymoskingdoms:entity/sporeling/sneeze3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.sporeling.sneeze"
+	},
+	"entity.truffler.ambient": {
+		"sounds": [
+			"jaymoskingdoms:entity/truffler/ambient1",
+			"jaymoskingdoms:entity/truffler/ambient2",
+			"jaymoskingdoms:entity/truffler/ambient3",
+			"jaymoskingdoms:entity/truffler/ambient4"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.truffler.ambient"
+	},
+	"entity.truffler.death": {
+		"sounds": [
+			"jaymoskingdoms:entity/truffler/death1",
+			"jaymoskingdoms:entity/truffler/death2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.truffler.death"
+	},
+	"entity.truffler.dig": {
+		"sounds": [
+			"jaymoskingdoms:entity/truffler/dig1",
+			"jaymoskingdoms:entity/truffler/dig2",
+			"jaymoskingdoms:entity/truffler/dig3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.truffler.dig"
+	},
+	"entity.truffler.hurt": {
+		"sounds": [
+			"jaymoskingdoms:entity/truffler/hurt1",
+			"jaymoskingdoms:entity/truffler/hurt2",
+			"jaymoskingdoms:entity/truffler/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.truffler.hurt"
+	},
+	"entity.truffler.sniff": {
+		"sounds": [
+			"jaymoskingdoms:entity/truffler/sniff1",
+			"jaymoskingdoms:entity/truffler/sniff2",
+			"jaymoskingdoms:entity/truffler/sniff3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.entity.truffler.sniff"
+	},
+	"item.bloomreaver.burst": {
+		"sounds": [
+			"jaymoskingdoms:item/bloomreaver/burst1",
+			"jaymoskingdoms:item/bloomreaver/burst2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.item.bloomreaver.burst"
+	},
+	"item.fruiting_heart.use": {
+		"sounds": [
+			"jaymoskingdoms:item/fruiting_heart/use1"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.item.fruiting_heart.use"
 	}
 }

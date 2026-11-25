@@ -735,6 +735,22 @@ public final class KitchenCompat {
 		}
 	}
 
+	/**
+	 * Floors {@code mob} into Kitchen's limp ragdoll, toppled away from {@code from} (a takedown). Reached by reflection, as
+	 * this build may compile against a Kitchen without it; false if Kitchen isn't here, is older, or the mob can't go limp.
+	 */
+	public static boolean floorMob(net.minecraft.world.entity.Mob mob, net.minecraft.world.phys.Vec3 from) {
+		if (!LOADED) {
+			return false;
+		}
+		try {
+			return (Boolean) Class.forName("com.jaymoskitchen.ragdoll.MobRagdolls")
+				.getMethod("floor", net.minecraft.world.entity.Mob.class, net.minecraft.world.phys.Vec3.class).invoke(null, mob, from);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** Whether {@code entity} is a player lying limp in Kitchen's ragdoll (drawn by Kitchen, so our own poses keep off). */
 	public static boolean limp(Entity entity) {
 		if (!LOADED || !(entity instanceof Player)) {
@@ -818,6 +834,10 @@ public final class KitchenCompat {
 					: com.jaymospowers.core.BladeBlood.NO_BLOOD;
 				com.jaymospowers.core.SeveredPart severed = com.jaymospowers.core.SeveredPart.drop(level, look, part, type.getDimensions().height(),
 					corpse.getYRot(), at.add(0.0, 0.1, 0.0), fling, blood);
+				// drawn as the body lies now: its rot and char (Kitchen's wear) and the blood on it
+				int dressed = what.length >= 6 && what[4] instanceof Integer d ? d : 0;
+				int wear = what.length >= 6 && what[5] instanceof Integer w ? w : 0;
+				severed.lookedAs(dressed, wear, com.jaymospowers.core.blood.Bloodied.corpseBlood(corpse));
 				if (toHand && by instanceof net.minecraft.server.level.ServerPlayer player) {
 					com.jaymospowers.core.Carry.takePart(player, severed);
 				}

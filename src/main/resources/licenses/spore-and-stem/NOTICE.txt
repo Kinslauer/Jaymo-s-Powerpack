@@ -1,0 +1,27 @@
+The glow-woods (the giant glowcap, bouncecap and inkcap, their cap, gill and fungal wood blocks, the glowcap lantern, the
+small mushrooms that grow them, and the fairy ring) are ported from Spore & Stem by NightBeam Studio, licensed under the
+Apache License, Version 2.0 (LICENSE, beside this file). Its own notice follows.
+
+----
+
+Spore & Stem
+Copyright 2026 NightBeam Studio
+
+This product is licensed under the Apache License, Version 2.0.
+You may obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+This product includes software developed by NightBeam Studio.
+Spore & Stem is the 1.0 rewrite of the project formerly published as Genetically Modified Monsters.
+All textures, models, animations and sound effects shipped with this mod were generated from source by the
+scripts in tools/assets and are covered by the same license. A few block sound types reference vanilla
+Minecraft sounds by name; those files are not redistributed.
+Third-party dependencies retain their own licenses; see each dependency's project page for details.
+
+----
+
+Changes made here (Apache-2.0 section 4): the Java is rewritten for Jaymo's Kingdoms (package com.jaymoskingdoms.glowwood,
+registered under the jaymoskingdoms namespace); the textures, models, block states, item definitions and the bouncecap
+sounds for exactly those blocks are copied with their ids renamed (spore_and_stem: to jaymoskingdoms:); their loot
+tables, recipes and tags are rewritten without the parts of Spore & Stem this mod does not carry.

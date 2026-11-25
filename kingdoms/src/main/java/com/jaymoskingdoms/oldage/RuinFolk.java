@@ -256,7 +256,7 @@ public final class RuinFolk {
 						.get(ResourceKey.create(Registries.STRUCTURE, JaymosKingdoms.id(o.id + "_ruins"))).ifPresent(others::add);
 				}
 			}
-			found = others.isEmpty() ? null : level.findNearestMapStructure(HolderSet.direct(others), v.blockPosition(), MAP_SEARCH, false);
+			found = others.isEmpty() ? null : com.jaymoskingdoms.Scout.nearest(level, HolderSet.direct(others), v.blockPosition(), MAP_SEARCH);
 			MAPPED.put(key, found);
 		}
 		if (found == null) {

@@ -70,8 +70,8 @@ public final class NightThings {
 	static final float WIDOW_CHANCE = 0.06F;
 	static final int WIDOW_NEAR = 20, WIDOW_FAR = 32;
 	static final double ONE_WITHIN = 128.0;
-	/** The Unburied: this many dead left lying within this far of each other. */
-	static final int DEAD_NEEDED = 8;
+	/** The Unburied: this many grown men's worth of the dead (people only) left lying within this far of each other. */
+	static final float DEAD_NEEDED = Unburied.FULL_MEN;
 	static final double DEAD_RANGE = 16.0;
 	/** The swell: the chance each look for a sailor in fog at night on Mohknee's sea, the fog it needs, and how far ahead it rises. */
 	static final float SWELL_CHANCE = 0.2F, SWELL_FOG = 0.5F;
@@ -181,7 +181,10 @@ public final class NightThings {
 
 	/** Where enough dead have been left lying together, they get up as one. */
 	private static void unburied(ServerLevel level, ServerPlayer player) {
-		List<Entity> near = KitchenCompat.fallenNear(level, player.position(), DEAD_RANGE * 2.0);
+		// Andy: "the unburied should only be made from humanoids": only the dead that were people (no maggots, bugs,
+		// spiders or beasts), each counted for its bulk against a man's
+		List<Entity> near = KitchenCompat.fallenNear(level, player.position(), DEAD_RANGE * 2.0).stream()
+			.filter(e -> KitchenCompat.men(e) > 0.0F).toList();
 		// a body that lost its head or limbs still counts, for less (Andy: "it just requires more if the body isnt complete"),
 		// and one that's been eaten is gone and counts for nothing
 		if (bodies(near) < DEAD_NEEDED || !level.getEntitiesOfClass(Unburied.class, player.getBoundingBox().inflate(ONE_WITHIN), LivingEntity::isAlive).isEmpty()) {
@@ -197,6 +200,9 @@ public final class NightThings {
 				return;
 			}
 			giant.snapTo(heart.getX(), heart.getY(), heart.getZ(), level.getRandom().nextFloat() * 360.0F, 0.0F);
+			// as big as the dead it would be made of, to see whether it has room
+			giant.size(bodies(heap));
+			giant.refreshDimensions();
 			if (!level.noCollision(giant)) {
 				giant.discard();
 				continue;
@@ -204,21 +210,25 @@ public final class NightThings {
 			for (Entity dead : heap) {
 				level.sendParticles(ParticleTypes.SOUL, dead.getX(), dead.getY() + 0.3, dead.getZ(), 6, 0.3, 0.2, 0.3, 0.02);
 			}
-			// the dead are what it is made of: taken into it whole, and let go again at daybreak
-			giant.take(level, heap);
+			// the dead are what it is made of: the ground rumbles under them, then they're dragged in and slap together
+			// (Unburied.gather), kept whole in it, and let go again at daybreak
+			giant.gather(heap);
 			level.addFreshEntity(giant);
 			level.playSound(null, giant.blockPosition(), SoundEvents.SKELETON_HORSE_DEATH, SoundSource.HOSTILE, 3.0F, 0.4F);
 			return;
 		}
 	}
 
-	/** How many whole bodies {@code dead} add up to (each as much as is left of it, {@link KitchenCompat#wholeness}). */
+	/**
+	 * How many grown men's worth of the dead {@code dead} add up to: each a person's body counted for its bulk and as
+	 * much as is left of it, anything else for nothing ({@link KitchenCompat#men}).
+	 */
 	static float bodies(List<Entity> dead) {
-		float whole = 0.0F;
+		float men = 0.0F;
 		for (Entity body : dead) {
-			whole += KitchenCompat.wholeness(body);
+			men += KitchenCompat.men(body);
 		}
-		return whole;
+		return men;
 	}
 
 	/** It rises ahead of a sailor in a fog bank at night, on the sea round Mohknee. */

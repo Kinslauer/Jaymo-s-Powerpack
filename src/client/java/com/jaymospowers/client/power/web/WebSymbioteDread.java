@@ -244,8 +244,11 @@ final class WebSymbioteDread {
 		}
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
-		if (strength <= 0.0F) {
-			tendrils(graphics, width, height, now, urgency, life);
+		if (strength <= 0.0F || WebSymbioteSettingsClient.edgeOff()) {
+			// (the edge membrane switched off in the Settings screen: no vignette, the tendrils stay)
+			if (life > 0.0F) {
+				tendrils(graphics, width, height, now, urgency, life);
+			}
 			return;
 		}
 		int dark = (int)(255 * DARKEN * shade);

@@ -186,9 +186,9 @@ public final class Arcana {
 		});
 	}
 
-	/** (0.7.212) A staff that casts: the wizard's, or the healer's. */
+	/** (0.7.212) A staff that casts: the wizard's, or the healer's; a mage's wand casts as one ({@link MageWand}). */
 	public static boolean isStaff(ItemStack stack) {
-		return stack.is(WIZARD_STAFF) || stack.is(HEALER_STAFF);
+		return stack.is(WIZARD_STAFF) || stack.is(HEALER_STAFF) || stack.getItem() instanceof MageWand;
 	}
 
 	/** The spells by name ({@code raising}, {@code draining}, {@code fire}, {@code warding}, {@code arcane}). */

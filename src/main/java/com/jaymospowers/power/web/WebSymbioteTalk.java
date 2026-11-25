@@ -177,7 +177,7 @@ public final class WebSymbioteTalk {
 			int fury = WebFury.fury(player);
 			WebSymbiote.whisper(player, pick(player, fury >= FURY_HOT ? "talk.fury.hot" : fury >= FURY_WARM ? "talk.fury.warm" : "talk.fury.calm"));
 		} else if (has(text, SUIT)) {
-			String kind = !state.has(WebSymbioteState.BULK) && state.bond() < WebSymbiote.BOND_MAX ? "talk.suit.not_yet"
+			String kind = !state.has(WebSymbioteState.BULK) && state.bond() < WebSymbiote.bulkBond(player) ? "talk.suit.not_yet"
 				: WebSymbiote.bulked(player) ? "talk.suit.out" : "talk.suit.caged";
 			WebSymbiote.whisper(player, pick(player, kind));
 		} else if (has(text, SLEEP)) {

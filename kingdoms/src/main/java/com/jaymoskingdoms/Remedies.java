@@ -47,6 +47,11 @@ final class Remedies {
 		new Ware("jaymospowers:splint", 3, 1, 8),
 		new Ware("jaymospowers:smelling_salts", 6, 1, 4),
 		new Ware("jaymospowers:leeches", 4, 1, 6),
+		new Ware("jaymoskingdoms:empty_thorn", 1, 2, 16),
+		new Ware("jaymoskingdoms:staunching_thorn", 4, 1, 8),
+		new Ware("jaymoskingdoms:numbing_thorn", 5, 1, 6),
+		new Ware("jaymoskingdoms:quickening_thorn", 6, 1, 4),
+		new Ware("jaymoskingdoms:restoring_thorn", 12, 1, 3),
 		new Ware("jaymoskitchen:strong_spirits", 4, 1, 8));
 	/** (0.7.102) What a tavern's keeper or a festival's toaster sells. */
 	static final List<Ware> DRINK = List.of(

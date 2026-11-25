@@ -263,7 +263,9 @@ public final class LifeStory {
 		// (0.7.349, Andy: "new starts, involving the other worlds") woken off the overworld by Jaymo's Powers ({@link #OTHER_WORLDS})
 		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false),
 		// reborn a monster: the goblin people's forms (MonsterBorn), opened by naming a follower
-		MONSTERBORN(false);
+		MONSTERBORN(false),
+		// (Andy 2026-11-25, "curate a start like an adventure map") a start built by hand: WrittenStarts
+		WRITTEN(false);
 
 		public final boolean realm;
 
@@ -301,6 +303,7 @@ public final class LifeStory {
 		TERMS.put(Start.SKYFALL, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.WHALERS, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.VERDANT, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.WRITTEN, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.BANISHED, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.CAVE, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.BURNED, new Terms(Mark.HARD, 0));
@@ -663,7 +666,8 @@ public final class LifeStory {
 				Answer.road(Start.DEMON, Items.SOUL_LANTERN),
 				Answer.road(Start.AFTERLIFE, Items.TOTEM_OF_UNDYING),
 				Answer.road(Start.FATE, Items.ENDER_EYE),
-				Answer.road(Start.MONSTERBORN, Items.BONE)));
+				Answer.road(Start.MONSTERBORN, Items.BONE),
+				Answer.road(Start.WRITTEN, Items.CAMPFIRE)));
 			// (gb-faith) the eight patrons, each drawn by its own shrine glyph on the page (the item is the fallback picture)
 			FAITH.answers.addAll(List.of(
 				Answer.faith(Patron.HEARTHKEEPER, Items.CAMPFIRE),
@@ -993,6 +997,29 @@ public final class LifeStory {
 		}
 	}
 
+	/**
+	 * Server → player: the story sent back was refused, and why ({@code reason}: realm, road, blood, class, flaws or
+	 * unanswered). The story screen comes back at once with the reason on it, so a life that can't be lived is never
+	 * the same page coming back with no word of what's wrong.
+	 */
+	public record Refused(String reason) implements CustomPacketPayload {
+		public static final Type<Refused> TYPE = new Type<>(JaymosKingdoms.id("story_refused"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Refused> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeUtf(p.reason), buf -> new Refused(buf.readUtf(64)));
+
+		@Override
+		public Type<Refused> type() {
+			return TYPE;
+		}
+	}
+
+	/** Tells {@code player}'s story screen why the story it sent was refused ({@link Refused}). */
+	private static void refuse(ServerPlayer player, String reason) {
+		if (ServerPlayNetworking.canSend(player, Refused.TYPE)) {
+			ServerPlayNetworking.send(player, new Refused(reason));
+		}
+	}
+
 	private LifeStory() {
 	}
 
@@ -1021,6 +1048,7 @@ public final class LifeStory {
 		net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(LifeStory::leftWorld);
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(LifeStory::leftBand);
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Refused.TYPE, Refused.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Live.TYPE, Live.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Live.TYPE, (payload, context) -> live(context.player(), payload));
 		PayloadTypeRegistry.serverboundPlay().register(Skipped.TYPE, Skipped.CODEC);
@@ -1271,14 +1299,21 @@ public final class LifeStory {
 		Answer born = at(Question.BORN, live.answers()), raised = at(Question.RAISED, live.answers()), child = at(Question.CHILDHOOD, live.answers()),
 			youth = at(Question.YOUTH, live.answers()), turn = at(Question.TURN, live.answers()), road = at(Question.ROAD, live.answers()),
 			faith = at(Question.FAITH, live.answers());
+		// A road with no realm to name (never named, or the realm has fallen) while MCA's creator is still to come waits for
+		// after it like any road does, rather than refusing the whole story (Andy was stuck on the story page over this)
+		if (road != null && road.realm && realm(server, live.roadRealm()) == null && McaCompat.destinyPending(player)) {
+			road = null;
+		}
 		// (0.7.356) with MCA's creator still to come, the road is told after it ({@link #road})
 		boolean later = road == null && McaCompat.destinyPending(player);
 		if (born == null || raised == null || child == null || youth == null || road == null && !later || powers() && turn == null
 			|| road != null && !road.offered()) {
+			refuse(player, "unanswered");
 			return;
 		}
 		// (0.7.420) at most two flaws, known ids only: the client is not trusted with that
 		if (!Flaws.valid(live.flaws(), live.switches())) {
+			refuse(player, "flaws");
 			return;
 		}
 		// (0.7.419) a locked road is only for a deed done in this world or a past that opens it: the client is not trusted with that
@@ -1286,6 +1321,7 @@ public final class LifeStory {
 			Answer a = at(q, live.answers());
 			return a == null ? null : a.key;
 		})) {
+			refuse(player, "road");
 			return;
 		}
 		// the heritage and class picked over the story's, if any: a heritage open to them, any class
@@ -1293,6 +1329,7 @@ public final class LifeStory {
 		if (live.heritage() >= 0) {
 			Heritage.Kind[] kinds = Heritage.Kind.values();
 			if (live.heritage() >= kinds.length || !Heritage.unlocked(player, kinds[live.heritage()])) {
+				refuse(player, "blood");
 				return;
 			}
 			heritage = kinds[live.heritage()];
@@ -1300,15 +1337,18 @@ public final class LifeStory {
 		// (0.7.448) the questions asked were the birthplace's: an answer for another blood (a vat-born's Tinkerer) is refused
 		for (Answer a : new Answer[] {raised, child, youth, turn}) {
 			if (a != null && !a.fits(born.heritage)) {
+				refuse(player, "blood");
 				return;
 			}
 		}
 		// (0.7.349) the Verdant World's start is the Verdant-born's alone (0.7.355: the demon master's, the Emberborn's); the afterlife's makes you Divine-born
 		if (road != null && !road.fits(heritage)) {
+			refuse(player, "road");
 			return;
 		}
 		// (0.7.501) an earned blood (the Bio-built's vats) is only born to one it has woken in, unless the road makes another
 		if ((road == null || road.makes() == null) && !Heritage.unlocked(player, heritage)) {
+			refuse(player, "blood");
 			return;
 		}
 		if (road != null && road.makes() != null) {
@@ -1323,6 +1363,7 @@ public final class LifeStory {
 		Faction nobleRealm = raised.realm ? realm(server, live.raisedRealm()) : null;
 		Faction roadRealm = road != null && road.realm ? realm(server, live.roadRealm()) : null;
 		if (raised.realm && nobleRealm == null || road != null && road.realm && roadRealm == null) {
+			refuse(player, "realm");
 			return;
 		}
 		Classes.PlayerClass[] classes = Classes.PlayerClass.values();
@@ -1331,6 +1372,7 @@ public final class LifeStory {
 		// (class trees) a youth that drifted makes no class yet
 		boolean classless = cls == null && youth.cls == null && live.cls() < 0;
 		if (!classless && (cls == null || !cls.options.isEmpty() && option.isEmpty())) {
+			refuse(player, "class");
 			return;
 		}
 		// (Andy, 2026-11-17) a Cleric serves the patron they grew up praying to; only one with no faith in their story picks.
@@ -1409,6 +1451,7 @@ public final class LifeStory {
 		Answer road = payload.road() >= 0 && payload.road() < roads.size() ? roads.get(payload.road()) : null;
 		Heritage.Kind heritage = Heritage.of(player);
 		if (road == null || !road.offered() || !road.fits(heritage)) {
+			refuse(player, "road");
 			return;
 		}
 		// (0.7.419) the same lock check as the whole story's: the past is the story told before the creator
@@ -1416,10 +1459,12 @@ public final class LifeStory {
 			Answer a = answer(player, q);
 			return a == null ? null : a.key;
 		})) {
+			refuse(player, "road");
 			return;
 		}
 		Faction roadRealm = road.realm ? realm(player.level().getServer(), payload.roadRealm()) : null;
 		if (road.realm && roadRealm == null) {
+			refuse(player, "realm");
 			return;
 		}
 		if (road.makes() != null && heritage != road.makes()) {
@@ -2209,6 +2254,25 @@ public final class LifeStory {
 					return start;
 				}
 			}
+			case WRITTEN -> {
+				// (Written starts) a build of the start's maker, raised for you out in the wild on level ground (its land made
+				// behind the loading screen first), woken in where its maker marked. A party mate's: beside them, in theirs.
+				if (mate != null) {
+					WrittenStarts.share(player, server.getPlayerList().getPlayer(mate.who));
+					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
+				} else {
+					BlockPos near = spot(level, null, spawn, WILD_MIN, WILD_MAX, random);
+					WrittenStarts.Raised raised = WrittenStarts.raise(level, player, near, random, setOut);
+					if (raised != null) {
+						player.teleportTo(level, raised.feet().x, raised.feet().y, raised.feet().z, Set.<net.minecraft.world.entity.Relative>of(), raised.yaw(), 0.0F, false);
+						landSafely(player);
+						home(player, level, player.blockPosition());
+						landedAt(player, Start.WRITTEN, -1, player.blockPosition(), -1, raised.place());
+						WrittenStarts.begin(player);
+						return Start.WRITTEN;
+					}
+				}
+			}
 			case WILD, UNARMED, FATE, MONSTERBORN -> {
 				// the unarmed start sets out from the wild too, and the monster-born wake in it
 				if (start == Start.UNARMED || start == Start.MONSTERBORN) {
@@ -2276,6 +2340,10 @@ public final class LifeStory {
 			landed == Start.CHAINED ? StoryHard.shackleCamp(player) : landed == Start.CAPTIVE && held != null ? held.camp() : -1, yours);
 		if (landed == Start.SKYFALL) {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SKYFALL_TICKS, 0));
+		}
+		if (landed == Start.WRITTEN) {
+			// (woken beside a party mate in their written start: its tale is yours too)
+			WrittenStarts.begin(player);
 		}
 		if (landed == Start.BURNED) {
 			// (0.7.501, Andy) smoke-sick from the fire you woke in
@@ -2745,6 +2813,10 @@ public final class LifeStory {
 	 * the place couldn't be found), {@code landed} where they woke (its place's things).
 	 */
 	private static void kit(ServerPlayer player, Start start, Start landed, Answer raised, Classes.PlayerClass cls, String option, RandomSource random) {
+		if (landed == Start.WRITTEN && WrittenStarts.bare(player)) {
+			// (a written start that says so: only what its maker put in the build, and what its tale hands over)
+			return;
+		}
 		if (start == Start.SWORN) {
 			// a realm's sworn guard: an iron helmet, a chainmail chestplate, an iron sword and a shield
 			for (Item item : List.of(Items.IRON_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.IRON_SWORD, Items.SHIELD)) {
@@ -3525,6 +3597,8 @@ public final class LifeStory {
 		}
 		Parties.reborn(player);
 		Tales.reborn(player);
+		// (the written start the last life woke in stays standing in the world; it's no longer theirs)
+		player.removeAttached(WrittenStarts.PLACED);
 		QuestPast.reborn(player);
 		Overheard.reborn(player);
 		Banks.reborn(player, heir);

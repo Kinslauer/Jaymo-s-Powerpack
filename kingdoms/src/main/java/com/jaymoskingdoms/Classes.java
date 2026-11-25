@@ -681,7 +681,7 @@ public final class Classes {
 			case MARKSMAN -> List.of(any(1, "weaponmod:flintlock", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"),
 				any(1, "archers:rapid_crossbow"), new ItemStack(Items.ARROW, 16), RpgKit.or("archers:archer_armor_chest", "minecraft:leather_chestplate"));
 			case SORCERER -> List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.LEATHER_CHESTPLATE), new ItemStack(Items.LEATHER_LEGGINGS));
-			case RIDER -> List.of(any(1, "jaymospowers:iron_lance", "minecraft:iron_sword"), new ItemStack(Items.SADDLE), new ItemStack(Items.LEATHER_CHESTPLATE),
+			case RIDER -> List.of(any(1, "jaymospowers:iron_lance", "minecraft:iron_sword"), new ItemStack(Items.LEATHER_CHESTPLATE),
 				new ItemStack(Items.LEATHER_BOOTS), new ItemStack(Items.WHEAT, 8));
 		};
 	}

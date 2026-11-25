@@ -26,8 +26,6 @@ import sys
 import zipfile
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'kingdoms', 'src', 'main', 'resources', 'data')
-# the offset files live in a built-in pack that Jaymo's Kingdoms leaves out when Tectonic is loaded
-SHAPE = os.path.join(ROOT, '..', 'resourcepacks', 'continent_shape', 'data')
 
 # ---- tuning ----
 LAND_SCALE = 0.025         # the land noise's xz scale: its broadest wave is 256 / this blocks (about 10,000)
@@ -49,7 +47,7 @@ BLOCKS_PER_OFFSET = 128.0  # depth's y gradient: 3.0 over 384 blocks
 
 
 def write(path, obj):
-    path = os.path.join(SHAPE if path.endswith('/offset.json') else ROOT, path)
+    path = os.path.join(ROOT, path)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', newline='\n') as f:
         json.dump(obj, f, indent=2)

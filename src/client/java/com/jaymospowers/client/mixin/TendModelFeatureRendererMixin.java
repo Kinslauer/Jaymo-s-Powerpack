@@ -25,6 +25,8 @@ abstract class TendModelFeatureRendererMixin {
 	private void jaymospowers$bendKnee(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		// (0.19.45) your own body in first person: the top of the torso off, before anything bends what's left
 		com.jaymospowers.client.FirstPersonTrim.apply(submit.model(), submit.state());
+		// a Rig leg's side kick or roundhouse: the chamber's knee (first, so the kick's bends win)
+		com.jaymospowers.client.rig.RigPose.bendLimbs(submit.model(), submit.state());
 		com.jaymospowers.client.CrouchPose.bendKnee(submit.model(), submit.state());
 		// (0.21.28) and every other kneel's knees (tending, drinking, finishers, executions, Gravity's crush)
 		com.jaymospowers.client.KneelLegs.bend(submit.model(), submit.state());

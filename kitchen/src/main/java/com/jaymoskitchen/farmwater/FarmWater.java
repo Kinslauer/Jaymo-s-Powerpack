@@ -24,10 +24,11 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * the scarecrow ({@link ScarecrowBlock}, {@link Scarecrows}).
  */
 public final class FarmWater {
-	public static Block WATER_BARREL, FISH_BARREL, TROUGH, FISH_TRAP, SCARECROW;
-	public static Item WATER_BARREL_ITEM, FISH_BARREL_ITEM, TROUGH_ITEM, FISH_TRAP_ITEM, SCARECROW_ITEM, WATERING_CAN;
+	public static Block WATER_BARREL, FISH_BARREL, TROUGH, FISH_TRAP, SCARECROW, ROTTEN_PUMPKIN;
+	public static Item WATER_BARREL_ITEM, FISH_BARREL_ITEM, TROUGH_ITEM, FISH_TRAP_ITEM, SCARECROW_ITEM, WATERING_CAN, ROTTEN_PUMPKIN_ITEM, HARVEST_SPARK;
 	public static BlockEntityType<FishBarrelEntity> FISH_BARREL_ENTITY;
 	public static BlockEntityType<FishTrapEntity> FISH_TRAP_ENTITY;
+	public static BlockEntityType<FarmhandEntity> FARMHAND_ENTITY;
 
 	private FarmWater() {
 	}
@@ -38,6 +39,9 @@ public final class FarmWater {
 		TROUGH = block("feeding_trough", TroughBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(1.5F).noOcclusion());
 		FISH_TRAP = block("fish_trap", FishTrapBlock::new, BlockBehaviour.Properties.of().strength(0.8F).sound(SoundType.BAMBOO_WOOD).noOcclusion());
 		SCARECROW = block("scarecrow", ScarecrowBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.HAY_BLOCK).strength(0.6F).noOcclusion());
+		ROTTEN_PUMPKIN = block("rotten_pumpkin", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PUMPKIN).strength(0.8F).sound(SoundType.SLIME_BLOCK));
+		FARMHAND_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("farmhand"),
+			new BlockEntityType<>(FarmhandEntity::new, Set.of(SCARECROW)));
 		FISH_BARREL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("fish_barrel"),
 			new BlockEntityType<>(FishBarrelEntity::new, Set.of(FISH_BARREL)));
 		FISH_TRAP_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("fish_trap"),
@@ -47,6 +51,8 @@ public final class FarmWater {
 		TROUGH_ITEM = item("feeding_trough", p -> new BlockItem(TROUGH, p), new Item.Properties());
 		FISH_TRAP_ITEM = item("fish_trap", p -> new BlockItem(FISH_TRAP, p), new Item.Properties());
 		SCARECROW_ITEM = item("scarecrow", p -> new BlockItem(SCARECROW, p), new Item.Properties());
+		ROTTEN_PUMPKIN_ITEM = item("rotten_pumpkin", p -> new BlockItem(ROTTEN_PUMPKIN, p), new Item.Properties());
+		HARVEST_SPARK = item("harvest_spark", Item::new, new Item.Properties().stacksTo(16).rarity(net.minecraft.world.item.Rarity.RARE));
 		WATERING_CAN = item("watering_can", WateringCanItem::new, new Item.Properties().durability(WateringCanItem.USES));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
@@ -55,11 +61,13 @@ public final class FarmWater {
 			output.accept(TROUGH_ITEM);
 			output.accept(FISH_TRAP_ITEM);
 			output.accept(SCARECROW_ITEM);
+			output.accept(ROTTEN_PUMPKIN_ITEM);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.accept(WATERING_CAN));
 
 		Troughs.register();
 		Scarecrows.register();
+		Farmhand.register();
 		WaterStock.register();
 	}
 

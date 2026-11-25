@@ -1,0 +1,88 @@
+{
+  "replace": false,
+  "values": [
+    "#jaymoskingdoms:two_handed",
+    "jaymoskingdoms:war_horn",
+    "jaymoskingdoms:warlord_helmet",
+    "jaymoskingdoms:warlord_chestplate",
+    "jaymoskingdoms:warlord_leggings",
+    "jaymoskingdoms:warlord_boots",
+    "jaymoskingdoms:school_mask_blade",
+    {
+      "id": "rogues:warrior_armor_head",
+      "required": false
+    },
+    {
+      "id": "rogues:warrior_armor_chest",
+      "required": false
+    },
+    {
+      "id": "rogues:warrior_armor_legs",
+      "required": false
+    },
+    {
+      "id": "rogues:warrior_armor_feet",
+      "required": false
+    },
+    {
+      "id": "rogues:stone_double_axe",
+      "required": false
+    },
+    {
+      "id": "rogues:iron_double_axe",
+      "required": false
+    },
+    {
+      "id": "rogues:golden_double_axe",
+      "required": false
+    },
+    {
+      "id": "rogues:diamond_double_axe",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_double_axe",
+      "required": false
+    },
+    {
+      "id": "rogues:ruby_double_axe",
+      "required": false
+    },
+    {
+      "id": "rogues:aether_double_axe",
+      "required": false
+    },
+    {
+      "id": "rogues:aeternium_double_axe",
+      "required": false
+    },
+    {
+      "id": "rogues:iron_glaive",
+      "required": false
+    },
+    {
+      "id": "rogues:golden_glaive",
+      "required": false
+    },
+    {
+      "id": "rogues:diamond_glaive",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_glaive",
+      "required": false
+    },
+    {
+      "id": "rogues:ruby_glaive",
+      "required": false
+    },
+    {
+      "id": "rogues:aether_glaive",
+      "required": false
+    },
+    {
+      "id": "rogues:aeternium_glaive",
+      "required": false
+    }
+  ]
+}

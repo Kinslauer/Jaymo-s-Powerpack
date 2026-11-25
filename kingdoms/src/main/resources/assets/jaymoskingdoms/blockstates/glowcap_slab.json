@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymoskingdoms:block/glowcap_slab"
+    },
+    "type=double": {
+      "model": "jaymoskingdoms:block/glowcap_planks"
+    },
+    "type=top": {
+      "model": "jaymoskingdoms:block/glowcap_slab_top"
+    }
+  }
+}

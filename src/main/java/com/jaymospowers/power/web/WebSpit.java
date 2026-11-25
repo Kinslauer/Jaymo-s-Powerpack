@@ -100,8 +100,26 @@ public final class WebSpit {
 		if (!WebGoo.ready(player, WebGoo.SPIT) || WebPuddle.puddled(player) || !WebGoo.pay(player, WebGoo.SPIT_COST)) {
 			return;
 		}
+		spit(player, player.getLookAngle());
+	}
+
+	/**
+	 * A takeover spits at {@code target} on its own (WebSymbiote's move deck): only with a maw to spit from, the spit
+	 * ready and satiety to pay for it (never a complaint about it). True if it spat.
+	 */
+	static boolean spitAt(ServerPlayer player, LivingEntity target) {
+		if (!WebGoo.maw(player) || !WebGoo.ready(player, WebGoo.SPIT) || WebPuddle.puddled(player)
+			|| !player.isCreative() && WebSymbiote.state(player).satiety() < WebGoo.SPIT_COST) {
+			return false;
+		}
+		WebGoo.pay(player, WebGoo.SPIT_COST);
+		Vec3 lips = player.getEyePosition();
+		spit(player, target.getBoundingBox().getCenter().subtract(lips).normalize());
+		return true;
+	}
+
+	private static void spit(ServerPlayer player, Vec3 look) {
 		ServerLevel level = player.level();
-		Vec3 look = player.getLookAngle();
 		Vec3 lips = player.getEyePosition().add(look.scale(0.4)).subtract(0.0, 0.15, 0.0);
 		GLOBS.add(new Glob(player.getUUID(), level.dimension(), lips, look.scale(SPEED).add(player.getDeltaMovement().multiply(1.0, 0.0, 1.0).scale(0.5))));
 		WebGoo.cool(player, WebGoo.SPIT, COOLDOWN);

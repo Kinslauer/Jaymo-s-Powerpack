@@ -408,6 +408,8 @@ public final class Quests {
 		if (rep <= Reputation.HOSTILE || (giver instanceof Folk && rep < Reputation.WELCOME)) {
 			Speech.tell(level, giver, player, Component.translatable(giver instanceof Folk ? "quest.jaymoskingdoms.refuse.king" : "quest.jaymoskingdoms.refuse"),
 				Speech.RED);
+			// (refusal hints) your name in their town
+			RefusalHints.hint(player, giver, RefusalHints.Cause.REPUTE, Component.literal(f.name()));
 			send(player, new QuestNet.Open(giver.getId(), name, List.of(),
 				Component.translatable(giver instanceof Folk ? "quest.jaymoskingdoms.untrusted.king" : "quest.jaymoskingdoms.untrusted", f.name())));
 			return;
@@ -597,6 +599,7 @@ public final class Quests {
 			QuestJobs.handIn(level, player, giver, q);
 		}
 		remove(player, q.id());
+		ErrandBooks.finished(player, q);
 		if (q.kind() >= Quest.PACK) {
 			// (board work: what it put in the world is cleared, and the board's name grows)
 			QuestJobs.over(level, player, q);

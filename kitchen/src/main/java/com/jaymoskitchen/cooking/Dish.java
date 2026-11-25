@@ -358,7 +358,29 @@ public enum Dish {
 	CHORUS_PIE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(CRUST, CHORUS_FRUIT, CHORUS_FRUIT, CHORUS_FRUIT, WHEAT, SUGAR), 9, 0.6F, false,
 		List.of(new Buff(() -> com.jaymoskitchen.delight.EnderDelight.PHASING, 30 * 20, 0), new Buff(MobEffects.SPEED, 60 * 20, 0))),
 	STUFFED_SHULKER(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(SHULKER_SHELL, SHULKER_MEAT, CHORUS_FRUIT, RICE, TOMATO, BROWN_MUSHROOM), 11, 0.8F,
-		false, List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.SLOW_FALLING, 60 * 20, 0)));
+		false, List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.SLOW_FALLING, 60 * 20, 0))),
+	// --- the forager's kitchen (forage/Forage): Spore & Stem's mushroom dishes, with its effects as the Perfect cook's buffs ---
+	ROASTED_MOREL(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(MOREL, FLIP, FLIP), 6, 0.6F, false, List.of()),
+	CHANTERELLE_TOAST(Method.CHOP, EnumSet.of(Station.BOARD), List.of(BREAD, CHANTERELLE, CHANTERELLE), 8, 0.8F, false, List.of()),
+	GLOWCAP_SOUP(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, GLOWCAP, GLOWCAP), 6, 0.6F, true,
+		List.of(new Buff(MobEffects.NIGHT_VISION, 90 * 20, 0))),
+	BOUNCECAP_JELLY(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(GLASS_BOTTLE, BOUNCECAP, BOUNCECAP, SUGAR), 4, 0.4F, false,
+		List.of(new Buff(MobEffects.JUMP_BOOST, 45 * 20, 1), new Buff(MobEffects.SLOW_FALLING, 15 * 20, 0))),
+	FROSTCAP_TEA(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(GLASS_BOTTLE, FROSTCAP, FROSTCAP, SUGAR), 2, 0.2F, false,
+		List.of(new Buff(MobEffects.FIRE_RESISTANCE, 90 * 20, 0))),
+	EMBER_SKEWER(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(SKEWER_STICK, EMBERSTOOL, MOREL, FLIP, FLIP), 6, 0.7F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 30 * 20, 0))),
+	TRUFFLE_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, TRUFFLE, MOREL, CHANTERELLE, BAKED_POTATO), 10, 1.2F, true,
+		List.of(new Buff(MobEffects.REGENERATION, 8 * 20, 1), new Buff(MobEffects.ABSORPTION, 60 * 20, 0))),
+	// any three good mushrooms
+	FORAGERS_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, FORAGED, FORAGED, FORAGED), 8, 0.8F, true, List.of()),
+	// Psithurism's rice, soybeans and fugu
+	SOY_RICE_BOWL(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, RICE, SOYBEANS, SOYBEANS), 9, 0.8F, true,
+		List.of(new Buff(MobEffects.RESISTANCE, 60 * 20, 0))),
+	SEARED_FUGU(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(FUGU, SOYBEANS, FLIP, FLIP), 8, 0.8F, false,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 90 * 20, 0))),
+	FUGU_RICE_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, FUGU, RICE, CARROT), 11, 0.9F, true,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 60 * 20, 0), new Buff(MobEffects.REGENERATION, 10 * 20, 0)));
 
 	/** Which minigame cooks the dish. */
 	public enum Method {
@@ -409,7 +431,7 @@ public enum Dish {
 		EGG, SUGAR, SWEET_BERRIES, SALMON, DRIED_KELP, CHICKEN, BEETROOT, MUTTON, COD, APPLE, PUMPKIN, NETHER_WART, CRIMSON_FUNGUS, WARPED_FUNGUS,
 		LEMON, PEACH, GRAPES, TOMATO, ONION, EGGPLANT, CHILI_PEPPER, STRAWBERRY, TURNIP, PEANUT, VENISON, DUCK, RABBIT, BUSHMEAT, MAMMOTH_MEAT,
 		DRUMSTICK, MORSEL, BASS, CATFISH, PIRANHA, ANGLERFISH, BLOBFISH, CRAB_MEAT, CLAM_MEAT, LIZARD_TAIL, ORANGE, WYNDBERRY, BLUE_BERRY,
-		WHITE_APPLE, SATIVAL_BULB, PRISMALLARD_EGG, TAEGORE_MEAT, BURRUKAI_RIB, KIRRID_LOIN, PRISMALLARD_LEG, VERDANT_FRUIT, GLACIA_SALT, BALLOON_MUSHROOM, COOKED_COD, COOKED_SALMON,
+		WHITE_APPLE, SATIVAL_BULB, PRISMALLARD_EGG, TAEGORE_MEAT, BURRUKAI_RIB, KIRRID_LOIN, PRISMALLARD_LEG, VERDANT_FRUIT, GLACIA_SALT, BALLOON_MUSHROOM, MOREL, CHANTERELLE, FROSTCAP, EMBERSTOOL, TRUFFLE, GLOWCAP, BOUNCECAP, COOKED_COD, COOKED_SALMON,
 		COOKED_PORKCHOP, COOKED_MUTTON, BREAD, CABBAGE, CABBAGE_LEAF, RICE, MINCED_BEEF, RAW_BACON,
 		MELON_SLICE, MILK_BOTTLE, COCOA_BEANS, GLOW_BERRIES, BONE, ROTTEN_FLESH, INK_SAC, GOLDEN_CARROT, BAKED_POTATO, COOKED_BEEF, WHEAT, ICE,
 		PASTA, COD_SLICE, SALMON_SLICE, MUTTON_CHOPS);
@@ -573,7 +595,8 @@ public enum Dish {
 	/** What eating it leaves behind: the bowl of a stew, the bottle of a drink; null for none. */
 	public @Nullable Item remainder() {
 		return switch (this) {
-			case MELON_JUICE, GLOW_BERRY_CUSTARD, HOT_COCOA, CHORUS_JUICE -> Items.GLASS_BOTTLE;
+			case MELON_JUICE, GLOW_BERRY_CUSTARD, HOT_COCOA, CHORUS_JUICE, FROSTCAP_TEA, BOUNCECAP_JELLY -> Items.GLASS_BOTTLE;
+			case EMBER_SKEWER -> Items.STICK;
 			case CHORUS_STEW, TWISTED_CEREAL, ENDERMITE_STEW, PEARL_PASTA, ENDER_PAELLA, AMBERVEIL_STEW, AMBERVEILED_CURRY, CHICKEN_CURRY, STEAK_FRIES,
 				VEIL_OF_FLAMES_RISOTTO -> com.jaymoskitchen.delight.EnderDelight.SHULKER_BOWL;
 			default -> bowlFood ? Items.BOWL : null;

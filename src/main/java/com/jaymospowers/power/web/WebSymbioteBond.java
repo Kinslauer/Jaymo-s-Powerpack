@@ -99,6 +99,8 @@ public final class WebSymbioteBond {
 		boolean fighting;
 		/** (0.13.23) The fight is over the mask alone ({@link #resistMask}), not the whole suit. */
 		boolean forMask;
+		/** The fight is over the red one's big body ({@link #fightForBody}): win and you're back in the plain suit. */
+		boolean forBody;
 		float struggle;
 		int needed;
 		long fightUntil;
@@ -124,6 +126,10 @@ public final class WebSymbioteBond {
 
 	/** Still settling in: none of its abilities answer (never in creative). Synced to the owner only. */
 	public static boolean dormant(Player player) {
+		if (WebSymbioteSleep.out(player)) {
+			// (its symbiote is out walking while it sleeps: unsuited, nothing answers)
+			return true;
+		}
 		Integer left = player.getAttached(DORMANT);
 		return left != null && left > 0 && !player.isCreative();
 	}
@@ -237,11 +243,23 @@ public final class WebSymbioteBond {
 		}
 		int bond = WebSymbiote.state(player).bond();
 		int fought = player.getAttachedOrElse(FOUGHT, 0);
-		if (player.isCreative() || bond >= FIGHT_BOND || !mask && fought >= FIGHTS || WebSymbiote.driving(player) || WebSymbiote.roaring(player)
-			|| WebSymbiote.bulked(player)) {
+		// (Andy, 2026-11-25: "it will fight you off everytime you try") without the Web it always fights: no bond, count,
+		// chance or big body lets you off
+		boolean held = WebSymbiote.clings(player);
+		if (player.isCreative()) {
 			return false;
 		}
-		if (!mask && player.getRandom().nextFloat() >= Mth.lerp(bond / (float)FIGHT_BOND, FIGHT_CHANCE_LOW, FIGHT_CHANCE_HIGH)) {
+		if (WebSymbiote.driving(player) || WebSymbiote.roaring(player) || WebSymbiote.bulked(player)) {
+			// it has the wheel or the whole body: no fight to start, but without the Web nothing comes off for free either
+			if (held) {
+				WebSymbiote.whisper(player, "fight." + (1 + player.getRandom().nextInt(FIGHT_LINES)));
+			}
+			return held;
+		}
+		if (!held && (bond >= FIGHT_BOND || !mask && fought >= FIGHTS)) {
+			return false;
+		}
+		if (!held && !mask && player.getRandom().nextFloat() >= Mth.lerp(bond / (float)FIGHT_BOND, FIGHT_CHANCE_LOW, FIGHT_CHANCE_HIGH)) {
 			// (0.15.69) not this time: it lets you
 			return false;
 		}
@@ -273,6 +291,38 @@ public final class WebSymbioteBond {
 		return resistRemoval(player, true);
 	}
 
+	/**
+	 * The red one's big body, the Suit key pressed to come down out of it (Andy, 2026-11-25: "there should be a struggle
+	 * whenever you want to go back to the regular suit"): every time, until it lets you have the suit
+	 * (WebSymbioteMind#redControlled), it fights you for its shape the way it fights you for the suit, the same bar and
+	 * keys; the presses fall from {@code FIGHT_PRESSES_MAX} at no trust to {@code FIGHT_PRESSES_MIN} at
+	 * {@link WebSymbioteMind#RED_EASE_TRUST}. Win and you're back in the plain suit (WebSymbiote#shedRedBody); lose
+	 * ({@link #FIGHT_TICKS}) and it keeps its shape.
+	 */
+	static void fightForBody(ServerPlayer player) {
+		Live live = live(player);
+		if (live.fighting || WebSymbiote.driving(player) || WebSymbiote.roaring(player)) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		float trust = Mth.clamp(WebSymbioteMind.mind(player).trust() / (float)WebSymbioteMind.RED_EASE_TRUST, 0.0F, 1.0F);
+		live.fighting = true;
+		live.forMask = false;
+		live.forBody = true;
+		live.struggle = 0.0F;
+		live.struggleAt = -1L;
+		live.needed = Math.round(Mth.lerp(trust, FIGHT_PRESSES_MAX, FIGHT_PRESSES_MIN));
+		live.fightUntil = now + FIGHT_TICKS;
+		player.setAttached(FIGHT, true);
+		player.setAttached(WebSymbiote.STRUGGLE, 0.0F);
+		ServerPlayNetworking.send(player, new WebNet.Peel(live.needed, FIGHT_TICKS));
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 1.1F, 1.1F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
+		com.jaymospowers.core.Shakes.send(player, WebSymbiote.SURGE_BACK_SHAKE, null);
+		WebSymbiote.whisper(player, "red.body_fight." + (1 + player.getRandom().nextInt(FIGHT_LINES)));
+	}
+
 	/** A key pressed against it (the same packet as against a takeover). Returns true if a fight took it. */
 	static boolean struggle(ServerPlayer player) {
 		Live live = player.getAttached(LIVE);
@@ -294,16 +344,19 @@ public final class WebSymbioteBond {
 	}
 
 	private static void tickFight(ServerPlayer player, Live live, long now) {
-		if (WebSymbiote.driving(player) || WebSymbiote.roaring(player) || WebSymbiote.bulked(player) || !WebSymbiote.suitShown(player)) {
+		// (a fight for the red one's big body is over once the big body is: the bulk's what it's for)
+		if (WebSymbiote.driving(player) || WebSymbiote.roaring(player) || (live.forBody ? !WebSymbiote.bulked(player)
+			: WebSymbiote.bulked(player) || !WebSymbiote.suitShown(player))) {
 			// something else has the suit now
 			endFight(player, live);
 			return;
 		}
 		if (now >= live.fightUntil) {
+			boolean body = live.forBody;
 			endFight(player, live);
 			ServerLevel level = player.level();
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.1F, 0.5F);
-			WebSymbiote.whisper(player, "fight_lost." + (1 + player.getRandom().nextInt(FIGHT_LINES)));
+			WebSymbiote.whisper(player, (body ? "red.body_lost." : "fight_lost.") + (1 + player.getRandom().nextInt(FIGHT_LINES)));
 			return;
 		}
 		int bond = WebSymbiote.state(player).bond();
@@ -333,6 +386,7 @@ public final class WebSymbioteBond {
 	private static void endFight(ServerPlayer player, Live live) {
 		live.fighting = false;
 		live.forMask = false;
+		live.forBody = false;
 		live.struggle = 0.0F;
 		player.removeAttached(FIGHT);
 		if (!WebSymbiote.driving(player)) {
@@ -345,10 +399,28 @@ public final class WebSymbioteBond {
 	/** You tore its face off yours: only the face, and only for a while (longer the better the bond). */
 	private static void win(ServerPlayer player, Live live, long now) {
 		boolean mask = live.forMask;
+		boolean body = live.forBody;
 		endFight(player, live);
-		if (mask) {
+		if (body) {
+			// out of the red one's shape and back into the plain suit
+			WebSymbiote.shedRedBody(player);
+			ServerLevel level = player.level();
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.PLAYERS, 0.6F, 1.5F);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.05);
+			com.jaymospowers.core.Shakes.send(player, 1.0F, null);
+			WebSymbiote.whisper(player, "red.body_won." + (1 + player.getRandom().nextInt(FIGHT_LINES)));
+			return;
+		}
+		if (mask || WebSymbiote.clings(player)) {
 			// (0.13.23) the mask fight: it comes off for good, until you put it back
-			player.setAttached(WebSymbiote.UNMASKED, true);
+			// (Andy, 2026-11-25: without the Web "the most you can get is the mask", of any fight for the suit too)
+			com.jaymospowers.costume.CostumeDesign shape = com.jaymospowers.costume.Costume.shown(player);
+			if (shape != null && shape.mask() != com.jaymospowers.costume.CostumeDesign.Mask.NONE) {
+				// its suit is the host's costume: the mask is the costume's head piece
+				com.jaymospowers.costume.Costume.maskOff(player);
+			} else {
+				player.setAttached(WebSymbiote.UNMASKED, true);
+			}
 		} else {
 			player.setAttached(FOUGHT, player.getAttachedOrElse(FOUGHT, 0) + 1);
 			bareFace(player, now);

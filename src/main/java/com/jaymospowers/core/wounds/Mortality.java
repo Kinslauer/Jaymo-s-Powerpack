@@ -93,7 +93,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link ZFighterRealism}); off, deaths are as they were.</li>
  * <li>Every survivor wakes, and every death respawns, on no more than half a stomach ({@link #WAKE_FOOD}).</li>
  * </ul>
- * Survival only (creative never dies here), not one of the dead in the Other World (it holds its own), and a totem in hand is
+ * Survival only (creative never dies here), not one of the dead in the Other World (it holds its own), and a totem in hand or worn is
  * left to do its work.
  */
 public final class Mortality {
@@ -756,7 +756,7 @@ public final class Mortality {
 		Boolean executed = EXECUTED.remove(player);
 		if (!on() || player.isCreative() || player.isSpectator() || isFinal(player) || ZFighterAfterlife.among(player)
 			|| Karma.pending(player)
-			|| player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)) {
+			|| com.jaymospowers.baubles.WornTotems.ready(player)) {
 			return true;
 		}
 		if (Karma.below(player)) {

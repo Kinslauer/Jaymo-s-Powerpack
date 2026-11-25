@@ -47,7 +47,7 @@ public final class MedicineItems {
 	public static Item POPPY_SYRUP;
 	/** (0.19.24) The herbal remedies, the clean rag, the healer's satchel and the sickbed foods (docs/Healing-Plan.md). */
 	public static Item YARROW_POWDER, KNITBONE_POULTICE, BURN_SALVE, GARLIC_POULTICE, CLEAN_RAG, HEALERS_SATCHEL;
-	public static Item BONE_BROTH, CHAMOMILE_TEA, POSSET;
+	public static Item BONE_BROTH, CHAMOMILE_TEA, POSSET, ANTIFUNGAL_TONIC;
 
 	/** (0.14.4) Smelling salts' uses, and needle and thread's. */
 	public static final int SALTS_USES = 4, NEEDLE_USES = 8;
@@ -68,6 +68,9 @@ public final class MedicineItems {
 		WILLOW_BARK_TEA = item("willow_bark_tea", p -> new DrinkItem(false, p.stacksTo(16).usingConvertsTo(Items.BOWL)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)));
 		POPPY_SYRUP = item("poppy_syrup", p -> new DrinkItem(true, p.stacksTo(16).usingConvertsTo(Items.GLASS_BOTTLE)
+			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)));
+
+		ANTIFUNGAL_TONIC = item("antifungal_tonic", p -> new Item(p.stacksTo(16).usingConvertsTo(Items.GLASS_BOTTLE)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)));
 
 		// (0.19.24) the five wild herbs (blocks and items), then what's made of them

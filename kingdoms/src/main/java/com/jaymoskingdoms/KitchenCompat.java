@@ -163,6 +163,34 @@ public final class KitchenCompat {
 	/** (0.7.353) Might points to a point of hauling brawn. */
 	static final int MIGHT_PER_BRAWN = 3;
 
+	private static @Nullable Method brawn;
+	private static boolean brawnLooked;
+
+	/**
+	 * Kitchen's {@code Hauling.brawn(Player)}: how strong {@code player} is (the Strength effect, size, Might, Packhorse,
+	 * Z Fighters and whatever else adds to it), or -1 without Kitchen.
+	 */
+	public static int brawn(net.minecraft.world.entity.player.Player player) {
+		if (!brawnLooked) {
+			brawnLooked = true;
+			if (FabricLoader.getInstance().isModLoaded(MOD)) {
+				try {
+					brawn = Class.forName("com.jaymoskitchen.corpse.Hauling").getMethod("brawn", net.minecraft.world.entity.player.Player.class);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for strong characters to shove fallen trees: {}", e.toString());
+				}
+			}
+		}
+		if (brawn == null) {
+			return -1;
+		}
+		try {
+			return (int)brawn.invoke(null, player);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return -1;
+		}
+	}
+
 	/**
 	 * (0.7.123) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
 	 * null without Kitchen 0.5.6.
@@ -441,6 +469,54 @@ public final class KitchenCompat {
 		return (barrel == net.minecraft.world.level.block.Blocks.AIR ? net.minecraft.world.level.block.Blocks.BARREL : barrel).defaultBlockState();
 	}
 
+	/** Kitchen's year is 84 days (21 to a season, 7 to each early, mid and late part); late autumn is days 56 to 62. */
+	private static final int LATE_AUTUMN_FIRST = 56, LATE_AUTUMN_LAST = 62;
+
+	/** Late autumn, the harvest in; false without Kitchen's seasons. The wicked harvest's altar answers only then. */
+	public static boolean lateAutumn(net.minecraft.world.level.Level level) {
+		int day = dayOfYear(level);
+		return day >= LATE_AUTUMN_FIRST && day <= LATE_AUTUMN_LAST;
+	}
+
+	private static @Nullable Method crowGuard;
+	private static boolean crowGuardLooked;
+
+	/**
+	 * Whether one of Kitchen's scarecrows (a carved pumpkin on its head) stands within 16 blocks of {@code crop} and so
+	 * keeps crows off it ({@code Scarecrows.guardedFromCrows}); false without Kitchen.
+	 */
+	public static boolean guardedFromCrows(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos crop) {
+		if (!crowGuardLooked) {
+			crowGuardLooked = true;
+			if (FabricLoader.getInstance().isModLoaded(MOD)) {
+				try {
+					crowGuard = Class.forName("com.jaymoskitchen.farmwater.Scarecrows").getMethod("guardedFromCrows",
+						net.minecraft.world.level.Level.class, net.minecraft.core.BlockPos.class);
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for scarecrows to keep crows off: {}", e.toString());
+				}
+			}
+		}
+		if (crowGuard == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(crowGuard.invoke(null, level, crop));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen scarecrow call failed: {}", e.toString());
+			return false;
+		}
+	}
+
+	/** One of Kitchen's items by id (its rotten pumpkin, the Spark of the Harvest), or null without Kitchen or without that item. */
+	public static net.minecraft.world.item.@Nullable Item item(String path) {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return null;
+		}
+		return net.minecraft.core.registries.BuiltInRegistries.ITEM
+			.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD, path)).orElse(null);
+	}
+
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;
@@ -494,6 +570,18 @@ public final class KitchenCompat {
 		return false;
 	}
 
+	/** Whether {@code corpse} still has its head on (Kitchen's {@code CorpseEntity.missing()}, bit 1); false for anything else. */
+	static boolean headOn(Entity corpse) {
+		if (CORPSE == null || !CORPSE.isInstance(corpse)) {
+			return false;
+		}
+		try {
+			return ((int)CORPSE.getMethod("missing").invoke(corpse) & 1) == 0;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/**
 	 * The unburied dead within {@code range} of {@code at}: free corpses of people and monsters (not animals, never a
 	 * player's). Empty without Kitchen.
@@ -538,6 +626,89 @@ public final class KitchenCompat {
 		}
 		float whole = 1.0F - ((mask & 1) != 0 ? HEAD_SHARE : 0.0F) - Integer.bitCount(mask & 30) * LIMB_SHARE;
 		return Math.max(LEAST_WHOLE, whole);
+	}
+
+	/** Kitchen's {@code CorpseEntity.ragdollRig()}, and its {@code RagdollRig}'s {@code shape} and standing {@code height}. */
+	private static @Nullable Method ragdollRig;
+	private static java.lang.reflect.@Nullable Field rigShape, rigHeight;
+	private static boolean lookedForRig;
+	/** A grown man's height (blocks): a body this tall is one man's worth of the dead. */
+	static final float MAN_HEIGHT = 1.8F;
+	/** The most one body counts for, however big it was (a giant's). */
+	static final float MOST_MEN = 4.0F;
+	/** What is never taken into the Unburied, though Kitchen lays it out like a person (creepers, golems, the creaking). */
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> NOT_UNBURIED = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ENTITY_TYPE, JaymosKingdoms.id("not_unburied"));
+
+	/**
+	 * Andy: "the unburied should only be made from humanoids", one "made from maggots ... barely had enough mass to
+	 * conglomerate into a human size". How many grown men's worth of the dead {@code corpse} is: 0 unless it was built like
+	 * a person (Kitchen lays it out as a humanoid: people, zombies, skeletons, illagers, piglins and the like, not bugs, beasts
+	 * or spiders, nor {@link #NOT_UNBURIED}); else its bulk against a man's (its standing height over {@link #MAN_HEIGHT},
+	 * cubed: a child or a baby zombie an eighth, a goblin a third or so), times as much of it as is left
+	 * ({@link #wholeness}), at most {@link #MOST_MEN}.
+	 */
+	public static float men(Entity corpse) {
+		if (!lookedForRig) {
+			lookedForRig = true;
+			if (CORPSE != null) {
+				try {
+					ragdollRig = CORPSE.getMethod("ragdollRig");
+					Class<?> rig = ragdollRig.getReturnType();
+					rigShape = rig.getField("shape");
+					rigHeight = rig.getField("height");
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to tell what the dead were built like: {}", e.toString());
+					ragdollRig = null;
+				}
+			}
+		}
+		net.minecraft.world.entity.EntityType<?> was = sourceType(corpse);
+		if (was == null || was.builtInRegistryHolder().is(NOT_UNBURIED) || ragdollRig == null || rigShape == null || rigHeight == null) {
+			return 0.0F;
+		}
+		Object rig = call(ragdollRig, corpse);
+		if (rig == null) {
+			return 0.0F;
+		}
+		try {
+			if (!(rigShape.get(rig) instanceof Enum<?> shape) || !"HUMANOID".equals(shape.name())) {
+				return 0.0F;
+			}
+			float tall = rigHeight.getFloat(rig) / MAN_HEIGHT;
+			return Math.min(MOST_MEN, tall * tall * tall) * wholeness(corpse);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return 0.0F;
+		}
+	}
+
+	/** Kitchen's {@code CorpseEntity.jolt(boolean)}. */
+	private static @Nullable Method joltBody;
+	private static boolean lookedForJolt;
+
+	/** The body {@code corpse} jolts where it lies (hard: as an axe blow does), drawn and in its ragdoll. */
+	public static void jolt(Entity corpse, boolean hard) {
+		if (!lookedForJolt) {
+			lookedForJolt = true;
+			if (CORPSE != null) {
+				try {
+					joltBody = CORPSE.getMethod("jolt", boolean.class);
+				} catch (ReflectiveOperationException e) {
+					joltBody = null;
+				}
+			}
+		}
+		call(joltBody, corpse, hard);
+	}
+
+	/** Whether the body {@code corpse} still wears any armour (helmet, chest, legs or boots). */
+	public static boolean armoured(Entity corpse) {
+		net.minecraft.nbt.CompoundTag look = lookTag(corpse);
+		if (look == null) {
+			return false;
+		}
+		net.minecraft.nbt.CompoundTag gear = look.getCompoundOrEmpty("equipment");
+		return gear.contains("head") || gear.contains("chest") || gear.contains("legs") || gear.contains("feet");
 	}
 
 	/** (0.7.132) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.5.9). */

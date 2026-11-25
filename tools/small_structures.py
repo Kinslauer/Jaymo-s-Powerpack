@@ -210,7 +210,7 @@ SITES = []
 
 def write_site(s, known, previews):
     for vname, g in s.variants.items():
-        bad = sorted({v[0].split(":")[1] for v in g.b.values()} - known) if known else []
+        bad = sorted({v[0].split(":")[1] for v in g.b.values() if v[0].startswith("minecraft:")} - known) if known else []
         assert not bad, f"{vname}: not 26.3 blocks: {bad}"
         if s.template:
             nbt.save(os.path.join(DATA, "structure", "smalls", vname + ".nbt"), template(g))

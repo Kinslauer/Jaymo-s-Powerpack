@@ -1,0 +1,36 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:holy_symbol",
+    {
+      "id": "minecraft:book",
+      "required": false
+    },
+    {
+      "id": "minecraft:writable_book",
+      "required": false
+    },
+    "jaymoskingdoms:commandments",
+    "jaymoskingdoms:healer_staff",
+    "#jaymoskingdoms:bludgeons",
+    "jaymoskingdoms:scroll_of_augury",
+    "jaymoskingdoms:scroll_of_bulwark",
+    "jaymoskingdoms:scroll_of_calling_back",
+    "jaymoskingdoms:scroll_of_counterspell",
+    "jaymoskingdoms:scroll_of_create_food",
+    "jaymoskingdoms:scroll_of_dispel",
+    "jaymoskingdoms:scroll_of_feather_fall",
+    "jaymoskingdoms:scroll_of_find_magic",
+    "jaymoskingdoms:scroll_of_heroes_feast",
+    "jaymoskingdoms:scroll_of_identify",
+    "jaymoskingdoms:scroll_of_keeping",
+    "jaymoskingdoms:scroll_of_locate_object",
+    "jaymoskingdoms:scroll_of_mending",
+    "jaymoskingdoms:scroll_of_purify_food",
+    "jaymoskingdoms:scroll_of_restoration",
+    "jaymoskingdoms:scroll_of_sanctuary",
+    "jaymoskingdoms:scroll_of_ward_line",
+    "jaymoskingdoms:scroll_of_warding",
+    "jaymoskingdoms:scroll_of_zone_of_truth"
+  ]
+}

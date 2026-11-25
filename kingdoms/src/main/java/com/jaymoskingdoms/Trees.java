@@ -819,6 +819,11 @@ public final class Trees {
 	 * {@code speed} degrees a tick (the tree that struck it carries it along); a branch struck takes its whole tree over.
 	 */
 	public static int knock(ServerLevel level, BlockPos struck, float heading, @Nullable Entity by, int mostLogs, float speed) {
+		return knock(level, struck, heading, by, mostLogs, speed, false);
+	}
+
+	/** As above; {@code byPlayer}: a player caused it (FelledCompat: a tree they felled struck it), so it leaves drops (FallingTree#byPlayer). */
+	public static int knock(ServerLevel level, BlockPos struck, float heading, @Nullable Entity by, int mostLogs, float speed, boolean byPlayer) {
 		BlockState state = level.getBlockState(struck);
 		if (!state.is(BlockTags.LOGS) || fallen(level, struck, state)) {
 			return 0;
@@ -841,6 +846,9 @@ public final class Trees {
 		FallingTree tree = FallingTree.topple(level, foot, logs, leaves, heading, by, ItemStack.EMPTY, null);
 		if (tree != null) {
 			tree.carried(speed);
+			if (byPlayer) {
+				tree.markByPlayer();
+			}
 		}
 		return logs.size();
 	}

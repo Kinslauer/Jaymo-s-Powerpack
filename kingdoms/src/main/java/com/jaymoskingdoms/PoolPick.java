@@ -10,6 +10,7 @@ import net.minecraft.server.level.ChunkResult;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.Ticket;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Climate;
@@ -48,10 +49,17 @@ public final class PoolPick {
 	 * {@code chunk} made only as far as its structure starts (which structures start in it), off the server thread: a
 	 * fraction of making its land, which on the Deck took ~30 s a chunk. What really starts there is read from it, so a
 	 * wrong guess costs a moment, not a made chunk.
+	 *
+	 * <p>Asked from a background thread: on the server thread {@code getChunkFuture} waits for the chunk
+	 * ({@code managedBlock}) and runs other queued chunk loads meanwhile, which froze the server into a watchdog crash
+	 * (Deck, 2026-11-25, waking snowy villages into kingdoms). From another thread it only queues the request.
 	 */
 	public static CompletableFuture<ChunkResult<ChunkAccess>> starts(ServerLevel level, ChunkPos chunk) {
 		level.getChunkSource().addTicket(new Ticket(STARTS, ChunkLevel.byStatus(ChunkStatus.STRUCTURE_STARTS)), chunk);
-		return level.getChunkSource().getChunkFuture(chunk.x(), chunk.z(), ChunkStatus.STRUCTURE_STARTS, true);
+		return CompletableFuture.supplyAsync(
+				() -> level.getChunkSource().getChunkFuture(chunk.x(), chunk.z(), ChunkStatus.STRUCTURE_STARTS, true),
+				Util.backgroundExecutor())
+			.thenCompose(future -> future);
 	}
 
 	/**

@@ -483,6 +483,21 @@ def packMods = [
 	[dep: "maven.modrinth:qraftyfied:cpRes8NL", cf: [1005868, 8916149]],
 	// VillagersTradingPlus (GPL-3.0): the trading library VillagersPlus needs (packModsNoCf).
 	[dep: "maven.modrinth:villagerstradingplus:uut3GStm", cf: [1635301, 9346754]],
+	// Psithurism 1.4.0 (by the MModding Team; code PolyForm Shield 1.0.0, art all rights reserved, shipped as the untouched
+	// jar with credit, never edited or taken apart; curseforge.com/minecraft/mc-mods/psithurism): Japanese deco blocks (paper
+	// walls, tatami, dark cherry wood, lanterns, futons) and onsen water. Jaymo's Kingdoms' PsithurismCompat builds Blossom
+	// houses from its paper walls, tatami and dark cherry and sets onsen pools by the Blossom villages, by registry id only
+	// (never a compile dependency). Needs MModding Library (below). Not loaded in the dev game.
+	// HELD BACK: Psithurism 1.4.0 (the only 26.3 build) needs Fabric Loader >=0.20.1 and Fabric API >=0.165.0, and the pack
+	// is on 0.19.5 / 0.164.0 (checkPackMods). Uncomment both lines once the pack moves up. Until then PsithurismCompat stays idle.
+	// [dep: "curse.maven:psithurism-1533119:9374201", cf: [1533119, 9374201], dev: false],
+	// MModding Library 0.9.2-alpha (MModding Team; same licence; curseforge.com/minecraft/mc-mods/mmodding-library): Psithurism's library.
+	// [dep: "curse.maven:mmodding-library-694928:9374057", cf: [694928, 9374057], dev: false],
+	// Hot Air Balloons 0.0.30 (by Profet; all rights reserved, shipped as the untouched jar with credit and a link, never
+	// edited: curseforge.com/minecraft/mc-mods/hot-air-balloons): balloons you craft, dye, fuel and ride, drifting on wind at
+	// every height. Our own rough/HotAirBalloon is a separate balloon of ours with its own wind (also used by airships and ferries).
+	// Fantasy Mounts is NOT shipped: its author has not agreed yet (docs/FaeWoods-Plan.md, Andy's answer 3).
+	[dep: "curse.maven:hot-air-balloons-1776121:9405501", cf: [1776121, 9405501], dev: false],
 ]
 // on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest
 // can't list them: the CurseForge import zip carries the jars themselves (overrides/mods), and they're in modpack/mods
@@ -499,15 +514,8 @@ def packModsNoCf = [
 	// models and implementations". Needs GeckoLib and Fabric API (above) and Modonomicon (below). Modrinth XlUm5I57; CurseForge
 	// [project id, file id] to look up from the home PC (cloud can't reach it).
 	[dep: "maven.modrinth:icys-better-horses:AvgqdGip", cf: null],
-	// Tectonic 3.0.32 (MIT, by Apollo; the official jar, shipped unchanged; Modrinth lWDHr9jE): the Overworld's terrain rewritten
-	// (taller mountains, wide oceans, rivers that run under mountains in caves with hung lanterns, jungle pillars, lava tunnels at
-	// the bottom, islands). Andy (L6, 2026-11-24): "which one is more stable? we seem to have alot of world gen issues right
-	// now, can we test this then swap back if not?" A TRIAL: Jaymo's Kingdoms' own continents' shape (the continents, erosion,
-	// ridges and offset files, and the higher sea) stands down while this jar is in the pack, and its climate map stays
-	// (TectonicCompat); judge it on a NEW world. To swap back, delete this line (its jar leaves the pack and the shape comes
-	// back for worlds made after; chunks already made keep Tectonic's terrain). Needs Fabric API and Lithostitched (packMods,
-	// above); its config library (Apollib) is inside its jar. CurseForge [project id, file id] to look up from the home PC.
-	[dep: "maven.modrinth:tectonic:tRBGDcCT", cf: null],
+	// (Tectonic 3.0.32 left after its trial: Andy, 2026-11-25, "the generation is impressive but i dont want it if it breaks
+	// caves and the heatmap". Jaymo's Kingdoms' own continents' shape and climate map are back in its data, always on.)
 	// Modonomicon 26.3-2.23.1 (MIT code, CC BY 4.0 art; klikli-dev): the book library Icy's Better Horses' Stable Handbook is
 	// written in. Shipped unchanged. Modrinth 692GClaE.
 	[dep: "maven.modrinth:modonomicon:z8ESky23", cf: null],
@@ -984,8 +992,9 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // Streams Reflowing (Dynamic Waters took its place); Grassier Grass and Punchy! with Punchy! Moves (Andy, 2026-11-16: "i
 // think the new grass and punchy are lagging the game"; punchy_expressions comes inside Punchy! Moves);
 // Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list);
-// VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list)
-def removedIdsFromProfile = ["horseexpert", "kaffees_dual_ride", "ultimate_horseshoes", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
+// VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list); Tectonic (its trial ended: Andy,
+// 2026-11-25, it broke the caves and the climate map)
+def removedIdsFromProfile = ["tectonic", "horseexpert", "kaffees_dual_ride", "ultimate_horseshoes", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
 	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions",
 	"vanilla-outsider-better-dogs", "dasik-library", "scalablelux"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
@@ -1183,6 +1192,7 @@ tasks.register("checkPackMods") {
 tasks.register("curseforgeManifest") {
 	def out = layout.buildDirectory.file("modpack/manifest.json")
 	outputs.file out
+	inputs.property "version", version // else Gradle reuses an old manifest and the CurseForge tile shows an old version
 	doLast {
 		def manifest = [
 			minecraft      : [version: project.minecraft_version, modLoaders: [[id: "fabric-${project.loader_version}", primary: true]]],

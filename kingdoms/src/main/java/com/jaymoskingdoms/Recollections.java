@@ -596,6 +596,21 @@ public final class Recollections {
 		return line(r, nameTo(player, who), random);
 	}
 
+	/**
+	 * (Refusal hints) The worst {@code who} holds against {@code player}, in the words they'd bring it up with: what they
+	 * say when that is why they won't ({@link RefusalHints}). Null if they hold nothing against them.
+	 */
+	static @Nullable Component worstLine(LivingEntity who, ServerPlayer player, RandomSource random) {
+		Recollection worst = null;
+		for (Recollection r : of(who, player)) {
+			Kind k = r.type();
+			if (k != null && k.remark && r.sway() < 0 && (worst == null || r.sway() < worst.sway())) {
+				worst = r;
+			}
+		}
+		return worst == null ? null : line(worst, nameTo(player, who), random);
+	}
+
 	private static Component line(Recollection r, Component name, RandomSource random) {
 		if (r.heard()) {
 			return Component.translatable("recall.jaymoskingdoms.heard." + r.kind() + "." + random.nextInt(HEARD_REMARKS), name, r.detail(), r.from());

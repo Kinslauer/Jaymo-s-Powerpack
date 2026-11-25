@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#jaymoskingdoms:bouncecap_stems"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:bouncecap_planks",
+    "count": 4
+  },
+  "group": "planks"
+}

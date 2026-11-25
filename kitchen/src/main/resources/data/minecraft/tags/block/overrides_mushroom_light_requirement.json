@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "jaymoskitchen:organic_compost",
-    "jaymoskitchen:rich_soil"
+    "jaymoskitchen:rich_soil",
+    "jaymoskitchen:mycelial_soil",
+    "jaymoskitchen:truffle_soil"
   ]
 }

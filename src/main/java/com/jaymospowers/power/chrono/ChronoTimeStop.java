@@ -203,6 +203,13 @@ public final class ChronoTimeStop {
 				// a dull thud: the blow is felt by time, not yet by them
 				entity.level().playSound(null, entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(),
 					SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.7F, 0.6F + stop.hits * 0.01F);
+				// (Hand of God's held blows, ideas only) the blow's mark, held on the body where it struck
+				if (entity.level() instanceof ServerLevel level) {
+					Vec3 c = entity.getBoundingBox().getCenter();
+					com.jaymospowers.core.fx.MagicFx.orb(level, c, Math.min(0.9F, 0.18F + stop.banked.get(entity).size() * 0.06F), ChronoSlowTime.GOLD,
+						DURATION);
+					com.jaymospowers.core.fx.MagicFx.ring(level, c, attacker.position().subtract(entity.position()), 0.9F, ChronoSlowTime.GOLD, 8);
+				}
 			}
 			return false;
 		}
@@ -248,6 +255,7 @@ public final class ChronoTimeStop {
 				target.needsSync = true;
 				ChronoFx.particles(level, (Player) null, ParticleTypes.CRIT, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
 					6 + e.getValue().size() * 2, target.getBbWidth() * 0.4, target.getBbHeight() * 0.3, target.getBbWidth() * 0.4, 0.4);
+				com.jaymospowers.core.fx.MagicFx.blast(level, target.getBoundingBox().getCenter(), 0.8F + e.getValue().size() * 0.25F, ChronoSlowTime.GOLD);
 			}
 		} finally {
 			releasing = false;

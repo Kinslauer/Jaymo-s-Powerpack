@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskingdoms:block/bouncecap"
+      },
+      {
+        "model": "jaymoskingdoms:block/bouncecap",
+        "y": 90
+      },
+      {
+        "model": "jaymoskingdoms:block/bouncecap",
+        "y": 180
+      },
+      {
+        "model": "jaymoskingdoms:block/bouncecap",
+        "y": 270
+      }
+    ]
+  }
+}

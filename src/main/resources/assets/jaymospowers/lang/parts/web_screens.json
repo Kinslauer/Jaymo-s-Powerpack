@@ -1,0 +1,41 @@
+{
+	"message.jaymospowers.web_symbiote.stamina.tired.1": "Slow down. The cords ache. Give us a breath.",
+	"message.jaymospowers.web_symbiote.stamina.tired.2": "We can't hold on, not yet. Let us rest.",
+	"message.jaymospowers.web_symbiote.stamina.tired.3": "Spent. Stand still a moment and we will be ready.",
+
+	"gui.jaymospowers.web_symbiote.status.blurb.black": "It keeps what it is given, and it remembers who gave it.",
+	"gui.jaymospowers.web_symbiote.status.blurb.white": "Gentle with the hurt, and strangely quiet about what it was before.",
+	"gui.jaymospowers.web_symbiote.status.blurb.red": "It wants the hunt more than it wants you. Be useful to it.",
+	"gui.jaymospowers.web_symbiote.status.settings": "Settings",
+
+
+	"gui.jaymospowers.web_symbiote.card.attached": "It has found its hold on you.",
+	"gui.jaymospowers.web_symbiote.card.integrated": "It is learning where you end.",
+	"gui.jaymospowers.web_symbiote.card.cooperative": "It moves when you move. Mostly.",
+	"gui.jaymospowers.web_symbiote.card.dominant": "There is very little between you now.",
+
+	"screen.jaymospowers.web_symbiote_settings": "Symbiote Settings",
+	"gui.jaymospowers.web_symbiote.settings.subtitle": "What it may do, and what you see of it",
+	"gui.jaymospowers.web_symbiote.settings.fidgets": "Fidgets",
+	"gui.jaymospowers.web_symbiote.settings.fidgets.tip": "The small things it does when you aren't looking.",
+	"gui.jaymospowers.web_symbiote.settings.jealousy": "Jealousy",
+	"gui.jaymospowers.web_symbiote.settings.jealousy.tip": "Its sulks and moods when you pay attention to others.",
+	"gui.jaymospowers.web_symbiote.settings.requests": "Requests",
+	"gui.jaymospowers.web_symbiote.settings.requests.tip": "The errands and wants it asks of you.",
+	"gui.jaymospowers.web_symbiote.settings.hints": "Hints",
+	"gui.jaymospowers.web_symbiote.settings.hints.tip": "The one-time lines that tell you what a new talent does.",
+	"gui.jaymospowers.web_symbiote.settings.edge": "Edge membrane",
+	"gui.jaymospowers.web_symbiote.settings.edge.tip": "The dark vignette that creeps round the screen when it speaks.",
+	"gui.jaymospowers.web_symbiote.settings.on": "On",
+	"gui.jaymospowers.web_symbiote.settings.off": "Off",
+	"gui.jaymospowers.web_symbiote.settings.back": "Back",
+
+	"screen.jaymospowers.web_arm": "The Arm",
+	"gui.jaymospowers.web_arm.subtitle": "Three slots in the symbiote's arm",
+	"gui.jaymospowers.web_arm.slot": "Arm slot %s",
+	"gui.jaymospowers.web_arm.empty": "Empty",
+	"gui.jaymospowers.web_arm.inventory": "Your pack",
+	"gui.jaymospowers.web_arm.help": "Click one thing, then another, to swap them. Shift-click an arm slot to send it to your pack.",
+	"gui.jaymospowers.web_arm.button": "Arm",
+	"gui.jaymospowers.web_arm.close": "Esc to close"
+}

@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:druid_sprig",
+    "jaymoskingdoms:scroll_of_control_weather",
+    "jaymoskingdoms:scroll_of_create_food",
+    "jaymoskingdoms:scroll_of_feather_fall",
+    "jaymoskingdoms:scroll_of_find_magic",
+    "jaymoskingdoms:scroll_of_fog",
+    "jaymoskingdoms:scroll_of_grease",
+    "jaymoskingdoms:scroll_of_harrying_gale",
+    "jaymoskingdoms:scroll_of_heroes_feast",
+    "jaymoskingdoms:scroll_of_hut",
+    "jaymoskingdoms:scroll_of_locate_creature",
+    "jaymoskingdoms:scroll_of_long_jump",
+    "jaymoskingdoms:scroll_of_mending",
+    "jaymoskingdoms:scroll_of_moonbeam",
+    "jaymoskingdoms:scroll_of_plant_growth",
+    "jaymoskingdoms:scroll_of_purify_food",
+    "jaymoskingdoms:scroll_of_rebirth",
+    "jaymoskingdoms:scroll_of_speak_animals",
+    "jaymoskingdoms:scroll_of_spider_climb",
+    "jaymoskingdoms:scroll_of_spike_growth",
+    "jaymoskingdoms:scroll_of_storm_cloak",
+    "jaymoskingdoms:scroll_of_tide_pearl",
+    "jaymoskingdoms:scroll_of_water_walk",
+    "jaymoskingdoms:scroll_of_web"
+  ]
+}

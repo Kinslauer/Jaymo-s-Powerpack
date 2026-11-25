@@ -194,6 +194,8 @@ abstract class McaDialogueMixin {
 			// (0.7.109) they remember too much ill of you for that
 			villager.sendChatMessage(Component.translatable("recall.jaymoskingdoms.refuse." + villager.getRandom().nextInt(Recollections.REFUSALS),
 				Recollections.nameTo(player, villager)), player);
+			// (refusal hints) and the worst of it, or what they bear you
+			com.jaymoskingdoms.RefusalHints.hintStanding(player, villager);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;

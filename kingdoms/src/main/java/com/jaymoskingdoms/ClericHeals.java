@@ -101,15 +101,24 @@ public final class ClericHeals {
 		return worst;
 	}
 
-	/** Throws a splash potion of healing at {@code patient}'s feet. */
+	/** Throws a splash potion of healing at the patient's feet. */
 	private static void splash(ServerLevel level, Villager cleric, LivingEntity patient) {
-		double xd = patient.getX() - cleric.getX(), zd = patient.getZ() - cleric.getZ();
-		double yd = patient.getY() - cleric.getEyeY() + 0.5;
+		throwSplash(level, cleric, patient, PotionContents.createItemStack(Items.SPLASH_POTION, Potions.HEALING), POWER, STRAY);
+	}
+
+	/**
+	 * Throws {@code potion} (a splash potion the thrower has already spent from what it carries) at {@code at}'s feet: a healer's
+	 * healing, and a fighter's harmful splash ({@link WeaponSense}).
+	 */
+	static void throwSplash(ServerLevel level, LivingEntity thrower, LivingEntity at, ItemStack potion, float power, float stray) {
+		double xd = at.getX() - thrower.getX(), zd = at.getZ() - thrower.getZ();
+		double yd = at.getY() - thrower.getEyeY() + 0.5;
 		double dist = Math.sqrt(xd * xd + zd * zd);
-		cleric.getLookControl().setLookAt(patient, 30.0F, 30.0F);
-		cleric.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		ItemStack potion = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.HEALING);
-		Projectile.spawnProjectileUsingShoot(ThrownSplashPotion::new, level, potion, cleric, xd, yd + dist * 0.2, zd, POWER, STRAY);
-		level.playSound(null, cleric.getX(), cleric.getY(), cleric.getZ(), SoundEvents.WITCH_THROW, SoundSource.NEUTRAL, 1.0F, 1.2F);
+		if (thrower instanceof net.minecraft.world.entity.Mob mob) {
+			mob.getLookControl().setLookAt(at, 30.0F, 30.0F);
+		}
+		thrower.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		Projectile.spawnProjectileUsingShoot(ThrownSplashPotion::new, level, potion, thrower, xd, yd + dist * 0.2, zd, power, stray);
+		level.playSound(null, thrower.getX(), thrower.getY(), thrower.getZ(), SoundEvents.WITCH_THROW, SoundSource.NEUTRAL, 1.0F, 1.2F);
 	}
 }

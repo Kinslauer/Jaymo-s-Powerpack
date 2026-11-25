@@ -16,6 +16,7 @@ public final class ModelPoses {
 		PullerPose.apply(model, state);
 		PickpocketPose.apply(model, state);
 		BioAbsorbPose.apply(model, state);
+		TreePushPose.apply(model, state);
 		BloodGrabPose.apply(model, state);
 		RubberEngulf.apply(model, state);
 		// (0.7.457) Andy: "still having a problem with the way the character is drawn on the start path screen". A Bio-built's

@@ -1094,8 +1094,26 @@ public final class ZFighterLineage {
 		player.setAttached(WILD_GOAL, groundAt(level, player.getX() + Math.cos(angle) * far, player.getZ() + Math.sin(angle) * far));
 	}
 
-	/** Hurt: the wild ape turns tail from the blow and runs a way off, unless it only just stopped running. */
+	/**
+	 * (Andy, 2026-11-25: takeovers should fight with the new MCA fighting AI's aggression: "they are the most playerlike
+	 * and aggressive".) Hurt, the wild ape turns on whatever hit it; only badly hurt (at or under {@code APE_FALL_BACK}
+	 * of its health, the fighting AI's fall-back line) does it turn tail from the blow and run a way off, unless it only
+	 * just stopped running.
+	 */
+	static final float APE_FALL_BACK = 0.2F;
+
 	static void flee(LivingEntity player, ZFighterPower.Live live, DamageSource source, long now) {
+		if (player.getHealth() > player.getMaxHealth() * APE_FALL_BACK) {
+			if (live.fleeUntil < 0L && source.getEntity() instanceof LivingEntity by && by != player && by.isAlive()
+				&& quarry(player, live, by, now) && by.getId() != live.berserkTarget) {
+				// it turns on them
+				live.berserkTarget = by.getId();
+				live.berserkSince = now;
+				player.setAttached(BERSERK, by.getId());
+				player.removeAttached(WILD_GOAL);
+			}
+			return;
+		}
 		if (live.fleeUntil >= 0L || now < live.fleeRestUntil || live.apeSize < 0.5F) {
 			return;
 		}

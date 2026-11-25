@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "jaymoskingdoms:glowcap_stem"
+  },
+  "result": {
+    "id": "jaymoskingdoms:glowcap_hyphae",
+    "count": 3
+  },
+  "group": "bark"
+}

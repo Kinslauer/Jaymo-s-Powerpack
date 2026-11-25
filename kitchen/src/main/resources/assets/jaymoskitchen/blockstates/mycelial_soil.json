@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskitchen:block/forage/mycelial_soil"
+      },
+      {
+        "model": "jaymoskitchen:block/forage/mycelial_soil",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/forage/mycelial_soil",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/forage/mycelial_soil",
+        "y": 270
+      }
+    ]
+  }
+}

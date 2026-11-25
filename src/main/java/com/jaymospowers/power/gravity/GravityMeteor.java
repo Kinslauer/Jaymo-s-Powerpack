@@ -54,7 +54,7 @@ import net.minecraft.world.phys.Vec3;
  * while before they clear. When the shockwave has run out, whatever the strike cut loose and left hanging in the air over
  * the crater (a tree's crown, a lip of an overhang) comes down too (see {@link GravityMeteorSweep}).
  */
-final class GravityMeteor {
+public final class GravityMeteor {
 	/** A charging meteor: a deep hum, rising, with stone grinding under it at uneven beats. */
 	static final Soundscape.Layer CHARGE_HUM = Soundscape.Layer.of(0.9F, 1.1F, 0.96F, 1.04F, SoundEvents.BEACON_AMBIENT);
 	static final Soundscape.Layer CHARGE_GRIND = Soundscape.Layer.of(0.3F, 0.5F, 0.4F, 0.6F, SoundEvents.GRAVEL_BREAK, SoundEvents.STONE_BREAK)
@@ -499,6 +499,8 @@ final class GravityMeteor {
 			}
 		}
 		for (net.minecraft.core.BlockPos pos : going) {
+			// the crater is ground that comes back (terrain return)
+			com.jaymospowers.core.TerrainReturn.record(level, pos);
 			BlockState state = level.getBlockState(pos);
 			if (random.nextFloat() < CARVE_DROP_CHANCE || state.hasBlockEntity()) {
 				level.destroyBlock(pos, true, owner);
@@ -553,6 +555,17 @@ final class GravityMeteor {
 	/** How far round a strike the sweep looks for what it left hanging: the crater rings' reach and a little more. */
 	private static double sweepRadius(float charge) {
 		return GravityMeteorSweep.REACH_BEYOND + craterRings(charge) * CRATER_RING_STEP + POWER;
+	}
+
+	/**
+	 * The biggest meteor's landing at {@code at} with no rock of its own (Nadir's thrown Sun or Moon; Andy, 2026-11-25:
+	 * "should deal damage equivalent to the largest meteor or spirit bomb"): a full charge's blast, hurt, fire, shockwave
+	 * and crater, and the burst thrown up from it in {@code debris} (block state ids).
+	 */
+	public static void fullStrike(ServerLevel level, ServerPlayer owner, Vec3 at, List<Integer> debris) {
+		Set<Long> floatingBefore = GravityMeteorSweep.floating(level, at, sweepRadius(1.0F));
+		impact(level, owner, at, 1.0F, floatingBefore);
+		burst(level, at, 1.0F, debris, owner);
 	}
 
 	/** It lands: the blast and the hurt; the shockwave sets off from here (see {@link #wave}). */

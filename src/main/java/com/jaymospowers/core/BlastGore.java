@@ -1,6 +1,8 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.wounds.BodyPart;
+import com.jaymospowers.core.wounds.BodyPlan;
 import com.jaymospowers.core.wounds.NoOneShot;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -285,8 +287,12 @@ public final class BlastGore {
 		return at != null && at == target.level().getGameTime();
 	}
 
-	/** How bulky a body is: its box's width across both ways, times its height. */
-	private static double bulk(LivingEntity e) {
+	/** How bulky a body is: its box's width across both ways, times its height (or what an op set, times a man's). */
+	public static double bulk(LivingEntity e) {
+		Float set = com.jaymospowers.core.reader.GoreOverrides.weight(e.getType());
+		if (set != null) {
+			return set * MAN_BULK;
+		}
 		return (double) e.getBbWidth() * e.getBbWidth() * e.getBbHeight();
 	}
 
@@ -380,6 +386,87 @@ public final class BlastGore {
 		double reach = Math.max(0.01, blast.radius() * 2.0);
 		float near = (float) Mth.clamp(1.0 - Math.sqrt(victim.distanceToSqr(blast.centre())) / reach, 0.0, 1.0);
 		return near * (float) Math.sqrt(Math.min(1.0F, blast.radius() / FULL_RADIUS));
+	}
+
+	// ---- which parts the blast can reach ----------------------------------------------------------------------------------
+
+	/** Where each body's exposure to the blast going off was last worked out: {game time, centre, mask}. */
+	private static final Map<LivingEntity, Object[]> EXPOSURE = new WeakHashMap<>();
+	/** How far a part's sample point sits from the body's axis, as a share of its box's width, for an arm, a leg and a wing. */
+	private static final double ARM_SIDE = 0.45, LEG_SIDE = 0.2, WING_SIDE = 0.7;
+
+	/**
+	 * The parts of {@code victim} that have a clear line to the vanilla blast hurting it ({@code source}), as a mask of
+	 * {@link BodyPart#ordinal} bits: a part behind a wall, or a pillar, isn't hit. -1 when this isn't a blast with a known
+	 * centre (every part counts), and if no part is clear (the blast reached it some other way) every part is too.
+	 */
+	public static int exposure(LivingEntity victim, DamageSource source) {
+		Blast blast = GOING_OFF.peek();
+		BodyPlan plan = BodyPlan.of(victim);
+		if (!blast(source) || blast == null || plan == null || !(victim.level() instanceof ServerLevel level)) {
+			return -1;
+		}
+		long now = level.getGameTime();
+		Object[] cached = EXPOSURE.get(victim);
+		if (cached != null && (Long) cached[0] == now && blast.centre().equals(cached[1])) {
+			return (Integer) cached[2];
+		}
+		int mask = 0;
+		for (int i = 0; i < plan.size(); i++) {
+			BodyPart part = plan.part(i);
+			if (clear(level, blast.centre(), samplePoint(victim, plan, part))) {
+				mask |= 1 << part.ordinal();
+			}
+		}
+		if (mask == 0) {
+			mask = -1;
+		}
+		EXPOSURE.put(victim, new Object[] {now, blast.centre(), mask});
+		return mask;
+	}
+
+	/** Whether {@code limb} (a {@link Dismember} bit) is in {@code exposed} (from {@link #exposure}). */
+	private static boolean open(int exposed, int limb) {
+		BodyPart part = com.jaymospowers.core.wounds.Breaks.part(limb);
+		return exposed == -1 || part == null || (exposed >> part.ordinal() & 1) != 0;
+	}
+
+	/** Whether {@code from} sees {@code to} with no block between. */
+	private static boolean clear(ServerLevel level, Vec3 from, Vec3 to) {
+		return level.clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+			net.minecraft.world.level.ClipContext.Fluid.NONE, net.minecraft.world.phys.shapes.CollisionContext.empty())).getType()
+			== net.minecraft.world.phys.HitResult.Type.MISS;
+	}
+
+	/** About where {@code part} of {@code victim} is: a person's from its {@link LimbBoxes}, any other body's by height and side. */
+	private static Vec3 samplePoint(LivingEntity victim, BodyPlan plan, com.jaymospowers.core.wounds.BodyPart part) {
+		if (plan == BodyPlan.HUMANOID) {
+			int limb = part == BodyPart.BODY ? LimbBoxes.TORSO : com.jaymospowers.core.wounds.Breaks.limb(part);
+			for (LimbBoxes.Box box : LimbBoxes.of(victim)) {
+				if (box.part() == limb) {
+					return part == BodyPart.LEFT_FOOT || part == BodyPart.RIGHT_FOOT ? box.center().subtract(0.0, box.half()[1] * 0.8, 0.0) : box.center();
+				}
+			}
+		}
+		net.minecraft.world.phys.AABB box = victim.getBoundingBox();
+		double h = box.getYsize(), w = box.getXsize();
+		Vec3 right = Vec3.directionFromRotation(0.0F, victim.yBodyRot + 90.0F);
+		Vec3 forward = Vec3.directionFromRotation(0.0F, victim.yBodyRot);
+		Vec3 mid = new Vec3(victim.getX(), box.minY, victim.getZ());
+		return switch (part) {
+			case HEAD -> mid.add(forward.scale(plan == BodyPlan.QUADRUPED ? w * 0.4 : 0.0)).add(0.0, h * 0.88, 0.0);
+			case LEFT_ARM -> mid.add(right.scale(-w * ARM_SIDE)).add(0.0, h * 0.6, 0.0);
+			case RIGHT_ARM -> mid.add(right.scale(w * ARM_SIDE)).add(0.0, h * 0.6, 0.0);
+			case LEFT_LEG -> mid.add(right.scale(-w * LEG_SIDE)).add(0.0, h * 0.25, 0.0);
+			case RIGHT_LEG -> mid.add(right.scale(w * LEG_SIDE)).add(0.0, h * 0.25, 0.0);
+			case LEFT_FOOT -> mid.add(right.scale(-w * LEG_SIDE)).add(0.0, h * 0.05, 0.0);
+			case RIGHT_FOOT -> mid.add(right.scale(w * LEG_SIDE)).add(0.0, h * 0.05, 0.0);
+			case FRONT_LEGS -> mid.add(forward.scale(w * 0.3)).add(0.0, h * 0.2, 0.0);
+			case HIND_LEGS -> mid.add(forward.scale(-w * 0.3)).add(0.0, h * 0.2, 0.0);
+			case LEGS -> mid.add(0.0, h * 0.2, 0.0);
+			case WINGS -> mid.add(right.scale(w * WING_SIDE)).add(0.0, h * 0.6, 0.0);
+			default -> mid.add(0.0, h * 0.55, 0.0);
+		};
 	}
 
 	/** The blast's centre, if a vanilla one is going off (the way parts fly from). */
@@ -478,7 +565,7 @@ public final class BlastGore {
 			return;
 		}
 		if (entity.getRandom().nextFloat() < (shot ? 1.0F : CORPSE_LIMB) * chance(entity, by, limbBase(source, closeness), source)) {
-			loseLimb(entity, by, from);
+			loseLimb(entity, by, from, source);
 		}
 	}
 
@@ -510,8 +597,8 @@ public final class BlastGore {
 		if (entity.getRandom().nextFloat() >= chance) {
 			return;
 		}
-		if (loseLimb(entity, by, from) && entity.isAlive() && entity.getRandom().nextFloat() < chance * SECOND_LIMB) {
-			loseLimb(entity, by, from);
+		if (loseLimb(entity, by, from, source) && entity.isAlive() && entity.getRandom().nextFloat() < chance * SECOND_LIMB) {
+			loseLimb(entity, by, from, source);
 		}
 	}
 
@@ -536,8 +623,8 @@ public final class BlastGore {
 		if (entity.getRandom().nextFloat() >= chance) {
 			return;
 		}
-		if (loseLimb(entity, by, from) && entity.isAlive() && entity.getRandom().nextFloat() < chance * SECOND_LIMB) {
-			loseLimb(entity, by, from);
+		if (loseLimb(entity, by, from, source) && entity.isAlive() && entity.getRandom().nextFloat() < chance * SECOND_LIMB) {
+			loseLimb(entity, by, from, source);
 		}
 	}
 
@@ -562,8 +649,15 @@ public final class BlastGore {
 	}
 
 	/** One limb it still has, at random, comes off. True if one did. */
-	private static boolean loseLimb(LivingEntity entity, @Nullable LivingEntity by, @Nullable Vec3 from) {
+	private static boolean loseLimb(LivingEntity entity, @Nullable LivingEntity by, @Nullable Vec3 from, DamageSource source) {
 		int mask = Dismember.missing(entity);
+		// (a blast takes only a limb it had a clear line to)
+		int exposed = exposure(entity, source);
+		for (int limb : LIMBS) {
+			if (!open(exposed, limb)) {
+				mask |= limb;
+			}
+		}
 		int left = 0;
 		for (int limb : LIMBS) {
 			if ((mask & limb) == 0) {

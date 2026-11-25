@@ -3534,6 +3534,13 @@ public final class PowersCompat {
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the class trees' extras (older Powers?)", e);
 		}
+		try {
+			// a Brute wrestles mobs down (and throws them) from the start, whatever their brawn (Wrestle)
+			java.util.function.Predicate<net.minecraft.world.entity.player.Player> wrestler = WarExtras::wrestles;
+			Class.forName("com.jaymospowers.core.Wrestle").getField("granted").set(null, wrestler);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the Brute's wrestling (older Powers?)", e);
+		}
 	}
 
 	/**
@@ -3828,6 +3835,36 @@ public final class PowersCompat {
 			layStain.invoke(level, bleeder.getUUID(), colour, x, bleeder.getY() + 0.5, z, size, 6);
 		} catch (Throwable e) {
 			// no drop
+		}
+	}
+
+	/** Powers' {@code BladeBlood.squashed(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle squashedHandle;
+	private static boolean lookedForSquashed;
+
+	/**
+	 * {@code body} (a small spider or bug just squashed underfoot, {@code wild/SpiderSquash}) bursts flat in its own blood,
+	 * a few drops and a splat sized to it, as Powers draws blood; nothing without Powers.
+	 */
+	public static void squashed(LivingEntity body) {
+		if (!lookedForSquashed) {
+			lookedForSquashed = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					squashedHandle = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.BladeBlood"),
+						"squashed", java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' squashed blood (older Powers?)", e);
+				}
+			}
+		}
+		if (squashedHandle == null) {
+			return;
+		}
+		try {
+			squashedHandle.invoke(body);
+		} catch (Throwable e) {
+			// no blood
 		}
 	}
 

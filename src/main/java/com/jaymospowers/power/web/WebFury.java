@@ -180,6 +180,16 @@ public final class WebFury {
 		}
 	}
 
+	/** Spends {@code amount} fury (the crowned onslaught's price); false, and nothing spent, if there is less. */
+	static boolean spend(ServerPlayer player, int amount) {
+		int have = fury(player);
+		if (have < amount) {
+			return false;
+		}
+		set(player, have - amount);
+		return true;
+	}
+
 	private static void set(ServerPlayer player, int value) {
 		if (value <= 0) {
 			player.removeAttached(FURY);

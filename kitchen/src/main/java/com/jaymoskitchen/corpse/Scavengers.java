@@ -85,6 +85,8 @@ public final class Scavengers {
 	private static final double BITE_HEIGHT = 0.2;
 	/** Pieces of meat until it's full, and how long it stays full (ticks; 2400 is two days' quarter). */
 	private static final int FULL_AFTER = 3, FULL_TICKS = 4800;
+	/** After swallowing a part, a scavenger isn't hunting for this long (ticks), unless something hurt it ({@link #sated}). */
+	private static final int SATED_TICKS = 2400, HURT_MEMORY = 200;
 	/** Health back per piece eaten. */
 	private static final float HEAL = 3.0F;
 	/** How often a scavenger with nothing else to do sniffs for a gut pile (ticks). */
@@ -257,6 +259,18 @@ public final class Scavengers {
 		return hunger != null && (hunger.eating || hunger.chewing());
 	}
 
+	/**
+	 * Whether {@code mob} has just eaten and isn't hunting: it takes up no new target (see {@code ScavengerFedMixin}) for
+	 * {@link #SATED_TICKS} after swallowing a part, unless something hurt it in the last {@link #HURT_MEMORY} ticks.
+	 */
+	public static boolean sated(Mob mob) {
+		Hunger hunger = HUNGERS.get(mob);
+		if (hunger == null || mob.level().getGameTime() >= hunger.satedUntil) {
+			return false;
+		}
+		return mob.getLastHurtByMob() == null || mob.tickCount - mob.getLastHurtByMobTimestamp() > HURT_MEMORY;
+	}
+
 	private static boolean isMouthful(net.minecraft.world.item.ItemStack stack) {
 		net.minecraft.world.item.component.CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
 		return data != null && data.copyTag().getBooleanOr(MOUTHFUL, false);
@@ -265,6 +279,8 @@ public final class Scavengers {
 	/** One scavenger's appetite: full for a while after eating. */
 	private static final class Hunger {
 		long fullUntil;
+		/** Not hunting anyone till this game time (it has just eaten). */
+		long satedUntil;
 		int eaten;
 		/** At its meal (at a body, meat or a pile, in reach of it). */
 		boolean eating;
@@ -285,6 +301,8 @@ public final class Scavengers {
 		}
 
 		void ate(Mob mob) {
+			satedUntil = mob.level().getGameTime() + SATED_TICKS;
+			mob.setTarget(null);
 			if (++eaten >= (cub(mob) ? CUB_FULL_AFTER : FULL_AFTER)) {
 				eaten = 0;
 				fullUntil = mob.level().getGameTime() + FULL_TICKS;
@@ -656,6 +674,16 @@ public final class Scavengers {
 	private static final int GONE = 0, BITTEN = -1;
 
 	/**
+	 * How much of {@code body} is eaten: a share (under 1) of its parts and trunk, a part being done when it's torn off, so the
+	 * flesh falls away in patches as the meal goes on ({@link CorpseEntity#eaten}).
+	 */
+	private static float eatenShare(CorpseEntity body, int bites, int needed) {
+		int lost = Integer.bitCount(body.missing() & CorpseEntity.ALL_PARTS);
+		int stages = lost > 0 || body.nextPart() != 0 ? Integer.bitCount(CorpseEntity.ALL_PARTS) + 1 : 1;
+		return Math.min(0.99F, (lost + Math.min(1.0F, bites / (float) Math.max(1, needed))) / stages);
+	}
+
+	/**
 	 * One bite into {@code body} by {@code eater}, its jaws coming in along {@code in}: the body is dragged a little after
 	 * them and blood flies. Each {@code needed} bites tear off its next part ({@link CorpseEntity#nextPart}: the arms and
 	 * legs, then the head), and that's returned; with none left, the trunk is torn open: its meat spilled for the
@@ -671,6 +699,7 @@ public final class Scavengers {
 		Vec3 at = body.position().add(-in.x * body.getBbWidth() * 0.4, BITE_HEIGHT, -in.z * body.getBbWidth() * 0.4);
 		boolean partOff = bites >= needed;
 		body.tug(at, in, partOff);
+		body.eaten(eatenShare(body, bites, needed));
 		Gibs.bitten(body, level, at, in.scale(-1.0), partOff);
 		com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.25, body.getZ(), 10, 0.2, 0.1, 0.2, 0.15);
 		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, body.getX(), body.getY() + 0.3, body.getZ(), 2, 0.2, 0.1, 0.2, 0.05);

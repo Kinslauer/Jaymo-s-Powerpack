@@ -149,6 +149,23 @@ public final class WebSymbioteStrains {
 		return kind == null ? WebSymbioteStrain.BLACK : WebSymbioteStrain.of(kind);
 	}
 
+	/** Tags a host as a symbiote oddity (and which one, so villagers tell the red and the white from the black). */
+	static void oddMark(Entity host, WebSymbioteStrain strain) {
+		com.jaymospowers.core.Oddities.mark(host, com.jaymospowers.core.Oddities.SYMBIOTE);
+		if (strain == WebSymbioteStrain.RED) {
+			com.jaymospowers.core.Oddities.mark(host, com.jaymospowers.core.Oddities.SYMBIOTE_RED);
+		} else if (strain == WebSymbioteStrain.WHITE) {
+			com.jaymospowers.core.Oddities.mark(host, com.jaymospowers.core.Oddities.SYMBIOTE_WHITE);
+		}
+	}
+
+	/** Takes every symbiote oddity tag off a host it has left. */
+	static void oddUnmark(Entity host) {
+		com.jaymospowers.core.Oddities.unmark(host, com.jaymospowers.core.Oddities.SYMBIOTE);
+		com.jaymospowers.core.Oddities.unmark(host, com.jaymospowers.core.Oddities.SYMBIOTE_RED);
+		com.jaymospowers.core.Oddities.unmark(host, com.jaymospowers.core.Oddities.SYMBIOTE_WHITE);
+	}
+
 	/** The white one is asleep from healing (either side; synced to the owner). */
 	public static boolean asleep(Player player) {
 		return Boolean.TRUE.equals(player.getAttached(ASLEEP)) && WebSymbioteBond.dormant(player);

@@ -86,7 +86,37 @@ public final class BloodCoatLayer {
 	private static void corpseBody(Entity corpse, EntityRenderState state) {
 		state.setData(KEY, null);
 		state.setData(GRIME, null);
-		state.setData(CORPSE, BloodSettings.off() ? null : Bloodied.corpseBlood(corpse));
+		state.setData(CORPSE, BloodSettings.off() || BloodSettings.streamerSafe() ? null : Bloodied.corpseBlood(corpse));
+	}
+
+	/**
+	 * Andy: severed limbs weren't "rendered with the proper blood and grime layers". A severed part's body
+	 * ({@code bodyState}, rebuilt from its saved look) wears the blood and dirt the part itself carries, taken from the
+	 * body it came off (a dead body's blood, or the living one's coat and grime), not whatever the rebuilt stand-in has.
+	 * Left as it is for a part from before parts carried them.
+	 */
+	public static void severed(com.jaymospowers.core.SeveredPart part, EntityRenderState bodyState) {
+		Bloodied.Blood blood = Bloodied.corpseBlood(part);
+		ArmourGrime.Grime grime = part.getAttached(ArmourGrime.BODY);
+		if (blood == null && grime == null && part.dressed() < 0) {
+			return;
+		}
+		bodyState.setData(KEY, null);
+		bodyState.setData(CORPSE, BloodSettings.off() || BloodSettings.streamerSafe() ? null : blood);
+		bodyState.setData(GRIME, grime);
+	}
+
+	/**
+	 * The same for a player's severed part, drawn straight from their skin ({@code skin}) on {@code model}: its dirt and
+	 * blood laid over it, after it.
+	 */
+	public static void submitSeveredPlayer(com.jaymospowers.core.SeveredPart part, PlayerModel model, AvatarRenderState avatar,
+		Identifier skin, PoseStack poseStack, SubmitNodeCollector collector, int light) {
+		Bloodied.Blood blood = BloodSettings.off() || BloodSettings.streamerSafe() ? null : Bloodied.corpseBlood(part);
+		for (Identifier painted : paints(skin, null, blood, part.getAttached(ArmourGrime.BODY), true)) {
+			collector.order(1).submitModel(model, avatar, poseStack, RenderTypes.entityCutout(painted), light, OverlayTexture.NO_OVERLAY,
+				avatar.outlineColor);
+		}
 	}
 
 	/** (0.20.55) Just after a dead player's plain body: its blood over it, in its pose. */
@@ -110,7 +140,7 @@ public final class BloodCoatLayer {
 
 	/** From every living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
-		state.setData(KEY, BloodSettings.off() ? null : Bloodied.coat(entity));
+		state.setData(KEY, BloodSettings.off() || BloodSettings.streamerSafe() ? null : Bloodied.coat(entity));
 		state.setData(CORPSE, null);
 		state.setData(GRIME, ArmourGrime.body(entity));
 	}

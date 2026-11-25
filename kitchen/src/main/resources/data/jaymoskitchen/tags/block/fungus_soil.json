@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:dirt",
+    "#minecraft:grass_blocks",
+    "minecraft:moss_block",
+    "minecraft:mycelium",
+    "#minecraft:nylium",
+    "minecraft:mud",
+    "minecraft:muddy_mangrove_roots",
+    "jaymoskitchen:mycelial_soil",
+    "jaymoskitchen:truffle_soil"
+  ]
+}

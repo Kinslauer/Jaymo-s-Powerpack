@@ -181,10 +181,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Firefighting.register();
 		// Peterwolf's Forest Fire (when it's in the pack): its fire runs our wildfires, its wind follows ours
 		ForestFireCompat.register();
+		// Psithurism (when it's in the pack): a soak in its onsen water lifts the winter cold
+		PsithurismCompat.register();
 		// 0.7.31: disasters strike settlements: news, repairs, tempers, relief quests
 		DisasterRelief.register();
 		// 0.5.23: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
 		Undertakers.register();
+		Gravediggers.register();
 		// 0.7.132: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
 		LOGGER.debug("grave attachment: {}", Bearers.GRAVES);
 		Bearers.register();
@@ -273,12 +276,14 @@ public final class JaymosKingdoms implements ModInitializer {
 		GuardMeals.register();
 		GuardKicks.register();
 		AlarmBells.register();
+		com.jaymoskingdoms.deep.Deeps.register();
 		RaidBeasts.register();
 		WitchRaids.register();
 		GolemPathing.register();
 		Visitors.register();
 		// 0.7.483: every settlement keeps a butcher and a healer
 		TownTrades.register();
+		TownNeeds.register();
 		TownFitting.register();
 		LOGGER.debug("visitor attachment: {}", Visitors.VISIT);
 		Reforms.register();
@@ -489,6 +494,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spoils.register();
 		HavenGates.register();
 		HavenWares.register();
+		// the glow-woods: giant fungi, fungal woods and fairy rings (ported from Spore & Stem), and the Sylvan havens' share
+		com.jaymoskingdoms.glowwood.GlowWoods.register();
+		GlowWoodHavens.register();
+		// their creatures: sporelings, trufflers, glowmoths, the old woods' mimicaps and bloatshrooms, the spore-rot's shamblers and the Myceliarch
+		com.jaymoskingdoms.glowwood.creatures.GlowCreatures.register();
+		GlowHavenLife.register();
 		// (0.7.490) Havens expand: their works, land and sworn order
 		HavenGrowth.register();
 		// (0.7.490) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
@@ -554,6 +565,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		HollowSighting.register();
 		LOGGER.debug("pallid seen attachment: {}", PallidHollows.SEEN);
 		PallidHollows.register();
+		HollowCaptains.register();
 		// the Skeleton Lord's curse: the only way to rise a skeleton (and its attachment)
 		LOGGER.debug("skeleton curse attachment: {}", SkeletonCurse.CURSED);
 		SkeletonCurse.register();
@@ -619,8 +631,6 @@ public final class JaymosKingdoms implements ModInitializer {
 		VoiceMasks.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
-		// Tectonic's terrain in place of the continents' shape (the shape's pack is on only without it)
-		TectonicCompat.register();
 		// underground rivers' lanterns, jungle pillar crowns, volcanic islands and lit lava tunnels
 		TerrainFeatures.register();
 		// kingdoms' seats the world generates whole: a castle with its square, garden, barracks and homes round it
@@ -628,6 +638,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// village mods 6, small structures: the tree sites (the hollow oak's hermit, the lookout's bandits, the hanging
 		// tree's crows) and the changing maze under a necromancer's crypt (their attachments load with them)
 		TreeSites.register();
+		FieldCrows.register();
+		com.jaymoskingdoms.harvest.WickedHarvest.register();
 		CryptMaze.register();
 		// and the druids' cave gardens, tended while their druid lives
 		CaveGardens.register();
@@ -733,6 +745,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// village mods 6: an inn halfway along each long King's Road (and its attachment)
 		LOGGER.debug("wayside inn attachment: {}", WaysideInns.INNS);
 		WaysideInns.register();
+		// (Andy 2026-11-25) starts built by hand, as an adventure map is (and their attachment)
+		LOGGER.debug("written start attachment: {}", WrittenStarts.PLACED);
+		WrittenStarts.register();
 		// 0.7.103: roads are quicker going, sand, snow and leaves slower
 		RoadPace.register();
 		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
@@ -825,6 +840,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		Callouts.register();
 		FieldMedics.register();
 		BandLeaders.register();
+		BreakOff.register();
+		DangerSense.register();
+		Passages.register();
+		Detours.register();
+		Hiding.register();
+		PathProbes.register();
+		Disembark.register();
+		// (fighting AI patch 7) band styles: heavy blows and leaps, shield walls, a second arrow, rolls and two blades
+		BandStyles.register();
 		QuickOrders.register();
 		// (pawn picks patch 2) holding a foe or pinning you, a leg up, readying and ambushes, grabbing loot mid-fight
 		Grapples.register();
@@ -1220,6 +1244,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Deafened.register();
 		Nets.register();
 		Poisons.register();
+		LeechKit.register();
+		HedgeWitches.register();
 		Surprise.register();
 		ThiefSneak.register();
 		RecklessBlows.register();

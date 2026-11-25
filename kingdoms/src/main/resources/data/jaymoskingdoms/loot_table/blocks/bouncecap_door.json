@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:bouncecap_door"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jaymoskingdoms:bouncecap_door",
+            "state": {
+              "half": "lower"
+            }
+          },
+          {
+            "type": "minecraft:survives_explosion"
+          }
+        ]
+      }
+    }
+  ],
+  "random_sequence": "jaymoskingdoms:blocks/bouncecap_door"
+}

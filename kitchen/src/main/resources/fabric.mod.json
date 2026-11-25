@@ -3,7 +3,7 @@
 	"id": "jaymoskitchen",
 	"version": "${version}",
 	"name": "Jaymo's Kitchen",
-	"description": "Cooking minigames (at Cooking for Blockheads' oven and kitchens, which this mod requires), cookware, corpses and butchering, a wearable quiver, horse gear and carts, and horse-powered mill machines. Includes the carts of NiftyCarts (MIT, by MennoMax, paul101 and jmb19905; see LICENSE_niftycarts), the machines of Horse Power (LGPL-3.0, by Gory_Moon; see LICENSE_horsepower), and the cooking pot, skillet, cutting board, feasts, crops and art of Farmer's Delight (MIT, by vectorwing; see LICENSE_farmersdelight), and the rat and rat trap models, textures and sounds of Rats (LGPL-3.0, by Alexthe666; see LICENSE_rats).",
+	"description": "Cooking minigames (at Cooking for Blockheads' oven and kitchens, which this mod requires), cookware, corpses and butchering, a wearable quiver, horse gear and carts, and horse-powered mill machines. Includes the carts of NiftyCarts (MIT, by MennoMax, paul101 and jmb19905; see LICENSE_niftycarts), the machines of Horse Power (LGPL-3.0, by Gory_Moon; see LICENSE_horsepower), and the cooking pot, skillet, cutting board, feasts, crops and art of Farmer's Delight (MIT, by vectorwing; see LICENSE_farmersdelight), and the rat and rat trap models, textures and sounds of Rats (LGPL-3.0, by Alexthe666; see LICENSE_rats), and the small mushrooms, soils, cultivation log and foraging knife of Spore & Stem (Apache-2.0, by NightBeam; see licenses/spore-and-stem), and the drive model (tyre grip, drift and slope) of Cars: Drive, Drift & Force Feedback (MIT, by Pokato; see licenses/cars).",
 	"authors": [],
 	"license": "LicenseRef-All-Rights-Reserved",
 	"icon": "assets/jaymoskitchen/icon.png",
@@ -43,6 +43,7 @@
 		"MennoMax, paul101, jmb19905 (NiftyCarts carts, MIT)",
 		"Gory_Moon (Horse Power machines, LGPL-3.0)",
 		"vectorwing (Farmer's Delight cooking, crops and art, MIT)",
-		"Alexthe666 and the Rats maintainers (Rats' rat and rat trap models, textures and sounds, LGPL-3.0)"
+		"Alexthe666 and the Rats maintainers (Rats' rat and rat trap models, textures and sounds, LGPL-3.0)",
+		"NightBeam (Spore & Stem mushrooms, soils, cultivation log, knife and their art, Apache-2.0)"
 	]
 }

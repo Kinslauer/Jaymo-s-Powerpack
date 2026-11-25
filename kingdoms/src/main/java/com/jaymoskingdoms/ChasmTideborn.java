@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * with no player within {@link #GONE} is gone, and none are left after a restart.
  */
 public final class ChasmTideborn {
-	static final ResourceKey<Biome> CHASM = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(AlexsCavesCompat.MOD_ID, "abyssal_chasm"));
+	public static final ResourceKey<Biome> CHASM = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(AlexsCavesCompat.MOD_ID, "abyssal_chasm"));
 	public static final String TAG = "jaymoskingdoms.chasm_wild";
 	// ---- tuning ----
 	/** How often (ticks) the chasm may send more, the chance each time, how many come, and the most near one player. */

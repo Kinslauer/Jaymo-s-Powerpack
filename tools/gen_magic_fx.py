@@ -1,5 +1,5 @@
 """Paints the Magic FX textures (core/fx/MagicFx): the mote's glint, the miasma's puff, the spark's crackle, the
-rune's marks, the sigil's circle of marks, the wave's running water, the stroke's brush mark and the pool with its ripples.
+rune's marks, the sigil's circle of marks, the wave's running water, the stroke's brush mark, the pool with its ripples and the scorch mark.
 All white or grey: the game tints them. Run from the root: python -I tools/gen_magic_fx.py"""
 import math
 import os
@@ -246,7 +246,45 @@ def ripple():
     return img
 
 
+def scorch():
+    """A mark burned onto a surface, 64x64: a ragged heart, streaks flung out from it like a blast's, specks round it.
+    Solid at the heart, thinning out along each streak."""
+    rnd = random.Random(55)
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    px = img.load()
+    rays = [(rnd.uniform(0, math.tau), rnd.uniform(14.0, 30.0), rnd.uniform(0.05, 0.13)) for _ in range(15)]
+    lobes = [(rnd.uniform(0, math.tau), rnd.choice((3, 4, 5, 7)), rnd.uniform(0.8, 1.8)) for _ in range(4)]
+    for y in range(64):
+        for x in range(64):
+            dx, dy = x - 31.5, y - 31.5
+            d = math.hypot(dx, dy)
+            a = math.atan2(dy, dx)
+            heart = 10.0 + sum(amp * math.sin(a * n + ph) for ph, n, amp in lobes)
+            best = 0.0
+            if d <= heart:
+                best = 1.0 - 0.25 * (d / heart) ** 2
+            for ang, reach, spread in rays:
+                off = abs((a - ang + math.pi) % math.tau - math.pi)
+                # a streak narrows as it runs out
+                if d < reach and off < spread * (1.0 - d / reach * 0.7) * (1.0 + 6.0 / max(d, 1.0)):
+                    best = max(best, 0.85 * (1.0 - d / reach) ** 0.8)
+            if best <= 0.04:
+                continue
+            if rnd.random() < 0.18 * (1.0 - best):
+                continue
+            v = 255 if rnd.random() > 0.2 else 210
+            px[x, y] = (v, v, v, int(255 * min(1.0, best)))
+    for _ in range(40):
+        a = rnd.uniform(0, math.tau)
+        d = rnd.uniform(12.0, 30.0)
+        x, y = int(31.5 + math.cos(a) * d), int(31.5 + math.sin(a) * d)
+        if 0 <= x < 64 and 0 <= y < 64:
+            px[x, y] = (255, 255, 255, rnd.randint(110, 200))
+    return img
+
+
 def main():
+    save(scorch(), "fx", "scorch.png")
     save(wave(), "fx", "wave.png")
     save(stroke(), "fx", "stroke.png")
     save(pool(), "fx", "pool.png")

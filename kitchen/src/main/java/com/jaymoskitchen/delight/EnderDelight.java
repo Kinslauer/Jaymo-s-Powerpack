@@ -196,8 +196,11 @@ public final class EnderDelight {
 		Predicate<BiomeSelectionContext> end = BiomeSelectors.foundInTheEnd().and(BiomeSelectors.includeByKey(
 			net.minecraft.world.level.biome.Biomes.THE_END).negate())
 			.or(context -> context.getBiomeKey().identifier().getNamespace().equals("enderscape"));
+		// Last step, not vegetal decoration: Enderscape's own plants reach the same biomes later (through Lithostitched), so
+		// in the vegetal step the order differs between biomes that share a dimension and the game stops with a
+		// "Feature order cycle". In the last step these plants come after everything else in every biome.
 		for (String id : List.of("voidpepper", "ethereal_saffron", "amberveil", "chorusflame")) {
-			BiomeModifications.addFeature(end, GenerationStep.Decoration.VEGETAL_DECORATION,
+			BiomeModifications.addFeature(end, GenerationStep.Decoration.TOP_LAYER_MODIFICATION,
 				ResourceKey.create(Registries.PLACED_FEATURE, JaymosKitchen.id(id)));
 		}
 	}

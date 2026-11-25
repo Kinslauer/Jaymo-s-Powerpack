@@ -214,7 +214,7 @@ public final class Fractures {
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z, 16,
 			0.12, 0.12, 0.12, 0.15);
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 8, 0.1, 0.1, 0.1, 0.2);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.2F, 0.6F);
+		com.jaymospowers.combat.HitSounds.broke(level, target, at);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 0.8F, 0.5F);
 	}
 }

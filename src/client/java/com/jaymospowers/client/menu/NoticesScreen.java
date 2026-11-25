@@ -1,5 +1,6 @@
 package com.jaymospowers.client.menu;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.jaymospowers.client.PowerScreen;
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.client.hud.TipCard;
@@ -78,7 +79,7 @@ public class NoticesScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() == 0 && UiStyle.over((int)event.x(), (int)event.y(), tipsX(), tipsY(), TIPS_W, TIPS_H)) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && UiStyle.over((int)event.x(), (int)event.y(), tipsX(), tipsY(), TIPS_W, TIPS_H)) {
 			TipCard.setEnabled(!TipCard.enabled());
 			Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			return true;

@@ -12,7 +12,7 @@
 		"client": ["com.jaymoskingdoms.client.JaymosKingdomsClient"],
 		"server": ["com.jaymoskingdoms.JaymosKingdomsServer"],
 		"jade": ["com.jaymoskingdoms.client.compat.JadeIntroductions"],
-		"jei_mod_plugin": ["com.jaymoskingdoms.client.compat.TierJei"],
+		"jei_mod_plugin": ["com.jaymoskingdoms.client.compat.TierJei", "com.jaymoskingdoms.client.compat.ClassJei"],
 		"voicechat": ["com.jaymoskingdoms.VoiceRange"]
 	},
 	"mixins": [
@@ -53,6 +53,7 @@
 		"jaymoskingdoms.forestfire.mixins.json",
 		"jaymoskingdoms.fts.mixins.json",
 		"jaymoskingdoms.provenance.mixins.json",
+		"jaymoskingdoms.eyes.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },

@@ -106,6 +106,11 @@ public final class BloodClient {
 			puddles = sprites;
 			return (options, level, x, y, z, xd, yd, zd, random) -> puddle(level, x, y, z, sprites, options);
 		});
+		// a big hit close by: this client's own screen is spattered if it's in view
+		registry.register(BloodParticles.SCREEN, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> {
+			BloodScreen.hit(new Vec3(x, y, z), options.color(), options.size());
+			return null;
+		});
 		// blood scrubbed off here (BloodTrail.scrub): what only this client draws goes too
 		registry.register(BloodParticles.WIPE, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> {
 			wipe(level, new Vec3(x, y, z), options.radius());
@@ -169,6 +174,8 @@ public final class BloodClient {
 		if (BloodSettings.off()) {
 			return null;
 		}
+		options = new BloodParticles.Puddle(BloodSettings.tint(options.color()), options.scale(), options.mark(), options.age(), options.life(),
+			options.shape());
 		if (options.mark() == 0L) {
 			return splash(level, x, y, z, sprites, options);
 		}
@@ -312,6 +319,11 @@ public final class BloodClient {
 		}
 		return "Blood (" + BloodSettings.amount().name().toLowerCase(java.util.Locale.ROOT) + "): " + stains + " stains, " + pools
 			+ " pools, " + BloodDrop.flying() + " drops";
+	}
+
+	/** The drop sprites (a spatter's), for the cloud blood makes in water. */
+	static @Nullable SpriteSet dropSprites() {
+		return drops;
 	}
 
 	static @Nullable SpriteSet puddleSprites() {

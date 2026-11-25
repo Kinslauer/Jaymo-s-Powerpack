@@ -168,6 +168,12 @@ public final class CrouchPose {
 		return track != null && track.kneeling;
 	}
 
+	/** How far into vanilla's crouch the body with this id was last drawn (0 to 1, eased), for a going prone that starts from it. */
+	static float bendShown(int id) {
+		Track track = TRACKS.get(id);
+		return track == null ? 0.0F : smooth(track.bend);
+	}
+
 	/** How far onto the knee the body with this id was last drawn (0 to 1, eased), for a sit that starts from it. */
 	static float kneelShown(int id) {
 		Track track = TRACKS.get(id);
