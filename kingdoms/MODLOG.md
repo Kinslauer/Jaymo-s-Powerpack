@@ -17422,3 +17422,8 @@ Andy: "the AI in these mods is exactly what our MCA and npcs have been missing."
 - A player's fallen tree still drops its leaves a few at a time as it lies, but those only give drops while a player is within 32 blocks (`DEBRIS_WATCH`); otherwise they wither to nothing.
 - Loose bare logs falling like sand no longer turn into item drops when they can't land as a block.
 - Fixes villages and forests filling with hundreds of item drops after a storm (lag). Built; not played.
+
+## 0.12.89 (2026-11-25): skill bar: symbiote lash, rupture, nightstep, onslaught (#2169)
+
+- Four new Powers moves on the skill bar for a bonded web slinger: Tendril Lash, Rupture (red), Nightstep (black), Crowned Onslaught; Shroud's description now says it is Carapace / Aegis / Shroud by strain. Data and lang only (`move_*` spells, `power_moves.json`, `weapon_forms` tag).
+- Built; not played.

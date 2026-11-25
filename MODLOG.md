@@ -8214,3 +8214,76 @@ Andy's rulings of 2026-11-25, for a host who isn't a web slinger (whom the symbi
 - **Hop** moved to Sneak + V on the ground (40-tick cooldown as before).
 - `RigLimbs`, `RigMoves.ROUNDHOUSE`, `RigPose` (kick frames, whole-body turn, knee bends), new `RigKickCamera` +
   `RigKickCameraMixin`. Compiled; not played.
+
+## 0.27.51 (2026-11-25): The symbiote saves you (#2169)
+
+- It looks after you now, every half second, without being asked, each time with a line and your screen darkening: it hauls you up out of drowning (breaking ice above, giving up under a solid roof), tears you out of rock you are buried in (not obsidian or bedrock, cracks first), breaks powder snow off you and shoves you out, and heaves you from lava to the nearest shore (fast, but it costs it satiety and stress and doesn't put you out).
+- The white strain pulls you back with a tendril from a walk toward a drop that would kill you (void, lava, fire, a fall it can't cushion); not while swinging, gliding, with wings out, sneaking, or on a running jump that lands.
+- About to die with a hit coming or just taken, an arm uses a totem, golden apple or milk from your bag (once per scare, with a cooldown, a tendril to your mouth). With your food bar low it eats non-meat food from your bag for you.
+- Arrows bounce off Living Armor; now and then one very big arrow hit is capped at a cost in satiety and stress. A goodbye line when you fall into the void.
+- None of it while it is dormant, sulking, stunned by a bell, or you are in creative. New: `WebSymbioteReflexes` (called from the instinct in `WebSymbiote`), lang `web_reflexes.json`.
+- Built; not played.
+
+## 0.27.52 (2026-11-25): symbiote 1.1.3 patch 1 - attacks and strain powers (#2169)
+
+- **Tendril Lash**: the tendrils sweep round you and whip every enemy within 4.5 blocks once; 3 / 4.5 / 6.5 / 9 damage by bond stage (Attached to Dominant). 4 satiety, 7 second cooldown. On the radial as a Lash chip (once the tendrils are given) and on the skill bar. `WebLash`.
+- **Carapace (black, the Shroud tile)**: the suit hardens for 6 seconds: 8 points of absorption and Resistance II, then softens with a breath of ink; cooldown from when it softens. `WebCarapace`.
+- **Aegis (white, the Shroud tile)**: from the Integrated stage (bond 30) a hard shell for 7 seconds that cuts blows and throws half of each (up to 8 points) back at whoever struck. The tile shows the right icon and name per strain (scute / shield / ink sac). The red strain keeps Shroud; takeover's flight is untouched. `WebAegis`, `WebSymbiote.shroudTile`.
+- **Rupture pounce (red, suited)**: leap at prey (not a player, up to 40 health) within 9 blocks, pin it and stab it six times by two tendrils, the last the kill, a new `WebExecutions.Move.RUPTURE_STAB` with its own pose; the kill is carried and fed on like any execution. On the skill bar. `WebRupture`.
+- **Nightstep (black, suited)**: in the dark (light at most 7 at both ends) step 6 blocks the way you look, 12 at night, to the furthest dark footing in a clear line; ink at both ends and a moment of darkness over your eyes. On the skill bar. `WebNightstep`.
+- **Crowned onslaught**: whole bond, big suit: tendrils rise round the head and strike in volleys of two at the nearest enemies for 5 seconds; spends 40 fury. On the skill bar. `WebOnslaught`.
+- **Two-foe slam reflex**: exactly two enemies within 4 blocks at once: the symbiote throws a tendril at each, holds them and claps them with the clap combo's own code (`WebTendrilCombos.startClap`); it speaks, your screen shakes; 20 second cooldown; not under the Hide order. `WebSlamReflex`.
+- Kingdoms' skill bar: spells `move_lash`, `move_rupture`, `move_nightstep`, `move_onslaught` (recoloured icons), listed in `weapon_forms`.
+- Built; not played.
+
+## 0.27.53 (2026-11-25): The symbiote's mind: temper, memories, fears, firsts (#2169)
+
+The symbiote now has a nature, rolled once when it first bonds (watchful, sour, warm or wary), kept through death and a new bond, shown as "Nature" on the Status page; it sets how soon it frets and how it words what it feels. It keeps a short log of moments (starved, held you together, a tool pried from it, a request ignored) and now and then brings one up. A kind of creature that hurt you badly is feared for a couple of days: it flinches when one is near and asks to walk wide. Another player or a tame pet close to you too long, with nobody fighting beside you, makes it jealous: a line and a red pull at the edge of the screen (its mood decides how much it cares). It remarks on the first time it meets or eats each kind of creature (sometimes turning your head to look), and on your first Nether, End, thunderstorm, Deep Dark and Ancient City. It narrates other symbiotes' hosts and roaming symbiotes (far, closer, further, holding, coming, feeding, noticed you). A day with nothing done together (a meal, a fight beside you, a request granted) costs a point of bond, and it says so when it drops a stage. It also comments when you fall, walk into a cactus, berry bush or fire. Standing still with the tendrils out, a tendril now pokes a nearby block or tastes the rain.
+
+## 0.27.54 (2026-11-25): symbiote 1.1.3 screens: HUD pip, words plate, stamina, stage cards, settings, shader marks, arm screen (#2169)
+
+- **HUD** (`WebSymbioteHud`): beside the hotbar, with the arm's chips, a small bond pip filled to the bond in the strain's colour with a socket lit in its mood's colour, its hunger bar, the tendrils' stamina bar and the icon of the standing order it holds. Goes with F1.
+- **Its words on a plate**: the symbiote's whispers are no longer on the action bar but low and centred on a dark plate, wrapped, fading in and out (`WebSymbioteWords` packet, drawn by `WebSymbioteHud`). A client without the mod still gets the action bar.
+- **Stamina** (`WebStamina`, saved and synced to you): Tendril Grab, Web Zip, Yank, the Lash and every tick of clinging to a wall (Wall Crawl or a parkour cling) spend it; it comes back at rest. Out of it those moves refuse with a line, and you let go of the wall. Numbers at the top of the class.
+- **Strain blurb**: the Status page has one hinting line for the black, the white and the red.
+- **Stage cards** (`WebStageCards`): reaching Attached, Integrated, Cooperative or Dominant slides in a card with a picture tinted in the strain's colours (`tools/gen_web_stage_cards.py` makes the four pictures).
+- **Settings** (`WebSymbioteSettingsScreen`, from a button on the Status page): switch off fidgets, jealousy, requests, hints and the edge membrane. Kept in `config/jaymospowers-symbiote.properties` and sent to the server (`WebSymbioteSettings.off(player, Setting)`); hints and the edge membrane already obey. Fidgets, jealousy and requests in `WebSymbioteMind`/`WebSymbioteMemory` still have to ask it.
+- **Shader markers** (`WebShaderMarks`): with an Iris shader pack on, small diamonds float over what the black scent and the red heartbeat sense pick up, where outlines often don't draw.
+- **Arm screen** (`WebArmScreen`): the arm's three slots and your pack in one screen, click two things to swap them, Shift-click to send one across; a button for it in the inventory once the arm is unlocked (`WebArmSwap` does the moving on the server).
+- Built; not played.
+
+## 0.27.55 (2026-11-25): Symbiote 1.1.3: takeovers and the world (#2169)
+
+The symbiote does things in the world now, not only on your screen.
+
+- **It walks while you sleep.** A host it barely trusts (trust 30 or under) is left to sleep alone: a moment after you lie down it slips out as its blob, really roams and hunts hostile mobs (small animals when nothing hostile is near) round your bed, and is back inside by dawn or when you wake, hurrying if you wake early. While it is out you are unsuited, with no powers. In the morning it says what it killed. With the Kingdoms timelapse the blob has the whole night of real ticks; with vanilla's instant skip, the skipped hours are made up in a few hops, each the blob really going to the nearest quarry.
+- **Night prowl.** At night under open sky the black one now and then takes the body to stalk and kill one hostile mob, then gives it back.
+- **Doors.** The big suit and the red slender body narrow and stretch through a door or any one-wide, two-high gap and form whole on the other side, however they are driven. Takeover walks tear wooden doors off (they drop) and bite through leaves; iron doors stop them.
+- **Elder against young.** Go back to your old remains while another symbiote rides you and the two fight over your body: you jerk, are hurt and stressed, both speak. The elder usually wins, replacing the young one and taking its old bond and your things back.
+- **Golems and villagers know.** Iron golems turn on a host whose symbiote shows (suit or Living Armor on). Villagers shy away from the black one's host.
+
+## 0.27.56 (2026-11-25): symbiote: its body and the arm (arm fights and helps itself, keeps a tool, chests, molting and the cast skin, the bloom) (#2169)
+
+- **The arm fights** (Andy's 1.1.3 picks): from the Cooperative stage, while you are in a fight, a weapon stored in the
+  arm swings at a foe within 3.6 blocks every 14 ticks, at the weapon's own damage and enchantments, wearing it down.
+- **The arm helps itself:** left hungry for a minute it takes meat out of your bag (raw first) and eats; it swats
+  silverfish, endermites and the smallest slimes that come near; and it digs an exposed ore it can see within five
+  blocks when the arm holds a tool that would win it (never in a village or Kingdoms land).
+- **It keeps a good tool:** now and then it takes an enchanted or long-lasting tool or weapon from your bag into a
+  free slot of the arm, and gives it back once its trust has risen and a little time has passed. Taking it back sooner
+  (the Arm key or the Arm screen) angers it: it remembers, trusts you less, and its edge flares.
+- **A torch for your eyes:** in the dark, with torches in your bag, it sets one down beside you.
+- **Collect takes experience** too: orbs within twelve blocks are drawn in on threads of goo (Mending included).
+- **Chest curiosity:** it looks in chests near you; loots a dungeon chest nobody has opened (the haul goes in your pack),
+  re-sorts a chest now and then, and sometimes steals a tool into the arm. Never chests in villages or Kingdoms land,
+  locked or trapped ones, or ones someone has open.
+- **Living Armor moves you:** a little faster (6%) and a full-block step while the armour is on.
+- **Molting and the cast skin:** every week or two of days, from the Integrated stage, it molts for a day. It itches and
+  asks you to stay close and not run. At the end the skin splits off at your feet as the new Cast Skin (a thin black
+  husk: food, and meat to the symbiote, as are other mods' raw meat and organs). A calm molt binds it tighter (bond,
+  trust and calm up); running or fighting through one costs stress and trust. The skin, eaten while it is dormant
+  (asleep from healing, settling in), cuts two minutes off the sleep. New tag `jaymospowers:symbiote_meat`.
+- **The bloom:** in the big body, cornered (three foes on you and low health), starving or panicking, the head splits
+  into a crown of eight petal tendrils for a while, folding away when it has passed.
+- Its new lines are in `lang/parts/web_body_acts.json`; the Settings screen's small-talk and requests switches are
+  respected (the molt asks nothing and keeps no score with requests off).
