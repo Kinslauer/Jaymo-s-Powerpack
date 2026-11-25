@@ -4468,7 +4468,8 @@ public class CorpseEntity extends Entity {
 	/**
 	 * Told of each part that comes off a body lying dead: the corpse, and {the part (an Integer, one of the
 	 * {@code PART_} bits), where it was (a Vec3), who took or struck it off (an Entity, or null), whether it came away in
-	 * their hand (a Boolean)}. Jaymo's Powers makes it a severed part to carry, kick or throw; without a hook a skeleton's
+	 * their hand (a Boolean), and how the body looks now, its {@link #dressed()} and its {@link #wear()} (Integers), so the
+	 * part is drawn rotted, charred or skinned as the body is}. Jaymo's Powers makes it a severed part to carry, kick or throw; without a hook a skeleton's
 	 * is a loose bone and a zombie's a scrap of rotten flesh. Plain Java types, so it can be set by reflection from a mod
 	 * built against an older Kitchen.
 	 */
@@ -4543,7 +4544,7 @@ public class CorpseEntity extends Entity {
 		java.util.function.BiConsumer<Entity, Object[]> hook = onPart;
 		if (hook != null) {
 			try {
-				hook.accept(this, new Object[] {part, at, by, toHand});
+				hook.accept(this, new Object[] {part, at, by, toHand, dressed(), wear()});
 				return;
 			} catch (RuntimeException | LinkageError e) {
 				com.jaymoskitchen.JaymosKitchen.LOGGER.warn("A corpse-part hook failed: {}", e.toString());
