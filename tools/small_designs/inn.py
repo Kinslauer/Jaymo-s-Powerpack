@@ -137,7 +137,7 @@ def inn(api):
     for x in range(X0 + 1, X1):
         for z in range(Z0 + 1, Z1):
             g.put(x, 4, z, PLANK)
-    for z in (7, 8, 9):
+    for z in (6, 7, 8, 9):
         g.clear(1, 4, z)
     for i, z in enumerate((6, 7, 8, 9)):
         y = 1 + i
