@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: running
 task: mordhau-2-hoods-crests
 branch: claude/mordhau-2-hoods-crests
 with: claude (PC worker, Opus 5.5)
@@ -34,4 +34,3 @@ track 1's royal helms wear), antlers, mantling, bevor, armet wrapper, gorget. Ou
 
 ## Done
 What a player will see, and what wasn't tested.
-- 2026-11-24 21:29 No sign of work for 30 min: marked stalled (whoever ran it stopped).
