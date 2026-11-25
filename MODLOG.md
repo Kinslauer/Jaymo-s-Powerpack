@@ -8072,3 +8072,12 @@ Ideas from the Hand of God mod (All Rights Reserved: nothing of it copied, all b
 - **Alt, one press, three lengths** (Andy: "more akin to arc raiders, where they tap for a dodge and hold for a roll"): a tap (let go within 0.25 s) is the upright dodge; held past 0.25 s it goes on into the long roll; still held as the roll ends you come up into a crouch and stay crouched while you hold; only still held at 1.3 s do you go down into prone (was about 0.65 s straight out of the roll). Let go at any point and nothing more happens: the roll finishes and you stand, the crouch stands up. Tuning: `Dodge.ROLL_HOLD_TICKS` 5, `PRONE_HOLD_TICKS` 26, `LANDING_HOLD_TICKS` 3. Back roll only when locked on, one move per press and landing rolls are as before.
 - **Smoother hand-offs**: the roll out of a held dash starts from the dash's lunge and guard and eases out of it, instead of snapping upright for a frame (`DodgeRollPose` `Roll.carry`, synced as `Dodge.Rolling.fromDash`); that roll now turns evenly over its 9 ticks instead of 80% of the tumble in the first 4 and a slow-motion finish; a landing roll made long slows from 3 ticks in rather than 4, so its finish is less drawn out. The weighty walk (`BodyWeight`) fades out as a dash or roll comes on and back in as it ends, rather than vanishing and returning in one frame. Going prone from a crouch (the crouch after the roll, a held sneak, the stance wheel) starts as far into the crouch as you were (`ProneTransition`, `CrouchPose.bendShown`), so you no longer straighten up for a moment first, and the first-person view starts at the crouch's height.
 - Built; not played.
+
+## 0.27.36 (2026-11-25): Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (#2146)
+
+- Minecraft 26.3 numbers mouse buttons from 1 (left is 1, right is 3), and three screens still used the old numbers:
+  - **Advancement pins**: shift-clicking an advancement never pinned it (the check waited for button 0). It pins again.
+  - **Sound browser**: every left click on a sound set it to full volume (button 1 was meant as the right click). Left click mutes or unmutes and dragging the bar sets the level again; right click resets to full.
+  - **Notices**: clicking the tips toggle did nothing (waited for button 0). It turns the tip cards on and off again.
+- Classes: `AdvancementPins`, `SoundBrowserScreen`, `NoticesScreen`.
+- Built; not played.

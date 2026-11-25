@@ -17326,3 +17326,11 @@ Not tested in a running game: site choice, ground levelling and building overlap
 - **Light wards you.** It only gathers where the light is 7 or less. It can't reach you while you stand in light 12 or more (sky or block, as it is right now) or hold a torch or lantern. After 30 s warded in one hunt it gives up, steps back into sight where it waited, and won't start another hunt for 20 s. Shots still go through it; only steel up close bites, and only while it is there.
 - Players who can see invisible things (occult Exposure, Initiated) see it waiting while it lurks.
 - Built; not played.
+
+## 0.12.77 (2026-11-25): Introduce yourself, Family Tree, Ask of Them... and Back on the talk wheel work again; shapeshift and vow book right clicks (#2146)
+
+- Andy: "the intro chat button is broken". Picking **Introduce yourself** on a stranger's talk wheel did nothing, however often it was clicked (his clip, 2026-11-24). The same was true of every spoke that stands for one of the old buttons: **Family Tree**, **Ask of Them...** and everything on its rings, and **Back**. MCA's own talk answers were fine.
+- Why: Minecraft 26.3 numbers mouse buttons from 1 (left is 1, right is 3; `InputConstants.MOUSE_BUTTON_LEFT`/`MOUSE_BUTTON_RIGHT`), and the wheel waited for button 0, which never comes. It now waits for a left click. Introducing works as before the talk-first change: their name if you share a tongue (then the talk starts), a hand held out if you don't, a bow to a ruler, and a cold word from one wary of you.
+- The same slip, fixed: the **shapeshift wheel** starred a form on a left click instead of taking it (right click stars, as meant), and the **vow book** struck out a sworn term or turned a rule part back on a left click (right click does those again).
+- Classes: `McaDialogueBoxMixin`, `ShapeWheelScreen`, `VowBookScreen`.
+- Built; not played.
