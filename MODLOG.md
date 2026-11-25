@@ -8353,3 +8353,39 @@ The symbiote does things in the world now, not only on your screen.
 - The smithing anvil forges Kingdoms' new mail coif cuts (lowered, square-cut, with a ventail, square-cut with a ventail) in iron and the armet's wrapper in steel, in every finish (`HeraldryForging`).
 - The champion of a tournament is also given Kingdoms' victor's wreath (`ZFighterTournaments`; only when Kingdoms is in).
 - Compiles in CI; not played.
+
+## 0.27.67 (2026-11-25): space pods fly: a climb through the sky, a piloted crossing, raiders, wrecks, rocks, a sling past the Maw, towing and Patrol posts (#2180)
+
+- **The climb**: after the lift the pod flies up through the sky of the world you leave, in the real world. Look to steer, forward cruises, sprint boosts, back brakes, nothing held drifts on. The autopilot key (I by default, in Controls) switches the autopilot, which climbs straight up and sidesteps what is in the way. Aerclouds and Cloudbank let a pod through (collision exception for pods only; anyone on foot still stands on them). The old timed flight screen is gone for pods (Ki voyages keep it); you cannot leave the pod mid-jump.
+- **The crossing**: a flight space simulated on the server (no new dimension): the world left behind, the world ahead, drifting rock fields, derelict pods, raiders and the Maw. Speed, a boost tank, hull and shield; the client only draws it. The old "skip" is removed.
+- **Star map**: each world shows its distance in leagues and how long the way takes cruising and boosted (by pod class and the Hollow's drag), and an autopilot switch for the launch. Only found worlds are on the map as before.
+- **Slingshot**: past the Maw (three leagues or more, once its chart is read) skim it with the pull from the Maw's numbers for a throw that saves fuel once; fall in and it takes the pod and you wake at the Maw with a return stage.
+- **Raiders in the dark**: shoot them with the ki cannon (shield absorbs hits) or outrun them with a boost; a ship that is shot down drops scrap and blaze powder.
+- **Derelict pods**: slow beside one and strip it. Keels are found in wrecks, never made: about two in five strips yield a keel, otherwise plates and a tank.
+- **Rock fields**: the mining beam (24 blocks) breaks rock into the ores of the world the rock came from.
+- **Towing**: a crashed pod (hull lost in the crossing: the pod limps down with its tank dry and is tagged for its pilot) can be made fast by sneaking at it with an empty hand while a pod with a tow line is near. The towing pod must fly home (one more fuel, slower); the crashed pod is set down beside the tower and its pilot is brought down if they stood close.
+- **Patrol posts**: a station hangs in the high sky over the Moon, Rustfall and Glacia, built the first time a pod docks (slow beside it, press G). Its console sells fuel cans, blaze powder and return stages to anyone for emeralds; for officers, modules by rank (the plain ones from the lowest rank, then the kick stage and legs, then the ki cannon and shield, and at the fourth rank the mining beam and tow line). Sneaking at it with an empty hand asks for the day's warrant on the world below. No MCA needed.
+- **See-through clouds**: cold aerclouds and Cloudbank are thinner to see through; thin lanes of Cloudbank now hang between the isles of the Aether (new chunks only; chunks already generated keep their sky).
+- Built; not played in the game. Raid chance, tuning and the post's look are guesses.
+
+## 0.27.68 (2026-11-25): Psithurism ships: the pack moves to Fabric Loader 0.20.1 (#2180)
+
+- **Pack**: the pack moves to Fabric Loader 0.20.1 and Fabric API 0.165.2 (Andy, 2026-11-25), which Psithurism 1.4.0 needs. Psithurism and its MModding Library 0.9.2-alpha (MModding Team; unchanged jars, credit and CurseForge links in the build file) join the pack.
+
+## 0.27.69 (2026-11-25): pod travel the Unbound way - sockets, modules, legs, return stage, logbook, stardust, scope, beacons, fuel works (#2180)
+
+- **Sockets and modules**: a keel has module sockets: 2 on a raider's, 3 on an old pod, 4 on a wreck, 6 on a Patrol one (shown on the keel's tooltip). Use a module on the pod's bay (low on the hull) to fit it; sneak with an empty hand there to take one out; a plain empty-hand use opens the cargo hold. Modules: landing legs, cargo hold, second seat, extra tank (half as much fuel again), kick stage (a trip costs a fifth less), scanner, and four for the flight patch (ki cannon, shield, mining beam, tow line: items that fit, `PodModules.has(pod, Kind)`, no behaviour yet). The legs, ki cannon, shield, mining beam and tow line are iron, forged at Tinkers (blanks); the rest are grid recipes in copper. The pod draws each fitted module on its hull.
+- **Landing legs**: without legs only the cabin comes down under a chute; the fins, bell, tank and mast tear away, the tank is empty and the pod must be mended before it flies. Old pods and wrecks made whole get legs.
+- **Return stage and packing**: lifting off from a far world takes a return stage (in the hold or your pack). The star map shows what the way home takes (fuel, a stage, whether the tank is big enough) in red when short.
+- **Pod class**: C to S from the forging grade of the keel and plates (the grade now rides on the part blocks and items). Better classes fly faster, hold more fuel and a bigger hold.
+- **Pilot's logbook**: a book that fills in as you go (keel, built, fuelled, charted, launched, landed, returned, modules, scope, stardust, beacon, scanner, crash), the worlds read and landed on, hints told, and one line for what is next.
+- **Stardust**: a falling star's dust, caught in a glass bottle by someone watching it come down. A Patrol officer (and Kingdoms' stargazers) trade a hint of the sky for a pinch: where, how high and when to look for a world not on the map yet.
+- **Find a world through a telescope**: hold a spyglass (or the telescope tag) on a world's light in the night sky for five seconds under the open sky and it is recorded as a read chart.
+- **Landing beacon**: light one with flint and steel (up to four a player), home becomes it and a pod coming home lands beside it; only you and your team see its motes. **Landing spot**: on a far world the pod lands where you last lifted off, unless the star map's button says somewhere new.
+- **Scanner**: after landing, an arrow and distance to the nearest wreck, pad or mission foe on the action bar.
+- **Fuel Works** (coal to fuel cans, hoppers feed it; blaze powder stays the rich fuel) and a JEI page for it and for stardust.
+- Built; not played in the game.
+
+## 0.27.70 (2026-11-25): Ground that grows back drops nothing (#2180)
+
+- **Terrain return**: a block that Gravity moves, meteors or a big player blast break and that will grow back (`TerrainReturn.record`) now breaks without drops, so stone and dirt can't be farmed from a returning crater (Andy, 2026-11-25). Blocks that don't come back (ores, chests, anything with a block entity, or when the server switch is off) drop as before.

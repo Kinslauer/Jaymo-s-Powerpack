@@ -17578,3 +17578,12 @@ Realm troops can draw their kettle cut, a regional helm, or a third helm suited 
 - A Hearthkeeper's stone shelter with a pitched spruce roof, a covered porch, a cold hearth, a cot and a stocked cellar behind an iron trapdoor. Uses the written-start system; each newcomer gets their own copy and only the supplies placed in its containers.
 - Read the keeper's note to open the hatch, find the packing slip below, keep a short night watch, wait for daylight and find town. Leaving during the watch leads straight to the road.
 - Drawn by tools/last_lantern.py; start and tale are separate editable JSON files. Not played in game.
+
+## 0.13.6 (2026-11-25): Psithurism in the Blossom land (#2180)
+
+- **Psithurism** is now in the pack, so the Blossom houses and onsen pools from the Fae Woods work (`PsithurismCompat`) come alive: paper walls, tatami and dark cherry in Blossom houses, and hot springs of onsen water near some Blossom villages where snow monkeys soak in winter.
+
+## 0.13.7 (2026-11-25): stargazers trade a hint for stardust (#2180)
+
+- A stargazer's "Ask about the stars" now has a line to give a pinch of Powers' stardust (caught from a falling star in a glass bottle) for a hint of where in the sky to look for a world not yet on the pod's map. Reflection only; without Powers' stardust nothing changes.
+- Built; not played.
