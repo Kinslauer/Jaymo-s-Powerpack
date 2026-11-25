@@ -25,3 +25,6 @@ pr: 2110
 - Compile check against the 26.3 jars; every Minecraft API checked against 26.3 sources.
 - `python3 tools/pr_checks.py` passes.
 - Lore: no new paragraph expected; if one is needed, quote it in full to Andy in the thread for approval first.
+
+## Notes
+- 2026-11-25 20:49 2026-11-25 claude-cloud-village-mods-7-9: PR #2110 is merged on master; marked done (card was left open).
