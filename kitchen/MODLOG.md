@@ -2846,3 +2846,34 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
 
 - A part coming off a body lying dead (`CorpseEntity.shed`) also hands the hook the body's `dressed()` and `wear()`, so Jaymo's Powers draws the severed limb rotted, charred or skinned as the body is.
 - Built; not played.
+
+## 0.6.89 (2026-11-25): carts have weight (drive model after the Cars mod) (#2179)
+
+- **Pulled carts roll on a pole, not a rigid bar**: `CartPhysics` (new), the drive model of Cars: Drive, Drift & Force Feedback (MIT, by Pokato; licence in `licenses/cars/`) rewritten for a cart. The pole is a spring with a pull limit, so a cart gathers speed slowly and coasts; its heading turns at a limited rate that falls with speed (no instant turns); side-slip is scrubbed by a saturating tyre curve scaled by the block's slipperiness, so on ice it slides on and hardly turns; a smoothed slope reading slows it uphill and speeds it downhill; and a horse (not a player) that hauls it feels a small pull back. A hard leash keeps it from falling far behind. Tuning is in `static final` constants at the top of `CartPhysics`. `CartEntity.follow` uses it.
+- No cars are added (that is a later patch).
+- Built; not played or tuned in game.
+
+## 0.6.90 (2026-11-25): the forager's kitchen and the Harvest Hive (#2179)
+
+- **Wild mushrooms** (from Spore & Stem, Apache-2.0, 3D models and art; licence in `licenses/spore-and-stem`): morel, chanterelle, deathcap (poison), frostcap, emberstool and puffball, all in `c:mushrooms`, compostable and pottable. They grow sparsely in the biomes Spore & Stem uses (morels in forests, chanterelles in taigas and birch woods, deathcaps in dark forests, frostcaps in the snow, puffballs on plains, emberstools in deep caves and the Nether's crimson forest and basalt deltas), and Truffle Soil lies in pockets under woods (breaking it gives 1 to 2 truffles).
+- **Seasons**: the mushrooms keep the year (the `jaymoskitchen:seasons/*` block tags). Morels fruit in spring, chanterelles in the last third of summer and in autumn, frostcaps from autumn through winter; autumn is the big flush, when every fruiting mushroom spreads faster; a winter in the open rots the ones that are out of season. Caves, roofs and Mycelial Soil keep no season.
+- **Mycelial Soil** (dirt, bone meal, 2 mushrooms makes 2): any mushroom stands on it in any light and it slowly spreads the one on top. **Cultivation Log** (3 logs over thread, soil, thread makes 2): use a mushroom on it, four stages (twice as fast on Mycelial Soil, half as fast under open daytime sky), a ripe log gives 2 to 3 and goes back to its first flush; morel, chanterelle, frostcap and emberstool, and Jaymo's Kingdoms' glowcap, bouncecap and inkcap if installed (found by id and the item tags `jaymoskitchen:glowcaps`, `bouncecaps`, `inkcaps`). **Foraging Knife** mines mushrooms fast, takes two from each, and scrapes **Mycelial Thread** off mycelium and Mycelial Soil (bare mycelium is spoiled now and then).
+- **Dishes** in the cooking minigame: roasted morel, chanterelle toast, glowcap soup, bouncecap jelly, frostcap tea, ember skewer, truffle stew and forager's stew (any three good mushrooms), with Spore & Stem's effects as the Perfect cook's buffs. The glowcap and bouncecap dishes show only when Kingdoms' mushrooms exist. No spore-rot cure parts (the rot comes later).
+- **Psithurism** (`OptionalItems.PSITHURISM`): its rice joins the rice group, and soybeans and fugu are cooking ingredients in three dishes: soy rice bowl, seared fugu, fugu rice stew.
+- **Harvest Hive** (planks, honeycomb, a barrel): put up to three vanilla bees in it with a **Bee Jar** (use the jar on a bee to catch it, on the hive to let it in; on any other block it lets the bee go). By day and not in rain a bee flies out to a ripe crop within 10 blocks, picks it, plants it again and carries the harvest home into the hive's nine slots (right-click to open, hoppers can pull). With no flowers in range the bees work at a third of the pace, a trip home may pollinate a nearby flower (so a worked hive makes its own flowers), and a kept hive fills with honey (bottle or shears at the top level). Our own code and art.
+- Classes: `forage/Forage` (registry), `ForageMushroomBlock`, `MycelialSoilBlock`, `CultivationLogBlock`, `CultivationFungus`, `ForagingKnifeItem`, `ForageWorld`, `HarvestHiveBlock`, `HarvestHiveEntity`, `HiveWorker` (the bee's job and goal), `BeeJarItem`, `JarredBeeItem`; new `Step` and `Dish` entries; tools `port_spore_and_stem.py` and `gen_forage.py`.
+- Compiled; not played.
+
+## 0.6.91 (2026-11-25): giant carcasses (#2179)
+
+- Giants (ogres, the Bogre, trolls, the minotaur, the Aether's giants) and the Deep beasts are big carcasses: a 2x2 butcher table, or cut up where they lie with a butchering tool, piece by piece from what they dropped. Cut to the bone, they leave extra bones (`jaymoskitchen:giant_carcasses`).
+- Frostborn Siege Rigs and Tinkerer's Colossi are heavy corpses (machine scrap).
+- Built; not played.
+
+## 0.6.92 (2026-11-25): the wicked harvest - rotten pumpkins, Spark of the Harvest, woken scarecrows (#2179)
+
+- **Rotten pumpkins**: a pumpkin that grows beside a stem now and then turns rotten (6%, 20% in late autumn). `RottenPumpkins`, `RottenPumpkinMixin`.
+- **Crow range**: `Scarecrows.guardedFromCrows` keeps crows off within 16 blocks (the old 8-block guard is unchanged); Kingdoms' field crows ask it by id.
+- **Woken scarecrows**: a Spark of the Harvest used on a scarecrow with a pumpkin wakes it. It reaps ripe crops within 6 blocks, replants them, never tramples farmland, and carries the harvest to a chest you choose (empty hand, then click the chest). It works only while mended with straw: a hay block gives 64, wheat 6. A well-kept one sometimes brings in an extra crop. Nobody is punished for not having one. `Farmhand`, `FarmhandEntity`, `ScarecrowBlock`.
+- Art from Seasonal: The Wicked Harvest (MIT, Lazurium), licence in `licenses/seasonal/`.
+- Compiled; not played.

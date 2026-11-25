@@ -17472,3 +17472,67 @@ Andy: "the AI in these mods is exactly what our MCA and npcs have been missing."
 - **The way-hut** (the first one, `tools/written_starts.py`): a Hearthkeeper's stone hut with a cold hearth, a cot and the keeper's chest. Read the keeper's slate, and the iron trapdoor to the store under the floor opens; go down; keep the hut through your first night; find the nearest town.
 - `WrittenStarts`, `LifeStory` (the road), `Tales.written` and `opens`, `RoadLocks`, `tools/tale_check.py`; lore placement "Way-huts" in Lore.md for Andy to approve.
 - Built in the cloud; not played. The build's placement, gates and the tale were not run in a game.
+
+## 0.12.95 (2026-11-25): Fae Woods: Psithurism in the Blossom land, hot springs, one sky for balloons (#2179)
+
+- **Psithurism** (when it's in the pack; it waits on a Fabric Loader update. Kingdoms reaches it only by registry id, `PsithurismCompat`): Blossom houses use its paper wall blocks for windows, small tatami for floors, dark cherry logs for posts and beams and dark cherry planks for the veranda deck. Without it they look as before.
+- **Onsen**: a Blossom village now and then has a hot spring beyond its fields (a rim of ashino stone bricks round a pool of Psithurism's onsen water, a stone lantern). In winter snow monkeys walk up to 32 blocks to soak in it (`SnowMonkey`), and a player soaking in it in winter (or a cold biome) has the cold lifted off their body heat (+55 on Kitchen's scale through `BodyHeat.addWeather`, our own seasons decide winter).
+- **One sky**: balloon ships (airships and the sky folk's ferries) now feel the wind of their height with its gusts (`Winds.aloft`, from Jaymo's Powers' balloon wind): a gentle push while under way, and the let-go drift goes the way of that layer.
+- **FantasyMountsCompat**: a stub only. Fantasy Mounts is not in the pack (its author has not agreed), and its ids could not be read, so the stag, treant, luna moth and jackalope near Sylvan havens, wardens riding stags and bond-unlocked mount levels are still to do.
+- Built; not played.
+
+## 0.12.96 (2026-11-25): errand books, and a rare errand to a buried ruin (#2179)
+
+- **Errand books** (`ErrandBooks`, new): a town errand taken off the board now also gives a written book in the giver's hand: who asked, their settlement, where they were (coordinates, distance and bearing from where you stood), and that the errand goes back to them. It goes when the quest does.
+- **A rare errand**: after 8 town errands finished (`RARE_AFTER`), the next one pulled off a board has a 1 in 4 chance (`RARE_CHANCE`) of being instead a fetch to a buried trail ruin (`QuestBoard.dig`, the existing dig quest), told in its own book. The count starts over when it is taken.
+- Words are in the book text and the quest log only. Lang part `errand-books.json`.
+- Built; not played.
+
+## 0.12.97 (2026-11-25): Glow-wood creatures, the spore-rot's risen, and the Myceliarch (#2179)
+
+- **Ported from Spore & Stem** (Apache-2.0, code and art; licence and notice under `licenses/spore-and-stem/`), ids renamed to `jaymoskingdoms:`, in `glowwood/creatures/` (client in `client/glowwood/`).
+- **Sporeling** (tended fungi; tamed with a truffle, 1 in 3; follows, sits; sheds a mushroom of its kind every 5-10 min; breeds on truffles). It spreads mushrooms only on shaded, damp ground near giant caps, so cutting the giants stops it.
+- **Truffler** (sniffs and digs truffles, 0.15 chance a dig, roots out truffle soil), **Glowmoth** (drawn to light and glowcaps; lumen spores), **Bloatshroom** and **Mimicap** (only in deep, roofed, dark woods, never within 64 blocks of a haven), **Shambler** (rises from what dies carrying the rot, never within 64 blocks of a Sylvan haven; wilts in full sun).
+- The truffle is Kitchen's `jaymoskitchen:truffle`, found by id; without Kitchen a brown mushroom stands in. Kitchen-only loot and the mycoleather and fruiting heart recipes use optional tags / load conditions.
+- **Havens** (`GlowHavenLife`): a Sylvan or mixed haven that is not dark and has giants keeps up to 6 sporelings, 2 trufflers and (at night) 6 glowmoths, scaled by its giants, while a player is within 72 blocks. Sparse natural spawns by wild giants and in forest biomes.
+- **Myceliarch** (boss; Fruiting Heart on mycelium, mycelial soil, podzol or moss): 300 health, 10 armour, 40-block leash, breaks no blocks. Slam with a spore-ring tell, root eruption line, spore nova, brood call, second bloom with spore rain. Our boss bar. Drops Spore Heart, mycoleather, lumen spores.
+- **Items**: Bloomreaver, Crown of the Bloom (sporelings trust the wearer; spore ward), mycoleather armour, spawn eggs.
+- The rot's infections go through the Powers effect `jaymospowers:mycosis` by id (nothing infects without Powers); Circle of Spores druids get a spore ward.
+- Skipped: Sporemaw and its spore glob use, spore bomb, the Myceliarch film, BossTurns/Posture, natural shambler spawns, the lore overlay messages.
+- Compiled; not played.
+
+## 0.12.98 (2026-11-25): the Deep beasts rise from the Abyssal Chasm (#2179)
+
+- **Deep Lancer, Deep Gloomwing, Deep Behemoth**: three sea beasts, shapes ported from the Rim mod (CC0, ThePoupyBuTers; `kingdoms/art/deep-LICENSE.txt`, `deep-CREDITS.md`, `tools/rim_port.py`), repainted violet with amber glow and renamed. They rise out of the Abyssal Chasm on a schedule that grows every few days (a tier a visit), each alarm bell tolls as one nears (`AlarmBells.toll`), and the biggest come last.
+- **Living**: they hunger (a meal lasts a day, then they hunt harder), keep a territory and go home when hurt (retreat under a third of their health, return when mended), and a fish or meat given by hand makes a friend that holds off for a time.
+- **Darktide**: one that dies can be raised and commanded like any dead (it carries the no-corpse tag); a commanded beast skips its own hunger and retreat.
+- **Loot**: each leaves fish, bone and prismarine; they are tagged as giants for per-part wounds.
+- Built; not played. The Gloomwing does not fly; five other Rim species are not ported; no sounds.
+
+## 0.12.99 (2026-11-25): glow-woods round Sylvan havens - giant glowcaps, bouncecaps and inkcaps, fungal woods, fairy rings, skeps (#2179)
+
+- **Giant fungi** (ported from Spore & Stem, Apache-2.0, licence and notice in `licenses/spore-and-stem/`): the **glowcap** (a slender stem under a wide parasol, luminous gills hanging with drifting motes), the **bouncecap** (a puffy dome that bounces you with no fall damage and its own boing) and the **inkcap** (a tall bell that drips ink). The three small mushrooms grow them with bone meal (40%, when there is room); they spread by themselves only in the dark or on mycelium.
+- **Fungal woods**: each giant gives a wood set (stem, stripped stem, hyphae, stripped hyphae, planks, stairs, slab, fence, fence gate, door, trapdoor, button, pressure plate), axe-strippable, counted as logs and planks and not flammable like nether stems; and the **glowcap lantern** (made with glowcap gills, which need shears). Black dye from an inkcap.
+- **Haven glow-woods**: a Sylvan haven (and the Sylvan houses of a mixed one) grows giants between its house-trees: the first at size 8, another for every 4 past that, at most 12 (half in a mixed haven); never on paths or near buildings, and only on shaded ground, mostly beside one already standing. Autumn doubles the growth, winter stops it. Small bouncecaps stand under the tree houses' platforms (up to 6) and one fairy ring on the green (from size 6). About half the Sylvan houses are built from the haven's own fungal wood (one of the three per haven). A haven that is emptied, burned or fallen goes dark: its giants thin out and are gone within 21 days (faster in winter), each leaving its small mushroom; looked after again, the rot stops.
+- **Skeps**: Sylvan orchards get two straw skeps (vanilla bee boxes) among flowers, and vanilla bees to live in them. Sylvan haven traders sell honey bottles, honeycomb, and their haven's fungal planks and stems.
+- **Wild**: giants and fairy rings only sparsely, by biome tag (`data/jaymoskingdoms/tags/worldgen/biome/has_feature/*`): glowcaps in mushroom fields and underground (lush caves more), bouncecaps in flower forests (1 chunk in 12), meadows (1 in 32) and mushroom fields, inkcaps in dark forests (1 in 8), swamps and mushroom fields; fairy rings of small bouncecaps, glowcaps and inkcaps in plains, meadows and forests, 1 chunk in 48.
+- **Sparkles** (client only, no packets, no new art): at night, soft motes and fireflies drift up from glowcap gills, glowcap lanterns and the fairy rings' mushrooms.
+- Classes: `glowwood/*` (GlowWoods, FungusWood, WoodBlocks, the three cap blocks, GlowcapGillsBlock, FungusBlock, FungusStripping, FungusPlan, HugeFungusFeature and its three shapes, FairyRingFeature), `GlowWoodHavens`, `HavenBuildings` (tree house wood, skeps), `HavenWares`, `Buildings.Kit`, client `GlowSparkles`. Lang in `lang/parts/glowwood.json`.
+- Compiled; not played.
+
+## 0.13.0 (2026-11-25): the wicked harvest - field crows, witch's cauldron, Harvest Lich, ruined barn (#2179)
+
+- **Field crows**: by day, flocks land on open farmland (10 or more open crops) and peck crops back a stage. More open field draws more crows; a field within a Kitchen scarecrow's 16 blocks draws none. They leave at dusk, in rain, or after a few pecks. `FieldCrows`, `Crow`.
+- **Witch's Cauldron**: over soul fire at night, 2 rotten pumpkins (Kitchen) and a full soul jar of an undead kind brew 2 Wicked Resin in three stages. No new ghost appears. `WitchCauldronBlock`.
+- **Harvest Altar**: takes 2 Wicked Resin and raises the Harvest Lich only in late autumn (Kitchen Seasons) at night; otherwise cold smoke and the resin stays. `HarvestAltarBlock`.
+- **Harvest Lich**: boss on a skeleton-horse steed; charges, lobs rotten pumpkins, calls up to 3 flying wicked pumpkins that shoot orbs. Drops Spark of the Harvest (wakes scarecrows), resin and gold. `HarvestLich`, `LichSteed`, `WickedPumpkin`, `WickedOrb`, `ThrownRottenPumpkin`, client `LichModel`, `LichRenderer`, `PumpkinRenderers`.
+- **Ruined barn**: `wicked_barn` (standing and ruined), drawn in `tools/small_designs/wicked_barn.py`, rare on plains, sunflower plains and meadow, with the altar, a chest and a scarecrow.
+- Art and ideas from Seasonal: The Wicked Harvest (MIT, Lazurium), licence in `licenses/seasonal/`. Not ported: custom steed model, Lich armour, other Seasonal mobs.
+- Compiled; not played.
+
+## 0.13.1 (2026-11-25): mage wands - cast what you have learned through a wand (#2179)
+
+- **Wands** (Andy: "They should learn spells and cast from the wand"): the amethyst, quartz, emerald and diamond wand, each made from a stick, a plank and its stone (`  F` / ` P ` / `S  `). The plank's wood (oak, birch, cherry or dark oak) is kept in the wand. Nothing new is learned: a wand casts the spells you already know. A Mage, or anyone who casts from a staff (an attuned player, a Cleric, a Druid, a Warlock), uses it as a staff: use casts the spell it is turned to, sneak and use turns it to the next one they know. A Sorcerer casts the spells they have kept (glass, fire's, lightning's, the black flame) through it the same way.
+- **Quality**: the wood and the focus each change how hard the spell hits and how long the wand waits. Woods: oak 100%/100%, birch 95%/80%, cherry 105%/90%, dark oak 115%/110%. Foci: amethyst 110%/100%, quartz 100%/85%, emerald 115%/95%, diamond 130%/90% (strength / wait; they multiply). A glint of the focus's colour shows at the tip as it casts.
+- A wand counts as a staff for spoken magic and the Mage's staff boons. In the hand of someone who has learned nothing it only says so. No iron in the recipe.
+- Classes: `MageWand` (hooks in `Spellcraft`, `ElementSpells#castKnown`, `Arcana#isStaff`); `tools/gen_mage_wands.py` makes the textures, models and recipes. Lang in `lang/parts/mage_wands.json`. Compiled; not played.

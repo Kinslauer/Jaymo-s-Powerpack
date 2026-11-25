@@ -8303,3 +8303,38 @@ The symbiote does things in the world now, not only on your screen.
 - Locked onto a foe (zombies, 2026-11-25), a swing for a body region the weapon has no attack of its own for uses a stand-in swing (`RegionSwings.made`). That stand-in carried no trail particle list (null), and Better Combat 3.2.2 checks the list on every upswing (`SlashParticleUtil.trailParticlesFromAttack`), so the client crashed. The stand-in now carries an empty list, which lets Better Combat draw its own trail for the stand-in animation.
 - No other code in the pack builds Better Combat attacks; the newer gore code (gnawing, bite gibs, body tugs) was checked for the same kind of null and needed nothing.
 - Built; checked against the crash log; not played.
+
+## 0.27.60 (2026-11-25): Fae Woods: shipped mods for the Blossom land, balloon gusts (#2179)
+
+- **Pack**: Hot Air Balloons 0.0.30 (Profet; unchanged jar, credit and its CurseForge link in the build file) is added to the pack. Psithurism and MModding Library are held back until the pack moves to Fabric Loader 0.20.1 and Fabric API 0.165, which Psithurism needs. Fantasy Mounts is not shipped (its author has not agreed).
+- **Balloon wind**: our hot air balloon's wind now has gusts as well as layers by height (`HotAirBalloon.wind(level, x, y, z)`); Kingdoms' airships and ferries read the same wind.
+- Built; not played.
+
+## 0.27.61 (2026-11-25): the future's cars and rigs (#2179)
+
+- **Cars**: four drivable cars (Runabout, Hauler, Bruiser, Dasher), ported from the Cars mod (MIT, Pokato; licence and credit in `licenses/cars`, meshes by `tools/car_port.py`). They stand left over in the future's ruins, one chunk in thirty-three, turned along the street with the tank dry or nearly. Fuel is what the future's crates still hold: redstone and gunpowder (also coal, charcoal, blaze powder); a fuel bar shows while driving. Forward/back/left/right drive, jump is the handbrake, a one-block step is hopped, a crash hurts the driver, a car at speed hurts what it hits. Two seats. The Cars tyre curve is written out again in `CarPhysics` (Kitchen's `CartPhysics` is private to that jar).
+- **Rigs**: the Frostborn Siege Rig and the Tinkerer's Colossus, larger android-mech builds (the existing model, scaled up and repainted), found in the future where a horde of the dead gathers. They fight the dead and anything hostile that is not a machine; Frostborn troopers do not fight them. A felled rig drops its pilot (a trooper, or an android).
+- **Per-part hits**: rigs, the Deep beasts and every giant take hits by part (head, arms, legs, core) through the Wounds body plans; a giant with both arms at zero is weakened for a minute and drops its target. Rigs are tagged as machine scrap for Kitchen.
+- Built; not played. Cars are open-top with no glass; the Cars mod's damage and gloss textures, sounds, bikes and other cars are not ported. Rig geometry is our own mech, nothing from film rigs.
+
+## 0.27.62 (2026-11-25): pink fairies are drawn to fairy rings (#2179)
+
+- **Fairies**: with Jaymo's Kingdoms, a fairy ring (6 or more of the ring's small mushrooms within 16 blocks of a player, read by the block tag `jaymoskingdoms:fairy_ring`) makes a pink fairy five times likelier to turn up at night, and she appears over the ring, in any biome. Without Kingdoms nothing changes.
+- Class: `Fairies` (`RING_ODDS_DIVIDER`, `RING_SEARCH`, `RING_LEAST`, `ringNear`).
+- Compiled; not played.
+
+## 0.27.63 (2026-11-25): The spore-rot (Mycosis), spore ward and antifungal tonic (#2179)
+
+- **Spore-Rot** (`jaymospowers:mycosis`): one point of damage every 80 ticks, halved each level (never under 10 ticks), never below one heart. Fungal things (Kingdoms' `fungal` tag) and anyone under a spore ward are immune. Those who die carrying it rise as shamblers when Kingdoms is present (it listens by id; Powers needs no Kingdoms).
+- **Cures**: milk, Kitchen's forager's stew and milk bottle, the antifungal tonic, and every healing spell (`Mending.easeFever`, so Restoration too). A raw Kitchen deathcap gives the rot for 20 s.
+- **Spore Ward** (`jaymospowers:spore_ward`): turns the rot away.
+- **Antifungal Tonic** (medicine tab): cures the rot and wards for 3 min. Recipe: glass bottle, frostcap, chanterelle, honey bottle (only with Kitchen). JEI notes added.
+- Code in `core/wounds/Mycosis.java`; effect icons and tonic art ported from Spore & Stem (Apache-2.0, `licenses/spore-and-stem/`).
+- Compiled; not played.
+
+## 0.27.64 (2026-11-25): spells that leave the land whole - terrain return, the wood path, held ultimates (#2179)
+
+- **Terrain return** (the idea of God Wand's terrain engine, hyisnoob, MIT; our own code, its licence kept in `licenses/god-wand/`): ground that Gravity (the meteor's crater and sweep, the wave, the push, the rock throws, the wrath's slam) and any big blast a player's power throws (a blast of 3 or more with the player as its source) tears out is recorded and comes back, a little at a time: from 90 seconds on, the lowest blocks first, at most 24 a tick, only into air or what a block can replace, and only once nothing living stands there. A spot someone has built on since stays as it is. Only whole blocks come back (ground, stone, logs, leaves); ores, chests and anything with an inventory never do. Saved with the world. Server switch: `terrain_return=false` in `config/jaymospowers-terrain.properties` (written on first start, default true) leaves the craters as before.
+- **Wood path** (Sylvan, on the heritage hold slot beside Thunderclap and Sunflare: hold left mouse bare-handed, let go when full): for 12 seconds the logs, planks and leaves at your body are lent and come back behind you once nothing stands in them; never the floor underfoot. Every 40 seconds.
+- **Hold, wait, release** for ultimates: a one-press ultimate (Cryokinesis' Blizzard, Resonance's Boom and Shriek, Wind's Lance, Dome and Thunder Dive) still casts on a quick tap; held for 2 seconds it is charged (a gold bar and a swelling ball of power), stays charged for as long as C is held (up to 20 seconds more) and goes off when you let go. Let go half-charged and it slips away. Other powers' ultimates are unchanged.
+- Classes: `core/TerrainReturn`, `mixin/ExplosionReturnMixin`, `core/UltimateHold`, `Power#ultimateHeld`, `HeritageMoves` (Sylvan blood). Compiled; not played.

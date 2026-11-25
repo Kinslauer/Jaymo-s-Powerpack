@@ -1,6 +1,0 @@
-# Fae Woods: Psithurism in the Blossom land, hot springs, one sky for balloons
-- **Psithurism** (when it's in the pack; it waits on a Fabric Loader update. Kingdoms reaches it only by registry id, `PsithurismCompat`): Blossom houses use its paper wall blocks for windows, small tatami for floors, dark cherry logs for posts and beams and dark cherry planks for the veranda deck. Without it they look as before.
-- **Onsen**: a Blossom village now and then has a hot spring beyond its fields (a rim of ashino stone bricks round a pool of Psithurism's onsen water, a stone lantern). In winter snow monkeys walk up to 32 blocks to soak in it (`SnowMonkey`), and a player soaking in it in winter (or a cold biome) has the cold lifted off their body heat (+55 on Kitchen's scale through `BodyHeat.addWeather`, our own seasons decide winter).
-- **One sky**: balloon ships (airships and the sky folk's ferries) now feel the wind of their height with its gusts (`Winds.aloft`, from Jaymo's Powers' balloon wind): a gentle push while under way, and the let-go drift goes the way of that layer.
-- **FantasyMountsCompat**: a stub only. Fantasy Mounts is not in the pack (its author has not agreed), and its ids could not be read, so the stag, treant, luna moth and jackalope near Sylvan havens, wardens riding stags and bond-unlocked mount levels are still to do.
-- Built; not played.
