@@ -64,7 +64,7 @@ public final class HitReactionsClient {
 	}
 
 	public static void init() {
-		ClientPlayNetworking.registerGlobalReceiver(HitReactions.Flinch.TYPE, (payload, context) -> flinch(context.client(), payload));
+		ClientPlayNetworking.registerGlobalReceiver(HitReactions.Flinch.TYPE, (payload, context) -> context.client().execute(() -> flinch(context.client(), payload)));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			long now = Util.getMillis();
 			for (Iterator<Hit> it = HITS.values().iterator(); it.hasNext();) {

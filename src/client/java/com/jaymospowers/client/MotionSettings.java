@@ -73,7 +73,8 @@ public final class MotionSettings {
 		try (InputStream in = Files.newInputStream(path)) {
 			props.load(in);
 			reduced = Boolean.parseBoolean(props.getProperty(KEY_REDUCED, "false").trim());
-			reaction = Math.clamp(Float.parseFloat(props.getProperty(KEY_REACTION, "1").trim()), 0.0F, REACTION_MAX);
+			float read = Float.parseFloat(props.getProperty(KEY_REACTION, "1").trim());
+			reaction = Float.isFinite(read) ? Math.clamp(read, 0.0F, REACTION_MAX) : 1.0F;
 		} catch (IOException | IllegalArgumentException e) {
 			JaymosPowers.LOGGER.warn("Couldn't read the motion setting; using the defaults", e);
 			reduced = false;

@@ -35,7 +35,7 @@ public final class KillMomentClient {
 	}
 
 	public static void init() {
-		ClientPlayNetworking.registerGlobalReceiver(KillMoment.Cue.TYPE, (payload, context) -> begin(context.client()));
+		ClientPlayNetworking.registerGlobalReceiver(KillMoment.Cue.TYPE, (payload, context) -> context.client().execute(() -> begin(context.client())));
 		ClientTickEvents.END_CLIENT_TICK.register(KillMomentClient::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("kill_moment"), KillMomentClient::draw);
 	}

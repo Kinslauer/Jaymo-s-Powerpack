@@ -27,6 +27,9 @@ public final class KillMoment {
 	public static final double RANGE = 24.0;
 	/** A hostile counts as fighting the player if either hit the other within this many ticks. */
 	public static final int FIGHTING_TICKS = 100;
+	/** Any other hostile this close (blocks), busy or not, rules the moment out. */
+	public static final double NEAR = 10.0;
+
 	/** Ticks between two moments for one player. */
 	public static final int COOLDOWN = 200;
 
@@ -62,7 +65,8 @@ public final class KillMoment {
 			return;
 		}
 		for (Mob other : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(RANGE), m -> m != victim && m.isAlive() && m instanceof Enemy)) {
-			if (other.getTarget() == player || fighting(player, other)) {
+			// anything hostile close enough to reach you, or already after you, and the moment would get you hit
+			if (other.getTarget() == player || fighting(player, other) || other.distanceToSqr(player) < NEAR * NEAR) {
 				return;
 			}
 		}
