@@ -28,6 +28,10 @@ import org.jspecify.annotations.Nullable;
  * push you up, the feet come in under you, and you rise out of the crouch. In first person the view goes down (or up)
  * with the head instead of dropping in a few ticks.
  * <p>
+ * (Andy, 2026-11-25, the dodge's long hold) Down from a crouch (the crouch a held roll comes up into, a held sneak, the
+ * stance wheel's), the move starts as far into its own crouch as the body was drawn crouched ({@code CrouchPose#bendShown}),
+ * rather than standing up straight for a moment and crouching again; the first-person view starts at the crouch's eye.
+ * <p>
  * Not for the downed (they fall, {@link CrawlPose}'s jolt), a slide ending prone (already low), a leap's dive (flat at once), a ledge climb, or water.
  */
 public final class ProneTransition {
@@ -89,9 +93,17 @@ public final class ProneTransition {
 			boolean was = LYING.contains(id);
 			Float progress = progress(id, now);
 			if (lying && !was && ON_FEET.contains(id) && !com.jaymospowers.freerun.moves.Leap.diving(player)) {
-				// down from the feet: a crawl that cuts a getting-up short goes on from how far up it got
-				float from = progress == null ? 0.0F : progress;
-				MOVES.put(id, new Move(now - from * DOWN_TICKS, true, LAST_EYE.getOrDefault(id, player.getEyeHeight(Pose.STANDING))));
+				// down from the feet: a crawl that cuts a getting-up short goes on from how far up it got, one from a crouch from
+				// as far into the move's crouch as the body was drawn crouched
+				float from = progress == null ? CROUCH_SHARE * CrouchPose.bendShown(id) : progress;
+				float eye = LAST_EYE.getOrDefault(id, player.getEyeHeight(Pose.STANDING));
+				if (progress == null && from > 0.0F) {
+					// the view starts where the crouch had it: the feet's eye set so the move's own crouch gives that height
+					float g = viewShare(from);
+					float flatEye = player.getEyeHeight(Pose.SWIMMING);
+					eye = g > 0.01F ? flatEye + (eye - flatEye) / g : eye;
+				}
+				MOVES.put(id, new Move(now - from * DOWN_TICKS, true, eye));
 			} else if (!lying && was && Crawl.canCrawl(player) && !Downed.isDowned(player)) {
 				float from = progress == null ? 1.0F : progress;
 				Pose up = player.isShiftKeyDown() ? Pose.CROUCHING : Pose.STANDING;
@@ -197,11 +209,15 @@ public final class ProneTransition {
 		if (down == null || move == null) {
 			return null;
 		}
+		return Mth.lerp(viewShare(down), player.getEyeHeight(Pose.SWIMMING), move.footEye());
+	}
+
+	/** How far up from lying to the feet's eye the head is at {@code down} of the move (1 standing, 0 flat). */
+	private static float viewShare(float down) {
 		float c = crouch(down), u = tip(down);
 		float a = u * Mth.HALF_PI;
 		float head = -CROUCH_SINK * c * (1.0F - u) + FLAT_RAISE * u * u + BODY_EYE * Mth.cos(a);
 		float flat = FLAT_RAISE;
-		float g = Mth.clamp((head - flat) / (BODY_EYE - flat), 0.0F, 1.0F);
-		return Mth.lerp(g, player.getEyeHeight(Pose.SWIMMING), move.footEye());
+		return Mth.clamp((head - flat) / (BODY_EYE - flat), 0.0F, 1.0F);
 	}
 }

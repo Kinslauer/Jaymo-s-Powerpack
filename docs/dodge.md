@@ -56,6 +56,15 @@ Sources: github.com/ElenaiDev/Feathers, github.com/ElenaiDev/ElenaiDodge2.0, git
   your feet, still held at its end and you go prone. The landing roll is still a roll.
   The dash's pose is `DodgeRollPose`'s (`Roll.dash`, `stance`): planted feet with the hips dropped to match, the upper
   body leaned into the way about the hips (`PoseBlend.bend`), a guard, the head level.
+  Andy (2026-11-25), "tap for a dodge and hold for a roll" (Arc Raiders) and a longer hold for prone. One press, timed
+  from the press (`Dodge.ROLL_HOLD_TICKS` 5, `PRONE_HOLD_TICKS` 26): let go before 5 ticks (0.25 s) = the dash; held at
+  5 = the long roll (9 ticks); held as the roll ends = you come up into a crouch (`DodgeClient.crouchHeld`, the Sneak bit
+  sent through `StanceInputMixin`); held to 26 ticks (1.3 s) = prone. Let go at any point and the hold ends: the roll
+  finishes and you stand, the crouch stands up. A landing roll goes long held `LANDING_HOLD_TICKS` (3) into it, then
+  the same crouch and prone, timed from the press in the air. Animation hand-offs: the roll out of a dash starts from the
+  dash's stance (`Roll.carry`, `DASH_HANDOFF`, synced as `Rolling.fromDash`) and turns evenly (`Dodge.rollShare`);
+  BodyWeight fades out and in round every dodge (`DodgeRollPose.weightKept`); ProneTransition goes down from as far
+  into a crouch as the body was drawn (`CrouchPose.bendShown`).
 - `client/stamina/FeathersHud`: the row, right above hunger, moved up for air bubbles and a mount's hearts. Art
   `textures/gui/feathers.png` from `tools/gen_feathers.py` (9x9 icons on vanilla's HUD grid).
 - Powers (Andy: the powers that had extra dodges get extra feathers): Darktide +12 golden (`DarktideDodges`; dashes cost a dodge's feathers, a landed flurry refunds them; the

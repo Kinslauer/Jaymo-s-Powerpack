@@ -96,9 +96,10 @@ public final class BodyWeight {
 
 	/**
 	 * What the renderer needs, eased between ticks: {@code lean} (degrees, + forward), {@code squash} (0-1 or a little past, - for the rebound), {@code tuck} (0-1), {@code weight} (1 bare),
-	 * {@code ground} on the ground, {@code ownView} your own body seen from inside it.
+	 * {@code ground} on the ground, {@code ownView} your own body seen from inside it, {@code kept} how much of the stride's
+	 * sink, rock and twist is drawn (1, less as a dodge takes over: {@link #weight}).
 	 */
-	public record Weight(float lean, float squash, float tuck, float weight, boolean ground, boolean ownView) {
+	public record Weight(float lean, float squash, float tuck, float weight, boolean ground, boolean ownView, float kept) {
 	}
 
 	public static final RenderStateDataKey<Weight> KEY = RenderStateDataKey.create(() -> "jaymospowers:body_weight");
@@ -246,7 +247,7 @@ public final class BodyWeight {
 		}
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean own = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
-		state.setData(KEY, new Weight(lean, squash, smooth(tuck), body.weight, entity.onGround(), own && FirstPersonCompat.bodyShown()));
+		state.setData(KEY, new Weight(lean, squash, smooth(tuck), body.weight, entity.onGround(), own && FirstPersonCompat.bodyShown(), 1.0F));
 	}
 
 	private static @Nullable Weight weight(LivingEntityRenderState state) {
@@ -254,16 +255,29 @@ public final class BodyWeight {
 			return null;
 		}
 		Weight w = state.getData(KEY);
-		if (w == null || avatar.isPassenger || avatar.isFallFlying || avatar.isVisuallySwimming || avatar.swimAmount > 0.0F
-			|| PoseTakeover.posedOtherwise(avatar)) {
+		if (w == null || avatar.isPassenger || avatar.isFallFlying || avatar.isVisuallySwimming || avatar.swimAmount > 0.0F) {
 			return null;
 		}
-		return w;
+		// (Andy, 2026-11-25, ironing out the dodge) a dodge's dash or roll doesn't drop the weight in one frame: it fades out
+		// as the dodge's pose comes on and back in as it lets go (DodgeRollPose#weightKept); every other pose of ours still
+		// has the whole body
+		com.jaymospowers.client.stamina.DodgeRollPose.Roll roll = avatar.getData(com.jaymospowers.client.stamina.DodgeRollPose.KEY);
+		if (roll == null) {
+			return PoseTakeover.posedOtherwise(avatar) ? null : w;
+		}
+		float kept = com.jaymospowers.client.stamina.DodgeRollPose.weightKept(roll);
+		if (kept <= 0.01F) {
+			return null;
+		}
+		avatar.setData(com.jaymospowers.client.stamina.DodgeRollPose.KEY, null);
+		boolean other = PoseTakeover.posedOtherwise(avatar);
+		avatar.setData(com.jaymospowers.client.stamina.DodgeRollPose.KEY, roll);
+		return other ? null : new Weight(w.lean() * kept, w.squash() * kept, w.tuck() * kept, w.weight(), w.ground(), w.ownView(), kept);
 	}
 
 	/** How far into its stride the walk is, 0 standing to 1 at full speed (on the ground only). */
 	private static float stride(AvatarRenderState state, Weight w) {
-		return w.ground() && !state.isCrouching ? Math.min(1.0F, state.walkAnimationSpeed) : 0.0F;
+		return w.ground() && !state.isCrouching ? Math.min(1.0F, state.walkAnimationSpeed) * w.kept() : 0.0F;
 	}
 
 	/** After the body faces its way (about the feet): the step's sink and rock, the pendulum's lean, the squash. */

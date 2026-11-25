@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.18.57) A held sneak or low crouch keeps the Sneak bit down without the key; standing by the wheel lets it up. (0.18.80)
  * On the knee in the low crouch the walking keys are dropped. (0.21.36) While Sneak is held toward a sprint slide (the 1.5 s
  * hold, {@code FreerunClient.slideWindup}), the Sneak bit is kept off so the run goes on. Sat down (Sitting), the walking
- * keys are dropped too.
+ * keys are dropped too. Up out of a roll with the Dodge key held on, the Sneak bit is held down (the crouch before prone).
  */
 @Mixin(KeyboardInput.class)
 abstract class StanceInputMixin extends ClientInput {
@@ -24,6 +24,13 @@ abstract class StanceInputMixin extends ClientInput {
 		Input k = this.keyPresses;
 		if (shift != null && shift != k.shift()) {
 			this.keyPresses = new Input(k.forward(), k.backward(), k.left(), k.right(), k.jump(), shift, k.sprint());
+		}
+		// up out of a roll with the Dodge key still held: crouched on the way to prone (DodgeClient#crouchHeld)
+		if (com.jaymospowers.client.stamina.DodgeClient.crouchHeld()) {
+			k = this.keyPresses;
+			if (!k.shift()) {
+				this.keyPresses = new Input(k.forward(), k.backward(), k.left(), k.right(), k.jump(), true, k.sprint());
+			}
 		}
 		// (0.21.36) Sneak held toward a sprint slide: the run goes on, no sneak, till the hold is long enough to slide
 		if (com.jaymospowers.client.freerun.FreerunClient.slideWindup()) {
