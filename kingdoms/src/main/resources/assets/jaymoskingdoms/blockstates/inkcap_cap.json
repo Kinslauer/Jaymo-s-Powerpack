@@ -1,0 +1,120 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap"
+      }
+    },
+    {
+      "when": {
+        "north": "false"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap_inside"
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "east": "false"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap_inside",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "south": "false"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap_inside",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "west": "false"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap_inside",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap",
+        "x": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "false"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap_inside",
+        "x": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap",
+        "x": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "false"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/inkcap_cap_inside",
+        "x": 90,
+        "uvlock": true
+      }
+    }
+  ]
+}
