@@ -8156,3 +8156,14 @@ Andy's rulings of 2026-11-25, for a host who isn't a web slinger (whom the symbi
   - Symbiote takeover: if something other than its prey hits it within 6 blocks while the prey is out of reach, it turns on the attacker (`TAKEOVER_TURN_ON_*`). It also sidesteps arrows and other shots coming at it (new `client/TakeoverDodge`, which steps each projectile up to 10 ticks ahead).
   - Great Ape (wild or in a fit, and villager apes): when hit, it turns on the attacker instead of running. It only falls back at 20% health or less (`ZFighterLineage.APE_FALL_BACK`, the fighting AI's fall-back line).
 - Built (compileJava + compileClientJava); not played.
+
+## 0.27.46 (2026-11-25): red symbiote - hunts first, trust unlocks orders, takes over in its big body, fights you for the small suit (#2164)
+
+- **Standing order**: the red one starts on **Hunt** (and goes back to it, not to At ease, when its trust breaks). **Protect Me** opens at trust 50 and **At ease** at trust 80; until then it refuses with a line saying the trust it wants, and a granted order it no longer trusts you with lapses back to Hunt. The status menu dims locked orders and shows what trust opens them, with red-only tips (`WebSymbioteMind.standing`/`orderTrust`/`redControlled`, `WebSymbioteStatusScreen`).
+- **Takeovers**: every red takeover swells into its slender big body, and it stays big after it lets go (`WebSymbiote.Live.redHeld`).
+- **Back to the small suit**: pressing the suit key in the red big body starts a struggle (the same press-to-tear fight as the takeover's: fewer presses the more it trusts you); win and it sheds to the small suit, lose and it stays big (`WebSymbioteBond.fightForBody`, `WebSymbiote.shedRedBody`, lines `red.body_fight/won/lost`).
+- **Control at high trust**: at trust 80+ with At ease set, no struggle: the suit key retracts the big body like the black one's, and it stops its own red hunts and its doubled takeover checks (takeovers as often as the black one's).
+- **Villagers tell the strains apart**: players and mobs carrying the red or white strain are tagged `symbiote_red` / `symbiote_white` beside `symbiote` (`Oddities.SYMBIOTE_RED/WHITE`, `WebSymbioteStrains.oddMark/oddUnmark`).
+- **Black hands fixed**: the red slender body's forearms, hands and fingers were near-black in its texture (showing as black silhouettes in first person); they're red now, the claws a darker red.
+- Lore: "Three colours, three names" (new) in Lore.md.
+- Built; not played. The low framerate in the large red suit is not found yet (no profile).

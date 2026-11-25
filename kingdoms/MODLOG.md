@@ -17410,3 +17410,8 @@ Andy: "the AI in these mods is exactly what our MCA and npcs have been missing."
 - **Dodging**: arrows and other shots coming at you are sidestepped (`client/TakeoverDodge`).
 - **Aggression**: if something other than its prey hits you within 6 blocks while the prey is out of reach, it turns on the attacker.
 - Built (compileJava + compileClientJava); not played.
+
+## 0.12.87 (2026-11-25): villagers tell the red and white symbiotes from the black (#2164)
+
+- Fear cries, "we know what you are" lines and gossip now have their own families for the **red** symbiote (the bloody one, the killer) and the **white** one (the quiet warrior of the old songs, in his white cloak), read from Powers' `symbiote_red` / `symbiote_white` tags; the black one keeps its lines (`Oddities.strain`, lang part `talk-odd-strains.json`).
+- Built; not played.
