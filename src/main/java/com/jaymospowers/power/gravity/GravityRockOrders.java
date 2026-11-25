@@ -312,7 +312,7 @@ public final class GravityRockOrders {
 			return;
 		}
 		last.put(living.getId(), now);
-		GravityRocks.hit(player, level, living, damage, true);
+		GravityRocks.hit(player, level, living, damage * GravityMetal.heft(rocks.item()), true);
 		Vec3 at = living.getBoundingBox().getCenter();
 		grit(level, rocks, at, 4);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.STONE_HIT, SoundSource.PLAYERS, 0.8F, 0.9F + level.getRandom().nextFloat() * 0.3F);
