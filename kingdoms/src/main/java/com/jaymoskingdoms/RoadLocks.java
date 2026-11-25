@@ -63,7 +63,7 @@ public final class RoadLocks {
 	 * blood ({@link #DIVINE_DEED}).
 	 */
 	static final Set<Start> OPEN = Collections.unmodifiableSet(EnumSet.of(Start.VILLAGE, Start.ROCK_BOTTOM, Start.BANISHED, Start.SHIPWRECK,
-		Start.FATE, Start.VERDANT, Start.DEMON, Start.LAB));
+		Start.FATE, Start.VERDANT, Start.DEMON, Start.LAB, Start.WRITTEN));
 
 	/**
 	 * (0.7.501, Andy: "Biobuilt start and heritage should be locked ... only unlocked after meeting the tinkerer or becoming an

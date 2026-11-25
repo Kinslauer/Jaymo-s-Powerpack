@@ -13,9 +13,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "kingdoms/src/main/resources/data/jaymoskingdoms"
 
-STARTS = {"giver", "rumour", "book", "letter", "companion", "found", "notice"}
+# ("written": begun by a written start, WrittenStarts.java, never offered by anyone)
+STARTS = {"giver", "rumour", "book", "letter", "companion", "found", "notice", "written"}
 BODIES = {"villager", "fighter"}
-PLACES = {"home", "town", "other_town", "tavern", "wild", "road", "ruin", "camp", "near"}
+# ("written": a mark in a written start's build, its "mark" or else its own key; only in a tale a written start begins)
+PLACES = {"home", "town", "other_town", "tavern", "wild", "road", "ruin", "camp", "near", "written"}
 STEP_FIELDS = {
     "talk": {"who", "say", "replies", "voices", "not_now"},
     "name": {"who", "say", "suspects", "none", "not_now"},
@@ -41,7 +43,8 @@ STEP_FIELDS = {
 }
 # (step kinds whose work is done by other code, which doesn't read the step's hour)
 UNGATED = {"slay", "wait", "await", "defend", "pack", "build", "blast", "stash", "lamps", "rescue", "capture"}
-COMMON = {"do", "goal", "journal", "then", "give", "mark", "pay", "hidden", "within", "late", "until", "clock", "when", "candle"}
+# ("opens": gates of a written start's build that open once the step is done)
+COMMON = {"do", "goal", "journal", "then", "give", "mark", "pay", "hidden", "within", "late", "until", "clock", "when", "candle", "opens"}
 # (docs/StoryQuests-Plan.md, section 7) when a step can be done, how a try is made, how someone is dressed
 WHENS = {"night", "day", "moon:full", "moon:new"}
 TRIES = {"persuade", "threaten", "bribe", "dice"}
@@ -482,6 +485,8 @@ def check_tale(path):
             c.err(where, "missing 'name'")
         if "from" in place and place["from"] != "home" and place["from"] not in tale.get("places", {}):
             c.err(where, f"'from': no such place '{place['from']}'")
+        if place.get("at") == "written" and tale.get("start", {}).get("by") != "written":
+            c.err(where, "'at': 'written' is only for a tale a written start begins (start.by 'written')")
         if place.get("at") in ("wild", "road", "near") and "dist" not in place:
             c.err(where, "needs 'dist': [least, most]")
         if "dist" in place:
@@ -810,7 +815,9 @@ def check_tale(path):
             c.err("first", "the opening talk must be with 'giver'")
         if by == "rumour" and not (first.get("do") == "go" and first.get("hidden")):
             c.err("first", "a rumour's tale must open with a hidden 'go'")
-    if not has_wait and not any("within" in step or "clock" in step for step in steps.values()):
+    # (a written start's tale is the start's own steps, an adventure map's chain: it needn't take days or end two ways)
+    written = tale.get("start", {}).get("by") == "written"
+    if not written and not has_wait and not any("within" in step or "clock" in step for step in steps.values()):
         c.err("tale", "a tale should take days: add at least one 'wait', or a day it must be done by")
 
     used = set()
@@ -856,7 +863,7 @@ def check_tale(path):
             check_role(c, where + ".joins", ending["joins"], tale)
         for i, later in enumerate(ending.get("later", [])):
             check_later(c, f"{where}.later[{i}]", later, tale)
-    if len(tale["endings"]) < 2:
+    if not written and len(tale["endings"]) < 2:
         c.err("endings", "a tale needs more than one way to end")
     return c.errors
 

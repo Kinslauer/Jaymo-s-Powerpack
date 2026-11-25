@@ -263,7 +263,9 @@ public final class LifeStory {
 		// (0.7.349, Andy: "new starts, involving the other worlds") woken off the overworld by Jaymo's Powers ({@link #OTHER_WORLDS})
 		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false),
 		// reborn a monster: the goblin people's forms (MonsterBorn), opened by naming a follower
-		MONSTERBORN(false);
+		MONSTERBORN(false),
+		// (Andy 2026-11-25, "curate a start like an adventure map") a start built by hand: WrittenStarts
+		WRITTEN(false);
 
 		public final boolean realm;
 
@@ -301,6 +303,7 @@ public final class LifeStory {
 		TERMS.put(Start.SKYFALL, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.WHALERS, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.VERDANT, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.WRITTEN, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.BANISHED, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.CAVE, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.BURNED, new Terms(Mark.HARD, 0));
@@ -663,7 +666,8 @@ public final class LifeStory {
 				Answer.road(Start.DEMON, Items.SOUL_LANTERN),
 				Answer.road(Start.AFTERLIFE, Items.TOTEM_OF_UNDYING),
 				Answer.road(Start.FATE, Items.ENDER_EYE),
-				Answer.road(Start.MONSTERBORN, Items.BONE)));
+				Answer.road(Start.MONSTERBORN, Items.BONE),
+				Answer.road(Start.WRITTEN, Items.CAMPFIRE)));
 			// (gb-faith) the eight patrons, each drawn by its own shrine glyph on the page (the item is the fallback picture)
 			FAITH.answers.addAll(List.of(
 				Answer.faith(Patron.HEARTHKEEPER, Items.CAMPFIRE),
@@ -2250,6 +2254,25 @@ public final class LifeStory {
 					return start;
 				}
 			}
+			case WRITTEN -> {
+				// (Written starts) a build of the start's maker, raised for you out in the wild on level ground (its land made
+				// behind the loading screen first), woken in where its maker marked. A party mate's: beside them, in theirs.
+				if (mate != null) {
+					WrittenStarts.share(player, server.getPlayerList().getPlayer(mate.who));
+					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
+				} else {
+					BlockPos near = spot(level, null, spawn, WILD_MIN, WILD_MAX, random);
+					WrittenStarts.Raised raised = near == null ? null : WrittenStarts.raise(level, player, near, random, setOut);
+					if (raised != null) {
+						player.teleportTo(level, raised.feet().x, raised.feet().y, raised.feet().z, Set.<net.minecraft.world.entity.Relative>of(), raised.yaw(), 0.0F, false);
+						landSafely(player);
+						home(player, level, player.blockPosition());
+						landedAt(player, Start.WRITTEN, -1, player.blockPosition(), -1, raised.place());
+						WrittenStarts.begin(player);
+						return Start.WRITTEN;
+					}
+				}
+			}
 			case WILD, UNARMED, FATE, MONSTERBORN -> {
 				// the unarmed start sets out from the wild too, and the monster-born wake in it
 				if (start == Start.UNARMED || start == Start.MONSTERBORN) {
@@ -2317,6 +2340,10 @@ public final class LifeStory {
 			landed == Start.CHAINED ? StoryHard.shackleCamp(player) : landed == Start.CAPTIVE && held != null ? held.camp() : -1, yours);
 		if (landed == Start.SKYFALL) {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SKYFALL_TICKS, 0));
+		}
+		if (landed == Start.WRITTEN) {
+			// (woken beside a party mate in their written start: its tale is yours too)
+			WrittenStarts.begin(player);
 		}
 		if (landed == Start.BURNED) {
 			// (0.7.501, Andy) smoke-sick from the fire you woke in
@@ -2786,6 +2813,10 @@ public final class LifeStory {
 	 * the place couldn't be found), {@code landed} where they woke (its place's things).
 	 */
 	private static void kit(ServerPlayer player, Start start, Start landed, Answer raised, Classes.PlayerClass cls, String option, RandomSource random) {
+		if (landed == Start.WRITTEN && WrittenStarts.bare(player)) {
+			// (a written start that says so: only what its maker put in the build, and what its tale hands over)
+			return;
+		}
 		if (start == Start.SWORN) {
 			// a realm's sworn guard: an iron helmet, a chainmail chestplate, an iron sword and a shield
 			for (Item item : List.of(Items.IRON_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.IRON_SWORD, Items.SHIELD)) {
@@ -3566,6 +3597,8 @@ public final class LifeStory {
 		}
 		Parties.reborn(player);
 		Tales.reborn(player);
+		// (the written start the last life woke in stays standing in the world; it's no longer theirs)
+		player.removeAttached(WrittenStarts.PLACED);
 		QuestPast.reborn(player);
 		Overheard.reborn(player);
 		Banks.reborn(player, heir);

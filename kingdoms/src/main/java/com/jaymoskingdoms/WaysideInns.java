@@ -329,7 +329,7 @@ final class WaysideInns {
 	 * The height of the natural, dry ground top at {@code x, z} (trunks and plants over it don't count: the template digs
 	 * them out), or {@link Integer#MIN_VALUE} if it is built, wet or not there. The column's chunk must be made.
 	 */
-	private static int groundY(ServerLevel level, int x, int z) {
+	static int groundY(ServerLevel level, int x, int z) {
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z)).below();
 		for (int i = 0; i < 12; i++) {
 			BlockState s = level.getBlockState(top);
