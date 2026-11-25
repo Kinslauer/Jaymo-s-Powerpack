@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
 
 /**
- * Rogue fighters on the player model with their own skins (a tyrant's dark armour, a champion's blue gi). A tyrant
+ * Rogue fighters on the player model with their own skins (a tyrant's dark armour, a champion's blue gi, the cave band's hide). A tyrant
  * wears Super hair, gold, paler and taller in Super 2.
  */
 public class ZFighterRogueRenderer extends MobRenderer<ZFighterRogue, AvatarRenderState, PlayerModel> {
@@ -30,6 +30,15 @@ public class ZFighterRogueRenderer extends MobRenderer<ZFighterRogue, AvatarRend
 	 * getTextureLocation, and its default is Steve.
 	 */
 	private static final PlayerSkin TYRANT_SKIN = skin(TYRANT), CHAMPION_SKIN = skin(CHAMPION);
+	/** The cave band's own four looks, all in primitive hide (tools/gen_cave_brute_skins.py), one by each brute's id. */
+	private static final Identifier[] BRUTES = new Identifier[4];
+	private static final PlayerSkin[] BRUTE_SKINS = new PlayerSkin[BRUTES.length];
+	static {
+		for (int i = 0; i < BRUTES.length; i++) {
+			BRUTES[i] = JaymosPowers.id("textures/entity/rogue_fighter/brute_" + i + ".png");
+			BRUTE_SKINS[i] = skin(BRUTES[i]);
+		}
+	}
 	static final int SUPER_HAIR = 0xFFD030;
 	static final int SUPER_2_HAIR = 0xFFF090;
 
@@ -59,8 +68,10 @@ public class ZFighterRogueRenderer extends MobRenderer<ZFighterRogue, AvatarRend
 		HumanoidMobRenderer.extractHumanoidRenderState(entity, state, partialTicks, this.itemModelResolver);
 		state.id = entity.getId();
 		state.setData(ZFighterRogueRenderer.KIND, entity.kind());
-		state.skin = entity.kind() == ZFighterRogue.TYRANT ? TYRANT_SKIN : CHAMPION_SKIN;
 		boolean brute = com.jaymospowers.power.zfighter.ZFighterCaveBand.brute(entity);
+		int look = brute ? Math.floorMod(entity.getUUID().hashCode(), BRUTES.length) : -1;
+		state.setData(BRUTE, look);
+		state.skin = look >= 0 ? BRUTE_SKINS[look] : entity.kind() == ZFighterRogue.TYRANT ? TYRANT_SKIN : CHAMPION_SKIN;
 		state.setData(ZFighterTail.KEY, brute ? 1 : 0);
 		state.setData(ZFighterTail.STYLE, brute ? WarriorLooks.tail(entity) : null);
 		int form = entity.form();
@@ -75,8 +86,15 @@ public class ZFighterRogueRenderer extends MobRenderer<ZFighterRogue, AvatarRend
 	static final net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<Integer> KIND =
 		net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey.create(() -> "jaymospowers:rogue_kind");
 
+	static final net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<Integer> BRUTE =
+		net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey.create(() -> "jaymospowers:rogue_brute");
+
 	@Override
 	public Identifier getTextureLocation(AvatarRenderState state) {
+		Integer look = state.getData(BRUTE);
+		if (look != null && look >= 0) {
+			return BRUTES[look];
+		}
 		Integer kind = state.getData(KIND);
 		return kind != null && kind == ZFighterRogue.TYRANT ? TYRANT : CHAMPION;
 	}
