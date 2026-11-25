@@ -2807,3 +2807,13 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
 
 - **Thirst** drains half as fast: a point of water every 150 s at rest (was 75 s), and jumping, sprinting, mining and attacking cost half the water they did (8 exhaustion to a point, was 4). Heat, swimming and the Nether still speed it up by the same shares. (`Thirst.DRAIN`, `Thirst.EXHAUSTION_POINT`)
 - Not built or played; only two constants changed.
+
+## 0.6.84 (2026-11-25): New art for the waterskins: a leather bag, a round iron canteen, a glass flask of dragon's breath (#2124)
+
+- **Leather Waterskin**: a soft, lumpy hide bag with a cork, stitched down the middle and tied at the neck with string.
+- **Iron Canteen**: a round, flat metal canteen with a pressed ring, a screw cap and a string strap over the top.
+- **Dragon Canteen**: a two-bulb glass flask of glowing pink dragon's breath, with a purpur stopper, the same string tied
+  round its waist and a wisp of breath at the top.
+- The old three were one bag in three colours; now each reads by its shape alone, even at inventory size. Textures
+  only (`textures/item/waterskin_{leather,iron,dragon}.png`), same names, no code changes.
+- Picked by an independent judge from four sets (three Claude artists, one Codex), then touched up. Not checked in game.
