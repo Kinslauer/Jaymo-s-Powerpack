@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "jaymoskitchen:block/forage/harvest_hive_top",
+    "front": "jaymoskitchen:block/forage/harvest_hive_front",
+    "side": "jaymoskitchen:block/forage/harvest_hive_side"
+  }
+}
