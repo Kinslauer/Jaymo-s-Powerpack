@@ -91,6 +91,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.combat.HitSounds.init();
 		// blades keep an edge: dulled by use, put right at a grindstone
 		com.jaymospowers.combat.Edge.init();
+		// silver blades sear the dead, the moon-cursed and the other monsters: more harm, a short stun, a hot cut
+		com.jaymospowers.combat.SilverSear.init();
 		// every magic effect's type: beam, blast, ring, orb, sigil, mote, miasma
 		com.jaymospowers.core.fx.MagicFx.init();
 		com.jaymospowers.combat.ShieldShatter.init();
