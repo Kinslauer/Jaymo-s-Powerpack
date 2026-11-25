@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Three primitive hide armour sets (one per drawn style), each with a darker make
 branch: claude/primitive-hide-sets
 with: Claude Opus 5.5 (T3 Code sub-agent)
-pr: 
+pr: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2127
 mods: powers, kingdoms (light_armor tag only)
 versions: 
 started: 2026-11-24
@@ -34,3 +34,6 @@ they can have a darker variation made from darker hides".
 - Same stats for all six (no tougher-dark pattern in the codebase).
 
 ## Done
+Draft PR #2127 (waits on Andy's look at Assets/primitive-hide-sets/). Six sets: Caveman (b, existing ids), Trapper's (a),
+Barbarian (c), and Dark makes (bear fur / hardened leather in the leather's place, or a light piece + charcoal or coal).
+Lore.md: "The hide-wearers" (new). All 24 icons pass audit.py; pr_checks passes. Not seen in game; CI compiles.
