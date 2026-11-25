@@ -75,7 +75,7 @@ public final class MocBeastsClient {
 			s -> texture(s.variant == 1 ? "ent_birch" : "ent_oak"), (ent, state) -> state.variant = ent.birch() ? 1 : 0, ent -> 1.0F));
 		critter(MocWild.CRICKET, c -> new CricketModel(CricketModel.createBodyLayer().bakeRoot()), 1.0F, s -> texture("cricket_" + (char) ('a' + s.variant % 2)));
 		critter(MocWild.SNAIL, c -> new SnailModel(SnailModel.createBodyLayer().bakeRoot()), 1.0F, s -> texture("snail_" + (char) ('a' + s.variant % 6)));
-		critter(MocWild.FLY, c -> new FlyModel(FlyModel.createBodyLayer().bakeRoot()), 1.0F, s -> texture("fly"));
+		critter(MocWild.FLY, c -> new FlyModel(FlyModel.createBodyLayer().bakeRoot()), 0.5F, s -> texture("fly"));
 		critter(MocWild.MAGGOT, c -> new MaggotModel(MaggotModel.createBodyLayer().bakeRoot()), 1.0F, s -> texture("maggot"));
 		critter(MocWild.ROACH, c -> new RoachModel(RoachModel.createBodyLayer().bakeRoot()), 0.5F, s -> texture("roach"));
 		critter(MocWild.MOUSE, c -> new MouseModel(MouseModel.createBodyLayer().bakeRoot()), 0.5F, s -> texture(new String[] {"mouse_white", "mouse_brown", "mouse_grey"}[s.variant % 3]));

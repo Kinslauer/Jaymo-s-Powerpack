@@ -80,6 +80,13 @@ public final class BladeBlood {
 	static final int BURST_DROPS = 26, BURST_GORE = 28;
 	static final double BURST_SPEED = 0.22, BURST_GORE_SPEED = 0.35;
 	static final float BURST_POOL = 3.0F;
+	/**
+	 * Squashed underfoot (a small spider or bug, Jaymo's Kingdoms' {@code SpiderSquash}): this many drops, this fast, a
+	 * splat of this size for a body a block across (smaller for a smaller one, never under the least), and this many flecks.
+	 */
+	static final int SQUASH_DROPS = 6, SQUASH_FLECKS = 4;
+	static final double SQUASH_SPEED = 0.12;
+	static final float SQUASH_SPLAT = 0.9F, SQUASH_LEAST = 0.25F;
 	/** (0.15.128) Blown apart by a blast: this many drops this fast, this many pools (each a burst's), this much gore this fast. */
 	static final int BLAST_DROPS = 40, BLAST_POOLS = 3, BLAST_GORE = 40;
 	static final double BLAST_SPEED = 0.35, BLAST_GORE_SPEED = 0.55;
@@ -699,6 +706,24 @@ public final class BladeBlood {
 		level.sendParticles(BloodParticles.fleck(color(target), 2.0F), at.x, at.y, at.z,
 			BURST_GORE, w, h, w, BURST_GORE_SPEED);
 		com.jaymospowers.core.blood.BloodSounds.burst(level, at, SoundSource.HOSTILE, 1.0F);
+	}
+
+	/**
+	 * Andy: "maggots, crickets, small bugs should burst into bug blood after a stomp like spiders." {@code body} (a small
+	 * spider or bug, just squashed to death underfoot) bursts flat: a few drops of its own blood thrown out low and a splat
+	 * where it was, sized to it (a maggot's is a thumbprint, a spider's a hand's breadth). Kept small (blood toned down).
+	 */
+	public static void squashed(LivingEntity body) {
+		if (!(body.level() instanceof ServerLevel level) || !bleeds(body)) {
+			return;
+		}
+		int color = color(body);
+		float across = Math.max(body.getBbWidth(), SQUASH_LEAST);
+		double w = body.getBbWidth() * 0.4;
+		double x = body.getX(), y = body.getY() + body.getBbHeight() * 0.5, z = body.getZ();
+		level.sendParticles(new BloodParticles.Spray(color, across), true, true, x, y, z, SQUASH_DROPS, w, 0.02, w, SQUASH_SPEED);
+		BloodTrail.blot(level, body, color, x, body.getY() + 0.3, z, SQUASH_SPLAT * across);
+		level.sendParticles(BloodParticles.fleck(color, across), x, y, z, SQUASH_FLECKS, w, 0.02, w, SQUASH_SPEED);
 	}
 
 	/**

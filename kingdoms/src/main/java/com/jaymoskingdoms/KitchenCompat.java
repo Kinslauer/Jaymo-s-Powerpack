@@ -552,6 +552,89 @@ public final class KitchenCompat {
 		return Math.max(LEAST_WHOLE, whole);
 	}
 
+	/** Kitchen's {@code CorpseEntity.ragdollRig()}, and its {@code RagdollRig}'s {@code shape} and standing {@code height}. */
+	private static @Nullable Method ragdollRig;
+	private static java.lang.reflect.@Nullable Field rigShape, rigHeight;
+	private static boolean lookedForRig;
+	/** A grown man's height (blocks): a body this tall is one man's worth of the dead. */
+	static final float MAN_HEIGHT = 1.8F;
+	/** The most one body counts for, however big it was (a giant's). */
+	static final float MOST_MEN = 4.0F;
+	/** What is never taken into the Unburied, though Kitchen lays it out like a person (creepers, golems, the creaking). */
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> NOT_UNBURIED = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ENTITY_TYPE, JaymosKingdoms.id("not_unburied"));
+
+	/**
+	 * Andy: "the unburied should only be made from humanoids", one "made from maggots ... barely had enough mass to
+	 * conglomerate into a human size". How many grown men's worth of the dead {@code corpse} is: 0 unless it was built like
+	 * a person (Kitchen lays it out as a humanoid: people, zombies, skeletons, illagers, piglins and the like, not bugs, beasts
+	 * or spiders, nor {@link #NOT_UNBURIED}); else its bulk against a man's (its standing height over {@link #MAN_HEIGHT},
+	 * cubed: a child or a baby zombie an eighth, a goblin a third or so), times as much of it as is left
+	 * ({@link #wholeness}), at most {@link #MOST_MEN}.
+	 */
+	public static float men(Entity corpse) {
+		if (!lookedForRig) {
+			lookedForRig = true;
+			if (CORPSE != null) {
+				try {
+					ragdollRig = CORPSE.getMethod("ragdollRig");
+					Class<?> rig = ragdollRig.getReturnType();
+					rigShape = rig.getField("shape");
+					rigHeight = rig.getField("height");
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to tell what the dead were built like: {}", e.toString());
+					ragdollRig = null;
+				}
+			}
+		}
+		net.minecraft.world.entity.EntityType<?> was = sourceType(corpse);
+		if (was == null || was.builtInRegistryHolder().is(NOT_UNBURIED) || ragdollRig == null || rigShape == null || rigHeight == null) {
+			return 0.0F;
+		}
+		Object rig = call(ragdollRig, corpse);
+		if (rig == null) {
+			return 0.0F;
+		}
+		try {
+			if (!(rigShape.get(rig) instanceof Enum<?> shape) || !"HUMANOID".equals(shape.name())) {
+				return 0.0F;
+			}
+			float tall = rigHeight.getFloat(rig) / MAN_HEIGHT;
+			return Math.min(MOST_MEN, tall * tall * tall) * wholeness(corpse);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return 0.0F;
+		}
+	}
+
+	/** Kitchen's {@code CorpseEntity.jolt(boolean)}. */
+	private static @Nullable Method joltBody;
+	private static boolean lookedForJolt;
+
+	/** The body {@code corpse} jolts where it lies (hard: as an axe blow does), drawn and in its ragdoll. */
+	public static void jolt(Entity corpse, boolean hard) {
+		if (!lookedForJolt) {
+			lookedForJolt = true;
+			if (CORPSE != null) {
+				try {
+					joltBody = CORPSE.getMethod("jolt", boolean.class);
+				} catch (ReflectiveOperationException e) {
+					joltBody = null;
+				}
+			}
+		}
+		call(joltBody, corpse, hard);
+	}
+
+	/** Whether the body {@code corpse} still wears any armour (helmet, chest, legs or boots). */
+	public static boolean armoured(Entity corpse) {
+		net.minecraft.nbt.CompoundTag look = lookTag(corpse);
+		if (look == null) {
+			return false;
+		}
+		net.minecraft.nbt.CompoundTag gear = look.getCompoundOrEmpty("equipment");
+		return gear.contains("head") || gear.contains("chest") || gear.contains("legs") || gear.contains("feet");
+	}
+
 	/** (0.7.132) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.5.9). */
 	static boolean burials() {
 		return ROB_BY != null;

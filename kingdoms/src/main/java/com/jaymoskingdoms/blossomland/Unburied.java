@@ -28,6 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -66,6 +67,10 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * A great foe (its own bar, a posture to break). It is slow and its blows throw people. A field where the dead are
  * buried or burned never raises one.
+ * <p>Andy: "the unburied should only be made from humanoids". Only the dead that were built like people go into it
+ * (Kingdoms' {@code KitchenCompat.men}: never a maggot, a bug, a spider or a beast), each counted for its bulk against a
+ * grown man's, and it is as big as what it is made of ({@link #size}): {@link #FULL_MEN} men's worth make it its usual
+ * size, more make it bigger and stronger, up to {@link #MAX_SCALE}. The biggest of its dead make its frame.
  */
 public class Unburied extends Beast {
 	static final double HEALTH = 220.0, SPEED = 0.2, DAMAGE = 12.0, KNOCKBACK = 2.5;
@@ -76,6 +81,8 @@ public class Unburied extends Beast {
 	static final int DROP_EVERY = 4;
 	/** How hard a body falls out of it: outward, and up. */
 	static final double SPILL_OUT = 0.22, SPILL_UP = 0.12;
+	/** This many grown men's worth of the dead make it its usual size (and health); more grow it, up to this scale. */
+	public static final float FULL_MEN = 8.0F, MAX_SCALE = 1.5F;
 
 	/** The parts of its frame a body hangs off (as the bone giant's model parts, which move the same way). */
 	public static final int TRUNK = 0, HEAD = 1, ARM_R = 2, ARM_L = 3, LEG_R = 4, LEG_L = 5;
@@ -159,6 +166,8 @@ public class Unburied extends Beast {
 	private static final EntityDataAccessor<Integer> TOOK = SynchedEntityData.defineId(Unburied.class, EntityDataSerializers.INT);
 	/** Ticks since it began to come apart (0: whole). */
 	private static final EntityDataAccessor<Integer> APART = SynchedEntityData.defineId(Unburied.class, EntityDataSerializers.INT);
+	/** Ticks since it began to get up out of its dead ({@link #gather}; 0: it's whole). */
+	private static final EntityDataAccessor<Integer> GATHER = SynchedEntityData.defineId(Unburied.class, EntityDataSerializers.INT);
 
 	static {
 		for (int i = 0; i < DRAWN; i++) {
@@ -191,6 +200,7 @@ public class Unburied extends Beast {
 		}
 		entityData.define(TOOK, 0);
 		entityData.define(APART, 0);
+		entityData.define(GATHER, 0);
 	}
 
 	@Override
@@ -206,20 +216,161 @@ public class Unburied extends Beast {
 
 	// ---- its dead ------------------------------------------------------------------------------------------------------
 
-	/** Takes these dead into itself (they leave the world, kept whole in it). */
-	void take(ServerLevel level, List<Entity> dead) {
-		for (Entity body : dead) {
-			TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
-			if (body.saveAsPassenger(out)) {
-				this.bodies.add(out.buildResult());
-			}
-			body.discard();
+	/**
+	 * As big as the dead it is made of: {@code men} grown men's worth ({@code KitchenCompat.men}) against
+	 * {@link #FULL_MEN}, its bulk (and with it its health) growing as they do, its height as the cube root, from its usual
+	 * size up to {@link #MAX_SCALE}.
+	 */
+	void size(float men) {
+		float scale = Mth.clamp((float)Math.cbrt(men / FULL_MEN), 1.0F, MAX_SCALE);
+		AttributeInstance size = this.getAttribute(Attributes.SCALE), health = this.getAttribute(Attributes.MAX_HEALTH);
+		if (size != null) {
+			size.setBaseValue(scale);
 		}
+		if (health != null) {
+			health.setBaseValue(HEALTH * scale * scale * scale);
+		}
+		this.setHealth(this.getMaxHealth());
+	}
+
+	/** {@code dead}, the biggest first (they make its frame), and how many men's worth they all are. */
+	private static float biggestFirst(List<Entity> dead) {
+		java.util.Map<Entity, Float> men = new java.util.HashMap<>();
+		float all = 0.0F;
+		for (Entity body : dead) {
+			float m = KitchenCompat.men(body);
+			men.put(body, m);
+			all += m;
+		}
+		dead.sort((a, b) -> Float.compare(men.get(b), men.get(a)));
+		return all;
+	}
+
+	/** Takes these dead into itself at once (they leave the world, kept whole in it), the biggest first. */
+	void take(ServerLevel level, List<Entity> dead) {
+		List<Entity> sorted = new ArrayList<>(dead);
+		size(biggestFirst(sorted));
+		for (Entity body : sorted) {
+			takeOne(level, body);
+		}
+	}
+
+	/** Takes {@code body} into itself: it leaves the world, kept whole in the next place on it. */
+	private void takeOne(ServerLevel level, Entity body) {
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		if (body.saveAsPassenger(out)) {
+			this.bodies.add(out.buildResult());
+		}
+		body.discard();
 		this.entityData.set(TOOK, this.bodies.size());
 		refreshLooks();
 	}
 
-	/** One raised with no dead of its own (an egg, a summons) is made of this many, and of these. */
+	// ---- getting up ----------------------------------------------------------------------------------------------------
+
+	/**
+	 * Andy: "there should be a rumbling and debris as the bodies shake and then slap together with flesh or clanging
+	 * sounds if any wore armor". It gets up as a gathering ({@link #gather}): first the ground rumbles for
+	 * {@link #RUMBLE_TICKS} under the dead where they lie, earth thrown up round them as they twitch and jerk; then one
+	 * by one, every {@link #SLAP_EVERY} ticks, the biggest first, each is dragged up out of the dirt and slaps onto the
+	 * heap with a wet smack of flesh, and a clang of iron if it wore armour, until it stands whole. Until the first body
+	 * is on it there is nothing to see or strike, and it doesn't move until it is all there.
+	 */
+	static final int RUMBLE_TICKS = 50, SLAP_EVERY = 3;
+	/** How often the ground groans, and the dead twitch, while it rumbles (ticks). */
+	static final int GROAN_EVERY = 12, TWITCH_EVERY = 5;
+	/** Server: the dead still lying where they fell, to be pulled into it, biggest first. */
+	private final List<java.util.UUID> coming = new ArrayList<>();
+
+	/** Begins to get up out of {@code heap} (the dead it will be made of), sized to them already. */
+	void gather(List<Entity> heap) {
+		List<Entity> sorted = new ArrayList<>(heap);
+		size(biggestFirst(sorted));
+		for (Entity body : sorted) {
+			this.coming.add(body.getUUID());
+		}
+		this.entityData.set(GATHER, 1);
+	}
+
+	/** Ticks since it began to gather (0: not gathering, it's whole). */
+	public int gathering() {
+		return this.entityData.get(GATHER);
+	}
+
+	private void gatherTick(ServerLevel level) {
+		int t = gathering() + 1;
+		this.entityData.set(GATHER, t);
+		this.setDeltaMovement(0.0, this.getDeltaMovement().y, 0.0);
+		if (t <= RUMBLE_TICKS) {
+			if (t % GROAN_EVERY == 1) {
+				level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_DIG, SoundSource.HOSTILE, 2.5F,
+					0.4F + this.random.nextFloat() * 0.15F);
+			}
+			boolean twitch = t % TWITCH_EVERY == 0;
+			for (java.util.UUID id : this.coming) {
+				Entity body = level.getEntity(id);
+				if (body == null || body.isRemoved()) {
+					continue;
+				}
+				debris(level, body.getX(), body.getY(), body.getZ(), 2);
+				if (twitch && this.random.nextInt(3) > 0) {
+					KitchenCompat.jolt(body, this.random.nextInt(3) == 0);
+				}
+			}
+			debris(level, this.getX(), this.getY(), this.getZ(), 4);
+			return;
+		}
+		if ((t - RUMBLE_TICKS) % SLAP_EVERY != 0) {
+			return;
+		}
+		// the next of them that's still lying there free (one carried off, burned or eaten is gone)
+		while (!this.coming.isEmpty()) {
+			Entity body = level.getEntity(this.coming.remove(0));
+			if (body == null || body.isRemoved() || body.isPassenger()) {
+				continue;
+			}
+			slap(level, body);
+			return;
+		}
+		// all there
+		this.entityData.set(GATHER, 0);
+		if (this.bodies.isEmpty()) {
+			this.discard();
+		}
+	}
+
+	/** {@code body} is torn up out of the ground and slaps onto it in its place: flesh, and iron if it wore armour. */
+	private void slap(ServerLevel level, Entity body) {
+		boolean armoured = KitchenCompat.armoured(body);
+		debris(level, body.getX(), body.getY(), body.getZ(), 8);
+		takeOne(level, body);
+		Vec3 at = slotPosition(this.bodies.size() - 1);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_BLOCK_FALL, SoundSource.HOSTILE, 1.6F, 0.5F + this.random.nextFloat() * 0.2F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 0.7F, 0.5F + this.random.nextFloat() * 0.2F);
+		if (armoured) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_FALL, SoundSource.HOSTILE, 1.4F, 0.6F + this.random.nextFloat() * 0.2F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 0.35F, 1.6F + this.random.nextFloat() * 0.3F);
+		}
+		level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, Items.ROTTEN_FLESH), at.x, at.y, at.z, 6, 0.3, 0.3, 0.3, 0.08);
+	}
+
+	/** Earth thrown up at (x, y, z): bits of whatever it stands on. */
+	private void debris(ServerLevel level, double x, double y, double z, int count) {
+		net.minecraft.core.BlockPos under = net.minecraft.core.BlockPos.containing(x, y - 0.2, z);
+		net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(under);
+		if (ground.isAir()) {
+			return;
+		}
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, ground), x, y + 0.1, z, count, 0.4, 0.05, 0.4, 0.15);
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		// nothing there yet to strike
+		return (gathering() == 0 || !this.bodies.isEmpty()) && super.hurtServer(level, source, amount);
+	}
+
+	/** One raised with no dead of its own (an egg, a summons) is made of this many men's worth, and of these. */
 	static final int RAISED_DEAD = 10;
 
 	/**
@@ -233,9 +384,12 @@ public class Unburied extends Beast {
 		SpawnGroupData data = super.finalizeSpawn(level, difficulty, reason, groupData);
 		if (this.bodies.isEmpty() && KitchenCompat.makesCorpses()) {
 			ServerLevel world = level.getLevel();
-			List<Entity> dead = new ArrayList<>(KitchenCompat.fallenNear(world, this.position(), NightThings.DEAD_RANGE));
+			// only the dead that were people
+			List<Entity> dead = new ArrayList<>(KitchenCompat.fallenNear(world, this.position(), NightThings.DEAD_RANGE).stream()
+				.filter(e -> KitchenCompat.men(e) > 0.0F).toList());
 			List<EntityType<? extends net.minecraft.world.entity.Mob>> kinds = List.of(EntityTypes.ZOMBIE, EntityTypes.HUSK, EntityTypes.ZOMBIE_VILLAGER, EntityTypes.ZOMBIE);
-			for (int i = dead.size(); i < RAISED_DEAD; i++) {
+			float men = NightThings.bodies(dead);
+			for (int i = dead.size(); men < RAISED_DEAD && i < SLOTS.length; i++) {
 				net.minecraft.world.entity.Mob old = kinds.get(this.random.nextInt(kinds.size())).create(world, EntitySpawnReason.EVENT);
 				if (old == null) {
 					continue;
@@ -244,6 +398,7 @@ public class Unburied extends Beast {
 				Entity body = KitchenCompat.bodyOf(world, old);
 				if (body != null) {
 					dead.add(body);
+					men += KitchenCompat.men(body);
 				}
 			}
 			if (!dead.isEmpty()) {
@@ -280,7 +435,8 @@ public class Unburied extends Beast {
 	private Vec3 slotPosition(int i) {
 		Slot slot = SLOTS[Math.min(i, SLOTS.length - 1)];
 		float[] pivot = PIVOTS[slot.part()];
-		double right = pivot[0] + slot.x(), up = pivot[1] + slot.y(), back = pivot[2] + slot.z();
+		float scale = this.getScale();
+		double right = (pivot[0] + slot.x()) * scale, up = (pivot[1] + slot.y()) * scale, back = (pivot[2] + slot.z()) * scale;
 		float yaw = this.yBodyRot * Mth.DEG_TO_RAD;
 		// facing yaw: forward (-sin, cos), its right (-cos, -sin)
 		double fx = -Mth.sin(yaw), fz = Mth.cos(yaw);
@@ -358,7 +514,11 @@ public class Unburied extends Beast {
 		// not in its AI step: that stops running the moment it stops moving (isImmobile), and it would stand there
 		// whole all day
 		if (this.level() instanceof ServerLevel level && this.isAlive()) {
-			nightAndDay(level);
+			if (gathering() > 0) {
+				gatherTick(level);
+			} else {
+				nightAndDay(level);
+			}
 		}
 	}
 
@@ -399,7 +559,7 @@ public class Unburied extends Beast {
 
 	@Override
 	protected boolean isImmobile() {
-		return super.isImmobile() || apart() > 0;
+		return super.isImmobile() || apart() > 0 || gathering() > 0;
 	}
 
 	@Override
@@ -424,6 +584,8 @@ public class Unburied extends Beast {
 		output.store("Bodies", CompoundTag.CODEC.listOf(), list);
 		output.putInt("Took", took());
 		output.putInt("Apart", apart());
+		// (still getting up: the dead not yet on it stay where they lie, and it stands up with what it has)
+		output.putBoolean("Gathering", gathering() > 0);
 	}
 
 	@Override
@@ -433,6 +595,8 @@ public class Unburied extends Beast {
 		input.read("Bodies", CompoundTag.CODEC.listOf()).ifPresent(this.bodies::addAll);
 		this.entityData.set(TOOK, input.getIntOr("Took", this.bodies.size()));
 		this.entityData.set(APART, input.getIntOr("Apart", 0));
+		// saved while getting up: it finishes with what it had (nothing: it never got up)
+		this.entityData.set(GATHER, input.getBooleanOr("Gathering", false) ? RUMBLE_TICKS + SLAP_EVERY - 1 : 0);
 		refreshLooks();
 	}
 

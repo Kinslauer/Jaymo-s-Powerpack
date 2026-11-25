@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
 public class Critter extends PathfinderMob {
 	/** The seven kinds: the size of their body, whether they fly, how many coats (textures) each has, and its health. */
 	public enum Kind {
-		CRICKET("cricket", 0.35F, 0.3F, false, 2, 1.0), SNAIL("snail", 0.3F, 0.3F, false, 6, 1.0), FLY("fly", 0.25F, 0.2F, true, 1, 1.0),
+		CRICKET("cricket", 0.35F, 0.3F, false, 2, 1.0), SNAIL("snail", 0.3F, 0.3F, false, 6, 1.0), FLY("fly", 0.15F, 0.12F, true, 1, 1.0),
 		MAGGOT("maggot", 0.25F, 0.15F, false, 1, 1.0), ROACH("roach", 0.4F, 0.25F, false, 1, 2.0), MOUSE("mouse", 0.3F, 0.3F, false, 3, 2.0),
 		MOLE("mole", 0.5F, 0.45F, false, 1, 5.0);
 
