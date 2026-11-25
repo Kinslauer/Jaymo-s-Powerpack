@@ -8194,3 +8194,8 @@ Andy's rulings of 2026-11-25, for a host who isn't a web slinger (whom the symbi
   Both pictures come from `tools/vanilla_style/space_pod.py`.
 - Without Alex's Caves, our own pod model and seat are unchanged.
 - Built; not played. The seat height and canopy fit were checked in preview renders of the model, not in game.
+
+## 0.27.49 (2026-11-25): The friends' zip shows the pack's real version in CurseForge (#2168)
+
+- The zip's CurseForge manifest is remade whenever the pack version changes. Before, Gradle kept reusing an old one, so the 0.27.46 zip imported as "Reason 0.27.39" (the mods inside were right). `curseforgeManifest` now lists the version as an input.
+- Build change only; nothing in game changes.
