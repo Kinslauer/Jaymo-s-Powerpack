@@ -228,7 +228,8 @@ public final class Orcs {
 		if (role == RANGER && fighting) {
 			double range = folk.distanceTo(target);
 			Item want = range > RANGER_BOW_FROM ? Items.BOW : range < RANGER_CROSSBOW_WITHIN ? Items.CROSSBOW : null;
-			if (want != null && !folk.getMainHandItem().is(want)) {
+			// (a ranger rushed to its blade keeps it: WeaponSense)
+			if (want != null && !folk.getMainHandItem().is(want) && !WeaponSense.rushed(folk)) {
 				folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(want));
 				level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.HOSTILE, 0.8F, 1.0F);
 			}

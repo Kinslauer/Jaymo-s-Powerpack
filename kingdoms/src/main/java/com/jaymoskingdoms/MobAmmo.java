@@ -80,7 +80,8 @@ import org.jspecify.annotations.Nullable;
 public final class MobAmmo {
 	/** What a mob shoots or throws. */
 	public enum Kind {
-		ARROWS("arrows"), JAVELINS("javelins"), SHOT("shot"), POTIONS("potions"), BOMBS("bombs"), ROCKS("rocks"), KNIVES("knives"), BALLS("balls"), BLAZE("blaze");
+		ARROWS("arrows"), JAVELINS("javelins"), SHOT("shot"), POTIONS("potions"), BOMBS("bombs"), ROCKS("rocks"), KNIVES("knives"), BALLS("balls"), BLAZE("blaze"),
+		BOOMERANGS("boomerangs");
 
 		final String key;
 
@@ -99,6 +100,8 @@ public final class MobAmmo {
 	 * with less ammo"; was 6 to 10).
 	 */
 	static final int[] JAVELINS = {2, 3}, SHOT = {3, 5};
+	/** The boomerangs a desert bandit or a ranger carries ({@link Boomerangs}). */
+	static final int[] BOOMERANGS = {2, 3};
 	/** A caravan guard's balls for his musketoon ({@link Musketoon}): heavy, so few (was 3 to 5). */
 	static final int[] BALLS = {2, 3};
 	/** A Flame Avatar Tinkerer's blaze rods and powder for the fire cannon ({@link FireCannon}). */
@@ -247,6 +250,7 @@ public final class MobAmmo {
 	static int full(Mob mob, Kind kind, RandomSource random) {
 		int[] range = switch (kind) {
 			case JAVELINS -> JAVELINS;
+			case BOOMERANGS -> BOOMERANGS;
 			case SHOT -> SHOT;
 			case POTIONS -> POTIONS;
 			case BOMBS -> BOMBS;
@@ -285,6 +289,7 @@ public final class MobAmmo {
 			case ARROWS -> stack.is(ItemTags.ARROWS);
 			case JAVELINS -> stack.is(Items.TRIDENT) || stack.is(Items.COBBLESTONE)
 				|| BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("javelin");
+			case BOOMERANGS -> BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("boomerang");
 			case POTIONS -> stack.is(Items.SPLASH_POTION) || stack.is(Items.LINGERING_POTION);
 			case ROCKS -> stack.is(Items.COBBLESTONE) || stack.is(Items.MOSSY_COBBLESTONE) || stack.is(Items.COBBLED_DEEPSLATE);
 			case KNIVES -> knife(stack);
@@ -474,6 +479,28 @@ public final class MobAmmo {
 			mob.getNavigation().moveTo(nearest, FETCH_SPEED);
 		}
 		return true;
+	}
+
+	/**
+	 * The nearest thrown weapon of {@code mob}'s (a javelin, trident or boomerang) lying at rest within {@link #FETCH_RANGE} of it
+	 * that it could pick up, or null. For a fighter going back for what it threw while its foe is not on top of it
+	 * ({@link WeaponSense}).
+	 */
+	static @Nullable Entity nearestThrown(ServerLevel level, Mob mob) {
+		Entity nearest = null;
+		double best = Double.MAX_VALUE;
+		for (Entity e : level.getEntities(mob, mob.getBoundingBox().inflate(FETCH_RANGE), e -> e instanceof ItemEntity || e instanceof AbstractArrow)) {
+			ItemStack stack = stackOf(e);
+			if (stack == null || !(is(stack, Kind.JAVELINS) && !stack.is(Items.COBBLESTONE) || is(stack, Kind.BOOMERANGS))) {
+				continue;
+			}
+			double d = mob.distanceToSqr(e);
+			if (d < best) {
+				best = d;
+				nearest = e;
+			}
+		}
+		return nearest;
 	}
 
 	/** The stack an item or a resting arrow/javelin/trident would give, or null if it can't be picked up. */
