@@ -272,6 +272,32 @@ public final class HeraldryArmour {
 		part("pauldrons", Harness.Slot.SHOULDERS, 2, 1.0F, 340, true, null, "pauldrons");
 		part("ailettes", Harness.Slot.SHOULDERS, 0, 0.0F, 0, false, null, "ailettes");
 		part("mitten_gauntlets", Harness.Slot.HANDS, 1, 0.0F, 260, true, null, "mitten_gauntlets");
+		// (Mordhau harness 4, kingdoms/tools/gen_heraldry_legs.py) the waist, thighs, shins and feet, and the new HOSE place (its sheets are
+		// UnderArmourLayer's)
+		part("long_tassets", Harness.Slot.WAIST, 2, 0.5F, 320, true, null, "long_tassets");
+		part("coat_of_plates_skirt", Harness.Slot.WAIST, 1, 0.0F, 200, false, Items.IRON_INGOT, "coat_of_plates_skirt");
+		part("lamellar_skirt", Harness.Slot.WAIST, 1, 0.0F, 240, false, Items.IRON_INGOT, "lamellar_skirt");
+		part("leather_lamellar_skirt", Harness.Slot.WAIST, 1, 0.0F, 180, false, Items.LEATHER, "leather_lamellar_skirt");
+		part("padded_skirt", Harness.Slot.WAIST, 1, 0.0F, 160, false, Items.STRING, "padded_skirt");
+		part("scale_skirt", Harness.Slot.WAIST, 1, 0.0F, 240, false, Items.IRON_INGOT, "scale_skirt");
+		for (String skirt : List.of("cloth_skirt", "short_skirt", "long_skirt", "apron", "pleated_base", "embroidered_skirt")) {
+			part(skirt, Harness.Slot.WAIST, 0, 0.0F, 0, false, null, skirt);
+		}
+		part("fluted_cuisses", Harness.Slot.THIGHS, 2, 1.0F, 340, true, null, "fluted_cuisses");
+		part("brigandine_cuisses", Harness.Slot.THIGHS, 2, 0.0F, 220, false, Items.IRON_INGOT, "brigandine_cuisses");
+		part("leather_cuisses", Harness.Slot.THIGHS, 1, 0.0F, 200, false, Items.LEATHER, "leather_cuisses");
+		part("mail_chausses", Harness.Slot.THIGHS, 2, 0.0F, 300, false, Items.IRON_INGOT, "mail_chausses");
+		part("schynbald", Harness.Slot.SHINS, 1, 0.5F, 260, true, null, "schynbald");
+		part("leg_wraps", Harness.Slot.SHINS, 0, 0.0F, 0, false, null, "leg_wraps");
+		worn("scale_sabatons", ArmorType.BOOTS);
+		worn("mail_shoes", ArmorType.BOOTS);
+		part("shorts", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, null);
+		part("breeches", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, null);
+		part("baggy_breeches", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, "baggy_breeches");
+		part("linen_hose", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, null);
+		part("joined_hose", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, null);
+		part("riding_hose", Harness.Slot.HOSE, 1, 0.0F, 200, false, Items.LEATHER, null);
+		part("landsknecht_hose", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, "landsknecht_hose");
 		List<Item> all = new ArrayList<>();
 		PIECES.values().forEach(p -> all.add(p.item()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

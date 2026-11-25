@@ -70,7 +70,7 @@ public final class Harness {
 	 * a list in this order, and an older, shorter one is read with its new places bare ({@link #worn}).
 	 */
 	public enum Slot {
-		PADDING, MAIL, SHOULDERS, ARMS, HANDS, THIGHS, SHINS, OVER, HOOD, CREST, NECK, WAIST;
+		PADDING, MAIL, SHOULDERS, ARMS, HANDS, THIGHS, SHINS, OVER, HOOD, CREST, NECK, WAIST, HOSE;
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);
@@ -82,7 +82,7 @@ public final class Harness {
 	 * doublet: "you will see guards opt to remove their armor and stay within the harness gear, as it is too much to remove and
 	 * store"), read as: off duty or in town the heavy pieces come off and the under-layers stay.
 	 */
-	public static final java.util.Set<Slot> UNDER_LAYERS = EnumSet.of(Slot.PADDING, Slot.MAIL);
+	public static final java.util.Set<Slot> UNDER_LAYERS = EnumSet.of(Slot.PADDING, Slot.MAIL, Slot.HOSE);
 
 	public static final int SLOTS = Slot.values().length;
 	private static final List<ItemStack> NONE = Collections.nCopies(SLOTS, ItemStack.EMPTY);
@@ -284,7 +284,7 @@ public final class Harness {
 					out.add(limb);
 				}
 			}
-			case "all" -> add(out, worn, Slot.PADDING, Slot.MAIL, Slot.NECK, Slot.SHOULDERS, Slot.ARMS, Slot.HANDS, Slot.WAIST, Slot.THIGHS, Slot.SHINS);
+			case "all" -> add(out, worn, Slot.PADDING, Slot.MAIL, Slot.NECK, Slot.SHOULDERS, Slot.ARMS, Slot.HANDS, Slot.WAIST, Slot.HOSE, Slot.THIGHS, Slot.SHINS);
 			default -> {
 			}
 		}
@@ -384,7 +384,7 @@ public final class Harness {
 	private static int partsOf(Slot slot) {
 		return switch (slot) {
 			case ARMS, HANDS -> 2 | 4;
-			case THIGHS, SHINS -> 8 | 16;
+			case THIGHS, SHINS, HOSE -> 8 | 16;
 			case HOOD, CREST -> 1;
 			default -> 0;
 		};

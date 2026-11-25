@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/embroidered_skirt",
+    "layer1": "jaymoskingdoms:item/embroidered_skirt_trim"
+  }
+}

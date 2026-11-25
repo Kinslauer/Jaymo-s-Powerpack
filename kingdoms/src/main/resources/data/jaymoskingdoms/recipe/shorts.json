@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "ingredients": [
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:string"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:shorts"
+  }
+}

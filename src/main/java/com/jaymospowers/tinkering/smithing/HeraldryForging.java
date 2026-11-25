@@ -93,9 +93,20 @@ public final class HeraldryForging {
 		MORE_PLATE.put("embossed_cuirass", 8);
 		MORE_PLATE.put("pauldrons", 5);
 		MORE_PLATE.put("mitten_gauntlets", 3);
+		// (Mordhau harness 4) the long tassets, the fluted cuisses, the schynbald and the scale sabatons
+		MORE_PLATE.put("long_tassets", 6);
+		MORE_PLATE.put("fluted_cuisses", 5);
+		MORE_PLATE.put("schynbald", 2);
+		MORE_PLATE.put("scale_sabatons", 4);
 		MORE_MAIL.put("mail_hauberk", 8);
 		MORE_MAIL.put("plated_mail", 8);
 		MORE_MAIL.put("scale_shirt", 6);
+		// (Mordhau harness 4) the scale and lamellar skirts, the brigandine cuisses, the mail chausses and the mail shoes
+		MORE_MAIL.put("scale_skirt", 4);
+		MORE_MAIL.put("lamellar_skirt", 5);
+		MORE_MAIL.put("brigandine_cuisses", 3);
+		MORE_MAIL.put("mail_chausses", 8);
+		MORE_MAIL.put("mail_shoes", 3);
 		EXTRA_FINISHES.put("rounded_breastplate", List.of(PAINTED));
 		EXTRA_FINISHES.put("fluted_cuirass", List.of(PAINTED, "etched"));
 		EXTRA_FINISHES.put("plate_cuirass", List.of("russeted"));

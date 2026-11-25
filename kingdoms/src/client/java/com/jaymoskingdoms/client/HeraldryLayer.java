@@ -56,7 +56,7 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	private static final Map<String, String> BONES = Map.of("armorHead", "head", "armorBody", "body", "armorRightArm", "right_arm",
 		"armorLeftArm", "left_arm", "armorRightLeg", "right_leg", "armorLeftLeg", "left_leg", "armorRightBoot", "right_leg", "armorLeftBoot", "left_leg");
 	/** The harness places drawn here, innermost first. */
-	private static final Harness.Slot[] DRAWN = {Harness.Slot.PADDING, Harness.Slot.MAIL, Harness.Slot.SHINS, Harness.Slot.THIGHS, Harness.Slot.WAIST, Harness.Slot.HANDS, Harness.Slot.ARMS,
+	private static final Harness.Slot[] DRAWN = {Harness.Slot.HOSE, Harness.Slot.PADDING, Harness.Slot.MAIL, Harness.Slot.SHINS, Harness.Slot.THIGHS, Harness.Slot.WAIST, Harness.Slot.HANDS, Harness.Slot.ARMS,
 		Harness.Slot.NECK, Harness.Slot.SHOULDERS, Harness.Slot.OVER, Harness.Slot.HOOD, Harness.Slot.CREST};
 	/** An undyed piece of cloth's colour, by piece (as its icon's: the generator's DYED). */
 	private static final Map<String, Integer> UNDYED = Map.of("giornea", 0x8E2B2B, "cloak", 0x4A5568, "torn_cloak", 0x5A5246, "hood", 0x4A5568,
@@ -67,15 +67,20 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		Map.entry("clerics_mantle", 0x8E2B2B), Map.entry("arming_cap", 0xD8CCB0), Map.entry("linen_coif", 0xECE6D6), Map.entry("bag_hat", 0x6E7F4A),
 		Map.entry("archers_cap", 0x3F6B3A), Map.entry("hunters_hat", 0x5E4A32), Map.entry("landsknecht_bonnet", 0xA02828), Map.entry("turban", 0xE8E0CC),
 		Map.entry("veiled_turban", 0x3A5A8E), Map.entry("jesters_hood", 0xB02E26));
-	private static final Map<String, Integer> SECOND_UNDYED = Map.of("landsknecht_bonnet", 0xF0C838, "jesters_hood", 0xE8C83A, "jesters_motley", 0xE8C83A);
+	private static final Map<String, Integer> SECOND_UNDYED = Map.of("landsknecht_bonnet", 0xF0C838, "jesters_hood", 0xE8C83A, "jesters_motley", 0xE8C83A, "embroidered_skirt", 0xE8C83A, "landsknecht_hose", 0xD8B034);
 	/** (Mordhau harness 3) The body's cloth models' undyed colours (gen_heraldry_body.py's UNDYED), and the colour a covered plate piece shows undyed. */
 	private static final Map<String, Integer> BODY_UNDYED = Map.ofEntries(Map.entry("wool_tunic", 0x6B5A44), Map.entry("quilted_coat", 0xCEBE96),
 		Map.entry("surcoat", 0x2B4A8E), Map.entry("torn_surcoat", 0x5A5246), Map.entry("monks_robe", 0x5A4632), Map.entry("kaftan", 0x2F5A7A),
-		Map.entry("jesters_motley", 0xB02E26), Map.entry("sash", 0xB02E26), Map.entry("ailettes", 0x2B4A8E), Map.entry("brigandine_coat", 0x7A2E2A));
+		Map.entry("jesters_motley", 0xB02E26), Map.entry("sash", 0xB02E26), Map.entry("ailettes", 0x2B4A8E), Map.entry("brigandine_coat", 0x7A2E2A),
+		// (Mordhau harness 4, gen_heraldry_legs.py's UNDYED) the waist's and the legs' cloth
+		Map.entry("coat_of_plates_skirt", 0x7A2E2A), Map.entry("padded_skirt", 0xD8CCB0), Map.entry("cloth_skirt", 0x6B5A44), Map.entry("short_skirt", 0x6E7F4A),
+		Map.entry("long_skirt", 0x4A5568), Map.entry("apron", 0xCEBE96), Map.entry("pleated_base", 0x8E2B2B), Map.entry("embroidered_skirt", 0x2B4A8E),
+		Map.entry("leg_wraps", 0xB8A878), Map.entry("baggy_breeches", 0x7A6A48), Map.entry("landsknecht_hose", 0x2B4A8E));
 	private static final int COVERED_UNDYED = 0x7A2E3A;
 	/** Dyed pieces with parts drawn as they are painted (feathers, bells, gilt: heraldry_PIECE_fixed). */
 	private static final Set<String> TRIMMED = Set.of("clerics_mantle", "archers_cap", "hunters_hat", "landsknecht_bonnet", "turban", "veiled_turban",
-		"jesters_hood", "surcoat", "torn_surcoat", "monks_robe", "kaftan", "jesters_motley", "ailettes", "brigandine_coat");
+		"jesters_hood", "surcoat", "torn_surcoat", "monks_robe", "kaftan", "jesters_motley", "ailettes", "brigandine_coat", "coat_of_plates_skirt", "padded_skirt", "cloth_skirt", "short_skirt", "long_skirt", "apron",
+		"pleated_base");
 	/** Hats, worn bare-headed: not drawn under a helm (the hood, cowl, mantle, caps and coifs go on over or under one). */
 	private static final Set<String> HATS = Set.of("tight_hood", "headsmans_hood", "bag_hat", "archers_cap", "field_hat", "hunters_hat",
 		"landsknecht_bonnet", "fur_hat", "turban", "veiled_turban", "jesters_hood", "laurel_wreath");
