@@ -31,7 +31,12 @@ public final class FirstPersonWounds {
 
 	/** Before the game draws your arm: a lost arm is shortened to its stump (not one with a prosthetic fitted, which is drawn as it is). */
 	public static void begin(ModelPart arm, PlayerModel model) {
-		shortened = false;
+		if (shortened) {
+			// last frame's draw was cut short (another mod cancelled it) before end() put the arm back
+			arm.yScale = yScale;
+			arm.y = y;
+			shortened = false;
+		}
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null || BloodSettings.streamerSafe() || BloodSettings.off()) {
 			return;
