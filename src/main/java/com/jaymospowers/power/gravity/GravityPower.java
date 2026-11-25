@@ -1245,9 +1245,11 @@ public final class GravityPower implements Power {
 		ServerLevel world = player.level();
 		BlockPos aimed = hit.getBlockPos().immutable();
 		// (iron answers first, GravityMetal) a metal block comes faster, and the metal touching it comes too, however hard
-		state.ripMetal = com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_1) && GravityMetal.metalBlock(world.getBlockState(aimed));
+		// (the extra pieces are only ever metal: the ground round it is asked for as for any block)
+		state.ripMetal = false;
 		List<BlockPos> blocks = new ArrayList<>(com.jaymospowers.core.BlockCluster.crater(world, hit.getBlockPos(), ripMax(player, state),
 			CHUNK_HARDEST_BASE + CHUNK_HARDEST_PER_LEVEL * abilities, player));
+		state.ripMetal = com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_1) && GravityMetal.metalBlock(world.getBlockState(aimed));
 		if (state.ripMetal) {
 			// the aimed block first, then its metal, then the rest
 			List<BlockPos> metal = GravityMetal.touchingMetal(world, aimed, ripMax(player, state) - 1, player);
