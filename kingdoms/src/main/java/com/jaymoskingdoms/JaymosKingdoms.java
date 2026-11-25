@@ -614,6 +614,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		AtiCompounds.register();
 		// kingdoms' seats the world generates whole: a castle with its square, garden, barracks and homes round it
 		SeatCompounds.register();
+		// village mods 6, small structures: the tree sites (the hollow oak's hermit, the lookout's bandits, the hanging
+		// tree's crows) and the changing maze under a necromancer's crypt (their attachments load with them)
+		TreeSites.register();
+		CryptMaze.register();
 		EpicTowns.register();
 		TownWakes.register();
 		// 0.5: seats in the world's buildings (and their attachment); fiefdoms and camps in Grim Kingdoms' ruins (only with

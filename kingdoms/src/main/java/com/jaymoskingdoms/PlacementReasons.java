@@ -42,6 +42,12 @@ import org.jspecify.annotations.Nullable;
  * {@link #RUIN_HARSH} steps harsh ({@link HarshLands}), where the cold or the heat drove its people out.</li>
  * <li><b>Cairns</b> ({@code cairns_by_ways}): heaps of stones marking the ways out of a town, so a settlement within
  * {@link #CAIRN_NEAR} chunks (about 500 blocks) and none within {@link #CAIRN_CLEAR} (not in its streets).</li>
+ * <li><b>Hermitages</b> ({@code hermitages_apart}: the hollow oak's hermit, the cave gardens): nothing lived in within
+ * {@link #HERMIT_CLEAR} chunks of them (a hermit left the towns behind; a druid's garden is no village's doorstep).</li>
+ * <li><b>Bandit lookouts</b> ({@code lookouts_by_ways}: the great spruce's platform): where the roads out of a settlement
+ * run, within {@link #LOOKOUT_NEAR} chunks of one but none within {@link #LOOKOUT_CLEAR}, out of its watch's reach.</li>
+ * <li><b>Hanging trees</b> ({@code gibbets_by_towns}): the Sun's law hangs a road thief by the way into town, so a
+ * settlement within {@link #GIBBET_NEAR} chunks and none within {@link #GIBBET_CLEAR}.</li>
  * </ul>
  * A neighbour is found the way the world places it, without generating anything: each structure set holding one is asked
  * where its spread puts one near here, and whether the land there is one it stands in. A neighbour that later fails for
@@ -62,6 +68,9 @@ public final class PlacementReasons {
 	static final int HOMESTEAD_NEAR = 32;
 	static final int OLD_CLEAR = 4;
 	static final int CAIRN_NEAR = 32, CAIRN_CLEAR = 3;
+	static final int HERMIT_CLEAR = 12;
+	static final int LOOKOUT_NEAR = 25, LOOKOUT_CLEAR = 6;
+	static final int GIBBET_NEAR = 12, GIBBET_CLEAR = 4;
 	/** Land this harsh explains a ruin with no heir. */
 	static final int RUIN_HARSH = 2;
 
@@ -81,7 +90,10 @@ public final class PlacementReasons {
 		new Rule(tag("ruins_with_heirs"), SETTLEMENTS, RUIN_NEAR, 0, RUIN_HARSH),
 		new Rule(tag("homesteads_by_towns"), SETTLEMENTS, HOMESTEAD_NEAR, 0, 0),
 		new Rule(tag("old_cities"), tag("lived_in"), 0, OLD_CLEAR, 0),
-		new Rule(tag("cairns_by_ways"), SETTLEMENTS, CAIRN_NEAR, CAIRN_CLEAR, 0));
+		new Rule(tag("cairns_by_ways"), SETTLEMENTS, CAIRN_NEAR, CAIRN_CLEAR, 0),
+		new Rule(tag("hermitages_apart"), tag("lived_in"), 0, HERMIT_CLEAR, 0),
+		new Rule(tag("lookouts_by_ways"), SETTLEMENTS, LOOKOUT_NEAR, LOOKOUT_CLEAR, 0),
+		new Rule(tag("gibbets_by_towns"), SETTLEMENTS, GIBBET_NEAR, GIBBET_CLEAR, 0));
 
 	/** Given a part to play by our own code once they stand (Grim Kingdoms' holds and camps), so not reported. */
 	public static final TagKey<Structure> OWN_REASON = tag("own_reason");
