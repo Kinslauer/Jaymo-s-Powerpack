@@ -95,7 +95,7 @@ public final class MagicFxClient {
 	/** Spheres are this many faces round and down (a blast's shell is thin and brief, so fewer). */
 	static final int LON = 16, LAT = 10;
 	/** The most shapes alive at once: past it the oldest go. */
-	static final int MAX_SHAPES = 256;
+	static final int MAX_SHAPES = 512;
 
 	private static final class Live {
 		final MagicFx.Shape shape;
