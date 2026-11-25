@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "mvs:wooden_wheat_farm", "required": false},
+    {"id": "mvs:wheat_grain_bin", "required": false},
+    {"id": "mvs:haystack", "required": false},
+    {"id": "mvs:windmill", "required": false},
+    {"id": "mvs:barn", "required": false},
+    {"id": "mvs:horse_pen", "required": false}
+  ]
+}

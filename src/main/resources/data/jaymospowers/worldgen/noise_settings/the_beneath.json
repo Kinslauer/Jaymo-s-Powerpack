@@ -1,0 +1,84 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "enderscape"
+      ]
+    }
+  ],
+  "aquifers_enabled": false,
+  "default_block": {
+    "id": "minecraft:end_stone"
+  },
+  "default_fluid": {
+    "id": "minecraft:air"
+  },
+  "disable_mob_generation": false,
+  "legacy_random_source": true,
+  "noise": {
+    "height": 320,
+    "min_y": -48
+  },
+  "noise_router": {
+    "chunk_surface_level": 0.0,
+    "barrier": 0.0,
+    "continents": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:noise",
+        "noise": "enderscape:continents",
+        "xz_scale": 0.15,
+        "y_scale": 0,
+        "shift_x": 0,
+        "shift_y": 0,
+        "shift_z": 0
+      },
+      "right": {
+        "type": "minecraft:noise",
+        "noise": "enderscape:continents",
+        "xz_scale": 0.1,
+        "y_scale": 0,
+        "shift_x": 4000,
+        "shift_y": 0,
+        "shift_z": 4000
+      }
+    },
+    "depth": {
+      "type": "interpolated",
+      "cell_size_xz": 2,
+      "cell_size_y": 1,
+      "input": "enderscape:depth"
+    },
+    "erosion": {
+      "type": "interpolated",
+      "cell_size_xz": 2,
+      "cell_size_y": 1,
+      "input": "enderscape:center"
+    },
+    "final_density": "enderscape:final",
+    "fluid_level_floodedness": 0.0,
+    "fluid_level_spread": 0.0,
+    "initial_density_without_jaggedness": 0.0,
+    "lava": 0.0,
+    "ridges": {
+      "type": "interpolated",
+      "cell_size_xz": 2,
+      "cell_size_y": 1,
+      "input": "enderscape:weirdness"
+    },
+    "temperature": {
+      "type": "minecraft:noise",
+      "noise": "minecraft:temperature",
+      "shift_x": "minecraft:shift_x",
+      "shift_y": 0.0,
+      "shift_z": "minecraft:shift_z",
+      "xz_scale": 0.15,
+      "y_scale": 0.0
+    },
+    "vegetation": 0.0
+  },
+  "sea_level": 0,
+  "spawn_target": [],
+  "material_rule": "enderscape:end"
+}

@@ -172,5 +172,15 @@
   "message.jaymospowers.helm_view.is_on": "Great helms narrow your view to the visor's slit. /helmview off to see clearly.",
   "message.jaymospowers.helm_view.is_off": "Great helms leave your view clear. /helmview on for the visor's slit.",
   "menu.jaymospowers.body_weapons.set": "Weapons: set places",
-  "menu.jaymospowers.body_weapons.free": "Weapons: free"
+  "menu.jaymospowers.body_weapons.free": "Weapons: free",
+  "item.jaymospowers.hoverboard": "Hoverboard",
+  "item.jaymospowers.hoverboard.hint": "Set it down on a block, then right-click to step on. Hovers over ground and water; Jump hops, and in the air throws a trick. Dye colours the hull (sneak: the trail)",
+  "item.jaymospowers.hoverboard.charge": "Charge: %ss. Feed it redstone; flat, it only rolls like a skateboard",
+  "entity.jaymospowers.hoverboard": "Hoverboard",
+  "block.jaymospowers.future_workbench": "Future Workbench",
+  "message.jaymospowers.future_workbench.needs": "A hoverboard takes %s iron ingots, %s copper ingots and %s redstone, from your pack",
+  "message.jaymospowers.hoverboard.hud": "Cell %ss | W/S speed, A/D turn, Jump hop or trick",
+  "message.jaymospowers.hoverboard.pushing": "Cell flat: push with W, feed it redstone",
+  "message.jaymospowers.hoverboard.flat": "The cell runs flat: the board drops",
+  "message.jaymospowers.hoverboard.full": "The cell is full"
 }

@@ -87,7 +87,7 @@ final class HitRouting {
 	private static void spread(LivingEntity victim, BodyPlan plan, float[] points, float max, float loss) {
 		float share = loss / Math.max(0.01F, victim.getMaxHealth());
 		for (int i = 0; i < points.length; i++) {
-			float cap = plan.share(i) * max;
+			float cap = plan.share(i, victim) * max;
 			float floor = Math.min(points[i], SPREAD_FLOOR * cap);
 			points[i] = Math.max(floor, points[i] - share * cap);
 		}

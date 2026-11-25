@@ -80,7 +80,7 @@ public final class BioTailEngulf {
 				continue;
 			}
 			float started = STARTED.computeIfAbsent(player.getId(), k -> clock);
-			float t = Mth.clamp((clock - started) / BioBuilt.ABSORB_TICKS, 0.0F, 1.0F);
+			float t = Mth.clamp((clock - started) / player.getAttachedOrElse(HeritageHold.ABSORB_NEED, BioBuilt.ABSORB_TICKS), 0.0F, 1.0F);
 			draw(context, level, camera, player, foe, t, clock, partialTick);
 		}
 	}

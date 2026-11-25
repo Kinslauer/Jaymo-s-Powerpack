@@ -1,0 +1,25 @@
+{
+  "display": {
+    "title": {
+      "translate": "advancements.jaymospowers.dino.mount_skeleton.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.dino.mount_skeleton.description"
+    },
+    "icon": {
+      "id": "jaymospowers:velociraptor_skeleton"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "jaymospowers:dino/root"
+}

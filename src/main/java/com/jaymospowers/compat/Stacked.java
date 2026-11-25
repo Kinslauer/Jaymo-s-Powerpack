@@ -250,7 +250,12 @@ public final class Stacked {
 	 * anything in the level); anywhere else the level's own, shift 0. The same as Kingdoms' {@code Stacked.overworldGround}.
 	 */
 	public static Ground overworldGround(ServerLevel level) {
-		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), Level.OVERWORLD) : null;
+		return ground(level, Level.OVERWORLD);
+	}
+
+	/** {@link #overworldGround}, for any realm's band (the Nether's, for its castles): the level's own when it isn't stacked. */
+	public static Ground ground(ServerLevel level, ResourceKey<Level> realm) {
+		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), realm) : null;
 		if (band != null) {
 			try {
 				return new Ground((ChunkGenerator) bandGenerator.invoke(band), (RandomState) bandRandomState.invoke(band),
@@ -268,7 +273,12 @@ public final class Stacked {
 	 * runs, the level's structure checks are worked out by that band's generator. An ordinary world just runs it.
 	 */
 	public static <T> T searchingOverworld(ServerLevel level, java.util.function.Supplier<T> body) {
-		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), Level.OVERWORLD) : null;
+		return searching(level, Level.OVERWORLD, body);
+	}
+
+	/** {@link #searchingOverworld}, for any realm's band. */
+	public static <T> T searching(ServerLevel level, ResourceKey<Level> realm, java.util.function.Supplier<T> body) {
+		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), realm) : null;
 		ThreadLocal<Object> mark = searching;
 		if (band == null || mark == null) {
 			return body.get();

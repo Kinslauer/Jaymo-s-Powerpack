@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:dino_venom_sac",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "id": "jaymospowers:narcotic",
+    "count": 4
+  }
+}

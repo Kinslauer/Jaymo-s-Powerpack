@@ -13,6 +13,12 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -105,6 +111,17 @@ public final class RubberFolk {
 	static final int FIRE = 1, WATER = 2, FLIGHT = 4, NIGHT = 8, SPRING = 16;
 	/** A sweet thing mends this much; a baked one from Kitchen, and a slice of cake. */
 	static final float SWEET_HEAL = 4.0F, KITCHEN_HEAL = 6.0F, CAKE_HEAL = 4.0F;
+	/**
+	 * Home ground: Alex's Caves' Candy Cavity, where the Mad Tinkerer grew the first of them (Lore.md, "Where the
+	 * Rubber-folk come from"; "the few who go back down find the caves familiar without knowing why"). There a lost limb
+	 * grows back every {@link #HOME_REGROW_EVERY} ticks, not {@link #REGROW_EVERY}, and they mend {@link #HOME_MEND} every
+	 * {@link #HOME_MEND_EVERY} ticks. Nothing tells them why. Alex's candy counts among their sweets ({@link #SWEETS}).
+	 */
+	static final ResourceKey<Biome> CANDY_CAVITY = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("alexscaves", "candy_cavity"));
+	static final int HOME_REGROW_EVERY = 200, HOME_MEND_EVERY = 100;
+	static final float HOME_MEND = 1.0F;
+	/** Other sweets that mend them (Alex's candy: data/jaymoskingdoms/tags/item/rubber_sweets.json). */
+	static final TagKey<Item> SWEETS = TagKey.create(Registries.ITEM, JaymosKingdoms.id("rubber_sweets"));
 	/** Pink motes. */
 	private static final DustParticleOptions PINK = new DustParticleOptions(0xF08CB8, 0.8F);
 
@@ -237,10 +254,10 @@ public final class RubberFolk {
 		player.addEffect(new MobEffectInstance(effect, GIFT_TICKS, amplifier, true, false, true));
 	}
 
-	/** A sweet thing: a cookie, a pie, honey, berries, a slice of melon, a cake, or one of Kitchen's. */
+	/** A sweet thing: a cookie, a pie, honey, berries, a slice of melon, a cake, one of Kitchen's, or Alex's candy ({@link #SWEETS}). */
 	static boolean sweet(ItemStack stack) {
 		return stack.is(Items.COOKIE) || stack.is(Items.PUMPKIN_PIE) || stack.is(Items.HONEY_BOTTLE) || stack.is(Items.SWEET_BERRIES)
-			|| stack.is(Items.MELON_SLICE) || stack.is(Items.CAKE) || KitchenCompat.sweet(stack);
+			|| stack.is(Items.MELON_SLICE) || stack.is(Items.CAKE) || KitchenCompat.sweet(stack) || stack.is(SWEETS);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -260,14 +277,19 @@ public final class RubberFolk {
 			if (adopted != null && server.getTickCount() % GIFT_EVERY == 0 && living) {
 				gifts(player, adopted);
 			}
-			// a lost limb grows back, one at a time
+			// a lost limb grows back, one at a time, faster at home in the Candy Cavity, where they also mend
 			// ((0.7.552) not while cut in half and waiting on a swallow: that one has to come first)
-			if (server.getTickCount() % REGROW_EVERY == REGROW_EVERY - STRETCH_TICKS && living && !player.entityTags().contains(SPLIT_TAG)
+			boolean home = player.level().getBiome(player.blockPosition()).is(CANDY_CAVITY);
+			int regrowEvery = home ? HOME_REGROW_EVERY : REGROW_EVERY;
+			if (home && living && server.getTickCount() % HOME_MEND_EVERY == 0 && player.getHealth() < player.getMaxHealth()) {
+				player.heal(HOME_MEND);
+			}
+			if (server.getTickCount() % regrowEvery == regrowEvery - STRETCH_TICKS && living && !player.entityTags().contains(SPLIT_TAG)
 				&& PowersCompat.missingLimbs(player) != 0) {
 				// the limb starts stretching back: a balloon pulled tight
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), STRETCH, SoundSource.PLAYERS, 1.0F, 1.0F);
 			}
-			if (server.getTickCount() % REGROW_EVERY == 0 && living && !player.entityTags().contains(SPLIT_TAG) && PowersCompat.regrow(player, false) && player.level() instanceof ServerLevel level) {
+			if (server.getTickCount() % regrowEvery == 0 && living && !player.entityTags().contains(SPLIT_TAG) && PowersCompat.regrow(player, false) && player.level() instanceof ServerLevel level) {
 				level.sendParticles(PINK, player.getX(), player.getY(0.6), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), POP, SoundSource.PLAYERS, 1.0F, 1.0F);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rubber.regrown"));
@@ -297,7 +319,7 @@ public final class RubberFolk {
 						GROWTH.put(id, new float[] {genes[0], genes[1], to[0], to[1], 0.0F});
 					}
 				}
-				LivingEntity foe = HeritageHold.step(level, player, RubberFolk::weak, ABSORB_REACH, ABSORB_TICKS, PINK, SoundEvents.SLIME_SQUISH_SMALL,
+				LivingEntity foe = HeritageHold.step(level, player, RubberFolk::weak, ABSORB_REACH, TreeLocks.wait(player, ABSORB_TICKS), PINK, SoundEvents.SLIME_SQUISH_SMALL,
 					"message.jaymoskingdoms.rubber.absorbing");
 				if (foe != null) {
 					absorb(level, player, foe);
@@ -336,10 +358,6 @@ public final class RubberFolk {
 	static void press(ServerPlayer player) {
 		// (0.7.312) sneaking, they bring their last swallow back up (or spit out one still alive in them)
 		if (player.isShiftKeyDown() && HeritageHold.channel(player) == null && RubberStomach.bringUp(player)) {
-			return;
-		}
-		if (HeritageHold.channel(player) == null && !TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
-			// (Andy's skill-tree locks) swallowing is learned: Blood Awakening (bringing one back up, or letting go, never is)
 			return;
 		}
 		HeritageHold.press(player, e -> (HeritageHold.foe(player, e) || person(player, e)) && weak(e), ABSORB_REACH, "message.jaymoskingdoms.rubber.absorbing");

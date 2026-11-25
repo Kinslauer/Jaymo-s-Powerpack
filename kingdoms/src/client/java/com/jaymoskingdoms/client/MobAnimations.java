@@ -21,6 +21,9 @@ import net.minecraft.world.entity.monster.illager.AbstractIllager;
  * controller of our own per mob and lays its bones onto the mob's humanoid (or illager) model after vanilla posed it
  * (the {@code ModelFeatureRenderer} and {@code LivingEntityRenderer} mixins), so armour and held items follow the swing.
  * <p>
+ * Between swings, a mob holding a two-handed weapon holds it in both hands in the weapon's Better Combat pose
+ * ({@link MobCombat#holdPose}, {@link PalMobAnimator#hold}), as a player does.
+ * <p>
  * This class never touches the library's classes; without it (or without Better Combat), mobs swing their arm as
  * vanilla does.
  */
@@ -50,7 +53,15 @@ public final class MobAnimations {
 		if (!PAL || entity instanceof Avatar) {
 			return;
 		}
-		state.setData(KEY, PalMobAnimator.extract(entity, partialTicks));
+		Object animation = PalMobAnimator.extract(entity, partialTicks);
+		if (animation == null && entity instanceof net.minecraft.world.entity.Mob mob) {
+			// between swings: a two-handed weapon held in both hands (MobCombat.holdPose)
+			String pose = MobCombat.holdPose(mob);
+			if (pose != null) {
+				animation = PalMobAnimator.hold(entity, pose, partialTicks);
+			}
+		}
+		state.setData(KEY, animation);
 	}
 
 	/** Right after a model was posed for this state: lays the attack animation over it. */

@@ -32,7 +32,7 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		float fly, breath, land, sit, crash, flap, glide, pitch, swim;
 		/** (0.7.522) Risen onto its hind legs (0 to 1). */
 		float stand;
-		boolean saddled;
+		boolean saddled, ridden;
 		/** (0.7.522) The move it's making ({@link WindDragon#action}) and how long it has been at it (ticks, smoothed). */
 		int action;
 		float actionAge;
@@ -107,6 +107,7 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		state.swim = Mth.lerp(partialTicks, dragon.swimAnimO, dragon.swimAnim);
 		state.stand = Mth.lerp(partialTicks, dragon.standAnimO, dragon.standAnim);
 		state.saddled = dragon.saddled();
+		state.ridden = dragon.isVehicle();
 		state.action = dragon.actionSeen;
 		state.actionAge = dragon.actionAge + partialTicks;
 		com.jaymoskingdoms.client.PowersClimbClient.Pose boarding = com.jaymoskingdoms.client.PowersClimbClient.on(dragon.getId(), partialTicks);

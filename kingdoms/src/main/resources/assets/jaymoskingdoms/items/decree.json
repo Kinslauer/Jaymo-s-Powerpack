@@ -1,0 +1,41 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "smiths",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/decree_smiths"
+        }
+      },
+      {
+        "when": "hunters",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/decree_hunters"
+        }
+      },
+      {
+        "when": "farmers",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/decree_farmers"
+        }
+      },
+      {
+        "when": "war",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/decree_war"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymoskingdoms:item/decree_smiths"
+    }
+  }
+}

@@ -145,7 +145,9 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 			BOARDED.put(entity.getId(), heading);
 		}
 		state.heading = heading;
-		state.turn = net.minecraft.util.Mth.wrapDegrees(heading - BOARDED.get(entity.getId()));
+		// (from the heading the server saw it boarded at, when it has it, so the board and anyone sat on it turn as one)
+		Float boarded = entity.getAttached(BlockCluster.BOARD_HEADING);
+		state.turn = net.minecraft.util.Mth.wrapDegrees(heading - (boarded != null ? boarded : BOARDED.get(entity.getId())));
 		com.jaymospowers.client.power.gravity.GravityBoardPose.Ride ride = com.jaymospowers.client.power.gravity.GravityBoardPose.ride(rider, partialTicks);
 		state.lean = ride.lean();
 		state.tilt = ride.tilt();

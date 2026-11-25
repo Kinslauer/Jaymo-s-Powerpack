@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "P": "minecraft:paper",
+    "H": "minecraft:honeycomb",
+    "B": "minecraft:bamboo"
+  },
+  "pattern": [
+    "PPP",
+    "PHP",
+    " B "
+  ],
+  "result": {
+    "id": "jaymospowers:paper_parasol"
+  }
+}

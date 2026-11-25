@@ -219,6 +219,55 @@ public final class Gibs {
 		}
 	}
 
+	/** Bite chunks: lumps a bite throws (more when a part comes away), how big beside a blast's, how long they lie (ticks), how hard they fly. */
+	static final int BITE_LUMPS = 1, PART_LUMPS = 3, BITE_LIFE_MIN = 60, BITE_LIFE_MAX = 120;
+	static final float BITE_SIZE = 0.4F;
+	static final double BITE_SPEED = 0.55;
+	/** One bite in this many tears a scrap off what the body wore (a part coming away always does). */
+	static final int BITE_TATTERS_ONE_IN = 4;
+
+	/**
+	 * Andy (2026-11-24): "chunks flying everywhere". A bite torn out of {@code corpse} at {@code at} ({@link Scavengers}):
+	 * lumps of it fly up and back the way the jaws ripped ({@code away}, flat), a scrap of its clothes now and then, more
+	 * when a whole part comes away ({@code partOff}). Small and quickly gone, not a blast's mess.
+	 */
+	static void bitten(CorpseEntity corpse, ServerLevel level, Vec3 at, Vec3 away, boolean partOff) {
+		Insides insides = Insides.of(corpse);
+		EntityType<?> type = corpse.sourceType();
+		double width = type == null ? corpse.getBbWidth() : type.getWidth() * corpse.bodyScale();
+		if (insides == Insides.NONE || width < GORE_MIN_WIDTH) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		float size = goreSize(width) * BITE_SIZE;
+		int lumps = partOff ? PART_LUMPS + random.nextInt(2) : BITE_LUMPS + random.nextInt(2);
+		for (int i = 0; i < lumps; i++) {
+			// flesh where it bleeds, bone where it's only bone
+			biteChunk(level, at, away, insides.soft() ? Gib.ORGAN : Gib.BONE, insides, size, random);
+		}
+		if (partOff && insides.bones()) {
+			biteChunk(level, at, away, Gib.BONE, insides, size, random);
+		}
+		if (insides.clothes() && (partOff || random.nextInt(BITE_TATTERS_ONE_IN) == 0)) {
+			biteChunk(level, at, away, Gib.TATTERS, insides, size, random);
+		}
+	}
+
+	private static void biteChunk(ServerLevel level, Vec3 at, Vec3 away, int piece, Insides insides, float size, RandomSource random) {
+		Gib gib = new Gib(GIB, level);
+		gib.snapTo(at.x, at.y, at.z, random.nextFloat() * 360.0F, 0.0F);
+		double angle = random.nextDouble() * Math.PI * 2.0;
+		double out = GIB_SPEED * BITE_SPEED * (0.5 + random.nextDouble() * 0.5);
+		gib.setDeltaMovement((away.x * 0.6 + Math.cos(angle) * 0.4) * out, GIB_HOP * BITE_SPEED * (0.8 + random.nextDouble() * 0.6),
+			(away.z * 0.6 + Math.sin(angle) * 0.4) * out);
+		gib.setUp(piece == Gib.TATTERS ? insides.look() : "", size, BITE_LIFE_MIN + random.nextInt(BITE_LIFE_MAX - BITE_LIFE_MIN + 1));
+		if (piece == Gib.TATTERS) {
+			gib.setOwner(insides.owner());
+		}
+		gib.setPiece(piece, insides.soft() ? insides.blood() : KitchenBlood.RED);
+		level.addFreshEntity(gib);
+	}
+
 	/**
 	 * What a body has in it to throw: {@code blood} its colour (RGB) if it has soft insides (organs, gut), or
 	 * {@link KitchenBlood#NONE}; whether it has bones; whether it wore clothes, and then its look and (a player's) id, so

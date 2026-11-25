@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "ati_structures:quarry",
+      "required": false
+    },
+    {
+      "id": "nova_structures:badlands_miner_outpost",
+      "required": false
+    },
+    {
+      "id": "homesteads:prospector_badlands_camp",
+      "required": false
+    },
+    {
+      "id": "homesteads:prospector_cave_camp",
+      "required": false
+    },
+    {
+      "id": "mvs:mine_with_campsite",
+      "required": false
+    }
+  ]
+}

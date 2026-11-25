@@ -16,6 +16,7 @@ abstract class WebModelFeatureRendererMixin {
 	private void jaymospowers$webArms(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		com.jaymospowers.client.BodyMotion.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.moving.BodyWeight.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.body.BodyAnim.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.FreefallPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.BalancePose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.water.SwimStrokePose.applyModel(submit.model(), submit.state());

@@ -198,12 +198,12 @@ final class PirateCoves {
 		return sea(level, realm.seat(), COAST_REACH) != null;
 	}
 
-	/** Pirate land: dry ground (a beach, a coast, an island) with open sea a short row off. */
+	/** Pirate land: dry ground (a beach, a coast, an island) with open sea a short row off, rocky and out of every navy's reach ({@link CoveExtras#hidden}). */
 	static boolean land(ServerLevel level, BlockPos at) {
 		if (level.getBiome(at).is(BiomeTags.IS_OCEAN) || level.getBiome(at).is(BiomeTags.IS_RIVER)) {
 			return false;
 		}
-		return sea(level, at, SEA_REACH) != null;
+		return sea(level, at, SEA_REACH) != null && CoveExtras.hidden(level, at);
 	}
 
 	// ---- founding --------------------------------------------------------------------------------------------------
@@ -363,6 +363,7 @@ final class PirateCoves {
 		set(level, fire.relative(side, -3).relative(back), Blocks.BARREL.defaultBlockState());
 		// the jetty: from the cove's edge out over the water
 		BlockPos end = jetty(level, fire.relative(seaward, RADIUS - 1), seaward, side);
+		CoveExtras.build(level, fire, seaward);
 		return new Layout(storage, depot, end);
 	}
 

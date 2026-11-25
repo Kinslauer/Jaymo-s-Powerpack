@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/umbrella/parasol_cloth",
+    "layer1": "jaymospowers:item/umbrella/parasol_band",
+    "layer2": "jaymospowers:item/umbrella/parasol_handle"
+  }
+}

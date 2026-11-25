@@ -130,8 +130,11 @@ public final class Sorcery {
 	static final float SHAMAN_SCROLL_CHANCE = 0.6F;
 
 	/** The spell timers' slots (on each caster, {@link Folk#spellTimers}). */
-	static final int T_RAISE = 0, T_SPIKES = 1, T_HEX = 2, T_RING = 3, T_CHANT = 4, T_MEND = 5, T_WARD = 6, T_REPULSE = 7, T_BANISH = 8;
-	public static final int TIMERS = 9;
+	static final int T_RAISE = 0, T_SPIKES = 1, T_HEX = 2, T_RING = 3, T_CHANT = 4, T_MEND = 5, T_WARD = 6, T_REPULSE = 7, T_BANISH = 8, T_POT = 9;
+	public static final int TIMERS = 10;
+	/** An orc shaman's poison pot: lobbed at a foe farther off than {@link #CLOSE}, this often (ticks), flying this fast; the poison lasts this long (ticks). */
+	static final int POT_COOLDOWN = 20 * 8, POT_POISON_TICKS = 20 * 8;
+	static final float POT_SPEED = 0.9F;
 
 	/** Dust colours of the spells. */
 	static final int DRAIN_COLOUR = 0x7A1FA2, BOLT_COLOUR = 0x66CCFF, HEX_COLOUR = 0x3F7F2A;
@@ -506,6 +509,9 @@ public final class Sorcery {
 				if (d <= CLOSE && timers[T_RING] <= 0) {
 					Casting.gesture(mob, Casting.Gesture.GROUND, HEX_COLOUR);
 					ring(level, caster);
+				} else if (caster.role() == Orcs.SHAMAN && d > CLOSE && timers[T_POT] <= 0) {
+					Casting.gesture(mob, Casting.Gesture.PUSH, HEX_COLOUR);
+					poisonPot(level, caster, target);
 				} else if (target instanceof ServerPlayer && timers[T_HEX] <= 0) {
 					Casting.gesture(mob, Casting.Gesture.PUSH, HEX_COLOUR);
 					hex(level, caster, target);
@@ -746,6 +752,21 @@ public final class Sorcery {
 			e.knockback(0.8, folk.getX() - e.getX(), folk.getZ() - e.getZ(), magic(level, folk), 0.0F);
 		}
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 1.2F, 0.6F);
+	}
+
+	/**
+	 * An orc shaman's poison pot: a clay pot of green brew lobbed in an arc at {@code target} (a splash of poison where it breaks,
+	 * for anyone near, his own side's orcs aside as the potion knows no sides: he lobs it only at a foe that is not close to him).
+	 */
+	private static void poisonPot(ServerLevel level, Caster caster, LivingEntity target) {
+		PathfinderMob folk = caster.mob();
+		caster.timers()[T_POT] = POT_COOLDOWN;
+		net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion pot = new net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion(level, folk,
+			net.minecraft.world.item.alchemy.PotionContents.createItemStack(net.minecraft.world.item.Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.POISON));
+		double dx = target.getX() - folk.getX(), dz = target.getZ() - folk.getZ(), dy = target.getY(0.5) - pot.getY();
+		pot.shoot(dx, dy + Math.sqrt(dx * dx + dz * dz) * 0.2, dz, POT_SPEED + (float)Math.min(0.6, Math.sqrt(dx * dx + dz * dz) / 40.0), 1.0F);
+		level.addFreshEntity(pot);
+		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.SPLASH_POTION_THROW, SoundSource.HOSTILE, 1.0F, 0.7F);
 	}
 
 	/** Hex: green smoke round the foe; weak and slow for a while. */

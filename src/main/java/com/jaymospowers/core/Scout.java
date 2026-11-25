@@ -64,15 +64,26 @@ public final class Scout {
 	public static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings) {
 		// (in a One Dimension world, the Overworld band's own placements, ground and structure checks: the stacked level's
 		// have no placements at all and read the clouds as ground, so nothing was ever found)
-		return com.jaymospowers.compat.Stacked.searchingOverworld(level, () -> findHere(level, wanted, from, rings));
+		return find(level, net.minecraft.world.level.Level.OVERWORLD, wanted, from, rings, null);
 	}
 
-	private static @Nullable Pair<BlockPos, Holder<Structure>> findHere(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings) {
+	/**
+	 * The same in {@code realm}'s ground (its band in a stacked world), the biome read at {@code biomeY} (the realm's own
+	 * height, as a structure's fixed start height is) or at the surface when null: the Nether's castles start at y 33,
+	 * under a roof the surface would read.
+	 */
+	public static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> realm,
+		HolderSet<Structure> wanted, BlockPos from, int rings, @Nullable Integer biomeY) {
+		return com.jaymospowers.compat.Stacked.searching(level, realm, () -> findHere(level, realm, wanted, from, rings, biomeY));
+	}
+
+	private static @Nullable Pair<BlockPos, Holder<Structure>> findHere(ServerLevel level, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> realm,
+		HolderSet<Structure> wanted, BlockPos from, int rings, @Nullable Integer biomeY) {
 		StructureManager structures = level.structureManager();
 		if (!structures.shouldGenerateStructures()) {
 			return null;
 		}
-		com.jaymospowers.compat.Stacked.Ground ground = com.jaymospowers.compat.Stacked.overworldGround(level);
+		com.jaymospowers.compat.Stacked.Ground ground = com.jaymospowers.compat.Stacked.ground(level, realm);
 		ChunkGeneratorStructureState state = ground.structures();
 		// the structures that share a placement are looked at together, as vanilla does
 		Map<StructurePlacement, Set<Holder<Structure>>> byPlacement = new LinkedHashMap<>();
@@ -108,7 +119,7 @@ public final class Scout {
 			Holder<Biome> biome = null;
 			for (Holder<Structure> structure : spot.structures()) {
 				if (biome == null) {
-					int y = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, ground.heights(), random) + ground.shift();
+					int y = (biomeY != null ? biomeY : generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, ground.heights(), random)) + ground.shift();
 					biome = level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x), net.minecraft.core.QuartPos.fromBlock(y), net.minecraft.core.QuartPos.fromBlock(z));
 				}
 				if (!structure.value().biomes().contains(biome)) {

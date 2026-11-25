@@ -119,6 +119,26 @@ public class BlockCluster extends Entity {
 	public static final AttachmentType<Boolean> BOARD = AttachmentRegistry.create(JaymosPowers.id("block_cluster_board"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
+	/**
+	 * On a ridden earthboard: its rider's body heading when they boarded it (degrees). The board is drawn turned by how far
+	 * they've turned since, and its sitters ({@link #SEAT}) go round with it.
+	 */
+	public static final AttachmentType<Float> BOARD_HEADING = AttachmentRegistry.create(JaymosPowers.id("block_cluster_board_heading"),
+		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
+
+	/**
+	 * (Andy: "sitting should stop you from moving so you can ride other physics objects, like the gravity earthboard") On a
+	 * player sat on an earthboard (riding it as a passenger, see {@code Sitting}): where they sit, from the middle of its
+	 * top, as the board lay before it was turned. Synced, so every client puts them in the same place.
+	 */
+	public static final AttachmentType<Vec3> SEAT = AttachmentRegistry.create(JaymosPowers.id("block_cluster_seat"),
+		builder -> builder.syncWith(Vec3.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/** How many can sit on one earthboard at once (its rider stands, and isn't one of them). */
+	public static final int SITTERS = 4;
+	/** A sitter is never put closer than this to a ridden board's middle, where its rider stands (blocks). */
+	static final double SEAT_CLEAR = 0.8;
+
 	/** Lingering debris crumbles a block at a time, one every this many ticks. */
 	static final int CRUMBLE_EVERY = 3;
 
@@ -438,6 +458,87 @@ public class BlockCluster extends Entity {
 		return this.getAttached(BOARD) != null;
 	}
 
+	/** The player flying this as their earthboard (Gravity's rock flight), or null. */
+	public @Nullable Player boardRider() {
+		for (Player player : this.level().players()) {
+			Integer board = player.getAttached(com.jaymospowers.power.gravity.GravityPower.ROCK_FLIGHT);
+			if (board != null && board == this.getId()) {
+				return player;
+			}
+		}
+		return null;
+	}
+
+	/** Whether this is an earthboard one can sit on: lying where it was dropped, or flown by someone. */
+	public boolean sittable() {
+		return this.isAlive() && (this.board() || this.boardRider() != null);
+	}
+
+	/**
+	 * The middle of the top of this earthboard, where its sitters' seats are measured from. Flown, it's its rider's feet (the
+	 * board is drawn right under them, ahead of where the entity trails); lying, the top of its blocks.
+	 */
+	public Vec3 boardTop() {
+		Player rider = this.boardRider();
+		return rider != null ? rider.position() : this.position().add(0.0, 0.7 + bounds(this.pieces()).getYsize() * 0.5, 0.0);
+	}
+
+	/** How far a flown earthboard has turned since it was boarded (degrees), as it's drawn; 0 lying. */
+	public float boardTurn() {
+		Player rider = this.boardRider();
+		Float from = this.getAttached(BOARD_HEADING);
+		return rider == null || from == null ? 0.0F : Mth.wrapDegrees(rider.yBodyRot - from);
+	}
+
+	/** Whether {@code feet} are on (or just over, or falling through) this earthboard's top. */
+	public boolean under(Vec3 feet) {
+		if (!this.sittable() || this.getPassengers().size() >= SITTERS) {
+			return false;
+		}
+		AABB bounds = bounds(this.pieces());
+		Vec3 top = this.boardTop();
+		double reach = Math.max(bounds.getXsize(), bounds.getZsize()) * 0.5 + 0.3;
+		double dx = feet.x - top.x, dz = feet.z - top.z, dy = feet.y - top.y;
+		return dx * dx + dz * dz <= reach * reach && dy >= -1.0 && dy <= 1.2;
+	}
+
+	/**
+	 * Where on this earthboard a sitter whose feet are at {@code feet} sits ({@link #SEAT}): straight down onto its top, in
+	 * the board's own frame, kept clear of a rider standing at its middle.
+	 */
+	public Vec3 seatFor(Vec3 feet) {
+		Vec3 top = this.boardTop();
+		Vec3 off = new Vec3(feet.x - top.x, 0.0, feet.z - top.z).yRot(this.boardTurn() * Mth.DEG_TO_RAD);
+		double length = off.length();
+		if (this.boardRider() != null && length < SEAT_CLEAR) {
+			off = length < 1.0E-3 ? new Vec3(0.0, 0.0, -SEAT_CLEAR) : off.scale(SEAT_CLEAR / length);
+		}
+		return off;
+	}
+
+	/** A sitter rides where they sat on the board, turned with it ({@link #SEAT}). */
+	@Override
+	protected void positionRider(Entity passenger, Entity.MoveFunction moveFunction) {
+		Vec3 seat = passenger.getAttached(SEAT);
+		if (seat == null) {
+			super.positionRider(passenger, moveFunction);
+			return;
+		}
+		Vec3 at = this.boardTop().add(seat.yRot(-this.boardTurn() * Mth.DEG_TO_RAD));
+		moveFunction.accept(passenger, at.x, at.y, at.z);
+	}
+
+	/** Getting up off the board: just where they sat (not on top of its middle, where its rider stands). */
+	@Override
+	public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
+		return passenger.position().add(0.0, 0.05, 0.0);
+	}
+
+	@Override
+	protected boolean canAddPassenger(Entity passenger) {
+		return passenger instanceof Player && this.getPassengers().size() < SITTERS && this.sittable();
+	}
+
 	@Override
 	public boolean canBeCollidedWith(@Nullable Entity other) {
 		return this.board() && !(other instanceof BlockCluster);
@@ -683,7 +784,8 @@ public class BlockCluster extends Entity {
 			return;
 		}
 		// left lying (not held: held things have no gravity), it crumbles in a while
-		if (!this.isNoGravity() && this.onGround() && !this.kept) {
+		// (someone sitting on it, waiting for its rider, keeps it from crumbling)
+		if (!this.isNoGravity() && this.onGround() && !this.kept && !this.isVehicle()) {
 			if (++this.idle > this.lifetime) {
 				if (this.lingers) {
 					this.crumbling = true;

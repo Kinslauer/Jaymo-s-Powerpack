@@ -81,6 +81,8 @@ public final class Scavengers {
 	private static final int LOOK_ABOUT = 5;
 	/** How hard it lunges in and yanks back, and how far each yank drags the body (blocks). */
 	private static final double LUNGE = 0.18, YANK = 0.22, DRAG = 0.07;
+	/** How high off the ground of a lying body a bite closes (blocks). */
+	private static final double BITE_HEIGHT = 0.2;
 	/** Pieces of meat until it's full, and how long it stays full (ticks; 2400 is two days' quarter). */
 	private static final int FULL_AFTER = 3, FULL_TICKS = 4800;
 	/** Health back per piece eaten. */
@@ -143,9 +145,56 @@ public final class Scavengers {
 	}
 
 	private static boolean busy(Mob mob) {
+		// (a cub eats only with a parent by it, Families; a baby zombie is as hungry as the rest)
 		return mob.getTarget() != null && !feedingOver(mob, mob.getTarget())
-			|| mob.isVehicle() || mob.isPassenger() || mob.isLeashed() || mob.isBaby()
-			|| mob instanceof TamableAnimal tame && tame.isTame();
+			|| mob.isVehicle() || mob.isPassenger() || mob.isLeashed()
+			|| mob instanceof TamableAnimal tame && tame.isTame()
+			|| cub(mob) && escort(mob) == null;
+	}
+
+	// ---- cubs fed first ----------------------------------------------------------------------------------------------
+	// Andy (2026-11-24): "cubs should first, escorted by their parent, and guarded while they fill their stomachs". A cub
+	// (a young scavenger that isn't a monster: a wolf pup, a bear cub, a fox kit) eats from a body only with a grown one
+	// of its kind by it, and only the body that one leads it to. At the body the parent doesn't eat while any of its
+	// cubs is still hungry: it stands over them on guard, warning off anyone who comes near ({@link #WARN}) and going for
+	// them if they come closer ({@link #CHARGE}), a monster or another scavenger too; a skittish one (a fox) bolts with
+	// them instead. Once they're full, it eats.
+
+	/** How near a grown one of its kind keeps a cub's company (blocks); a cub is full after this many pieces. */
+	private static final double FAMILY = 12.0;
+	private static final int CUB_FULL_AFTER = 1;
+	/** Guarding its cubs: it warns off anything this near the body (blocks), and goes for it this near; its warning every this many ticks. */
+	private static final double WARN = 8.0, CHARGE = 4.0;
+	private static final int WARN_EVERY = 40;
+	/** Leading its cubs to a body, it goes at their pace. */
+	private static final double LEAD_SPEED = 0.9;
+
+	/** A young scavenger that's fed by its parent (not a baby zombie, which feeds as the grown ones do). */
+	static boolean cub(Mob mob) {
+		return mob.isBaby() && !(mob instanceof net.minecraft.world.entity.monster.Enemy);
+	}
+
+	/** The nearest grown one of {@code cub}'s kind keeping it company (wild, within {@link #FAMILY}), or null. */
+	private static @Nullable Mob escort(Mob cub) {
+		Mob best = null;
+		for (Mob parent : cub.level().getEntitiesOfClass(Mob.class, cub.getBoundingBox().inflate(FAMILY), other -> other.getType() == cub.getType()
+			&& other.isAlive() && !other.isBaby() && !(other instanceof TamableAnimal pet && pet.isTame()))) {
+			if (best == null || parent.distanceToSqr(cub) < best.distanceToSqr(cub)) {
+				best = parent;
+			}
+		}
+		return best;
+	}
+
+	/** {@code parent}'s cubs about it (within {@link #FAMILY}) still hungry and not driven off. */
+	private static boolean hungryCubs(Mob parent) {
+		// (a monster has no cubs to feed)
+		if (parent.isBaby() || parent instanceof net.minecraft.world.entity.monster.Enemy) {
+			return false;
+		}
+		return !parent.level().getEntitiesOfClass(Mob.class, parent.getBoundingBox().inflate(FAMILY), cub -> cub.getType() == parent.getType()
+			&& cub.isAlive() && cub(cub) && !(cub instanceof TamableAnimal pet && pet.isTame())
+			&& HUNGERS.get(cub) instanceof Hunger h && !h.full(cub) && !h.scared(cub)).isEmpty();
 	}
 
 	/**
@@ -219,6 +268,8 @@ public final class Scavengers {
 		int eaten;
 		/** At its meal (at a body, meat or a pile, in reach of it). */
 		boolean eating;
+		/** The body it's gone for (its cubs follow it there). */
+		@Nullable CorpseEntity going;
 		/** Driven off: it leaves the bodies be until this game time. */
 		long scaredUntil;
 		/** A part it tore off, eaten at this game time (-1: none); and what shows in its mouth meanwhile, if its mouth was free. */
@@ -234,7 +285,7 @@ public final class Scavengers {
 		}
 
 		void ate(Mob mob) {
-			if (++eaten >= FULL_AFTER) {
+			if (++eaten >= (cub(mob) ? CUB_FULL_AFTER : FULL_AFTER)) {
 				eaten = 0;
 				fullUntil = mob.level().getGameTime() + FULL_TICKS;
 			}
@@ -291,8 +342,15 @@ public final class Scavengers {
 
 		@Override
 		public boolean canUse() {
-			if (busy(mob) || hunger.full(mob) || hunger.scared(mob) || hunger.chewing() || mob.getRandom().nextInt(10) != 0) {
+			if (busy(mob) || hunger.full(mob) && !hungryCubs(mob) || hunger.scared(mob) || hunger.chewing() || mob.getRandom().nextInt(10) != 0) {
 				return false;
+			}
+			if (cub(mob)) {
+				// a cub goes only where its parent leads it
+				Mob parent = escort(mob);
+				CorpseEntity led = parent == null || !(HUNGERS.get(parent) instanceof Hunger h) ? null : h.going;
+				body = led != null && led.isAlive() && led.isCarrionFor(mob) ? led : null;
+				return body != null;
 			}
 			List<CorpseEntity> bodies = mob.level().getEntitiesOfClass(CorpseEntity.class, mob.getBoundingBox().inflate(SMELL),
 				corpse -> corpse.isCarrionFor(mob));
@@ -317,15 +375,21 @@ public final class Scavengers {
 			noticed = 0;
 			fled = false;
 			giveUp = GIVE_UP;
+			hunger.going = body;
 			if (body != null) {
-				mob.getNavigation().moveTo(body, 1.15);
+				mob.getNavigation().moveTo(body, speed());
 			}
+		}
+
+		/** How fast it goes to the body: at its cubs' pace, leading them. */
+		private double speed() {
+			return hungryCubs(mob) ? LEAD_SPEED : 1.15;
 		}
 
 		@Override
 		public boolean canContinueToUse() {
 			return body != null && body.isCarrionFor(mob) && giveUp > 0 && !busy(mob) && !hunger.scared(mob)
-				&& (hunger.chewing() || !hunger.full(mob));
+				&& (hunger.chewing() || !hunger.full(mob) || hungryCubs(mob));
 		}
 
 		@Override
@@ -350,17 +414,19 @@ public final class Scavengers {
 			double dx = body.getX() - mob.getX(), dz = body.getZ() - mob.getZ();
 			if (dx * dx + dz * dz > reach()) {
 				hunger.eating = false;
+				Gnawing.feed(mob, body, Gnawing.UP);
 				giveUp--;
 				ticks = 0;
 				mob.getLookControl().setLookAt(body, 30.0F, 30.0F);
 				if (mob.getNavigation().isDone()) {
-					mob.getNavigation().moveTo(body, 1.15);
+					mob.getNavigation().moveTo(body, speed());
 				}
 				return;
 			}
 			mob.getNavigation().stop();
 			if (!mob.onGround() && !mob.isInWater() && !mob.isInLava()) {
 				// a flier comes down onto the ground beside it to eat
+				Gnawing.feed(mob, body, Gnawing.UP);
 				Vec3 v = mob.getDeltaMovement();
 				mob.setDeltaMovement(v.x * 0.5, Math.min(v.y, -LAND), v.z * 0.5);
 				mob.getLookControl().setLookAt(body, 30.0F, 30.0F);
@@ -379,6 +445,7 @@ public final class Scavengers {
 			if (hunger.chewing()) {
 				// eating the part it tore off, head down over it
 				hunger.eating = true;
+				Gnawing.feed(mob, body, Gnawing.CHEW);
 				mob.getLookControl().setLookAt(body.getX(), body.getY() - 0.3, body.getZ(), 30.0F, 30.0F);
 				if (ticks % 10 == 0) {
 					com.jaymoskitchen.sound.KitchenSounds.chew(mob, 0.7F, 0.85F);
@@ -386,8 +453,21 @@ public final class Scavengers {
 				}
 				return;
 			}
+			if (!hunger.chewing() && hungryCubs(mob)) {
+				// its cubs eat first: it stands over them on guard (it waits a while for them, if none has come to it yet)
+				hunger.eating = false;
+				Gnawing.feed(mob, body, Gnawing.UP);
+				CorpseEntity at = body;
+				if (level.getEntitiesOfClass(Mob.class, at.getBoundingBox().inflate(3.0), cub -> cub.getType() == mob.getType() && cub(cub)
+					&& HUNGERS.get(cub) instanceof Hunger h && h.eating).isEmpty()) {
+					giveUp--;
+				}
+				guard(level);
+				return;
+			}
 			if (!hunger.eating && waiting(level)) {
 				// its turn hasn't come: it stands by and watches the ones at it
+				Gnawing.feed(mob, body, Gnawing.UP);
 				giveUp--;
 				mob.getLookControl().setLookAt(body, 30.0F, 30.0F);
 				return;
@@ -400,6 +480,8 @@ public final class Scavengers {
 			mob.getLookControl().setLookAt(body.getX() + side.x * shake, body.getY() - 0.3, body.getZ() + side.z * shake, 90.0F, 90.0F);
 			int phase = ticks % BITE_EVERY;
 			Vec3 in = toBody.lengthSqr() < 1.0E-4 ? Vec3.ZERO : toBody.normalize();
+			// down over it (bent double, a zombie: GnawPose), each bite drawn from the lunge to the rip back
+			Gnawing.feed(mob, body, phase == 1 ? Gnawing.BITE : Gnawing.DOWN);
 			if (phase == 1) {
 				// lunge in, jaws first
 				mob.setDeltaMovement(mob.getDeltaMovement().add(in.scale(LUNGE)));
@@ -413,7 +495,7 @@ public final class Scavengers {
 		private boolean waiting(ServerLevel level) {
 			CorpseEntity at = body;
 			return level.getEntitiesOfClass(Mob.class, at.getBoundingBox().inflate(3.0), other -> other != mob && HUNGERS.get(other) instanceof Hunger h
-				&& h.eating && other.getNavigation().isDone() && other.distanceToSqr(at) < 9.0).size() >= MAX_EATERS;
+				&& h.eating && other.getNavigation().isDone() && other.distanceToSqr(at) < 9.0).size() >= MAX_EATERS + (cub(mob) ? 1 : 0);
 		}
 
 		private void bite(ServerLevel level, Vec3 in) {
@@ -442,6 +524,10 @@ public final class Scavengers {
 			if (mob instanceof net.minecraft.world.entity.monster.Enemy) {
 				return null;
 			}
+			if (!mob.is(SKITTISH) && (cub(mob) || hungryCubs(mob))) {
+				// its parent stands guard over it; a parent on guard sees to what comes ({@link #guard})
+				return null;
+			}
 			double size = mob.getBbWidth() * mob.getBbWidth() * mob.getBbHeight();
 			for (Mob other : level.getEntitiesOfClass(Mob.class, mob.getBoundingBox().inflate(DISPLACE), other -> other != mob && other.isAlive()
 				&& other.getType() != mob.getType() && !(other instanceof TamableAnimal pet && pet.isTame()))) {
@@ -455,6 +541,46 @@ public final class Scavengers {
 			}
 			net.minecraft.world.entity.player.Player player = level.getNearestPlayer(WATCHING, mob, mob.getX(), mob.getEyeY(), mob.getZ());
 			return player != null && !player.isCreative() ? player : null;
+		}
+
+		/**
+		 * Standing over its cubs at the body: it watches about it, and anyone (or anything not its own kind, not a pet)
+		 * that comes within {@link #WARN} of the body is warned off, growled at; one that comes within {@link #CHARGE} it
+		 * goes for. A skittish one bolts with its cubs instead (theirs is the same fright, {@link #trouble}).
+		 */
+		private void guard(ServerLevel level) {
+			net.minecraft.world.entity.LivingEntity threat = null;
+			double best = WARN * WARN;
+			for (net.minecraft.world.entity.LivingEntity near : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+				body.getBoundingBox().inflate(WARN), e -> e != mob && e.isAlive() && e.getType() != mob.getType()
+					&& !(e instanceof TamableAnimal pet && pet.isTame()) && !(e instanceof net.minecraft.world.entity.player.Player p && (p.isCreative() || p.isSpectator()))
+					&& (e instanceof net.minecraft.world.entity.player.Player || e instanceof net.minecraft.world.entity.monster.Enemy || e.is(SCAVENGERS)))) {
+				double distance = near.distanceToSqr(body);
+				if (distance < best) {
+					best = distance;
+					threat = near;
+				}
+			}
+			if (threat == null) {
+				// nothing about: it keeps an eye on its cubs, and on the way it came
+				if (ticks % 30 == 0) {
+					mob.getLookControl().setLookAt(body.getX() + (mob.getRandom().nextDouble() - 0.5) * 8.0, mob.getEyeY(),
+						body.getZ() + (mob.getRandom().nextDouble() - 0.5) * 8.0, 30.0F, 30.0F);
+				}
+				return;
+			}
+			if (mob.is(SKITTISH)) {
+				flee(level, threat);
+				return;
+			}
+			mob.getLookControl().setLookAt(threat, 30.0F, 30.0F);
+			if (ticks % WARN_EVERY == 0) {
+				// warning it off
+				mob.playAmbientSound();
+			}
+			if (best < CHARGE * CHARGE && mob.getAttributes().hasAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)) {
+				mob.setTarget(threat);
+			}
 		}
 
 		/**
@@ -472,6 +598,8 @@ public final class Scavengers {
 			}
 			hunger.scaredUntil = level.getGameTime() + SCARED_TICKS;
 			hunger.eating = false;
+			hunger.going = null;
+			Gnawing.feed(mob, null, Gnawing.UP);
 			body = null;
 			if (mob.is(SKITTISH)) {
 				fled = true;
@@ -488,6 +616,8 @@ public final class Scavengers {
 		public void stop() {
 			body = null;
 			hunger.eating = false;
+			hunger.going = null;
+			Gnawing.feed(mob, null, Gnawing.UP);
 			if (!fled) {
 				mob.getNavigation().stop();
 			}
@@ -537,6 +667,11 @@ public final class Scavengers {
 		if (level.noCollision(body, body.getBoundingBox().move(drag))) {
 			body.setPos(body.getX() + drag.x, body.getY(), body.getZ() + drag.z);
 		}
+		// (Andy, 2026-11-24) where the jaws closed: its near side, which jerks after them as they rip back and throws chunks
+		Vec3 at = body.position().add(-in.x * body.getBbWidth() * 0.4, BITE_HEIGHT, -in.z * body.getBbWidth() * 0.4);
+		boolean partOff = bites >= needed;
+		body.tug(at, in, partOff);
+		Gibs.bitten(body, level, at, in.scale(-1.0), partOff);
 		com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.25, body.getZ(), 10, 0.2, 0.1, 0.2, 0.15);
 		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, body.getX(), body.getY() + 0.3, body.getZ(), 2, 0.2, 0.1, 0.2, 0.05);
 		float pitch = 0.6F + eater.getRandom().nextFloat() * 0.3F;

@@ -100,6 +100,7 @@ public final class Bearings {
 		deed(Recollections.Kind.SAVED, 15, 8, 15);
 		// (Andy, 2026-11-18) cured of the Hollow's blight: saved from death and from walking after it, more than a rescue
 		deed(Recollections.Kind.CURED_BLIGHT, 20, 15, 10);
+		deed(Recollections.Kind.TAILED, -4, 0, -6);
 		// seeing someone they knew get up as one of the Hollow: fear and distrust, nothing taken from respect
 		deed(Recollections.Kind.SAW_TURNED, -10, 0, -15);
 		deed(Recollections.Kind.MENDED, 4, 2, 6);

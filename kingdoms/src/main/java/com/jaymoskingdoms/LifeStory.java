@@ -261,7 +261,9 @@ public final class LifeStory {
 		// (0.7.417, the powered roads) a hermit alchemist's lab (Powers), the Mad Tinkerer's bench (Powers), the moon's curse
 		LAB(false), ANDROID(false), MOON_CURSED(false),
 		// (0.7.349, Andy: "new starts, involving the other worlds") woken off the overworld by Jaymo's Powers ({@link #OTHER_WORLDS})
-		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false);
+		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false),
+		// reborn a monster: the goblin people's forms (MonsterBorn), opened by naming a follower
+		MONSTERBORN(false);
 
 		public final boolean realm;
 
@@ -306,6 +308,7 @@ public final class LifeStory {
 		TERMS.put(Start.UNARMED, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.DEMON, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.AFTERLIFE, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.MONSTERBORN, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.EVICTED, new Terms(Mark.HARD, EVICTED_SILVER));
 		TERMS.put(Start.SENTENCED, new Terms(Mark.HARD, SENTENCED_SILVER));
 		TERMS.put(Start.HIDEOUT, new Terms(Mark.HARD, HIDEOUT_SILVER));
@@ -369,6 +372,7 @@ public final class LifeStory {
 		FATE_ODDS.put(Start.VERDANT, 2);
 		FATE_ODDS.put(Start.DEMON, 2);
 		FATE_ODDS.put(Start.AFTERLIFE, 2);
+		FATE_ODDS.put(Start.MONSTERBORN, 2);
 		FATE_ODDS.put(Start.MOON, 1);
 		FATE_ODDS.put(Start.RUSTFALL, 1);
 		FATE_ODDS.put(Start.MAW, 1);
@@ -495,7 +499,7 @@ public final class LifeStory {
 
 		/** (0.7.349, Andy: "you can start as divine born again, but only if you pick that start") The heritage a start makes you, over your birth's; null for none. */
 		public Heritage.@Nullable Kind makes() {
-			return this.start == Start.AFTERLIFE ? Heritage.Kind.DIVINE : null;
+			return this.start == Start.AFTERLIFE ? Heritage.Kind.DIVINE : this.start == Start.MONSTERBORN ? Heritage.Kind.GOBLIN : null;
 		}
 	}
 
@@ -658,7 +662,8 @@ public final class LifeStory {
 				Answer.road(Start.MAW, Items.CRYING_OBSIDIAN),
 				Answer.road(Start.DEMON, Items.SOUL_LANTERN),
 				Answer.road(Start.AFTERLIFE, Items.TOTEM_OF_UNDYING),
-				Answer.road(Start.FATE, Items.ENDER_EYE)));
+				Answer.road(Start.FATE, Items.ENDER_EYE),
+				Answer.road(Start.MONSTERBORN, Items.BONE)));
 			// (gb-faith) the eight patrons, each drawn by its own shrine glyph on the page (the item is the fallback picture)
 			FAITH.answers.addAll(List.of(
 				Answer.faith(Patron.HEARTHKEEPER, Items.CAMPFIRE),
@@ -2204,9 +2209,9 @@ public final class LifeStory {
 					return start;
 				}
 			}
-			case WILD, UNARMED, FATE -> {
-				// the unarmed start sets out from the wild too
-				if (start == Start.UNARMED) {
+			case WILD, UNARMED, FATE, MONSTERBORN -> {
+				// the unarmed start sets out from the wild too, and the monster-born wake in it
+				if (start == Start.UNARMED || start == Start.MONSTERBORN) {
 					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
 				}
 			}
@@ -2808,6 +2813,9 @@ public final class LifeStory {
 		if (landed == Start.HIDEOUT) {
 			give(player, purse(player, HIDEOUT_SILVER));
 		}
+		if (landed == Start.MONSTERBORN) {
+			MonsterBorn.wake(player);
+		}
 		if (landed == Start.GREENSKIN) {
 			// (0.7.443) what the camp gave you: hide on your back, a stone axe, and a goblin's mask (theirs know you by it)
 			equip(player, new ItemStack(Items.LEATHER_CHESTPLATE));
@@ -3052,7 +3060,8 @@ public final class LifeStory {
 
 	/** (0.7.412) The starts that tell you a line on waking (lang {@code message.jaymoskingdoms.story.<start>}). */
 	static final Set<Start> HARD_MESSAGES = Set.of(Start.CAPTIVE, Start.TIMELOST, Start.CHAINED, Start.ROCK_BOTTOM, Start.SENTENCED, Start.EVICTED,
-		Start.HIDEOUT, Start.CAST_OUT, Start.GREENSKIN, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES, Start.LAB, Start.ANDROID, Start.MOON_CURSED);
+		Start.HIDEOUT, Start.CAST_OUT, Start.GREENSKIN, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES, Start.LAB, Start.ANDROID, Start.MOON_CURSED,
+		Start.MONSTERBORN);
 
 	/**
 	 * (0.7.417, Start Together) Where a player's road set them down: the start that came to pass, the realm it named (-1: none),
@@ -3506,6 +3515,8 @@ public final class LifeStory {
 		Skills.refresh(player);
 		// the old life's companions live on, lost (docs/Pawn-Plan.md H3); before MCA forgets who they followed
 		Masterless.forsaken(player);
+		// their next of kin, asked of MCA's family tree before it forgets them (the bank pays out to them)
+		java.util.UUID heir = McaCompat.heir(player);
 		// Tiv: "EVERYTHING should be reset on a reincarnate". MCA's villagers forget the player (hearts, memories,
 		// relationships), the player leaves their party, and no captain remembers having met them. This runs before
 		// MCA's creator opens, so the reset can't wipe the new character being made in it.
@@ -3516,6 +3527,7 @@ public final class LifeStory {
 		Tales.reborn(player);
 		QuestPast.reborn(player);
 		Overheard.reborn(player);
+		Banks.reborn(player, heir);
 		Captains.forgetPlayer(player.level().getServer(), player);
 		// our own villagers and folk forget them too: whatever they remembered, suspected or swore against the old life
 		Recollections.bornAnew(player);

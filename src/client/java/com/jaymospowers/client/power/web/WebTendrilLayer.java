@@ -47,14 +47,14 @@ import net.minecraft.util.Mth;
  * out from its glob, stretched long, for as long as the server's flail lasts ({@link WebSymbiote#FLAIL_TICKS}).
  */
 final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
-	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
+	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
 	/** Ticks of Living Armor until the tendrils are fully grown. */
 	static final float GROWN_TICKS = 80.0F;
 	/** Segments per tendril, and each one's length (model pixels). */
-	private static final int SEGMENTS = 7;
-	private static final float SEGMENT_LENGTH = 4.5F;
+	static final int SEGMENTS = 7;
+	static final float SEGMENT_LENGTH = 4.5F;
 	/** The last segments' thickness (model pixels; the rest are 3): each tendril tapers to a point. */
-	private static final float[] TIP = {2.5F, 1.9F, 1.2F};
+	static final float[] TIP = {2.5F, 1.9F, 1.2F};
 	/** Where each tendril roots (model space: +Y down, +Z back), its outward lean and its upward tilt (radians). */
 	private static final float[][] ROOTS = {
 		{-3.0F, 1.5F, 2.0F, -0.6F, -1.0F},
@@ -177,13 +177,22 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	private static final float MORPH_MAX_REACH = 10.5F;
 
 	private final TendrilModel model;
+	/** The slender body's thin strands (WebSlender.STRANDS), and the big body's (WebHulk.STRANDS). */
+	private final WebSlender.Strands strands, bigStrands;
 	private static TendrilModel firstPersonModel;
+	/** On a ridden mob's tendrils' state: they keep their old roots (it isn't in the slender body). */
+	private static final net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<Boolean> OWN_ROOTS =
+		net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey.create(() -> "jaymospowers:web_tendrils_own_roots");
+	/** The bodies' strands on a ridden humanoid (the slender's, the big one's). */
+	private static WebSlender.Strands mobStrands, mobBigStrands;
 	/** The same tendrils on the mobs the symbiote rides ({@link #submitOnMob}). */
 	private static TendrilModel mobModel;
 
 	WebTendrilLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
 		this.model = new TendrilModel(createLayer().bakeRoot());
+		this.strands = new WebSlender.Strands(WebSlender.STRANDS);
+		this.bigStrands = new WebSlender.Strands(WebHulk.STRANDS);
 	}
 
 	private static LayerDefinition createLayer() {
@@ -224,6 +233,11 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		this.getParentModel().body.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
 			OverlayTexture.NO_OVERLAY, state.outlineColor);
+		if (tendrils.armor()) {
+			// the body's thin strands among them (WebSlender.STRANDS, WebHulk.STRANDS)
+			collector.submitModel(WebSuitGrowth.slender(state) ? this.strands : this.bigStrands, state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
+				OverlayTexture.NO_OVERLAY, state.outlineColor);
+		}
 		// (the red strain's tendrils always end in hooked blades)
 		boolean red = WebStrainLook.of(state) == com.jaymospowers.power.web.WebSymbioteStrain.RED;
 		if (tendrils.combo() == WebTendrilCombos.BARRAGE || red) {
@@ -529,9 +543,11 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	 */
 	static void submitOnMob(PoseStack poseStack, SubmitNodeCollector collector, int light,
 		net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, WebSymbioteClient.Tendrils tendrils, float rootY, float rootZ,
-		float size) {
+		float size, boolean body) {
 		if (mobModel == null) {
 			mobModel = new TendrilModel(createLayer().bakeRoot());
+			mobStrands = new WebSlender.Strands(WebSlender.STRANDS);
+			mobBigStrands = new WebSlender.Strands(WebHulk.STRANDS);
 		}
 		AvatarRenderState own = new AvatarRenderState();
 		own.setData(WebSymbioteClient.TENDRILS, tendrils);
@@ -539,11 +555,18 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		own.walkAnimationPos = state.walkAnimationPos;
 		own.walkAnimationSpeed = state.walkAnimationSpeed;
 		own.setData(WebStrainLook.STRAIN, state.getData(WebStrainLook.STRAIN));
+		// (only a humanoid it rides in the strain's body wears that body's tendrils and strands: WebHostBody)
+		own.setData(OWN_ROOTS, body ? null : Boolean.TRUE);
+		own.setData(WebSlender.AIR, state.getData(WebSlender.AIR));
 		poseStack.pushPose();
 		poseStack.translate(0.0F, rootY / 16.0F, rootZ / 16.0F);
 		poseStack.scale(size, size, size);
 		collector.submitModel(mobModel, own, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), light, OverlayTexture.NO_OVERLAY,
 			state.outlineColor);
+		if (body) {
+			collector.submitModel(WebSuitGrowth.slender(own) ? mobStrands : mobBigStrands, own, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), light, OverlayTexture.NO_OVERLAY,
+				state.outlineColor);
+		}
 		poseStack.popPose();
 	}
 
@@ -567,7 +590,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		drift = drift.subtract(normal.scale(drift.dot(normal))).scale(WebSymbiote.TETHER_FOLLOW);
 		for (int i = 0; i < wall.points().size() && i + FIRST_TETHER < FIRST_SPARE; i++) {
 			int t = i + FIRST_TETHER;
-			float[] r = ROOTS[t];
+			// (from where they root on the strain's own body, as they're drawn: walkRoots)
+			float[] r = walkRoots(player)[t];
 			net.minecraft.world.phys.Vec3 root = feet.add(left.scale(r[0] / 16.0F * scale)).add(0.0, (24.0F - r[1]) / 16.0F * scale, 0.0)
 				.subtract(ahead.scale(r[2] / 16.0F * scale));
 			float reach = Mth.clamp((age - i) / TETHER_REACH_TICKS, 0.0F, 1.0F);
@@ -585,7 +609,32 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 
 	/** Climbing: the walking tendrils' chords and bows (see {@link WebTendrilWalk#legs}), or null when not climbing. */
 	static float @org.jspecify.annotations.Nullable [] walk(net.minecraft.world.entity.player.Player player, float partial) {
-		return WebTendrilWalk.legs(player, partial, ROOTS);
+		return WebTendrilWalk.legs(player, partial, walkRoots(player));
+	}
+
+	/** Where the tendrils root, as WebTendrilWalk and tetherLegs measure from: on the strain's own body, its roots (WebSlender, WebHulk). */
+	private static float[][] walkRoots(net.minecraft.world.entity.player.Player player) {
+		if (!com.jaymospowers.power.web.WebSymbiote.armored(player)) {
+			return ROOTS;
+		}
+		return com.jaymospowers.power.web.WebSymbioteStrains.of(player) == com.jaymospowers.power.web.WebSymbioteStrain.RED ? SLENDER_ROOTS : BIG_ROOTS;
+	}
+
+	/**
+	 * The roots the tendrils walk from on the slender body: its own for the eight, the spares' as ever, all measured from
+	 * its neck, which sits {@code WebSlender.BODY_LIFT} above a player's (WebTendrilWalk reads them from a player's).
+	 */
+	private static final float[][] SLENDER_ROOTS = bodyRoots(WebSlender.TENDRIL_REST, WebSlender.BODY_LIFT);
+	/** The same on the big body (its neck {@code WebHulkMesh.BODY_LIFT} up). */
+	private static final float[][] BIG_ROOTS = bodyRoots(WebHulk.TENDRIL_REST, WebHulkMesh.BODY_LIFT);
+
+	private static float[][] bodyRoots(float[][] rest, float lift) {
+		float[][] out = new float[ROOTS.length][];
+		for (int t = 0; t < ROOTS.length; t++) {
+			float[] r = t < rest.length ? rest[t] : ROOTS[t];
+			out[t] = new float[] {r[0], r[1] - lift, r[2]};
+		}
+		return out;
 	}
 
 	/**
@@ -749,8 +798,17 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			Float flailAt = state.getData(WebSymbioteClient.FLAIL);
 			float hitFlail = flailAt == null ? 0.0F : 1.0F - smooth((flailAt - (WebSymbiote.FLAIL_TICKS - HIT_FLAIL_EASE)) / HIT_FLAIL_EASE);
 
+			// (on the strain's own body, the slender or the big, they root on its back and shoulders: WebSlender, WebHulk)
+			boolean onBody = tendrils.armor() && state.getData(OWN_ROOTS) == null;
+			boolean slender = onBody && WebSuitGrowth.slender(state);
+			float[][] rest = slender ? WebSlender.TENDRIL_REST : onBody ? WebHulk.TENDRIL_REST : null;
+			Float airborne = state.getData(WebSlender.AIR);
+			float pounce = airborne == null ? 0.0F : airborne;
 			for (int t = 0; t < ROOTS.length; t++) {
 				float[] r = ROOTS[t];
+				// (on the strain's own body each has its own rest, size and length: WebSlender.TENDRIL_REST, WebHulk.TENDRIL_REST)
+				float[] sl = rest != null && t < rest.length ? rest[t] : null;
+				float tThick = sl != null ? thick * sl[6] : thick, tLength = sl != null ? length * sl[7] : length;
 				boolean upper = r[1] < UPPER_ROOT_Y;
 				float side = Math.signum(r[0]);
 				ModelPart base = this.parts[t][0];
@@ -785,6 +843,16 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					base.y = r[1];
 					base.z = r[2];
 				}
+				if (sl != null) {
+					// the slender body: off its back and shoulders, rising and curling over (never out in front)
+					base.x = sl[0];
+					base.y = sl[1];
+					base.z = sl[2];
+					leanYaw = sl[3];
+					leanPitch = sl[4];
+					dragYaw = sl[3] * (1.0F - DRAG_NARROW * drag);
+					dragPitch = sl[4] * (1.0F - DRAG_LOWER * drag);
+				}
 				// the top two (right, left) are the ones that reach out and hold: while holding, they're drawn reaching
 				base.visible = !(t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0);
 				float[] legs = tendrils.legs();
@@ -796,6 +864,17 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				if (legs != null && (legs[t * 6] != 0.0F || legs[t * 6 + 1] != 0.0F || legs[t * 6 + 2] != 0.0F)) {
 					// walking you along: bowed out from the back, its tip planted (or stepping) on whatever it holds
 					bend(this.parts[t], legs[t * 6], legs[t * 6 + 1], legs[t * 6 + 2], legs[t * 6 + 3], legs[t * 6 + 4], legs[t * 6 + 5], eased);
+					continue;
+				}
+				if (slender && t >= WebSlender.SKITTER_FIRST && legs == null && weight <= 0.0F && combo < 0 && drag > WebSlender.SKITTER_FROM
+					&& !fp && tendrils.tethers() == null && !state.isFallFlying && !state.isPassenger && state.swimAmount <= 0.0F) {
+					// the slender body on the move: its low tendrils plant on the ground and stride with its legs, out to
+					// each side and behind, lifting and reaching on in step (a skitter, its favourite way about)
+					float phase = state.walkAnimationPos * 0.6662F + (side > 0.0F ? Mth.PI : 0.0F) + WebSlender.SKITTER_LAG;
+					float tx = sl[0] + side * WebSlender.SKITTER_WIDE;
+					float ty = WebSlender.GROUND_BELOW - Math.max(0.0F, Mth.sin(phase)) * WebSlender.SKITTER_LIFT;
+					float tz = WebSlender.SKITTER_BACK + Mth.cos(phase) * WebSlender.SKITTER_STRIDE;
+					bend(this.parts[t], (tx - base.x) / 16.0F, (ty - base.y) / 16.0F, (tz - base.z) / 16.0F, side, -0.6F, 0.4F, eased);
 					continue;
 				}
 				if (combo == WebTendrilCombos.BARRAGE && base.visible && tendrils.tethers() == null) {
@@ -826,9 +905,9 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					}
 					base.yRot = aimYaw(tendrils.aimYaw() - side * STAB_OUT * cock, r[3]);
 					base.xRot = tendrils.aimPitch() + STAB_UP * cock;
-					base.xScale = thick;
-					base.yScale = thick;
-					base.zScale = length * reach * (fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F);
+					base.xScale = tThick;
+					base.yScale = tThick;
+					base.zScale = tLength * reach * (fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F);
 					this.stabbing[t] = true;
 					// rigid as a spear
 					for (int k = 1; k < SEGMENTS; k++) {
@@ -847,9 +926,20 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				sway = sway + jerk;
 				float restYaw = dragYaw + sway * 0.5F;
 				float restPitch = dragPitch + sway;
-				float restCurlX = Mth.lerp(drag, 0.28F, DRAG_CURL);
+				// rearing while they work: the rest lifted high and curled over like claws (a striker eases from this into its
+				// strike) (WebSlender.REAR_*)
+				boolean rearing = slender && (tendrils.strike() >= 0.0F || combo >= 0 || tendrils.held() != 0);
+				if (rearing) {
+					restPitch += WebSlender.REAR_LIFT;
+				}
+				if (slender && pounce > 0.0F && !rearing && tendrils.legs() == null) {
+					// pouncing: flared out wide behind it (WebSlender.FLARE_*)
+					restYaw *= 1.0F + WebSlender.FLARE_WIDE * pounce;
+					restPitch += WebSlender.FLARE_LIFT * pounce;
+				}
+				float restCurlX = Mth.lerp(drag, sl != null ? sl[5] : 0.28F, DRAG_CURL) + (rearing ? WebSlender.REAR_CURL : 0.0F);
 				float restCurlY = 0.0F;
-				float restLength = length;
+				float restLength = tLength;
 				if (fp && upper) {
 					// your own, from your eyes: forward over the shoulders, curling in at the edges of the view
 					float fpSway = Mth.sin(time * 0.09F + t * 1.7F) * FP_SWAY;
@@ -857,7 +947,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					restPitch = FP_PITCH + fpSway * 0.5F;
 					restCurlX = FP_CURL_DOWN;
 					restCurlY = side * FP_CURL_IN;
-					restLength = length * FP_LENGTH;
+					restLength = tLength * FP_LENGTH;
 				}
 				// a combo: every upper tendril joins in, from both sides
 				boolean striking = weight > 0.0F && upper && (side == strikers || combo >= 0);
@@ -875,8 +965,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				}
 				base.yRot = Mth.lerp(w, restYaw, aimYaw(tYaw, restYaw));
 				base.xRot = Mth.lerp(w, restPitch, tPitch);
-				base.xScale = thick;
-				base.yScale = thick;
+				base.xScale = tThick;
+				base.yScale = tThick;
 				base.zScale = restLength * (striking ? stretch : 1.0F);
 				float segCurlX = Mth.lerp(w, restCurlX, tCurlX);
 				float segCurlY = Mth.lerp(w, restCurlY, tCurlY);
@@ -888,7 +978,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					segCurlY = 0.0F;
 					base.yRot = aimYaw(tendrils.wallYaw() - r[3] * 0.25F, r[3]);
 					base.xRot = tendrils.wallPitch() - (r[1] - 4.0F) * 0.04F;
-					base.zScale = length * 1.6F * (fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F);
+					base.zScale = tLength * 1.6F * (fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F);
 				} else if (tendrils.wall() == 2 && tendrils.tethers() == null) {
 					// back to the wall: fanned out straight behind, driven into it
 					calm = 0.0F;
@@ -896,7 +986,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					segCurlY = 0.0F;
 					base.yRot = r[3] * 0.85F;
 					base.xRot = (r[1] - 4.0F) * 0.13F;
-					base.zScale = length * 1.15F;
+					base.zScale = tLength * 1.15F;
 				}
 				float[] tethers = tendrils.tethers();
 				if (tethers != null && t >= FIRST_TETHER && tethers[t * 3 + 2] > 0.0F) {
@@ -905,8 +995,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					float thrum = Mth.sin(state.ageInTicks * 2.3F + t * 1.9F) * TETHER_THRUM;
 					base.yRot = aimYaw(tethers[t * 3], r[3]);
 					base.xRot = tethers[t * 3 + 1] + thrum;
-					base.xScale = thick * TETHER_THICK;
-					base.yScale = thick * TETHER_THICK;
+					base.xScale = tThick * TETHER_THICK;
+					base.yScale = tThick * TETHER_THICK;
 					base.zScale = tethers[t * 3 + 2] * 16.0F / CHAIN;
 					for (int k = 1; k < SEGMENTS; k++) {
 						ModelPart segment = this.parts[t][k];
@@ -935,7 +1025,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					float flailPitch = leanPitch * 0.7F + Mth.sin(a * 1.2F + t * 1.7F) * FLAIL_PITCH;
 					base.yRot = Mth.lerp(fling, flailYaw, Mth.lerp(on, r[3] * FLING_WIDE, leanYaw));
 					base.xRot = Mth.lerp(fling, flailPitch, leanPitch * 0.6F);
-					base.zScale = length * (1.0F + FLING_STRETCH * fling + 0.15F * thrash);
+					base.zScale = tLength * (1.0F + FLING_STRETCH * fling + 0.15F * thrash);
 					for (int k = 1; k < SEGMENTS; k++) {
 						ModelPart segment = this.parts[t][k];
 						// whipping: big waves rolling down each one (straightened as they're flung)

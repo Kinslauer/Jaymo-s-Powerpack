@@ -296,7 +296,69 @@ public enum Dish {
 	GIANTS_MARROW_BROTH(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, GIANTS_MARROW, CARROT, POTATO), 12, 1.0F, true,
 		List.of(new Buff(MobEffects.RESISTANCE, 180 * 20, 1))),
 	DEEP_KINGS_PLATTER(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(LEGEND_FILLET, DRIED_KELP, FLIP, FLIP), 13, 1.0F, false,
-		List.of(new Buff(MobEffects.STRENGTH, 180 * 20, 1)));
+		List.of(new Buff(MobEffects.STRENGTH, 180 * 20, 1))),
+	// --- Ocean's Delight's dishes (MIT, its art kept with the notice in textures/item/CREDITS-delight.txt) ---
+	HONEY_FRIED_KELP(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(DRIED_KELP, HONEY_BOTTLE, FLIP, FLIP), 4, 0.5F, false,
+		List.of(new Buff(MobEffects.HASTE, 60 * 20, 0))),
+	BRAISED_SEA_PICKLE(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, SEA_PICKLE, BROWN_MUSHROOM, BROWN_MUSHROOM), 7, 0.6F, true,
+		List.of(new Buff(MobEffects.NIGHT_VISION, 120 * 20, 0), new Buff(MobEffects.WATER_BREATHING, 60 * 20, 0))),
+	KELP_ENCRUSTED_COD(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(COD_SLICE, EGG, KELP), 6, 0.6F, false,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 90 * 20, 0))),
+	STUFFED_COD(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(COD, KELP, ONION, TOMATO, BROWN_MUSHROOM), 11, 0.8F, false,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0), new Buff(MobEffects.REGENERATION, 20 * 20, 0))),
+	SEAGRASS_SALAD(Method.CHOP, EnumSet.of(Station.BOARD), List.of(BOWL, SEAGRASS, SEAGRASS, CARROT), 5, 0.5F, true,
+		List.of(new Buff(MobEffects.DOLPHINS_GRACE, 30 * 20, 0))),
+	// cut by a cook who knows where the poison sits: no Poison or Nausea, as a raw pufferfish gives
+	FUGU_ROLL(Method.CHOP, EnumSet.of(Station.BOARD), List.of(PUFFERFISH, RICE_COOKED, DRIED_KELP), 7, 0.6F, false,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 120 * 20, 0), new Buff(MobEffects.DOLPHINS_GRACE, 20 * 20, 0))),
+	// --- Nether's Delight's dishes (MIT, its art kept with the same notice); hoglins drop porkchops, so pork stands in for hoglin ---
+	MAGMA_GELATIN(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(MAGMA_CREAM, MAGMA_CREAM, SUGAR, WATER_BOTTLE), 6, 0.5F, false,
+		List.of(new Buff(MobEffects.FIRE_RESISTANCE, 180 * 20, 0))),
+	WARPED_MOLDY_MEAT(Method.SMOKE, EnumSet.of(Station.SMOKER), List.of(PORKCHOP, WARPED_ROOTS, WARPED_ROOTS), 9, 0.7F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 60 * 20, 0), new Buff(MobEffects.FIRE_RESISTANCE, 60 * 20, 0))),
+	// --- after Ender's Delight (MIT; its strange eclair art, our own for the other two), from Enderscape's End ---
+	STRANGE_ECLAIR(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, SUGAR, MILK_BOTTLE, PURUBERRY), 7, 0.5F, false,
+		List.of(new Buff(MobEffects.SLOW_FALLING, 60 * 20, 0), new Buff(MobEffects.SPEED, 60 * 20, 0))),
+	CHANTERELLE_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CELESTIAL_CHANTERELLE, MURUBLIGHT_CHANTERELLE, POTATO), 9, 0.7F, true,
+		List.of(new Buff(MobEffects.NIGHT_VISION, 120 * 20, 0), new Buff(MobEffects.RESISTANCE, 30 * 20, 0))),
+	DRIFT_JELLY_PUDDING(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, DRIFT_JELLY, MILK_BOTTLE, SUGAR), 6, 0.6F, true,
+		List.of(new Buff(MobEffects.SLOW_FALLING, 120 * 20, 0))),
+	// --- Ender's Delight's dishes (MIT, its art kept with the same notice; delight/EnderDelight): the End's plants, chorus and
+	// what a knife takes from its creatures, most served in a shulker bowl (see remainder). A Perfect cook gives its good effects;
+	// its Nausea is left to the raw bites ---
+	CHORUS_JUICE(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(GLASS_BOTTLE, CHORUS_FRUIT, CHORUS_FRUIT, SUGAR), 3, 0.4F, false,
+		List.of(new Buff(() -> com.jaymoskitchen.delight.EnderDelight.PHASING, 10 * 20, 0))),
+	CHORUS_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(SHULKER_BOWL, CHORUS_FRUIT, CHORUS_FRUIT, CHORUS_FLOWER), 8, 0.7F, false,
+		List.of(new Buff(() -> com.jaymoskitchen.delight.EnderDelight.PHASING, 10 * 20, 0), new Buff(() -> com.jaymoskitchen.delight.Delight.NOURISHMENT, 5 * 60 * 20, 0))),
+	CRISPY_SKEWER(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(SKEWER_STICK, MITE_CRUST, POPPED_CHORUS_FRUIT, CHORUS_FRUIT, FLIP, FLIP), 5, 0.5F,
+		false, List.of(new Buff(MobEffects.SPEED, 60 * 20, 0))),
+	CRAWLING_SANDWICH(Method.CHOP, EnumSet.of(Station.BOARD), List.of(BREAD, SHULKER_MEAT, MITE_CRUST, CHORUS_FRUIT), 7, 0.5F, false,
+		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0))),
+	TWISTED_CEREAL(Method.CHOP, EnumSet.of(Station.BOARD), List.of(SHULKER_BOWL, ENDERMAN_SIGHT, ENDER_SHARD, POPPED_CHORUS_FRUIT, MILK_BOTTLE), 8, 0.6F,
+		false, List.of(new Buff(() -> com.jaymoskitchen.delight.EnderDelight.PHASING, 90 * 20, 0))),
+	ENDERMITE_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(SHULKER_BOWL, ENDER_SHARD, MITE_CRUST, MITE_CRUST), 9, 0.7F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 30 * 20, 0), new Buff(() -> com.jaymoskitchen.delight.Delight.NOURISHMENT, 5 * 60 * 20, 0))),
+	PEARL_PASTA(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(SHULKER_BOWL, ENDER_SHARD, PASTA, Step.CHORUS_JUICE), 10, 0.7F, false,
+		List.of(new Buff(() -> com.jaymoskitchen.delight.Delight.NOURISHMENT, 5 * 60 * 20, 0))),
+	ENDER_PAELLA(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(SHULKER_BOWL, ENDERMAN_SIGHT, SHULKER_MEAT, CHORUS_FLOWER, RICE), 11,
+		0.8F, false, List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(() -> com.jaymoskitchen.delight.Delight.NOURISHMENT, 5 * 60 * 20, 0))),
+	UNCANNY_COOKIES(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(WHEAT, WHEAT, MITE_CRUST, SUGAR), 5, 0.6F, false,
+		List.of(new Buff(MobEffects.NIGHT_VISION, 60 * 20, 0))),
+	AMBERVEIL_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(SHULKER_BOWL, AMBERVEIL, VOIDPEPPER, ETHEREAL_SAFFRON, CHORUS_FLOWER), 8,
+		0.7F, false, List.of(new Buff(MobEffects.REGENERATION, 30 * 20, 0), new Buff(MobEffects.SPEED, 120 * 20, 0))),
+	AMBERVEILED_CURRY(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(SHULKER_BOWL, AMBERVEIL, VOIDPEPPER, CHORUS_FLOWER, CHORUSFLAME), 9,
+		0.7F, false, List.of(new Buff(MobEffects.ABSORPTION, 180 * 20, 0), new Buff(MobEffects.SPEED, 120 * 20, 0))),
+	CHICKEN_CURRY(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(SHULKER_BOWL, CHORUSFLAME, ETHEREAL_SAFFRON, VOIDPEPPER, CHICKEN, RICE),
+		12, 0.9F, false, List.of(new Buff(() -> com.jaymoskitchen.delight.Delight.NOURISHMENT, 5 * 60 * 20, 0))),
+	STEAK_FRIES(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(SHULKER_BOWL, BEEF, POTATO, VOIDPEPPER, MILK_BOTTLE), 10, 0.8F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 60 * 20, 0))),
+	VEIL_OF_FLAMES_RISOTTO(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(SHULKER_BOWL, AMBERVEIL, ETHEREAL_SAFFRON, CHORUS_FLOWER,
+		CHORUSFLAME), 11, 0.9F, false, List.of(new Buff(MobEffects.FIRE_RESISTANCE, 120 * 20, 0))),
+	// a pie (four slices) and a feast in a shulker's own shell (four servings, into a shulker bowl)
+	CHORUS_PIE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(CRUST, CHORUS_FRUIT, CHORUS_FRUIT, CHORUS_FRUIT, WHEAT, SUGAR), 9, 0.6F, false,
+		List.of(new Buff(() -> com.jaymoskitchen.delight.EnderDelight.PHASING, 30 * 20, 0), new Buff(MobEffects.SPEED, 60 * 20, 0))),
+	STUFFED_SHULKER(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(SHULKER_SHELL, SHULKER_MEAT, CHORUS_FRUIT, RICE, TOMATO, BROWN_MUSHROOM), 11, 0.8F,
+		false, List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.SLOW_FALLING, 60 * 20, 0)));
 
 	/** Which minigame cooks the dish. */
 	public enum Method {
@@ -471,6 +533,14 @@ public enum Dish {
 			case PANCAKES -> 90;
 			case FRENCH_TOAST -> 100;
 			case HASH_BROWNS -> 100;
+			case HONEY_FRIED_KELP -> 90;
+			case KELP_ENCRUSTED_COD -> 150;
+			case STUFFED_COD -> 180;
+			case STRANGE_ECLAIR -> 170;
+			case CRISPY_SKEWER -> 110;
+			case UNCANNY_COOKIES -> 110;
+			case CHORUS_PIE -> 200;
+			case STUFFED_SHULKER -> 220;
 			default -> 100;
 		};
 	}
@@ -478,12 +548,12 @@ public enum Dish {
 	/** A feast: it comes out as a block to set down, with servings to take from it (see delight/Feast). */
 	public boolean feast() {
 		return this == ROAST_CHICKEN_FEAST || this == SHEPHERDS_PIE_FEAST || this == HONEY_GLAZED_HAM_FEAST || this == STUFFED_PUMPKIN_FEAST
-			|| this == GLEAMING_SALAD_FEAST || this == RICE_ROLL_MEDLEY;
+			|| this == GLEAMING_SALAD_FEAST || this == RICE_ROLL_MEDLEY || this == STUFFED_SHULKER;
 	}
 
 	/** (0.5.33) A whole pie: it comes out as a block to set down, four slices to take from it (see delight/PieBlock). */
 	public boolean pie() {
-		return this == APPLE_PIE || this == SWEET_BERRY_CHEESECAKE || this == CHOCOLATE_PIE;
+		return this == APPLE_PIE || this == SWEET_BERRY_CHEESECAKE || this == CHOCOLATE_PIE || this == CHORUS_PIE;
 	}
 
 	/** A feast or a pie: a block to set down, not something to eat as it is. */
@@ -503,7 +573,9 @@ public enum Dish {
 	/** What eating it leaves behind: the bowl of a stew, the bottle of a drink; null for none. */
 	public @Nullable Item remainder() {
 		return switch (this) {
-			case MELON_JUICE, GLOW_BERRY_CUSTARD, HOT_COCOA -> Items.GLASS_BOTTLE;
+			case MELON_JUICE, GLOW_BERRY_CUSTARD, HOT_COCOA, CHORUS_JUICE -> Items.GLASS_BOTTLE;
+			case CHORUS_STEW, TWISTED_CEREAL, ENDERMITE_STEW, PEARL_PASTA, ENDER_PAELLA, AMBERVEIL_STEW, AMBERVEILED_CURRY, CHICKEN_CURRY, STEAK_FRIES,
+				VEIL_OF_FLAMES_RISOTTO -> com.jaymoskitchen.delight.EnderDelight.SHULKER_BOWL;
 			default -> bowlFood ? Items.BOWL : null;
 		};
 	}

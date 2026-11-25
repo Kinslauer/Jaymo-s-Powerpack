@@ -385,6 +385,11 @@ public final class Theft {
 
 	private static void opened(ServerPlayer player, ServerLevel level, BlockPos pos) {
 		Faction f = Factions.storageOwner(level.getServer(), pos);
+		if (f == null && level.getBlockEntity(pos) instanceof Container && !(level.getBlockEntity(pos) instanceof Strongbox.Entity)) {
+			// (someone's chest at home, by their bed: taking from it is theft too, and what's taken is marked)
+			Faction law = lawAt(level, pos);
+			f = law != null && StolenGoods.homeChest(level, pos) ? law : null;
+		}
 		if (f == null || f.fallen() || level != Factions.level(level.getServer()) || !(level.getBlockEntity(pos) instanceof Container c)
 			|| Placed.byPlayer(player, level, pos, level.getBlockState(pos))) {
 			// (0.5.46) a chest you placed yourself is yours to open
@@ -431,6 +436,12 @@ public final class Theft {
 			gift(player, level, f, given - taken);
 		} else if (!exempt(player, f)) {
 			if (taken > 0) {
+				// (what was taken carries the realm's mark: its merchants and guards will know it)
+				for (var e : open.before.entrySet()) {
+					int out = Math.max(0, e.getValue() - after.getOrDefault(e.getKey(), 0));
+					int gained = Math.max(0, pack.getOrDefault(e.getKey(), 0) - open.pack.getOrDefault(e.getKey(), 0));
+					StolenGoods.markTaken(player, level, e.getKey(), Math.min(out, gained), f);
+				}
 				commit(player, level, f, Crime.TAKE, open.pos, taken >= HEAVY_TAKE_ITEMS ? Weight.HEAVY : null, true);
 			} else {
 				commit(player, level, f, Crime.RUMMAGE, open.pos, null, false);

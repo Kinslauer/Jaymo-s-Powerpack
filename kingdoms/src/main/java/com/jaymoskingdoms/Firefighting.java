@@ -230,11 +230,12 @@ public final class Firefighting {
 
 	/** How a grown villager answers: fights it, looks after a child (if one's near), or runs. */
 	private static Answer choose(ServerLevel level, Villager v) {
-		float roll = level.getRandom().nextFloat();
-		if (roll < (Calamities.wildfireNear(v.blockPosition()) ? WILDFIRE_FIGHT : FIGHT)) {
+		// (Andy: "only the brave and guards should ever fight") the rest look after a child or run
+		if (Temperaments.fearless(v) || BlastFright.standsGround(v)) {
 			return Answer.FIGHT;
 		}
-		if (roll < FIGHT + GUARD && child(level, v) != null) {
+		float roll = level.getRandom().nextFloat();
+		if (roll < GUARD && child(level, v) != null) {
 			return Answer.GUARD;
 		}
 		return Answer.RUN;

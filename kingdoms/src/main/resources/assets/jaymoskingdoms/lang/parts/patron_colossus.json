@@ -1,0 +1,7 @@
+{
+	"entity.jaymoskingdoms.patron_colossus": "Patron's Colossus",
+	"message.jaymoskingdoms.colossus.spent": "Your patron has answered you once today.",
+	"message.jaymoskingdoms.colossus.turned": "Your patron will not answer one who breaks its commandments.",
+	"message.jaymoskingdoms.colossus.hunt": "RUN. %s blocks",
+	"message.jaymoskingdoms.colossus.forgiven": "A broken commandment is forgiven."
+}

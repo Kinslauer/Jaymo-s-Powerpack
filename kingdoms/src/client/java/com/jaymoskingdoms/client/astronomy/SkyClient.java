@@ -60,6 +60,7 @@ public final class SkyClient {
 
 	public static void register() {
 		LevelRenderEvents.COLLECT_SUBMITS.register(SkyClient::render);
+		Meteors.register();
 		ClientTickEvents.END_CLIENT_TICK.register(SkyClient::tick);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			Discovery.clear();
@@ -235,6 +236,11 @@ public final class SkyClient {
 		return 1.0F - 0.15F * (0.5F + 0.5F * Mth.sin((clock + hip * 1.7F) * 0.07F));
 	}
 
+	/** How much a settlement's lights dim the sky here now (0..1). */
+	static float pollution() {
+		return pollution;
+	}
+
 	/** Light pollution: nearby villagers mark a settlement, and its lights dim the sky. A place, not a number. */
 	private static float pollution(ClientLevel level, LocalPlayer player) {
 		double best = Double.MAX_VALUE;
@@ -248,7 +254,7 @@ public final class SkyClient {
 	}
 
 	/** A point of light at dome distance, facing the camera, full bright. */
-	private static void billboard(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float z, float size, int colour) {
+	static void billboard(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float z, float size, int colour) {
 		Vec3 n = new Vec3(x, y, z).normalize();
 		Vec3 side = Math.abs(n.y) > 0.95 ? new Vec3(1.0, 0.0, 0.0) : n.cross(new Vec3(0.0, 1.0, 0.0)).normalize();
 		Vec3 up = side.cross(n).normalize();
@@ -283,7 +289,7 @@ public final class SkyClient {
 	}
 
 	/** One quad, drawn both ways round so it shows from either side. */
-	private static void quad(VertexConsumer buffer, PoseStack.Pose pose, float[] p0, int k0, float u0, float v0,
+	static void quad(VertexConsumer buffer, PoseStack.Pose pose, float[] p0, int k0, float u0, float v0,
 		float[] p1, int k1, float u1, float v1, float[] p2, int k2, float u2, float v2, float[] p3, int k3, float u3, float v3) {
 		vertex(buffer, pose, p0, k0, u0, v0);
 		vertex(buffer, pose, p1, k1, u1, v1);

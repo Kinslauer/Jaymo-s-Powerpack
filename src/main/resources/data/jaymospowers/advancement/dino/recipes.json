@@ -1,0 +1,74 @@
+{
+  "criteria": {
+    "entered_verdant": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "jaymospowers:verdant_world"
+      }
+    },
+    "got_bone": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "jaymospowers:dino_bone"
+          }
+        ]
+      }
+    },
+    "got_hide": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "jaymospowers:dino_hide"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "entered_verdant",
+      "got_bone",
+      "got_hide"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "jaymospowers:dino/bone_meal_from_dino_bone",
+      "jaymospowers:dino/brachiosaurus_saddle",
+      "jaymospowers:dino/brachiosaurus_skeleton",
+      "jaymospowers:dino/carnotaurus_saddle",
+      "jaymospowers:dino/carnotaurus_skeleton",
+      "jaymospowers:dino/cooked_dino_meat",
+      "jaymospowers:dino/cooked_dino_meat_from_campfire_cooking",
+      "jaymospowers:dino/cooked_dino_meat_from_smoking",
+      "jaymospowers:dino/cooked_prime_meat",
+      "jaymospowers:dino/cooked_prime_meat_from_campfire_cooking",
+      "jaymospowers:dino/cooked_prime_meat_from_smoking",
+      "jaymospowers:dino/dilophosaurus_saddle",
+      "jaymospowers:dino/dilophosaurus_skeleton",
+      "jaymospowers:dino/dodo_skeleton",
+      "jaymospowers:dino/field_guide",
+      "jaymospowers:dino/gallimimus_saddle",
+      "jaymospowers:dino/gallimimus_skeleton",
+      "jaymospowers:dino/leather_from_dino_hide",
+      "jaymospowers:dino/narcotic",
+      "jaymospowers:dino/narcotic_from_venom",
+      "jaymospowers:dino/parasaurolophus_saddle",
+      "jaymospowers:dino/parasaurolophus_skeleton",
+      "jaymospowers:dino/saddle_from_dino_hide",
+      "jaymospowers:dino/spinosaurus_saddle",
+      "jaymospowers:dino/spinosaurus_skeleton",
+      "jaymospowers:dino/tranq_dart",
+      "jaymospowers:dino/tranq_rifle",
+      "jaymospowers:dino/triceratops_saddle",
+      "jaymospowers:dino/triceratops_skeleton",
+      "jaymospowers:dino/tyrannosaurus_saddle",
+      "jaymospowers:dino/tyrannosaurus_skeleton",
+      "jaymospowers:dino/velociraptor_saddle",
+      "jaymospowers:dino/velociraptor_skeleton"
+    ]
+  }
+}

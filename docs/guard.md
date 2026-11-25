@@ -44,6 +44,11 @@ Andy: "Build those ideas too".
   once. Axes, two-handed weapons and Combat Arts area blows can't be parried by them.
 - Every fighter's swing (Better Combat moves) starts with a glint at the weapon: white means you can parry it, red means
   a heavy blow (two-handed or 1.4x+) that Guard won't parry, only block or dodge (`Guard.UNPARRYABLE_TAG`).
+- Andy (2026-11-24): "armed enemies should [not] attack with unblockables EVERY attack anymore, it should be closer to
+  20%. and the windup should be longer so players can react". A two-handed weapon's swing is red only 1 time in 5
+  (`MobCombat.RED_CHANCE`; a one-handed weapon's heavy move already came only now and then and stays red), and a red
+  swing winds up about 1.6x longer, 18-30 ticks (`MobCombat.redLength`), its star held as long. A band reading a
+  parrier (`FoeLore`) no longer makes every blow unparryable: any of its blows comes red 35% of the time, glinting red.
 
 ## Every mob's blow glints first (Powers `combat/AttackTells`)
 Andy: "Can you make every mob use this glint mechanic?"
@@ -51,7 +56,8 @@ Andy: "Can you make every mob use this glint mechanic?"
   ravagers, our own monsters) or the MeleeAttack brain behaviour (piglins, hoglins, zoglins) now winds up: the glint
   shows at its weapon (or head), and the blow lands 6 ticks later only if you're still in reach and in sight. Its attack
   cooldown is unchanged. Red for heavy hitters (10+ attack damage or a body 1.35+ wide: iron golems, ravagers, wardens),
-  whose blows carry the unparryable tag.
+  whose blows carry the unparryable tag. A heavy hitter by damage alone is red 1 blow in 5 (`AttackTells.RED_CHANCE`);
+  a wide body still always is. A red blow winds up 20 ticks (`AttackTells.HEAVY_WINDUP`), a white one 10.
 - Custom attacks given the glint by hand: the Burrukai's charge, the Bladeshroom Hunter's cut, ship crews' blades
   (Kingdoms `Crewmen`, now with the same 6-tick wind-up). Kingdoms' Better Combat fighters keep their own wind-up glint.
 - Left out: contact damage (slimes, magma cubes, the Wraith flying into you), bows, and powers' own summons.
@@ -74,7 +80,7 @@ Andy: "All guns should red glint too, all sailors should have at least one flint
 4. Locked on, a swing at a foe 4-6 blocks away steps you in.
 5. Darktide katana guard and Z Fighter bare-hand guard work as before.
 6. A sword-armed guard raises its blade now and then; hitting it right after it does gets parried (sparks, you're pushed back, it swings back).
-7. A white glint before a fighter's swing; a red one on two-handed swings, and those can't be parried.
+7. A white glint before a fighter's swing; a red one on about 1 in 5 two-handed swings, coming noticeably slower, and those can't be parried.
 8. A plain zombie glints before each blow and misses if you step back in time; an iron golem's glint is red.
 9. A pirate or musketeer glints red with a click before each shot; a raised sword blocks the ball but never parries it.
 10. Every ship's crew who fight draw a flintlock; some fire two or three in a row before reloading.

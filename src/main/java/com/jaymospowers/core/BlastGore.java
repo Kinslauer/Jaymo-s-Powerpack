@@ -85,6 +85,11 @@ public final class BlastGore {
 	public static final float GIB_FROM = 0.25F, GIB_MAX = 0.95F;
 	/** A survivor loses a limb: none at or below this closeness, rising evenly to {@link #LIMB_MAX} at the centre. */
 	public static final float LIMB_FROM = 0.3F, LIMB_MAX = 0.5F;
+	/**
+	 * Andy (2026-11-24): "blasts on downed enemies should blow limbs off". A body already down when a blast hits it loses a
+	 * limb at this many times a standing survivor's chance ({@link #limbChance}): certain from about two thirds of the way in.
+	 */
+	public static final float DOWNED_LIMB_SCALE = 2.0F;
 	/** After one limb, a second goes at this share of the chance. */
 	public static final float SECOND_LIMB = 0.4F;
 	/** A body killed but not gibbed keeps this share of a survivor's chance to lose a limb onto the corpse. */
@@ -143,6 +148,8 @@ public final class BlastGore {
 	private static final Map<LivingEntity, long[]> ROLLED = new WeakHashMap<>();
 	/** A body under a blunderbuss shot: the tick its first pellet landed, its health before it, and whether a limb was rolled. */
 	private static final Map<LivingEntity, long[]> SHOTS = new WeakHashMap<>();
+	/** A body already down that a blast's limbs were rolled for this tick (game time), so its after-damage doesn't roll again. */
+	private static final Map<LivingEntity, Long> DOWNED_ROLLED = new WeakHashMap<>();
 	/** A body under a crushing blow this tick (game time). */
 	private static final Map<LivingEntity, Long> CRUSHING = new WeakHashMap<>();
 	/** Bodies a crushing blow throws at the end of this tick: the way across (a unit vector) and how fast. */
@@ -492,9 +499,40 @@ public final class BlastGore {
 			// a Rubber-folk the blast tore apart already (Downed): nothing more to take
 			return;
 		}
+		Long downedAt = DOWNED_ROLLED.get(entity);
+		if (downedAt != null && downedAt == entity.level().getGameTime()) {
+			// (down before it hit: rolled already, at the downed's chance)
+			return;
+		}
 		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
 		Vec3 from = centre(source);
 		float chance = chance(entity, by, limbBase(source, closeness(entity, source, taken)), source);
+		if (entity.getRandom().nextFloat() >= chance) {
+			return;
+		}
+		if (loseLimb(entity, by, from) && entity.isAlive() && entity.getRandom().nextFloat() < chance * SECOND_LIMB) {
+			loseLimb(entity, by, from);
+		}
+	}
+
+	/**
+	 * A blast hits {@code entity} while it's down and doesn't end it (Downed, before the damage, which the downed state may
+	 * keep for itself): an arm or a leg comes off at {@link #DOWNED_LIMB_SCALE} times a survivor's chance, now and then two.
+	 */
+	public static void downedBlast(LivingEntity entity, DamageSource source, float amount) {
+		if (!blast(source) || amount < Dismember.MIN_DAMAGE || !Dismember.canLoseParts(entity)
+			|| entity instanceof Player p && (p.isCreative() || p.isSpectator())) {
+			return;
+		}
+		long now = entity.level().getGameTime();
+		Long at = DOWNED_ROLLED.get(entity);
+		if (at != null && at == now) {
+			return;
+		}
+		DOWNED_ROLLED.put(entity, now);
+		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
+		Vec3 from = centre(source);
+		float chance = Math.min(1.0F, DOWNED_LIMB_SCALE * chance(entity, by, limbChance(closeness(entity, source, amount)), source));
 		if (entity.getRandom().nextFloat() >= chance) {
 			return;
 		}

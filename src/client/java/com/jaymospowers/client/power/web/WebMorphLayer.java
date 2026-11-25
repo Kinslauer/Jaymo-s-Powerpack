@@ -336,14 +336,16 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		boolean hulk = WebSuitGrowth.bigBody(state);
 		boolean slim = state.skin != null && state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM;
 		float handX = -s.side() * (slim ? 0.5F : 1.0F);
-		float handY = hulk ? HULK_HAND_Y : HAND_Y;
+		// (the red strain's slender body has longer, thinner arms: WebSlender)
+		boolean slender = hulk && WebSuitGrowth.slender(state);
+		float handY = slender ? WebSlender.HAND_Y : hulk ? HULK_HAND_Y : HAND_Y;
 		float grow = formed(s.age());
 		// the engulfed arm: its heads bigger, its cord thicker (less so in your own first-person view)
 		boolean fp = s.armor() && ownFirstPerson(state);
 		float head = grow * headScale(s.armor(), fp);
 		float mass = fp ? ARMOR_MASS_FP : 1.0F;
 		float cord = s.armor() ? Mth.lerp(mass, 1.0F, ARMOR_CORD) : 1.0F;
-		float armHalf = (slim ? ARM_HALF_SLIM : ARM_HALF) * (hulk ? HULK_ARM : 1.0F);
+		float armHalf = slender ? WebSlender.ARM_HALF : (slim ? ARM_HALF_SLIM : ARM_HALF) * (hulk ? HULK_ARM : 1.0F);
 		float length = Math.max(0.0F, s.reach() * 16.0F - handY - 2.0F) * out(s.age());
 		float sw = swing(s.age());
 		// a swing whips the cord out behind the hand (the scythe sideways, the mace and spear back along the arm's arc)
@@ -471,7 +473,9 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 			poseStack.popPose();
 		}
 		float handX = -g.side() * (slim ? 0.5F : 1.0F);
-		float handY = hulk ? HULK_HAND_Y : HAND_Y;
+		// (the red strain's slender body has longer, thinner arms: WebSlender)
+		boolean slender = hulk && WebSuitGrowth.slender(state);
+		float handY = slender ? WebSlender.HAND_Y : hulk ? HULK_HAND_Y : HAND_Y;
 		float outer = -g.side() * (slim ? 2.6F : 3.1F);
 		float swell = swollen(g);
 		float grow = grown(g);
@@ -481,7 +485,7 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		arm.translateAndRotate(poseStack);
 		if (g.armor()) {
 			// Living Armor: the tendril winds down from the shoulder and engulfs the arm, and the weapon swells out of that
-			float armHalf = (slim ? ARM_HALF_SLIM : ARM_HALF) * (hulk ? HULK_ARM : 1.0F);
+			float armHalf = slender ? WebSlender.ARM_HALF : (slim ? ARM_HALF_SLIM : ARM_HALF) * (hulk ? HULK_ARM : 1.0F);
 			boolean fp = ownFirstPerson(state);
 			float mass = fp ? ARMOR_MASS_FP : 1.0F;
 			float head = grow * headScale(true, fp);

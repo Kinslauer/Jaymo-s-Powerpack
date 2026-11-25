@@ -238,7 +238,8 @@ public final class Delight {
 		}
 		int times = quality == Quality.PERFECT ? 2 : 1;
 		UseRemainder remainder = stack.get(DataComponents.USE_REMAINDER);
-		if (remainder != null && remainder.convertInto().item().value() == Items.BOWL || stack.is(ModItems.dish(Dish.HOT_COCOA))) {
+		if (remainder != null && (remainder.convertInto().item().value() == Items.BOWL || EnderDelight.shulkerBowl(remainder.convertInto().item().value()))
+			|| stack.is(ModItems.dish(Dish.HOT_COCOA))) {
 			player.addEffect(new MobEffectInstance(COMFORT, COMFORT_TICKS * times));
 		}
 		if (food.nutrition() >= NOURISHING_FROM) {

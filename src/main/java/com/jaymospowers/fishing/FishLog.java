@@ -35,8 +35,12 @@ import org.jspecify.annotations.Nullable;
  * through death (a Reincarnation wipes it with everything else). Read it in the {@link #JOURNAL} (no command: Andy's rule).
  */
 public final class FishLog {
-	/** One kind of fish in the journal: counts, the best's weight, day, bait and water, and catches by time of day. */
-	public record Entry(int caught, int released, float best, int bestDay, String bestBait, String bestWater, List<Integer> hours) {
+	/**
+	 * One kind of fish in the journal: counts, the best's weight, day, bait and water, catches by time of day, and how
+	 * cleanly the best was landed ({@code bestClean}, 1 to 3 stars; 0 for one written down before that was kept).
+	 */
+	public record Entry(int caught, int released, float best, int bestDay, String bestBait, String bestWater, List<Integer> hours,
+		int bestClean) {
 		public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("caught").forGetter(Entry::caught),
 			Codec.INT.optionalFieldOf("released", 0).forGetter(Entry::released),
@@ -44,9 +48,10 @@ public final class FishLog {
 			Codec.INT.optionalFieldOf("best_day", 0).forGetter(Entry::bestDay),
 			Codec.STRING.optionalFieldOf("best_bait", "").forGetter(Entry::bestBait),
 			Codec.STRING.optionalFieldOf("best_water", "").forGetter(Entry::bestWater),
-			Codec.INT.listOf().optionalFieldOf("hours", List.of(0, 0, 0, 0)).forGetter(Entry::hours)).apply(i, Entry::new));
+			Codec.INT.listOf().optionalFieldOf("hours", List.of(0, 0, 0, 0)).forGetter(Entry::hours),
+			Codec.INT.optionalFieldOf("best_clean", 0).forGetter(Entry::bestClean)).apply(i, Entry::new));
 
-		static final Entry NONE = new Entry(0, 0, 0.0F, 0, "", "", List.of(0, 0, 0, 0));
+		static final Entry NONE = new Entry(0, 0, 0.0F, 0, "", "", List.of(0, 0, 0, 0), 0);
 	}
 
 	/** An angler's whole journal: every kind, the legends they've landed, and their contests. */
@@ -96,6 +101,12 @@ public final class FishLog {
 	 */
 	static boolean landed(ServerPlayer player, Species sp, float kg, @Nullable Item bait, ServerLevel level, BlockPos pos,
 		String legend) {
+		return landed(player, sp, kg, bait, level, pos, legend, 0);
+	}
+
+	/** As above, with how cleanly it was landed ({@code clean} stars, 0 unknown), kept with a best. */
+	static boolean landed(ServerPlayer player, Species sp, float kg, @Nullable Item bait, ServerLevel level, BlockPos pos,
+		String legend, int clean) {
 		Log log = of(player);
 		Entry was = log.entry(sp);
 		List<Integer> hours = new ArrayList<>(was.hours.size() == 4 ? was.hours : List.of(0, 0, 0, 0));
@@ -105,8 +116,8 @@ public final class FishLog {
 		int day = (int) (level.getOverworldClockTime() / 24000L);
 		String baitId = bait == null ? "" : BuiltInRegistries.ITEM.getKey(bait).toString();
 		String water = level.getBiome(pos).unwrapKey().map(k -> k.identifier().toString()).orElse("");
-		Entry now = best ? new Entry(was.caught + 1, was.released, kg, day, baitId, water, hours)
-			: new Entry(was.caught + 1, was.released, was.best, was.bestDay, was.bestBait, was.bestWater, hours);
+		Entry now = best ? new Entry(was.caught + 1, was.released, kg, day, baitId, water, hours, clean)
+			: new Entry(was.caught + 1, was.released, was.best, was.bestDay, was.bestBait, was.bestWater, hours, was.bestClean);
 		Map<String, Entry> kinds = new HashMap<>(log.kinds);
 		kinds.put(sp.id, now);
 		List<String> legends = log.legends;
@@ -129,7 +140,7 @@ public final class FishLog {
 		Log log = of(player);
 		Entry was = log.entry(sp);
 		Map<String, Entry> kinds = new HashMap<>(log.kinds);
-		kinds.put(sp.id, new Entry(was.caught, was.released + 1, was.best, was.bestDay, was.bestBait, was.bestWater, was.hours));
+		kinds.put(sp.id, new Entry(was.caught, was.released + 1, was.best, was.bestDay, was.bestBait, was.bestWater, was.hours, was.bestClean));
 		player.setAttached(LOG, new Log(kinds, log.legends, log.contests, log.won, log.notes));
 	}
 

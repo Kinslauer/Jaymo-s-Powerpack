@@ -242,7 +242,8 @@ public final class VampirePlayers {
 
 	static boolean sunlit(ServerPlayer player) {
 		ServerLevel level = player.level();
-		return !level.isRainingAt(player.blockPosition()) && level.canSeeSky(BlockPos.containing(player.getEyePosition()));
+		// (an open umbrella in hand shades them, and wears)
+		return !level.isRainingAt(player.blockPosition()) && level.canSeeSky(BlockPos.containing(player.getEyePosition())) && !Parasols.shade(player);
 	}
 
 	/** They wake changed (vaguely told: they find out the rest), in a crypt where there's room for one. */

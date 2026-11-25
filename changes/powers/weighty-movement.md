@@ -4,7 +4,6 @@
   (`client/moving/BodyWeight`):
   - **The torso swings on the hips.** It lags back a moment as you set off, leans into the walk and the run, and when
     you stop it carries on forward past upright and settles back instead of snapping straight.
-  - **Turns bank:** the body leans into a turn, more the faster you take it.
   - **Each step lands:** the body sinks as a foot comes down and rises over the planted leg, the hips rock over the leg
     taking the weight, the shoulders turn against the hips, and a slow walk's knee gives under the weight and folds as it
     swings back (the run's own knee fold is kept).

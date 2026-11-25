@@ -94,6 +94,8 @@ final class PackResourcePacks {
 		// Features, with coat variants. Version 4.3 for 1.21.11 (formats 22-94, older than 26.3's), fetched from Modrinth
 		// (project alMAK8J4). Horses, skeleton horses and zombie horses are Jaymo's Kingdoms' breed horses
 		// (BreedHorseRenderer), so only donkeys and mules take its look. Listed after Fresh Animations so it wins there.
+		// With Icy's Better Horses in the pack its breed horses swap in for every horse and draw themselves (GeckoLib), so this
+		// pack still only draws the donkeys and mules (and skeleton and zombie horses) that Icy's leaves vanilla.
 		new Pack("Better Horses", "jaymospowers-better-horses-v1", "Better Horses", "Better Horses v4.3 1.21.11.zip",
 			"https://cdn.modrinth.com/data/alMAK8J4/versions/EfH2muyG/Better%20Horses%20v4.3%201.21.11.zip",
 			"fea54f680dc959e122189b2005d11adebcd18b5b", true),

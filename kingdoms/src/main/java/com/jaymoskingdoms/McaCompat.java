@@ -347,6 +347,14 @@ public final class McaCompat {
 		return LOADED ? McaBridge.kinOf(v, dead) : STRANGERS;
 	}
 
+	/**
+	 * {@code player}'s next of kin among players (MCA's family tree): their partner, then a child, a parent, a sibling;
+	 * null if none, or without MCA.
+	 */
+	static java.util.@Nullable UUID heir(ServerPlayer player) {
+		return LOADED ? McaBridge.heir(player) : null;
+	}
+
 	/** (0.7.211) An MCA villager's personality id ("relaxed", "crabby"...); "" without MCA or for a plain villager. */
 	static String personality(Villager v) {
 		return LOADED ? McaBridge.personality(v) : "";
@@ -750,6 +758,11 @@ public final class McaCompat {
 	/** (0.7.424) The opening of one held down for questioning ({@link McaBridge#questioningOpening}). */
 	public static boolean questioningOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.questioningOpening(villager, player);
+	}
+
+	/** A ruin keeper's opening: the next tale of their city ({@link McaBridge#keeperOpening}). */
+	public static boolean keeperOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.keeperOpening(villager, player);
 	}
 
 	/** (2026-11-19) An old druid's own opening: who she is, her grove, her want ({@link McaBridge#druidOpening}). */

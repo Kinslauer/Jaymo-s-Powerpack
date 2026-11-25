@@ -152,8 +152,7 @@ public final class HeritageMoves {
 			return;
 		}
 		live.heard = now;
-		// (Andy's skill-tree locks) a blood's hold is learned: Blood Awakening
-		if (live.on || !usable(player) || !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.BLOOD)) {
+		if (live.on || !usable(player)) {
 			return;
 		}
 		long ready = READY.getOrDefault(player.getUUID(), 0L);
@@ -257,7 +256,8 @@ public final class HeritageMoves {
 		if (done) {
 			int cooldown = blood(player) == STORM ? level.isThundering() || com.jaymospowers.eden.EdenBrainstorm.in(player) ? CLAP_STORM_COOLDOWN : CLAP_COOLDOWN
 				: FLARE_COOLDOWN;
-			READY.put(player.getUUID(), level.getGameTime() + cooldown);
+			// (Blood Awakening) awakened, it comes back in half the time
+			READY.put(player.getUUID(), level.getGameTime() + com.jaymospowers.core.TreeLocks.wait(player, cooldown));
 		}
 	}
 

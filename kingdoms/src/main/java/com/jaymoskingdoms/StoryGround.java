@@ -42,7 +42,6 @@ import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -286,23 +285,25 @@ public final class StoryGround {
 	 * makes the chunk of the first likely one, to see if its village really starts there.
 	 */
 	private static final class VillageSearch {
-		record Spot(Structure structure, StructurePlacement placement, ChunkPos chunk, int distance) {
+		record Spot(StructurePlacement placement, ChunkPos chunk, int distance) {
 		}
-
-		/** Holds a likely village's chunk while it's made (no timeout, never saved). */
-		private static final TicketType MAKING = new TicketType(TicketType.NO_TIMEOUT, TicketType.FLAG_LOADING);
 
 		final BlockPos spawn;
 		final List<Spot> spots = new ArrayList<>();
-		/** The background's answer for each spot looked at so far (true: a village could start there), and how many it has. */
+		/** The background's answer for each spot looked at so far (true: an Epic town will start there), and how many it has. */
 		private boolean[] could = new boolean[0];
+		/** The structure the game will start at each spot looked at (null: none), from {@link PoolPick#winner}. */
+		@SuppressWarnings("unchecked")
+		private Holder<Structure>[] winners = new Holder[0];
 		private volatile int answered;
 		private volatile boolean cancelled;
 		int next;
 		@Nullable BlockPos found;
-		/** The spot whose chunk is being made, to see if its village really starts, and when that's done (null: none). */
+		/** The spot whose chunk's structure starts are being worked out, to see if its town really starts, and when that's done (null: none). */
 		@Nullable Spot making;
-		@Nullable CompletableFuture<?> made;
+		/** The Epic town foreseen at {@link #making}. */
+		@Nullable Structure makingTown;
+		@Nullable CompletableFuture<net.minecraft.server.level.ChunkResult<net.minecraft.world.level.chunk.ChunkAccess>> made;
 		final long startedAt = System.nanoTime();
 
 		VillageSearch(ServerLevel level, BlockPos spawn) {
@@ -319,30 +320,34 @@ public final class StoryGround {
 			ChunkGeneratorStructureState state = ground.structures();
 			ChunkPos origin = ChunkPos.containing(spawn);
 			int reach = CAPITAL_VILLAGE_SEARCH * CAPITAL_VILLAGE_SEARCH;
+			// the placements the Epic towns start by (the five share the pooled villages' one): each spot is looked at once,
+			// for whichever structure the game will really start there
+			java.util.Set<StructurePlacement> placements = new java.util.LinkedHashSet<>();
 			for (Holder<Structure> village : villages.get()) {
 				// (0.7.598) a capital only in an Epic town
-				if (!Seats.epic(village)) {
+				if (Seats.epic(village)) {
+					placements.addAll(state.getPlacementsForStructure(village));
+				}
+			}
+			for (StructurePlacement placement : placements) {
+				if (!(placement instanceof RandomSpreadStructurePlacement spread)) {
 					continue;
 				}
-				for (StructurePlacement placement : state.getPlacementsForStructure(village)) {
-					if (!(placement instanceof RandomSpreadStructurePlacement spread)) {
-						continue;
-					}
-					int spacing = spread.spacing();
-					int cells = CAPITAL_VILLAGE_SEARCH / spacing + 1;
-					for (int dx = -cells; dx <= cells; dx++) {
-						for (int dz = -cells; dz <= cells; dz++) {
-							ChunkPos chunk = spread.getPotentialStructureChunk(state.getLevelSeed(), origin.x() + dx * spacing, origin.z() + dz * spacing);
-							int distance = chunk.distanceSquared(origin);
-							if (distance <= reach) {
-								this.spots.add(new Spot(village.value(), placement, chunk, distance));
-							}
+				int spacing = spread.spacing();
+				int cells = CAPITAL_VILLAGE_SEARCH / spacing + 1;
+				for (int dx = -cells; dx <= cells; dx++) {
+					for (int dz = -cells; dz <= cells; dz++) {
+						ChunkPos chunk = spread.getPotentialStructureChunk(state.getLevelSeed(), origin.x() + dx * spacing, origin.z() + dz * spacing);
+						int distance = chunk.distanceSquared(origin);
+						if (distance <= reach) {
+							this.spots.add(new Spot(placement, chunk, distance));
 						}
 					}
 				}
 			}
 			this.spots.sort(Comparator.comparingInt(Spot::distance));
 			this.could = new boolean[this.spots.size()];
+			this.winners = new Holder[this.spots.size()];
 			if (!this.spots.isEmpty()) {
 				lookAhead(level.registryAccess(), level.getServer().getStructureTemplateManager(), ground, state.getLevelSeed());
 			}
@@ -353,22 +358,23 @@ public final class StoryGround {
 			Stacked.Ground ground, long seed) {
 			List<Spot> spots = List.copyOf(this.spots);
 			boolean[] could = this.could;
+			Holder<Structure>[] winners = this.winners;
 			CompletableFuture.runAsync(() -> {
 				// (this thread's own: a climate sampler's caches aren't shared between threads)
 				net.minecraft.world.level.biome.Climate.Sampler climate = ground.randomState().createClimateSampler(
 					net.minecraft.world.level.levelgen.densityfunction.SamplerContext.builder().enableCaches().build());
 				for (int i = 0; i < spots.size() && !this.cancelled; i++) {
 					Spot spot = spots.get(i);
-					boolean can = false;
+					Holder<Structure> winner = null;
 					try {
-						can = spot.placement().applyAdditionalChunkRestrictions(spot.chunk().x(), spot.chunk().z(), seed)
-							&& spot.structure().findValidGenerationPoint(new Structure.GenerationContext(registries, ground.generator(),
-								ground.generator().getBiomeSource(), climate, ground.randomState(), templates, seed, spot.chunk(), ground.heights(),
-								spot.structure().biomes()::contains)).isPresent();
+						// (Deck client test) not "could an Epic town stand here?" but "which village wins this spot's draw?": in the
+						// shared pool another mod's village often does, and its chunk was made for nothing
+						winner = PoolPick.winner(registries, templates, ground, climate, spot.chunk(), spot.placement());
 					} catch (RuntimeException e) {
 						JaymosKingdoms.LOGGER.debug("The capital's village search couldn't look at {}", spot.chunk(), e);
 					}
-					could[i] = can;
+					winners[i] = winner;
+					could[i] = winner != null && Seats.epic(winner);
 					this.answered = i + 1;
 				}
 			}, net.minecraft.util.Util.backgroundExecutor());
@@ -387,8 +393,9 @@ public final class StoryGround {
 				}
 				Spot spot = this.making;
 				this.making = null;
-				this.found = Stacked.searchingOverworld(level, () -> started(level, spot));
-				level.getChunkSource().removeTicketWithRadius(MAKING, spot.chunk(), 0);
+				Structure town = this.makingTown;
+				net.minecraft.world.level.chunk.ChunkAccess chunk = this.made.join().orElse(null);
+				this.found = chunk == null ? null : Stacked.searchingOverworld(level, () -> started(level, spot, chunk, town));
 				if (this.found != null) {
 					return true;
 				}
@@ -398,20 +405,21 @@ public final class StoryGround {
 				int i = this.next++;
 				Spot spot = this.spots.get(i);
 				if (this.could[i]) {
-					// a village could start here: its chunk is made off the server thread and looked at once it's there
-					// (made on the server thread, the wait behind Chunky's pregen ran into the 60 s watchdog)
+					// an Epic town will start here: its chunk's structure starts are worked out off the server thread and read
+					// once there (made on the server thread, the wait behind Chunky's pregen ran into the 60 s watchdog). Only
+					// the starts: making the whole chunk to look took ~30 s a spot on the Deck, for a guess that could miss
 					this.making = spot;
-					this.made = level.getChunkSource().addTicketAndLoadWithRadius(MAKING, spot.chunk(), 0);
+					this.makingTown = this.winners[i].value();
+					this.made = PoolPick.starts(level, spot.chunk());
 					return false;
 				}
 			}
 			return this.next >= this.spots.size();
 		}
 
-		/** Whether the village the background foresaw at {@code spot} started in its chunk, now made (null: it didn't). */
-		private static @Nullable BlockPos started(ServerLevel level, Spot spot) {
-			LevelChunk chunk = level.getChunkSource().getChunkNow(spot.chunk().x(), spot.chunk().z());
-			StructureStart start = chunk == null ? null : level.structureManager().getStartForStructure(spot.structure(), chunk);
+		/** Whether the town the background foresaw at {@code spot} started in its chunk, made as far as its starts (null: it didn't). */
+		private static @Nullable BlockPos started(ServerLevel level, Spot spot, net.minecraft.world.level.chunk.ChunkAccess chunk, Structure town) {
+			StructureStart start = chunk.getStartForStructure(town);
 			if (start != null && start.isValid() && !EpicTowns.surface(level, start)) {
 				JaymosKingdoms.LOGGER.info("The capital's village at chunk {} is in {}, not the Overworld: passed over", spot.chunk(),
 					Stacked.realm(level, start.getBoundingBox().getCenter().getY()).identifier());

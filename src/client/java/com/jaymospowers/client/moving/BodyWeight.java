@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>The body is a weight on the hips.</b> The torso swings like a pendulum on the hips' movement: it lags back a
  * moment as you set off, leans into the walk ({@link #STEADY_LEAN}) and the run, and when you stop it carries on forward
  * past upright and settles back ({@link #CARRY_ON}), never snapping straight.</li>
- * <li><b>Turns bank.</b> The body leans into a turn the faster you take it ({@link #BANK}).</li>
+ * (The lean into a turn is BodyAnim's, which came in beside this.)
  * <li><b>Each step lands.</b> The body sinks as a foot comes down (the stride's widest point, where straight legs would
  * lift the feet off the ground) and rises over the planted leg ({@link #STEP_DIP}); the hips rock over the leg taking
  * the weight ({@link #HIP_SWAY}); the shoulders turn against the hips ({@link #COUNTER_TWIST}); a walking leg's knee
@@ -67,8 +67,6 @@ public final class BodyWeight {
 	static final float LEAN_SPRING = 0.16F, LEAN_DAMP = 0.28F, CARRY_ON = 25.0F;
 	/** The most the torso is swung either way (degrees). */
 	static final float LEAN_MAX = 16.0F;
-	/** Banking: degrees of lean per degree a tick turned at a full sprint's speed, the most, and its spring and damping. */
-	static final float BANK = 0.35F, BANK_MAX = 9.0F, BANK_SPRING = 0.2F, BANK_DAMP = 0.3F;
 	/**
 	 * The step: the share of a straight leg's lift at the stride's widest that the body sinks instead (blocks at most), the
 	 * forward nod as the foot lands (degrees), the hips' rock over the planted leg (degrees), the shoulders turned against
@@ -97,11 +95,10 @@ public final class BodyWeight {
 	// ================================================================================================================
 
 	/**
-	 * What the renderer needs, eased between ticks: {@code lean} (degrees, + forward), {@code bank} (degrees, + the top to
-	 * the right), {@code squash} (0-1 or a little past, - for the rebound), {@code tuck} (0-1), {@code weight} (1 bare),
+	 * What the renderer needs, eased between ticks: {@code lean} (degrees, + forward), {@code squash} (0-1 or a little past, - for the rebound), {@code tuck} (0-1), {@code weight} (1 bare),
 	 * {@code ground} on the ground, {@code ownView} your own body seen from inside it.
 	 */
-	public record Weight(float lean, float bank, float squash, float tuck, float weight, boolean ground, boolean ownView) {
+	public record Weight(float lean, float squash, float tuck, float weight, boolean ground, boolean ownView) {
 	}
 
 	public static final RenderStateDataKey<Weight> KEY = RenderStateDataKey.create(() -> "jaymospowers:body_weight");
@@ -123,11 +120,11 @@ public final class BodyWeight {
 
 	private static final class Body {
 		double x, y, z;
-		float yaw, speed, minVy;
+		float speed, minVy;
 		boolean ground = true, fresh = true;
 		int weighed = -1;
 		float weight = 1.0F, tuck, tuckLast;
-		final Spring lean = new Spring(), bank = new Spring(), squash = new Spring();
+		final Spring lean = new Spring(), squash = new Spring();
 	}
 
 	private static final Int2ObjectOpenHashMap<Body> BODIES = new Int2ObjectOpenHashMap<>();
@@ -175,7 +172,6 @@ public final class BodyWeight {
 			body.x = player.getX();
 			body.y = player.getY();
 			body.z = player.getZ();
-			body.yaw = yaw;
 			body.ground = player.onGround();
 			return;
 		}
@@ -196,16 +192,11 @@ public final class BodyWeight {
 		float change = up && ground && body.ground ? forward - body.speed : 0.0F;
 		body.speed = forward;
 		float pace = Mth.clamp(forward / SPRINT_SPEED, -BACK_LEAN_SHARE, 1.0F);
-		float turn = Mth.wrapDegrees(yaw - body.yaw);
-		body.yaw = yaw;
-		float along = (float)Math.sqrt(dx * dx + dz * dz) / SPRINT_SPEED;
 
 		// heavier is slower to swing and swings further
 		float leanTarget = up && ground ? STEADY_LEAN * pace * w : 0.0F;
 		body.lean.step(leanTarget, LEAN_SPRING / w, LEAN_DAMP, -change * CARRY_ON * w);
 		body.lean.x = Mth.clamp(body.lean.x, -LEAN_MAX, LEAN_MAX);
-		float bankTarget = up && ground ? Mth.clamp(turn * Math.min(1.0F, along) * BANK * w, -BANK_MAX, BANK_MAX) : 0.0F;
-		body.bank.step(bankTarget, BANK_SPRING / w, BANK_DAMP, 0.0F);
 
 		// landings: the hardest downward speed of the time in the air, then a kick into the squash
 		float vy = (float)dy;
@@ -246,16 +237,16 @@ public final class BodyWeight {
 			state.setData(KEY, null);
 			return;
 		}
-		float lean = body.lean.at(partialTicks), bank = body.bank.at(partialTicks), squash = body.squash.at(partialTicks);
+		float lean = body.lean.at(partialTicks), squash = body.squash.at(partialTicks);
 		float tuck = Mth.lerp(partialTicks, body.tuckLast, body.tuck);
 		boolean moving = state.walkAnimationSpeed > 0.01F;
-		if (!moving && Math.abs(lean) < 0.05F && Math.abs(bank) < 0.05F && Math.abs(squash) < 0.005F && tuck <= 0.0F) {
+		if (!moving && Math.abs(lean) < 0.05F && Math.abs(squash) < 0.005F && tuck <= 0.0F) {
 			state.setData(KEY, null);
 			return;
 		}
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean own = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
-		state.setData(KEY, new Weight(lean, bank, squash, smooth(tuck), body.weight, entity.onGround(), own && FirstPersonCompat.bodyShown()));
+		state.setData(KEY, new Weight(lean, squash, smooth(tuck), body.weight, entity.onGround(), own && FirstPersonCompat.bodyShown()));
 	}
 
 	private static @Nullable Weight weight(LivingEntityRenderState state) {
@@ -275,7 +266,7 @@ public final class BodyWeight {
 		return w.ground() && !state.isCrouching ? Math.min(1.0F, state.walkAnimationSpeed) : 0.0F;
 	}
 
-	/** After the body faces its way (about the feet): the step's sink and rock, the pendulum's lean, the bank, the squash. */
+	/** After the body faces its way (about the feet): the step's sink and rock, the pendulum's lean, the squash. */
 	public static void rotate(LivingEntityRenderState state, PoseStack poseStack, float entityScale) {
 		Weight w = weight(state);
 		if (w == null || !(state instanceof AvatarRenderState avatar)) {
@@ -304,7 +295,7 @@ public final class BodyWeight {
 		}
 		poseStack.rotateDegrees(Axis.XP, -lean);
 		float rock = HIP_SWAY * s * Mth.sin(beat) * w.weight();
-		poseStack.rotateDegrees(Axis.ZP, -(w.bank() - rock));
+		poseStack.rotateDegrees(Axis.ZP, rock);
 	}
 
 	/** After the model animates: the shoulders against the hips, and the landing's and the jump's legs and arms. */

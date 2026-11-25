@@ -26,7 +26,9 @@ import org.jspecify.annotations.Nullable;
  * toward it (straight on and a few angles either side) for ground on the far side of a drop, up to {@link #REACH} blocks
  * away, a block higher at most or {@link #DROP} lower, with the air clear for its body all the way over. If there is
  * some, closer to its goal than it is now, it takes a running jump at it, sized to land there, and paths on from the
- * other side. It won't jump onto lava, fire, magma or cactus, or out of water.
+ * other side. It won't jump onto lava, fire, magma or cactus, or out of water, nor onto a roof or any floor with a room
+ * under it ({@link #HOLLOW_DEPTH}). With no jump to be had and where it was going below it, it's stranded up there and
+ * climbs down ({@link Stranded}).
  */
 public final class GapJumps {
 	/** How often (in ticks) a mob at the end of a short path looks for a jump. */
@@ -45,6 +47,13 @@ public final class GapJumps {
 	static final int RISE = 1, DROP = 3;
 	/** A drop at least this deep between here and the landing makes it a gap (a shallower dip the pathfinder walks). */
 	static final int GAP_DEPTH = 2;
+	/**
+	 * No landing with a room's worth of air under its floor this near below (a roof, an upper storey, a bridge): a jump
+	 * onto a roof left villagers walking it with no way down (Andy, 2026-11-24, "stuck on buildings").
+	 */
+	static final int HOLLOW_DEPTH = 4;
+	/** No jump to be had and where it was going at least this far below: it's stranded up there ({@link Stranded}). */
+	static final int STRANDED_BELOW = 2;
 	/** Angles (degrees) off the straight line to its goal that it looks along, best first. */
 	static final int[] ANGLES = {0, 20, -20, 40, -40, 65, -65, 90, -90};
 	/** The jump: upward speed, the most sideways speed it can put into one, and how far past the landing's middle it aims. */
@@ -87,16 +96,33 @@ public final class GapJumps {
 		}
 		Vec3 goal = Vec3.atBottomCenterOf(target);
 		double far = across(here, goal);
+		boolean below = target.getY() <= here.y - STRANDED_BELOW;
 		if (far < STILL_FAR) {
+			if (below) {
+				strand(mob, nav, target, now, speed);
+			}
 			return;
 		}
 		Vec3 landing = landing(level, mob, here, goal, far);
 		if (landing == null) {
 			s.next = now + AFTER_NOTHING;
+			if (below) {
+				strand(mob, nav, target, now, speed);
+			}
 			return;
 		}
 		leap(mob, nav, here, landing, speed);
 		s.next = now + AFTER_JUMP;
+	}
+
+	/** Up on a roof or a ledge with where it's going below and no jump down: it climbs down ({@link Stranded}), on a fresh path. */
+	private static void strand(Mob mob, PathNavigation nav, BlockPos target, long now, double speed) {
+		if (Stranded.mark(mob, now)) {
+			Path down = nav.createPath(target, 1);
+			if (down != null) {
+				nav.moveTo(down, speed);
+			}
+		}
 	}
 
 	/** Who jumps gaps: the humanoids. Beasts and livestock keep to what they can walk. */
@@ -168,11 +194,28 @@ public final class GapJumps {
 				continue;
 			}
 			Vec3 spot = new Vec3(x + 0.5, feet.getY(), z + 0.5);
-			if (level.noCollision(mob, mob.getBoundingBox().move(spot.subtract(mob.position())))) {
+			if (level.noCollision(mob, mob.getBoundingBox().move(spot.subtract(mob.position()))) && !hollowUnder(level, below)) {
 				return spot;
 			}
 		}
 		return null;
+	}
+
+	/** Two blocks of open air one above the other somewhere in the {@link #HOLLOW_DEPTH} under {@code floor}: a roof or a floor over a room. */
+	private static boolean hollowUnder(ServerLevel level, BlockPos floor) {
+		BlockPos.MutableBlockPos pos = floor.mutable();
+		int open = 0;
+		for (int i = 0; i < HOLLOW_DEPTH; i++) {
+			pos.move(Direction.DOWN);
+			if (level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && level.getFluidState(pos).isEmpty()) {
+				if (++open >= 2) {
+					return true;
+				}
+			} else {
+				open = 0;
+			}
+		}
+		return false;
 	}
 
 	private static boolean unsafe(BlockState floor) {

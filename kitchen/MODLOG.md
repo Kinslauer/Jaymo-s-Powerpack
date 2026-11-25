@@ -2766,3 +2766,54 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
   fire, or warmer clothes.", "The cold's biting into me!", "Phew... I'm sweating.", "I'm overheating. Need shade, or
   water.", "Heatstroke... my head's swimming." (lang `message.jaymoskitchen.body_heat.*`).
 - Built; not played.
+
+## 0.6.80 (2026-11-24): zombies kneel and gnaw on bodies, chunks flying, the body jerking with each bite (#2093)
+
+- **Gnawing pose** (Andy: "zombies should also bend over and down to gnaw on bodies in a new gruesome animation, chunks flying everywhere and the body they are eating reacting to the movement"): a zombie (husk, drowned, zombie villager, anything drawn with a humanoid body) feeding on a body now goes down on its knees over it, bent double at the waist, head down at the meat and both hands on the body. Each bite it dives in, then rips back, head jerking up and worrying side to side, hands dragging up what they hold. With a limb torn off it sits back and gnaws it in its hand, head bobbing. It eases down and back up over a few ticks. Baby zombies kneel the same way at their own size.
+- **Chunks**: every scavenger bite (zombies, wolves, bears, werewolves) throws one or two small lumps of flesh up and back the way the jaws ripped, a scrap of clothing now and then; a limb coming off throws more, and a bone. Small and gone in 3 to 6 seconds, not a blast's mess (Gibs.bitten). Blood stays the toned-down flecks.
+- **The body reacts**: each bite tugs the body toward the eater, the bitten side lifting (its ragdoll is struck there; Flop draws the jolt); harder when a part comes away (CorpseEntity.tug).
+- Baby zombies now feed on bodies too.
+- **Cubs fed first** (Andy: "cubs should first, escorted by their parent, and guarded while they fill their stomachs"): a wolf pup, bear cub or fox kit eats from a body only with a grown one of its kind within 12 blocks, and only the body that one leads it to (the parent walks at their pace). At the body the parent doesn't eat while any of its cubs is still hungry: it stands guard, growls at anyone, any monster or other scavenger that comes within 8 blocks of the body, and goes for it within 4. A fox (skittish) bolts with its kits instead. Cubs fill up after one piece; then the parent eats. Guarded cubs aren't driven off the body by monsters or bigger beasts.
+- Synced to everyone by a non-saved attachment, Gnawing.GNAWING (DOWN/BITE/CHEW), set by Scavengers' GnawGoal and by Jaymo's Powers' eaters of the downed. Client: GnawPose (LivingEntityRendererMixin, ModelFeatureRendererMixin).
+- Built; not played.
+
+## 0.6.81 (2026-11-24): Butchers work the town's carcasses on the meat hook through the day (#2090)
+
+- Andy: "Butcher at the hook on their own": in working hours a butcher with a free meat hook within 14 blocks of their
+  workstation fetches a carcass lying within 20 blocks of the hook (a passive animal's, fresh, loose, and never a
+  player's kill), carries it over, hangs it, and works it with the hook's own steps: bled into the grate, head off,
+  skinned, gutted, three cuts. About ten steps fill a working day, with the blade worked between them, a cleaver or a
+  skinning knife in hand for each step.
+- What comes off goes to the town's stores (Jaymo's Kingdoms, `Butchers.setStock`), else a chest within 4 blocks of the
+  hook, else at the butcher's feet. A carcass they can't get to (fenced in) is left alone.
+- `Hanging.dressStep` runs the hook's steps for a villager (no tool wear, no messages; a player's blessings and perks
+  aren't added). `CorpseEntity.killedByPlayer()`, `Butchers.butchering` and `Butchers.wantsCarcass` are new for other mods.
+- Built in CI; not played.
+
+## 0.6.82 (2026-11-24): Vanilla+ picks: Ocean's, Nether's and Ender's Delight (#2102)
+
+- **11 new dishes** after Ocean's, Nether's and Ender's Delight: honey fried kelp, braised sea pickle, kelp-encrusted cod, stuffed cod, seagrass salad, fugu roll, magma gelatin, warped moldy meat, strange eclair, chanterelle stew and drift jelly pudding (`Dish`, with new `Step` ingredients). The strange eclair, chanterelle stew and pudding use Enderscape's fruit, mushrooms and jelly and only load with it.
+- **Ender's Delight ported** (MIT, by Ax3dGaming; `delight/EnderDelight`), chorus included (Andy's "Port all of it, chorus too"):
+  - **End plants** growing wild on the End's stone and on Enderscape's in the Beneath, and on farmland: void pepper (creeps over end stone, sets a pepper when it stops; picking it starts it creeping again; it won't crowd past 12 bushes in a small space), ethereal saffron, the amberveil mushroom and chorusflame (grows in three sizes).
+  - **Knife cuts**: an enderman, endermite or shulker killed with a knife drops an enderman sight, mite crust or shulker mollusk. On the cutting board an ender pearl gives 2 ender shards, an enderman sight 2 sight fragments, a mollusk 2 shulker filets.
+  - **Shulker bowls** (8 from a shell). The End stews, curries and the cereal are served in one and give it back; a hot one gives Comfort like a wooden bowl.
+  - **15 dishes**: chorus juice, chorus stew, crispy skewer, crawling sandwich, twisted cereal, endermite stew, pearl pasta, ender paella, uncanny cookies, amberveil stew, amberveiled curry, chicken curry, steak fries, veil of flames risotto, and the chorus pie (four slices). Plus the **stuffed shulker** feast, cooked in a shulker shell, four servings taken with a shulker bowl. A Perfect cook gives Ender's Delight's good effects; its Nausea stays only on the raw bites.
+  - **Ender Phasing**: a blow carries you a few blocks aside (at most every half second), and water and rain hurt you while it lasts.
+  - **End stone stove** (works as the stove), **chorus crate**, and Ender's Delight's **end house**: an empty cook's house out on the End's highlands and midlands, its stove still lit.
+- Ocean's, Nether's and Ender's Delight art is used under MIT (`textures/item/CREDITS-delight.txt`). Chanterelle stew and drift jelly pudding have our own.
+- Built; not played.
+
+## 0.6.83 (2026-11-24): thirst lasts twice as long (#2119)
+
+- **Thirst** drains half as fast: a point of water every 150 s at rest (was 75 s), and jumping, sprinting, mining and attacking cost half the water they did (8 exhaustion to a point, was 4). Heat, swimming and the Nether still speed it up by the same shares. (`Thirst.DRAIN`, `Thirst.EXHAUSTION_POINT`)
+- Not built or played; only two constants changed.
+
+## 0.6.84 (2026-11-25): New art for the waterskins: a leather bag, a round iron canteen, a glass flask of dragon's breath (#2124)
+
+- **Leather Waterskin**: a soft, lumpy hide bag with a cork, stitched down the middle and tied at the neck with string.
+- **Iron Canteen**: a round, flat metal canteen with a pressed ring, a screw cap and a string strap over the top.
+- **Dragon Canteen**: a two-bulb glass flask of glowing pink dragon's breath, with a purpur stopper, the same string tied
+  round its waist and a wisp of breath at the top.
+- The old three were one bag in three colours; now each reads by its shape alone, even at inventory size. Textures
+  only (`textures/item/waterskin_{leather,iron,dragon}.png`), same names, no code changes.
+- Picked by an independent judge from four sets (three Claude artists, one Codex), then touched up. Not checked in game.

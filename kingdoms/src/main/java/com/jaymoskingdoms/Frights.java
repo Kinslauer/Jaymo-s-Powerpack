@@ -104,7 +104,8 @@ public final class Frights {
 			// (a guard whose band broke runs with the rest)
 			return false;
 		}
-		if (BlastFright.standsGround(v)) {
+		if (BlastFright.standsGround(v) || Temperaments.fearless(v)) {
+			// (a guard, or one of the brave: TakeCover has the brave go at the monster)
 			return true;
 		}
 		if (!(v instanceof Worker w) || w.factionId() < 0 || Temperaments.runs(v)) {
@@ -120,7 +121,7 @@ public final class Frights {
 	 * the symbiote's suit or walking as a shade, and a mob the symbiote has taken ({@link Oddities#monstrous}); (0.7.10) and a Z Fighter
 	 * with a tail out, unless they have explained it to {@code v} ({@link Tails}).
 	 */
-	private static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
+	static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
 		LivingEntity best = null;
 		// ((0.7.186) the brave hardly at all, the timid from farther: Temperaments)
 		double range = Temperaments.frightRange(v, FRIGHT);

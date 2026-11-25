@@ -64,6 +64,8 @@ public final class Reputation {
 		if (by == 0) {
 			return;
 		}
+		// a stranger warms faster to Everybody's Friend
+		by = FeatsTrade.friendly(player, stored(player, kingdom.id()), by);
 		// (0.5.12) as its ruler's temper takes it
 		by = Tempers.reputation(kingdom, by);
 		// (0.7.130) and a purist ruler's, by your blood

@@ -78,6 +78,9 @@ public final class RoadLocks {
 	 */
 	static final String DIVINE_DEED = "afterlife.died";
 
+	/** The deed that opens the monster-born's road: a goblin or wolf named and made your follower ({@link NamedFollowers}). */
+	static final String NAMED_DEED = "monster.named";
+
 	/** (0.7.605) The capital's deed: a journeyman's rank in any trade. The wild's: a night out far from any settlement. Sworn's: a raider slain. */
 	static final String TRADE_DEED = "trade.ranked", WILD_DEED = "wild.night", RAIDER_DEED = "raider.slain";
 	/** (0.7.605) How far from every settlement's seat a night counts as one in the wild (blocks). */
@@ -164,6 +167,8 @@ public final class RoadLocks {
 		lock(Start.MAW, p -> is(p, Question.CHILDHOOD, "caves") && is(p, Question.TURN, "bite"), "world.maw");
 		// (0.7.606) the afterlife's road opens with the Divine-born blood; no secret past
 		lock(Start.AFTERLIFE, p -> false, DIVINE_DEED);
+		// the monster-born's road opens when you name a follower and it grows (NamedFollowers); no secret past
+		lock(Start.MONSTERBORN, p -> false, NAMED_DEED);
 	}
 
 	private RoadLocks() {

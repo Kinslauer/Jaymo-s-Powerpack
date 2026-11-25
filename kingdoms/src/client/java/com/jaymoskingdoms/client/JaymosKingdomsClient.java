@@ -50,6 +50,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
 		TierHidingClient.register();
 		LocksClient.register();
+		BoardTermsClient.register();
 		// (ff-kit) Peterwolf's firefighter readout on our HUD layout, only while carrying the kit
 		ForestFireHud.register();
 		// (0.7.329) the second batch of Blockbench Workshop creatures
@@ -60,6 +61,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.sailing.ShipShot.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.2F, false));
 		ShipClient.init();
 		BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
+		BlockEntityRenderers.register(com.jaymoskingdoms.TreeStump.ENTITY, ChoppedLogRenderer::new);
 		// the armillary sphere's animated rings and its screen
 		BlockEntityRenderers.register(com.jaymoskingdoms.astronomy.ArmillarySphereBlock.ENTITY, com.jaymoskingdoms.client.astronomy.ArmillaryBlockEntityRenderer::new);
 		// the scrying orb's living miniature
@@ -116,17 +118,21 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		com.jaymoskingdoms.client.wild.WildRenderer.register();
 		com.jaymoskingdoms.client.monsters.LegendRenderer.register();
+		com.jaymoskingdoms.client.monsters.MocBeastsClient.register();
 		com.jaymoskingdoms.client.monsters.MimeRenderer.register();
 		// (0.7.145) the Aether's Giants
 		com.jaymoskingdoms.client.remnants.GiantRenderer.register();
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
 		com.jaymoskingdoms.client.reaped.ReapedClient.register();
+		com.jaymoskingdoms.client.illagers.IllagerKindsClient.register();
 		com.jaymoskingdoms.client.creatures.CreaturesClient.register();
 		// 0.7.131: the Hornkin of the Nether
 		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
 		com.jaymoskingdoms.client.nether.ImpRenderer.register();
 		// (0.7.518) the patron champions
 		com.jaymoskingdoms.client.champions.ChampionRenderer.register();
+		// the patrons' colossi (the strike and the hunt)
+		com.jaymoskingdoms.client.champions.ColossusRenderer.register();
 		GreatNecromancerRenderer.register();
 		// medieval picks: the old age's rulers and their guard
 		com.jaymoskingdoms.client.oldage.OldAgeClient.register();
@@ -219,6 +225,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 					: "tooltip.jaymoskingdoms.fitted.other").withStyle(net.minecraft.ChatFormatting.GRAY));
 			}
 		});
+		// where a thing came from, stolen marks, heirlooms (Provenance)
+		ProvenanceTooltips.register();
 		FamiliarClient.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
@@ -295,6 +303,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		MimicBenchScreen.register();
 		BoutBracketScreen.register();
 		MaskedFacesClient.register();
+		CelebrationsClient.register();
 		CastOutMap.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
@@ -394,8 +403,6 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ArtKeysClient.register();
 		// the Cleric's medallion board
 		MedallionClient.register();
-		// a pop-up for key bindings that share a key (twice ever)
-		KeyClashes.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
 			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;

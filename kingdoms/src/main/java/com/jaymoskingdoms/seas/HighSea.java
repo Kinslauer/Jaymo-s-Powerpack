@@ -56,6 +56,11 @@ public final class HighSea {
 		}
 		Path marker = server.getWorldPath(LevelResource.ROOT).resolve(MARKER);
 		boolean on = Files.exists(marker);
+		if (!on && com.jaymoskingdoms.TectonicCompat.loaded()) {
+			// the land's lift for the higher sea is in the continents' shape pack, which stands down for Tectonic's terrain
+			JaymosKingdoms.LOGGER.info("Higher sea: off (Tectonic's own terrain)");
+			return;
+		}
 		if (!on && !server.getWorldData().overworldData().isInitialized()) {
 			// a new world: made with the higher sea, and marked so
 			try {
