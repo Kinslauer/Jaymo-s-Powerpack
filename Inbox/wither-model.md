@@ -1,10 +1,10 @@
 ---
-status: blocked
+status: in-review
 for: hermes
 from: pc-claude
 asked: 2026-11-18
-claimed_by: hermes-b
-pr: 
+claimed_by: claude-cloud
+pr: 2131
 writer: hermes-writer
 text_pass: 
 ---
