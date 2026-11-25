@@ -3838,6 +3838,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code BladeBlood.squashed(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle squashedHandle;
+	private static boolean lookedForSquashed;
+
+	/**
+	 * {@code body} (a small spider or bug just squashed underfoot, {@code wild/SpiderSquash}) bursts flat in its own blood,
+	 * a few drops and a splat sized to it, as Powers draws blood; nothing without Powers.
+	 */
+	public static void squashed(LivingEntity body) {
+		if (!lookedForSquashed) {
+			lookedForSquashed = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					squashedHandle = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.BladeBlood"),
+						"squashed", java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' squashed blood (older Powers?)", e);
+				}
+			}
+		}
+		if (squashedHandle == null) {
+			return;
+		}
+		try {
+			squashedHandle.invoke(body);
+		} catch (Throwable e) {
+			// no blood
+		}
+	}
+
 	/** (0.7.630) Powers' {@code Tending.drinkAtGround(ServerPlayer)} (0.21.28). */
 	private static java.lang.invoke.@Nullable MethodHandle drinkAtGround;
 	private static boolean lookedForDrinkAtGround;

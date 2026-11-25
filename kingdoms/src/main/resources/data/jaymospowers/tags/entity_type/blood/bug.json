@@ -1,0 +1,16 @@
+{
+	"replace": false,
+	"values": [
+		"jaymoskingdoms:cricket",
+		"jaymoskingdoms:maggot",
+		"jaymoskingdoms:roach",
+		"jaymoskingdoms:fly",
+		"jaymoskingdoms:barrow_beetle",
+		{"id": "naturalist:ant", "required": false},
+		{"id": "naturalist:caterpillar", "required": false},
+		{"id": "cubeanimals:cricket", "required": false},
+		{"id": "alexsmobs:cockroach", "required": false},
+		{"id": "alexsmobs:fly", "required": false},
+		{"id": "alexsmobs:leafcutter_ant", "required": false}
+	]
+}
