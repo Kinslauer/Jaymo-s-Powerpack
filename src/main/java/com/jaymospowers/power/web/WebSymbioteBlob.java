@@ -217,6 +217,25 @@ public class WebSymbioteBlob extends PathfinderMob {
 		return blob;
 	}
 
+	/**
+	 * (Andy, 2026-11-25) It binds to {@code target} at once, up a tendril and in (no roll to take them): a host's symbiote
+	 * that fought them and gave up its host for them ({@link WebSymbioteInfection}). False if it can't (they already have
+	 * one, or aren't near), and it makes for them as usual instead.
+	 */
+	boolean leapInto(ServerPlayer target) {
+		if (this.isRemoved() || !(this.level() instanceof ServerLevel level) || target.level() != level || !this.wants(target, target.position())) {
+			return false;
+		}
+		Vec3 from = this.position().add(0.0, 0.3, 0.0);
+		this.tendril(level, from, target.position().add(0.0, target.getBbHeight() * 0.6, 0.0));
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 0.8F, 1.6F);
+		Shakes.send(target, 8.0F, from);
+		this.bondWith(target, from);
+		level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 0.3, this.getZ(), 30, 0.3, 0.2, 0.3, 0.1);
+		this.discard();
+		return true;
+	}
+
 	/** (0.15.52) It makes for {@code target} (see {@link #pursuing}). */
 	WebSymbioteBlob pursue(Player target) {
 		if (this.rampageSite == null && this.remains == null) {
