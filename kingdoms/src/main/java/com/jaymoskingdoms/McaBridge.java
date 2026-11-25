@@ -894,6 +894,55 @@ final class McaBridge {
 		return w;
 	}
 
+	/**
+	 * {@link McaCompat#hollowBody}: a grown man of no settlement and out of MCA's family tree, enlisted to none in {@code role},
+	 * at {@code at}, not yet in the world: the one whose saved self is {@code face} (from {@link #saved}) if there is one, else
+	 * a new face.
+	 */
+	static @Nullable PathfinderMob hollowBody(ServerLevel level, Vec3 at, float yaw, int role, @Nullable CompoundTag face) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(at).withAge(0).withGender(Gender.MALE).build(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		if (face != null) {
+			CompoundTag self = face.copy();
+			for (String gone : new String[] {"UUID", "Health", "DeathTime", "HurtTime", "Pos", "Motion", "Rotation", "Passengers", "leash", "Fire",
+				"Brain", "NoAI", "attributes", "active_effects", "equipment", "Inventory"}) {
+				self.remove(gone);
+			}
+			try {
+				villager.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
+					level.registryAccess(), self));
+			} catch (RuntimeException e) {
+				JaymosKingdoms.LOGGER.warn("A Pallid captain's body only partly loaded: {}", e.toString());
+			}
+			villager.setUUID(java.util.UUID.randomUUID());
+			villager.entityTags().removeIf(t -> t.contains("downed"));
+		}
+		villager.snapTo(at.x, at.y, at.z, yaw, 0.0F);
+		villager.setPersistenceRequired();
+		worker(villager).enlist(role, -1);
+		villager.setHomeTo(BlockPos.containing(at), 32);
+		return villager;
+	}
+
+	/** {@code mob}'s whole saved self (for {@link #hollowBody}), or null if it isn't one of MCA's. */
+	static @Nullable CompoundTag saved(LivingEntity mob) {
+		if (!(mob instanceof VillagerEntityMCA v)) {
+			return null;
+		}
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+			net.minecraft.util.ProblemReporter.DISCARDING, v.registryAccess());
+		return v.saveAsPassenger(out) ? out.buildResult() : null;
+	}
+
+	/** {@code mob} (one of MCA's, just put in the world) is in nobody's family tree. */
+	static void untree(ServerLevel level, LivingEntity mob) {
+		if (mob instanceof VillagerEntityMCA) {
+			FamilyTree.get(level).remove(mob.getUUID());
+		}
+	}
+
 	/** (0.7.295) {@link McaCompat#assassin}, {@link McaCompat#stranger}: a grown villager of no settlement, enlisted to none in {@code role}. */
 	static @Nullable PathfinderMob stranger(ServerLevel level, BlockPos at, float yaw, int role, BlockPos home, int radius) {
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0).spawn(EntitySpawnReason.EVENT);

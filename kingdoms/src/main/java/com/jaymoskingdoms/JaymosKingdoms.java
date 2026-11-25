@@ -556,6 +556,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		HollowSighting.register();
 		LOGGER.debug("pallid seen attachment: {}", PallidHollows.SEEN);
 		PallidHollows.register();
+		HollowCaptains.register();
 		// the Skeleton Lord's curse: the only way to rise a skeleton (and its attachment)
 		LOGGER.debug("skeleton curse attachment: {}", SkeletonCurse.CURSED);
 		SkeletonCurse.register();
