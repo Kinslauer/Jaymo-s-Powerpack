@@ -137,10 +137,10 @@ def packMods = [
 	// haven: Havens.ctov). Jaymo's Kingdoms reads its trade buildings in the game (ctov:village/<land>/jobsite/<trade>)
 	// for a town's butcher, fishery, hunting lodge, smithy and mason (CtovHalls). The 26.2 Fabric build (4.1.1, says
 	// minecraft >=26.1, no mixins, almost all data); needs Lithostitched (above). Server-side worldgen.
-	// Taken out 2026-11-04 (0.20.32): CTOV 4.1.1 is a 26.2 build, and on 26.3 its structures fail to load (vanilla
+	// Taken out 2026-11-04 (0.20.32): CTOV 4.1.1 is a 26.2 build, and on 26.3 its structures failed to load (vanilla
 	// no longer has minecraft:simple_state_provider / weighted_state_provider, and Lithostitched 2.0.6 has no
-	// lithostitched:limited), so the server refused to start. Put the line back once CTOV has a 26.3 build.
-	// [dep: "maven.modrinth:ct-overhaul-village:DpxVZVuT", cf: [623908, 9435529]],
+	// lithostitched:limited), so the server refused to start. Back with the 26.3 build (4.2.2a, Modrinth Vcv7z4RB, in
+	// packModsNoCf below): its data uses only minecraft:simple / minecraft:weighted, which 26.3 has, and no lithostitched:limited.
 	// William Wythers' Overhauled Overworld (CC BY-NC-ND 4.0; shipped unchanged, downloaded by id) and its library Cristel
 	// Lib (same licence): every vanilla biome redecorated (trees, foliage, rocks, sub-biomes) under its vanilla id, so
 	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
@@ -503,6 +503,13 @@ def packMods = [
 // registries, for Luna Slimes, 2026-11-20). Once CurseForge has the matching file, add its [project id, file id] and
 // move the line into packMods.
 def packModsNoCf = [
+	// ChoiceTheorem's Overhauled Village 4.2.2a, its 26.3 Fabric build (see the note in packMods above; needs Lithostitched).
+	// CurseForge project 623908; its file id for 4.2.2a to look up from the home PC (cloud can't reach CurseForge).
+	[dep: "maven.modrinth:ct-overhaul-village:Vcv7z4RB", cf: null],
+	// Tidal Towns 2.0 (all rights reserved, by joshieman; packs welcome, shipped unchanged with credit and a link:
+	// modrinth.com/datapack/tidal-towns): driftwood raft villages out on the deep ocean. Jaymo's Kingdoms makes each a
+	// Tideborn haven moored to the sea's trade (TidalTowns). Data only (structures), server-side worldgen. No CurseForge id looked up.
+	[dep: "maven.modrinth:tidal-towns:ahvrY85Y", cf: null],
 	// Icy's Better Horses 2.1.8 (Bare Minimum License, Icywhenhot; the official jar, shipped unchanged: its models, textures and
 	// sounds may be used only as part of it, and it may not be reposted on its own, so it travels only inside the pack,
 	// credited, with its licence in licenses/LICENSE_icys_better_horses): fifteen horse breeds with their own coats, biomes
@@ -982,7 +989,8 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it), Combat Roll (0.15.16: it left the pack in 0.15.5 for our own feathers and
-// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar); CTOV (0.20.32, a 26.2 build that stops a 26.3 server loading);
+// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar);
+// (CTOV left this list when its 26.3 build came into the pack);
 // (AmbientSounds and CreativeCore left for ImmersiveFX: Resurrected, then came back when it went: Andy, 2026-11-12);
 // ImmersiveVFX (its test ended: Andy, 2026-11-11, "revert the immersive vfx changes"; Iris and Complementary are back);
 // ImmersiveFX: Resurrected (Andy, 2026-11-12: with Sound Physics Remastered both filtered every sound and everyone lagged,
@@ -992,7 +1000,7 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list);
 // VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list); Tectonic (its trial ended: Andy,
 // 2026-11-25, it broke the caves and the climate map)
-def removedIdsFromProfile = ["tectonic", "horseexpert", "kaffees_dual_ride", "ultimate_horseshoes", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
+def removedIdsFromProfile = ["tectonic", "horseexpert", "kaffees_dual_ride", "ultimate_horseshoes", "citadel", "distanthorizons", "camerautils", "combat_roll", "immersivevfx", "immersivefx", "streamsreflowing",
 	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions",
 	"vanilla-outsider-better-dogs", "dasik-library", "scalablelux"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's

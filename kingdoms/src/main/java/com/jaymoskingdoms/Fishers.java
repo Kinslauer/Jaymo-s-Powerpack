@@ -104,10 +104,12 @@ final class Fishers {
 			return;
 		}
 		for (Faction f : Factions.all(server)) {
-			if (!f.type().isRealm() || f.fallen()) {
+			// (village mods patch 7) a raft town's own fishers put out from its mooring too (TidalTowns)
+			boolean raft = TidalTowns.is(server, f);
+			if (!f.type().isRealm() && !raft || f.fallen()) {
 				continue;
 			}
-			Navies.Harbour h = Navies.harbour(server, f.id());
+			Navies.Harbour h = raft ? TidalTowns.moor(level, f) : Navies.harbour(server, f.id());
 			if (h == null || !level.isPositionEntityTicking(h.mooring())) {
 				continue;
 			}

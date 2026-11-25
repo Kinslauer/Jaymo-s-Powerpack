@@ -310,6 +310,12 @@ final class TradeRoutes {
 			case TOWN -> {
 				boolean wagons = folk >= TOWN_WAGON_FOLK && purse(Factions.level(server), f) >= TOWN_WAGON_PURSE;
 				int carts = wagons ? 1 : Math.min(MOST_HANDCARTS, 1 + folk / 16);
+				// (village mods patch 7) a raft town out at sea sends its goods by skiff (TidalTowns)
+				if (TidalTowns.is(server, f)) {
+					yield new Profile(BOAT, carts + (haven ? HAVEN_CARTS : 0), BOAT_LOAD, haven ? HAVEN_GUARDS : 0, false,
+						EnumSet.of(Ware.FOOD, Ware.CLOTH, Ware.HIDE, Ware.TIMBER), EnumSet.of(Ware.STONE, Ware.METAL, Ware.TIMBER, Ware.FOOD, Ware.HIDE),
+						new Item[] {Items.COD, Items.SALMON, Items.KELP, Items.STRING, Items.LEATHER});
+				}
 				yield new Profile(wagons ? CART : HAND, carts + (haven ? HAVEN_CARTS : 0), wagons ? Caravans.CART_LOAD : HAND_LOAD,
 					(wagons ? 1 : 0) + (haven ? HAVEN_GUARDS : 0), false, EnumSet.of(Ware.FOOD, Ware.CLOTH, Ware.HIDE, Ware.TIMBER),
 					// (hides too, for a town that has no hunters of its own: Andy, 2026-11-19)
@@ -355,10 +361,19 @@ final class TradeRoutes {
 		return 1.0;
 	}
 
-	/** Where a skiff ties up at {@code f}: a cove's mooring, else its door. */
+	/** Where a skiff ties up at {@code f}: a cove's mooring (or a raft town's, {@link TidalTowns}), else its door. */
 	static BlockPos quay(MinecraftServer server, Faction f) {
 		PirateCoves.Cove cove = PirateCoves.cove(server, f.id());
-		return cove != null ? cove.mooring() : Caravans.start(f);
+		if (cove != null) {
+			return cove.mooring();
+		}
+		Navies.Harbour raft = TidalTowns.is(server, f) ? Navies.harbour(server, f.id()) : null;
+		return raft != null ? raft.mooring() : Caravans.start(f);
+	}
+
+	/** {@code f} has a mooring for skiffs: a pirate cove, or a raft town (village mods patch 7). */
+	private static boolean moored(MinecraftServer server, Faction f) {
+		return PirateCoves.cove(server, f.id()) != null || TidalTowns.is(server, f) && Navies.harbour(server, f.id()) != null;
 	}
 
 	private static int capOf(Caravans.Caravan c) {
@@ -421,7 +436,8 @@ final class TradeRoutes {
 			// (0.7.519) and takes an extra cart
 			p = new Profile(p.rig(), p.carts() + Treaties.CHARTER_CARTS, p.cap(), p.guards(), p.mounted(), p.sells(), p.wants(), p.levy());
 		}
-		if (p.rig() == BOAT && (PirateCoves.cove(server, f.id()) == null || PirateCoves.cove(server, to.id()) == null)) {
+		// ((village mods patch 7) a raft town's skiffs row to any partner: there is no road off the raft)
+		if (p.rig() == BOAT && !TidalTowns.is(server, f) && (!moored(server, f) || !moored(server, to))) {
 			// ((0.7.490) skiffs only from a mooring to a mooring: to a partner inland, the cove's trade goes by handcart)
 			p = new Profile(HAND, p.carts(), HAND_LOAD, p.guards(), p.mounted(), p.sells(), p.wants(), p.levy());
 		}
