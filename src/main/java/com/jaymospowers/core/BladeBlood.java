@@ -41,7 +41,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class BladeBlood {
 	/** Red blood (Simple Blood's), and the other kinds' colours (see {@link #color}). */
-	public static final int RED = 0x80000D, ENDER = 0x800D80, DARK = 0x231D21, SLIME = 0x76BE6D, BUG = 0xD8CB3A;
+	public static final int RED = 0x80000D, ENDER = 0x800D80, DARK = 0x231D21, SLIME = 0x76BE6D, BUG = 0xD8CB3A, CREEPER = 0x4FA13A;
 	/**
 	 * (0.21.50) Andy: "all zombies should get the rotten blood": a zombie's dark, rotten blood. And the heritages' own
 	 * (Jaymo's Kingdoms picks them): a Divine's gold, a Verdant's green sap.
@@ -113,7 +113,7 @@ public final class BladeBlood {
 	public static final TagKey<EntityType<?>> BLOODLESS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("bloodless"));
 	/** (0.15.93) What bleeds another colour than red (Simple Blood's kinds). */
 	public static final TagKey<EntityType<?>> ENDER_BLOOD = tag("blood/ender"), DARK_BLOOD = tag("blood/dark"),
-		SLIME_BLOOD = tag("blood/slime"), BUG_BLOOD = tag("blood/bug"), MAGMA_BLOOD = tag("blood/magma"), ROTTEN_BLOOD = tag("blood/rotten");
+		SLIME_BLOOD = tag("blood/slime"), CREEPER_BLOOD = tag("blood/creeper"), BUG_BLOOD = tag("blood/bug"), MAGMA_BLOOD = tag("blood/magma"), ROTTEN_BLOOD = tag("blood/rotten");
 
 	/** Who bled this tick (the game time): a power's blade blow that also reads as a held blade bleeds only once. */
 	private static final Map<LivingEntity, Long> SPLASHED = new WeakHashMap<>();
@@ -164,6 +164,48 @@ public final class BladeBlood {
 	}
 
 	/**
+	 * Metal bodies (iron and copper golems, mechs: {@link #METAL_BODIES}) throw sparks where they're struck: this many, plus this
+	 * many per point of damage, at most this many, this fast.
+	 */
+	static final int SPARKS = 2, SPARKS_MAX = 12;
+	static final float SPARKS_PER_DAMAGE = 0.8F;
+	static final double SPARK_SPEED = 0.25;
+	public static final TagKey<EntityType<?>> METAL_BODIES = tag("metal_bodies");
+
+	/** {@code target}, if it's metal, sparks under a blow of {@code damage}. */
+	static void sparks(LivingEntity target, float damage) {
+		if (!(target.level() instanceof ServerLevel level) || !target.getType().builtInRegistryHolder().is(METAL_BODIES)) {
+			return;
+		}
+		int count = Math.min(SPARKS_MAX, Mth.floor(SPARKS + damage * SPARKS_PER_DAMAGE));
+		Vec3 at = target.getBoundingBox().getCenter();
+		double w = target.getBbWidth() * 0.3;
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, at.x, at.y + target.getBbHeight() * 0.1, at.z, count, w,
+			target.getBbHeight() * 0.2, w, SPARK_SPEED);
+	}
+
+	/**
+	 * A slime or magma cube struck throws goo: lumps of slime (green), or for a magma cube dripping lava (orange): this many,
+	 * plus this many per point of damage, at most this many.
+	 */
+	static final int GOO = 2, GOO_MAX = 10;
+	static final float GOO_PER_DAMAGE = 0.5F;
+	static final double GOO_SPEED = 0.12;
+
+	/** {@code target}, if it's a slime or magma cube, throws goo under a blow of {@code damage}. */
+	static void goo(LivingEntity target, float damage) {
+		if (!(target.level() instanceof ServerLevel level) || !(target instanceof net.minecraft.world.entity.monster.cubemob.Slime)) {
+			return;
+		}
+		boolean magma = target.getType().builtInRegistryHolder().is(MAGMA_BLOOD);
+		int count = Math.min(GOO_MAX, Mth.floor(GOO + damage * GOO_PER_DAMAGE));
+		Vec3 at = target.getBoundingBox().getCenter();
+		double w = target.getBbWidth() * 0.3;
+		level.sendParticles(magma ? net.minecraft.core.particles.ParticleTypes.FALLING_LAVA : net.minecraft.core.particles.ParticleTypes.ITEM_SLIME,
+			at.x, at.y, at.z, count, w, target.getBbHeight() * 0.25, w, GOO_SPEED);
+	}
+
+	/**
 	 * (0.20.51) How much blood a blow on {@code target} spills against a full one ({@link #FULL_HEALTH_BLOOD} at full
 	 * health up to {@link #NO_HEALTH_BLOOD} at none), so how hurt they are shows in it.
 	 */
@@ -210,6 +252,8 @@ public final class BladeBlood {
 		}
 		// (0.20.51) bones splinter
 		splinters(target, damage);
+		sparks(target, damage);
+		goo(target, damage);
 		if (heavyBlunt(source, damage)) {
 			// (0.15.117) a killing one crushes a spider (Kitchen)
 			Crushing.mark(target);
@@ -432,6 +476,9 @@ public final class BladeBlood {
 		if (type.is(SLIME_BLOOD)) {
 			return SLIME;
 		}
+		if (type.is(CREEPER_BLOOD)) {
+			return CREEPER;
+		}
 		return type.is(BUG_BLOOD) ? BUG : RED;
 	}
 
@@ -460,7 +507,26 @@ public final class BladeBlood {
 			drops, w, 0.1, w, SPRAY_SPEED + drops * SPEED_PER_DROP);
 		BloodTrail.bleed(level, target, color(target), Math.min(HIT_STAINS_MAX, 1 + drops / DROPS_PER_STAIN), w + 0.4,
 			HIT_STAIN * size(target), FALL_TICKS);
+		screen(level, target, damage);
 		return true;
+	}
+
+	/** A blow this hard (health points) close to a player spatters their screen; within this many blocks of the body. */
+	static final float SCREEN_HIT = 6.0F;
+	static final double SCREEN_RANGE = 2.5;
+
+	/** A heavy blow on {@code target}: each player within {@link #SCREEN_RANGE} of it is told, to spatter their own screen. */
+	private static void screen(ServerLevel level, LivingEntity target, float damage) {
+		if (damage < SCREEN_HIT) {
+			return;
+		}
+		Vec3 at = target.getBoundingBox().getCenter();
+		BloodParticles.Screen splat = new BloodParticles.Screen(color(target), Math.min(2.0F, damage / HEAVY_BLUNT));
+		for (net.minecraft.server.level.ServerPlayer player : level.players()) {
+			if (player != target && player.distanceToSqr(at) <= SCREEN_RANGE * SCREEN_RANGE) {
+				level.sendParticles(player, splat, true, true, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			}
+		}
 	}
 
 	/** How big {@code target}'s drops and pools are (a man's are 1; Simple Blood's rule, by its width). */

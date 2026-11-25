@@ -117,6 +117,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.web.WebbedLook.register();
 		com.jaymospowers.client.power.web.WebbedView.register();
 		com.jaymospowers.client.blood.Flies.register();
+		com.jaymospowers.client.blood.BloodScreen.init();
 		com.jaymospowers.client.blood.WeaponDrips.register();
 		com.jaymospowers.client.sound.SpotSounds.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip

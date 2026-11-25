@@ -1,5 +1,6 @@
 package com.jaymospowers.client.blood;
 
+import com.jaymospowers.core.blood.BloodBurn;
 import com.jaymospowers.core.blood.BloodParticles;
 import com.jaymospowers.core.blood.BloodTrail;
 import net.minecraft.client.Camera;
@@ -124,6 +125,12 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 		if (this.age % BloodPuddle.RAIN_CHECK == 0 && this.lifetime - this.age > BloodPuddle.RAIN_WASH
 			&& (BloodPuddle.rainedOn(this.level, this.x, this.y, this.z) || BloodPuddle.underWater(this.level, this.x, this.y, this.z))) {
 			this.lifetime = this.age + BloodPuddle.RAIN_WASH;
+			this.washFrom = this.age;
+		}
+		// fire or lava beside it burns it away
+		if (this.age % BloodPuddle.RAIN_CHECK == 0 && this.lifetime - this.age > BloodPuddle.BURN_AWAY
+			&& BloodBurn.near(this.level, BlockPos.containing(this.x, this.y, this.z))) {
+			this.lifetime = this.age + BloodPuddle.BURN_AWAY;
 			this.washFrom = this.age;
 		}
 		// the stain that fed it scrubbed or washed away: it goes too
@@ -397,6 +404,54 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 			add(mark);
 			made++;
 		}
+	}
+
+	/**
+	 * A pool of {@code color} {@code size} across at (x, y, z) lying on a stair or slab and reaching its edge, with a lower step
+	 * beyond it (up to a block down): a drop runs off the edge and falls to that step, where it pools. False if it
+	 * isn't on a step or nothing lies below.
+	 */
+	static boolean stepDown(ClientLevel level, double x, double y, double z, float size, int color) {
+		BlockPos under = BlockPos.containing(x, y - 0.02, z);
+		BlockState ground = level.getBlockState(under);
+		if (!(ground.getBlock() instanceof net.minecraft.world.level.block.SlabBlock) && !(ground.getBlock() instanceof net.minecraft.world.level.block.StairBlock)) {
+			return false;
+		}
+		VoxelShape shape = ground.getCollisionShape(level, under);
+		if (shape.isEmpty() || Math.abs(under.getY() + shape.max(Direction.Axis.Y) - y) > 0.05) {
+			return false;
+		}
+		double half = size * 0.5;
+		int start = level.getRandom().nextInt(4);
+		for (int i = 0; i < 4; i++) {
+			Direction face = Direction.from2DDataValue((start + i) % 4);
+			double edge = switch (face) {
+				case EAST -> under.getX() + 1.0 - x;
+				case WEST -> x - under.getX();
+				case SOUTH -> under.getZ() + 1.0 - z;
+				default -> z - under.getZ();
+			};
+			if (edge > half * 0.85) {
+				continue;
+			}
+			BlockPos beyond = under.relative(face);
+			// the top of whatever lies beyond: this level if it's open and the block below is lower, or the beyond block's own top
+			double lower = level.getBlockState(beyond).getCollisionShape(level, beyond).isEmpty()
+				? topOf(level, beyond.below()) : topOf(level, beyond);
+			if (!(lower < y - 0.1) || lower < y - 1.1 || !open(level, beyond.above())) {
+				continue;
+			}
+			double ox = x + face.getStepX() * (edge + 0.12), oz = z + face.getStepZ() * (edge + 0.12);
+			BloodClient.drip(level, ox, y + 0.02, oz, color, 0.4F);
+			return true;
+		}
+		return false;
+	}
+
+	/** The height of the top of the block at {@code pos} (its collision shape's), or the bottom of it if it has none. */
+	private static double topOf(ClientLevel level, BlockPos pos) {
+		VoxelShape shape = level.getBlockState(pos).getCollisionShape(level, pos);
+		return pos.getY() + (shape.isEmpty() ? 0.0 : shape.max(Direction.Axis.Y));
 	}
 
 	/** How far down from {@code fromY} a run can go on {@code face} of {@code block} and the whole blocks under it. */
