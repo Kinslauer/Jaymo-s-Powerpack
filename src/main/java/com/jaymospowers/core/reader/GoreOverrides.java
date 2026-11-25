@@ -76,6 +76,9 @@ public final class GoreOverrides {
 
 	/** Sets (or, with null, clears) a creature's weight, as times a man's bulk. */
 	public static void setWeight(Identifier id, @Nullable Float times) {
+		if (times != null && !Float.isFinite(times)) {
+			return;
+		}
 		put(WEIGHT, id, times == null ? null : Math.max(MIN_WEIGHT, times));
 	}
 
@@ -100,51 +103,74 @@ public final class GoreOverrides {
 
 	// ---------------------------------------------------------------- the file
 
+	/** Whether the file was there but couldn't be read (then it is never written over). */
+	private static boolean unreadable;
+
 	private static Path file() {
 		return FabricLoader.getInstance().getConfigDir().resolve(FILE);
 	}
 
-	/** Reads the file (if there is one). */
+	/** Reads the file (if there is one), in place of what was read before. A bad entry is skipped, not the rest. */
 	public static void load() {
+		BLOOD.clear();
+		WEIGHT.clear();
+		BODY.clear();
+		WEAPON.clear();
+		unreadable = false;
 		Path file = file();
 		if (!Files.exists(file)) {
+			BodyPlan.forget();
 			return;
 		}
+		JsonObject root;
 		try (Reader reader = Files.newBufferedReader(file)) {
-			JsonObject root = GSON.fromJson(reader, JsonObject.class);
-			if (root == null) {
-				return;
-			}
+			root = GSON.fromJson(reader, JsonObject.class);
+		} catch (IOException | RuntimeException e) {
+			// (kept as it is: an edit won't write over a file a hand can still mend)
+			unreadable = true;
+			JaymosPowers.LOGGER.warn("Could not read {}; edits won't be saved until it's fixed: {}", FILE, e.toString());
+			BodyPlan.forget();
+			return;
+		}
+		if (root != null) {
 			for (var e : section(root, "blood")) {
-				String v = e.getValue().getAsString().trim().toLowerCase(Locale.ROOT);
-				Identifier id = Identifier.tryParse(e.getKey());
-				if (id != null) {
-					BLOOD.put(id, v.equals("none") ? NO_BLOOD : Integer.parseInt(v.replace("#", ""), 16) & 0xFFFFFF);
-				}
+				entry(e, (id, v) -> {
+					String c = v.getAsString().trim().toLowerCase(Locale.ROOT);
+					BLOOD.put(id, c.equals("none") ? NO_BLOOD : Integer.parseInt(c.replace("#", ""), 16) & 0xFFFFFF);
+				});
 			}
 			for (var e : section(root, "weight")) {
-				Identifier id = Identifier.tryParse(e.getKey());
-				if (id != null) {
-					WEIGHT.put(id, Math.max(MIN_WEIGHT, e.getValue().getAsFloat()));
-				}
+				entry(e, (id, v) -> {
+					float w = v.getAsFloat();
+					if (Float.isFinite(w)) {
+						WEIGHT.put(id, Math.max(MIN_WEIGHT, w));
+					}
+				});
 			}
 			for (var e : section(root, "body")) {
-				Identifier id = Identifier.tryParse(e.getKey());
-				if (id != null) {
-					BODY.put(id, BodyPlan.valueOf(e.getValue().getAsString().toUpperCase(Locale.ROOT)));
-				}
+				entry(e, (id, v) -> BODY.put(id, BodyPlan.valueOf(v.getAsString().toUpperCase(Locale.ROOT))));
 			}
 			for (var e : section(root, "weapon")) {
-				Identifier id = Identifier.tryParse(e.getKey());
-				String v = e.getValue().getAsString().toUpperCase(Locale.ROOT);
-				if (id != null) {
-					WEAPON.put(id, v.equals("NONE") ? Optional.empty() : Optional.of(WeaponKind.valueOf(v)));
-				}
+				entry(e, (id, v) -> {
+					String k = v.getAsString().toUpperCase(Locale.ROOT);
+					WEAPON.put(id, k.equals("NONE") ? Optional.empty() : Optional.of(WeaponKind.valueOf(k)));
+				});
 			}
-		} catch (IOException | RuntimeException e) {
-			JaymosPowers.LOGGER.warn("Could not read {}: {}", FILE, e.toString());
 		}
 		BodyPlan.forget();
+	}
+
+	/** Reads one entry; a bad one is warned about and left out. */
+	private static void entry(Map.Entry<String, JsonElement> e, java.util.function.BiConsumer<Identifier, JsonElement> read) {
+		Identifier id = Identifier.tryParse(e.getKey());
+		if (id == null) {
+			return;
+		}
+		try {
+			read.accept(id, e.getValue());
+		} catch (RuntimeException ex) {
+			JaymosPowers.LOGGER.warn("Skipping {} in {}: {}", e.getKey(), FILE, ex.toString());
+		}
 	}
 
 	private static Iterable<Map.Entry<String, JsonElement>> section(JsonObject root, String name) {
@@ -163,8 +189,16 @@ public final class GoreOverrides {
 		root.add("weight", weight);
 		root.add("body", body);
 		root.add("weapon", weapon);
-		try (Writer writer = Files.newBufferedWriter(file())) {
-			GSON.toJson(root, writer);
+		if (unreadable) {
+			JaymosPowers.LOGGER.warn("Not saving {}: it couldn't be read, so writing it would lose what's in it", FILE);
+			return;
+		}
+		Path file = file(), temp = file.resolveSibling(FILE + ".tmp");
+		try {
+			try (Writer writer = Files.newBufferedWriter(temp)) {
+				GSON.toJson(root, writer);
+			}
+			Files.move(temp, file, java.nio.file.StandardCopyOption.REPLACE_EXISTING, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e) {
 			JaymosPowers.LOGGER.warn("Could not write {}: {}", FILE, e.toString());
 		}

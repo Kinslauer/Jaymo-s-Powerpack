@@ -245,6 +245,9 @@ public final class Gravediggers {
 			}
 			case DIG_BOTTOM -> {
 				if (level.getBlockState(lower).isAir() || !level.getBlockState(lower).is(BlockTags.MINEABLE_WITH_SHOVEL)) {
+					// (no second spit of soil here: the first goes back in, and the body waits for another try)
+					level.setBlockAndUpdate(upper, Graves.soilAround(level, upper));
+					LEFT.put(job.body, now + RETRY);
 					return false;
 				}
 				level.destroyBlock(lower, false);
@@ -267,6 +270,10 @@ public final class Gravediggers {
 				// the mound goes over it and the body is laid under it, saved whole
 				if (Graves.lay(level, body, upper)) {
 					JaymosKingdoms.LOGGER.debug("{} buried a villager at {}", villager.getName().getString(), upper);
+				} else {
+					// the body couldn't be laid: the hole is filled and it's left for another try
+					level.setBlockAndUpdate(upper, Graves.soilAround(level, upper));
+					LEFT.put(job.body, now + RETRY);
 				}
 				return false;
 			}

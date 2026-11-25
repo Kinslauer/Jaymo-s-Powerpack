@@ -220,12 +220,17 @@ public final class Graves {
 		List<Grave> graves = new ArrayList<>(all(level));
 		for (Grave g : graves) {
 			if (g.pos == pos.asLong()) {
+				Entity body = DeadBodies.raise(level, g.body, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+				if (body == null) {
+					// (the body couldn't be raised: its record stays, so it isn't lost)
+					return null;
+				}
 				graves.remove(g);
 				level.setAttached(BURIED, graves);
 				if (level.getBlockState(pos).is(GRAVE)) {
 					level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
 				}
-				return DeadBodies.raise(level, g.body, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+				return body;
 			}
 		}
 		return null;

@@ -55,13 +55,13 @@ public class GoreReaderScreen extends Screen {
 	}
 
 	public static void register() {
-		ClientPlayNetworking.registerGlobalReceiver(GoreReader.Data.TYPE, (payload, context) -> {
+		ClientPlayNetworking.registerGlobalReceiver(GoreReader.Data.TYPE, (payload, context) -> context.client().execute(() -> {
 			if (payload.open()) {
 				Minecraft.getInstance().gui.setScreen(new GoreReaderScreen(payload));
 			} else if (Minecraft.getInstance().gui.screen() instanceof GoreReaderScreen screen) {
 				screen.merge(payload);
 			}
-		});
+		}));
 	}
 
 	private void merge(GoreReader.Data data) {
