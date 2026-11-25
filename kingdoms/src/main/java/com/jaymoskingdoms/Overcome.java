@@ -48,8 +48,10 @@ import org.jspecify.annotations.Nullable;
  * exposure ({@link #FAINTED}), and on a player the living nightmare ({@link LivingNightmare}).</li>
  * <li><b>Once an encounter</b> (Andy, 2026-11-25: "it should only happen once per encounter, and it should only last a
  * max of 6s"): one who has fainted isn't overcome again ({@link #SPENT}) until nothing overwhelming has been in their
- * sight for {@link #ENCOUNTER_GAP}. The unease still climbs and still shows, but they keep their feet. One of the folk
- * lies out {@link #FOLK_OUT} at most, as a player's faint lasts 6 s.</li>
+ * sight for {@link #ENCOUNTER_GAP}. The unease still climbs and still shows, but they keep their feet.</li>
+ * <li><b>Shaken awake</b> (Andy, 2026-11-25: "they still stay down that long, but you can wake them and tell them to run"):
+ * a player's sneak + use on one of the folk lying out cold ({@link #shake}) shakes them by the shoulder; they come round
+ * and run from what overcame them, as one who withdraws does.</li>
  * <li><b>Facing it</b>: unease that ebbs away again after being uneasy counts as having faced it ({@link #FACED}).</li>
  * </ul>
  * Never: the Brave, the Unveiled ({@link Exposure#UNVEILED}), bosses, players out of play (creative, spectating, downed),
@@ -76,7 +78,7 @@ public final class Overcome {
 	/** How long one who withdraws keeps away (ticks). */
 	static final int WITHDRAW_TICKS = 20 * 12;
 	/** How long one of the folk lies out cold (ticks). */
-	static final int FOLK_OUT = 20 * 6;
+	static final int FOLK_OUT = 20 * 15;
 	/** An encounter ends once nothing overwhelming has been in sight this long (ticks): only then can they faint again. */
 	static final int ENCOUNTER_GAP = 20 * 60;
 	/** Exposure for a faint, and for facing one down. */
@@ -94,17 +96,25 @@ public final class Overcome {
 		boolean uneasy, withdrew;
 		/** When one of the folk comes round (game time), or 0. */
 		long outUntil;
+		/** What one of the folk lying out cold fainted at, to run from once shaken awake. */
+		@Nullable LivingEntity fearOf;
 	}
 
 	private static final Map<LivingEntity, State> STATES = new WeakHashMap<>();
 	/** Who has fainted this encounter → the game time they last had something overwhelming in sight. */
 	private static final Map<LivingEntity, Long> SPENT = new WeakHashMap<>();
+	/** Before the default use phase, so a shake isn't taken for a talk. */
+	private static final net.minecraft.resources.Identifier SHAKE_PHASE = JaymosKingdoms.id("overcome_shake");
 
 	private Overcome() {
 	}
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Overcome::tick);
+		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.addPhaseOrdering(SHAKE_PHASE, net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE);
+		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register(SHAKE_PHASE, (player, level, hand, entity, hit) ->
+			player instanceof ServerPlayer shaker && hand == net.minecraft.world.InteractionHand.MAIN_HAND && entity instanceof LivingEntity who
+				&& shake(shaker, who) ? net.minecraft.world.InteractionResult.SUCCESS : net.minecraft.world.InteractionResult.PASS);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STATES.clear();
 			SPENT.clear();
@@ -310,6 +320,7 @@ public final class Overcome {
 			return;
 		}
 		s.outUntil = level.getGameTime() + FOLK_OUT;
+		s.fearOf = thing;
 		s.unease = UNEASY;
 		SPENT.put(who, level.getGameTime());
 		if (who instanceof Mob m) {
@@ -335,8 +346,38 @@ public final class Overcome {
 		}
 	}
 
+	/**
+	 * {@code player}'s sneak + use on {@code who}: one of the folk lying out cold is shaken by the shoulder, comes round
+	 * and runs from what overcame them (if it's still about), saying so. Returns whether they were out.
+	 */
+	static boolean shake(ServerPlayer player, LivingEntity who) {
+		State s = STATES.get(who);
+		if (s == null || s.outUntil <= 0L || !player.isShiftKeyDown() || player.isSpectator() || Downed.isDowned(player)
+			|| !(who.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		LivingEntity thing = s.fearOf;
+		s.outUntil = 0L;
+		s.fearOf = null;
+		HeldFast.release(who);
+		if (who.getPose() == Pose.SLEEPING && !who.isSleeping()) {
+			who.setPose(Pose.STANDING);
+		}
+		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.7F, 0.8F);
+		if (thing != null && thing.isAlive() && !thing.isRemoved() && thing.level() == level) {
+			s.withdrew = true;
+			say(level, who, "withdraw");
+			withdraw(level, who, thing);
+		} else {
+			say(level, who, "woke");
+		}
+		return true;
+	}
+
 	private static void comeRound(LivingEntity who, State s) {
 		s.outUntil = 0L;
+		s.fearOf = null;
 		HeldFast.release(who);
 		if (who.getPose() == Pose.SLEEPING && !who.isSleeping()) {
 			who.setPose(Pose.STANDING);

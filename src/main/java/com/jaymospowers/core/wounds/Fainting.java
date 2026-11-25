@@ -52,10 +52,10 @@ import java.util.UUID;
  * <li><b>Coming round:</b> they get up and the letterbox opens over {@link #WAKE}. No fainting again for {@link #COOLDOWN}.</li>
  * </ul>
  * <b>Short, and mashed out of:</b> Andy (2026-11-25): "you should be able to spam out of a feint, it should only happen
- * once per encounter, and it should only last a max of 6s". The swoon and the black together, the whole time the keys are
- * gone, are {@link #SWOON} + {@link #OUT} = 6 s at most. In the black, mashing sneak brings them round sooner, the same
- * as a knock-out's mash ({@link #mash}): each press takes an even share off what's left, {@link Downed#MASH_LEAST} presses
- * in all. Those who'd take them while they're out ({@link TakenOut}) still get their look before the last press lets them
+ * once per encounter, and it should only last a max of 6s". The swoon is {@link #SWOON}, 2 s. The black is
+ * {@link #OUT}, 15 s (Andy, same day: "raise it back to 15s, because the mash can reduce it", so friends and villagers
+ * have time to come and wake them), but mashing sneak brings them round sooner, the same as a knock-out's mash
+ * ({@link #mash}): each press takes an even share off what's left, {@link Downed#mashPresses} of them in all (3). Those who'd take them while they're out ({@link TakenOut}) still get their look before the last press lets them
  * up. (Once per encounter: Kingdoms' {@code Overcome}.)
  * <b>Overcome:</b> Kingdoms' {@code Overcome} drops a player of little occult exposure in the same faint at the sight of an
  * especially strong supernatural thing ({@link #overcome}); the swoon, the fall and the waking are the same, only shorter
@@ -80,7 +80,7 @@ public final class Fainting {
 	/** Sprinting or swimming, the chance is this many times greater. */
 	static final float EXERTION = 2.0F;
 	/** Going (letterbox closing, keys lost), lying out, and coming round (ticks). */
-	public static final int SWOON = 40, OUT = 80, WAKE = 60;
+	public static final int SWOON = 40, OUT = 300, WAKE = 60;
 	/** An overcome faint starts this far into the swoon (ticks), so it comes on faster than hunger's. */
 	static final int OVERCOME_SWOON = 20;
 	/** The warnings before a hunger or thirst faint: how far each pulse shuts the letterbox (0-1; 1 is black). */
