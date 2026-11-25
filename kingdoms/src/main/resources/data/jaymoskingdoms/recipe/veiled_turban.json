@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "ingredients": [
+    "jaymoskingdoms:turban",
+    "#minecraft:wool",
+    "minecraft:string"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:veiled_turban"
+  }
+}
