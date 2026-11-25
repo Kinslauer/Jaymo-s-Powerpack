@@ -28,6 +28,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -108,12 +109,14 @@ public final class CaveGardens {
 			ChunkPos middle = player.chunkPosition();
 			for (int dx = -LOOK_CHUNKS; dx <= LOOK_CHUNKS; dx++) {
 				for (int dz = -LOOK_CHUNKS; dz <= LOOK_CHUNKS; dz++) {
-					int cx = middle.x() + dx, cz = middle.z() + dz;
-					if (level.getChunkSource().getChunkNow(cx, cz) == null) {
+					// (the starts kept in this loaded chunk itself: following references could load another chunk)
+					var chunk = level.getChunkSource().getChunkNow(middle.x() + dx, middle.z() + dz);
+					if (chunk == null) {
 						continue;
 					}
-					for (StructureStart start : level.structureManager().startsForStructure(cx, cz, s -> structures.wrapAsHolder(s).is(GARDENS))) {
-						if (start.isValid() && start.getBoundingBox().getXSpan() >= LARGE_SPAN) {
+					for (Map.Entry<Structure, StructureStart> e : chunk.getAllStarts().entrySet()) {
+						StructureStart start = e.getValue();
+						if (start.isValid() && structures.wrapAsHolder(e.getKey()).is(GARDENS) && start.getBoundingBox().getXSpan() >= LARGE_SPAN) {
 							near.putIfAbsent(start.getChunkPos().pack(), start);
 						}
 					}
@@ -164,7 +167,9 @@ public final class CaveGardens {
 		if (lectern == null) {
 			return;
 		}
-		for (Direction side : Direction.Plane.HORIZONTAL) {
+		// (its front first, where the design keeps a reader's place clear, then its other sides)
+		Direction front = level.getBlockState(lectern).getValue(LecternBlock.FACING);
+		for (Direction side : new Direction[] {front, front.getClockWise(), front.getCounterClockWise(), front.getOpposite()}) {
 			BlockPos stand = lectern.relative(side);
 			if (standable(level, stand)) {
 				Groves.druidAt(level, stand);

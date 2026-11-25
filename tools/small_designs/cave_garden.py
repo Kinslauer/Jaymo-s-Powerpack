@@ -177,7 +177,7 @@ def sites(api):
         "cave_garden_small": garden(api, 101, 11, 16, 4),
         "cave_garden_medium": garden(api, 202, 15, 20, 5),
         "cave_garden_large": garden(api, 303, 21, 24, 7, nook=True),
-    }, ground=GROUND, worldgen={
+    }, ground=GROUND, weights={"cave_garden_small": 6, "cave_garden_medium": 3, "cave_garden_large": 1}, worldgen={
         "step": "underground_structures", "terrain_adaptation": "none",
         "biomes": ["#minecraft:is_forest", "#minecraft:is_taiga", "#minecraft:is_jungle", "minecraft:dark_forest",
                    "minecraft:lush_caves"],

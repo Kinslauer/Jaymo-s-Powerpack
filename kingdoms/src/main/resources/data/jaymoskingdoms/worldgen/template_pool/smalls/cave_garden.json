@@ -9,7 +9,7 @@
         "projection": "rigid",
         "location": "jaymoskingdoms:smalls/cave_garden_small"
       },
-      "weight": 1
+      "weight": 6
     },
     {
       "element": {
@@ -18,7 +18,7 @@
         "projection": "rigid",
         "location": "jaymoskingdoms:smalls/cave_garden_medium"
       },
-      "weight": 1
+      "weight": 3
     },
     {
       "element": {
