@@ -54,6 +54,8 @@ public final class BodyWeaponsLayer {
 		{-1.5F, 7.0F, 2.8F, -90.0F, 90.0F, 30.0F, 0.9F, 0.0F, 1.0F},     // BACK_RIGHT
 		{0.0F, 6.0F, 3.6F, 90.0F, 90.0F, 0.0F, 0.9F, 0.0F, 1.0F},        // BACK_SHIELD: over the crossed guns
 		{0.0F, 10.5F, 2.8F, 90.0F, 90.0F, 90.0F, 0.7F, 0.0F, 1.0F},      // BACK_TOOL: across the small of the back
+		{-2.0F, -0.5F, 3.4F, 90.0F, 90.0F, -30.0F, 0.9F, 0.0F, 1.0F},    // TWIN_OUTER: the silver blade, hilt up over the right shoulder, point to the left hip
+		{-5.0F, 1.2F, 2.8F, 90.0F, 90.0F, -24.0F, 0.9F, 0.0F, 1.0F},     // TWIN_INNER: the second blade, beside it toward the shoulder, under it
 	};
 	/** How much further out (pixels) over a chestplate or leggings, over a costume's suit, and (back) over a backpack. */
 	static final float OVER_ARMOUR = 1.2F, OVER_COSTUME = 0.5F, OVER_BACKPACK = 5.0F;

@@ -82,7 +82,8 @@ public final class WoundMarks {
 	 * One mark. {@code shape} packs, from the bottom: the part (its {@link BodyPart#ordinal()}, 4 bits), the kind (3), the
 	 * side (2), where on that side across and down (8 and 8, 0 to 255) and its angle (8, 0 to 255 for a half turn), and 16
 	 * bits of seed for its own small shape, then its depth ({@link CutDepth}, 2 bits), whether it is a bullet's exit hole
-	 * (1) and how hurt its part was when it was made (4 bits, 0 whole to 15 gone: what its healing is measured against).
+	 * (1) and how hurt its part was when it was made (4 bits, 0 whole to 15 gone: what its healing is measured against),
+	 * and whether a silver blade seared it ({@link com.jaymospowers.combat.SilverSear}, 1 bit).
 	 * {@code laid} is the game time it was made.
 	 */
 	public record Mark(long shape, long laid) {
@@ -100,6 +101,15 @@ public final class WoundMarks {
 			long s = this.shape & ~(0x3L << 49 | 0x1L << 51 | 0xFL << 52);
 			s |= (long) (depth & 0x3) << 49 | (exit ? 1L << 51 : 0L) | (long) Mth.clamp(Math.round(hurt * 15.0F), 0, 15) << 52;
 			return new Mark(s, this.laid);
+		}
+
+		/** This mark, seared by silver (charred, glowing hot for a while, and it doesn't drip). */
+		public Mark seared() {
+			return new Mark(this.shape | 1L << 56, this.laid);
+		}
+
+		public boolean isSeared() {
+			return (this.shape >> 56 & 0x1) != 0;
 		}
 
 		/** This mark as if it were made at {@code when}. */
@@ -205,6 +215,8 @@ public final class WoundMarks {
 		int side = side(victim, source.getSourcePosition(), random);
 		// a blade's depth, and the line of the swing that made a cut
 		int depth = CutDepth.NORMAL, angle = -1;
+		// (a silver blade into what silver burns: the cut is seared along the same line)
+		boolean seared = kind == Kind.CUT && com.jaymospowers.combat.SilverSear.sears(victim, source);
 		if (kind == Kind.CUT) {
 			depth = CutDepth.of(level, source.getWeaponItem());
 			if (source.getEntity() instanceof LivingEntity attacker) {
@@ -224,6 +236,9 @@ public final class WoundMarks {
 		} else {
 			BodyPart part = landed != null && plan.index(landed) >= 0 ? landed : BodyPart.BODY;
 			Mark entry = make(victim, part, kind, side, random, now, depth, angle, false, -1, -1);
+			if (seared) {
+				entry = entry.seared();
+			}
 			marks.add(entry);
 			if (kind == Kind.HOLE) {
 				// the bullet's way out: the far side of the same part, a little off the entry
@@ -374,7 +389,7 @@ public final class WoundMarks {
 		}
 	}
 
-	/** The freshest open cut or puncture not already bleeding properly drips, more seldom as it closes; a bandaged part never does. */
+	/** The freshest open cut or puncture (not a seared one) not already bleeding properly drips, more seldom as it closes; a bandaged part never does. */
 	private static void drip(ServerLevel level, LivingEntity body, List<Mark> marks, long now) {
 		if (BladeBlood.color(body) == BladeBlood.NO_BLOOD) {
 			return;
@@ -386,7 +401,7 @@ public final class WoundMarks {
 		Mark fresh = null;
 		for (Mark mark : marks) {
 			Kind kind = mark.kind();
-			if ((kind == Kind.CUT || kind == Kind.CLAW || kind == Kind.STAB || kind == Kind.HOLE) && now - mark.laid() < DRIP_TICKS
+			if ((kind == Kind.CUT || kind == Kind.CLAW || kind == Kind.STAB || kind == Kind.HOLE) && !mark.isSeared() && now - mark.laid() < DRIP_TICKS
 				&& ((Bleeding.bleeding(body) | Bleeding.bandaged(body) | Bleeding.wrapped(body)) & Breaks.bit(mark.part())) == 0
 				&& (fresh == null || mark.laid() > fresh.laid())) {
 				fresh = mark;
