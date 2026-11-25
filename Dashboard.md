@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:49). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -26,6 +26,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2126 weighty movement - the walk carries weight (Powers, 2026-11-25)
 - [ ] #2121 Takeover pathing fixes: long tunnels, safe shafts, no stray weapon arm (Powers, 2026-11-24)
 - [ ] #2120 Scouter: hold to scan, full readings, marks and tracking (Powers, Kingdoms, 2026-11-24)
 - [ ] #2119 players' limbs twice as tough (Powers, Kitchen, 2026-11-24)
@@ -85,8 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2054 Says what hurt you when nobody did (Powers, 2026-11-24)
 - [ ] #2053 Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms, 2026-11-24)
 - [ ] #2052 A small creature is finished with one quick slice (Powers, 2026-11-23)
-- [ ] #2051 Alt in mid air dives: jump + Alt is a dive-roll evade (Powers, 2026-11-23)
-- …and 510 older ones.
+- …and 511 older ones.
 
 ## Health
 
