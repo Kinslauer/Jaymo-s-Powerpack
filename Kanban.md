@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 22:36). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,13 +25,13 @@ kanban-plugin: board
 - [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · for 💻 Odysseus · open
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
+- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · for 💻 Odysseus · open
+- [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · for 💻 Odysseus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · 💻 Odysseus · claimed
-- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · 💻 Odysseus · claimed
 
 
 ## In review
