@@ -39,7 +39,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Sides without</b> raise their captains from what walks their land: the risen dead of the Overworld (zombies and
  * skeletons, the raised, all of them Deathless) and the Hornkin of the Nether. A fitting one who comes near a player may rise
  * as a captain while the region's ladder is short ({@link #ROAM_CHANCE}); a fallen captain due back takes the next one
- * ({@link Captains#waiting}). Nothing new is built for them: no new realm.</li>
+ * ({@link Captains#waiting}). Nothing new is built for them: no new realm. With MCA the raised's captains are Hollow men who
+ * stand up in the dead one's place ({@link HollowCaptains}).</li>
  * <li><b>The world's tier:</b> as the Aether's Giants raise the world's floor ({@link WorldTiers#floor}), ladders grow
  * longer, captains rise higher and start stronger ({@link #ladder}, {@link #rankMax}, {@link #tierHealth}).</li>
  * <li><b>Temperament:</b> each captain keeps the temperament he first had ({@link #TEMPERS}), whatever body he's in after;
@@ -244,7 +245,9 @@ public final class Rivals {
 		if (e instanceof Hornkin h) {
 			return h.kind() == Hornkin.Kind.WARRIOR || h.kind() == Hornkin.Kind.BRUTE ? Side.HORNKIN : null;
 		}
-		if ((e instanceof Zombie z && !z.isBaby() || e instanceof AbstractSkeleton) && e.level().dimension() == Level.OVERWORLD && !Thralls.isThrall(e)) {
+		if (HollowCaptains.is(e) || (e instanceof Zombie z && !z.isBaby() || e instanceof AbstractSkeleton) && e.level().dimension() == Level.OVERWORLD
+			&& !Thralls.isThrall(e)) {
+			// (and the Hollow men their captains are now)
 			return Side.RAISED;
 		}
 		return null;
@@ -425,6 +428,11 @@ public final class Rivals {
 	 */
 	static void loaded(Entity e, ServerLevel level) {
 		Side s = roamer(e);
+		if (s == Side.RAISED && e instanceof PathfinderMob old && HollowCaptains.stillDead(e)) {
+			// (one of the raised from before, still in a zombie's or skeleton's body: a Hollow man now, HollowCaptains)
+			HollowCaptains.later(() -> HollowCaptains.rehouse(level, old));
+			return;
+		}
 		if (s == null || !(e instanceof PathfinderMob mob) || Captains.is(e) || e.entityTags().contains(ROLLED_TAG)) {
 			return;
 		}
@@ -436,7 +444,19 @@ public final class Rivals {
 		MinecraftServer server = level.getServer();
 		String ladder = key(s, e.blockPosition());
 		Captain waiting = Captains.waiting(server, ladder);
-		if (waiting != null) {
+		if (s == Side.RAISED && HollowCaptains.live()) {
+			// (the raised get up as Hollow men, put off till the land is loaded: HollowCaptains)
+			if (waiting != null) {
+				String id = waiting.id();
+				HollowCaptains.later(() -> HollowCaptains.comeBack(level, id, mob));
+			} else if (level.getRandom().nextFloat() < ROAM_CHANCE && Captains.of(server, ladder).size() < ladder(server)) {
+				HollowCaptains.later(() -> {
+					if (mob.isAlive() && !mob.isRemoved()) {
+						Captains.riseFrom(level, ladder, mob);
+					}
+				});
+			}
+		} else if (waiting != null) {
 			Captains.embodyIn(level, waiting, mob);
 		} else if (level.getRandom().nextFloat() < ROAM_CHANCE && Captains.of(server, ladder).size() < ladder(server)) {
 			Captains.riseFrom(level, ladder, mob);
