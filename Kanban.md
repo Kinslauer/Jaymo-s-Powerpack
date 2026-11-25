@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 17:12). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 17:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,8 +32,8 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · mordhau-4-legs · #2187 · in-review
 - [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · mordhau-3-body · #2185 · in-review
-- [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · mordhau-4-legs · #2186 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
