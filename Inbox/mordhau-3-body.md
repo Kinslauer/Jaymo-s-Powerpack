@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
-claimed_by: 
+claimed_by: mordhau-3-body
 pr: 
 ---
 # Mordhau harness 3: body (padding, mail, cuirasses, over-garments, shoulders, arms, hands) (Kingdoms)
@@ -60,3 +60,4 @@ pr:
 
 ## Notes
 - 2026-11-25 07:33 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.
+- 2026-11-25 4:12 PM claude (T3 thread, Sonnet 5.5) claimed both Mordhau tracks (3 then 4, one PR each; 4 stacks on 3). Reading of the slashed-doublet note: off duty a guard's heavy places come off and the under-layers stay on (padding, mail, hose); recorded in the agent note.

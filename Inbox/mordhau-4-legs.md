@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
-claimed_by: 
+claimed_by: mordhau-4-legs
 pr: 
 ---
 # Mordhau harness 4: waist, legs and feet (and a new HOSE place) (Kingdoms)
@@ -35,3 +35,4 @@ pr:
 ### Legs (no harness place)
 - **mh-hose** Hose and breeches (L, new): Pants, Baggy Pants, Linnen Hosen, Wanderers Pants/Shorts, Workers Shorts, Hunters Hosen, Riders Hosen, Joined Hosen, Light Cavalry Joined Hosen. Medieval braies and 15th c. joined hose. Ours: No place for them: LEGS takes no heraldry piece and none of the twelve places is clothing on the legs. It needs a new harness place (a HOSE place on the end of Harness.Slot) or a vanilla LEGS item.
 - **mh-landsknecht-pants** Slashed Landsknecht hose (L, new): Landsknecht Pants, Landsknecht set legs (P26). Puffed and slashed hose, often one leg different from the other. Ours: Same as hose: needs a new place. Pairs with the slashed doublet (PADDING).
+- 2026-11-25 4:12 PM claude (T3 thread, Sonnet 5.5) claimed both Mordhau tracks (3 then 4, one PR each; 4 stacks on 3). Reading of the slashed-doublet note: off duty a guard's heavy places come off and the under-layers stay on (padding, mail, hose); recorded in the agent note.
