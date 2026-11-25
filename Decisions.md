@@ -1061,3 +1061,13 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-25, Andy (Gravity magnetism, PR #2125): "a max mastery gravity user should be able to pull it in hand everytime": at the last Mastery rank, Tear Loose puts the weapon straight into your hand.
 - 2026-11-25 (Andy): "approve": the "Iron answers first" lore placement (Gravity feels metal as the heaviest weight) is canon.
 - 2026-11-25 (Andy): "merge": PR #2128 (Gravity metal fixes) merged.
+
+- 2026-11-24 (worn-totems thread, PR #2129): Andy approved the lore paragraph "The last old totems" (old heirloom totems, worn or held, some villagers/illagers/evokers carry one).
+
+- 2026-11-24 (Andy, Visceral gore thread): picked 42 of 46 Visceral pick-list rows (not death camera, "this is what limbo does"; not the body bag, blood test tools or regrow draught). Notes: kill moment mostly for the last mob of an encounter; piñata turns on by itself in the Candy Cavity; hurt stances should help hunting skittish deer and gazelle; Brute gets the takedown at spawn; healing a fresh mob corpse = the druid's. Approved the lore paragraph "The leech's kit".
+
+- 2026-11-24 (Andy, Visceral gore thread): picked 16 of 18 PixelGore rows (not carved voxel bodies, not shovel carry). Gear stays whole when a mob loses a limb, lost only if eaten or burned in lava. Shovels bury any corpse: a hole at least two blocks deep, right-click with the shovel fills it back in, and NPCs bury their dead too.
+
+- 2026-11-25 (Andy, Hand of God thread): Hand of God (onikoox, ARR) borrowed as ideas: its time manipulation and super speed effects go to Chrono, its heat vision beam is the look of Frostborn's beam, its electrokinesis is what he wants from Stormborn's Thunderhead, and the rest of its powers go to Nadir.
+
+- 2026-11-25 (Andy, Hand of God thread): all five of its other powers go on Nadir (telekinesis, Void erase, finger-snap to dust, sun/moon throw, reality wave). The sun and moon throw deals damage equal to the largest meteor or Spirit Bomb and really damages the world; only the biome wave restores afterward ("it is just a visual effect").

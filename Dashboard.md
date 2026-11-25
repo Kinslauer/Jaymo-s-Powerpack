@@ -8,7 +8,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 **Questions for you:**
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/wither-model|wither-model]] · 2026-11-21 10:18 Andy hold instruction (2026-11-19 23:40 ET): leave the model as-is (v3 previews); do not pick up or raise this again until Andy hands it on. N…
 
 ## Stuck
 
@@ -16,6 +15,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
 
 ## On the board
 
