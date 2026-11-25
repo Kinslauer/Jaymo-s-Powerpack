@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 02:43). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 02:47). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,7 +35,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Agents/Hand of God effects|Hand of God effects]] · 💻 Odysseus · #2134 · in-review
 - [ ] [[Agents/Visceral gore picks|Visceral gore picks]] · 💻 Odysseus · #2133 · in-review
 
 
