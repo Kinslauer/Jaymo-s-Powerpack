@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:44). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,7 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · open
-- [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · for 💻 Odysseus · open
@@ -33,13 +32,10 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · 💻 Odysseus · claimed
-- [ ] [[Agents/gravity-magnetism|gravity-magnetism]] · 💻 Odysseus · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2125 · running
 
 
 ## In review
 
-- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · 💻 Odysseus · #2122 · in-review
-- [ ] [[Agents/primitive-hide-sets|primitive-hide-sets]] · 💻 Odysseus · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2127 · in-review
 
 
 ## Needs Andy
@@ -54,14 +50,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/village-mods-6-small-structures|village-mods-6-small-structures]]
+- [x] [[Inbox/Done/village-mods-5-town-life-hats|village-mods-5-town-life-hats]]
 - [x] [[Inbox/Done/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]]
 - [x] [[Inbox/Done/refmods-13-body-anim-stations|refmods-13-body-anim-stations]]
 - [x] [[Inbox/Done/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]]
 - [x] [[Inbox/Done/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]]
 - [x] [[Inbox/Done/refmods-09-village-styles|refmods-09-village-styles]]
 - [x] [[Inbox/Done/refmods-08-vampire-villager|refmods-08-vampire-villager]]
-- [x] [[Inbox/Done/refmods-07-mocreatures-beasts|refmods-07-mocreatures-beasts]]
-- [x] [[Inbox/Done/refmods-06-horses|refmods-06-horses]]
 
 
 %% kanban:settings
