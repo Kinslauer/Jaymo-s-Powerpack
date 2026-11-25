@@ -1091,3 +1091,7 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-25 (Andy, symbiote non-web hosts, #2158): confirmed all four: the big body at bond 60 has no time-out of its own; the bell and bottle still pour the symbiote off a host without Web, with no fight; breaking free of a takeover still locks the suit off for a minute; a slinger fight is an ordinary-strength hold.
 - 2026-11-25: Andy chose "Give them a real draught": band members' free 40% daily draught (PackUse) becomes a real healing potion in their pack, restocked once a day out of a fight (PR #2159).
+
+
+## 2026-11-25 - Codex: hand-built start example
+Andy: "can you make one of these as an example?" Supplied Hand-built starts (adventure-map style).md. Applies to a concrete example using the written-start system in PR #2153.

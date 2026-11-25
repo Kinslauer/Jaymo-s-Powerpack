@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: in-review
 task: mordhau-1-helms
 branch: claude/mordhau-1-helms
 with: claude (PC worker, Opus 5.5)
-pr: 
+pr: 2160
 mods: kingdoms, powers
 versions: 
 started: 2026-11-24
@@ -49,5 +49,8 @@ for different realms.
 - Guards are issued only the kettle cuts; whether they should wear the others is a question for Andy (Inbox note).
 
 ## Done
-What a player will see, and what wasn't tested.
-- 2026-11-24 21:29 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+Draft PR #2160 (head 317de57, checks green). A player will see 15 new helms at the smithing anvil (and the barbute and spangenhelm,
+forgeable now; barbutes can also be painted), the barbute with its T-opening open, and realm soldiers in their realm's
+kettle cut. Previews in `Assets/mordhau-1-helms/` (README maps them to rows). Lore (new) paragraphs: the gallowglass,
+the turban helm, the spectacle helm. Not tested in game: fit on MCA bodies, visors lifting, sight shares and crest
+heights on the pointed helms. Waiting on Andy: previews, and whether guards should wear any of the other new helms.
