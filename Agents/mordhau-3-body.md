@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: in-review
 task: mordhau-3-body
 branch: claude/mordhau-3-body
 with: claude (T3 thread, Sonnet 5.5)
-pr: 
+pr: 2185
 mods: kingdoms, powers
 versions: 
 started: 2026-11-25
@@ -41,4 +41,5 @@ made the way the harness makes its pieces. Mordhau's meshes, textures and names 
 - Local builds: Andy plays on this PC, so no Gradle here. The generators (Python) run here; CI compiles.
 
 ## Done
-- 2026-11-25 16:53 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-25 4:54 PM Generator, models, sheets, previews, Java (registrations, layers, forging, guards), lore and change notes are written; branch claude/mordhau-3-body is being checked and pushed.
+- 2026-11-25 4:59 PM Draft PR #2185 (waits on Andy's preview approval). 35 rows: 25 new pieces + covered finish + 10 have rows checked (3 made reachable at the anvil, coat of plates given a recipe). Change notes: changes/kingdoms and changes/powers claude-mordhau-3-body.md. Lore: 8 (new) paragraphs after 'The victor's wreath'. Not played; Java compiled only by CI.
