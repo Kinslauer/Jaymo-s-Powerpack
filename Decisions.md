@@ -1011,3 +1011,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 (worn-totems thread, PR #2129): Andy approved the lore paragraph "The last old totems" (old heirloom totems, worn or held, some villagers/illagers/evokers carry one).
 
 - 2026-11-24 (Andy, Visceral gore thread): picked 42 of 46 Visceral pick-list rows (not death camera, "this is what limbo does"; not the body bag, blood test tools or regrow draught). Notes: kill moment mostly for the last mob of an encounter; piñata turns on by itself in the Candy Cavity; hurt stances should help hunting skittish deer and gazelle; Brute gets the takedown at spawn; healing a fresh mob corpse = the druid's. Approved the lore paragraph "The leech's kit".
+
+- 2026-11-24 (Andy, Visceral gore thread): picked 16 of 18 PixelGore rows (not carved voxel bodies, not shovel carry). Gear stays whole when a mob loses a limb, lost only if eaten or burned in lava. Shovels bury any corpse: a hole at least two blocks deep, right-click with the shovel fills it back in, and NPCs bury their dead too.
