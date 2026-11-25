@@ -8347,3 +8347,9 @@ The symbiote does things in the world now, not only on your screen.
 - The barbute and the visored barbute can also be forged painted (no gold or rank needed).
 - Classes: `HeraldryForging`.
 - Built by CI; not played.
+
+## 0.27.66 (2026-11-25): Mordhau harness 2: the coif's cuts and the wrapper at the anvil, the champion's wreath (#2178)
+
+- The smithing anvil forges Kingdoms' new mail coif cuts (lowered, square-cut, with a ventail, square-cut with a ventail) in iron and the armet's wrapper in steel, in every finish (`HeraldryForging`).
+- The champion of a tournament is also given Kingdoms' victor's wreath (`ZFighterTournaments`; only when Kingdoms is in).
+- Compiles in CI; not played.
