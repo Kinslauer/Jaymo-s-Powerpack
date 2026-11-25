@@ -494,6 +494,18 @@ public final class KitchenCompat {
 		return false;
 	}
 
+	/** Whether {@code corpse} still has its head on (Kitchen's {@code CorpseEntity.missing()}, bit 1); false for anything else. */
+	static boolean headOn(Entity corpse) {
+		if (CORPSE == null || !CORPSE.isInstance(corpse)) {
+			return false;
+		}
+		try {
+			return ((int)CORPSE.getMethod("missing").invoke(corpse) & 1) == 0;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/**
 	 * The unburied dead within {@code range} of {@code at}: free corpses of people and monsters (not animals, never a
 	 * player's). Empty without Kitchen.

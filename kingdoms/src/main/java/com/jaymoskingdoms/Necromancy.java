@@ -315,6 +315,23 @@ public final class Necromancy {
 		ForbiddenArts.cast(player, level, false, ForbiddenArts.RAISING_CORRUPTION);
 	}
 
+	/**
+	 * The body gets up as {@code player}'s thrall as a raised one does ({@link #weaken}), without the spell's mana, wait or crime
+	 * (the caller's own: a raising thorn, {@link LeechKit}). Null, and the body stays, if it won't rise.
+	 */
+	static @Nullable Mob riseFor(ServerPlayer player, ServerLevel level, Entity corpse) {
+		EntityType<? extends Mob> type = risesAs(KitchenCompat.sourceType(corpse), Climate.at(level, corpse.blockPosition()));
+		if (type == null || Thralls.count(player.getUUID()) >= SORCERER_THRALLS) {
+			return null;
+		}
+		Mob risen = Thralls.raise(level, type, corpse.position(), -1, player.getUUID(), true, RAISE_LIFE, null);
+		if (risen != null) {
+			weaken(risen);
+			corpse.discard();
+		}
+		return risen;
+	}
+
 	/** A Death Sorcerer's risen: a shadow of what it was, half its health and half its blow. */
 	private static void weaken(Mob risen) {
 		var health = risen.getAttribute(Attributes.MAX_HEALTH);

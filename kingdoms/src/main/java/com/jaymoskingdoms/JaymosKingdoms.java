@@ -1220,6 +1220,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Deafened.register();
 		Nets.register();
 		Poisons.register();
+		LeechKit.register();
+		HedgeWitches.register();
 		Surprise.register();
 		ThiefSneak.register();
 		RecklessBlows.register();

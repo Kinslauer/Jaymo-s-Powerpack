@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:leech_kit",
+  "ingredients": [
+    "minecraft:bone",
+    "minecraft:glass_pane"
+  ],
+  "result": {
+    "count": 2,
+    "id": "jaymoskingdoms:empty_thorn"
+  }
+}
