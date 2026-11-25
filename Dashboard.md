@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 01:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 01:40). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2128 Gravity metal fixes: no dupes from torn chunks, no weapon minting (Powers, 2026-11-25)
 - [ ] #2127 three primitive hide sets, each with a dark make (Powers, Kingdoms, 2026-11-25)
 - [ ] #2126 weighty movement - the walk carries weight (Powers, 2026-11-25)
 - [ ] #2125 Gravity: iron answers first (the X-Men mod's Magnetism, worked in) (Powers, 2026-11-25)
@@ -82,8 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2059 A body only spills the blood it holds (Powers, 2026-11-24)
 - [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
 - [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
-- [ ] #2056 Three blows on the ground and you're finished (Powers, 2026-11-24)
-- …and 515 older ones.
+- …and 516 older ones.
 
 ## Health
 
