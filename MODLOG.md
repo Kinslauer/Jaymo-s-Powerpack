@@ -8055,3 +8055,9 @@ Ideas from the Hand of God mod (All Rights Reserved: nothing of it copied, all b
 - **Tectonic 3.0.32** is out of `packModsNoCf` (Andy, 2026-11-25: it broke the caves and the climate map), so it leaves the pack zip, the CurseForge export and the testers' pack. Its Fabric mod id is in `removedIdsFromProfile`, so the next build moves its jar out of the CurseForge profile into `removed-mods`. Jaymo's Kingdoms' own terrain comes back (see the Kingdoms note).
 - Lithostitched stays (other mods need it). Dynamic Waters' Tectonic compat stays in its port; it only turns on when Tectonic is loaded.
 - Not played: needs a new world.
+
+## 0.27.33 (2026-11-25): Wall knocks only from real knocks: plain jumps and your own sprint-jumps never hurt (#2142)
+
+- **No hurt from a plain jump** (Andy: "just jumping into a wall isnt enough to hurt"). A head knock on a ceiling now needs you going up faster than your own jump can carry you (Jump Boost counted), so jumping in a low room or a two-high tunnel is free again; a launch, a power's boost or a blast into the ceiling still knocks your head.
+- **A wall slam needs something behind it.** Before, any hurt at all (a bleed, hunger, a fall, or the last slam itself) let your own sprint-jump into a wall count as being thrown into it, and each slam's hurt let the next one count, so in a cramped room the "Ugh... fly into wall!" hurts kept coming (Andy's clip in a tiny house full of owls; the owls only crowded him, Ambient Creatures' owls have no attack). Now a slam counts only right after a blow, a shot or a blast (anything that hurts from somewhere), or a throw such as a tornado's; never after a bleed, hunger, a fall or one of our own bumps. Mobs follow the same rule. (`core/collide/Collisions` `knocked`, `HEAD_PAST_JUMP`; client `collide/CollisionsClient`)
+- Built; not played.
