@@ -1,0 +1,6 @@
+# Toughness: Grit and gear let you take more hits
+- **Toughness** (new, `Toughness`): every player has it. It's a base of 20 (Andy's pick), plus one per point of Grit, plus 4 per point of armour toughness worn (full diamond +32, netherite +48; broken pieces give nothing).
+- **Shrug:** every blow (a hit, a shot, a blast; not falls, fire, drowning, hunger, bleeding, and nothing on the downed) lands lighter, before armour: 0.6 x t / (t + 100), never past 40%. New character 10%, Grit 30 20%, Grit 100 33%, Grit 100 in netherite 38%. It comes after the Hearth cap, and the parts' pools (head, body, limbs) take what's left, so a blow that would have blacked out the head or body may not now. Jaymo's Powers' finishing step (its `wounds` damage) isn't a blow and is left alone.
+- **Poise:** a blow that arrives at 0.04 x toughness damage or less doesn't knock you back (`PoiseKnockbackMixin`): new character 0.8, Grit 50 2.8, Grit 100 4.8, Grit 100 in netherite 6.7.
+- Grit keeps its armour and knockback resistance. Its K screen line now says how much it takes off every blow, and hovering it shows your whole toughness (with gear), the share off every blow and the poise.
+- Built; not played. Numbers in the PR are from a model of plain blows (no crits, combos, red swings, bleeding or armour breaking).

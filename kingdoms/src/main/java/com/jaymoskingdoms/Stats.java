@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Agility:</b> quicker on your feet.</li>
  * <li><b>Finesse:</b> quicker swings, and (Powers' lock-on) head shots that miss and glance less.</li>
  * <li><b>Endurance:</b> hunger drains slower.</li>
- * <li><b>Grit:</b> armour and a firmer stance.</li>
+ * <li><b>Grit:</b> armour, a firmer stance, and toughness ({@link Toughness}): every point is one, so blows land lighter.</li>
  * <li><b>Wits:</b> every pillar learns faster, and a little luck.</li>
  * <li><b>Presence</b>: how you carry yourself among people. It sways persuading, lying, threatening and haggling
  * ({@link Presence#talk}), how fast strangers warm to you ({@link Presence#warmed}) and how far your orders carry to
@@ -329,7 +329,8 @@ public final class Stats {
 			case AGILITY -> Component.translatable("stat.jaymoskingdoms.agility.now", pct(AGILITY * value));
 			case FINESSE -> Component.translatable("stat.jaymoskingdoms.finesse.now", pct(FINESSE * value));
 			case ENDURANCE -> Component.translatable("stat.jaymoskingdoms.endurance.now", pct(ENDURANCE * value));
-			case GRIT -> Component.translatable("stat.jaymoskingdoms.grit.now", num(GRIT_ARMOR * value), pct(GRIT_KNOCKBACK * value));
+			case GRIT -> Component.translatable("stat.jaymoskingdoms.grit.now", num(GRIT_ARMOR * value), pct(Toughness.shrug(Toughness.BASE + value)),
+				pct(GRIT_KNOCKBACK * value));
 			case WITS -> Component.translatable("stat.jaymoskingdoms.wits.now", pct(WITS_XP * value), num(WITS_LUCK * value));
 			case ARCANA -> Component.translatable("stat.jaymoskingdoms.arcana.now", num(Mana.NATURAL_PER_POINT * value), num(Mana.FOUND_PER_POINT * value),
 				num(Mana.REGEN_PER_POINT * value));
