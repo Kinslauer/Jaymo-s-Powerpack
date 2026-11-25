@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-vanilla-plus-thread
 asked: 2026-11-19
@@ -23,3 +23,4 @@ pr:
 
 ## Notes
 - 2026-11-24 17:58 2026-11-24 PR #1796 merged 2026-11-19: docs/VanillaPlus-Plan.md is on master, start from master. Horse Expert itself shipped in #1796.
+- 2026-11-24 19:40 Checked master 2026-11-24 (cloud): both gaps already built. CartEntity lets a player take a cart by the shafts and pull it on foot (CartEntity.java:75, puller may be a Player, handDrag), and the plow tills a 3x3 patch behind it (CartEntity.java:145, :539). Nothing to build; closed.

@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
 claimed_by: 
-pr: 
+pr: 2120
 suggested_owns: []
 ---
 # Reference Mods Patch 9: Village styles and capitals (V1-V14)
@@ -33,3 +33,7 @@ Every structure says where it generates and why (placement plan https://claude.a
 - **V12 An airship mooring** (Integrated Villages, size M). A mast tower with a docked airship and sky traders. Where and why: high peaks under the cloud towns, because that's where sky folk come down to trade. We have: Cloud towns, sky whalers.
 - **V13 Capitals worth the name** (Luki's Grand Capitals, size L). Bigger realm seats: walled districts, a market quarter, temples and a keep, styled by climate. We have: Sprawling kingdoms, Epic villages.
 - **V14 Rebuilt illager outposts** (Luki's Grand Capitals, size M). Pillager outposts with palisades, cages and a tower. Where and why: on roads into realms they raid. We have: Illager camp picks.
+
+## Notes
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.

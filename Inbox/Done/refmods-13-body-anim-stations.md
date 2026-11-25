@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
 claimed_by: 
-pr: 
+pr: 2120
 suggested_owns: []
 ---
 # Reference Mods Patch 13: Body animation and station displays
@@ -29,3 +29,7 @@ Owns: powers client animation; C3/C4 block renderers.
   - Andy's note: "mostly for MCA"
 - **B7 The shield arm takes the hit** (Punchy Moves, size S). A blocked blow jolts the shield arm back. We have: Shield bangs.
 - **B8 Hands on the reins** (Punchy Moves, size S). Riders sway with the gait and hold the reins.
+
+## Notes
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.

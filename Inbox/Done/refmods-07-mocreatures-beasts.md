@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
 claimed_by: 
-pr: 
+pr: 2120
 suggested_owns: []
 ---
 # Reference Mods Patch 7: Mo' Creatures beasts we lack
@@ -32,3 +32,7 @@ Owns: kingdoms monsters (GPL, licenses/mocreatures).
 - **M11 Rays and jellyfish** (Mo' Creatures, size S). Manta rays gliding in warm seas, stingrays buried in shallows that sting waders, jellyfish drifting in blooms that sting.
 - **M12 Big cats you can raise** (Mo' Creatures, size M). Take an orphaned cub (its mother killed) and raise it; grown, it guards you. Lions and tigers cross into rare big hybrids. We have: Naturalist's big cats are wild only.
 - **M13 Amulets that carry a beast** (Mo' Creatures, size M). A bone charm a beast-tamer makes: a bonded beast rests in it and comes out where you call it.
+
+## Notes
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.

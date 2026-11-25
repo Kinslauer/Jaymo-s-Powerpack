@@ -973,3 +973,43 @@ Andy: "any feature that requires another PR to work as intended should be held a
 ### 2026-11-24: Ruin Keepers tell the lore in talk
 - **Decided:** "Yes, hints in their talk" (decision card): the Keepers tell their people, why the city fell, the consul in the tomb, why they stay and take emeralds, and the map to the next city, as hints in talk. A (new) Lore.md paragraph goes to Andy first.
 - **Agent:** claude-cloud.
+
+### 2026-11-24: Coins patch: strongbox yes, shop stall no
+- **Decided:** From Reference Mods patch 15, build the strongbox at home (G7) but not the shop stall (G6), keeping the 2026-11-23 "no shop block" ruling.
+- **Agent:** claude-cloud.
+
+- 2026-11-24 (Andy, Vanilla+ patch I card): King's Roads already lays settlement roads, so patch I becomes "Also link a realm's towns": besides its nearest neighbours, every town in a realm gets a road to its capital.
+- 2026-11-24 (Andy, Vanilla+ thread): "work straight through, one PR. let me know is there are issues": patches A-K go out as one PR from this thread, not one PR per patch.
+- 2026-11-24 (Andy, illager tongue): illagers speak the tongue uncovered in Alex's Caves: unknown words in the Cave Tablets' glyphs (minecraft:alt), and translating a tablet at a Spelunkery Table teaches it (PR #2098, merged). Lore "The tablets' tongue" approved.
+- 2026-11-24 (Andy): approved Lore "What the keepers tell" and "What goods remember".
+- 2026-11-24 (Andy, Vanilla+ thread): approved the "camps' other hands" lore paragraph (patch G). Ender's Delight "is NOT ARR": its Modrinth page gives MIT (the jar's mods.toml says All Rights Reserved, a template default), so its strange eclair texture is used with the MIT notice.
+- 2026-11-24 (Andy, Alex's Caves thread): "i want to target world gen first": the world-gen track (biome placement under Mohknee, Magnetic Caves in Aether stone) goes first, as its own PR.
+- 2026-11-24 (Andy, Vanilla+ thread): port Ender's Delight's crops and dishes ("port them"), chorus dishes too (card: "Port all of it, chorus too"), past the old "except chorus fruit" rule.
+
+- 2026-11-24 (Andy, patron colossus thread): approved the lore paragraph "The patrons' colossi" (PR #2103, merged); asked for the hunt to bring a random tornado, earthquake or tsunami (PR #2104).
+- 2026-11-24 4:34 PM ET (Andy, Alex's Caves thread, PR #2105): "yes bring it back with our theme": Alex's neodymium nodes stay, every scarlet/azure texture recoloured (scarlet = ferrosite-sand rust, azure = magnetic-shroom slate blue).
+- 2026-11-24 (Andy, Vanilla+ thread): approved the Lore paragraph "The End's larder" (Ender's Delight port).
+- 2026-11-24 4:43 PM ET (Andy, Alex's Caves thread): approved Lore "The deep places under the far land".
+- 2026-11-24 4:44 PM ET (Andy, Alex's Caves thread): "the same dinos in the prehistoric cave should spawn on verdant and vice versa. there should also be barbaric warrior born found training by fighting the dinos": Alex's Primordial Caves dinos also on the Verdant World, the Verdant World's dinos (PR #2099) also in the Primordial Caves, and wild barbaric Warrior-born there train by fighting them.
+
+- 2026-11-24: Silk Deeps removed (Andy: "remove these caves and their abandoned buildings"): the biome no longer generates, so no watcher huts or brood lairs either; registered still for old saves. PR #2108.
+
+- 2026-11-24 5:39 PM ET (Andy, refmods thread, decision card): Tectonic trial goes in as is ("Trial as is, Mohknee waits"): with Tectonic loaded our continent shape is off and Mohknee's continent doesn't generate; rebuilding Mohknee on Tectonic's land is a follow-up only if he keeps Tectonic.
+- 2026-11-24 5:05 PM ET (Andy, Alex's Caves thread): cave band Warrior-born get their own look later: "they should vary, not all shirtless but all in primitive hide".
+
+- 2026-11-24 5:38 PM ET (Andy, Alex's Caves thread): chasm wild Tideborn "should ease up on you as you build relation with the lurkers who stalk you, either through trades or defense": tied to Alex's Deep One reputation.
+- 2026-11-24 (Andy, decision card): Candy Cavity Rubber-folk = "Home ground + newborns": now and then a newborn Rubber-folk villager climbs out of the Candy Cavity and walks to the nearest town (Kingdoms RubberNewborns). No Tinkerer vat ruins.
+- 2026-11-24 (Andy): "you should be able to escort the rubberfolk to a village when you meet them after born": sneak + right-click a newborn Rubber-folk to have it follow you; any town you bring it into keeps it (RubberNewborns, PR #2116).
+- 2026-11-24 (Andy): newborn Rubber-folk escort is done through talk, never shift-right-click: "you should have to talk to it and convince it or answer its request. it should all be done through talk". A newborn calls out to you; "Lost?" in its talk menu offers take it / point the way / not now (PR #2116).
+- 2026-11-24 (Andy): "spiders should not attack during the day anymore": every spider kind (tarantulas, leaf-hiding spiders, woodland flyers) hunts only in the dark, fights back when hit, as vanilla spiders do.
+
+- 2026-11-24 6:44 PM ET (Andy, refmods thread, PR #2120): villagers "flee if you unsheathe and swing or shoot, or loose an arrow within city limits"; paper parasols "only women in civilization" (none in barbarian camps).
+
+- 2026-11-24, Andy (Reference Mods PR #2120): vanilla spiders are not Druid wild shapes ("no"); they stay out.
+- 2026-11-24 (Andy): "approve lore": the 7 Alex's Caves lore placements in Lore.md are canon.
+
+- 2026-11-24 (worn-totems thread, PR #2129): Andy approved the lore paragraph "The last old totems" (old heirloom totems, worn or held, some villagers/illagers/evokers carry one).
+
+- 2026-11-24 (Andy, Visceral gore thread): picked 42 of 46 Visceral pick-list rows (not death camera, "this is what limbo does"; not the body bag, blood test tools or regrow draught). Notes: kill moment mostly for the last mob of an encounter; piñata turns on by itself in the Candy Cavity; hurt stances should help hunting skittish deer and gazelle; Brute gets the takedown at spawn; healing a fresh mob corpse = the druid's. Approved the lore paragraph "The leech's kit".
+
+- 2026-11-24 (Andy, Visceral gore thread): picked 16 of 18 PixelGore rows (not carved voxel bodies, not shovel carry). Gear stays whole when a mob loses a limb, lost only if eaten or burned in lava. Shovels bury any corpse: a hole at least two blocks deep, right-click with the shovel fills it back in, and NPCs bury their dead too.

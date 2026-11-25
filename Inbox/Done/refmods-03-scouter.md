@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
 claimed_by: 
-pr: 
+pr: 2120
 suggested_owns: []
 ---
 # Reference Mods Patch 3: Scouter: hold to scan, full readings, tracking
@@ -42,3 +42,5 @@ commands, no discovery chat text. Change note under changes/powers/<branch>.md.
 
 ## Notes
 - 2026-11-24 16:54 Pick-list rows S1-S8 for the bio scanner and tracking are on https://claude.ai/artifact/Fu1jDwywXNKSGj6mmU65fg; build from Andy's ticks there.
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.
