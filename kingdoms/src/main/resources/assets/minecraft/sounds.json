@@ -1,0 +1,51 @@
+{
+	"entity.wither.ambient": {
+		"replace": true,
+		"subtitle": "subtitles.entity.wither.ambient",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:wither/ambient_1",
+				"volume": 1.0
+			},
+			{
+				"name": "jaymoskingdoms:wither/ambient_2",
+				"volume": 1.0
+			},
+			{
+				"name": "jaymoskingdoms:wither/ambient_3",
+				"volume": 1.0
+			}
+		]
+	},
+	"entity.wither.hurt": {
+		"replace": true,
+		"subtitle": "subtitles.entity.wither.hurt",
+		"sounds": [
+			"jaymoskingdoms:wither/hurt_1",
+			"jaymoskingdoms:wither/hurt_2",
+			"jaymoskingdoms:wither/hurt_3"
+		]
+	},
+	"entity.wither.death": {
+		"replace": true,
+		"subtitle": "subtitles.entity.wither.death",
+		"sounds": [
+			"jaymoskingdoms:wither/death"
+		]
+	},
+	"entity.wither.spawn": {
+		"replace": true,
+		"subtitle": "subtitles.entity.wither.spawn",
+		"sounds": [
+			"jaymoskingdoms:wither/spawn"
+		]
+	},
+	"entity.wither.shoot": {
+		"replace": true,
+		"subtitle": "subtitles.entity.wither.shoot",
+		"sounds": [
+			"jaymoskingdoms:wither/shoot_1",
+			"jaymoskingdoms:wither/shoot_2"
+		]
+	}
+}

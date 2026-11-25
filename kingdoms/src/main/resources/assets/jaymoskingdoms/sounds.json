@@ -5567,5 +5567,35 @@
 			"jaymoskingdoms:illagers/mob/sorcerer/completecast"
 		],
 		"subtitle": "subtitles.jaymoskingdoms.illager.sorcerer.complete_cast"
+	},
+	"wither.beam_charge": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.beam_charge",
+		"sounds": [
+			"jaymoskingdoms:wither/beam_charge"
+		]
+	},
+	"wither.beam_fire": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.beam_fire",
+		"sounds": [
+			"jaymoskingdoms:wither/beam_fire"
+		]
+	},
+	"wither.charge_roar": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.charge_roar",
+		"sounds": [
+			"jaymoskingdoms:wither/charge_roar"
+		]
+	},
+	"wither.charge_rush": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.charge_rush",
+		"sounds": [
+			"jaymoskingdoms:wither/charge_rush"
+		]
+	},
+	"wither.stun": {
+		"subtitle": "subtitles.jaymoskingdoms.wither.stun",
+		"sounds": [
+			"jaymoskingdoms:wither/stun"
+		]
 	}
 }

@@ -78,6 +78,18 @@ final class WitherMoves {
 	private WitherMoves() {
 	}
 
+	/** The animation its look plays for the move in hand at {@code now} (null for none): {@link WitherAct}. */
+	static @org.jspecify.annotations.Nullable String act(Move move, long now) {
+		long t = now - move.start;
+		return switch (move.kind) {
+			case BEAM -> t < BEAM_TELL ? WitherAct.BEAM_TELL : WitherAct.BEAM_FIRE;
+			case CHARGE -> t < CHARGE_TELL ? WitherAct.CHARGE_TELL : WitherAct.CHARGE_RUSH;
+			case BARRAGE -> WitherAct.CLIMB;
+			case BLUES -> WitherAct.THROW;
+			case NONE -> null;
+		};
+	}
+
 	static boolean busy(Move move) {
 		return move.kind != Kind.NONE;
 	}
@@ -118,12 +130,12 @@ final class WitherMoves {
 		switch (pick) {
 			case BEAM -> {
 				PowersCompat.tellGlint(level, head, true);
-				level.playSound(null, head.x, head.y, head.z, SoundEvents.WITHER_AMBIENT, SoundSource.HOSTILE, 3.0F, 0.5F);
+				level.playSound(null, head.x, head.y, head.z, WitherSounds.BEAM_CHARGE, SoundSource.HOSTILE, 4.0F, 1.0F);
 			}
 			case CHARGE -> {
 				move.aim = quarry.position().add(0.0, quarry.getBbHeight() * 0.5, 0.0).subtract(wither.position().add(0.0, wither.getBbHeight() * 0.5, 0.0)).normalize();
 				PowersCompat.tellGlint(level, head, true);
-				level.playSound(null, head.x, head.y, head.z, SoundEvents.WITHER_AMBIENT, SoundSource.HOSTILE, 3.0F, 0.7F);
+				level.playSound(null, head.x, head.y, head.z, WitherSounds.CHARGE_ROAR, SoundSource.HOSTILE, 4.0F, 1.0F);
 			}
 			case BARRAGE -> level.playSound(null, head.x, head.y, head.z, SoundEvents.WITHER_AMBIENT, SoundSource.HOSTILE, 3.0F, 0.6F);
 			default -> PowersCompat.tellGlint(level, head, false);
@@ -171,7 +183,7 @@ final class WitherMoves {
 			Vec3 far = head.add(move.aim.subtract(head).normalize().scale(BEAM_RANGE));
 			Vec3 end = WitherFight.clip(level, wither, head, far);
 			Fx.beam(level, head, end, 0.5F, BEAM_COLOR, BEAM_SHOW);
-			level.playSound(null, head.x, head.y, head.z, SoundEvents.WITHER_SHOOT, SoundSource.HOSTILE, 4.0F, 0.5F);
+			level.playSound(null, head.x, head.y, head.z, WitherSounds.BEAM_FIRE, SoundSource.HOSTILE, 5.0F, 1.0F);
 			for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, WitherFight.around(head, end, 2.0), e -> WitherFight.fair(wither, e))) {
 				// (what's in the line, and not behind a block: the clip already stopped the beam at the first one)
 				if (segment(victim.position().add(0.0, victim.getBbHeight() * 0.5, 0.0), head, end) <= BEAM_WIDTH + victim.getBbWidth() * 0.5) {
@@ -202,6 +214,9 @@ final class WitherMoves {
 				Fx.beam(level, centre, centre.add(dir.scale(24.0)), 0.07F, 0xE02020, 5);
 			}
 			return;
+		}
+		if (t == CHARGE_TELL) {
+			level.playSound(null, wither.getX(), wither.getY(), wither.getZ(), WitherSounds.CHARGE_RUSH, SoundSource.HOSTILE, 4.0F, 1.0F);
 		}
 		if (t >= CHARGE_TELL + CHARGE_RUN || wither.horizontalCollision && t > CHARGE_TELL + 2) {
 			if (wither.horizontalCollision) {
