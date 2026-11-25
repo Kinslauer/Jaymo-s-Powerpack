@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 07:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 09:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,7 +32,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · for 💻 Odysseus · #2160 · changes · fixing review notes
-- [ ] [[Agents/symbiote-113-picks|symbiote-113-picks]] · 💻 Odysseus · running
 
 
 ## In review
@@ -47,6 +46,7 @@ kanban-plugin: board
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/codex-written-start-example|codex-written-start-example]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
+- [ ] [[Agents/symbiote-113-picks|symbiote-113-picks]] · 💻 Odysseus · stalled
 - [ ] [[Agents/wither-model|wither-model]] · 💻 Odysseus · blocked
 
 

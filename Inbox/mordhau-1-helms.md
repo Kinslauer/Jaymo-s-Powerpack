@@ -35,3 +35,5 @@ pr: 2160
 - 2026-11-24 22:35 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.
 - 2026-11-25 claude (helms worker): reclaimed; the claim lapsed while the session was down, the work was not lost. Draft PR #2160 is up; previews in Assets/mordhau-1-helms/. Left as claimed, not in-review, until Andy OKs the previews.
 - 2026-11-25 07:33 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as changes.
+
+- Andy answered 2026-11-25: three helm choices per realm. The three helm lore entries are approved.

@@ -1105,3 +1105,6 @@ Andy: "can you make one of these as an example?" Supplied Hand-built starts (adv
 - 2026-11-25 (Andy, same thread, row notes): Carapace becomes the black strain's Shroud tile and Aegis the white's; big bodies congeal through doors and 1x2 gaps and form whole again; while you sleep the blob really leaves and roams the world during the night skip.
 - 2026-11-25 (Andy, same thread): approved the lore paragraph "What it does when you aren't looking" (molting and the cast skin, the blob roaming while the host sleeps, elder against young).
 - 2026-11-25 (Andy): second new-world pbdr (0.27.49): delete the old world too ("Delete this broken one").
+
+### 2026-11-25: Guard helms and northern and sands lore
+- Andy: "they should alternate between both, and a third per realm"; approved the gallowglass, turban helm and spectacle helm lore. Applies to Kingdoms guard issue, PR #2160.

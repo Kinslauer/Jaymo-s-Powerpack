@@ -54,3 +54,5 @@ forgeable now; barbutes can also be painted), the barbute with its T-opening ope
 kettle cut. Previews in `Assets/mordhau-1-helms/` (README maps them to rows). Lore (new) paragraphs: the gallowglass,
 the turban helm, the spectacle helm. Not tested in game: fit on MCA bodies, visors lifting, sight shares and crest
 heights on the pointed helms. Waiting on Andy: previews, and whether guards should wear any of the other new helms.
+
+- Codex joined for the guard-issue follow-up; owns the GuardKit helm selection and its change note.
