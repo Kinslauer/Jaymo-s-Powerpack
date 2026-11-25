@@ -82,7 +82,17 @@ Rows: car_ship (note: "only 4 cars and only in the future"), rim_ship (note belo
 ## Patch 9: Pod travel the Unbound way (Powers)
 Pick list: https://claude.ai/artifact/MpUPQ1WdceWLakcUPSZ5fP (25 rows, db `picks/andy`).
 Andy's note on ub_ship: "create a new list of how it would integrate our worlds with its travel system. and only use
-what we have. it would replace how our space pods work only." Its own pick list; built after he picks.
+what we have. it would replace how our space pods work only." Its own pick list.
+Andy's picks (2026-11-25): all 21 "build ours" rows (tr_jump is already true and stays). Note on tr_cockpit: "Make the
+aeroclouds beneath the aether transparent and add cloud seas between aether isles so the pods can go straight through."
+- Track A: finding worlds (telescope, stardust hints, logbook), modules (sockets, legs, return stage, hold, tank, scanner,
+  forge class, plus the ki cannon/shield/mining beam/tow module items), getting home (beacons, take-off mark, fuel works).
+- Track B (on A): the climb through the stack into space (aerclouds under the Aether see-through and passable to pods,
+  cloud seas between Aether isles), map with travel times and autopilot, slingshot past the Maw, raiders, wrecks,
+  rock fields, towing, Patrol posts.
+
+## Pack base
+Andy, 2026-11-25: the pack moves to Fabric Loader 0.20.1 and Fabric API 0.165.2 so Psithurism ships.
 
 ## Order
 Two tracks at a time: 1 + 3, then 2 + 4, then 5 + 7, then 6 + 8, then 9. One PR per patch, a change note per mod.
