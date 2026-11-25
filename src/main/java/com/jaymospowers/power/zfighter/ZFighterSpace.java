@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.chrono.future.Future;
 import com.jaymospowers.power.zfighter.fuel.PodFuel;
@@ -51,7 +52,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -101,6 +104,11 @@ public final class ZFighterSpace {
 	static final int PAD_RADIUS = 3, SEARCH_STEP = 28, SEARCH_TRIES = 36;
 	/** How much the surface may rise and fall across a pad before the spot is passed over. */
 	static final int PAD_SLOPE = 4;
+	/**
+	 * With no dry ground near a world's middle, how far out land is looked for from the seed (blocks), how far apart the
+	 * rings are, and how many spots that read dry may have their chunks made before the middle is settled for.
+	 */
+	static final int FAR_LAND = 2048, FAR_LAND_STEP = 48, FAR_LAND_MADE = 6;
 	/** The moon's gravity (share of normal) and the extra fall it forgives; Rustfall's gravity, slowing and jump. */
 	public static final double MOON_GRAVITY = 0.35, MOON_SAFE_FALL = 8.0;
 	public static final double RUSTFALL_GRAVITY = 2.2, RUSTFALL_SPEED = -0.15, RUSTFALL_JUMP = -0.2;
@@ -649,16 +657,24 @@ public final class ZFighterSpace {
 	 * is always at {@link #MAW_PAD_X}, {@link #MAW_Y} (a pad saved anywhere else is from before the Maw was remade, and left behind).
 	 */
 	static BlockPos pad(ServerLevel level, Dest dest) {
+		return pad(level, dest, true);
+	}
+
+	/**
+	 * The same; {@code withPod} false when a pod is about to come down on it (a trip that found nowhere else to land), so the
+	 * pad isn't given a pod of its own as well: that was the second pod standing beside the one you flew in.
+	 */
+	static BlockPos pad(ServerLevel level, Dest dest, boolean withPod) {
 		BlockPos saved = level.getAttached(PAD);
 		BlockPos fixed = dest.kind() == Kind.WRECKS ? new BlockPos(MAW_PAD_X, MAW_Y, 0) : null;
 		if (saved != null && (fixed == null || saved.equals(fixed))) {
 			level.getChunk(saved.getX() >> 4, saved.getZ() >> 4);
-			if (level.getBlockState(saved).is(POD) || !level.getEntitiesOfClass(PodEntity.class, new AABB(saved).inflate(PAD_RADIUS)).isEmpty()) {
+			if (!withPod || podStands(level, saved)) {
 				return saved;
 			}
 		}
 		BlockPos spot = fixed != null ? fixed : saved != null ? saved : find(level, dest);
-		build(level, dest, spot);
+		build(level, dest, spot, withPod);
 		level.setAttached(PAD, spot);
 		if (dest.kind() == Kind.WRECKS) {
 			MawWorld.build(level);
@@ -677,7 +693,8 @@ public final class ZFighterSpace {
 		if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) != null) {
 			return true;
 		}
-		if (made[0] <= 0) {
+		// (Andy: "avoid oceans for spawns") land the seed says will be under water isn't made only to be passed over
+		if (made[0] <= 0 || Boolean.FALSE.equals(foreseenDry(level, x, z))) {
 			return false;
 		}
 		made[0]--;
@@ -701,13 +718,93 @@ public final class ZFighterSpace {
 				return spot;
 			}
 		}
-		level.getChunk(0, 0);
 		if (dest.kind() == Kind.FORGE) {
+			level.getChunk(0, 0);
 			return new BlockPos(0, 80, 0);
 		}
+		BlockPos land = farLand(level);
+		if (land != null) {
+			return land;
+		}
+		level.getChunk(0, 0);
 		int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 0);
 		// a world with no ground under the middle (the giant's ring): the pad is built hanging in the air at the drifts' height
 		return new BlockPos(0, top > level.getMinY() + 4 ? top : GIANT_PAD_Y, 0);
+	}
+
+	/**
+	 * Whether the top of the ground at (x, z) will be dry once its chunk is made, read from the seed as /locate reads land,
+	 * without making or loading anything: the world generator's own column of blocks there (land, sea, lakes; not yet trees
+	 * or buildings). True for dry ground, false for water or lava on top, null when the seed shows no ground there (the giant's
+	 * ring, whose drifts aren't in the noise) or the generator can't say.
+	 */
+	static @Nullable Boolean foreseenDry(ServerLevel level, int x, int z) {
+		try {
+			Stacked.Ground ground = Stacked.ground(level, level.dimension());
+			NoiseColumn blocks = ground.generator().getBaseColumn(x, z, ground.heights(), ground.randomState());
+			for (int y = ground.heights().getMaxY(); y >= ground.heights().getMinY(); y--) {
+				BlockState state = blocks.getBlock(y);
+				if (!state.isAir()) {
+					return state.getFluidState().isEmpty();
+				}
+			}
+			return null;
+		} catch (RuntimeException e) {
+			JaymosPowers.LOGGER.debug("Couldn't read the ground at {}, {} from the seed", x, z, e);
+			return null;
+		}
+	}
+
+	/**
+	 * (Andy, set down in the sea: "avoid oceans for spawns") When nothing near the middle of a world was dry ground: the
+	 * nearest land the seed shows, looked for in rings out to {@link #FAR_LAND} (read, not made), and only the chunks of a
+	 * spot that reads dry made, at most {@link #FAR_LAND_MADE} spots. Null if the seed shows none (an all-sea world).
+	 */
+	private static @Nullable BlockPos farLand(ServerLevel level) {
+		int madeSpots = 0;
+		for (int r = FAR_LAND_STEP; r <= FAR_LAND && madeSpots < FAR_LAND_MADE; r += FAR_LAND_STEP) {
+			int around = Math.max(8, (int)(2.0 * Math.PI * r / FAR_LAND_STEP));
+			for (int i = 0; i < around && madeSpots < FAR_LAND_MADE; i++) {
+				double angle = i * 2.0 * Math.PI / around;
+				int x = (int)Math.round(Math.cos(angle) * r);
+				int z = (int)Math.round(Math.sin(angle) * r);
+				if (!Boolean.TRUE.equals(foreseenDry(level, x, z))) {
+					continue;
+				}
+				madeSpots++;
+				for (int dx = -PAD_RADIUS; dx <= PAD_RADIUS; dx += PAD_RADIUS * 2) {
+					for (int dz = -PAD_RADIUS; dz <= PAD_RADIUS; dz += PAD_RADIUS * 2) {
+						level.getChunk((x + dx) >> 4, (z + dz) >> 4);
+					}
+				}
+				BlockPos spot = surface(level, x, z);
+				if (spot != null) {
+					return spot;
+				}
+				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
+				if (top.getY() > level.getMinY() + 4 && level.getBlockState(top.below()).getFluidState().isEmpty()) {
+					return top;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Whether a pod stands on the pad at {@code saved}. While the chunk's entities are still being read from the save (they
+	 * come in after its blocks), the pod built there is taken to be there: looking too soon found none, and a second was built.
+	 */
+	private static boolean podStands(ServerLevel level, BlockPos saved) {
+		if (level.getBlockState(saved).is(POD)) {
+			return true;
+		}
+		boolean loaded = true;
+		for (int dx = -PAD_RADIUS; dx <= PAD_RADIUS; dx += PAD_RADIUS * 2) {
+			for (int dz = -PAD_RADIUS; dz <= PAD_RADIUS; dz += PAD_RADIUS * 2) {
+				loaded &= level.areEntitiesLoaded(ChunkPos.pack(new BlockPos(saved.getX() + dx, saved.getY(), saved.getZ() + dz)));
+			}
+		}
+		return !loaded || !level.getEntitiesOfClass(PodEntity.class, new AABB(saved).inflate(PAD_RADIUS)).isEmpty();
 	}
 
 	/** A flat spot of open ground at column (x, z) for a pad (no water under it, no steep slope across it), or null. */
@@ -768,10 +865,10 @@ public final class ZFighterSpace {
 	/** The pad: a floor of {@link Dest#floor}, a lamp at each corner, the air above cleared, and a pod (a complete one, no fuel) in the middle. */
 	/** (Tiv, from {@link ZFighterStarts}) A Maw salvager's deck of their own at {@code spot}: a pad and its pod, as the Maw's own. */
 	static void deck(ServerLevel level, Dest dest, BlockPos spot) {
-		build(level, dest, spot);
+		build(level, dest, spot, true);
 	}
 
-	private static void build(ServerLevel level, Dest dest, BlockPos spot) {
+	private static void build(ServerLevel level, Dest dest, BlockPos spot, boolean withPod) {
 		for (int dx = -PAD_RADIUS; dx <= PAD_RADIUS; dx++) {
 			for (int dz = -PAD_RADIUS; dz <= PAD_RADIUS; dz++) {
 				boolean corner = Math.abs(dx) == PAD_RADIUS && Math.abs(dz) == PAD_RADIUS;
@@ -790,6 +887,8 @@ public final class ZFighterSpace {
 				}
 			}
 		}
-		PodEntity.spawn(level, Vec3.atBottomCenterOf(spot), true, 0);
+		if (withPod) {
+			PodEntity.spawn(level, Vec3.atBottomCenterOf(spot), true, 0);
+		}
 	}
 }
