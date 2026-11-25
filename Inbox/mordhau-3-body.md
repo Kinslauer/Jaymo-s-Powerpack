@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
-claimed_by: 
+claimed_by: claude (PC coordinator thread, worker)
 pr: 
 ---
 # Mordhau harness 3: body (padding, mail, cuirasses, over-garments, shoulders, arms, hands) (Kingdoms)
