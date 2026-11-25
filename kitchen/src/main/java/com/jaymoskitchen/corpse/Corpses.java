@@ -127,7 +127,15 @@ public final class Corpses {
 		return TagKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id(name));
 	}
 
+	/**
+	 * Where Jaymo's Powers' context hints ask what a tap does to a body ({@link CorpseEntity#tapDoes}): a
+	 * {@code ToIntFunction<Entity>} in Fabric Loader's object share (Powers compiles against an older Kitchen jar).
+	 */
+	public static final String SHARE_TAP = "jaymoskitchen:corpse_tap";
+
 	public static void register() {
+		net.fabricmc.loader.api.FabricLoader.getInstance().getObjectShare().put(SHARE_TAP,
+			(java.util.function.ToIntFunction<net.minecraft.world.entity.Entity>) e -> e instanceof CorpseEntity corpse ? corpse.tapDoes() : CorpseEntity.TAP_LOOT);
 		ResourceKey<EntityType<?>> corpseKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id("corpse"));
 		CORPSE = Registry.register(BuiltInRegistries.ENTITY_TYPE, corpseKey,
 			EntityType.Builder.<CorpseEntity>of(CorpseEntity::new, MobCategory.MISC)

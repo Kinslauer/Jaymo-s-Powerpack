@@ -120,6 +120,19 @@ public class CorpseEntity extends Entity {
 		EntityDataSerializers.STRING);
 	/** Which of a dead player's tags are kept for their look. */
 	static final String[] LOOK_TAG_PREFIXES = {"jaymoskingdoms_heritage_", "jaymoskingdoms_bio_"};
+	/**
+	 * Andy (2026-11-25): "if it cannot be opened or has nothing left the context hint for that button should disappear".
+	 * What a tap (once the arrows are out) does to it now, so the hint by the crosshair only offers what will happen:
+	 * {@link #TAP_NOTHING}, {@link #TAP_LOOT} (the loot screen, or a fish's or a machine's loot) or {@link #TAP_BONE}
+	 * (a picked-clean skeleton gives up a bone). Kept by the server every {@link #TAP_CHECK_TICKS}.
+	 */
+	private static final EntityDataAccessor<Integer> TAP = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+	public static final int TAP_NOTHING = 0, TAP_LOOT = 1, TAP_BONE = 2;
+	private static final int TAP_CHECK_TICKS = 5;
+	/** The look {@link #gearCached} was read from (reading it parses the look, so it's done once per look). */
+	private @Nullable String gearLook;
+	private boolean gearCached;
 	/** A heavy corpse (an iron golem) falling apart once it's been looted (see {@link #crumble}). */
 	private static final EntityDataAccessor<Boolean> CRUMBLING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.BOOLEAN);
@@ -1063,6 +1076,7 @@ public class CorpseEntity extends Entity {
 		builder.define(OWNER_NAME, "");
 		builder.define(LOOK_TAGS, "");
 		builder.define(CRUMBLING, false);
+		builder.define(TAP, TAP_LOOT);
 		builder.define(MISSING, 0);
 		builder.define(DRESSED, 0);
 		builder.define(BORN, 0L);
@@ -2052,6 +2066,9 @@ public class CorpseEntity extends Entity {
 
 	private void serverTick(ServerLevel level) {
 		tickPress(level);
+		if (tickCount % TAP_CHECK_TICKS == 0) {
+			syncTap();
+		}
 		age++;
 		if (Keeping.kept(this, level)) {
 			// kept fresh (a priest's rite, a salt-and-herb wrap): its clock stands still, so it neither rots nor gets up
@@ -2473,8 +2490,9 @@ public class CorpseEntity extends Entity {
 			return false;
 		}
 		loot.removeIf(ItemStack::isEmpty);
-		if (looting == null && loot.isEmpty() && !hasGear() && hotbar.stream().allMatch(ItemStack::isEmpty)) {
+		if (looting == null && nothingOn()) {
 			searched = true;
+			syncTap();
 			return false;
 		}
 		if (looting == null) {
@@ -2511,6 +2529,43 @@ public class CorpseEntity extends Entity {
 		if (!openLoot(level, player)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.burn_zombie"));
 		}
+	}
+
+	/** Nothing left on it for the loot screen: no pockets, no gear, nothing a player carried. */
+	private boolean nothingOn() {
+		return loot.stream().allMatch(ItemStack::isEmpty) && hotbar.stream().allMatch(ItemStack::isEmpty) && !hasGearCached();
+	}
+
+	/** {@link #hasGear}, read again only when the look has changed. */
+	private boolean hasGearCached() {
+		String look = look();
+		if (!look.equals(gearLook)) {
+			gearLook = look;
+			gearCached = hasGear();
+		}
+		return gearCached;
+	}
+
+	/** Server: what a tap would do now ({@link #TAP}), as {@link #tapped} decides it. */
+	private void syncTap() {
+		int now;
+		if (isFish()) {
+			now = TAP_LOOT;
+		} else if (isMachine()) {
+			now = this.entityData.get(CRUMBLING) ? TAP_NOTHING : TAP_LOOT;
+		} else if (kind == CorpseKind.ANIMAL) {
+			now = TAP_NOTHING;
+		} else if (looting != null || !nothingOn()) {
+			now = TAP_LOOT;
+		} else {
+			now = kind == CorpseKind.SKELETON ? TAP_BONE : TAP_NOTHING;
+		}
+		this.entityData.set(TAP, now);
+	}
+
+	/** Client: what a tap (once the arrows are out) does to it now: {@link #TAP_NOTHING}, {@link #TAP_LOOT} or {@link #TAP_BONE}. */
+	public int tapDoes() {
+		return this.entityData.get(TAP);
 	}
 
 	/** Whether it still wears or holds anything. */
@@ -2605,6 +2660,7 @@ public class CorpseEntity extends Entity {
 		if (loot.isEmpty()) {
 			searched = true;
 		}
+		syncTap();
 	}
 
 	private InteractionResult interactAnimal(ServerLevel level, Player player, ItemStack held) {

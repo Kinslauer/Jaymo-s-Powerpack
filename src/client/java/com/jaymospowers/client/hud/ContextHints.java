@@ -146,9 +146,18 @@ public final class ContextHints {
 			list.add(line(TAP, "jaymospowers.context.pat_out", "key.use"));
 			return;
 		}
+		// Andy (2026-11-25): a body that can't be opened or has nothing left shows no search line, so nobody taps on and
+		// on at it; arrows come out first, a tap each, and a picked-clean skeleton gives up its bones
 		boolean animal = !corpse.isFish() && !corpse.isMachine() && corpse.clientBody() instanceof Animal;
-		if (!animal) {
-			list.add(line(TAP, "jaymospowers.context.loot", "key.use"));
+		if (com.jaymoskitchen.archery.StuckArrows.total(corpse.arrows()) > 0) {
+			list.add(line(TAP, "jaymospowers.context.pull_arrow", "key.use"));
+		} else if (!animal) {
+			int tap = tapDoes(corpse);
+			if (tap == CORPSE_LOOT) {
+				list.add(line(TAP, "jaymospowers.context.loot", "key.use"));
+			} else if (tap == CORPSE_BONE) {
+				list.add(line(TAP, "jaymospowers.context.take_bone", "key.use"));
+			}
 		}
 		if (corpse.isHeavy()) {
 			return;
@@ -159,7 +168,17 @@ public final class ContextHints {
 		}
 	}
 
-	/** "Shift + hold Right Button: lift": the keys in gold, the last one held if the line says so. */
+	/** Kitchen's {@code CorpseEntity.TAP_LOOT} and {@code TAP_BONE}. */
+	private static final int CORPSE_LOOT = 1, CORPSE_BONE = 2;
+
+	/** What a tap does to the body now, as Kitchen shares it ({@code Corpses.SHARE_TAP}); an older Kitchen: a search. */
+	@SuppressWarnings("unchecked")
+	private static int tapDoes(CorpseEntity corpse) {
+		return FabricLoader.getInstance().getObjectShare().get("jaymoskitchen:corpse_tap") instanceof java.util.function.ToIntFunction<?> f
+			? ((java.util.function.ToIntFunction<Entity>) f).applyAsInt(corpse) : CORPSE_LOOT;
+	}
+
+		/** "Shift + hold Right Button: lift": the keys in gold, the last one held if the line says so. */
 	private static Component text(String[] line) {
 		int gold = HudStyle.GOLD & 0xFFFFFF, dim = HudStyle.DIM & 0xFFFFFF;
 		MutableComponent out = Component.empty();
