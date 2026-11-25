@@ -597,7 +597,8 @@ public final class WebSymbioteMind {
 			return;
 		}
 		write(player, mind.withOrder(order));
-		WebSymbiote.whisper(player, "order." + ORDER_NAMES[order] + ".yes");
+		// (without the Web the suit stays on when told to hide: it says so, then fights for it)
+		WebSymbiote.whisper(player, order == HIDE && WebSymbiote.clings(player) && !player.isCreative() ? "order.hide.held" : "order." + ORDER_NAMES[order] + ".yes");
 		if (order == HIDE) {
 			WebSymbiote.mindHide(player);
 		}
