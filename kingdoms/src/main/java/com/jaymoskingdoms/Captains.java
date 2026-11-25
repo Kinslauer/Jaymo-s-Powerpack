@@ -891,7 +891,7 @@ public final class Captains {
 	/**
 	 * (0.7.614, Rivals) The raised dead fear nothing: their captains are Deathless, every one. A new one fights as the dead he
 	 * rose from (Andy: "they should fight the same as their counterparts at default only learning as they progress"): no
-	 * strengths or moves yet, only what he gains as he climbs (a Pallid leading them or one of the dead with a title, {@link HollowCaptains}).
+	 * strengths or moves yet, only what he gains as he climbs (one of the Hollow or of the dead who killed a player, {@link HollowCaptains}).
 	 */
 	static Captain raisedDead(Captain c) {
 		List<String> traits = new ArrayList<>(c.traits());
@@ -941,26 +941,15 @@ public final class Captains {
 			return;
 		}
 		RandomSource random = level.getRandom();
-		boolean raised = Rivals.side(ladder) == Rivals.Side.RAISED;
-		// (a new one of the raised starts at the bottom: he climbs as he goes, HollowCaptains)
-		Captain c = Captain.of(newId(random), ladder, rollName(ladder, random), raised ? 1 : Rivals.startRank(server, random), roll(server, random), -1, null,
-			false);
-		boolean leads = false;
-		if (raised) {
+		Captain c = Captain.of(newId(random), ladder, rollName(ladder, random), Rivals.startRank(server, random), roll(server, random), -1, null, false);
+		if (Rivals.side(ladder) == Rivals.Side.RAISED) {
 			c = raisedDead(c);
-			// (most often a Pallid gets up in the dead one's place to lead them; else the dead one takes the title himself)
-			leads = HollowCaptains.live() && random.nextFloat() < HollowCaptains.PALLID_LEAD;
-			if (leads) {
-				mob = HollowCaptains.riseOr(level, mob, null);
-			}
 		}
 		put(server, c);
 		Map<String, Long> fresh = new HashMap<>(risen);
 		fresh.put(ladder, now);
 		Factions.level(server).setAttached(RISEN, Map.copyOf(fresh));
 		embodyIn(level, c, mob);
-		HollowCaptains.keep(server, c.id(), mob);
-		HollowCaptains.muster(level, c, mob);
 	}
 
 	/** One rank more on {@code mob}'s build. */
@@ -1882,6 +1871,11 @@ public final class Captains {
 		Meeting m = c.met().get(player.getStringUUID());
 		c = c.met(player.getUUID(), new Meeting(m == null ? 1 : m.times() + 1, "killed", now));
 		bind(level, c, killer, false);
+		if (risen && HollowCaptains.is(killer)) {
+			// (one of the Hollow who walk with the dead, made a captain by the kill: his look kept, a Pallid's army called up)
+			HollowCaptains.keep(server, c.id(), killer);
+			HollowCaptains.muster(level, c, killer);
+		}
 		// (his head, at the height of the scene: orcs always, anyone else now and then)
 		boolean takes = Rivals.side(c.tribe()) == Rivals.Side.ORC || random.nextFloat() < HEAD_TAKING;
 		scene(level, killer, player, c.id(), risen, takes ? player.getUUID() : null);

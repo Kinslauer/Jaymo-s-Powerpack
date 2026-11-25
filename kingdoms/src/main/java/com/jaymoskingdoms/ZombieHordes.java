@@ -626,6 +626,10 @@ public final class ZombieHordes {
 				continue;
 			}
 			special(level, horde, tier, random);
+			if (kind.dead() || kind == Kind.SKELETONS) {
+				// (now and then one of the Hollow walks with them: HollowCaptains)
+				HollowCaptains.joinHorde(level, horde.members);
+			}
 			if (kind == Kind.SQUAD) {
 				// its leader carries the poster of who they've come for, and now and then a horn
 				Mob leader = horde.members.getFirst();

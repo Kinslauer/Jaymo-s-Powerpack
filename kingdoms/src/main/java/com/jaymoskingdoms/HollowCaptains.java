@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -32,42 +33,61 @@ import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The risen dead are led by the Pallid. Andy (2026-11-25): "the named zombies and skeletons should be replaced with skeleton,
- * pallid, or zombie hollow npcs instead, this makes more sense that they can speak, and will return from the dead. they should
- * fight the same as their counterparts at default only learning as they progress." Then: "the pallids are intelligent hollow
- * and will end up leading armies of the skeleton and zombies, as another faction. the captain ladder should work primarily
- * through them as you encounter them most. that also gives skeletons and zombies reason to gain titles again."
+ * The Hollow who walk among the risen dead, and the captains they become. Andy (2026-11-25): "the named zombies and skeletons
+ * should be replaced with skeleton, pallid, or zombie hollow npcs instead, this makes more sense that they can speak, and will
+ * return from the dead. they should fight the same as their counterparts at default only learning as they progress." Then:
+ * "the pallids are intelligent hollow and will end up leading armies of the skeleton and zombies, as another faction"; "pallids
+ * should fight with their old class abilities and weapons"; and "Hollow of all kinds except vampire should be among the zombie
+ * and skeleton hordes at night and otherwise. if ever ANY of them kill you is when they are promoted. a new world should spawn
+ * with a finite amount, and that number can increase or decrease. the number should be 6".
  * <ul>
- * <li><b>Who leads:</b> when a new captain of the raised ({@link Rivals.Side#RAISED}) rises from a zombie or skeleton near a
- * player ({@link Rivals#loaded}), most often ({@link #PALLID_LEAD}) a Pallid stands up in its place: an MCA villager of the
- * Hollow's blood, of the first look, who can be talked to. Otherwise the dead one takes the title himself, as before, and so
- * does a zombie or skeleton that kills a player ({@code Captains.slew}): the titled dead are the Pallids' lieutenants.</li>
- * <li><b>Their armies:</b> a Pallid captain calls up {@link #ARMY_START} of the dead (and {@link #ARMY_PER_RANK} more a rank)
- * when he rises, and gathers the untitled and titled dead near him to {@link #ARMY_MOST}: they keep with him and go for whoever
- * he goes for ({@link #army}).</li>
- * <li><b>The same man back:</b> his class and his whole saved self are kept ({@link #LOOKS}, {@link #FACES}), so when
- * he comes back from the dead it's him again, in the next of the dead to walk his land.</li>
- * <li><b>How they fight:</b> (Andy: "pallids should fight with their old class abilities and weapons") a Pallid keeps the
- * class he had in life ({@link PlayerClass}, rolled when he first rises): its starting weapons and armour, what it's good at
- * (a Warlord's or Brute's heavier blow, a Thief's speed, a Paladin's hide), a Ranger's or Marksman's shooting from afar, a
- * caster's bolt and a Cleric's or Druid's mending of his army. On a zombie's body ({@link #ZOMBIE_HEALTH}). A new captain has
- * none of a captain's strengths or moves: those come only as he climbs (a strength for each player he kills, what he learns
- * each time he comes back, a move of his own at rank four).</li>
+ * <li><b>How many:</b> the world keeps a count of the Hollow who walk with the dead ({@link #COUNT}, {@link #START} in a new
+ * world). While fewer than that walk ({@link #WALKING}), one stands up among the dead: in a horde of the dead or of skeletons as
+ * it comes ({@code ZombieHordes}, {@link #HORDE_CHANCE}), or by day or night in place of a zombie or skeleton out of a player's
+ * way ({@link #ROAM_EVERY}). The count falls by one each time one of them dies for good, and rises by one when the dead kill a
+ * villager and take them ({@link #TAKE_CHANCE}).</li>
+ * <li><b>Of every kind but the vampire's:</b> an MCA villager of the Hollow's blood ({@link #KINDS}): a Zombie Hollow, a
+ * Skeleton Hollow, a Reaper or a Pallid. The Wraith, the vampire's thrall, is never among them.</li>
+ * <li><b>Promoted by a kill:</b> the raised's captains ({@link Rivals.Side#RAISED}) are made only when one of the Hollow, or a
+ * zombie or skeleton, kills a player ({@code Captains.slew}); none rise from the land by chance any more. The titled dead are
+ * the Hollow's lieutenants.</li>
+ * <li><b>The Pallid lead:</b> a Pallid captain calls up {@link #ARMY_START} of the dead (and {@link #ARMY_PER_RANK} more a
+ * rank) when he rises, and gathers the dead near him to {@link #ARMY_MOST}: they keep with him and go for whoever he goes for
+ * ({@link #army}).</li>
+ * <li><b>How they fight:</b> a Zombie Hollow and a Reaper as a zombie, a Skeleton Hollow as a skeleton (its bow); a Pallid with
+ * the class he had in life ({@link PlayerClass}): its starting weapons and armour, what it's good at, a Ranger's or Marksman's
+ * shooting, a caster's bolt, a Cleric's or Druid's mending of his army. A new captain has none of a captain's strengths or
+ * moves: those come only as he climbs (a strength for each player he kills, what he learns each time he comes back, a move of
+ * his own at rank four).</li>
+ * <li><b>The same man back:</b> a captain's kind, class and whole saved self are kept ({@link #LOOKS}, {@link #FACES}), so when
+ * he comes back (as any captain may) it's him again, in the next of the dead to walk his land.</li>
  * <li>The dead leave them be ({@code mixin/nightgifts/ZombieBlightMixin}), and they're outside the law ({@link Outlaws}).</li>
  * </ul>
- * Without MCA the raised keep their zombies and skeletons, as before.
+ * Without MCA none of the Hollow walk, and the raised keep their zombies and skeletons as before.
  */
 public final class HollowCaptains {
 	// ================================================================================================================
 	// Tuning
-	/** Of the raised's new captains who rise near a player, this share are Pallids who lead the dead; the rest titled dead. */
-	static final float PALLID_LEAD = 0.75F;
+	/** How many of the Hollow walk with the dead in a new world. */
+	static final int START = 6;
+	/** The kinds they are, and how many in each hundred (the Pallid most: Andy, "you encounter them most"). */
+	static final List<String> KINDS = List.of("pallid", "zombie", "skeleton", "reaper");
+	static final int[] KIND_WEIGHTS = {40, 25, 25, 10};
+	/** The chance a horde of the dead (or of skeletons) brings one along while there's room. */
+	static final float HORDE_CHANCE = 0.5F;
+	/** How often (ticks) one may stand up among the dead near a player while there's room, at what chance; how near and how far from them (blocks). */
+	static final int ROAM_EVERY = 1200;
+	static final float ROAM_CHANCE = 0.5F;
+	static final double ROAM_NEAR = 24.0, ROAM_FAR = 64.0;
+	/** The chance a villager the dead kill is taken among them (one more Hollow to walk). */
+	static final float TAKE_CHANCE = 0.25F;
 	/** A Pallid captain's army: the dead he calls up as he rises, more for each rank, the most who follow him. */
 	static final int ARMY_START = 2, ARMY_PER_RANK = 1, ARMY_MOST = 10;
 	/** How far (blocks) he gathers the dead, how far they stray from him idle, and how often he looks to them (ticks). */
@@ -101,21 +121,26 @@ public final class HollowCaptains {
 	static final int GRUDGE_TICKS = 200, WANDER_EVERY = 120, WANDER = 8;
 	// ================================================================================================================
 
-	/** On every Pallid captain's body. */
+	/** On every one of the Hollow who walk with the dead (captain or not). */
 	public static final String TAG = "jaymoskingdoms.hollow_captain";
 	/** On each of the dead in a Pallid captain's army, then his captain id. */
 	static final String ARMY_TAG = "jaymoskingdoms.pallid_army:";
-	/** On each Pallid captain, then the key of the class he had in life. */
+	/** On each Pallid, then the key of the class he had in life. */
 	static final String CLASS_TAG = "jaymoskingdoms.pallid_class:";
 	/** Their role: outside the law, enlisted to nobody. */
 	static final int ROLE = 98;
 
-	/** On the Overworld: Pallid captain id → the class he had in life ({@link PlayerClass#key}). Saved. */
-	static final AttachmentType<Map<String, String>> LOOKS = AttachmentRegistry.create(JaymosKingdoms.id("pallid_captain_classes"),
+	/** On the Overworld: Hollow captain id → his kind, and a Pallid's class ({@code zombie}, {@code pallid:warlord}). Saved. */
+	static final AttachmentType<Map<String, String>> LOOKS = AttachmentRegistry.create(JaymosKingdoms.id("hollow_captain_looks"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.STRING)));
 	/** On the Overworld: captain id → his body's saved self (face, name, blood). Saved. */
-	static final AttachmentType<Map<String, CompoundTag>> FACES = AttachmentRegistry.create(JaymosKingdoms.id("pallid_captain_faces"),
+	static final AttachmentType<Map<String, CompoundTag>> FACES = AttachmentRegistry.create(JaymosKingdoms.id("hollow_captain_faces"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, CompoundTag.CODEC)));
+	/** On the Overworld: how many of the Hollow walk with the dead. Saved. */
+	static final AttachmentType<Integer> COUNT = AttachmentRegistry.create(JaymosKingdoms.id("hollow_count"), builder -> builder.persistent(Codec.INT));
+	/** On the Overworld: the bodies of the Hollow walking now (uuids). Saved. */
+	static final AttachmentType<List<String>> WALKING = AttachmentRegistry.create(JaymosKingdoms.id("hollow_walking"),
+		builder -> builder.persistent(Codec.STRING.listOf()));
 
 	/** Work put off to the end of the tick (a body can't be swapped while its chunk is still loading it). */
 	private static final List<Runnable> LATER = new ArrayList<>();
@@ -131,7 +156,14 @@ public final class HollowCaptains {
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
 			BOWS.remove(entity.getUUID());
 			NEXT.remove(entity.getUUID());
+			Entity.RemovalReason why = entity.getRemovalReason();
+			if (is(entity) && why != null && why.shouldDestroy() && why != Entity.RemovalReason.KILLED) {
+				// (taken out of the world some other way: not dead, so the count stands, and another will walk in its place)
+				walking(level.getServer(), entity, false);
+			}
 		});
+		ServerLivingEntityEvents.AFTER_DEATH.register(HollowCaptains::died);
+		ServerTickEvents.END_SERVER_TICK.register(HollowCaptains::roam);
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (LATER.isEmpty()) {
 				return;
@@ -159,8 +191,8 @@ public final class HollowCaptains {
 	// ---- rising ---------------------------------------------------------------------------------------------------------
 
 	/**
-	 * A Pallid stands up in {@code dead}'s place (it's gone): {@code id}'s own if he was one before, else a new one, of a class
-	 * rolled now. Null (and {@code dead} left as it is) without MCA or if none could be made.
+	 * One of the Hollow stands up in {@code dead}'s place (it's gone): captain {@code id}'s own if he was one before, else a new
+	 * one of a kind (and a Pallid's class) rolled now. Null (and {@code dead} left as it is) without MCA or if none could be made.
 	 */
 	static @Nullable PathfinderMob rise(ServerLevel level, PathfinderMob dead, @Nullable String id) {
 		if (!live() || is(dead)) {
@@ -168,12 +200,14 @@ public final class HollowCaptains {
 		}
 		MinecraftServer server = level.getServer();
 		String was = id == null ? null : Factions.level(server).getAttachedOrElse(LOOKS, Map.of()).get(id);
-		PlayerClass cls = was == null ? null : PlayerClass.byKey(was);
-		if (cls == null) {
+		String kind = was == null ? rollKind(level.getRandom()) : was.split(":")[0];
+		PlayerClass cls = was != null && was.contains(":") ? PlayerClass.byKey(was.substring(was.indexOf(':') + 1)) : null;
+		if (cls == null && "pallid".equals(kind)) {
 			// (what he was in life: any of the classes)
 			PlayerClass[] all = PlayerClass.values();
 			cls = all[level.getRandom().nextInt(all.length)];
 		}
+		ItemStack held = dead.getMainHandItem().copy();
 		CompoundTag face = id == null ? null : Factions.level(server).getAttachedOrElse(FACES, Map.of()).get(id);
 		PathfinderMob body = McaCompat.hollowBody(level, dead.position(), dead.getYRot(), ROLE, face);
 		if (body == null) {
@@ -182,19 +216,22 @@ public final class HollowCaptains {
 		if (face == null) {
 			VillagerHeritage.born(body, Heritage.Kind.HOLLOW, null);
 		}
-		// (the Pallid: the Hollow's first look)
-		HeritageVariants.set(body, null);
+		// (the Pallid is the Hollow's first look)
+		HeritageVariants.set(body, "pallid".equals(kind) ? null : HeritageVariants.Variant.byKey(kind));
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			body.setItemSlot(slot, ItemStack.EMPTY);
 			body.setDropChance(slot, 0.0F);
 		}
-		build(body, cls);
+		build(body, kind, cls, held);
 		body.addTag(TAG);
-		body.addTag(CLASS_TAG + cls.key());
+		if (cls != null) {
+			body.addTag(CLASS_TAG + cls.key());
+		}
 		body.addTag(Rivals.ROLLED_TAG);
 		if (!level.addFreshEntity(body)) {
 			return null;
 		}
+		walking(server, body, true);
 		McaCompat.untree(level, body);
 		level.sendParticles(ParticleTypes.SOUL, body.getX(), body.getY(0.4), body.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
 		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.HOSTILE, 0.8F, 0.7F);
@@ -202,23 +239,30 @@ public final class HollowCaptains {
 		return body;
 	}
 
-	/** As {@link #rise}, or {@code dead} itself if no Pallid could stand up in its place. */
+	/** As {@link #rise}, or {@code dead} itself if none of the Hollow could stand up in its place. */
 	static PathfinderMob riseOr(ServerLevel level, PathfinderMob dead, @Nullable String id) {
 		PathfinderMob body = rise(level, dead, id);
 		return body == null ? dead : body;
 	}
 
 	/**
-	 * His build and arms, which a captain's are put on top of: a zombie's body (a ranged class sees as far as a skeleton), the
-	 * weapons and armour his class starts with ({@link Classes#gear}), and what his class is good at (as the Flame Avatars'
-	 * classes are: {@code nether/AvatarClasses}).
+	 * Their build and arms, which a captain's are put on top of: a zombie's body (a bowman sees only as far as a skeleton). A
+	 * Skeleton Hollow carries a bow, a Zombie Hollow or a Reaper what the dead one held; a Pallid the weapons and armour his class
+	 * starts with ({@link Classes#gear}) and what his class is good at (as the Flame Avatars' classes are: {@code nether/AvatarClasses}).
 	 */
-	private static void build(PathfinderMob body, PlayerClass cls) {
+	private static void build(PathfinderMob body, String kind, @Nullable PlayerClass cls, ItemStack held) {
+		boolean bow = "skeleton".equals(kind) || ranged(cls);
 		base(body, Attributes.MAX_HEALTH, ZOMBIE_HEALTH);
 		base(body, Attributes.ATTACK_DAMAGE, ZOMBIE_DAMAGE);
 		base(body, Attributes.MOVEMENT_SPEED, ZOMBIE_SPEED);
 		base(body, Attributes.ARMOR, ZOMBIE_ARMOUR);
-		base(body, Attributes.FOLLOW_RANGE, ranged(cls) ? SKELETON_SIGHT : ZOMBIE_SIGHT);
+		base(body, Attributes.FOLLOW_RANGE, bow ? SKELETON_SIGHT : ZOMBIE_SIGHT);
+		if (cls == null) {
+			body.setItemSlot(EquipmentSlot.MAINHAND, "skeleton".equals(kind) ? held.getItem() instanceof BowItem ? held : new ItemStack(Items.BOW)
+				: held.getItem() instanceof BowItem ? ItemStack.EMPTY : held);
+			body.setHealth(body.getMaxHealth());
+			return;
+		}
 		List<ItemStack> gear = Classes.gear(cls, cls.options.isEmpty() ? "" : cls.options.getFirst());
 		// (the hand he fought with: the first of his kit, but a cleric's staff, a monk's cestus, a paladin's or tinkerer's blade)
 		int hand = switch (cls) {
@@ -296,18 +340,14 @@ public final class HollowCaptains {
 		}
 	}
 
-	/** {@code body} is Pallid captain {@code id}'s: how he fights, and (the first time) his saved self, kept for when he comes back. */
+	/** {@code body} is Hollow captain {@code id}'s: his kind and class, and (the first time) his saved self, kept for when he comes back. */
 	static void keep(MinecraftServer server, String id, LivingEntity body) {
 		if (!is(body)) {
 			return;
 		}
 		ServerLevel home = Factions.level(server);
-		PlayerClass cls = classOf(body);
-		if (cls == null) {
-			return;
-		}
 		Map<String, String> looks = new HashMap<>(home.getAttachedOrElse(LOOKS, Map.of()));
-		looks.put(id, cls.key());
+		looks.put(id, lookOf(body));
 		home.setAttached(LOOKS, Map.copyOf(looks));
 		Map<String, CompoundTag> faces = home.getAttachedOrElse(FACES, Map.of());
 		if (!faces.containsKey(id)) {
@@ -326,19 +366,133 @@ public final class HollowCaptains {
 		if (c == null || c.fallen() || c.body().isPresent() || !dead.isAlive() || dead.isRemoved() || Captains.is(dead)) {
 			return;
 		}
-		// (a Pallid gets up again a Pallid; one of the titled dead takes the next of the dead, as before)
-		boolean pallid = Factions.level(level.getServer()).getAttachedOrElse(LOOKS, Map.of()).containsKey(id);
-		PathfinderMob body = pallid ? riseOr(level, dead, id) : dead;
+		// (one of the Hollow gets up again as himself; one of the titled dead takes the next of the dead, as before)
+		boolean hollow = Factions.level(level.getServer()).getAttachedOrElse(LOOKS, Map.of()).containsKey(id);
+		PathfinderMob body = hollow ? riseOr(level, dead, id) : dead;
 		Captains.embodyIn(level, c, body);
 		keep(level.getServer(), id, body);
 		muster(level, c, body);
+	}
+
+	/** {@code body}'s kind, and a Pallid's class: {@code zombie}, {@code skeleton}, {@code reaper}, {@code pallid:<class>}. */
+	static String lookOf(LivingEntity body) {
+		HeritageVariants.Variant v = HeritageVariants.of(body);
+		PlayerClass cls = classOf(body);
+		return v != null ? v.key() : cls == null ? "pallid" : "pallid:" + cls.key();
+	}
+
+	private static String rollKind(net.minecraft.util.RandomSource random) {
+		int total = 0;
+		for (int w : KIND_WEIGHTS) {
+			total += w;
+		}
+		int roll = random.nextInt(total);
+		for (int i = 0; i < KINDS.size(); i++) {
+			roll -= KIND_WEIGHTS[i];
+			if (roll < 0) {
+				return KINDS.get(i);
+			}
+		}
+		return KINDS.getFirst();
+	}
+
+	// ---- how many walk ----------------------------------------------------------------------------------------------------
+
+	/** How many of the Hollow walk with the dead ({@link #START} in a new world). */
+	static int count(MinecraftServer server) {
+		return Factions.level(server).getAttachedOrElse(COUNT, START);
+	}
+
+	private static void count(MinecraftServer server, int by) {
+		Factions.level(server).setAttached(COUNT, Math.max(0, count(server) + by));
+	}
+
+	/** How many more may stand up now. */
+	static int room(MinecraftServer server) {
+		return count(server) - Factions.level(server).getAttachedOrElse(WALKING, List.of()).size();
+	}
+
+	private static void walking(MinecraftServer server, Entity body, boolean is) {
+		List<String> now = new ArrayList<>(Factions.level(server).getAttachedOrElse(WALKING, List.of()));
+		String id = body.getStringUUID();
+		if (is ? !now.contains(id) && now.add(id) : now.remove(id)) {
+			Factions.level(server).setAttached(WALKING, List.copyOf(now));
+		}
+	}
+
+	/** {@code e} is a plain zombie or skeleton one of the Hollow may stand up in place of. */
+	private static boolean plainDead(Entity e) {
+		return e instanceof PathfinderMob && !is(e) && !Captains.is(e) && Rivals.roamer(e) == Rivals.Side.RAISED && armyOf(e) == null
+			&& Banes.bandOf(e) == null;
+	}
+
+	/** (From {@code ZombieHordes}) A horde of the dead or of skeletons has come: now and then one of the Hollow walks in it. */
+	static void joinHorde(ServerLevel level, List<net.minecraft.world.entity.Mob> members) {
+		if (!live() || level.dimension() != net.minecraft.world.level.Level.OVERWORLD || room(level.getServer()) <= 0
+			|| level.getRandom().nextFloat() >= HORDE_CHANCE) {
+			return;
+		}
+		for (int i = 0; i < members.size(); i++) {
+			if (plainDead(members.get(i)) && members.get(i) instanceof PathfinderMob dead) {
+				PathfinderMob body = rise(level, dead, null);
+				if (body != null) {
+					members.set(i, body);
+				}
+				return;
+			}
+		}
+	}
+
+	/** Every {@link #ROAM_EVERY} ticks, while there's room: one of the Hollow stands up among the dead near a player, day or night. */
+	private static void roam(MinecraftServer server) {
+		if (!live() || server.getTickCount() % ROAM_EVERY != 0 || room(server) <= 0) {
+			return;
+		}
+		ServerLevel level = server.overworld();
+		net.minecraft.util.RandomSource random = level.getRandom();
+		List<ServerPlayer> players = level.players().stream().filter(HollowCaptains::fair).toList();
+		if (players.isEmpty() || random.nextFloat() >= ROAM_CHANCE) {
+			return;
+		}
+		ServerPlayer p = players.get(random.nextInt(players.size()));
+		List<PathfinderMob> dead = level.getEntitiesOfClass(PathfinderMob.class, p.getBoundingBox().inflate(ROAM_FAR),
+			e -> e.isAlive() && plainDead(e) && e.distanceTo(p) >= ROAM_NEAR && !p.hasLineOfSight(e));
+		if (!dead.isEmpty()) {
+			rise(level, dead.get(random.nextInt(dead.size())), null);
+		}
+	}
+
+	/** One of the Hollow died: unless he's a captain due back, there's one fewer. The dead took a villager: now and then, one more. */
+	private static void died(LivingEntity entity, net.minecraft.world.damagesource.DamageSource source) {
+		if (!(entity.level() instanceof ServerLevel level) || !live()) {
+			return;
+		}
+		MinecraftServer server = level.getServer();
+		if (is(entity)) {
+			walking(server, entity, false);
+			Captain c = Captains.is(entity) ? Captains.of(entity) : null;
+			String id = c == null ? null : c.id();
+			// (put off till the captain's own fall is settled: Captains)
+			later(() -> {
+				Captain now = id == null ? null : Captains.get(server, id);
+				if (now == null || !now.fallen() || now.back() < 0) {
+					count(server, -1);
+				}
+			});
+			return;
+		}
+		Entity by = source.getEntity();
+		if (entity instanceof net.minecraft.world.entity.npc.villager.Villager && by != null && (is(by) || Rivals.roamer(by) == Rivals.Side.RAISED)
+			&& level.getRandom().nextFloat() < TAKE_CHANCE) {
+			count(server, 1);
+		}
 	}
 
 	// ---- his army -------------------------------------------------------------------------------------------------------
 
 	/** A Pallid captain {@code c} has just risen in {@code body}: the dead get up round him. */
 	static void muster(ServerLevel level, Captain c, LivingEntity body) {
-		if (!is(body)) {
+		if (!is(body) || classOf(body) == null) {
 			return;
 		}
 		net.minecraft.util.RandomSource random = level.getRandom();
@@ -377,7 +531,7 @@ public final class HollowCaptains {
 	 */
 	private static void army(ServerLevel level, PathfinderMob leader, @Nullable LivingEntity foe) {
 		Captain c = Captains.of(leader);
-		if (c == null || leader.tickCount % ARMY_EVERY != 0) {
+		if (c == null || c.fallen() || classOf(leader) == null || leader.tickCount % ARMY_EVERY != 0) {
 			return;
 		}
 		String mine = ARMY_TAG + c.id();
@@ -409,7 +563,7 @@ public final class HollowCaptains {
 
 	// ---- their fight ----------------------------------------------------------------------------------------------------
 
-	/** A Pallid captain's step (from {@link Workers#step}, in place of his brain): his captain's ways, his army, then the dead's fight. */
+	/** One of the Hollow's step (from {@link Workers#step}, in place of the brain): a captain's ways, a Pallid's army, then the fight. */
 	static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
 		if (Downed.isDowned(mob)) {
@@ -435,7 +589,7 @@ public final class HollowCaptains {
 		Rulers.charge(mob, foe);
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		PlayerClass cls = classOf(mob);
-		if (ranged(cls)) {
+		if (ranged(cls) || mob.getMainHandItem().getItem() instanceof BowItem) {
 			shoot(level, mob, foe);
 		} else {
 			strike(level, mob, foe);
