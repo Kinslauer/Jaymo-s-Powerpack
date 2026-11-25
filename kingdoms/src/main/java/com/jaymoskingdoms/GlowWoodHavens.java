@@ -4,14 +4,18 @@ import com.jaymoskingdoms.glowwood.FungusWood;
 import com.jaymoskingdoms.glowwood.GlowWoods;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -74,6 +78,8 @@ public final class GlowWoodHavens {
 	static final long SEASON_TICKS = 21L * 24000L;
 	/** The chance a cap or gill block rots away in a check while the haven is dark (more in winter). */
 	static final double ROT_CHANCE = 0.0015;
+	/** The most blocks the search for one giant's own caps looks at (its 15x18x15 reach). */
+	static final int GROWN_MAX = 15 * 18 * 15;
 	/** A skep's bees: this many near it. */
 	static final int BEES_PER_SKEP = 2;
 	static final double BEE_RANGE = 14.0;
@@ -445,7 +451,7 @@ public final class GlowWoodHavens {
 	private static boolean decay(ServerLevel level, Giant g, double chance, boolean all, RandomSource random) {
 		BlockPos o = g.pos();
 		boolean any = false;
-		for (BlockPos p : BlockPos.betweenClosed(o.offset(-7, -1, -7), o.offset(7, 16, 7))) {
+		for (BlockPos p : grown(level, o)) {
 			BlockState s = level.getBlockState(p);
 			if (GlowWoods.isCapOrGill(s)) {
 				if (all || random.nextDouble() < chance) {
@@ -470,6 +476,37 @@ public final class GlowWoodHavens {
 			level.setBlock(o, small.defaultBlockState(), 3);
 		}
 		return true;
+	}
+
+	/**
+	 * The giant's own caps and gills: those joined to its stem through stem, cap and gill blocks, within reach of its
+	 * base. Caps a player placed nearby, not touching the giant, are left alone.
+	 */
+	private static List<BlockPos> grown(ServerLevel level, BlockPos o) {
+		List<BlockPos> found = new ArrayList<>();
+		Set<BlockPos> seen = new HashSet<>();
+		ArrayDeque<BlockPos> open = new ArrayDeque<>();
+		open.add(o.immutable());
+		seen.add(o.immutable());
+		while (!open.isEmpty() && seen.size() < GROWN_MAX) {
+			BlockPos p = open.poll();
+			BlockState s = level.getBlockState(p);
+			boolean part = isStem(s) || GlowWoods.isCapOrGill(s);
+			if (!part && !p.equals(o)) {
+				continue;
+			}
+			if (GlowWoods.isCapOrGill(s)) {
+				found.add(p);
+			}
+			for (Direction d : Direction.values()) {
+				BlockPos n = p.relative(d);
+				if (Math.abs(n.getX() - o.getX()) <= 7 && Math.abs(n.getZ() - o.getZ()) <= 7 && n.getY() >= o.getY() - 1
+					&& n.getY() <= o.getY() + 16 && seen.add(n)) {
+					open.add(n);
+				}
+			}
+		}
+		return found;
 	}
 
 	private static boolean isStem(BlockState state) {
