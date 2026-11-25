@@ -2,7 +2,7 @@
 
 Andy's picks, 2026-11-25 (pick list https://claude.ai/artifact/8MNDHjgDZ2Tg93bfsQsbG4, db `picks/andy`): 37 rows from
 12 mods, plus four notes that ask for more (cars, Rim, God Wand, Unbound). The licence of each source is in
-`outside-art-licences` memory and on the pick list. Lore: "(new) The glow-woods" in Lore.md waits for Andy's OK.
+`outside-art-licences` memory and on the pick list. Lore: "The glow-woods" in Lore.md, approved 2026-11-25.
 
 Rules that bind every patch: the living-things rules (sympathy, feedback loops, stewardship), no new dimensions or portals,
 lore only in talk and books, our own names, optional mods only through a compat class, and no new original mob models
@@ -87,8 +87,8 @@ what we have. it would replace how our space pods work only." Its own pick list;
 ## Order
 Two tracks at a time: 1 + 3, then 2 + 4, then 5 + 7, then 6 + 8, then 9. One PR per patch, a change note per mod.
 
-## Open questions for Andy
-1. Mage wands (God Wand note): wands as a Sorcerer/Mage item that holds learned spells, or new spells of their own?
-2. Rim's kaiju: may they keep Rim's body shapes repainted, or must every sea beast be a new shape (which your
-   no-new-mobs rule would hold back)?
-3. Fantasy Mounts: ship it only once its author says yes, as with Mosslorn?
+## Andy's answers (2026-11-25)
+1. Mage wands: "They should learn spells and cast from the wand": a caster's learned spells are cast through a wand.
+2. Rim's sea beasts keep Rim's body shapes, repainted and renamed.
+3. Fantasy Mounts ships only once its author agrees.
+Lore "The glow-woods" approved.
