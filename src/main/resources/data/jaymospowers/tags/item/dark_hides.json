@@ -12,6 +12,10 @@
     {
       "id": "naturalist:bear_fur",
       "required": false
+    },
+    {
+      "id": "jaymoskingdoms:war_hide",
+      "required": false
     }
   ]
 }

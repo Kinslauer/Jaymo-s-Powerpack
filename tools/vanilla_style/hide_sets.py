@@ -415,7 +415,7 @@ def design(style, layer, van_alpha):
         s.fill('head', 'right', 'H', rows=range(4, 8)); s.fill('head', 'left', 'H', rows=range(4, 8))
         s.fill('head', 'back', 'F', rows=range(4, 8))
         s.ragged('head', 7, faces=('right', 'left'))
-        s.put('head', 'front', 1, 4, 'b'); s.put('head', 'front', 6, 4, 'b')     # fangs over the brow
+        s.put('head', 'front', 2, 3, 'b'); s.put('head', 'front', 5, 3, 'b')     # fangs in the brow, clear of the eyes
         s.fill('body', 'top', 'F'); s.ring('body', 'F', [0, 1, 2]); s.ring('body', 'H', range(3, 12))
         s.ragged('body', 11)
         s.put('body', 'front', 1, 3, 's'); s.put('body', 'front', 6, 3, 's')     # tooth necklace

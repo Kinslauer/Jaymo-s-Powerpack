@@ -89,6 +89,8 @@ HIDE_SETS = [
     ("trapper", ["Trapper's Hood", "Trapper's Coat", "Trapper's Leggings", "Trapper's Boots"], "minecraft:string"),
     ("barbarian", ["Barbarian Hood", "Barbarian Mantle", "Barbarian Loincloth", "Barbarian Wraps"], "#c:hides"),
 ]
+# hoods of their own shape, so they don't match Kingdoms' leather tassets (leather + string) or fur hood (all hides)
+HELMET_PATTERNS = {"trapper": ["XLX", "L L"], "barbarian": ["X X", "LLL", "L L"]}
 ARMOR = [("helmet", "head_armor", ["LXL", "L L"]), ("chestplate", "chest_armor", ["L L", "LXL", "LLL"]),
          ("leggings", "leg_armor", ["LXL", "L L", "L L"]), ("boots", "foot_armor", ["L L", "X X"])]
 
@@ -312,6 +314,8 @@ def main(aow):
                 lang[f"item.{NS}.{item}"] = ("Dark " if dark else "") + name
                 handheld(aow, item, item, parent="minecraft:item/generated")
                 tags[tag].append(f"{NS}:{item}")
+                if piece == "helmet":
+                    pattern = HELMET_PATTERNS.get(style, pattern)
                 if dark:
                     pattern = [row.replace("L", "D") for row in pattern]
                     write(os.path.join(DATA, "recipe", "armory", item + "_smoked.json"), {
