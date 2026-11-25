@@ -1185,6 +1185,9 @@ public final class Dismember {
 
 	/** (Andy: armour guards against severing) What's left of the chance to sever {@code part} after the armour over it: 1 bare. */
 	public static float armourGuard(LivingEntity target, int part) {
+		if (part == HEAD && ArmourFace.skipped(target)) {
+			return 1.0F;
+		}
 		return 1.0F - (float) Math.min(ARMOUR_GUARD_MAX, armourOn(target, part) * ARMOUR_GUARD);
 	}
 
