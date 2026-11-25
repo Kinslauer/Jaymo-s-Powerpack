@@ -7976,3 +7976,22 @@ Not tested in game (compiled only): the zoom, the chevron placement, the chime, 
 
 - **Trade hats**: seven hats of the village trades, ported from PinkGoosik's Villager Hats (MIT, notice in `docs/licenses/Villager-Hats-MIT.txt`): Farmer's Hat, Fletcher's Cap, Fisherman's Hat, Armorer's Mask, Shepherd's Hat, Librarian's Cap and Butcher's Headband. Worn in the head bauble slot and drawn on the head (over a helmet too), cut from the game's own villager textures. No crafting recipe: a zombie villager of that trade drops its hat (35% when a player kills it), and tailors sew them (Jaymo's Kingdoms). (`TradeHats`, `TradeHatLayer`)
 - Built by CI only; not played. Not checked in game: how the hats sit on the head and look in the inventory.
+
+## 0.27.25 (2026-11-25): Gravity: iron answers first (the X-Men mod's Magnetism, worked in) (#2125)
+
+- **Tear Loose**: sneak + right click while Lift holds a creature tears the metal weapon or tool out of its hands (anything mended with an iron, gold, copper or netherite ingot, plus shears, buckets, flint and steel). It flies to your feet and a mob scrambles after it, as after a fist parry's disarm. You keep your hold. 14 s cooldown. Nothing metal: "No metal in reach". A player's weapon is flung 5 blocks away from them instead, and nobody can take it up for 2 s; a player you may not harm (no PvP, a teammate) and gear a mob never drops hold fast. At the last Mastery rank (every ability and rank 5), the torn weapon comes straight into your empty hand every time, or your pack, or at your feet if both are full. Sneaking now tears instead of choking; let go of sneak to choke.
+- **Heavy metal**: R at a metal block (by its sound: iron, gold, copper, netherite blocks, anvils, chains, bars, rails, lanterns; also cauldrons, raw-ore blocks, iron doors and trapdoors, weighted plates) tears it loose twice as fast, and up to 4 more pieces of the metal touching it come with it, however hard. Needs Lift fully unlocked.
+- **Scrap**: iron, gold and copper nuggets and netherite scrap gather and fly with the rocks (B+G), and a ball or ring made mostly of scrap hits twice as hard.
+- Classes: GravityMetal (new), GravityPower (grip, the rip), GravityRocks, GravityRockOrders, PassiveBlocks.scrambleFor.
+- Compiled on CI; not played.
+
+## 0.27.26 (2026-11-25): three primitive hide sets, each with a dark make (#2127)
+
+- **Three hide sets** (Andy: "i want all 3, and they can have a darker variation made from darker hides"), each with its own icons and its own worn look, all with the Caveman set's protection and wear (leather's armour, a little tougher-wearing):
+  - **Caveman** (the cave band's): hood with a dark face opening and a fur brow, a one-shoulder pelt, a loincloth with fur tails, sinew-wrapped boots. Same items as before; leather + bone, as before.
+  - **Trapper's** Hood, Coat, Leggings and Boots: vanilla's leather shapes in stitched hide, a fur brow and mantle, a laced front with bone toggles, fur-cuffed boots. Leather + string, in the Caveman shapes (the hood with string at its top corners, so it isn't Kingdoms' leather tassets).
+  - **Barbarian** Hood, Mantle, Loincloth and Wraps: a wolf-pelt hood with ears and fangs that hangs down the back, a fur mantle with a tooth necklace over bare arms, a fur loincloth, fur-cuffed wraps. Leather + any hide or fur (`#c:hides`: rabbit hide, Kitchen's hides and furs, beast pelt); the hood has its fur on top as ears (`X X / LLL / L L`), so a dark one of all bear fur isn't Kingdoms' fur hood.
+- **Dark makes** of all three (Dark Caveman, Dark Trapper's, Dark Barbarian): the same recipes with darker hides in the leather's place (`#jaymospowers:dark_hides`: Kitchen's bear fur and hardened leather, Kingdoms' war hide, Naturalist's bear fur), or any light piece crafted with charcoal or coal (smoked dark; it keeps its wear and enchantments).
+- Art: new icons and worn layers for all six, drawn in `tools/vanilla_style/hide_sets.py` (run by `armour.py`), base and vanilla_style alike, graded for the Excalibur look. The Caveman's old flat icons and Age of Weapons worn layers are replaced; its scraps cut is kept (`tools/vanilla_style/masks/`). All 24 icons pass `audit.py`.
+- `Armory` (one armour material per set, `HIDE_SETS`), `SoundKinds` (the new sets sound like leather), the armour and cloth-armour tags, `tools/armory_assets.py` (no longer copies AoW's caveman art).
+- Built by CI; not seen in game.
