@@ -128,16 +128,31 @@ public final class Scout {
 			if (skip.test(spot.chunk())) {
 				continue;
 			}
+			// the cheap placement cut (frequency, exclusion zone) comes before any sampling: spacing-1 sets (buried treasure,
+			// mineshafts) have thousands of candidates and almost none pass. A start already stored where the cut now fails
+			// (a pack changed the frequency after the world made it) isn't found; that needs a data change on a made world.
+			if (!spot.placement().isStructureChunk(state, spot.chunk().x(), spot.chunk().z())) {
+				continue;
+			}
 			int x = spot.chunk().getMinBlockX() + 8, z = spot.chunk().getMinBlockZ() + 8;
 			Holder<Biome> biome = null;
+			Set<Holder<Biome>> column = null;
 			for (Holder<Structure> structure : spot.structures()) {
 				if (biome == null) {
 					int y = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, ground.heights(), random) + ground.shift();
 					biome = level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x), net.minecraft.core.QuartPos.fromBlock(y), net.minecraft.core.QuartPos.fromBlock(z));
 				}
 				// (an underground structure starts at its own depth, not under the surface: ancient cities are in the deep dark)
-				if (!structure.value().biomes().contains(biome) && !(underground(structure.value()) && columnHas(level, ground, structure.value(), x, z))) {
-					continue;
+				if (!structure.value().biomes().contains(biome)) {
+					if (!underground(structure.value())) {
+						continue;
+					}
+					if (column == null) {
+						column = columnBiomes(level, ground, x, z);
+					}
+					if (column.stream().noneMatch(structure.value().biomes()::contains)) {
+						continue;
+					}
 				}
 				StructureCheckResult result = structures.checkStructurePresence(spot.chunk(), structure.value(), spot.placement(), requireUnreferenced);
 				// START_PRESENT: made already; CHUNK_LOAD_NEEDED: vanilla's check says one could be made there (the chunk isn't
@@ -171,14 +186,13 @@ public final class Scout {
 			|| structure.step() == net.minecraft.world.level.levelgen.GenerationStep.Decoration.UNDERGROUND_STRUCTURES;
 	}
 
-	/** Whether any of {@code structure}'s biomes lies in the column at (x, z), from the ground's floor up to its top (sampled every {@link #COLUMN_STEP} blocks). */
-	private static boolean columnHas(ServerLevel level, Stacked.Ground ground, Structure structure, int x, int z) {
+	/** The biomes in the column at (x, z), from the ground's floor up to its top (sampled every {@link #COLUMN_STEP} blocks). */
+	private static Set<Holder<Biome>> columnBiomes(ServerLevel level, Stacked.Ground ground, int x, int z) {
+		Set<Holder<Biome>> found = new LinkedHashSet<>();
 		for (int y = ground.heights().getMinY(); y <= ground.heights().getMaxY(); y += COLUMN_STEP) {
-			if (structure.biomes().contains(level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x),
-				net.minecraft.core.QuartPos.fromBlock(y + ground.shift()), net.minecraft.core.QuartPos.fromBlock(z)))) {
-				return true;
-			}
+			found.add(level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x),
+				net.minecraft.core.QuartPos.fromBlock(y + ground.shift()), net.minecraft.core.QuartPos.fromBlock(z)));
 		}
-		return false;
+		return found;
 	}
 }
