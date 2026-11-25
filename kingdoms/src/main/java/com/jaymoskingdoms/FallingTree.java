@@ -15,10 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,19 +37,24 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.bee.Bee;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -61,6 +68,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
@@ -152,6 +161,22 @@ public final class FallingTree extends Entity {
 	 */
 	/** (0.7.586) The most blocks weaker than its wood ({@link #weaker}) it smashes through in a tick. */
 	static final int SMASH_MOST = 12;
+	/**
+	 * Andy: "trees dont seem to be solid after they fall?" Down, each of its logs is a block's worth of solid wood where
+	 * it lies ({@link #collisions}): to stand on, walk along, walk into. Leaves stay soft (pushed through, as they drop
+	 * off anyway). A mob that walks into a log no higher than this (blocks over its feet) hops it.
+	 */
+	static final double HOPS = 1.2;
+	/**
+	 * Andy: only strong characters and giants shove a fallen tree. Lying flat, it slides and swings (about its middle)
+	 * under anyone with this much brawn ({@link #brawn}: Strength II, twice a man's size, Might and the like) walking
+	 * into one of its logs. Each point of brawn moves {@link #LOGS_PER_BRAWN} logs at {@link #SHOVE_SPEED} (blocks a
+	 * tick at the log pushed); a heavier tree goes slower, and one moving slower than {@link #SHOVE_SLOWEST} doesn't move.
+	 */
+	static final int SHOVE_BRAWN = 2, LOGS_PER_BRAWN = 4;
+	static final double SHOVE_SPEED = 0.08, SHOVE_SLOWEST = 0.006;
+	/** A person's height (blocks): each half again as tall as this is a point of brawn, as for hauling. */
+	static final float MAN_HEIGHT = 1.8F, HEIGHT_PER_BRAWN = 0.5F;
 
 	/** One block of the tree: its state, and where it stood relative to the cut. */
 	public record Piece(int state, int x, int y, int z) {
@@ -168,8 +193,23 @@ public final class FallingTree extends Entity {
 	/** Which way it falls (radians: 0 is east, along +x; a quarter turn is south, +z). */
 	public static final AttachmentType<Float> HEADING = AttachmentRegistry.create(JaymosKingdoms.id("falling_tree_heading"),
 		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
+	/**
+	 * On someone leaning into a fallen tree's log with both hands (Andy: "your character should animate both hands on it
+	 * and pushing, only moving it when you have sufficient strength"): the middle of the log they push, for every screen
+	 * to draw them at it. The weak push as hard as the strong; only the strong move it ({@link #shove}).
+	 */
+	public static final AttachmentType<Vec3> PUSHING = AttachmentRegistry.create(JaymosKingdoms.id("pushing_tree"),
+		builder -> builder.syncWith(Vec3.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** Who pushed a fallen tree, and the last tick they did. */
+	private static final Map<LivingEntity, Long> PUSHERS = new WeakHashMap<>();
+	/** How far it has to move (blocks) before the log pushed is told every screen again. */
+	static final double PUSH_RESYNC = 0.25;
+	/** A log pushed is within this of straight ahead (the cosine of the angle off the way they go). */
+	static final double AHEAD = 0.6;
 	/** How far over it leans (degrees from upright). */
 	private static final EntityDataAccessor<Float> LEAN = SynchedEntityData.defineId(FallingTree.class, EntityDataSerializers.FLOAT);
+	/** Lying still on the ground (down, not flying, held or going into a woodcutter's bag): its logs are solid. */
+	private static final EntityDataAccessor<Boolean> SOLID = SynchedEntityData.defineId(FallingTree.class, EntityDataSerializers.BOOLEAN);
 
 	public static EntityType<FallingTree> TYPE;
 
@@ -219,6 +259,15 @@ public final class FallingTree extends Entity {
 			.clientTrackingRange(10)
 			.updateInterval(1)
 			.build(key));
+		// those who stopped pushing take their hands off
+		ServerTickEvents.END_SERVER_TICK.register(server -> PUSHERS.entrySet().removeIf(e -> {
+			LivingEntity who = e.getKey();
+			if (who.isAlive() && e.getValue() >= who.level().getGameTime()) {
+				return false;
+			}
+			who.removeAttached(PUSHING);
+			return true;
+		}));
 	}
 
 	/**
@@ -447,6 +496,7 @@ public final class FallingTree extends Entity {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
+		this.entityData.set(SOLID, this.down && this.sink == null && !this.held && !this.flying);
 		List<Piece> pieces = this.pieces();
 		if (pieces.isEmpty()) {
 			this.discard();
@@ -467,6 +517,7 @@ public final class FallingTree extends Entity {
 				}
 				return;
 			}
+			this.shove(level, pieces);
 			this.rest(level, pieces);
 			return;
 		}
@@ -764,6 +815,206 @@ public final class FallingTree extends Entity {
 				broken++;
 			}
 		}
+	}
+
+	/**
+	 * Strong characters and giants walking into one of its logs shove it: it slides the way they push and swings about
+	 * its middle (pushed at one end, that end goes most), as long as its logs don't run into anything solid. Pushed off
+	 * what holds it up, it falls on or drops at its next look ({@link #rest}).
+	 */
+	private void shove(ServerLevel level, List<Piece> pieces) {
+		boolean lying = this.lean() >= LYING && !this.propped;
+		Quaternionf turn = turn(this.lean(), this.heading());
+		List<Vec3> logs = new ArrayList<>();
+		Vec3 middle = Vec3.ZERO;
+		BlockState wood = null;
+		for (Piece p : pieces) {
+			if (p.blockState().is(BlockTags.LOGS)) {
+				Vec3 at = this.where(p, turn);
+				logs.add(at);
+				middle = middle.add(at);
+				wood = p.blockState();
+			}
+		}
+		if (logs.isEmpty()) {
+			return;
+		}
+		int n = logs.size();
+		middle = middle.scale(1.0 / n);
+		double inertia = 0.0;
+		for (Vec3 at : logs) {
+			inertia += (at.x - middle.x) * (at.x - middle.x) + (at.z - middle.z) * (at.z - middle.z);
+		}
+		inertia = Math.max(inertia, 1.0);
+		double vx = 0.0, vz = 0.0, spin = 0.0;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(0.5),
+			e -> e.isAlive() && !e.isSpectator() && !e.noPhysics && !e.isPassenger() && e.onGround() && !e.isSwimming() && !e.isSleeping())) {
+			Vec3 way = pushing(e);
+			if (way == null) {
+				continue;
+			}
+			// the log it's up against, ahead of it
+			AABB reach = e.getBoundingBox().inflate(0.15, 0.0, 0.15);
+			Vec3 touched = null;
+			double nearest = Double.MAX_VALUE;
+			for (Vec3 at : logs) {
+				double dx = at.x - e.getX(), dz = at.z - e.getZ();
+				// (ahead of them, not one they're only brushing past)
+				if (dx * way.x + dz * way.z <= AHEAD * Math.sqrt(dx * dx + dz * dz) || !new AABB(at, at).inflate(0.5).intersects(reach)) {
+					continue;
+				}
+				double d = dx * dx + dz * dz;
+				if (d < nearest) {
+					nearest = d;
+					touched = at;
+				}
+			}
+			if (touched == null) {
+				continue;
+			}
+			// hands on it: everyone strains at it, and only the strong move it
+			PUSHERS.put(e, level.getGameTime());
+			Vec3 was = e.getAttached(PUSHING);
+			if (was == null || was.distanceToSqr(touched) > PUSH_RESYNC * PUSH_RESYNC) {
+				e.setAttached(PUSHING, touched);
+			}
+			int brawn = brawn(e);
+			if (!lying || brawn < SHOVE_BRAWN) {
+				continue;
+			}
+			double speed = SHOVE_SPEED * Math.min(1.0, (double)brawn * LOGS_PER_BRAWN / n);
+			if (speed < SHOVE_SLOWEST) {
+				continue;
+			}
+			// a push at that log: it moves there at that speed, shared between sliding and swinging as a plank would
+			double rx = touched.x - middle.x, rz = touched.z - middle.z;
+			double arm = rx * way.z - rz * way.x;
+			double impulse = speed / (1.0 / n + arm * arm / inertia);
+			vx += way.x * impulse / n;
+			vz += way.z * impulse / n;
+			spin += arm * impulse / inertia;
+		}
+		double slide = Math.sqrt(vx * vx + vz * vz);
+		if (slide > SHOVE_SPEED) {
+			vx *= SHOVE_SPEED / slide;
+			vz *= SHOVE_SPEED / slide;
+		}
+		spin = Mth.clamp(spin, -0.03, 0.03);
+		if (slide < 1.0E-4 && Math.abs(spin) < 1.0E-4) {
+			return;
+		}
+		// turned about its middle, and slid: where its foot goes
+		double fx = this.getX() - middle.x, fz = this.getZ() - middle.z;
+		double cos = Math.cos(spin), sin = Math.sin(spin);
+		Vec3 from = this.position();
+		float heading = this.heading() + (float)spin;
+		// (logs already lying sunk in something may stay so: it only mayn't be pushed further into anything solid)
+		int sunk = this.sunk(level, pieces, this.lean(), this.heading());
+		this.setPos(middle.x + fx * cos - fz * sin + vx, this.getY(), middle.z + fx * sin + fz * cos + vz);
+		if (this.sunk(level, pieces, this.lean(), heading) > sunk) {
+			this.setPos(from);
+			return;
+		}
+		this.setAttached(HEADING, heading);
+		if (this.tickCount % 6 == 0) {
+			level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 0.9F, 0.5F);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, wood), middle.x, middle.y - 0.4, middle.z, 4, 1.0, 0.05, 1.0, 0.02);
+		}
+	}
+
+	/** How many of its logs, leaning {@code lean} toward {@code heading}, are in something solid. */
+	private int sunk(ServerLevel level, List<Piece> pieces, float lean, float heading) {
+		Quaternionf turn = turn(lean, heading);
+		int sunk = 0;
+		for (Piece p : pieces) {
+			if (!p.blockState().is(BlockTags.LOGS)) {
+				continue;
+			}
+			BlockPos at = this.cell(this.where(p, turn));
+			BlockState there = level.getBlockState(at);
+			if (!there.isAir() && !there.canBeReplaced() && !(there.getBlock() instanceof LeavesBlock) && there.isCollisionShapeFullBlock(level, at)) {
+				sunk++;
+			}
+		}
+		return sunk;
+	}
+
+	/** How strong {@code e} is: Kitchen's hauling brawn for a player; for anything else its Strength and its size. */
+	static int brawn(LivingEntity e) {
+		if (e instanceof Player player) {
+			int brawn = KitchenCompat.brawn(player);
+			if (brawn >= 0) {
+				return brawn;
+			}
+		}
+		int brawn = Math.max(0, (int)((e.getBbHeight() / MAN_HEIGHT - 1.0F) / HEIGHT_PER_BRAWN));
+		MobEffectInstance strength = e.getEffect(MobEffects.STRENGTH);
+		return strength == null ? brawn : brawn + strength.getAmplifier() + 1;
+	}
+
+	/** The way (level, of length 1) {@code e} is trying to go: a player's keys as they face, a mob's walk; null standing. */
+	private static @Nullable Vec3 pushing(LivingEntity e) {
+		double x, z;
+		if (e instanceof ServerPlayer player) {
+			Input in = player.getLastClientInput();
+			float f = (in.forward() ? 1.0F : 0.0F) - (in.backward() ? 1.0F : 0.0F), side = (in.left() ? 1.0F : 0.0F) - (in.right() ? 1.0F : 0.0F);
+			float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+			x = side * Mth.cos(yaw) - f * Mth.sin(yaw);
+			z = f * Mth.cos(yaw) + side * Mth.sin(yaw);
+		} else if (e instanceof Mob mob && mob.getMoveControl().hasWanted()) {
+			x = mob.getMoveControl().getWantedX() - mob.getX();
+			z = mob.getMoveControl().getWantedZ() - mob.getZ();
+		} else {
+			return null;
+		}
+		double d = Math.sqrt(x * x + z * z);
+		return d < 1.0E-3 ? null : new Vec3(x / d, 0.0, z / d);
+	}
+
+	/** Whether its logs are solid now (it lies still). */
+	public boolean solid() {
+		return this.entityData.get(SOLID);
+	}
+
+	/**
+	 * The shapes {@code entity}, moving through {@code area}, runs into: {@code others}, and the logs of every fallen
+	 * tree lying there (a block round each log's middle, as it's drawn). Something already inside a log (the tree came
+	 * down on it) isn't held or pushed by it, only kept from going further in, so nobody is trapped. A mob that walks into
+	 * a log it can clear ({@link #HOPS}) hops it, since its path finding sees only blocks.
+	 */
+	public static List<VoxelShape> collisions(Entity entity, AABB area, List<VoxelShape> others) {
+		if (entity instanceof FallingTree || entity.noPhysics || entity.isSpectator()) {
+			return others;
+		}
+		List<FallingTree> trees = entity.level().getEntitiesOfClass(FallingTree.class, area, FallingTree::solid);
+		if (trees.isEmpty()) {
+			return others;
+		}
+		List<VoxelShape> out = null;
+		boolean hop = false;
+		double feet = entity.getY();
+		for (FallingTree tree : trees) {
+			Quaternionf turn = turn(tree.lean(), tree.heading());
+			for (Piece p : tree.pieces()) {
+				if (!p.blockState().is(BlockTags.LOGS)) {
+					continue;
+				}
+				Vec3 at = tree.where(p, turn);
+				AABB box = new AABB(at, at).inflate(0.5);
+				if (!box.intersects(area)) {
+					continue;
+				}
+				if (out == null) {
+					out = new ArrayList<>(others);
+				}
+				out.add(Shapes.create(box));
+				hop |= box.maxY > feet + entity.maxUpStep() + 1.0E-3 && box.maxY <= feet + HOPS && box.minY < feet + entity.getBbHeight();
+			}
+		}
+		if (hop && entity instanceof Mob mob && !mob.level().isClientSide() && (mob.onGround() || mob.isInWater())) {
+			mob.getJumpControl().jump();
+		}
+		return out == null ? others : out;
 	}
 
 	/** It comes down: a thud and a cloud of leaves. */
@@ -1359,6 +1610,7 @@ public final class FallingTree extends Entity {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		entityData.define(LEAN, 0.0F);
+		entityData.define(SOLID, false);
 	}
 
 	/** (0.7.588) Kept with the world: its pieces (by block, not number), lean, heading, and whether it's down or flying. */
