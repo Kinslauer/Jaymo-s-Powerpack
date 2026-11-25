@@ -826,9 +826,10 @@ public final class GuardKit {
 			}
 		}
 		if (by.isEmpty()) {
-			// (a kingdom's soldiers too: its own of the kettle hat and the lobster tail, so not every realm's are alike)
+			// (a kingdom's soldiers too: its own of the kettle hat and the lobster tail, so not every realm's are alike; the
+			// kettle in the realm's own cut, HeraldryWear.KETTLE_CUTS)
 			if (c.is(MIL | SOL | ARCH | GUN) && c.kind(VILLAGE | HAVEN | FIEF) || c.is(SOL) && c.kind(KINGDOM)) {
-				by.add("kettle_hat");
+				by.add(HeraldryWear.kettle(c.f()));
 			}
 			if (c.is(KN | VET)) {
 				by.add("sallet");

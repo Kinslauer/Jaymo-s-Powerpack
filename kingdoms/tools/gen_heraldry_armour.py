@@ -467,15 +467,16 @@ def great_helm(b):
 
 
 def barbute(b):
-	"""The barbute: deep helm, T/Y face opening. Open face."""
+	"""The barbute: a deep helm whose cheeks come round to leave a T open over the eyes and down to the mouth (the
+	shell is built round the face, so the face shows through it). Open face."""
 	bones(b, "head")
 	h = "armorHead"
-	b.cube(h, (-4.5, 25, -4.5), (4.5, 32.5, 4.5), "plate", faces_paint=P)
+	shell(b, 29.8, 24.0, top=32.5, r=4.5)
 	b.cube(h, (-3.5, 32.5, -3.5), (3.5, 33.5, 3.5), "plate", faces_paint=P_ALL)
-	# the T-face opening: cut out from the front
-	b.cube(h, (-4.3, 24, -5.7), (4.3, 32, -4.3), "plate", faces_paint={**P_ALL, "north": lambda i, r: opening(1, 1, 2, 4)(i, r)})
+	both(b, h, (1.4, 24.0, -4.9), (4.5, 26.8, -4.5), "plate", faces_paint=P_ALL)
+	both(b, h, (3.6, 26.8, -4.9), (4.5, 29.8, -4.5), "plate", faces_paint=P_ALL)
 	b.cube(h, (-5, 22, -5), (5, 24, 5), "plate", faces_paint=P)
-	both(b, h, (4.2, 24.4, -1), (4.7, 28.4, 1), "strap")
+	both(b, h, (4.5, 24.4, -1), (4.9, 28.4, 1), "strap")
 
 
 def burgonet(b):
@@ -544,6 +545,255 @@ def grotesque_visor(b):
 	b.cube(v, (-4.4, 24.6, -5.4), (4.4, 30.8, -4.4), "plate", faces_paint={**P_ALL, "north": death})
 	b.cube(v, (-4.6, 30.6, -5.8), (4.6, 31.7, -4.4), "plate", faces_paint=P_ALL)
 	both(b, "visor", (4.5, 29.4, -0.6), (5.2, 30.6, 0.6), "rivet")
+
+
+# ---- (Mordhau harness 1) more helms: our own cubes of the historical helms Andy picked ---------------------------------
+# An open face is left open: the shell is built of a crown, cheeks and a back, never one box over the whole head, so
+# the wearer's face shows (and shows under a raised visor).
+
+def shell(b, brow, low, back=-1.0, top=32.2, r=4.6):
+	"""An open helm's shell: the crown from the {brow} up to {top}, and the cheeks and the back down to {low} behind
+	z {back} (the box's front face is inside the head, so nothing covers the face)."""
+	h = "armorHead"
+	b.cube(h, (-r, brow, -r), (r, top, r), "plate", faces_paint=P)
+	b.cube(h, (-r, low, back), (r, brow, r), "plate", faces_paint={"east": plate, "west": plate, "south": plate})
+	both(b, h, (r - 0.6, low, -r), (r, brow, back), "plate", faces_paint=P_ALL)
+
+
+def great_face(img, rect):
+	"""A great helm's face: the sight two rows down, parted by a nasal, and breaths below it."""
+	plate(img, rect)
+	x0, y0, x1, y1 = rect
+	mid = (x0 + x1) // 2
+	dark = kit.PALETTE["dark"]
+	for x in range(x0 + 1, x1 - 1):
+		if abs(x - mid + 0.5) >= 1:
+			put(img, x, y0 + 2, dark)
+	for y in range(y0 + 5, y1 - 1, 2):
+		for x in range(x0 + 2 + (y - y0) % 4 // 2, x1 - 2, 2):
+			if abs(x - mid + 0.5) >= 1:
+				put(img, x, y, dark)
+
+
+def kettle_brim(b, inner, outer, y, drop):
+	"""A kettle's brim: a ring {inner} wide at {y}, and its outer edge {outer} wide turned {drop} down."""
+	h = "armorHead"
+	b.cube(h, (-inner, y, -inner), (inner, y + 0.8, inner), "plate", faces_paint=P_ALL)
+	b.cube(h, (-outer, y - drop, -outer), (outer, y - drop + 0.7, outer), "plate", faces_paint=P_ALL)
+
+
+def broad_kettle(b):
+	"""The kettle hat in the Spanish cut: a lower bowl under a broad brim turned a little down at its edge."""
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-4.5, 28.6, -4.5), (4.5, 31.4, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-3.6, 31.4, -3.6), (3.6, 32.3, 3.6), "plate", faces_paint=P_ALL)
+	b.cube(h, (-1.8, 32.3, -1.8), (1.8, 32.8, 1.8), "plate", faces_paint=P_ALL)
+	kettle_brim(b, 6.2, 8.2, 27.9, 0.5)
+	both(b, h, (4.2, 24.4, -1), (4.7, 28.6, 1), "strap")
+
+
+def tall_kettle(b):
+	"""The kettle hat in the German cut (the eisenhut): a tall bowl under a narrower brim that slopes down."""
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-4.5, 28.4, -4.5), (4.5, 33.0, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-3.6, 33.0, -3.6), (3.6, 34.2, 3.6), "plate", faces_paint=P_ALL)
+	b.cube(h, (-2.0, 34.2, -2.0), (2.0, 34.8, 2.0), "plate", faces_paint=P_ALL)
+	b.cube(h, (-4.6, 30.0, -4.6), (4.6, 30.7, 4.6), "rivet")
+	kettle_brim(b, 5.6, 6.8, 28.2, 1.0)
+	both(b, h, (4.2, 24.4, -1), (4.7, 28.4, 1), "strap")
+
+
+def deep_kettle(b):
+	"""The deep German kettle: a deep bowl, its brim round the sides and back, and before the face the brim pulled down
+	with two sights cut in it. The pulled-down front lifts like a visor (the kettle worn tipped back)."""
+	bones(b, "head")
+	h = "armorHead"
+	shell(b, 29.6, 27.4, top=32.8, r=4.5)
+	b.cube(h, (-3.6, 32.8, -3.6), (3.6, 33.8, 3.6), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.5, 32.8, -4.0), (0.5, 34.2, 4.0), "plate", faces_paint=P_ALL)
+	b.cube(h, (-6.4, 27.0, -2.0), (6.4, 27.8, 6.4), "plate", faces_paint=P_ALL)
+	both(b, h, (4.2, 24.4, -1), (4.7, 27.4, 1), "strap")
+	visor(b, 29.4)
+	v = "visor"
+	b.cube(v, (-5.4, 26.2, -5.4), (5.4, 30.4, -4.5), "plate", faces_paint={**P_ALL, "north": slit(1, 1, 2)})
+	b.cube(v, (-6.0, 25.6, -6.4), (6.0, 26.4, -4.5), "plate", faces_paint=P_ALL)
+	both(b, v, (5.4, 26.2, -4.5), (6.4, 27.8, -2.0), "plate", faces_paint=P_ALL)
+
+
+def sallet_tail(b, steps):
+	"""A sallet's tail swept out behind: one plate per step, (half width, low, high, z0, z1)."""
+	for (w, y0, y1, z0, z1) in steps:
+		b.cube("armorHead", (-w, y0, z0), (w, y1, z1), "plate", faces_paint=P_ALL)
+
+
+SHORT_TAIL = ((4.3, 26.6, 28.6, 4.6, 6.4), (3.4, 25.8, 27.2, 6.4, 7.8))
+LONG_TAIL = ((4.3, 25.8, 28.4, 4.6, 6.6), (3.6, 24.8, 26.8, 6.6, 8.8), (2.8, 24.0, 25.6, 8.8, 10.8), (1.8, 23.4, 24.6, 10.8, 12.4))
+
+
+def kettle_sallet(b):
+	"""The kettle sallet: a sallet's skull and short tail with a kettle's brim round the front and sides, no visor. It
+	takes a bevor at the neck like any sallet."""
+	bones(b, "head")
+	h = "armorHead"
+	shell(b, 29.8, 27.2)
+	b.cube(h, (-3.6, 32.2, -3.6), (3.6, 33.0, 4.0), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.5, 32.2, -4.6), (0.5, 33.5, 5.0), "plate", faces_paint=P_ALL)
+	sallet_tail(b, SHORT_TAIL)
+	b.cube(h, (-6.0, 29.0, -6.0), (6.0, 29.8, 4.6), "plate", faces_paint=P_ALL)
+	both(b, h, (4.2, 24.4, -1), (4.7, 27.2, 1), "strap")
+
+
+def archers_sallet(b):
+	"""The archer's sallet: an open sallet, the brow cut high over the eyes, a short tail, no visor."""
+	bones(b, "head")
+	h = "armorHead"
+	shell(b, 29.8, 26.4)
+	b.cube(h, (-3.6, 32.2, -3.6), (3.6, 33.0, 4.0), "plate", faces_paint=P_ALL)
+	b.cube(h, (-4.8, 29.6, -4.9), (4.8, 30.4, -4.5), "plate", faces_paint=P_ALL)
+	sallet_tail(b, SHORT_TAIL)
+	both(b, h, (4.6, 28.2, -0.6), (5.2, 29.2, 0.6), "rivet")
+	both(b, h, (4.2, 24.4, -1), (4.6, 26.4, 1), "strap")
+
+
+def long_sallet(b):
+	"""The German sallet: a deep skull drawn out behind into a very long tail, the front closed down to one sight
+	(hinged, so it can be pushed up)."""
+	bones(b, "head")
+	h = "armorHead"
+	shell(b, 30.0, 26.4)
+	b.cube(h, (-3.6, 32.2, -3.6), (3.6, 33.0, 4.0), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.5, 32.2, -4.6), (0.5, 33.6, 6.0), "plate", faces_paint=P_ALL)
+	sallet_tail(b, LONG_TAIL)
+	visor(b, 30.0)
+	v = "visor"
+	b.cube(v, (-4.8, 26.0, -5.6), (4.8, 31.2, -4.5), "plate", faces_paint={**P_ALL, "north": slit(2)})
+	b.cube(v, (-0.6, 26.4, -6.0), (0.6, 30.6, -5.6), "plate", faces_paint=P_ALL)
+	both(b, "visor", (4.6, 29.4, -0.6), (5.3, 30.6, 0.6), "rivet")
+
+
+def cone(b, rings, mat="plate"):
+	"""A helm's bowl drawn up to a point: one ring per step, (half width, low, high)."""
+	for (w, y0, y1) in rings:
+		b.cube("armorHead", (-w, y0, -w), (w, y1, w), mat, faces_paint=P_ALL)
+
+
+def mail_back(b, low, high, front=-3.0):
+	"""A mail aventail hung from a helm round the sides and back of the neck, the face left open."""
+	h = "armorHead"
+	b.cube(h, (-4.9, low, 1.0), (4.9, high, 4.9), "mail", faces_paint={"east": rings, "west": rings, "south": rings})
+	both(b, h, (4.3, low, front), (4.9, high, 1.0), "mail", faces_paint={"east": rings, "west": rings, "north": rings})
+
+
+def gallowglass_helm(b):
+	"""The gallowglass helm: a tall conical open bascinet, its point high over the crown, over a mail aventail."""
+	bones(b, "head")
+	h = "armorHead"
+	shell(b, 29.8, 26.8, top=31.6)
+	cone(b, ((4.0, 31.6, 33.2), (3.2, 33.2, 34.8), (2.3, 34.8, 36.4), (1.4, 36.4, 38.0), (0.6, 38.0, 39.6)))
+	b.cube(h, (-4.8, 29.6, -4.8), (4.8, 30.4, 4.8), "plate", faces_paint=P_ALL)
+	mail_back(b, 22.4, 26.8, -4.0)
+	b.cube(h, (-4.9, 22.4, -4.9), (4.9, 24.2, -3.0), "mail", faces_paint=on_sides(rings))
+
+
+def visored_barbute(b):
+	"""The visored barbute: the barbute, its T-opening closed by a visor with one sight and a ridge down it."""
+	barbute(b)
+	visor(b, 29.2)
+	v = "visor"
+	b.cube(v, (-4.4, 25.0, -6.4), (4.4, 31.0, -5.7), "plate", faces_paint={**P_ALL, "north": slit(1, 1, 2)})
+	b.cube(v, (-0.6, 25.4, -6.9), (0.6, 30.6, -6.4), "plate", faces_paint=P_ALL)
+	both(b, "visor", (4.7, 28.6, -0.6), (5.3, 29.8, 0.6), "rivet")
+
+
+def visored_great_helm(b):
+	"""The visored great helm: the flat-topped great helm, its face a plate hinged at the temples that lifts."""
+	bones(b, "head")
+	h = "armorHead"
+	shell(b, 30.6, 24.0, top=32.0, r=4.5)
+	b.cube(h, (-4, 32, -4), (4, 33, 4), "plate", faces_paint=P_ALL)
+	b.cube(h, (-5, 22, -5), (5, 24, 5), "plate", faces_paint=P)
+	visor(b, 29.4)
+	v = "visor"
+	b.cube(v, (-4.6, 23.2, -5.4), (4.6, 30.8, -4.5), "plate", faces_paint={**P_ALL, "north": great_face})
+	b.cube(v, (-0.5, 23.6, -5.8), (0.5, 30.4, -5.4), "rivet")
+	both(b, "visor", (4.5, 28.8, -0.6), (5.2, 30.0, 0.6), "rivet")
+
+
+def flat_top_helm(b):
+	"""The flat-topped helm: the early round-sided helm with a flat top, open at the face but for a nasal."""
+	bones(b, "head")
+	h = "armorHead"
+	shell(b, 29.8, 25.0, top=32.0, r=4.5)
+	b.cube(h, (-4.6, 32.0, -4.6), (4.6, 32.8, 4.6), "plate", faces_paint=P_ALL)
+	b.cube(h, (-4.7, 29.6, -4.7), (4.7, 30.4, 4.7), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.6, 26.2, -5.0), (0.6, 29.8, -4.5), "plate", faces_paint=P_ALL)
+	both(b, h, (4.6, 27.6, -0.6), (5.2, 28.8, 0.6), "rivet")
+
+
+def nasal_helm(b):
+	"""The Norman casque: one smooth iron cone with a band at its rim and a nasal, worn over a coif or none."""
+	bones(b, "head")
+	cone(b, ((4.5, 29.2, 31.0), (3.8, 31.0, 32.6), (3.0, 32.6, 34.0), (2.0, 34.0, 35.2), (1.0, 35.2, 36.2)))
+	b.cube("armorHead", (-4.7, 29.0, -4.7), (4.7, 29.8, 4.7), "plate", faces_paint=P_ALL)
+	b.cube("armorHead", (-0.6, 25.8, -5.0), (0.6, 29.4, -4.6), "plate", faces_paint=P_ALL)
+
+
+def spired_helm(b):
+	"""The Rus helm: a tall cone drawn up to a spire, a nasal, and a mail aventail round the neck."""
+	bones(b, "head")
+	h = "armorHead"
+	cone(b, ((4.5, 29.2, 31.0), (3.8, 31.0, 32.8), (3.0, 32.8, 34.6), (2.1, 34.6, 36.4), (1.2, 36.4, 38.2), (0.4, 38.2, 40.4)))
+	b.cube(h, (-4.7, 29.0, -4.7), (4.7, 29.8, 4.7), "gilt")
+	b.cube(h, (-0.6, 25.8, -5.0), (0.6, 29.4, -4.6), "plate", faces_paint=P_ALL)
+	mail_back(b, 22.6, 29.0)
+
+
+def spectacle_helm(b):
+	"""The spectacle helm: a round bowl banded across, an iron mask of rims round the eyes and a guard down the nose
+	(the 'spectacles'), and a mail curtain round the back and sides. Fixed face."""
+	bones(b, "head")
+	h = "armorHead"
+	shell(b, 28.8, 28.4, top=31.8)
+	b.cube(h, (-3.8, 31.8, -3.8), (3.8, 33.0, 3.8), "plate", faces_paint=P_ALL)
+	b.cube(h, (-2.4, 33.0, -2.4), (2.4, 33.6, 2.4), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.5, 31.8, -4.2), (0.5, 33.9, 4.2), "plate", faces_paint=P_ALL)
+	b.cube(h, (-4.2, 31.8, -0.5), (4.2, 33.7, 0.5), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.6, 33.6, -0.6), (0.6, 34.4, 0.6), "rivet")
+	# the spectacles: brow, nose guard, the rims under and beside the eyes
+	b.cube(h, (-4.7, 28.0, -5.0), (4.7, 28.9, -4.5), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.6, 25.8, -5.1), (0.6, 28.2, -4.5), "plate", faces_paint=P_ALL)
+	both(b, h, (0.6, 26.6, -4.9), (3.8, 27.2, -4.5), "plate", faces_paint=P_ALL)
+	both(b, h, (3.6, 26.6, -4.9), (4.6, 28.2, -4.5), "plate", faces_paint=P_ALL)
+	mail_back(b, 22.6, 28.4, -4.4)
+
+
+def skullcap(b):
+	"""The skullcap (cervelliere): a plain round iron cap, wide enough to sit over a mail coif."""
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-5.0, 30.0, -5.0), (5.0, 33.4, 5.0), "plate", faces_paint=P)
+	b.cube(h, (-4.1, 33.4, -4.1), (4.1, 34.2, 4.1), "plate", faces_paint=P_ALL)
+	b.cube(h, (-2.4, 34.2, -2.4), (2.4, 34.6, 2.4), "plate", faces_paint=P_ALL)
+	b.cube(h, (-5.1, 30.0, -5.1), (5.1, 30.6, 5.1), "rivet")
+
+
+def turban_helm(b):
+	"""The turban helm: a tall bulbous bowl fluted all round, drawn up to a spike, a nasal, and a mail aventail."""
+	bones(b, "head")
+	h = "armorHead"
+	fl = {**on_sides(flutes), "up": plate}
+	b.cube(h, (-4.6, 28.8, -4.6), (4.6, 30.0, 4.6), "plate", faces_paint=P_ALL)
+	b.cube(h, (-5.0, 30.0, -5.0), (5.0, 32.6, 5.0), "plate", faces_paint=fl)
+	b.cube(h, (-4.2, 32.6, -4.2), (4.2, 34.0, 4.2), "plate", faces_paint=fl)
+	b.cube(h, (-3.0, 34.0, -3.0), (3.0, 35.2, 3.0), "plate", faces_paint=fl)
+	b.cube(h, (-1.6, 35.2, -1.6), (1.6, 36.2, 1.6), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.8, 37.0, -0.8), (0.8, 37.8, 0.8), "rivet")
+	b.cube(h, (-0.4, 36.2, -0.4), (0.4, 39.2, 0.4), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.6, 25.8, -5.0), (0.6, 29.0, -4.6), "plate", faces_paint=P_ALL)
+	b.cube(h, (-1.1, 28.4, -5.1), (1.1, 29.4, -4.6), "plate", faces_paint=P_ALL)
+	mail_back(b, 22.4, 28.8)
 
 
 # ---- the body and limbs ----------------------------------------------------------------------------------------------
@@ -1380,6 +1630,12 @@ PLATE = {
 	"quilted_cotton_armor": (quilted_cotton_armor, 64), "hide_armor": (hide_armor, 64), "bronze_armor": (bronze_armor, 64), "laced_lamellar": (laced_lamellar, 64),
 	"fluted_cuirass": (fluted_cuirass, 64), "rounded_breastplate": (rounded_breastplate, 64), "gorget": (gorget, 64),
 	"faulds_and_tassets": (faulds_and_tassets, 64), "rondel_spaulders": (rondel_spaulders, 64), "bevor": (bevor, 64),
+	# (Mordhau harness 1) the kettle's three cuts and its deep kin, the sallets, and the older and the far helms
+	"broad_kettle": (broad_kettle, 64), "tall_kettle": (tall_kettle, 64), "deep_kettle": (deep_kettle, 64), "kettle_sallet": (kettle_sallet, 64),
+	"archers_sallet": (archers_sallet, 64), "long_sallet": (long_sallet, 64), "gallowglass_helm": (gallowglass_helm, 64),
+	"visored_barbute": (visored_barbute, 64), "visored_great_helm": (visored_great_helm, 64), "flat_top_helm": (flat_top_helm, 64),
+	"nasal_helm": (nasal_helm, 64), "spired_helm": (spired_helm, 64), "spectacle_helm": (spectacle_helm, 64), "skullcap": (skullcap, 64),
+	"turban_helm": (turban_helm, 64),
 }
 CRESTS = {"crest_dragon": crest_dragon, "crest_lion": crest_lion, "crest_stag": crest_stag, "crest_boar": crest_boar,
 	"crest_eagle": crest_eagle, "crest_pegasus": crest_pegasus, "crest_unicorn": crest_unicorn, "crest_snake": crest_snake,
@@ -1412,6 +1668,11 @@ NAMES = {
 	"mail_mitons": "Mail Mitons", "padded_cuisses": "Padded Cuisses", "splinted_greaves": "Splinted Greaves", "fur_hood": "Fur Hood",
 	"mail_coif": "Mail Coif", "standard_of_mail": "Standard of Mail", "bevor": "Bevor", "mail_skirt": "Mail Skirt",
 	"leather_tassets": "Leather Tassets",
+	"broad_kettle": "Broad-Brimmed Kettle Hat", "tall_kettle": "Tall Kettle Hat", "deep_kettle": "Deep Kettle Hat", "kettle_sallet": "Kettle Sallet",
+	"archers_sallet": "Archer's Sallet", "long_sallet": "Long-Tailed Sallet", "gallowglass_helm": "Gallowglass Helm",
+	"visored_barbute": "Visored Barbute", "visored_great_helm": "Visored Great Helm", "flat_top_helm": "Flat-Topped Helm",
+	"nasal_helm": "Nasal Helm", "spired_helm": "Spired Helm", "spectacle_helm": "Spectacle Helm", "skullcap": "Skullcap",
+	"turban_helm": "Turban Helm",
 }
 # the cloth the game tints with the piece's dye, and the colour its icon and an undyed one show (HeraldryLayer.UNDYED)
 DYED = {"arming_doublet": 0xA06540, "giornea": 0x8E2B2B, "cloak": 0x4A5568, "torn_cloak": 0x5A5246, "hood": 0x4A5568, "torn_hood": 0x5A5246,

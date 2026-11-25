@@ -132,6 +132,23 @@ public final class HeraldryArmour {
 			helm("lobster_tail", Face.VISORED, 0.25F, 1.5F);
 			helm("grotesque_visor", Face.VISORED, 0.2F, 1.8F);
 			helm("veiled_helm", Face.VISORED, 0.3F, 1.5F);
+			// (Mordhau harness 1) the kettle hat's other cuts and its deep kin, the open sallets, and the older and the far
+			// helms. Not in HELMS: a realm's own helm is picked from that list by position, so it stays as it was
+			helm("broad_kettle", Face.OPEN, 1.0F, 0.0F);
+			helm("tall_kettle", Face.OPEN, 1.0F, 1.8F);
+			helm("deep_kettle", Face.VISORED, 0.34F, 0.8F);
+			helm("kettle_sallet", Face.OPEN, 0.95F, 0.5F);
+			helm("archers_sallet", Face.OPEN, 1.0F, 0.0F);
+			helm("long_sallet", Face.VISORED, 0.32F, 0.6F);
+			helm("gallowglass_helm", Face.OPEN, 1.0F, 5.0F);
+			helm("visored_barbute", Face.VISORED, 0.3F, 0.5F);
+			helm("visored_great_helm", Face.VISORED, 0.15F, 0.0F);
+			helm("flat_top_helm", Face.OPEN, 0.9F, 0.0F);
+			helm("nasal_helm", Face.OPEN, 0.95F, 3.2F);
+			helm("spired_helm", Face.OPEN, 0.95F, 5.0F);
+			helm("spectacle_helm", Face.FIXED, 0.55F, 1.4F);
+			helm("skullcap", Face.OPEN, 1.0F, 1.6F);
+			helm("turban_helm", Face.OPEN, 0.95F, 4.2F);
 			worn("plate_cuirass", ArmorType.CHESTPLATE);
 		worn("plate_sabatons", ArmorType.BOOTS);
 		// the harness: slot, armour, toughness, durability, what mends it
