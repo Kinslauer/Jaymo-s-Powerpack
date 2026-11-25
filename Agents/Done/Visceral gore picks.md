@@ -1,6 +1,6 @@
 ---
-status: done
-task: Build Andy's 42 Visceral + 16 PixelGore gore picks
+status: stalled
+task: Build Andy's 42 Visceral gore picks; PixelGore pick list waiting on picks
 branch: claude/project-thread-9k4io3
 with: cloud thread (Reason Art project)
 pr: 2133
@@ -20,6 +20,4 @@ owns:
 
 ## Notes
 - Visceral picks: https://claude.ai/artifact/3NMtJdzmLuH1WyzbYV672f (db picks/andy).
-
-- 2026-11-25: all 8 tracks built, reviewed, fixed; PR #2133 opened. Not run in game. Kingdoms standalone runServer fails on pre-existing big_golem spawn entries (anvil_ruins, court_ruins).
-- 2026-11-25 03:47 PR #2133 is merged into master; moved to Agents/Done.
+- 2026-11-25 18:10 No sign of work for 30 min: marked stalled (whoever ran it stopped).
