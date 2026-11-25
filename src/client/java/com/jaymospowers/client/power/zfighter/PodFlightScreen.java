@@ -103,7 +103,7 @@ public class PodFlightScreen extends Screen {
 		if (InputConstants.isKeyDown(InputConstants.KEY_G)) {
 			flags |= PodFlight.DOCK_KEY;
 		}
-		boolean auto = InputConstants.isKeyDown(FlightClient.AUTO);
+		boolean auto = InputConstants.isKeyDown(FlightClient.autoCode());
 		if (auto && !this.autoWas) {
 			flags |= PodFlight.AUTO_KEY;
 		}
@@ -471,7 +471,7 @@ public class PodFlightScreen extends Screen {
 		UiStyle.lineCentred(graphics, this.font, Component.translatable("screen.jaymospowers.pod_flight.eta", Math.max(0, s.eta() / 20)), w / 2, 31, w - 80, UiStyle.DIM);
 		boolean auto = (s.flags() & PodFlight.F_AUTO) != 0;
 		Component mode = Component.translatable(auto ? "screen.jaymospowers.pod_flight.auto_on" : "screen.jaymospowers.pod_flight.auto_off",
-			InputConstants.Type.KEYBOARD.getOrCreate(FlightClient.AUTO).getDisplayName());
+			InputConstants.Type.KEYBOARD.getOrCreate(FlightClient.autoCode()).getDisplayName());
 		UiStyle.lineCentred(graphics, this.font, mode, w / 2, 41, w - 80, auto ? 0xFF7CFC9A : UiStyle.DIM);
 		if ((s.flags() & PodFlight.F_ALERT) != 0 && this.age / 6 % 2 == 0) {
 			UiStyle.lineCentred(graphics, this.font, Component.translatable("screen.jaymospowers.pod_flight.alert"), w / 2, 52, w - 80, FlightClient.WARN);

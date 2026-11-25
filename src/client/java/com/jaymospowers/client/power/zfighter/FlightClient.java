@@ -6,10 +6,12 @@ import com.jaymospowers.power.zfighter.ZFighterSpace;
 import com.jaymospowers.power.zfighter.pod.PodFlight;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -21,11 +23,11 @@ import org.jspecify.annotations.Nullable;
  * (Patch 9, tr_cockpit) The client's side of flying the pod: what the server last said ({@link PodFlight.State}), the stick it
  * sends back, the canopy cockpit drawn over the climb through the sky bands and under the crossing's view ({@link PodFlightScreen}).
  * The client decides nothing: it draws, and reports the keys. In the climb the game's own keys fly the pod (look to steer, forward,
- * sprint to boost, back to brake) and only the autopilot key ({@link #AUTO}) is read here.
+ * sprint to boost, back to brake) and only the autopilot key ({@link #autoCode()}) is read here.
  */
 public final class FlightClient {
-	/** The autopilot key, in the climb (in the crossing the screen reads it with the rest). */
-	static final int AUTO = InputConstants.KEY_T;
+	/** The autopilot key, rebindable (default I; T would open the chat), read in the climb and by the crossing's screen. */
+	private static @Nullable KeyMapping autoKey;
 	/** Ticks without word from the server after which the flight is taken to be over. */
 	static final int SILENCE = 40;
 	/** How often the stick is repeated to the server though it has not changed (ticks). */
@@ -44,7 +46,14 @@ public final class FlightClient {
 	private FlightClient() {
 	}
 
+	/** The key code the autopilot key is bound to now. */
+	static int autoCode() {
+		return autoKey == null ? InputConstants.KEY_I : KeyMappingHelper.getBoundKeyOf(autoKey).getValue();
+	}
+
 	static void init() {
+		autoKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.pod_autopilot", InputConstants.KEY_I,
+			com.jaymospowers.client.JaymosPowersClient.CATEGORY));
 		ClientPlayNetworking.registerGlobalReceiver(PodFlight.State.TYPE, (payload, ctx) -> receive(ctx.client(), payload));
 		ClientTickEvents.END_CLIENT_TICK.register(FlightClient::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosPowers.id("pod_cockpit"), FlightClient::hud);
@@ -87,7 +96,7 @@ public final class FlightClient {
 			return;
 		}
 		if (last.phase() == PodFlight.PHASE_CLIMB && minecraft.gui.screen() == null) {
-			boolean down = InputConstants.isKeyDown(AUTO);
+			boolean down = InputConstants.isKeyDown(autoCode());
 			if (down && !autoWas) {
 				ClientPlayNetworking.send(new PodFlight.Input(0, 0, PodFlight.AUTO_KEY));
 			}
@@ -122,7 +131,7 @@ public final class FlightClient {
 		gauge(graphics, font, left, baseY + 12, width / 2 - 2, Component.translatable("screen.jaymospowers.pod_flight.speed"), Mth.clamp(state.speed() / top, 0.0F, 1.0F),
 			(state.flags() & PodFlight.F_BOOST) != 0 ? FUEL : LIT);
 		Component mode = Component.translatable((state.flags() & PodFlight.F_AUTO) != 0 ? "screen.jaymospowers.pod_flight.auto_on" : "screen.jaymospowers.pod_flight.auto_off",
-			InputConstants.Type.KEYBOARD.getOrCreate(AUTO).getDisplayName());
+			InputConstants.Type.KEYBOARD.getOrCreate(autoCode()).getDisplayName());
 		UiStyle.lineCentred(graphics, font, mode, w / 2 + width / 4 + 2, baseY + 12, width / 2, (state.flags() & PodFlight.F_AUTO) != 0 ? 0xFF7CFC9A : UiStyle.DIM);
 		UiStyle.lineCentred(graphics, font, Component.translatable("screen.jaymospowers.pod_flight.eta", Math.max(0, state.eta() / 20)), w / 2, baseY + 24, width, UiStyle.DIM);
 	}
