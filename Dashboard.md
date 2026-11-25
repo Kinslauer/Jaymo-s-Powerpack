@@ -17,7 +17,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-15 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
+14 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
