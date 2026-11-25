@@ -17341,3 +17341,9 @@ Not tested in a running game: site choice, ground levelling and building overlap
 - `monsters/Critter.mobInteract` (maggots only, main hand), the bait looked up by its id `jaymospowers:maggots`.
 - Supply unchanged: once a body has lain unseen half a day (10 min), one maggot at a time comes to it, and another comes about 5 s after you take one, up to 4 near you. Taking them also stops them eating the body.
 - Built; not played.
+
+## 0.12.79 (2026-11-25): overcome faints once an encounter, shake fainted folk awake (#2150)
+
+- **Once an encounter**: after fainting at the sight of something overwhelming, a player or one of the folk isn't overcome again until nothing overwhelming has been in their sight for 60 s (`Overcome.SPENT`, `ENCOUNTER_GAP`). The unease still climbs and shows (cold edges, heartbeat; folk still say so and may withdraw), but they keep their feet. Before, the unease went back to 35 after a faint and you could faint again a few seconds after waking.
+- **Shake them awake**: sneak + use on one of the folk lying out cold from a fright (`Overcome.shake`) shakes them by the shoulder: they come round, cry out and run from what overcame them, as one who withdraws does (or just come round, if it's gone). They still lie out 15 s otherwise.
+- Built; not played.
