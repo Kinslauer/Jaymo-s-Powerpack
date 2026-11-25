@@ -1130,7 +1130,7 @@ tasks.register("checkPackMods") {
 		def present = [minecraft: version(mcVersion), java: version("25"), fabricloader: version(loaderVersion)]
 		def mods = []
 		def read
-		read = { String owner, InputStream jar ->
+		read = { String owner, InputStream jar, boolean nested ->
 			def entries = [:]
 			new java.util.zip.ZipInputStream(jar).withCloseable { zip ->
 				for (def e = zip.nextEntry; e != null; e = zip.nextEntry) {
@@ -1149,38 +1149,56 @@ tasks.register("checkPackMods") {
 				present[meta.id as String] = v
 			}
 			(meta.provides ?: []).each { present[it as String] = v }
-			mods << [owner, meta.id as String, meta.depends ?: [:], meta.breaks ?: [:]]
-			(meta.jars ?: []).each { nested ->
-				def bytes = entries[nested.file as String]
+			mods << [owner, meta.id as String, meta.depends ?: [:], meta.breaks ?: [:], nested]
+			(meta.jars ?: []).each { inner ->
+				def bytes = entries[inner.file as String]
 				if (bytes != null) {
-					read(owner, new ByteArrayInputStream(bytes as byte[]))
+					read(owner, new ByteArrayInputStream(bytes as byte[]), true)
 				}
 			}
 		}
-		jars.files.each { f -> f.withInputStream { read(f.name, it) } }
+		jars.files.each { f -> f.withInputStream { read(f.name, it, false) } }
 		own.each { f ->
 			def meta = slurper.parse(f)
 			present[meta.id as String] = version("999.0.0")
-			mods << [f.path, meta.id as String, meta.depends ?: [:], [:]]
+			mods << [f.path, meta.id as String, meta.depends ?: [:], [:], false]
 		}
 		def matches = { spec, v -> (spec instanceof List ? spec : [spec]).any { parsePredicate.invoke(null, it as String).test(v) } }
-		def problems = []
-		mods.each { owner, id, depends, breaks ->
+		def problemsOf = { owner, id, depends, breaks ->
+			def found = []
 			depends.each { dep, spec ->
 				def have = present[dep]
 				if (have == null) {
-					problems << "$id ($owner) needs $dep $spec, which isn't in the pack"
+					found << "$id ($owner) needs $dep $spec, which isn't in the pack"
 				} else if (!matches(spec, have)) {
-					problems << "$id ($owner) needs $dep $spec; the pack has ${have.friendlyString}"
+					found << "$id ($owner) needs $dep $spec; the pack has ${have.friendlyString}"
 				}
 			}
 			breaks.each { dep, spec ->
 				def have = present[dep]
 				if (have != null && matches(spec, have)) {
-					problems << "$id ($owner) breaks with $dep $spec, and the pack has ${have.friendlyString}"
+					found << "$id ($owner) breaks with $dep $spec, and the pack has ${have.friendlyString}"
 				}
 			}
+			found
 		}
+		// Fabric Loader force-loads only top-level jars: a mod nested inside one (jar-in-jar) whose own needs aren't met is
+		// left out quietly (MModding Library's integration modules for mods the pack doesn't have). Drop those, then check
+		// again, so a mod that needed a dropped one is still caught.
+		def dropped = true
+		while (dropped) {
+			dropped = false
+			mods.findAll { it[4] && !problemsOf(it[0], it[1], it[2], it[3]).isEmpty() }.each { m ->
+				mods.remove(m)
+				if (!mods.any { it[1] == m[1] }) {
+					present.remove(m[1])
+				}
+				logger.lifecycle("checkPackMods: ${m[1]} (inside ${m[0]}) would be left out by Fabric Loader: its needs aren't in the pack")
+				dropped = true
+			}
+		}
+		def problems = []
+		mods.each { owner, id, depends, breaks, nested -> problems.addAll(problemsOf(owner, id, depends, breaks)) }
 		if (!problems.isEmpty()) {
 			throw new GradleException("These pack mods would stop the game or the server starting:\n  " + problems.unique().join("\n  "))
 		}
