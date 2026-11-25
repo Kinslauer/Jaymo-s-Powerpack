@@ -18,6 +18,14 @@ Every row follows the three living-things rules where it touches animals, the me
 (`BloodSettings`: anything gory is hidden when blood is Off or streamer safe is on). Tuning numbers go in `static final`
 constants at the top of each class.
 
+Andy's PixelGore picks (2026-11-24, https://claude.ai/artifact/QJJyJXFrL5jxYxcL9kPRZJ, db `picks/andy`; PPs PixelGore is
+All Rights Reserved, ideas only) are folded into the tracks below as `pg_` rows: 16 of 18 (not the carved voxel bodies, not
+the shovel carry). His notes:
+- Mobs drop what they wore: "we already have this, but it disappears if they lose the limb, this should leave them whole
+  unless they are eaten or burned in lava".
+- Shovel (not picked as carry): "shovels should be able to bury corpses, and you should see npcs doing it. it requires a
+  hole at least two blocks deep and right clicking them with the shovel should fill the dirt back in". Added as `pg_bury`.
+
 Tracks are split so no two edit the same files. Two run at a time. One PR for the whole set, one change note per mod.
 
 ---
@@ -33,6 +41,10 @@ Files: `WoundMarks`, `WoundMarksLayer`, `Dismember` (depth only), `Dismembered` 
   `BladeBlood.bullet` hits.
 - **vi_heal** Marks close as the part heals: a mark's life follows its part's health fraction in `Wounds`, not only time.
 - **vi_stump** First-person stump: a lost arm draws its stump in first person (Dismembered's stump art on the hand renderer).
+- **pg_fparm** Your own wounded arm in first person shows its WoundMarks.
+- **pg_insides** Bone and ribs under deep cuts: a deep cut draws what's under it by BodyPlan part (ribs, skull, limb bone, gut).
+- **pg_sever** Cuts on one limb add up (a running total kept with Wounds); past a threshold the limb tears off in
+  `Dismember` even if no single blow was big enough.
 
 ## Track 2: How hits land (Powers client + Kitchen ragdolls)
 Files: new `HitReactions` (server cue + client pose), `MobHurtStances`, `MobRagdolls` (falls), `KillMoment`, a Reduced
@@ -58,6 +70,9 @@ Files: `Breaks` (arm loss), new `Disarms`, `Bleeding` (credit), `Carry` + new `T
 - **vi_takedown** Grab, take down and throw: with enough brawn (Carry's brawn count), grab a living mob, wrestle it down
   (it goes limp for a moment), or throw it. Kingdoms' Brute class gets it from the start.
 - **vi_sounds** Hit and break sounds by material: bone, metal, slime, flesh, with subtitles (our own sounds).
+- **pg_blastside** Blasts only harm the parts with a clear line to the blast centre (`BlastGore`, Kitchen `Gibs` asks the same).
+- **pg_pellets** A shotgun's pellets from one shot (TaCZ) join into one spread wound and one shove.
+- **pg_aimdown** Crawlers and the downed get a lying hitbox for the crosshair and arrows (`LimbBoxes`).
 
 ## Track 4: Armour (Powers, `ArmourWear`, `Blows`, armour render)
 - **vi_holes** Holes worn into armour: hits wear marks into the piece where they land, stored on the item, drawn on the
@@ -67,6 +82,8 @@ Files: `Breaks` (arm loss), new `Disarms`, `Bleeding` (credit), `Carry` + new `T
 - **vi_deflect** Each material's share against cut / stab / blunt (leather soaks blunt, iron turns blades, chain turns
   cuts but not stabs, diamond and netherite most things).
 Runs after Track 1 (both touch `Dismember`).
+
+Order: 2 + 5 first, then 1 + 3, then 4 + 6a, then 6b + 7, then 8.
 
 ## Track 5: Blood in the world (Powers `core/blood`, `client/blood`)
 - **vi_surfaces** Glass, metal and ice bead blood (smaller drops, wipe off quickly); dirt and sand soak it (darker,
@@ -79,7 +96,7 @@ Runs after Track 1 (both touch `Dismember`).
 - **vi_presets** Gore presets (Light, Cinematic, Brutal) on the Blood button, setting blood, gore and hit reactions.
 - **vi_safe** Streamer safe: grey dust for blood, no dismemberment drawn, living mobs drawn whole.
 
-## Track 6: Corpses (Kitchen `corpse`)
+## Track 6a: How corpses look and go (Kitchen `corpse`, client)
 - **vi_char** Burning bodies blacken, and a long burn leaves a bone stage before the ash pile.
 - **vi_frozen** Death in powder snow leaves an ice statue that shatters into ice shards when struck.
 - **vi_aging** Corpses stiffen, then grey, then sink slowly into the ground as they rot.
@@ -88,6 +105,22 @@ Runs after Track 1 (both touch `Dismember`).
 - **vi_skel** Skeleton corpses collapse into loose bones.
 - **vi_hang** Tie a corpse with a lead to a fence post: it hangs there and keeps without rotting.
 - **vi_pinata** Piñata: bodies burst into sweets (a gib kind). Server setting, and always on in the Candy Cavity.
+- **pg_rotblotch** Rot goes in blotches: patches darken before they fall away, outer flesh first, last stage the bones.
+- **pg_crush** A falling anvil or block flattens the body under it (squashed corpse pose, flattened gibs).
+- **pg_debris** Small scraps knocked off tumble, bounce and slide to a stop by material, then sink away.
+- **pg_budget** A cap on ragdolls moving at once; the oldest settle and freeze. Lower in low-end mode.
+
+## Track 6b: Handling the dead (Kitchen `corpse` + `butchery`, Kingdoms `Graves`)
+- **pg_feed** The dead are eaten bite by bite: zombies crouch over a body and tear at it (wolves and other meat-eaters too,
+  through Kitchen's `Scavengers`); the body visibly shrinks to bones. A fed zombie isn't hunting.
+- **pg_gut** Gutting with a blade: hold use on a corpse, the cut drawn along the belly stroke by stroke, pried open, insides out.
+- **pg_yield** What butchering gives depends on what's left of the body (cut away, rotten, burnt, torn).
+- **pg_opened** A gutted body lies open, ribs showing, insides beside it.
+- **pg_gear** A mob's worn and held gear stays whole when it loses a limb (today it vanishes); it's lost only if the body
+  is eaten or burns in lava.
+- **pg_bury** Any corpse can be buried: lay it in a hole at least two blocks deep, then right-click with a shovel to fill
+  the dirt back in (extends `Graves`/`Burial`, which today lower a dead player's body straight in). Villagers bury
+  their own dead the same way (gravediggers dig, lay, fill), which fits "The nights at the grave".
 
 ## Track 7: The leech's kit (Kingdoms, Alchemy + Druids)
 Lore: "The leech's kit" (approved). Thorns of bone and glass, filled at a brewing stand or the apothecary; leeches and
@@ -104,6 +137,7 @@ apothecaries sell them, hedge witches sell the dark ones.
 ## Track 8: Mob and weapon reader (Powers, ops only)
 - **vi_reader** A screen that lists how each mob was read (parts, weight, blood kind) and each weapon (cut, stab, blunt),
   lets an op change them, and saves to a config file read at start.
+- **pg_guess** Better guesses for modded mobs: blood and body from tags, the class they extend, or their id.
 
 ---
 
