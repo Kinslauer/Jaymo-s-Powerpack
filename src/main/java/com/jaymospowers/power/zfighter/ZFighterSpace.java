@@ -48,6 +48,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
@@ -264,6 +265,22 @@ public final class ZFighterSpace {
 		@Override
 		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 			builder.add(FUEL);
+		}
+
+		/**
+		 * (Andy, 2026-11-25: the pod's "in game model need work") Set down from the item, it stands up as the pod itself at
+		 * once, facing the way its placer looked, instead of showing the old block until it is right-clicked.
+		 */
+		@Override
+		public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+			super.setPlacedBy(level, pos, state, placer, stack);
+			if (level instanceof ServerLevel serverLevel) {
+				serverLevel.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+				PodEntity pod = PodEntity.spawn(serverLevel, Vec3.atBottomCenterOf(pos), true, state.getValue(FUEL));
+				if (placer != null) {
+					pod.setYRot(placer.getYRot());
+				}
+			}
 		}
 
 		@Override
