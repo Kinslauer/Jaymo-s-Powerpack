@@ -1,7 +1,7 @@
 # Mordhau harness 3: body previews and row table
 
-Each picture is one piece worn on a grey figure, seen (left to right) from the **front**, the **side**, a **three-quarter** view, the **back**
-and a second three-quarter view. Drawn with `tools/bbmodel_preview.py` from the baked models and sheets, the way the game draws them; not
+Each picture is one piece worn on a grey figure, seen (left to right) from the **front**, the **side**, the **back**, then **three-quarter
+front** and **three-quarter back**. Drawn with `tools/bbmodel_preview.py` from the baked models and sheets, the way the game draws them; not
 screenshots from the game. Cloth is shown tinted in the colour an undyed one shows (the game tints it with the piece's dye); `_gilded`,
 `_gilt_banded` and `_covered` are the same piece in that finish; `_over_plate` is a garment worn over the cuirass and spaulders.
 
@@ -19,7 +19,7 @@ these pictures were run here.
 | mh-mail (have) | `mail_haubergeon`: forged from iron at the smith's anvil (already). The tabard over it: row mh-tabard. | (existing) |
 | mh-hauberk | new `mail_hauberk` (MAIL, 3 armour): full sleeves on the sheet, the mail skirt to the knee a model hung on the legs; forged from iron | `mail_hauberk` |
 | mh-plated-mail | new `plated_mail` (MAIL, 3 armour): the haubergeon with plates let into the chest and back; forged from iron | `plated_mail` |
-| mh-padded-coat (have) | `quilted_coat`: recipe `quilted_coat.json`. It had no model and was drawn as a mail haubergeon; it now has its own quilted sheet and a long skirt, dyeable | `quilted_coat` |
+| mh-padded-coat (have) | `quilted_coat`: recipe `quilted_coat.json`. It had no model and was drawn as a mail haubergeon; it now has its own quilted sheet and a long skirt, dyeable. **Note for Andy:** the guard kit gives every guard this coat as the free mail layer (`GuardKit.cloth`), so guards that showed mail now show beige quilting with a knee skirt; say if they should keep mail instead. | `quilted_coat` |
 | mh-scale | new `scale_shirt` (MAIL, 2 armour): overlapping scales, forged from iron. Lore (new): "Scale and the old age" | `scale_shirt` |
 | mh-cuirass (have) | `plate_cuirass`: forged (already). Munition/crude = the blackened finish (already) and a new russeted (browned) finish at the anvil; rusted comes with wear. Can be covered. | (existing) |
 | mh-italian (have) | `rounded_breastplate`: was worn only by knights, now forged (8 steel); painted finish added at the anvil. Can be covered. | (existing) |
@@ -53,6 +53,12 @@ for a reading and to confirm it with Andy if it changes much. **Reading taken:**
 town), the heavy places of the harness (shoulders, arms, hands, thighs, shins, neck, waist, hood, crest, over-garment) come off with it, and the
 under-layers stay on: the padding and the mail (`Harness.UNDER_LAYERS`). Before this, everything in the harness came off with the armour. Tell me
 if "the harness gear" should mean the whole harness instead (then guards would keep all of it on and only the helm, chest piece and boots go).
+
+## Gold at the anvil
+
+The etched and gilt-banded finishes (offered on the fluted, Gothic, embossed and hussar cuirasses) are gold finishes in the guard kit
+(`HeraldryWear.GOLD_FINISHES`), so at the anvil they take 2 gold ingots like gilded does (Andy, 2026-11-20: gold armour needs gold to craft); unlike
+gilded they are not for royals and lords alone.
 
 ## Not done / not checked
 
