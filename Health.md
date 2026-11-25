@@ -18,6 +18,10 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
+## Missing PR numbers
+
+- [[Agents/hollow-captains|hollow-captains]]: in review with no `pr:`.
+
 ## Agent notes whose task is done
 
 - [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
@@ -33,3 +37,8 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/bleed-out-coma|bleed-out-coma]]: `for: coordinator` matches no bot or agent, so no one will claim it.
 - [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]]: `for: any (needs Andy's PC: the folder is local)` matches no bot or agent, so no one will claim it.
 - [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]]: `for: coordinator` matches no bot or agent, so no one will claim it.
+
+## Project memory
+
+- The memory index is 59 KB; only the first 16 KB load in a new thread. Shorten entries to one line and move detail into topic files.
+- 5 index lines are over 300 characters (lines 2, 54, 159, 211, 220): move their detail into topic files.

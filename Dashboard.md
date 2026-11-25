@@ -27,6 +27,21 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2152 The symbiote's meeting film no longer disconnects the client (Powers, 2026-11-25)
+- [ ] #2151 Bounty boards against a wall; plains towns always have a working windmill, a butcher and an infirmary (Kingdoms, 2026-11-25)
+- [ ] #2150 faints can be mashed out of (Powers, Kingdoms, 2026-11-25)
+- [ ] #2149 maggots for the hook: taken alive, best river bait, crawl off when dropped (Powers, Kingdoms, 2026-11-25)
+- [ ] #2148 explorer maps never make chunks on the server thread (Kingdoms, 2026-11-25)
+- [ ] #2147 The Nightmare haunts from the dark instead of acting as an enderman (Kingdoms, 2026-11-25)
+- [ ] #2146 Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (Powers, Kingdoms, 2026-11-25)
+- [ ] #2145 Dodge key: tap to dodge, hold to roll, hold longer to go prone (Powers, 2026-11-25)
+- [ ] #2144 hollow among the dead - the Hollow walk with the hordes, and a kill makes a captain (Kingdoms, 2026-11-25)
+- [ ] #2143 Life story: no more stuck on "On to your looks" (Kingdoms, 2026-11-25)
+- [ ] #2142 Wall knocks only from real knocks: plain jumps and your own sprint-jumps never hurt (Powers, 2026-11-25)
+- [ ] #2141 fallen trees are solid (Kingdoms, 2026-11-25)
+- [ ] #2140 Squashed bugs and spiders burst in their own blood (Powers, Kingdoms, 2026-11-25)
+- [ ] #2139 refusal hints - a turned-down talk option says why (Kingdoms, 2026-11-25)
+- [ ] #2138 Tectonic leaves the pack (Powers, Kingdoms, 2026-11-25)
 - [ ] #2137 Corpse hint drops "search the body" when nothing is left (Powers, Kitchen, 2026-11-25)
 - [ ] #2136 Riders no longer start with a spare saddle (Kingdoms, 2026-11-25)
 - [ ] #2135 journal map page shows Xaero's minimap, World map button (Kingdoms, 2026-11-25)
@@ -72,22 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2087 Bandit camps by the trade roads (Kingdoms, 2026-11-24)
 - [ ] #2086 Blasts blow limbs off the downed (Powers, 2026-11-24)
 - [ ] #2085 Structures need a reason: mines by buyers, stables by towns, watchtowers on borders, ruins with heirs (Kingdoms, 2026-11-24)
-- [ ] #2084 Red (unparryable) mob blows rarer and slower (Powers, Kingdoms, 2026-11-24)
-- [ ] #2083 Felled by a leg blow: ragdoll, prone, roll to get up (Powers, 2026-11-24)
-- [ ] #2082 Realm banks: deposits, interest, loans and letters of credit at the counting house (Kingdoms, 2026-11-24)
-- [ ] #2080 the big suit's new head (Powers, 2026-11-24)
-- [ ] #2079 Downed: a blow knocks you out, red blows kill, no tossing, fire kills after 6 s (Powers, 2026-11-24)
-- [ ] #2078 gear talk - bauble themes, knights and colours, two-tag lines, changes and gossip (Kingdoms, 2026-11-24)
-- [ ] #2077 gear talk - folk remark on masks, hoods and the symbiote's suit (Kingdoms, 2026-11-24)
-- [ ] #2076 Thick fire smoke starts on the ground, not up at the flames (Kingdoms, 2026-11-24)
-- [ ] #2075 The last bowl or bottle comes back (Powers, 2026-11-24)
-- [ ] #2074 gear talk - folk remark on your Frostborn work and stand-in limbs (Kingdoms, 2026-11-24)
-- [ ] #2072 Pillagers carry lanterns at night, and take one down when they have none (Kingdoms, 2026-11-24)
-- [ ] #2070 Lock-on names the part only with Called Shots; what hurts you is said in your own voice (Powers, Kitchen, 2026-11-24)
-- [ ] #2069 A dead player's severed head can be taken as a trophy (Powers, Kingdoms, 2026-11-24)
-- [ ] #2067 A Truth Cleric prays from a book, not a holy symbol (Kingdoms, 2026-11-24)
-- [ ] #2066 JEI shows stone tools, hammer and light armour recipes on a server (Powers, Kingdoms, Kitchen, 2026-11-24)
-- …and 525 older ones.
+- …and 540 older ones.
 
 ## Health
 
