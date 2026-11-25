@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 07:42). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 08:26). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -11,7 +11,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
-- [[Agents/Hostile Humans fighting AI|Hostile Humans fighting AI]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
@@ -24,7 +23,10 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2158 symbiote in hosts without the Web - every ability, a fight for the suit, a duel with the slinger (Powers, 2026-11-25)
+- [ ] #2157 Hearth's hit cap no longer softens the blow that downs you (Kingdoms, 2026-11-25)
 - [ ] #2156 NaN rotation diagnostic (Powers, 2026-11-25)
+- [ ] #2155 Toughness: Grit and gear let you take more hits (Kingdoms, 2026-11-25)
 - [ ] #2154 silver blades sear monsters, and the twin harness on the back (Powers, 2026-11-25)
 - [ ] #2152 The symbiote's meeting film no longer disconnects the client (Powers, 2026-11-25)
 - [ ] #2151 Bounty boards against a wall; plains towns always have a working windmill, a butcher and an infirmary (Kingdoms, 2026-11-25)
@@ -81,10 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2092 Fishing extras: don't stand on the hook, solid or light hooks, leaps, turning a run, clean landings, a line that hangs (Powers, 2026-11-24)
 - [ ] #2091 Locked-on swings hit small, quick foes (baby zombies) (Powers, Kingdoms, 2026-11-24)
 - [ ] #2090 Villagers seen at their jobs: tools in hand, the smith at the forge, the cook at the stove, the butcher at the hook (Kingdoms, Kitchen, 2026-11-24)
-- [ ] #2089 tree felling - cut through the trunk, carved stumps, blasts bring buildings down (Kingdoms, 2026-11-24)
-- [ ] #2088 NPCs hold two-handed weapons in both hands (Kingdoms, 2026-11-24)
-- [ ] #2087 Bandit camps by the trade roads (Kingdoms, 2026-11-24)
-- …and 542 older ones.
+- …and 545 older ones.
 
 ## Health
 
