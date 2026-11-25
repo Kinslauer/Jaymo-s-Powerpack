@@ -262,7 +262,7 @@ final class WebSymbioteScreen extends Screen {
 			} else if (!WebSymbiote.unlocked(player, i)) {
 				// not given to you yet: nearly black, with the bond it takes
 				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0xD8000000);
-				String need = Integer.toString(WebSymbiote.UNLOCK_BOND[i]);
+				String need = Integer.toString(WebSymbiote.unlockBond(player, i));
 				graphics.text(font, need, x + TILE / 2 - font.width(need) / 2, y + TILE / 2 - 4, 0xFF8070A0);
 			}
 			if (dormant) {
@@ -434,7 +434,7 @@ final class WebSymbioteScreen extends Screen {
 		}
 		if (selected == WebSymbiote.COLLECT_TOGGLE) {
 			if (!WebSymbioteCollect.unlocked(player)) {
-				return Component.translatable("gui.jaymospowers.web_symbiote.collect_locked", WebSymbioteCollect.COLLECT_BOND);
+				return Component.translatable("gui.jaymospowers.web_symbiote.collect_locked", WebSymbioteCollect.collectBond(player));
 			}
 			return Component.translatable(WebSymbiote.state(player).has(WebSymbioteState.COLLECT) ? "gui.jaymospowers.web_symbiote.collect_on"
 				: "gui.jaymospowers.web_symbiote.collect_off");
@@ -453,21 +453,28 @@ final class WebSymbioteScreen extends Screen {
 				}
 				return Component.translatable("gui.jaymospowers.web_symbiote.suit_pick", form(WebSymbiote.FORM_SUIT));
 			}
+			if (WebSymbiote.clings(player) && form >= top) {
+				// (Andy, 2026-11-25) without the Web nothing comes off by your choice: coming down is a fight
+				return Component.translatable("gui.jaymospowers.web_symbiote.suit_held");
+			}
 			if (form >= top) {
-				int next = top == WebSymbiote.FORM_SUIT ? WebSymbiote.FORM_ARMOR : top == WebSymbiote.FORM_ARMOR ? WebSymbiote.FORM_BULK : -1;
+				int next = top ==WebSymbiote.FORM_SUIT ? WebSymbiote.FORM_ARMOR : top == WebSymbiote.FORM_ARMOR ? WebSymbiote.FORM_BULK : -1;
 				return next < 0 ? Component.translatable("gui.jaymospowers.web_symbiote.suit_top", form(form - 1))
 					: Component.translatable("gui.jaymospowers.web_symbiote.suit_top_bond", form(form - 1), form(next),
-						next == WebSymbiote.FORM_BULK ? WebSymbiote.BOND_MAX : WebSymbiote.UNLOCK_BOND[WebSymbiote.ARMOR]);
+						next == WebSymbiote.FORM_BULK ? WebSymbiote.bulkBond(player) : WebSymbiote.unlockBond(player, WebSymbiote.ARMOR));
 			}
 			long left = cooldowns.end(WebSymbiote.ARMOR) - now;
 			if (form == WebSymbiote.FORM_SUIT && left > 0) {
 				return Component.translatable("gui.jaymospowers.web_symbiote.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
 			}
+			if (WebSymbiote.clings(player)) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.suit_pick", form(form + 1));
+			}
 			return Component.translatable("gui.jaymospowers.web_symbiote.suit_climb", form(form + 1), form(form - 1));
 		}
 		int i = selected;
 		if (!WebSymbiote.unlocked(player, i)) {
-			return Component.translatable("gui.jaymospowers.web_symbiote.unlock", WebSymbiote.UNLOCK_BOND[i]);
+			return Component.translatable("gui.jaymospowers.web_symbiote.unlock", WebSymbiote.unlockBond(player, i));
 		}
 		long left = cooldowns.end(i) - now;
 		boolean on = i == WebSymbiote.CRAWL && state.has(WebSymbioteState.CRAWL);

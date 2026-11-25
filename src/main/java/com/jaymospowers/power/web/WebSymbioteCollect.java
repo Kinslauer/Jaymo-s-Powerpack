@@ -84,9 +84,17 @@ public final class WebSymbioteCollect {
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.InspectGrab.TYPE, (payload, ctx) -> grab(ctx.player()));
 	}
 
+	/**
+	 * The bond the Collect slot opens at: {@link #COLLECT_BOND}, or for a host who isn't a web slinger the held bond
+	 * (Andy, 2026-11-25: "the blob should give you all the abilities that it has").
+	 */
+	public static int collectBond(net.minecraft.world.entity.player.Player player) {
+		return com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE) ? COLLECT_BOND : Math.min(COLLECT_BOND, WebSymbioteInfection.HOLD_BOND);
+	}
+
 	/** The Collect slot works (its bond, or everything lent to you; creative has it). */
 	public static boolean unlocked(net.minecraft.world.entity.player.Player player) {
-		return player.isCreative() || WebSymbiote.empowered(player) || WebSymbiote.state(player).bond() >= COLLECT_BOND;
+		return player.isCreative() || WebSymbiote.empowered(player) || WebSymbiote.state(player).bond() >= collectBond(player);
 	}
 
 	/** It's reaching for items now: Collect on in Living Armor past its bond, or tendrils out before it. */

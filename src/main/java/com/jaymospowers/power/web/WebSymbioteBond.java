@@ -237,11 +237,14 @@ public final class WebSymbioteBond {
 		}
 		int bond = WebSymbiote.state(player).bond();
 		int fought = player.getAttachedOrElse(FOUGHT, 0);
-		if (player.isCreative() || bond >= FIGHT_BOND || !mask && fought >= FIGHTS || WebSymbiote.driving(player) || WebSymbiote.roaring(player)
-			|| WebSymbiote.bulked(player)) {
+		// (Andy, 2026-11-25: "it will fight you off everytime you try") without the Web it always fights: no bond, count,
+		// chance or big body lets you off
+		boolean held = WebSymbiote.clings(player);
+		if (player.isCreative() || WebSymbiote.driving(player) || WebSymbiote.roaring(player)
+			|| !held && (bond >= FIGHT_BOND || !mask && fought >= FIGHTS || WebSymbiote.bulked(player))) {
 			return false;
 		}
-		if (!mask && player.getRandom().nextFloat() >= Mth.lerp(bond / (float)FIGHT_BOND, FIGHT_CHANCE_LOW, FIGHT_CHANCE_HIGH)) {
+		if (!held && !mask && player.getRandom().nextFloat() >= Mth.lerp(bond / (float)FIGHT_BOND, FIGHT_CHANCE_LOW, FIGHT_CHANCE_HIGH)) {
 			// (0.15.69) not this time: it lets you
 			return false;
 		}
@@ -294,8 +297,9 @@ public final class WebSymbioteBond {
 	}
 
 	private static void tickFight(ServerPlayer player, Live live, long now) {
-		if (WebSymbiote.driving(player) || WebSymbiote.roaring(player) || WebSymbiote.bulked(player) || !WebSymbiote.suitShown(player)) {
-			// something else has the suit now
+		if (WebSymbiote.driving(player) || WebSymbiote.roaring(player)
+			|| !WebSymbiote.clings(player) && (WebSymbiote.bulked(player) || !WebSymbiote.suitShown(player))) {
+			// something else has the suit now (a host without the Web fights it in any form)
 			endFight(player, live);
 			return;
 		}
@@ -346,9 +350,16 @@ public final class WebSymbioteBond {
 	private static void win(ServerPlayer player, Live live, long now) {
 		boolean mask = live.forMask;
 		endFight(player, live);
-		if (mask) {
+		if (mask || WebSymbiote.clings(player)) {
 			// (0.13.23) the mask fight: it comes off for good, until you put it back
-			player.setAttached(WebSymbiote.UNMASKED, true);
+			// (Andy, 2026-11-25: without the Web "the most you can get is the mask", of any fight for the suit too)
+			com.jaymospowers.costume.CostumeDesign shape = com.jaymospowers.costume.Costume.shown(player);
+			if (shape != null && shape.mask() != com.jaymospowers.costume.CostumeDesign.Mask.NONE) {
+				// its suit is the host's costume: the mask is the costume's head piece
+				com.jaymospowers.costume.Costume.maskOff(player);
+			} else {
+				player.setAttached(WebSymbiote.UNMASKED, true);
+			}
 		} else {
 			player.setAttached(FOUGHT, player.getAttachedOrElse(FOUGHT, 0) + 1);
 			bareFace(player, now);

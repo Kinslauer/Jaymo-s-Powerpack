@@ -325,6 +325,13 @@ public final class WebSymbiote {
 	 */
 	public static final int RED_HUNT_BOND = 30, RED_HUNT_MAX = 3600;
 	public static final float RED_FAR_HUNT_CHANCE = 0.12F, RED_HUNT_STRUGGLE = 0.5F;
+	/**
+	 * Andy (2026-11-25): in a host without the Web, on meeting a web slinger "the suit will try to fight the slinger
+	 * autonomously first, if it gets close to losing it will bind to the slinger, it will also detach and bind if the
+	 * slinger is downed". It drives its host at the slinger as in a red hunt (the same hold: {@link #RED_HUNT_STRUGGLE}),
+	 * for {@code SLINGER_FIGHT_MAX} ticks at the most (WebSymbioteInfection ends it sooner, into the slinger).
+	 */
+	public static final int SLINGER_FIGHT_MAX = 3600;
 	public static final int TAKEOVER_LIMIT = 1200;
 	public static final int TAKEOVER_RELIEF = 20;
 	/** The hold is told to the client again this many ticks before it would run out. */
@@ -1116,6 +1123,9 @@ public final class WebSymbiote {
 		/** A red hunt seized from inside ({@link #RED_HUNT_BOND}), and when it must let go at the latest (game time). */
 		boolean redHunt;
 		long redHuntUntil;
+		/** Driving its host at a web slinger to fight them ({@link #SLINGER_FIGHT_MAX}), and when it must let go at the latest. */
+		boolean slingerFight;
+		long slingerFightUntil;
 		boolean suitBeforeTakeover;
 		/** Living Armor: when it came out, and when it was last used (see ARMOR_IDLE_TICKS). */
 		long armorOnAt;
@@ -1320,9 +1330,49 @@ public final class WebSymbiote {
 		return player.isCreative() || empowered(player) || unlockedCount(player) >= SUIT_ABILITIES;
 	}
 
-	/** It has given you this ability (radial index) by now: its bond has reached {@link #UNLOCK_BOND} (creative has them all). */
+	/**
+	 * The bond ability {@code ability} opens at for this host. Andy (2026-11-25, of a host who isn't a web slinger, whom it
+	 * holds at {@link WebSymbioteInfection#HOLD_BOND}): "the blob should give you all the abilities that it has", so
+	 * there every one opens by the held bond; a web slinger's are {@link #UNLOCK_BOND}.
+	 */
+	public static int unlockBond(Player player, int ability) {
+		return Powers.has(player, WebPower.INSTANCE) ? UNLOCK_BOND[ability] : Math.min(UNLOCK_BOND[ability], WebSymbioteInfection.HOLD_BOND);
+	}
+
+	/**
+	 * The bond the big body comes at: {@link #BOND_MAX} for a web slinger; for a host who isn't one, the held bond
+	 * (Andy, 2026-11-25: "big body at 60").
+	 */
+	public static int bulkBond(Player player) {
+		return Powers.has(player, WebPower.INSTANCE) ? BOND_MAX : WebSymbioteInfection.HOLD_BOND;
+	}
+
+	/**
+	 * Bonded to someone without the Web (either side). Andy (2026-11-25): "i dont think you should be able to pull the suit
+	 * off manually without web. it will fight you off everytime you try. the most you can get is the mask."
+	 */
+	public static boolean clings(Player player) {
+		return isBonded(player) && !Powers.has(player, WebPower.INSTANCE);
+	}
+
+	/**
+	 * (server) Taking the mask off a costume-shaped suit, or the suit's own, in a host who isn't a web slinger: it fights
+	 * them for it, every time (returns true: the mask stays on for now). False for a web slinger, who takes it off as asked.
+	 */
+	public static boolean fightsMask(ServerPlayer player) {
+		if (!clings(player)) {
+			return false;
+		}
+		if (WebSymbioteBond.dormant(player)) {
+			WebSymbioteBond.refuse(player);
+			return true;
+		}
+		return WebSymbioteBond.resistMask(player);
+	}
+
+	/** It has given you this ability (radial index) by now: its bond has reached {@link #unlockBond} (creative has them all). */
 	public static boolean unlocked(Player player, int ability) {
-		return ability < 0 || ability >= ABILITIES || player.isCreative() || empowered(player) || state(player).bond() >= UNLOCK_BOND[ability];
+		return ability < 0 || ability >= ABILITIES || player.isCreative() || empowered(player) || state(player).bond() >= unlockBond(player, ability);
 	}
 
 	/** How many of its six abilities it has given you. */
@@ -1334,9 +1384,9 @@ public final class WebSymbiote {
 		return count;
 	}
 
-	/** The bond is whole: Living Armor brings the big body, and it's yours to drive. */
+	/** The bond is whole ({@link #bulkBond}): Living Armor brings the big body, and it's yours to drive. */
 	public static boolean fullBond(Player player) {
-		return state(player).bond() >= BOND_MAX;
+		return state(player).bond() >= bulkBond(player);
 	}
 
 	/** Presses it takes to break a takeover's hold now, or -1 if you can't yet (too few of its abilities earned). */
@@ -1553,12 +1603,12 @@ public final class WebSymbiote {
 		}
 		if (to > from) {
 			for (int i = 0; i < ABILITIES; i++) {
-				if (from < UNLOCK_BOND[i] && to >= UNLOCK_BOND[i]) {
+				if (from < unlockBond(player, i) && to >= unlockBond(player, i)) {
 					whisper(player, "unlock_" + ABILITY_NAMES[i]);
 					player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.2F, 0.8F);
 				}
 			}
-			if (from < BOND_MAX && to >= BOND_MAX) {
+			if (from < bulkBond(player) && to >= bulkBond(player)) {
 				whisper(player, "unlock_bulk");
 			}
 		}
@@ -1756,7 +1806,7 @@ public final class WebSymbiote {
 		boolean giftEnded = false;
 		if (live.giftUntil > 0L && (now >= live.giftUntil || !next.has(WebSymbioteState.ARMOR))) {
 			live.giftUntil = 0L;
-			if (next.has(WebSymbioteState.ARMOR) && next.bond() < BOND_MAX) {
+			if (next.has(WebSymbioteState.ARMOR) && next.bond() < bulkBond(player)) {
 				giftEnded = true;
 				next = next.withFlag(WebSymbioteState.ARMOR, false);
 				armor = next.has(WebSymbioteState.BULK);
@@ -1778,8 +1828,8 @@ public final class WebSymbiote {
 				live.armorUsedAt = now;
 			}
 			// (the bond whole, Living Armor is the big body you drive: it stays until you put it away)
-			boolean idle = !next.has(WebSymbioteState.SUIT) && next.bond() < BOND_MAX && now - live.armorUsedAt > ARMOR_IDLE_TICKS;
-			if (idle || now - live.armorOnAt > ARMOR_MAX_TICKS && next.bond() < BOND_MAX) {
+			boolean idle = !next.has(WebSymbioteState.SUIT) && next.bond() < bulkBond(player) && now - live.armorUsedAt > ARMOR_IDLE_TICKS;
+			if (idle || now - live.armorOnAt > ARMOR_MAX_TICKS && next.bond() < bulkBond(player)) {
 				next = next.withFlag(WebSymbioteState.ARMOR, false);
 				armor = next.has(WebSymbioteState.BULK);
 				live.armorOnAt = 0L;
@@ -1999,7 +2049,8 @@ public final class WebSymbiote {
 		}
 		// near death it will stop at nothing: everything it has, and under three hearts, the Shroud and a run for it
 		// (0.13.23) and low with something on you, it always fights for you: no hunger, bond, mood or chance about it
-		LivingEntity threat = threat(player);
+		// (fighting a web slinger it drove its host at: nothing else is a threat until WebSymbioteInfection ends that)
+		LivingEntity threat = live.slingerFight ? null : threat(player);
 		if (tickProtect(player, live, now, threat)) {
 			next = next.withStress(Math.min(STRESS_MAX, next.stress() + DEFEND_STRESS));
 		}
@@ -2080,7 +2131,7 @@ public final class WebSymbiote {
 		}
 		flailTick(player, live, now);
 		boolean bulkWanted = live.takeoverTicks > 0 && live.bigTakeover || roarAge >= ROAR_BULK_AT
-			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= BOND_MAX && !live.feedingArmor && live.takeoverTicks <= 0 && !live.armorSlim
+			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= bulkBond(player) && !live.feedingArmor && live.takeoverTicks <= 0 && !live.armorSlim
 			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && live.bigTakeover && !sulking(player) && !live.armorSlim;
 		if (bulkWanted != next.has(WebSymbioteState.BULK)) {
 			next = next.withFlag(WebSymbioteState.BULK, bulkWanted);
@@ -2091,7 +2142,7 @@ public final class WebSymbiote {
 				com.jaymospowers.core.Shakes.heavy(player, player.position(), BULK_SHAKE_RANGE, BULK_SHAKE);
 			} else {
 				removeArmor(player);
-				if ((!next.has(WebSymbioteState.ARMOR) || next.bond() < BOND_MAX) && !giftEnded && !lockedOut(player)) {
+				if ((!next.has(WebSymbioteState.ARMOR) || next.bond() < bulkBond(player)) && !giftEnded && !lockedOut(player)) {
 					whisper(player, "bulk_down");
 				}
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
@@ -2255,6 +2306,7 @@ public final class WebSymbiote {
 		abortFeeding(player, live);
 		if (live.takeoverTicks > 0) {
 			live.takeoverTicks = 0;
+			live.slingerFight = false;
 			dropSight(player, live);
 			WebTakeoverPath.stop(player, live.route);
 			live.route = null;
@@ -2299,6 +2351,7 @@ public final class WebSymbiote {
 		abortFeeding(player, live);
 		if (live.takeoverTicks > 0) {
 			live.takeoverTicks = 0;
+			live.slingerFight = false;
 			dropSight(player, live);
 			WebTakeoverPath.stop(player, live.route);
 			live.route = null;
@@ -2382,6 +2435,7 @@ public final class WebSymbiote {
 			if (live.takeoverTicks > 0) {
 				// mid-takeover: it lets go of the body (and the client stops steering)
 				live.takeoverTicks = 0;
+				live.slingerFight = false;
 				dropSight(player, live);
 				WebTakeoverPath.stop(player, live.route);
 				live.route = null;
@@ -2550,6 +2604,8 @@ public final class WebSymbiote {
 			if (live.protecting) {
 				// (0.13.23) fighting for you: back at it after you wrestled it off, or seizing you fresh
 				whisper(player, live.protectRetake ? "protect.again" : "protect." + (1 + player.getRandom().nextInt(PROTECT_LINES)));
+			} else if (live.slingerFight) {
+				whisper(player, "infection.fight." + (1 + player.getRandom().nextInt(WebSymbioteInfection.FIGHT_LINES)));
 			} else if (live.mending) {
 				whisper(player, "white.mending." + (1 + player.getRandom().nextInt(SAY_LINES)));
 			} else if (live.rivalry) {
@@ -2564,6 +2620,52 @@ public final class WebSymbiote {
 			} else {
 				whisper(player, live.curious ? "curious" : live.hunting ? "hunt" : "takeover");
 			}
+		}
+	}
+
+	/**
+	 * (Andy, 2026-11-25) It takes the wheel and drives {@code host} (who has no Web) at {@code slinger}, a web slinger, to
+	 * fight them (see {@link #SLINGER_FIGHT_MAX}); {@link WebSymbioteInfection} ends it, into the slinger when its host is
+	 * close to losing or the slinger is downed. False when it can't take the wheel just now.
+	 */
+	static boolean fightSlinger(ServerPlayer host, ServerPlayer slinger) {
+		Live live = live(host);
+		long now = host.level().getGameTime();
+		if (live.takeoverTicks > 0 || live.roarAt > 0L || live.feedStage != FEED_NONE || live.bondTicks > 0 || live.fleeing
+			|| WebSymbioteRescue.rescuing(host) || Downed.isDowned(host) || host.isCreative()) {
+			return false;
+		}
+		live.rampage = true;
+		live.curious = false;
+		live.feral = false;
+		live.bloodlust = false;
+		live.slingerFight = true;
+		startTakeover(host, live, now, slinger);
+		if (live.takeoverTicks <= 0) {
+			live.slingerFight = false;
+			return false;
+		}
+		live.bigTakeover = true;
+		live.slingerFightUntil = now + SLINGER_FIGHT_MAX;
+		// the host can always fight it (SPREE_BREAK_FREE), as against a red hunt
+		host.setAttached(SPREE, true);
+		return true;
+	}
+
+	/** It is driving this host at a web slinger ({@link #fightSlinger}). */
+	static boolean fightingSlinger(ServerPlayer host) {
+		Live live = host.getAttached(LIVE);
+		return live != null && live.slingerFight && live.takeoverTicks > 0;
+	}
+
+	/** It lets go of the wheel it took to fight a web slinger. */
+	static void endSlingerFight(ServerPlayer host) {
+		Live live = host.getAttached(LIVE);
+		if (live != null && live.slingerFight) {
+			if (live.takeoverTicks > 0) {
+				endTakeover(host, live);
+			}
+			live.slingerFight = false;
 		}
 	}
 
@@ -2737,7 +2839,7 @@ public final class WebSymbiote {
 		}
 		// (never back to one it gave up on before: two it can't reach don't hand it back and forth)
 		live.givenUp.add(target.getId());
-		LivingEntity next = live.protecting ? threat(player) : live.redHunt ? WebRedHunt.nearest(player.level(), player, live.givenUp)
+		LivingEntity next = live.slingerFight ? null : live.protecting ? threat(player) : live.redHunt ? WebRedHunt.nearest(player.level(), player, live.givenUp)
 			: prey(player, live.rampage, live.givenUp);
 		if (next == null || live.givenUp.contains(next.getId())) {
 			endTakeover(player, live);
@@ -2810,6 +2912,7 @@ public final class WebSymbiote {
 		live.mending = false;
 		live.bloodlust = false;
 		live.redHunt = false;
+		live.slingerFight = false;
 		live.rivalry = false;
 		live.protecting = false;
 		player.removeAttached(SPREE);
@@ -2853,7 +2956,8 @@ public final class WebSymbiote {
 			drawIn(player);
 		}
 		WebSymbioteState state = state(player);
-		if (state.has(WebSymbioteState.SUIT) && !bulked(player) && !livingArmor(player)) {
+		// (Andy, 2026-11-25: without the Web the suit doesn't come off by your word: only the tendrils draw in)
+		if (state.has(WebSymbioteState.SUIT) && !bulked(player) && !livingArmor(player) && !clings(player)) {
 			set(player, state.withFlag(WebSymbioteState.SUIT, false));
 			torn(player);
 			ServerLevel level = player.level();
@@ -3787,6 +3891,12 @@ public final class WebSymbiote {
 			endTakeover(player, live);
 			return;
 		}
+		if (live.slingerFight && (now >= live.slingerFightUntil || target == null || !target.isAlive()
+			|| target.distanceTo(player) > WebSymbioteInfection.WEB_SENSE_RANGE)) {
+			// the fight with the slinger is over (never a kill to feed on: WebSymbioteInfection takes it from here)
+			endTakeover(player, live);
+			return;
+		}
 		if (target == null || !target.isAlive() || target.distanceTo(player) > (live.redHunt ? WebRedHunt.RANGE : TAKEOVER_ESCAPE)) {
 			boolean dead = target != null && !target.isAlive();
 			if (dead && live.hunting && live.feedStage == FEED_KILL) {
@@ -3834,6 +3944,10 @@ public final class WebSymbiote {
 			return;
 		}
 		boolean inReach = player.distanceTo(target) - target.getBbWidth() * 0.5 <= TAKEOVER_REACH;
+		if (live.slingerFight && Downed.isDowned(target)) {
+			// (a blow on a downed player can kill: it stops, and WebSymbioteInfection binds to them)
+			return;
+		}
 		if (inReach && live.takeoverTicks % TAKEOVER_SEIZE_EVERY == TAKEOVER_SEIZE_AT && target instanceof LivingEntity seized && seize(player, seized)) {
 			// the tendrils take it: impale, whip, hurl or squeeze (a counter's own moves)
 		} else if (live.takeoverTicks % TAKEOVER_ATTACK_TICKS == 0 && inReach) {
@@ -4191,6 +4305,14 @@ public final class WebSymbiote {
 			return false;
 		}
 		// coming down one form
+		if (clings(player) && !player.isCreative()) {
+			// (Andy, 2026-11-25) without the Web nothing comes off by your choice: every try is a fight with it, and
+			// winning gets you the mask off at most (WebSymbioteBond)
+			if (!driving(player) && !roaring(player)) {
+				WebSymbioteBond.resistRemoval(player);
+			}
+			return false;
+		}
 		if (form >= FORM_ARMOR) {
 			if (driving(player) || roaring(player)) {
 				// it has the wheel: no key answers
@@ -6011,7 +6133,7 @@ public final class WebSymbiote {
 	/** Who's holding a symbiote's attention, for debug output. */
 	public static String describe(Player player) {
 		WebSymbioteState s = state(player);
-		return "bonded=" + s.bonded() + " strain=" + s.kind() + " bond=" + s.bond() + " satiety=" + s.satiety() + " stress=" + s.stress() + " rejections=" + s.rejections() + " flags=" + s.flags()
+		return "bonded=" + s.bonded() + " strain=" + s.kind() + " bond=" + s.bond() + (s.bonded() ? " trust=" + WebSymbioteMind.mind(player).trust() : "") + " satiety=" + s.satiety() + " stress=" + s.stress() + " rejections=" + s.rejections() + " flags=" + s.flags()
 			+ (player instanceof ServerPlayer sp ? " feeding[" + describeFeeding(sp) + "]" : "");
 	}
 }
