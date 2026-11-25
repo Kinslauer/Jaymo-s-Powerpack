@@ -27,7 +27,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2137 Corpse hint drops "search the body" when nothing is left (Powers, Kitchen, 2026-11-25)
+- [ ] #2136 Riders no longer start with a spare saddle (Kingdoms, 2026-11-25)
+- [ ] #2135 journal map page shows Xaero's minimap, World map button (Kingdoms, 2026-11-25)
 - [ ] #2134 Hand of God effects: heat-vision Frost beam, Thunderhead electrokinesis, Chrono slow time, five Nadir moves (Powers, 2026-11-25)
+- [ ] #2133 Visceral gore: deeper wounds, hit reactions, armour holes, takedowns, gore reader (Powers, Kingdoms, Kitchen, 2026-11-25)
 - [ ] #2132 Villager screen opens into talk: everything is a spoke on the talk wheel, only Gift and Trade stay buttons (Kingdoms, 2026-11-25)
 - [ ] #2131 The Wither's own look, animations and voice (Kingdoms, 2026-11-25)
 - [ ] #2130 End plants no longer break End worldgen (Kitchen, 2026-11-25)
@@ -83,11 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2069 A dead player's severed head can be taken as a trophy (Powers, Kingdoms, 2026-11-24)
 - [ ] #2067 A Truth Cleric prays from a book, not a holy symbol (Kingdoms, 2026-11-24)
 - [ ] #2066 JEI shows stone tools, hammer and light armour recipes on a server (Powers, Kingdoms, Kitchen, 2026-11-24)
-- [ ] #2065 The key clash pop-up comes per key, on its first press (Kingdoms, 2026-11-24)
-- [ ] #2064 the life aim page is a torn scrap on rough starts, headed by who you are (Kingdoms, 2026-11-24)
-- [ ] #2063 Your coin at a glance, and money bags in chests (Kingdoms, 2026-11-24)
-- [ ] #2062 Adrenaline kicks in once, going down included (Powers, 2026-11-24)
-- …and 521 older ones.
+- …and 525 older ones.
 
 ## Health
 

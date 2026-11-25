@@ -36,7 +36,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Agents/Visceral gore picks|Visceral gore picks]] · 💻 Odysseus · #2133 · in-review
 
 
 ## Needs Andy
