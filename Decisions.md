@@ -1114,3 +1114,4 @@ Andy: "can you make one of these as an example?" Supplied Hand-built starts (adv
 - **Decided:** "you should be able to wear any crown" (on the Mordhau harness 2 helm crown). Read as: every crown (the rulers' crowns, tiara, circlet, coronet and the new helm crown) goes over a helm in the crest place, and anyone may wear one (no royals-only rule for the helm crown).
 - **Applies to:** Kingdoms harness (Harness.slotOf, HeraldryLayer, gen_heraldry_hoods.py), branch claude/mordhau-2-hoods-crests.
 - **Agent:** mordhau-2-hoods-crests.
+- 2026-11-25 (Andy, Fae Woods thread): mage wands: "They should learn spells and cast from the wand" (a caster's learned spells, cast through a wand); Rim's sea beasts "can keep the shapes" (repainted and renamed); Fantasy Mounts ships only after its author says yes ("ok"); approved the lore paragraph "The glow-woods".
