@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 13:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 13:24). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,8 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
-- [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
-- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
@@ -36,8 +34,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · for 💻 Odysseus · #2178 · in-review
-- [ ] [[Agents/codex-written-start-example|codex-written-start-example]] · 💻 Odysseus · #2177 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -54,6 +50,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/mordhau-2-hoods-crests|mordhau-2-hoods-crests]]
 - [x] [[Inbox/Done/mordhau-1-helms|mordhau-1-helms]]
 - [x] [[Inbox/Done/wither-model|wither-model]]
 - [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
@@ -61,7 +58,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
 - [x] [[Inbox/Done/village-mods-6-small-structures|village-mods-6-small-structures]]
 - [x] [[Inbox/Done/village-mods-5-town-life-hats|village-mods-5-town-life-hats]]
-- [x] [[Inbox/Done/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]]
 
 
 %% kanban:settings
