@@ -3,8 +3,17 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
+import com.jaymospowers.power.zfighter.pod.PodClass;
 import com.jaymospowers.power.zfighter.pod.PodGrades;
+import com.jaymospowers.power.zfighter.pod.PodLegs;
+import com.jaymospowers.power.zfighter.pod.PodBeacons;
 import com.jaymospowers.power.zfighter.pod.PodParts;
+import com.jaymospowers.power.zfighter.pod.PodClimb;
+import com.jaymospowers.power.zfighter.pod.PodFlight;
+import com.jaymospowers.power.zfighter.pod.PodPost;
+import com.jaymospowers.power.zfighter.pod.PodReturn;
+import com.jaymospowers.power.zfighter.pod.PodSpace;
+import com.jaymospowers.power.zfighter.pod.PodTow;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -50,8 +59,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.18.4, Andy) A trip in the space pod, which you now ride: the pod entity ({@link PodEntity}, tagged {@link #TAG} for the trip)
  * takes you in, and it counts down shaking and smoking, then lifts off on its fire with you
- * inside while everyone near watches it go. Up past the clouds the client shows the flight ({@code ZFighterFlightScreen}): the pod
- * crossing space from here to there, longer the farther the world ({@link #flightTicks}); after a first trip it can be skipped.
+ * inside while everyone near watches it go. Then the pilot flies it: up through the sky bands of the world they leave ({@link PodClimb}),
+ * and across the dark between the worlds ({@link PodSpace}, shown by {@code PodFlightScreen}), or lets the autopilot do it.
  * Then the pod comes down out of the sky over open ground anywhere on the far world (no landing pad: {@link #ground}), slowing
  * on its thrusters, and sets down; it stands there holding the fuel left, and you climb out beside it. (0.18.50) It is the real
  * pod with the parts it was launched with: one that isn't whole lands hard ({@link #HARD_LANDING_DAMAGE}) and shakes
@@ -66,11 +75,8 @@ public final class ZFighterPodTrip {
 	/** The countdown (ticks), the lift (ticks), how fast the lift speeds up and its top speed (blocks a tick). */
 	static final int COUNTDOWN_TICKS = 60, LIFT_TICKS = 70;
 	static final double LIFT_ACCEL = 0.03, LIFT_TOP = 1.6;
-	/** While the flight screen shows, the pod keeps climbing this fast, up to this far over the world's top. */
-	static final double CRUISE_SPEED = 0.6;
-	static final int CRUISE_OVER_TOP = 40;
-	/** The flight's length: a base and more for each unit of fuel the trip burns (ticks). */
-	static final int FLIGHT_BASE_TICKS = 100, FLIGHT_PER_FUEL = 30;
+	/** How far over the world's top a descent starts from (blocks). */
+	static final int CRUISE_OVER_TOP = PodFlight.CLIMB_OVER_TOP;
 	/** The descent: how high over the ground it starts, its top and bottom speed, how quickly it slows, and when it gives up. */
 	static final int DESCENT_HEIGHT = 56, DESCENT_MAX_TICKS = 400;
 	static final double DESCENT_FAST = 1.2, DESCENT_SLOW = 0.12, DESCENT_EASE = 0.05;
@@ -91,15 +97,20 @@ public final class ZFighterPodTrip {
 	public static final String TAG = "jaymospowers.space_pod";
 
 	enum Phase {
-		COUNTDOWN, LIFT, FLIGHT, DESCENT,
+		COUNTDOWN, LIFT,
+		/** Patch 9: the pilot flies the pod up through the sky bands, in the real world ({@link PodClimb}). */
+		CLIMB,
+		/** Patch 9: the crossing between the worlds, a flight space the server simulates ({@link PodSpace}). */
+		SPACE,
+		DESCENT,
 		/** (0.20.36) Caught in the high sky by a raider band ({@link ZFighterHighSky}): the pod hangs struck, the pilot is out fighting. */
 		AMBUSH
 	}
 
 	/** One trip: where to (a destination index or Home), the fuel it will leave in the pod, the parts it carries, and where it is in the flight. */
 	private static final class Trip {
-		final int dest;
-		final int fuelLeft;
+		int dest;
+		int fuelLeft;
 		final int fuelBefore;
 		/** (0.18.50) The grade of the fuel in the tank, carried to the pod that lands. */
 		int fuelGrade;
@@ -115,6 +126,10 @@ public final class ZFighterPodTrip {
 		int grade;
 		/** (0.18.56) A Starlit Lens on the mast, carried to the pod that lands. */
 		boolean lens;
+		/** What else the pod carries (sockets, modules, forging, the hold), the share of the flight its class takes, and whether it has landing legs. */
+		PodEntity.@Nullable Extras extras;
+		float flightScale = 1.0F;
+		boolean legs = true;
 		@Nullable UUID guest;
 		@Nullable ResourceKey<Level> to;
 		@Nullable BlockPos ground;
@@ -122,6 +137,13 @@ public final class ZFighterPodTrip {
 		final List<UUID> raiders = new ArrayList<>();
 		boolean cleared;
 		boolean battered;
+		/** Patch 9: the climb, the crossing, whether the autopilot flies, whether the high-sky ambush has been rolled, whether the pod crashed, what it tows. */
+		PodClimb.@Nullable Flight climb;
+		@Nullable PodSpace sim;
+		boolean auto = true;
+		boolean ambushRolled;
+		boolean crashed;
+		PodTow.@Nullable Towed towed;
 
 		Trip(int dest, int fuelLeft, int fuelBefore, ResourceKey<Level> from, BlockPos origin) {
 			this.dest = dest;
@@ -248,18 +270,10 @@ public final class ZFighterPodTrip {
 	static final int AMBUSH_TICKS = 20 * 180;
 	static final double BOARD_RANGE = 2.5;
 
-	/** The flight's length for a trip that burns {@code cost} fuel. */
-	/** A trip that skirts the Hollow ({@link ZFighterSpace#skirtsHollow}) lasts this much longer. */
-	static final float HOLLOW_STRETCH = 1.35F;
-
-	public static int flightTicks(int cost) {
-		return FLIGHT_BASE_TICKS + FLIGHT_PER_FUEL * cost;
-	}
-
 	// ---------------------------------------------------------------- the start
 
 	/** Seats {@code player} in {@code pod} (the pod entity the star map was opened at) and starts the countdown. */
-	static void start(ServerPlayer player, int dest, PodEntity pod, int fuelLeft, int fuelBefore) {
+	static void start(ServerPlayer player, int dest, PodEntity pod, int fuelLeft, int fuelBefore, boolean auto, @Nullable PodEntity towed) {
 		com.jaymospowers.core.PackAdvancements.deed(player, "pod");
 		ServerLevel level = player.level();
 		BlockPos at = pod.blockPosition();
@@ -271,6 +285,15 @@ public final class ZFighterPodTrip {
 		trip.finished = pod.finished();
 		trip.grade = pod.grade();
 		trip.lens = pod.lens() && pod.has(PodPart.MAST, 0);
+		trip.extras = pod.extras();
+		trip.flightScale = PodClass.of(pod).flight;
+		trip.legs = PodLegs.lands(pod);
+		trip.auto = auto;
+		// a pod that crashed and was mended and fuelled flies as any other
+		PodTow.clear(pod);
+		if (towed != null) {
+			trip.towed = PodTow.take(player, towed);
+		}
 		// (0.18.50) a second seat: whoever else is aboard comes along
 		ServerPlayer guest = null;
 		for (Entity rider : pod.getPassengers()) {
@@ -301,6 +324,9 @@ public final class ZFighterPodTrip {
 		pod.setFinished(trip.finished);
 		pod.setGrade(trip.grade);
 		pod.setLens(trip.lens);
+		if (trip.extras != null) {
+			pod.applyExtras(trip.extras);
+		}
 		pod.setYRot(yaw);
 		pod.setHovering(true);
 		// tagged once it is in the world, so the load check doesn't take it for a leftover
@@ -329,6 +355,12 @@ public final class ZFighterPodTrip {
 		}
 		for (UUID id : done) {
 			TRIPS.remove(id);
+			ServerPlayer pilot = server.getPlayerList().getPlayer(id);
+			if (pilot != null) {
+				// the flight view of the pilot (and of anyone in the second seat) closes
+				ServerPlayNetworking.send(pilot, PodSpace.end());
+				PodFlight.forget(pilot);
+			}
 		}
 	}
 
@@ -392,16 +424,41 @@ public final class ZFighterPodTrip {
 					Shakes.send(player, 0.45F, at.add(0.0, -3.0, 0.0));
 				}
 				if (--trip.ticks <= 0) {
-					beginFlight(player, trip);
+					beginClimb(player, trip);
 				}
 			}
-			case FLIGHT -> {
-				if (at.y < level.getMaxY() + CRUISE_OVER_TOP) {
-					move(pod, at.add(0.0, CRUISE_SPEED, 0.0));
-					thrust(level, at, 3);
+			case CLIMB -> {
+				PodClimb.Flight climb = trip.climb;
+				if (climb == null) {
+					climb = trip.climb = new PodClimb.Flight(at.y, trip.auto);
 				}
-				if (--trip.ticks <= 0) {
+				double top = level.getMaxY() + PodFlight.CLIMB_OVER_TOP;
+				if (!trip.ambushRolled && at.y >= ZFighterHighSky.ambushY(level.getServer())) {
+					// up through the high sky, and a raider band may be waiting there
+					trip.ambushRolled = true;
+					if (ZFighterHighSky.ambushes(player, trip.from, player.getAttachedOrElse(FLIGHTS, 1) - 1)) {
+						beginAmbush(player, trip);
+						return false;
+					}
+				}
+				thrust(level, at, climb.auto ? 3 : 2);
+				if (PodClimb.step(player, level, pod, climb, top, trip.flightScale, guest)) {
+					beginSpace(player, trip);
+				}
+			}
+			case SPACE -> {
+				PodSpace sim = trip.sim;
+				if (sim == null) {
 					beginDescent(player, trip);
+					return false;
+				}
+				pod.setDeltaMovement(Vec3.ZERO);
+				PodSpace.Result result = sim.tick(player, pod, guest);
+				if (sim.takeSaving()) {
+					trip.fuelLeft = Math.min(trip.fuelBefore, trip.fuelLeft + PodSpace.SLING_SAVES);
+				}
+				if (result != PodSpace.Result.FLYING) {
+					endSpace(player, trip, result);
 				}
 			}
 			case DESCENT -> {
@@ -411,6 +468,11 @@ public final class ZFighterPodTrip {
 				}
 				double left = at.y - ground.getY();
 				double speed = Mth.clamp(left * DESCENT_EASE, DESCENT_SLOW, DESCENT_FAST);
+				if (!trip.legs) {
+					// no landing legs: only the cabin comes down, under a chute
+					speed = Math.min(speed, PodLegs.CHUTE_SPEED);
+					PodLegs.chute(level, at);
+				}
 				if (left <= speed || --trip.ticks <= 0) {
 					touchDown(player, trip);
 					return true;
@@ -441,33 +503,75 @@ public final class ZFighterPodTrip {
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y - 0.4, at.z, Math.max(1, flames / 2), 0.4, 0.15, 0.4, 0.02);
 	}
 
-	/** Past the clouds: the landing is found (and its ground made, behind the screen) and the flight shows. */
-	private static void beginFlight(ServerPlayer player, Trip trip) {
+	/** The lift is over: the landing is found (and its ground made, behind the climb) and the pilot has the pod. */
+	private static void beginClimb(ServerPlayer player, Trip trip) {
 		target(player, trip);
 		int flown = player.getAttachedOrElse(FLIGHTS, 0);
 		player.setAttached(FLIGHTS, flown + 1);
-		if (ZFighterHighSky.ambushes(player, trip.from, flown)) {
-			// (0.20.36) up through the high sky, and a raider band is waiting there
-			beginAmbush(player, trip);
-			return;
-		}
-		showFlight(player, trip);
+		trip.phase = Phase.CLIMB;
+		trip.climb = trip.pod == null ? null : new PodClimb.Flight(trip.pod.getY(), trip.auto);
+		player.sendOverlayMessage(Component.translatable(trip.auto ? "message.jaymospowers.pod.climb_auto" : "message.jaymospowers.pod.climb").withStyle(ChatFormatting.GOLD));
 	}
 
-	/** The flight shows: the pod crossing space, for the trip's length. */
-	private static void showFlight(ServerPlayer player, Trip trip) {
-		int cost = ZFighterSpace.cost(trip.dest, trip.from);
-		trip.phase = Phase.FLIGHT;
-		trip.ticks = flightTicks(cost);
-		if (ZFighterSpace.skirtsHollow(ZFighterSpace.indexOf(trip.from), trip.dest)) {
-			// the Hollow's pull drags the pod off course: the trip runs long
-			trip.ticks = Math.round(trip.ticks * HOLLOW_STRETCH);
+	/** The pod is above the world: the crossing begins, flown by hand or by the autopilot. */
+	private static void beginSpace(ServerPlayer player, Trip trip) {
+		PodEntity pod = trip.pod;
+		if (pod == null) {
+			beginDescent(player, trip);
+			return;
 		}
-		ServerPlayNetworking.send(player, new Flight(trip.dest, trip.ticks, player.getAttachedOrElse(FLIGHTS, 0) > 1, trip.lens, false));
-		ServerPlayer guest = guest(player.level().getServer(), trip);
+		int from = ZFighterSpace.indexOf(trip.from);
+		int leagues = PodFlight.leagues(trip.dest, trip.from);
+		boolean hollow = ZFighterSpace.skirtsHollow(from, trip.dest);
+		pod.setDeltaMovement(Vec3.ZERO);
+		trip.phase = Phase.SPACE;
+		trip.sim = new PodSpace(player, pod, from, trip.dest, leagues, trip.auto, ZFighterSpace.readCharts(player), trip.towed != null, hollow, trip.flightScale);
+	}
+
+	/** The crossing is over: landed on, docked at the post, or the pod crashed (or the Maw took it). */
+	private static void endSpace(ServerPlayer player, Trip trip, PodSpace.Result result) {
+		PodSpace sim = trip.sim;
+		trip.sim = null;
+		MinecraftServer server = player.level().getServer();
+		ServerPlayer guest = guest(server, trip);
+		ServerPlayNetworking.send(player, PodSpace.end());
 		if (guest != null) {
-			ServerPlayNetworking.send(guest, new Flight(trip.dest, trip.ticks, false, trip.lens, false));
+			ServerPlayNetworking.send(guest, PodSpace.end());
 		}
+		PodFlight.forget(player);
+		switch (result) {
+			case DOCKED -> {
+				// down on the post's deck, in the high sky of the world ahead
+				ServerLevel to = trip.dest == ZFighterSpace.HOME_INDEX ? null : server.getLevel(ZFighterSpace.DESTS[trip.dest].level());
+				if (to != null && PodPost.isPostWorld(to)) {
+					trip.to = to.dimension();
+					trip.ground = PodPost.dock(to);
+				}
+				tell(player, guest, Component.translatable("message.jaymospowers.pod.docked").withStyle(ChatFormatting.AQUA));
+			}
+			case CRASHED -> {
+				if (sim != null && sim.caught()) {
+					// the Maw takes the pod, and throws a return stage out of its wrecks after it
+					trip.dest = ZFighterSpace.MAW;
+					trip.to = null;
+					trip.ground = null;
+					player.getInventory().placeItemBackInInventory(new ItemStack(PodReturn.STAGE), net.minecraft.util.Prediction.SERVER_ONLY);
+					tell(player, guest, Component.translatable("message.jaymospowers.pod.maw_took").withStyle(ChatFormatting.RED));
+				} else {
+					// the hull is gone: the pod limps down on the nearer world, engines dead, and waits for a tow
+					boolean back = sim == null || sim.progress() < 0.5;
+					trip.dest = back ? ZFighterSpace.indexOf(trip.from) : trip.dest;
+					trip.to = null;
+					trip.ground = null;
+					trip.fuelLeft = 0;
+					trip.crashed = true;
+					tell(player, guest, Component.translatable(back ? "message.jaymospowers.pod.crash_back" : "message.jaymospowers.pod.crash_on").withStyle(ChatFormatting.RED));
+				}
+			}
+			default -> {
+			}
+		}
+		beginDescent(player, trip);
 	}
 
 	// ---------------------------------------------------------------- (0.20.36) the ambush in the high sky
@@ -482,7 +586,7 @@ public final class ZFighterPodTrip {
 		MinecraftServer server = level.getServer();
 		PodEntity pod = trip.pod;
 		if (pod == null) {
-			showFlight(player, trip);
+			beginDescent(player, trip);
 			return;
 		}
 		Vec3 at = new Vec3(pod.getX(), ZFighterHighSky.ambushY(server), pod.getZ());
@@ -565,7 +669,8 @@ public final class ZFighterPodTrip {
 		}
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1.0F, 0.7F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.BLOCKS, 2.0F, 0.6F);
-		showFlight(player, trip);
+		trip.phase = Phase.CLIMB;
+		trip.climb = new PodClimb.Flight(pod.getY(), trip.auto);
 		return false;
 	}
 
@@ -617,7 +722,10 @@ public final class ZFighterPodTrip {
 			}
 			if (to != null) {
 				trip.to = to.dimension();
-				trip.ground = groundAt(to, home.pos());
+				// a landing beacon: the pod comes down beside it
+				to.getChunk(home.pos().getX() >> 4, home.pos().getZ() >> 4);
+				BlockPos spot = to.getBlockState(home.pos()).is(PodBeacons.BLOCK) ? home.pos().east(PodBeacons.BESIDE) : home.pos();
+				trip.ground = groundAt(to, spot);
 			} else {
 				ServerLevel overworld = server.overworld();
 				trip.to = overworld.dimension();
@@ -637,7 +745,7 @@ public final class ZFighterPodTrip {
 			to = server.overworld();
 		}
 		trip.to = to.dimension();
-		trip.ground = ground(to, dest);
+		trip.ground = ground(to, dest, player);
 	}
 
 	/** {@code pos} if you can stand there, otherwise the open ground at its column. */
@@ -655,8 +763,13 @@ public final class ZFighterPodTrip {
 	}
 
 	/** Open ground anywhere on a far world: a random flat dry spot (a cave floor on Cinder, a wreck's deck in the Maw). */
-	private static BlockPos ground(ServerLevel level, ZFighterSpace.Dest dest) {
+	private static BlockPos ground(ServerLevel level, ZFighterSpace.Dest dest, ServerPlayer player) {
 		RandomSource random = level.getRandom();
+		// where the pilot last lifted off from this world, unless they asked for somewhere new
+		BlockPos marked = PodMarks.landing(level, dest, player);
+		if (marked != null) {
+			return marked;
+		}
 		if (dest.kind() == ZFighterSpace.Kind.WRECKS) {
 			MawWorld.build(level);
 			List<BlockPos> decks = MawWorld.decks();
@@ -741,9 +854,20 @@ public final class ZFighterPodTrip {
 		level.playSound(null, at, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.6F, 0.6F);
 		level.playSound(null, at, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.7F);
 		Shakes.send(player, 0.6F, Vec3.atCenterOf(at));
-		if (!pod.complete() || trip.battered) {
+		// no landing legs: the fins, bell, tank and mast are torn off and the tank is empty, instead of a hard landing
+		boolean torn = PodLegs.tearOff(level, pod, player);
+		if (!torn && (!pod.complete() || trip.battered || trip.crashed)) {
 			hardLanding(level, player, guest, pod);
 		}
+		if (trip.crashed) {
+			// engines dead, the tank empty: it stays here till it is mended, or a friend with a tow line takes it home
+			PodTow.mark(pod, player.getUUID());
+		}
+		if (trip.towed != null) {
+			PodTow.land(level, roomFor(level, ground.east(6)), trip.towed);
+			trip.towed = null;
+		}
+		PodScanner.wind(player, pod);
 		ZFighterSpace.Dest dest = trip.dest == ZFighterSpace.HOME_INDEX ? null : ZFighterSpace.DESTS[trip.dest];
 		if (trip.dest == ZFighterSpace.HOME_INDEX) {
 			// (0.18.52) a pod flown out and landed home again: the deed that opens Dread
@@ -792,9 +916,11 @@ public final class ZFighterPodTrip {
 		int shaken = SHAKEN_MIN + random.nextInt(SHAKEN_MAX - SHAKEN_MIN + 1);
 		for (int i = 0; i < shaken && !loose.isEmpty(); i++) {
 			boolean[] was = new boolean[1];
-			PodPart part = pod.detach(loose.remove(random.nextInt(loose.size())), was);
+			int bit = loose.remove(random.nextInt(loose.size()));
+			int forged = pod.forgedAt(bit);
+			PodPart part = pod.detach(bit, was);
 			if (part != null) {
-				ItemStack stack = PodParts.itemOf(part, was[0]);
+				ItemStack stack = PodParts.stackOf(part, was[0], 0, forged, com.jaymospowers.power.zfighter.pod.PodModules.FEWEST_SOCKETS);
 				Block.popResource(level, pod.blockPosition().above(), stack);
 			}
 		}
@@ -809,12 +935,15 @@ public final class ZFighterPodTrip {
 		pod.setFinished(trip.finished);
 		pod.setGrade(trip.grade);
 		pod.setLens(trip.lens);
+		if (trip.extras != null) {
+			pod.applyExtras(trip.extras);
+		}
 		pod.setFuel(fuel);
 		return pod;
 	}
 
 	/** Where a pod's feet may rest at {@code ground} (or the nearest spot with room round it). */
-	static Vec3 roomFor(ServerLevel level, BlockPos near) {
+	public static Vec3 roomFor(ServerLevel level, BlockPos near) {
 		return room(level, near.offset(3, 0, 0));
 	}
 
@@ -853,14 +982,6 @@ public final class ZFighterPodTrip {
 	}
 
 	// ---------------------------------------------------------------- the skip, and leaving mid-trip
-
-	/** The player asked to skip the flight: allowed after a first trip. */
-	static void skip(ServerPlayer player) {
-		Trip trip = TRIPS.get(player.getUUID());
-		if (trip != null && trip.phase == Phase.FLIGHT && player.getAttachedOrElse(FLIGHTS, 0) > 1) {
-			trip.ticks = 0;
-		}
-	}
 
 	/** Left the game mid-trip: before the lift the pod stands again where it was; after it, it is set down where it was going. */
 	private static void leave(ServerPlayer player) {
@@ -917,6 +1038,9 @@ public final class ZFighterPodTrip {
 			return;
 		}
 		PodEntity stood = stand(level, at, trip, fuel);
+		if (trip.towed != null) {
+			PodTow.land(level, roomFor(level, at.east(6)), trip.towed);
+		}
 		BlockPos wakes = beside(level, stood.blockPosition());
 		player.setAttached(PENDING, new Pending(level.dimension().identifier().toString(), wakes));
 		if (guest != null) {

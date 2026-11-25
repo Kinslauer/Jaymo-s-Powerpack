@@ -30,7 +30,8 @@
   },
   "features": [
     [
-      "jaymospowers:cloudbed"
+      "jaymospowers:cloudbed",
+      "jaymospowers:cloud_lane"
     ],
     [
       "jaymospowers:lake_pond_arctic"

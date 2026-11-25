@@ -7,6 +7,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ServerExplosion;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,7 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * A big blast a player's power throws (a meteor's rings, a ki blast: the player is the blast's own source, not a block of TNT
- * or a creeper) records the ground it is about to break, so the ground comes back ({@link TerrainReturn}).
+ * or a creeper) records the ground it is about to break, so the ground comes back ({@link TerrainReturn}), and clears it first
+ * so it drops nothing.
  */
 @Mixin(ServerExplosion.class)
 abstract class ExplosionReturnMixin {
@@ -30,7 +33,10 @@ abstract class ExplosionReturnMixin {
 		}
 		ServerLevel level = self.level();
 		for (BlockPos pos : blown) {
-			TerrainReturn.record(level, pos);
+			// ground that grows back is cleared here without drops (Andy, 2026-11-25), so the blast finds air there
+			if (TerrainReturn.record(level, pos)) {
+				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+			}
 		}
 	}
 }

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:furnace",
+    "minecraft:copper_block",
+    "minecraft:bricks"
+  ],
+  "result": {
+    "id": "jaymospowers:fuel_works",
+    "count": 1
+  }
+}

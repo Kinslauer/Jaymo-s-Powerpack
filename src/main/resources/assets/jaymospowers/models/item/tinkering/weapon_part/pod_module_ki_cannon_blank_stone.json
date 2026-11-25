@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/weapon_part/pod_module_ki_cannon_blank_stone"
+  }
+}

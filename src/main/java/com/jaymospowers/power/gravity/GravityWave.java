@@ -258,8 +258,8 @@ final class GravityWave {
 			if (random.nextFloat() >= chance) {
 				continue;
 			}
-			com.jaymospowers.core.TerrainReturn.record(level, pos);
-			level.destroyBlock(pos, random.nextFloat() < CARVE_DROP_CHANCE, owner);
+			boolean returns = com.jaymospowers.core.TerrainReturn.record(level, pos);
+			level.destroyBlock(pos, !returns && random.nextFloat() < CARVE_DROP_CHANCE, owner);
 			if (broken % 4 == 0) {
 				com.jaymospowers.core.Debris.puff(level, pos, state, 1.6F);
 			}

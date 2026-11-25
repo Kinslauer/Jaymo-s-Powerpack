@@ -43,7 +43,8 @@
   },
   "features": [
     [
-      "jaymospowers:cloudbed"
+      "jaymospowers:cloudbed",
+      "jaymospowers:cloud_lane"
     ],
     [
       "jaymospowers:lake_basin"

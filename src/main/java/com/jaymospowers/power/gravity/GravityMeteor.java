@@ -500,9 +500,9 @@ public final class GravityMeteor {
 		}
 		for (net.minecraft.core.BlockPos pos : going) {
 			// the crater is ground that comes back (terrain return)
-			com.jaymospowers.core.TerrainReturn.record(level, pos);
+			boolean returns = com.jaymospowers.core.TerrainReturn.record(level, pos);
 			BlockState state = level.getBlockState(pos);
-			if (random.nextFloat() < CARVE_DROP_CHANCE || state.hasBlockEntity()) {
+			if ((!returns && random.nextFloat() < CARVE_DROP_CHANCE) || state.hasBlockEntity()) {
 				level.destroyBlock(pos, true, owner);
 				continue;
 			}

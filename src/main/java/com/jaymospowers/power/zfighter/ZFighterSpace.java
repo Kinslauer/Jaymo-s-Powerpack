@@ -8,6 +8,15 @@ import com.jaymospowers.power.zfighter.fuel.PodFuel;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.jaymospowers.power.zfighter.pod.PodGrades;
+import com.jaymospowers.power.zfighter.pod.PodClass;
+import com.jaymospowers.power.zfighter.pod.PodLog;
+import com.jaymospowers.power.zfighter.pod.PodModules;
+import com.jaymospowers.power.zfighter.pod.PodBeacons;
+import com.jaymospowers.power.zfighter.pod.PodReturn;
+import com.jaymospowers.power.zfighter.pod.PodTow;
+import java.util.ArrayList;
+import java.util.List;
+import net.minecraft.network.codec.ByteBufCodecs;
 import com.jaymospowers.power.zfighter.sky.Charts;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -131,13 +140,15 @@ public final class ZFighterSpace {
 	 */
 	static final int MAW_Y = 188;
 	static final int MAW_PAD_X = -44;
-	static final double MAW_PULL_RANGE = 90.0, MAW_PULL_FAR = 0.008, MAW_PULL_NEAR = 0.03;
+	public static final double MAW_PULL_RANGE = 90.0, MAW_PULL_FAR = 0.008, MAW_PULL_NEAR = 0.03;
 	/** Inside this many blocks of the heart the tide throws you out and hurts you ({@link #MAW_TIDE_DAMAGE} every half second). */
-	static final double MAW_TIDE_RANGE = 9.0, MAW_TIDE_PUSH = 1.3;
+	public static final double MAW_TIDE_RANGE = 9.0, MAW_TIDE_PUSH = 1.3;
 	static final float MAW_TIDE_DAMAGE = 6.0F;
 
 	/** The star map's commands. */
-	public static final int GO = 0, BEGIN_MISSION = 1, ABANDON_MISSION = 2, SKIP = 3;
+	public static final int GO = 0, BEGIN_MISSION = 1, ABANDON_MISSION = 2, SKIP = 3, TOGGLE_SPOT = 4;
+	/** (Patch 9) Go, but flown by hand: the autopilot is left off (GO engages it; either can be switched in flight). */
+	public static final int GO_MANUAL = 5;
 	/** Home, as a destination index. */
 	public static final int HOME_INDEX = -1;
 
@@ -184,13 +195,26 @@ public final class ZFighterSpace {
 	 * Server → client: open the star map, for a pod holding {@code fuel} of grade {@code grade} (0.18.48: the tank's grade).
 	 * (0.18.53) {@code read} is the set of star charts the pilot has read (bit w: destination w): only those worlds are on the map.
 	 */
-	public record Open(int fuel, int grade, int read) implements CustomPacketPayload {
+	public record Open(int fuel, int maxFuel, int grade, int read, int stages, int flags, int marked, int clazz, List<Integer> there, List<Integer> back)
+		implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosPowers.id("zfighter_space_open"));
+		private static final StreamCodec<io.netty.buffer.ByteBuf, List<Integer>> INTS = ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list());
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec((p, buf) -> {
 			buf.writeVarInt(p.fuel);
+			buf.writeVarInt(p.maxFuel);
 			buf.writeVarInt(p.grade);
 			buf.writeVarInt(p.read);
-		}, buf -> new Open(buf.readVarInt(), buf.readVarInt(), buf.readVarInt()));
+			buf.writeVarInt(p.stages);
+			buf.writeVarInt(p.flags);
+			buf.writeVarInt(p.marked);
+			buf.writeVarInt(p.clazz);
+			INTS.encode(buf, p.there);
+			INTS.encode(buf, p.back);
+		}, buf -> new Open(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
+			buf.readVarInt(), INTS.decode(buf), INTS.decode(buf)));
+
+		/** The flags: a kick stage is fitted (trips cost less, already in {@code there} and {@code back}), the next landing is to be somewhere new. */
+		public static final int KICK = 1, NEW_SPOT = 2;
 
 		@Override
 		public Type<Open> type() {
@@ -328,7 +352,17 @@ public final class ZFighterSpace {
 		Level level = player.level();
 		OPENED.put(player.getUUID(), new Opened(pod.getUUID(), level.getGameTime()));
 		ZFighterAtlas.noteBed(player);
-		ServerPlayNetworking.send(player, new Open(pod.fuel(), PodFuel.effective(pod), readCharts(player)));
+		ResourceKey<Level> from = level.dimension();
+		List<Integer> there = new ArrayList<>(), back = new ArrayList<>();
+		for (int i = 0; i < DESTS.length; i++) {
+			there.add(tripCost(pod, i, from));
+			back.add(tripCost(pod, HOME_INDEX, DESTS[i].level()));
+		}
+		there.add(tripCost(pod, HOME_INDEX, from));
+		int flags = (PodModules.has(pod, PodModules.Kind.KICK_STAGE) ? Open.KICK : 0) | (PodMarks.wantsNew(player) ? Open.NEW_SPOT : 0);
+		ServerPlayNetworking.send(player, new Open(pod.fuel(), pod.maxFuel(), PodFuel.effective(pod), readCharts(player), PodReturn.packed(player, pod), flags,
+			PodMarks.marked(player), PodClass.of(pod).ordinal(), there, back));
+		PodScanner.wind(player, pod);
 		level.playSound(null, pod.getX(), pod.getY() + 1.0, pod.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.6F, 1.6F);
 	}
 
@@ -361,6 +395,16 @@ public final class ZFighterSpace {
 			}
 		}
 		return HOME_INDEX;
+	}
+
+	/** What a trip to {@code index} (or Home) from {@code from} burns from {@code pod}: the way's cost, less a grade I discount and a kick stage's fifth. */
+	public static int tripCost(PodEntity pod, int index, ResourceKey<Level> from) {
+		return PodModules.kicked(PodGrades.discount(pod.grade(), cost(index, from)), PodModules.has(pod, PodModules.Kind.KICK_STAGE));
+	}
+
+	/** Whether lifting off from {@code level} needs a return stage: it is one of the far worlds. */
+	public static boolean needsStage(ResourceKey<Level> level) {
+		return far(level);
 	}
 
 	public static int cost(int index, ResourceKey<Level> from) {
@@ -416,16 +460,17 @@ public final class ZFighterSpace {
 
 	private static void command(ServerPlayer player, Command command) {
 		switch (command.action()) {
-			case GO -> go(player, command.arg());
+			case GO -> go(player, command.arg(), true);
+			case GO_MANUAL -> go(player, command.arg(), false);
 			case BEGIN_MISSION -> ZFighterSpaceMissions.begin(player);
 			case ABANDON_MISSION -> ZFighterSpaceMissions.abandon(player);
-			case SKIP -> ZFighterPodTrip.skip(player);
+			case TOGGLE_SPOT -> PodMarks.toggle(player);
 			default -> {
 			}
 		}
 	}
 
-	private static void go(ServerPlayer player, int index) {
+	private static void go(ServerPlayer player, int index, boolean auto) {
 		MinecraftServer server = player.level().getServer();
 		UUID id = player.getUUID();
 		if (ZFighterPodTrip.flying(player)) {
@@ -475,8 +520,14 @@ public final class ZFighterSpace {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.unfinished").withStyle(ChatFormatting.RED));
 			return;
 		}
+		// (Patch 9, tr_tow) a crashed pod made fast to this one goes home with it, and only home
+		PodEntity towed = PodTow.hooked(player, pod);
+		if (towed != null && index != HOME_INDEX) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.tow_home_only").withStyle(ChatFormatting.RED));
+			return;
+		}
 		int fuel = pod.fuel();
-		int cost = player.isCreative() ? 0 : PodGrades.discount(pod.grade(), cost(index, player.level().dimension()));
+		int cost = player.isCreative() ? 0 : tripCost(pod, index, player.level().dimension()) + (towed != null ? PodTow.EXTRA_FUEL : 0);
 		// (0.18.56) a thrifty meal: this launch burns one less, once (the meal is used up when the trip starts)
 		boolean thrifty = cost > 0 && com.jaymospowers.power.zfighter.backhome.FarFood.thrifty(player);
 		if (thrifty) {
@@ -494,18 +545,31 @@ public final class ZFighterSpace {
 				.withStyle(ChatFormatting.RED));
 			return;
 		}
+		ResourceKey<Level> from = player.level().dimension();
+		// lifting off from a far world takes a return stage
+		if (far(from) && !player.isCreative() && PodReturn.packed(player, pod) < 1) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_no_stage").withStyle(ChatFormatting.RED));
+			return;
+		}
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}
-		ResourceKey<Level> from = player.level().dimension();
-		if (!far(from)) {
+		if (far(from)) {
+			if (!player.isCreative()) {
+				PodReturn.spend(player, pod);
+			}
+			// the spot lifted off from is where the next landing here can be
+			PodMarks.lifted(player, indexOf(from), pod.blockPosition());
+		} else if (!PodBeacons.homeIsBeacon(player)) {
+			// a lit landing beacon keeps being home; otherwise it is where this pod stood
 			player.setAttached(HOME, new Home(from.identifier().toString(), pod.blockPosition()));
 		}
+		PodLog.note(player, PodLog.Step.LAUNCHED);
 		OPENED.remove(id);
 		if (thrifty) {
 			com.jaymospowers.power.zfighter.backhome.FarFood.spendThrift(player);
 		}
-		ZFighterPodTrip.start(player, index, pod, fuel - cost, fuel);
+		ZFighterPodTrip.start(player, index, pod, fuel - cost, fuel, auto, towed);
 	}
 
 	// ---------------------------------------------------------------- every tick
@@ -660,6 +724,7 @@ public final class ZFighterSpace {
 			Component.translatable("space.jaymospowers.dest." + (dest == null ? "home" : dest.key()))).withStyle(ChatFormatting.AQUA));
 		weigh(player);
 		NEXT_LAUNCH.put(player.getUUID(), player.level().getGameTime() + COOLDOWN_TICKS);
+		PodLog.note(player, dest == null ? PodLog.Step.RETURNED : PodLog.Step.LANDED);
 		ZFighterSpaceMissions.arrived(player);
 		ZFighterPatrol.arrived(player, dest);
 		if (dest != null) {
@@ -778,13 +843,18 @@ public final class ZFighterSpace {
 	 * spot that reads dry made, at most {@link #FAR_LAND_MADE} spots. Null if the seed shows none (an all-sea world).
 	 */
 	private static @Nullable BlockPos farLand(ServerLevel level) {
+		return farLand(level, 0, 0);
+	}
+
+	/** {@link #farLand(ServerLevel)} searched in rings round (centreX, centreZ) instead of the world's middle (a remembered landing spot). */
+	static @Nullable BlockPos farLand(ServerLevel level, int centreX, int centreZ) {
 		int madeSpots = 0;
 		for (int r = FAR_LAND_STEP; r <= FAR_LAND && madeSpots < FAR_LAND_MADE; r += FAR_LAND_STEP) {
 			int around = Math.max(8, (int)(2.0 * Math.PI * r / FAR_LAND_STEP));
 			for (int i = 0; i < around && madeSpots < FAR_LAND_MADE; i++) {
 				double angle = i * 2.0 * Math.PI / around;
-				int x = (int)Math.round(Math.cos(angle) * r);
-				int z = (int)Math.round(Math.sin(angle) * r);
+				int x = centreX + (int)Math.round(Math.cos(angle) * r);
+				int z = centreZ + (int)Math.round(Math.sin(angle) * r);
 				if (!Boolean.TRUE.equals(foreseenDry(level, x, z))) {
 					continue;
 				}

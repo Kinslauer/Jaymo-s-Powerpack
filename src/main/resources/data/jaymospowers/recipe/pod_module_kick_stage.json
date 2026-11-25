@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:blaze_powder",
+    "minecraft:blaze_powder",
+    "minecraft:gunpowder"
+  ],
+  "result": {
+    "id": "jaymospowers:pod_module_kick_stage",
+    "count": 1
+  }
+}

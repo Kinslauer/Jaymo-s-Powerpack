@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:chest",
+    "minecraft:barrel",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "jaymospowers:pod_module_hold",
+    "count": 1
+  }
+}

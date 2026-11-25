@@ -1,5 +1,6 @@
 package com.jaymospowers.aether;
 
+import com.jaymospowers.power.zfighter.pod.PodEntity;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.DamageTypeTags;
@@ -60,6 +61,10 @@ public class AercloudBlock extends TransparentBlock {
 
 	@Override
 	protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		if (context instanceof EntityCollisionContext podContext && podContext.getEntity() instanceof PodEntity) {
+			// (Patch 9, tr_cockpit) a space pod climbs straight through every cloud; whoever walks still stands on it
+			return Shapes.empty();
+		}
 		VoxelShape plate = this.plate(state, level, pos, context);
 		if (!plate.isEmpty() && level.getBlockState(pos.above()).getBlock() instanceof AercloudBlock) {
 			return Shapes.block();

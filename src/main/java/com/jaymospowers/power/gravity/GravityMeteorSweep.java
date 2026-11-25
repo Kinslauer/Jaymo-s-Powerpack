@@ -110,8 +110,8 @@ final class GravityMeteorSweep {
 				if (state.isAir()) {
 					continue;
 				}
-				com.jaymospowers.core.TerrainReturn.record(level, pos);
-				if (random.nextFloat() < DROP_CHANCE || state.hasBlockEntity()) {
+				boolean returns = com.jaymospowers.core.TerrainReturn.record(level, pos);
+				if ((!returns && random.nextFloat() < DROP_CHANCE) || state.hasBlockEntity()) {
 					level.destroyBlock(pos, true);
 				} else {
 					if (random.nextInt(SHOW_ONE_IN) == 0) {

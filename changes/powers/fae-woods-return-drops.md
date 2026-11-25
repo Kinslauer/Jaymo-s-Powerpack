@@ -1,0 +1,2 @@
+# Ground that grows back drops nothing
+- **Terrain return**: a block that Gravity moves, meteors or a big player blast break and that will grow back (`TerrainReturn.record`) now breaks without drops, so stone and dirt can't be farmed from a returning crater (Andy, 2026-11-25). Blocks that don't come back (ores, chests, anything with a block entity, or when the server switch is off) drop as before.

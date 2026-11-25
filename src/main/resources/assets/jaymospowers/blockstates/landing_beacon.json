@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "jaymospowers:block/landing_beacon"
+    },
+    "lit=true": {
+      "model": "jaymospowers:block/landing_beacon_lit"
+    }
+  }
+}
