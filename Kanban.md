@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 02:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 02:16). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,18 +36,19 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/wither-model|wither-model]] · ☁️ Cloud · #2131 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
+- [ ] [[Agents/wither-model|wither-model]] · 💻 Odysseus · blocked
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/wither-model|wither-model]]
 - [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
 - [x] [[Inbox/Done/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]]
 - [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
@@ -55,7 +56,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]]
 - [x] [[Inbox/Done/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]]
 - [x] [[Inbox/Done/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]]
-- [x] [[Inbox/Done/vanilla-plus-d-horse-expert-skill|vanilla-plus-d-horse-expert-skill]]
 
 
 %% kanban:settings
