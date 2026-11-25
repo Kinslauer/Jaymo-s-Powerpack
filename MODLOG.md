@@ -7945,3 +7945,9 @@ Not tested in game (compiled only): the zoom, the chevron placement, the chime, 
   - **B8 hands on the reins**: a horse's rider sways and bobs with its gait and holds the reins in both hands (unless swinging or using an item). Icy's Better Horses only seats riders, so nothing of its is fought.
 - **B6 faces that move** (`BodyFaces`): MCA's villagers already blink with MCA's own blink face; a hit now shuts their eyes for a few ticks too (`McaWinceBlinkMixin`, a pseudo mixin that does nothing without MCA), and everyone drawn with the player renderer gets furrowed brows and a tight mouth over the face (`face_wince.png`), or a toothy grin while doing the fusion dance (`face_grin.png`). Players on ordinary skins close their eyes at a hit through PlayerFaces.
 - Built; not played. Not tested: any of the looks in a game (the furnace item's size and height over the vanilla mouth, the lectern book's size and lift, the leg turn's sign, the rung rhythm and the rein hold are set from the models' maths); the shield jolt and furnace sync on a server; MCA's face overlay on MCA's body. The pack has no emote system, so grins show only for the fusion dance.
+
+## 0.27.22 (2026-11-25): The cave band's own look (#2123)
+
+- The barbaric Warrior-born of the Primordial Caves have their own skins instead of the champion's blue gi: four looks,
+  all in primitive hide (a shirtless one with a fur strap and loincloth, a stitched hide tunic, a fur mantle and kilt,
+  an open hide vest), with wild hair, mixed through each band and still under their caveman gear and leather.
