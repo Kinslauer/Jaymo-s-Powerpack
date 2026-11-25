@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 05:26). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 05:28). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -44,14 +44,18 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2134 Hand of God effects: heat-vision Frost beam, Thunderhead electrokinesis, Chrono slow time, five Nadir moves (Powers, 2026-11-25)
 - [ ] #2133 Visceral gore: deeper wounds, hit reactions, armour holes, takedowns, gore reader (Powers, Kingdoms, Kitchen, 2026-11-25)
 - [ ] #2132 Villager screen opens into talk: everything is a spoke on the talk wheel, only Gift and Trade stay buttons (Kingdoms, 2026-11-25)
+- [ ] #2131 The Wither's own look, animations and voice (Kingdoms, 2026-11-25)
+- [ ] #2130 End plants no longer break End worldgen (Kitchen, 2026-11-25)
 - [ ] #2129 worn totems and villagers who carry one (Powers, 2026-11-25)
 - [ ] #2128 Gravity metal fixes: no dupes from torn chunks, no weapon minting (Powers, 2026-11-25)
+- [ ] #2127 three primitive hide sets, each with a dark make (Powers, Kingdoms, 2026-11-25)
 - [ ] #2126 weighty movement - the walk carries weight (Powers, 2026-11-25)
 - [ ] #2125 Gravity: iron answers first (the X-Men mod's Magnetism, worked in) (Powers, 2026-11-25)
 - [ ] #2122 Trade hats (Powers, Kingdoms, 2026-11-25)
 - [ ] #2110 Village mods patch 6: small structures (cairns, tree sites, mazes, wayside inns, cave gardens, plan plot outline) (Kingdoms, 2026-11-25)
 - [ ] #2121 Takeover pathing fixes: long tunnels, safe shafts, no stray weapon arm (Powers, 2026-11-24)
 - [ ] #2120 Scouter: hold to scan, full readings, marks and tracking (Powers, Kingdoms, 2026-11-24)
+- [ ] #2119 players' limbs twice as tough (Powers, Kitchen, 2026-11-24)
 - [ ] #2118 spiders in leaves leave you be by day (Powers, Kingdoms, 2026-11-24)
 - [ ] #2117 Blood Awakening upgrades your blood's held move; a Verdant's regrowth key (Powers, Kingdoms, 2026-11-24)
 - [ ] #2115 Takeovers dig straight to their prey and never stand stuck (Powers, 2026-11-24)
@@ -79,15 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2087 Bandit camps by the trade roads (Kingdoms, 2026-11-24)
 - [ ] #2086 Blasts blow limbs off the downed (Powers, 2026-11-24)
 - [ ] #2085 Structures need a reason: mines by buyers, stables by towns, watchtowers on borders, ruins with heirs (Kingdoms, 2026-11-24)
-- [ ] #2084 Red (unparryable) mob blows rarer and slower (Powers, Kingdoms, 2026-11-24)
-- [ ] #2083 Felled by a leg blow: ragdoll, prone, roll to get up (Powers, 2026-11-24)
-- [ ] #2082 Realm banks: deposits, interest, loans and letters of credit at the counting house (Kingdoms, 2026-11-24)
-- [ ] #2080 the big suit's new head (Powers, 2026-11-24)
-- …and 482 older ones.
+- …and 540 older ones.
 
 ## Health
 
-11 problems in the notes: [[Health]].
+13 problems in the notes: [[Health]].
 
 ## Last week
 
