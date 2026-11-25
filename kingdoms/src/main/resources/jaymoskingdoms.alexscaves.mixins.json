@@ -3,6 +3,6 @@
 	"package": "com.jaymoskingdoms.mixin.alexscaves",
 	"plugin": "com.jaymoskingdoms.mixin.alexscaves.AlexsCavesMixinPlugin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["CaveBiomePlacementMixin", "SpelunkeryTableTongueMixin"],
+	"mixins": ["CaveBiomePlacementMixin", "SpelunkeryTableTongueMixin", "CabinMapScoutMixin"],
 	"injectors": { "defaultRequire": 0 }
 }
