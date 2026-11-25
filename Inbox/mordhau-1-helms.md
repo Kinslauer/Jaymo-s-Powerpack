@@ -37,3 +37,4 @@ pr: 2160
 - 2026-11-25 07:33 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as changes.
 
 - Andy answered 2026-11-25: three helm choices per realm. The three helm lore entries are approved.
+- 2026-11-25: Andy signed off on the helm previews: "helms look incredible".

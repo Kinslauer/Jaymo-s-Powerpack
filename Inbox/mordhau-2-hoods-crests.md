@@ -42,3 +42,5 @@ pr: 2178
 
 ## Notes
 - 2026-11-24 22:35 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.
+
+- 2026-11-25: Andy approved the previews and all five lore entries for #2178.

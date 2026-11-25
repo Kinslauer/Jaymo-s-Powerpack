@@ -1115,3 +1115,11 @@ Andy: "can you make one of these as an example?" Supplied Hand-built starts (adv
 - **Applies to:** Kingdoms harness (Harness.slotOf, HeraldryLayer, gen_heraldry_hoods.py), branch claude/mordhau-2-hoods-crests.
 - **Agent:** mordhau-2-hoods-crests.
 - 2026-11-25 (Andy, Fae Woods thread): mage wands: "They should learn spells and cast from the wand" (a caster's learned spells, cast through a wand); Rim's sea beasts "can keep the shapes" (repainted and renamed); Fantasy Mounts ships only after its author says yes ("ok"); approved the lore paragraph "The glow-woods".
+
+### 2026-11-25: Mordhau headwear previews and lore
+- Andy approved the previews for PR #2178 and its five lore entries.
+- 2026-11-25, Mordhau helm previews (#2160): Andy said "helms look incredible"; recorded as visual sign-off.
+
+
+## 2026-11-25 - Codex: merge the written-start example
+Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start dependency #2153 before moving the example to master. Merge attempts failed at GitHub; both PRs remain open. No deployment requested.
