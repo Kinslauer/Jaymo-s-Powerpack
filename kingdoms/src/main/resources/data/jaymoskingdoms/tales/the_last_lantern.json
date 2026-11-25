@@ -1,0 +1,86 @@
+{
+  "title": "The Last Lantern",
+  "start": {"by": "written"},
+  "places": {
+    "board": {"at": "written", "mark": "board", "name": "the keeper's table"},
+    "store": {"at": "written", "mark": "store", "name": "the cellar store"},
+    "hearth": {"at": "written", "mark": "hearth", "name": "the shelter's hearth"},
+    "town": {"at": "other_town", "name": "the nearest town"}
+  },
+  "first": "note",
+  "steps": {
+    "note": {
+      "do": "search",
+      "at": "board",
+      "goal": "Read the keeper's note on the table",
+      "clues": [{
+        "name": "The Keeper's Note",
+        "item": "minecraft:paper",
+        "lore": [
+          "You were breathing when they brought you in. That is enough.",
+          "Bread by the hearth. Tools and boots below the iron hatch.",
+          "Take what you need. Leave a light for the next one."
+        ],
+        "journal": "Someone carried me to a Hearthkeeper's shelter. The keeper left bread above and tools below."
+      }],
+      "opens": ["cellar"],
+      "then": "store"
+    },
+    "store": {
+      "do": "search",
+      "at": "store",
+      "goal": "Find the packing slip in {place:store}",
+      "clues": [{
+        "name": "The Store's Packing Slip",
+        "item": "minecraft:paper",
+        "lore": [
+          "Three stone tools. Boots. Twelve torches. Coal and potatoes.",
+          "Keep the door shut after dark. There is no keeper here tonight.",
+          "Wait for daylight if you can. A town will take you in."
+        ],
+        "journal": "The cellar is stocked for a traveller, not a soldier. I can keep the shelter tonight or take my chances outside."
+      }],
+      "then": "watch"
+    },
+    "watch": {
+      "do": "vigil",
+      "at": "hearth",
+      "radius": 8,
+      "when": "night",
+      "gap": 20,
+      "goal": "Keep watch by the hearth after dark",
+      "lines": [
+        {"say": "Beyond the porch light, a wolf calls. Another answers farther off.", "sound": "minecraft:entity.wolf.howl"},
+        {"say": "Something scrapes the outside of the door, then stops.", "sound": "minecraft:entity.zombie.attack_wooden_door"},
+        {"say": "Footsteps cross the porch. They move away into the dark."},
+        {"say": "The wood settles. Nothing else comes to the door."}
+      ],
+      "journal": "I kept watch in the shelter. Something tried the door and went away.",
+      "left": "road",
+      "then": "dawn"
+    },
+    "dawn": {
+      "do": "go",
+      "to": "hearth",
+      "radius": 8,
+      "when": "day",
+      "goal": "Rest in the shelter until daylight",
+      "journal": "Daylight reached the windows. It was time to find other people.",
+      "then": "road"
+    },
+    "road": {
+      "do": "go",
+      "to": "town",
+      "radius": 32,
+      "goal": "Find {place:town} ({way:town})",
+      "journal": "I reached {place:town}, carrying what the keeper left for a stranger.",
+      "then": "end:arrived"
+    }
+  },
+  "endings": {
+    "arrived": {
+      "text": "I woke in a Hearthkeeper's shelter and found my way to town. I never learned who carried me in.",
+      "marks": ["last_lantern_arrived"]
+    }
+  }
+}
