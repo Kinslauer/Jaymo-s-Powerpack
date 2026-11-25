@@ -129,6 +129,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.reaped.ReapedClient.register();
 		com.jaymoskingdoms.client.illagers.IllagerKindsClient.register();
 		com.jaymoskingdoms.client.creatures.CreaturesClient.register();
+		com.jaymoskingdoms.client.deep.DeepBeastRenderer.register();
 		// 0.7.131: the Hornkin of the Nether
 		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
 		com.jaymoskingdoms.client.nether.ImpRenderer.register();

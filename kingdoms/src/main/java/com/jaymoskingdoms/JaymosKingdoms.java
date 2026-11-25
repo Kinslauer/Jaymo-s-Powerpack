@@ -276,6 +276,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		GuardMeals.register();
 		GuardKicks.register();
 		AlarmBells.register();
+		com.jaymoskingdoms.deep.Deeps.register();
 		RaidBeasts.register();
 		WitchRaids.register();
 		GolemPathing.register();

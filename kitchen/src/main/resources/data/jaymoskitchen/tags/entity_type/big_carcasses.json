@@ -23,6 +23,17 @@
 		{"id": "jaymoskingdoms:fire_ogre", "required": false},
 		{"id": "jaymoskingdoms:grizzly", "required": false},
 		{"id": "bearminimum:brown_bear", "required": false},
-		{"id": "bearminimum:black_bear", "required": false}
+		{"id": "bearminimum:black_bear", "required": false},
+		{"id": "jaymoskingdoms:deep_lancer", "required": false},
+		{"id": "jaymoskingdoms:deep_gloomwing", "required": false},
+		{"id": "jaymoskingdoms:deep_behemoth", "required": false},
+		{"id": "jaymoskingdoms:troll", "required": false},
+		{"id": "jaymoskingdoms:bogre", "required": false},
+		{"id": "jaymoskingdoms:minotaur", "required": false},
+		{"id": "jaymoskingdoms:highfield_giant", "required": false},
+		{"id": "jaymoskingdoms:magnetic_giant", "required": false},
+		{"id": "jaymoskingdoms:arctic_giant", "required": false},
+		{"id": "jaymoskingdoms:irradiated_giant", "required": false},
+		{"id": "jaymoskingdoms:armoured_ogre", "required": false}
 	]
 }
