@@ -455,6 +455,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
+		// out of fire and lava, to water, out of the water after a fight, a web cut, a creeper struck first (DangerSense)
+		this.goalSelector.addGoal(-1, new DangerSense.DangerGoal(this));
 		// (0.7.184) a shooter whose shots keep failing moves (RangedTactics)
 		this.goalSelector.addGoal(0, new RangedTactics.RepositionGoal(this));
 		// weapon sense: blade when rushed, the weapon's distance band, strafing and leaning, going for what was thrown

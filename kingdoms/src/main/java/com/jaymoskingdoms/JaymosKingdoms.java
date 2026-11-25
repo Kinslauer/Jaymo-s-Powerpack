@@ -827,6 +827,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		FieldMedics.register();
 		BandLeaders.register();
 		BreakOff.register();
+		DangerSense.register();
 		QuickOrders.register();
 		// (pawn picks patch 2) holding a foe or pinning you, a leg up, readying and ambushes, grabbing loot mid-fight
 		Grapples.register();
