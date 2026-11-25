@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
-claimed_by: claude (PC coordinator thread, worker)
+claimed_by: 
 pr: 
 ---
 # Mordhau harness 2: hoods, hats, crests and neck (Kingdoms)
@@ -39,3 +39,6 @@ pr:
 - **mh-bevor** Bevor and buffe (S, have): Sallet Bevor, Painted Sallet Bevor, Burgonet Buffet, German Sallet Buffet, Vanguard's Kettle Buffet (+ Orle, Straps), Kettle Sallet Bevored. A plate guarding the chin and throat, strapped behind, or a buffe fixed to the helm. Ours: NECK: have bevor, worn with burgonet or kettle_hat (not with our sallet, which already has one).
 - **mh-wrapper** Armet wrapper (S, variant): Italian Armet Wrapper / Alt Wrapper. A 15th c. reinforcing plate strapped round the lower face and chin of an armet. Ours: NECK: variant of bevor (a lower, rounder plate cut to sit over the armet's cheeks).
 - **mh-gorget** Gorget (S, have): Mordhau's gorget slot (neither list itemises it). A lamed steel collar. Ours: NECK: have gorget. Mail collar = standard_of_mail.
+
+## Notes
+- 2026-11-24 22:35 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.

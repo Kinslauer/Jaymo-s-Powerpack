@@ -5,7 +5,7 @@ branch:
 with: local desktop session (PC)
 pr: "#2130 (merged)"
 mods: 
-versions: Powers 0.27.28, Kingdoms 0.12.65, Kitchen 0.6.85 (Deck-built, keep world)
+versions: Powers 0.27.29, Kingdoms 0.12.67, Kitchen 0.6.85 (Deck-built, keep world)
 started: 2026-11-24
 owns:
   - deck/deploy.ps1 (local, untracked)
@@ -27,3 +27,6 @@ owns:
 - 9:12 PM: Deck pbdr of #2130 up (Done 1.7 s), 0 cycle errors. Andy's CurseForge profile updated (our jars + Alex's Caves, Icy's Better Horses, Incendium, Modonomicon, Stellarity, Tectonic; horse-expert, kaffees_dual_ride, ultimate_horseshoes retired .old); friends zip 0.27.28 in modpack/.
 - Open, Andy's call: this kept world's End is still Enderscape's new_terrain (enderscape:new_terrain/new_end_cities/new_strongholds enabled in level.dat after stellarity), not Stellarity's. No End chunk was ever saved, so disabling them now loses nothing.
 - 2026-11-24 21:29 PR #2130 is merged into master; moved to Agents/Done.
+- 9:47 PM: Deck pbdr to Powers 0.27.29 / Kingdoms 0.12.67. Then, on Andy's word, disabled enderscape:new_terrain, new_end_cities, new_strongholds over RCON and restarted (Done 9:59 PM): the End now has Stellarity biomes (/locate hallowed_tundra works), 0 cycle/watchdog errors. The End's centre chunks made at 9:12 PM keep Enderscape terrain.
+- Profile updated to 0.27.29 (matches the pack except server-only EasyAuth); modpack/mods and the 0.27.29 friends zip copied to E:\Origins Mod\modpack. Youth's watchdog is on; Claude's watcher stopped.
+- Gotcha: `pgrep -f "java.*fabric-server-launch"` inside an ssh `bash -c` matches its own command line; check /proc/<pid>/cmdline starts with java.

@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
-claimed_by: claude (PC coordinator thread, worker)
+claimed_by: 
 pr: 
 ---
 # Mordhau harness 1: helms (Kingdoms)
@@ -32,3 +32,4 @@ pr:
 
 ## Notes
 - 2026-11-24 20:22 Question for Andy (from the helms worker): the 15 new helms are forgeable at the smithing anvil, and the kettle comes in each realm's cut on its soldiers; no guard is issued the others yet (GuardKit is Andy's wardrobe list). Should guards wear any of them (turban helm for the sands' soldiers, spectacle or gallowglass helm in the north, archer's sallet for archers, skullcap for militia)?
+- 2026-11-24 22:35 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.
