@@ -3,7 +3,7 @@ status: running
 task: mordhau-2-hoods-crests
 branch: claude/mordhau-2-hoods-crests
 with: claude (PC worker, Opus 5.5)
-pr: 
+pr: 2178
 mods: kingdoms, powers
 versions: 
 started: 2026-11-24
@@ -12,9 +12,11 @@ owns:
   - kingdoms/src/main/resources/assets/jaymoskingdoms/bbmodels/heraldry_<this track's new pieces>.json, their textures, icons, item models, recipes
   - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/heraldry-hoods.json (new)
   - kingdoms/src/main/java/com/jaymoskingdoms/HeraldryArmour.java (one separate block of this track's registrations, at the end of register())
-  - kingdoms/src/main/java/com/jaymoskingdoms/HeraldryWear.java (mayWear: the crown crest only)
   - kingdoms/src/client/java/com/jaymoskingdoms/client/HeraldryLayer.java (hats under a helm, crown/orle without the torse, dyed crests, second colour)
   - src/main/java/com/jaymospowers/tinkering/smithing/HeraldryForging.java (the coif cuts and the armet wrapper only)
+  - kingdoms/src/main/java/com/jaymoskingdoms/Harness.java (slotOf: any crown goes in the crest place)
+  - src/main/java/com/jaymospowers/power/zfighter/ZFighterTournaments.java (the champion's wreath)
+  - kingdoms/src/main/resources/data/jaymospowers/tags/item/{cloth,mail,plate}_armor.json (new entries)
   - changes/kingdoms/claude-mordhau-2-hoods-crests.md, changes/powers/claude-mordhau-2-hoods-crests.md
 ---
 # Mordhau harness 2: hoods, hats, crests and neck
@@ -30,7 +32,10 @@ track 1's royal helms wear), antlers, mantling, bevor, armet wrapper, gorget. Ou
 - Previews to `Assets/mordhau-2-hoods-crests/`; lore (new) paragraphs for the headsman's hood, turban, jester, crown.
 
 ## Notes
-- Track 1 (claude/mordhau-1-helms) wasn't pushed when this started; its shared-file edits are the helm lists.
+- Track 1 (claude/mordhau-1-helms) wasn't pushed when this started; its shared-file edits are the helm lists. One-line conflict in HeraldryForging's PLATE arrays (second to merge keeps both).
+- Crown id for track 1's royal helms: `crest_crown`; a ring round the skull at y 31-32.6, 5.1 each side, 6.1 before (clears the veiled helm), not lifted by crestRise.
+- Andy (2026-11-25): "you should be able to wear any crown": every regalia crown goes in the crest place over a helm; anyone may wear one.
 
 ## Done
-What a player will see, and what wasn't tested.
+- PR #2178 (draft until Andy approves the previews in Assets/mordhau-2-hoods-crests/). 25 new pieces: 15 hoods and hats, the arming cap, 4 coif cuts, orle, helm crown, antlers, mantling, the armet wrapper; any regalia crown goes over a helm in the crest place; hats hidden under a helm; the sallet hides a bevor/wrapper; the tournament champion gets the victor's wreath. Lore: five (new) paragraphs after "The spectacle helm".
+- Not played: compiles in CI and the pack boots; drawing, recipes (incl. second colour), forging and the wreath prize untested in game. Skipped: the spiked lowered coif (row allowed it).

@@ -1109,3 +1109,8 @@ Andy: "can you make one of these as an example?" Supplied Hand-built starts (adv
 ### 2026-11-25: Guard helms and northern and sands lore
 - Andy: "they should alternate between both, and a third per realm"; approved the gallowglass, turban helm and spectacle helm lore. Applies to Kingdoms guard issue, PR #2160.
 - 2026-11-25 (Fae Woods picks): Andy picked 37 rows from Spore & Stem + 11 mods (https://claude.ai/artifact/8MNDHjgDZ2Tg93bfsQsbG4); plan docs/FaeWoods-Plan.md. Cars: "only 4 cars and only in the future". Rim: Frostborn/Tinkerer rigs only in the future against hordes and mutants; sea monsters from the abyssal cave that Darktide can command when dead. God Wand: "can we make powerful mage wands and spells from it?" Unbound: a new list for our pods only, using only our worlds.
+
+### 2026-11-25: Any crown can be worn over a helm
+- **Decided:** "you should be able to wear any crown" (on the Mordhau harness 2 helm crown). Read as: every crown (the rulers' crowns, tiara, circlet, coronet and the new helm crown) goes over a helm in the crest place, and anyone may wear one (no royals-only rule for the helm crown).
+- **Applies to:** Kingdoms harness (Harness.slotOf, HeraldryLayer, gen_heraldry_hoods.py), branch claude/mordhau-2-hoods-crests.
+- **Agent:** mordhau-2-hoods-crests.
