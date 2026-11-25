@@ -295,7 +295,7 @@ public final class LeechKit {
 
 	private static boolean corpse(Kind kind, @Nullable LivingEntity by, Entity corpse, ServerLevel level) {
 		// (a player's body is theirs: nothing here takes it)
-		if (KitchenCompat.isPlayerCorpse(corpse) || MELTS.stream().anyMatch(m -> m.corpse() == corpse)) {
+		if (!KitchenCompat.isFreeCorpse(corpse) || KitchenCompat.isPlayerCorpse(corpse) || MELTS.stream().anyMatch(m -> m.corpse() == corpse)) {
 			return false;
 		}
 		long now = level.getGameTime();

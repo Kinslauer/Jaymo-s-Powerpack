@@ -53,7 +53,7 @@ final class HedgeWitches {
 			if (!(world instanceof ServerLevel) || !(player instanceof ServerPlayer sp)) {
 				return InteractionResult.PASS;
 			}
-			if (!witch.isAlive() || witch.getTarget() != null || witch.getLastHurtByMob() != null) {
+			if (!witch.isAlive() || witch.hasRaid() || witch.getTarget() != null || witch.getLastHurtByMob() != null) {
 				return InteractionResult.PASS;
 			}
 			MerchantOffers offers = STOCK.computeIfAbsent(witch, w -> stock());

@@ -108,24 +108,6 @@ def blowgun():
     return img
 
 
-def scroll():
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    paper, shade = (0xe8, 0xdc, 0xb0, 255), (0xc0, 0xb0, 0x80, 255)
-    for x in range(2, 14):
-        for y in range(4, 12):
-            put(img, x, y, paper if y < 10 else shade)
-    for y in range(3, 13):
-        put(img, 1, y, shade)
-        put(img, 14, y, shade)
-    for x in range(1, 15):
-        put(img, x, 3, (0x8a, 0x6a, 0x3a, 255))
-        put(img, x, 12, (0x8a, 0x6a, 0x3a, 255))
-    leaf = (0x4a, 0x9a, 0x3a, 255)
-    for x, y in ((7, 6), (8, 6), (6, 7), (7, 7), (8, 7), (9, 7), (7, 8), (8, 8), (7, 9)):
-        put(img, x, y, leaf)
-    return img
-
-
 def write(path, text):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", newline="\n") as f:
@@ -165,7 +147,6 @@ def main():
         item_files(name, thorn(liquid))
     item_files("sleep_dart", dart())
     item_files("blowgun", blowgun())
-    item_files("scroll_of_green_return", scroll())
 
     m = lambda i: "minecraft:" + i
     t = lambda i: f"{NS}:{i}"
