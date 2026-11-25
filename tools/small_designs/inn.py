@@ -157,10 +157,10 @@ def inn(api):
     for x in (3, 5):
         for y in (1, 2, 3):
             g.put(x, y, Z1, "cobblestone")
-    for y in range(1, 13):
+    for y in range(0, 13):
         for x in (3, 4, 5):
             for z in (14, 15):
-                if x == DOOR_X and z == 14:
+                if x == DOOR_X and z == 14 and y > 0:
                     continue
                 g.put(x, y, z, "cobblestone")
     g.put(DOOR_X, 1, 14, "campfire", {"facing": "south", "lit": "true", "signal_fire": "false", "waterlogged": "false"})

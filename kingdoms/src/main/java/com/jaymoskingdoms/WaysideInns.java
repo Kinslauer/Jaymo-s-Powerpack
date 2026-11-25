@@ -82,8 +82,8 @@ final class WaysideInns {
 	static final double CLEAR = 4.0, TOWN_KEEP = 110.0;
 	/** Looks at a road that found no spot, before it's given up on. */
 	static final int MOST_TRIES = 6;
-	/** Filled under the footing, at most (blocks). */
-	static final int FILL_MOST = 6;
+	/** Filled under the footing, at most (blocks); the path's longest run to the road (blocks: a slantwise road is further off). */
+	static final int FILL_MOST = 6, PATH_MOST = 32;
 
 	/** The keeper's tag, how far from the inn one is looked for, how far from the spot they keep to, and the trade. */
 	static final String TAG = "jaymoskingdoms_innkeeper";
@@ -246,7 +246,8 @@ final class WaysideInns {
 		double dx = BlockPos.getX(after) - BlockPos.getX(before), dz = BlockPos.getZ(after) - BlockPos.getZ(before);
 		double len = Math.max(1.0E-3, Math.hypot(dx, dz));
 		// away from the road, to the inn's side; the door looks back at it
-		Direction away = Direction.getApproximateNearest((float)(-dz / len * side), 0.0F, (float)(dx / len * side));
+		double nx = -dz / len * side, nz = dx / len * side;
+		Direction away = Direction.getApproximateNearest((float)nx, 0.0F, (float)nz);
 		if (away.getAxis() == Direction.Axis.Y) {
 			return null;
 		}
@@ -260,7 +261,9 @@ final class WaysideInns {
 		if (rotation == null) {
 			return null;
 		}
-		int reach = SIDE + PIVOT.getZ();
+		// a road running slantwise past the inn: set further off, so the front corner nearer the road is still SIDE from it
+		double cos = nx * away.getStepX() + nz * away.getStepZ(), sin = Math.sqrt(Math.max(0.0, 1.0 - cos * cos));
+		int reach = (int)Math.ceil(PIVOT.getZ() + (SIDE + Math.max(PIVOT.getX(), WIDTH - 1 - PIVOT.getX()) * sin) / cos);
 		BlockPos centre = new BlockPos(BlockPos.getX(p) + away.getStepX() * reach, 0, BlockPos.getZ(p) + away.getStepZ() * reach);
 		StructurePlaceSettings settings = new StructurePlaceSettings().setRotation(rotation).setRotationPivot(PIVOT).setIgnoreEntities(true);
 		BlockPos at = new BlockPos(centre.getX() - PIVOT.getX(), 0, centre.getZ() - PIVOT.getZ());
@@ -406,7 +409,7 @@ final class WaysideInns {
 	private static void path(ServerLevel level, Roads.Road road, Site site) {
 		Roads.Line line = Roads.line(road);
 		BlockPos start = site.world(PATH);
-		for (int step = 1; step <= SIDE; step++) {
+		for (int step = 1; step <= PATH_MOST; step++) {
 			BlockPos col = start.relative(site.front(), step);
 			if (!Loaded.made(level, col) || line.project(col.getX() + 0.5, col.getZ() + 0.5)[1] <= Roads.HALF + 1) {
 				return;
@@ -444,6 +447,22 @@ final class WaysideInns {
 		return level.getEntitiesOfClass(Villager.class, new AABB(at).inflate(KEEPER_BOX), v -> v.isAlive() && v.entityTags().contains(TAG));
 	}
 
+	/**
+	 * Every chunk the keeper may stroll in ({@link #HOME} around their spot) is loaded with its entities and ticking, so a
+	 * keeper not found there is really gone (not in a chunk whose entities are still loading).
+	 */
+	private static boolean beatLoaded(ServerLevel level, BlockPos at) {
+		for (int dx = -HOME; dx <= HOME; dx += HOME) {
+			for (int dz = -HOME; dz <= HOME; dz += HOME) {
+				BlockPos p = at.offset(dx, 0, dz);
+				if (!Loaded.made(level, p) || !level.areEntitiesActuallyLoadedAndTicking(ChunkPos.containing(p))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	/** Each inn that's loaded has its keeper: a keeper missing for {@link #REPLACE_DAYS} days is replaced. */
 	private static void keep(ServerLevel level, long now) {
 		for (Map.Entry<String, Inn> e : level.getAttachedOrElse(INNS, Map.<String, Inn>of()).entrySet()) {
@@ -452,7 +471,7 @@ final class WaysideInns {
 				continue;
 			}
 			BlockPos at = BlockPos.of(inn.at());
-			if (!Loaded.made(level, at) || !level.isPositionEntityTicking(at)) {
+			if (!beatLoaded(level, at)) {
 				continue;
 			}
 			if (!keepers(level, at).isEmpty()) {
