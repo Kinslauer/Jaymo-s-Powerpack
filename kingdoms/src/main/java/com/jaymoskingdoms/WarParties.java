@@ -1040,13 +1040,13 @@ final class WarParties {
 		}
 	}
 
-	/** The squad's soldiers in the field, its leader first; those holding a banner, working an engine or out of reach left out. */
+	/** The squad's soldiers in the field, its leader first; those holding a banner, working an engine, out of reach or fallen back ({@link BreakOff}) left out. */
 	private static List<PathfinderMob> squadIn(ServerLevel level, Party party, List<UUID> squad, boolean fightingToo) {
 		List<PathfinderMob> out = new ArrayList<>();
 		for (UUID id : squad) {
 			if (level.getEntity(id) instanceof PathfinderMob m && m.isAlive() && m instanceof Worker && !party.holders.contains(id)
 				&& !party.crew.contains(id) && SiegeTrain.serving(level, party, m) == null && !Sappers.busy(party, m)
-				&& (fightingToo || Rulers.target(m) == null)) {
+				&& (fightingToo || Rulers.target(m) == null) && !BreakOff.away(m)) {
 				out.add(m);
 			}
 		}

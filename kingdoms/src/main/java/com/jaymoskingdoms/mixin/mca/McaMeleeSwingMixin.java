@@ -1,12 +1,18 @@
 package com.jaymoskingdoms.mixin.mca;
 
+import com.jaymoskingdoms.Blows;
 import com.jaymoskingdoms.MobCombat;
 import com.jaymoskingdoms.MobShields;
+import com.jaymoskingdoms.NpcDodge;
+import net.conczin.mca.entity.VillagerLike;
 import net.conczin.mca.entity.ai.brain.tasks.ExtendedMeleeAttackTask;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,9 +25,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * give other fighters. Now its blows go through {@link MobCombat} as {@code MeleeAttackGoalMixin}'s do: a weapon
  * Better Combat knows swings its combo (with the glint, the blade guard and the parry window), anything else
  * ({@link MobCombat#plainBlow}) a punch or a cut with the glint. Without Better Combat, MCA's own blow stands.
+ * <p>
+ * Fighting AI patch 3: a raised shield holds the blow with or without Better Combat ({@link MobShields#guard}: the block, the
+ * counter after it), and without Better Combat MCA's own blow waits for a full charge and may come from a jump's fall
+ * ({@link Blows#holds}).
  */
 @Mixin(ExtendedMeleeAttackTask.class)
 abstract class McaMeleeSwingMixin {
+	@Shadow
+	@Final
+	private int interval;
+
 	@Shadow
 	private LivingEntity getTarget(Mob mob) {
 		throw new AssertionError();
@@ -29,19 +43,32 @@ abstract class McaMeleeSwingMixin {
 
 	@Inject(method = "start(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;J)V", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$swing(ServerLevel level, Mob mob, long time, CallbackInfo ci) {
-		if (!MobCombat.ENABLED) {
-			return;
-		}
 		LivingEntity target = this.getTarget(mob);
 		if (target == null) {
 			return;
 		}
-		ci.cancel();
-		BehaviorUtils.lookAtEntity(mob, target);
 		// a guard held up: no blow until it comes down (MobShields)
 		if (MobShields.guard(mob, target)) {
+			ci.cancel();
+			BehaviorUtils.lookAtEntity(mob, target);
 			return;
 		}
+		if (!MobCombat.ENABLED) {
+			// (MCA's own blow: not before a full charge, and a heavy weapon's maybe from a jump's fall)
+			if (Blows.holds(mob, target)) {
+				ci.cancel();
+				BehaviorUtils.lookAtEntity(mob, target);
+			} else if (NpcDodge.incoming(target, mob, 0) | NpcDodge.dodged(target, mob)) {
+				// (st-dodge) a bandit or assassin rolled out of it (now, or just before): the blow misses, swung at the air, and is
+				// spent (its full recovery)
+				ci.cancel();
+				mob.swingForAttack(mob instanceof VillagerLike<?> villager ? villager.getDominantHand() : InteractionHand.MAIN_HAND);
+				mob.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_COOLING_DOWN, true, this.interval);
+			}
+			return;
+		}
+		ci.cancel();
+		BehaviorUtils.lookAtEntity(mob, target);
 		if (MobCombat.handles(mob)) {
 			MobCombat.attackTick(mob, target);
 		} else {

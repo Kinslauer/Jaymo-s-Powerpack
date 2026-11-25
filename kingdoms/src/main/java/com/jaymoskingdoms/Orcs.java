@@ -58,8 +58,11 @@ public final class Orcs {
 	static final double SLAM_TRIGGER = 3.5, SLAM_RADIUS = 5.0, SLAM_THROW = 1.3;
 	static final float SLAM_DAMAGE = 8.0F;
 	static final int SLAM_COOLDOWN = 20 * 8;
-	/** A ranger shoots his bow from farther than this, and takes up the crossbow (a harder, flatter shot) when his foe is nearer than this. */
-	static final double RANGER_BOW_FROM = 16.0, RANGER_CROSSBOW_WITHIN = 10.0;
+	/**
+	 * A ranger takes up the crossbow (the flatter, longer shot) for a foe past the bow's distance band, and the bow again for one inside
+	 * the crossbow's: the ends of {@link WeaponSense}'s bands, so the weapon and the range it keeps agree.
+	 */
+	static final double RANGER_CROSSBOW_FROM = WeaponSense.Arm.BOW.most, RANGER_BOW_WITHIN = WeaponSense.Arm.CROSSBOW.least;
 	/** A grunt with a foe at least this far off charges: fast for this long (ticks). */
 	static final double CHARGE_FROM = 7.0;
 	static final int CHARGE_TICKS = 20 * 3;
@@ -227,8 +230,10 @@ public final class Orcs {
 		// the four roles' own ways: a ranger changes weapon with the range, a grunt rushes in
 		if (role == RANGER && fighting) {
 			double range = folk.distanceTo(target);
-			Item want = range > RANGER_BOW_FROM ? Items.BOW : range < RANGER_CROSSBOW_WITHIN ? Items.CROSSBOW : null;
-			if (want != null && !folk.getMainHandItem().is(want)) {
+			ItemStack held = folk.getMainHandItem();
+			// (only a bow for a crossbow and back: a blade it was rushed to, with its bow in the other hand, is WeaponSense's to put away)
+			Item want = held.is(Items.BOW) && range > RANGER_CROSSBOW_FROM ? Items.CROSSBOW : held.is(Items.CROSSBOW) && range < RANGER_BOW_WITHIN ? Items.BOW : null;
+			if (want != null) {
 				folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(want));
 				level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.HOSTILE, 0.8F, 1.0F);
 			}

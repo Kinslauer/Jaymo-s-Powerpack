@@ -39,10 +39,16 @@ public final class MobAnimations {
 
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(MobCombat.MobSwing.TYPE, (payload, context) -> {
+			// (a dodger's roll is our own keyframes, with or without the library: NpcRollPose)
+			if (com.jaymoskingdoms.NpcDodge.ROLL_ANIMATION.equals(payload.animation())) {
+				NpcRollPose.start(context.client(), payload.entityId(), payload.length(), payload.mirror());
+				return;
+			}
 			if (PAL) {
-				PalMobAnimator.play(payload.entityId(), payload.animation(), payload.length());
+				PalMobAnimator.play(payload.entityId(), payload.animation(), payload.length(), payload.mirror());
 			}
 		});
+		NpcRollPose.register();
 		if (PAL) {
 			ClientTickEvents.END_CLIENT_TICK.register(client -> PalMobAnimator.tick(client.level));
 		}

@@ -406,6 +406,12 @@ public final class Comrades {
 			if (time - e.getValue() < WON_AFTER) {
 				continue;
 			}
+			Mob away = FOUGHT.get(e.getKey());
+			if (away != null && BreakOff.away(away)) {
+				// (falling back or mending: still in the fight, not the one to say it's won)
+				e.setValue(time);
+				continue;
+			}
 			Mob m = FOUGHT.remove(e.getKey());
 			it.remove();
 			HURT_SAID.remove(e.getKey());
@@ -532,7 +538,7 @@ public final class Comrades {
 
 	/** Left to what they're doing. */
 	static boolean busy(Mob m) {
-		if (FieldMedics.busy(m) || Downed.helping(m) || Arrests.busy(m) || Grapples.busy(m) || Grapples.held(m) || Scavengers.busy(m) || Loans.working(m) || Hunters.busy(m)) {
+		if (BreakOff.away(m) || FieldMedics.busy(m) || Downed.helping(m) || Arrests.busy(m) || Grapples.busy(m) || Grapples.held(m) || Scavengers.busy(m) || Loans.working(m) || Hunters.busy(m)) {
 			return true;
 		}
 		Followers.Order order = m instanceof Villager v ? v.getAttached(Followers.ORDER) : null;

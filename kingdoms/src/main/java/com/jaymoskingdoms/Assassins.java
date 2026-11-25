@@ -577,6 +577,8 @@ final class Assassins {
 		} else {
 			a.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
 		}
+		// (fighting AI patch 7, st-dodge) a second blade, maybe a shield on his back (DualBlades); none of it drops
+		DualBlades.arm(a, true);
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			a.setDropChance(slot, 0.0F);
 		}

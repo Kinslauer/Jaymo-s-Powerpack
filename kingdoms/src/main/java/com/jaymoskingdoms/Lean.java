@@ -164,7 +164,8 @@ public final class Lean {
 		}
 		for (Map.Entry<Mob, Vec3> e : Map.copyOf(LEANING).entrySet()) {
 			Mob mob = e.getKey();
-			if (mob.isRemoved() || !mob.isAlive() || mob.isPassenger() || mob.getTarget() == null || Downed.isDowned(mob)
+			// (its foe: its goals' target, or an MCA villager's brain's)
+			if (mob.isRemoved() || !mob.isAlive() || mob.isPassenger() || Comrades.target(mob) == null || Downed.isDowned(mob)
 				|| mob.position().distanceToSqr(e.getValue()) > NPC_STRAY * NPC_STRAY) {
 				lean(mob, 0);
 			}

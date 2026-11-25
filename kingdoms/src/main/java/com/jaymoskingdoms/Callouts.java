@@ -73,6 +73,12 @@ public final class Callouts {
 		}
 		LINES.put("won", 3);
 		VOICED.add("won");
+		// break off and mend: falling back, cover me, back in, and a leader telling his band to hold (BreakOff; lang/parts/break-off.json)
+		for (String k : new String[] {"fallback", "cover", "back"}) {
+			LINES.put(k, 2);
+			VOICED.add(k);
+		}
+		LINES.put("lead.hold", 3);
 		for (String o : new String[] {"go", "come", "wait", "help"}) {
 			LINES.put("order." + o, 2);
 			VOICED.add("order." + o);
