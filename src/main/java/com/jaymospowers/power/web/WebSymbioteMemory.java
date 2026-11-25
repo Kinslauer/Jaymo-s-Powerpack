@@ -488,7 +488,8 @@ public final class WebSymbioteMemory {
 	private static void jealousy(ServerPlayer player, Run run, long now) {
 		WebSymbioteMind.Mood mood = WebSymbioteMind.mood(player);
 		float scale = JEALOUS_MOOD[mood.ordinal()];
-		if (scale <= 0.0F || WebSymbioteMind.hiding(player) || fighting(player)) {
+		if (scale <= 0.0F || WebSymbioteMind.hiding(player) || fighting(player)
+				|| WebSymbioteSettings.off(player, WebSymbioteSettings.Setting.JEALOUSY)) {
 			run.jealousTicks = 0;
 			return;
 		}

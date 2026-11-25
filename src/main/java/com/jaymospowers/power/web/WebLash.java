@@ -91,9 +91,10 @@ public final class WebLash {
 		ServerLevel level = player.level();
 		List<LivingEntity> foes = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REACH),
 			e -> foe(player, e) && e.distanceTo(player) - e.getBbWidth() * 0.5 <= REACH);
-		if (!pay(player, COST)) {
+		if (!WebStamina.afford(player, WebStamina.LASH) || !pay(player, COST)) {
 			return false;
 		}
+		WebStamina.spend(player, WebStamina.LASH);
 		cool(player, SLOT_LASH, COOLDOWN);
 		int stage = WebSymbioteMind.stage(WebSymbiote.state(player).bond());
 		float damage = DAMAGE[Math.min(stage, DAMAGE.length - 1)];

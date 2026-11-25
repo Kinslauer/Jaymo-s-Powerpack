@@ -338,6 +338,10 @@ public final class WebPower implements Power {
 		WebSymbioteMind.register();
 		WebSymbioteMemory.register();
 		WebSymbioteBody.register();
+		WebStamina.register();
+		WebSymbioteSettings.register();
+		WebSymbioteWords.register();
+		WebArmSwap.register();
 		WebSymbioteLife.register();
 		WebStrength.register();
 		WebShooters.register();
@@ -1336,6 +1340,9 @@ public final class WebPower implements Power {
 			fwip(player);
 			return;
 		}
+		if (!WebStamina.pay(player, WebStamina.ZIP)) {
+			return;
+		}
 		pullToBlock(player, hit);
 		player.setAttached(COOLDOWNS, new WebCooldowns(now + WebSymbiote.zipCooldown(player), cooldowns.shot(), cooldowns.yank()));
 		thwip(player);
@@ -1588,6 +1595,9 @@ public final class WebPower implements Power {
 			} else {
 				startWebline(player);
 			}
+			return;
+		}
+		if (!WebStamina.pay(player, WebStamina.YANK)) {
 			return;
 		}
 		// (0.21.23) a Yank mid-fight keeps the streak going

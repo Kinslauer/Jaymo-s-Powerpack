@@ -1606,7 +1606,7 @@ public final class WebSymbiote {
 		// (each strain speaks in its own colour: WebSymbioteStrains)
 		// (0.17.150) in a mood, a line of its commentary has a variant of its own where one was written
 		String line = WebSymbioteMind.voice(player, key);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + line, args)
+		WebSymbioteWords.say(player, Component.translatable("message.jaymospowers.web_symbiote." + line, args)
 			.withStyle(WebSymbioteStrains.voice(player), ChatFormatting.ITALIC));
 		// (0.17.202) its narration is spoken aloud too, where the line has a clip
 		WebSymbioteVoice.speak(player, line);
@@ -2036,7 +2036,7 @@ public final class WebSymbiote {
 		}
 
 		// wall crawl: hanging on a wall or ceiling is like being on a ladder
-		live.clinging = crawlTendrils(player) && !player.onGround() && touchingWall(player);
+		live.clinging = crawlTendrils(player) && !player.onGround() && touchingWall(player) && WebStamina.cling(player);
 		if (live.clinging) {
 			player.resetFallDistance();
 		}

@@ -998,7 +998,7 @@ public final class WebSymbioteMind {
 		if (!state.has(WebSymbioteState.SUIT) && WebSymbiote.suitAllowed(player) && !WebSymbiote.lockedOut(player)) {
 			options.add(WORN);
 		}
-		if (options.isEmpty()) {
+		if (options.isEmpty() || WebSymbioteSettings.off(player, WebSymbioteSettings.Setting.REQUESTS)) {
 			return mind.withNext(now + 1200L);
 		}
 		int kind = options.get(player.getRandom().nextInt(options.size()));

@@ -80,6 +80,10 @@ final class WebSymbioteFidget {
 		if (minecraft.isPaused()) {
 			return;
 		}
+		if (WebSymbioteSettingsClient.isOff(com.jaymospowers.power.web.WebSymbioteSettings.Setting.FIDGETS)) {
+			FIDGETS.clear();
+			return;
+		}
 		clock++;
 		for (AbstractClientPlayer player : level.players()) {
 			F f = FIDGETS.computeIfAbsent(player.getId(), id -> new F());
