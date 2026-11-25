@@ -747,6 +747,16 @@ public final class Formations {
 		return best;
 	}
 
+	/**
+	 * (st-shield, {@link BandStyles}) How many of {@code m}'s own side with a shield in the off hand stand within {@code range} (blocks)
+	 * of it, on their feet: the neighbours a shield wall stands firmer for.
+	 */
+	static int shieldNeighbours(Mob m, double range) {
+		String side = Comrades.side(m);
+		return m.level().getEntitiesOfClass(Mob.class, m.getBoundingBox().inflate(range), o -> o != m && o.isAlive() && !Downed.isDowned(o)
+			&& o.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS) && side.equals(Comrades.side(o))).size();
+	}
+
 	/** Whether {@code e} keeps ranks in a player's formation just now. */
 	public static boolean inRanks(Entity e) {
 		return MEMBER_OF.containsKey(e.getUUID());

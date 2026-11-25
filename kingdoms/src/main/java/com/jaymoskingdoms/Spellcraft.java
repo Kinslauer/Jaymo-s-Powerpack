@@ -159,6 +159,13 @@ public final class Spellcraft {
 		// the Mage's staff (0.7.212: and an attuned caster's)
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
+			// (mage wands) a Sorcerer casts the spells they have kept through one, since a staff's spells aren't theirs to hold
+			if (stack.getItem() instanceof MageWand && Classes.is(player, PlayerClass.SORCERER)) {
+				if (player instanceof ServerPlayer sp && world instanceof ServerLevel level) {
+					MageWand.sorcerer(sp, level, stack);
+				}
+				return InteractionResult.SUCCESS;
+			}
 			if (!Arcana.isStaff(stack) || !staffCaster(player)) {
 				return InteractionResult.PASS;
 			}
@@ -321,7 +328,7 @@ public final class Spellcraft {
 		// (class trees) a Warder's wards last longer
 		float wardPower = mage ? ClassForks.wardPower(player, spell) : 1.0F;
 		if (!Arcana.cast(spell, level, player, ClassCasters.power(player, mage, ATTUNED_POWER) * wardPower * (blood && !pact ? Hemomancy.power(player) : 1.0F)
-			* (arcanum ? PactArts.ARCANUM_POWER : 1.0F))) {
+			* (arcanum ? PactArts.ARCANUM_POWER : 1.0F) * MageWand.power(staff))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return;
 		}
@@ -354,8 +361,9 @@ public final class Spellcraft {
 			level.sendParticles(Fx.LIGHT, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
 		} else {
 			int cooldown = MAGE_COOLDOWN.getOrDefault(spell, NewSpells.COOLDOWN.getOrDefault(spell, 40));
-			player.getCooldowns().addCooldown(staff, Math.round(cooldown * ClassCasters.cooldown(player, mage, ATTUNED_COOLDOWN)));
+			player.getCooldowns().addCooldown(staff, Math.round(cooldown * ClassCasters.cooldown(player, mage, ATTUNED_COOLDOWN) * MageWand.cooldown(staff)));
 		}
+		MageWand.glint(level, player, staff);
 		afterCast(player, level, spell);
 	}
 

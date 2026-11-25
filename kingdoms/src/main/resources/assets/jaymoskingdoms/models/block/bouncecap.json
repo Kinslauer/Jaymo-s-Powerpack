@@ -1,0 +1,317 @@
+{
+  "ambientocclusion": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "cap": "jaymoskingdoms:block/fungus/bouncecap_cap",
+    "cap_side": "jaymoskingdoms:block/fungus/bouncecap_cap_side",
+    "gills": "jaymoskingdoms:block/fungus/bouncecap_gills",
+    "stem": "jaymoskingdoms:block/fungus/bouncecap_stem",
+    "particle": "jaymoskingdoms:block/fungus/bouncecap_cap"
+  },
+  "elements": [
+    {
+      "from": [
+        6,
+        0,
+        6
+      ],
+      "to": [
+        10,
+        4,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6.0,
+            12,
+            10.0,
+            16.0
+          ],
+          "texture": "#stem"
+        },
+        "south": {
+          "uv": [
+            6.0,
+            12,
+            10.0,
+            16.0
+          ],
+          "texture": "#stem"
+        },
+        "east": {
+          "uv": [
+            6.0,
+            12,
+            10.0,
+            16.0
+          ],
+          "texture": "#stem"
+        },
+        "west": {
+          "uv": [
+            6.0,
+            12,
+            10.0,
+            16.0
+          ],
+          "texture": "#stem"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        4,
+        3
+      ],
+      "to": [
+        13,
+        6,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3.0,
+            12,
+            13.0,
+            14
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            3.0,
+            12,
+            13.0,
+            14
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            3.0,
+            12,
+            13.0,
+            14
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            3.0,
+            12,
+            13.0,
+            14
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            3.0,
+            3.0,
+            13.0,
+            13.0
+          ],
+          "texture": "#cap"
+        },
+        "down": {
+          "uv": [
+            3.0,
+            3.0,
+            13.0,
+            13.0
+          ],
+          "texture": "#gills"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        6,
+        4
+      ],
+      "to": [
+        12,
+        8,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4.0,
+            8,
+            12.0,
+            10
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            4.0,
+            8,
+            12.0,
+            10
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            4.0,
+            8,
+            12.0,
+            10
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            4.0,
+            8,
+            12.0,
+            10
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            4.0,
+            4.0,
+            12.0,
+            12.0
+          ],
+          "texture": "#cap"
+        },
+        "down": {
+          "uv": [
+            4.0,
+            4.0,
+            12.0,
+            12.0
+          ],
+          "texture": "#gills"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        8,
+        5
+      ],
+      "to": [
+        11,
+        9,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5.0,
+            5,
+            11.0,
+            6
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            5.0,
+            5,
+            11.0,
+            6
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            5.0,
+            5,
+            11.0,
+            6
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            5.0,
+            5,
+            11.0,
+            6
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            5.0,
+            5.0,
+            11.0,
+            11.0
+          ],
+          "texture": "#cap"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        9,
+        6
+      ],
+      "to": [
+        10,
+        10,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6.0,
+            3,
+            10.0,
+            4
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            6.0,
+            3,
+            10.0,
+            4
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            6.0,
+            3,
+            10.0,
+            4
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            6.0,
+            3,
+            10.0,
+            4
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            6.0,
+            6.0,
+            10.0,
+            10.0
+          ],
+          "texture": "#cap"
+        }
+      }
+    }
+  ]
+}

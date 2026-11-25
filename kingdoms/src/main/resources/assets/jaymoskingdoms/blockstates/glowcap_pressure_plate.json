@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "jaymoskingdoms:block/glowcap_pressure_plate"
+    },
+    "powered=true": {
+      "model": "jaymoskingdoms:block/glowcap_pressure_plate_down"
+    }
+  }
+}

@@ -171,6 +171,7 @@ public final class WebSymbioteLife {
 			PENDING.remove(id);
 			CONSUMED.remove(id);
 			SCENES.remove(id);
+			ELDER_FIGHTS.remove(id);
 		});
 	}
 
@@ -431,6 +432,103 @@ public final class WebSymbioteLife {
 		}
 	}
 
+	// ---- elder against young ----
+	/** The struggle lasts this long (ticks); every {@code ELDER_BEAT} ticks the host jerks, with {@code ELDER_STRESS} more stress each. */
+	static final int ELDER_TICKS = 80, ELDER_BEAT = 8, ELDER_STRESS = 3;
+	/** The host is hurt this much (never to the last of their health) every {@code ELDER_HURT_EVERY} beats. */
+	static final float ELDER_HURT = 1.0F, ELDER_HURT_FLOOR = 4.0F;
+	static final int ELDER_HURT_EVERY = 3;
+	/** The elder wins this often. */
+	static final float ELDER_WINS = 0.85F;
+	static final int ELDER_LINES = 3;
+	/** Hosts in a struggle with the blob that keeps their old bond: when it began (game time). */
+	private static final Map<UUID, Long> ELDER_FIGHTS = new HashMap<>();
+
+	/** The owner stands at their remains with another symbiote on them: the struggle begins (once). */
+	private static void elderMeets(WebSymbioteBlob blob, ServerPlayer owner) {
+		if (ELDER_FIGHTS.putIfAbsent(owner.getUUID(), owner.level().getGameTime()) != null) {
+			return;
+		}
+		blob.getNavigation().stop();
+		WebSymbiote.whisper(owner, "life.elder.young." + (1 + owner.getRandom().nextInt(ELDER_LINES)));
+		elderSay(blob, owner, "life.elder.old." + (1 + owner.getRandom().nextInt(ELDER_LINES)));
+		owner.level().playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 1.2F, 0.6F);
+	}
+
+	/** The old one's lines, in its own strain's colour. */
+	private static void elderSay(WebSymbioteBlob blob, ServerPlayer owner, String key) {
+		net.minecraft.ChatFormatting colour = blob.remains == null ? net.minecraft.ChatFormatting.DARK_PURPLE : switch (blob.remains.state().kind()) {
+			case WHITE -> net.minecraft.ChatFormatting.WHITE;
+			case RED -> net.minecraft.ChatFormatting.DARK_RED;
+			default -> net.minecraft.ChatFormatting.DARK_PURPLE;
+		};
+		WebSymbioteWords.say(owner, net.minecraft.network.chat.Component.translatable("message.jaymospowers.web_symbiote." + key)
+			.withStyle(colour, net.minecraft.ChatFormatting.ITALIC));
+	}
+
+	/** A beat of the struggle: the host jerks, is hurt and stressed; at the end one of them has the body. */
+	private static void elderFight(WebSymbioteBlob blob, ServerLevel level) {
+		Remains remains = blob.remains;
+		if (remains == null || !(level.getPlayerByUUID(remains.owner()) instanceof ServerPlayer owner)) {
+			return;
+		}
+		Long began = ELDER_FIGHTS.get(owner.getUUID());
+		if (began == null) {
+			return;
+		}
+		if (!owner.isAlive() || owner.distanceTo(blob) > WebSymbioteBlob.BOND_REACH * 3.0 || !WebSymbiote.state(owner).bonded()) {
+			// they got away, or died
+			ELDER_FIGHTS.remove(owner.getUUID());
+			return;
+		}
+		long t = level.getGameTime() - began;
+		if (t >= ELDER_TICKS) {
+			ELDER_FIGHTS.remove(owner.getUUID());
+			if (owner.getRandom().nextFloat() < ELDER_WINS) {
+				elderWins(blob, owner, remains);
+			} else {
+				youngWins(blob, owner);
+			}
+			return;
+		}
+		Shakes.send(owner, 6.0F, blob.position());
+		owner.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ELDER_BEAT + 4, 3, false, false));
+		Vec3 jerk = new Vec3(owner.getRandom().nextDouble() - 0.5, 0.15, owner.getRandom().nextDouble() - 0.5).scale(0.5);
+		owner.setDeltaMovement(owner.getDeltaMovement().add(jerk));
+		owner.needsSync = true;
+		owner.syncVelocity = true;
+		WebSymbioteState state = WebSymbiote.state(owner);
+		WebSymbiote.set(owner, state.withStress(Math.min(WebSymbiote.STRESS_MAX, state.stress() + ELDER_STRESS)));
+		if (t / ELDER_BEAT % ELDER_HURT_EVERY == 0 && owner.getHealth() > ELDER_HURT_FLOOR) {
+			owner.hurtServer(level, level.damageSources().magic(), ELDER_HURT);
+		}
+		level.sendParticles(WebSymbioteStrains.dust(owner, 1.2F), owner.getX(), owner.getY() + 1.0, owner.getZ(), 10, 0.4, 0.7, 0.4, 0.0);
+		level.sendParticles(WebSymbioteStrains.dust(blob, 1.2F), blob.getX(), blob.getY() + 0.3, blob.getZ(), 6, 0.3, 0.2, 0.3, 0.0);
+		if (t / ELDER_BEAT == ELDER_TICKS / ELDER_BEAT / 2) {
+			// halfway: each says its piece again
+			WebSymbiote.whisper(owner, "life.elder.young." + (1 + owner.getRandom().nextInt(ELDER_LINES)));
+			elderSay(blob, owner, "life.elder.old." + (1 + owner.getRandom().nextInt(ELDER_LINES)));
+		}
+	}
+
+	/** The old one has the body: the young one is torn out and flees, and the bond comes back as it was, with their things. */
+	private static void elderWins(WebSymbioteBlob blob, ServerPlayer owner, Remains remains) {
+		Vec3 from = blob.position();
+		WebSymbiote.withdraw(owner).spurn(owner);
+		rebond(blob, owner, from);
+		owner.level().sendParticles(ParticleTypes.SQUID_INK, owner.getX(), owner.getY() + 1.0, owner.getZ(), 40, 0.4, 0.8, 0.4, 0.1);
+		owner.level().playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.8F, 1.4F);
+		WebSymbiote.whisper(owner, "life.elder.won");
+		blob.discard();
+	}
+
+	/** The young one keeps the body: the old one lets go of the things and slinks off. */
+	private static void youngWins(WebSymbioteBlob blob, ServerPlayer owner) {
+		returnThings(blob, owner);
+		blob.spurn(owner);
+		WebSymbiote.whisper(owner, "life.elder.lost");
+	}
+
 	/** Someone else's blob has the owner's things and they stand beside it with another symbiote: just the things. */
 	static void returnThings(WebSymbioteBlob blob, ServerPlayer owner) {
 		Remains remains = blob.remains;
@@ -471,8 +569,11 @@ public final class WebSymbioteLife {
 	static boolean blobTick(WebSymbioteBlob blob, ServerLevel level) {
 		if (blob.remains != null && blob.tickCount % 10 == 0 && level.getPlayerByUUID(blob.remains.owner()) instanceof ServerPlayer owner
 			&& owner.isAlive() && owner.distanceTo(blob) <= WebSymbioteBlob.BOND_REACH + 0.5 && WebSymbiote.state(owner).bonded()) {
-			// they have another symbiote now and it can't take them: the things are theirs anyway
-			returnThings(blob, owner);
+			// they have another symbiote now: the two fight over the body (the old one usually wins), see below
+			elderMeets(blob, owner);
+		}
+		if (blob.remains != null && !ELDER_FIGHTS.isEmpty() && blob.tickCount % ELDER_BEAT == 0) {
+			elderFight(blob, level);
 		}
 		if (blob.feast <= 0) {
 			return false;

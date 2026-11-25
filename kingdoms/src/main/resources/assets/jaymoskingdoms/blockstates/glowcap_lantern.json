@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "jaymoskingdoms:block/glowcap_lantern"
+    },
+    "hanging=true": {
+      "model": "jaymoskingdoms:block/glowcap_lantern_hanging"
+    }
+  }
+}

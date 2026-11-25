@@ -124,6 +124,9 @@ public final class WebMeetingClient {
 		return length <= 0 ? 0.0F : Mth.clamp((age + partial) / length, 0.0F, 1.0F);
 	}
 
+	/** The film's figure's entity id: negative, so it never meets a server entity, and clear of the other client-only bodies' ids. */
+	private static final int FIGURE_ID = -8_880_001;
+
 	private static void start(Minecraft minecraft, WebMeeting.Scene scene) {
 		LocalPlayer self = minecraft.player;
 		ClientLevel level = minecraft.level;
@@ -147,6 +150,9 @@ public final class WebMeetingClient {
 		copy.yBodyRotO = yaw;
 		copy.yHeadRotO = yaw;
 		copy.setNoGravity(true);
+		// an id of its own: a client-only body has none until one is set, and addEntity asks for it (one figure at a
+		// time, so a fixed id far below the other client-only bodies' ids, which sit near zero)
+		copy.setId(FIGURE_ID);
 		level.addEntity(copy);
 		figure = copy;
 	}

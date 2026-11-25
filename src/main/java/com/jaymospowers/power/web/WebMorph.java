@@ -366,14 +366,22 @@ public final class WebMorph {
 
 	/**
 	 * A takeover's strike (WebSymbiote at its prey): the symbiote forms a weapon on its own and lets go at {@code target}.
-	 * False if it can't (not a web slinger's body, nothing to form from, still cooling down, a counter running).
+	 * False if it can't (nothing to form from, a hand full, still forming or cooling down, a counter running). Any host's
+	 * symbiote does it, web slinger or not (Andy, 2026-11-25: takeovers should use "the charged weapon m1s").
 	 */
 	static boolean drivenStrike(ServerPlayer player, LivingEntity target) {
-		if (!com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE) || !gather(player, true)) {
+		if (!gather(player, true)) {
 			return false;
 		}
 		release(player, target.getId());
 		return true;
+	}
+
+	/** The weapon arm is busy: forming, swinging, or not yet ready to form again. */
+	static boolean drivenBusy(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		return player.getAttached(CHARGE) != null || player.getAttached(MORPH) != null
+			|| live != null && player.level().getGameTime() < live.readyAt;
 	}
 
 	/** The takeover's over: a weapon the symbiote was forming on its own ({@link #drivenStrike}) melts back, unstruck. */
@@ -428,7 +436,7 @@ public final class WebMorph {
 		sound(level, player, SoundEvents.HONEY_BLOCK_SLIDE, 0.8F, 0.6F);
 	}
 
-	/** Every tick, for a web slinger: the gathering, held, then the strike under way lands, then ends. */
+	/** Every tick, for a web slinger (WebPower) or a host (WebSymbioteInfection): the gathering, held, then the strike under way lands, then ends. */
 	static void tick(ServerPlayer player) {
 		tickCharge(player);
 		tickBleeds(player);

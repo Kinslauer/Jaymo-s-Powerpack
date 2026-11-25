@@ -6,6 +6,7 @@ import com.zigythebird.playeranimcore.animation.Animation;
 import com.zigythebird.playeranimcore.animation.AnimationController;
 import com.zigythebird.playeranimcore.animation.AnimationData;
 import com.zigythebird.playeranimcore.animation.HumanoidAnimationController;
+import com.zigythebird.playeranimcore.animation.layered.modifier.MirrorModifier;
 import com.zigythebird.playeranimcore.animation.layered.modifier.SpeedModifier;
 import com.zigythebird.playeranimcore.bones.PlayerAnimBone;
 import com.zigythebird.playeranimcore.enums.PlayState;
@@ -45,15 +46,18 @@ final class PalMobAnimator {
 	private PalMobAnimator() {
 	}
 
-	/** A mob's controller, its speed (the stretch), and a bone to read each part through. */
+	/** A mob's controller, its speed (the stretch), its mirror (an off-hand blade's swing), and a bone to read each part through. */
 	private static final class Playing {
 		final HumanoidAnimationController controller;
 		final SpeedModifier speed = new SpeedModifier(1.0F);
+		final MirrorModifier mirror = new MirrorModifier();
 		final PlayerAnimBone[] bones = new PlayerAnimBone[BONES.length];
 
 		Playing() {
 			this.controller = newController();
 			this.controller.addModifierLast(this.speed);
+			this.mirror.enabled = false;
+			this.controller.addModifierLast(this.mirror);
 			for (int i = 0; i < BONES.length; i++) {
 				this.bones[i] = new PlayerAnimBone(BONES[i]);
 			}
@@ -95,8 +99,8 @@ final class PalMobAnimator {
 		}
 	}
 
-	/** Starts {@code animation} on the mob, stretched over {@code length} ticks. */
-	static void play(int entityId, String animation, int length) {
+	/** Starts {@code animation} on the mob, stretched over {@code length} ticks; {@code mirror}ed (left for right) for an off-hand blade. */
+	static void play(int entityId, String animation, int length, boolean mirror) {
 		Identifier id = Identifier.tryParse(animation);
 		if (id == null) {
 			return;
@@ -119,6 +123,7 @@ final class PalMobAnimator {
 		}
 		float animLength = anim.data().<Number>get("endTick").map(Number::floatValue).orElse(anim.length());
 		playing.speed.speed = Math.max(0.05F, animLength / Math.max(1, length));
+		playing.mirror.enabled = mirror;
 		playing.controller.triggerAnimation(anim);
 	}
 

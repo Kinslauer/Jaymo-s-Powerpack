@@ -48,7 +48,8 @@ import org.jspecify.annotations.Nullable;
  * for free any more (the players' side is Powers' {@code compat/SpellThrows}).
  * <ul>
  * <li><b>What they carry</b> ({@link #AMMO}, saved on the mob): arrows (skeletons in their {@link #TATTERED_QUIVER},
- * pillagers, piglins, illusioners, the folk's archers, crewmen, Scalebane archers, the Gorgon), javelins (a guard's
+ * pillagers, piglins, illusioners, the folk's archers, MCA's archers, guards and crewmen with a bow or crossbow, Scalebane
+ * archers, the Gorgon), javelins (a guard's
  * javelins, tridents or rocks) and shot (muskets and pistols). Each kind is filled once, the first time it's asked
  * for ({@link #full}), and every shot or throw spends one ({@link #spend}). With none left the mob can't loose that kind:
  * skeletons and pillagers fight with what's in their hands, the folk draw their blades.</li>
@@ -80,7 +81,8 @@ import org.jspecify.annotations.Nullable;
 public final class MobAmmo {
 	/** What a mob shoots or throws. */
 	public enum Kind {
-		ARROWS("arrows"), JAVELINS("javelins"), SHOT("shot"), POTIONS("potions"), BOMBS("bombs"), ROCKS("rocks"), KNIVES("knives"), BALLS("balls"), BLAZE("blaze");
+		ARROWS("arrows"), JAVELINS("javelins"), SHOT("shot"), POTIONS("potions"), BOMBS("bombs"), ROCKS("rocks"), KNIVES("knives"), BALLS("balls"), BLAZE("blaze"),
+		BOOMERANGS("boomerangs");
 
 		final String key;
 
@@ -91,7 +93,10 @@ public final class MobAmmo {
 
 	/** Arrows in a skeleton's tattered quiver, a pillager's, a piglin's, an illusioner's: least and most. */
 	static final int[] SKELETON_ARROWS = {6, 12}, PILLAGER_BOLTS = {8, 14}, PIGLIN_BOLTS = {6, 10}, ILLUSIONER_ARROWS = {12, 18};
-	/** The folk's archers and crewmen, a Scalebane archer, the Gorgon (her volleys come out of it too), anyone else. */
+	/**
+	 * The folk's archers; crewmen and every other villager with a bow or crossbow (MCA's archers and guards draw the crewmen's quiver);
+	 * a Scalebane archer; the Gorgon (her volleys come out of it too); anyone else.
+	 */
 	static final int[] FOLK_ARROWS = {12, 20}, CREW_ARROWS = {10, 16}, SCALEBANE_ARROWS = {16, 24}, GORGON_ARROWS = {60, 80},
 		OTHER_ARROWS = {8, 14};
 	/**
@@ -99,6 +104,8 @@ public final class MobAmmo {
 	 * with less ammo"; was 6 to 10).
 	 */
 	static final int[] JAVELINS = {2, 3}, SHOT = {3, 5};
+	/** The boomerangs a desert bandit or a ranger carries ({@link Boomerangs}). */
+	static final int[] BOOMERANGS = {2, 3};
 	/** A caravan guard's balls for his musketoon ({@link Musketoon}): heavy, so few (was 3 to 5). */
 	static final int[] BALLS = {2, 3};
 	/** A Flame Avatar Tinkerer's blaze rods and powder for the fire cannon ({@link FireCannon}). */
@@ -247,6 +254,7 @@ public final class MobAmmo {
 	static int full(Mob mob, Kind kind, RandomSource random) {
 		int[] range = switch (kind) {
 			case JAVELINS -> JAVELINS;
+			case BOOMERANGS -> BOOMERANGS;
 			case SHOT -> SHOT;
 			case POTIONS -> POTIONS;
 			case BOMBS -> BOMBS;
@@ -285,6 +293,7 @@ public final class MobAmmo {
 			case ARROWS -> stack.is(ItemTags.ARROWS);
 			case JAVELINS -> stack.is(Items.TRIDENT) || stack.is(Items.COBBLESTONE)
 				|| BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("javelin");
+			case BOOMERANGS -> BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("boomerang");
 			case POTIONS -> stack.is(Items.SPLASH_POTION) || stack.is(Items.LINGERING_POTION);
 			case ROCKS -> stack.is(Items.COBBLESTONE) || stack.is(Items.MOSSY_COBBLESTONE) || stack.is(Items.COBBLED_DEEPSLATE);
 			case KNIVES -> knife(stack);
@@ -330,7 +339,9 @@ public final class MobAmmo {
 	private static final Set<Mob> ARMED = java.util.Collections.newSetFromMap(new WeakHashMap<>());
 
 	/**
-	 * The game's own bowmen's arrows and the drowned's tridents lie where they land to be picked up again; a pillager out
+	 * The game's own bowmen's arrows, MCA's villagers' (each spent from their quiver: {@code McaShieldFireMixin}) and the drowned's
+	 * tridents lie where they land to be picked up again (a multishot crossbow's extra bolts stay unpickable, as they were never
+	 * counted); a pillager out
 	 * of bolts clubs with its crossbow (a skeleton out of arrows already fights with its bow: {@code SkeletonQuiverMixin}).
 	 */
 	private static void loaded(Entity entity, ServerLevel level) {
@@ -350,6 +361,8 @@ public final class MobAmmo {
 		}
 		if (entity instanceof AbstractArrow arrow && arrow.getOwner() instanceof Mob owner && (owner instanceof AbstractSkeleton
 			|| owner instanceof Pillager || owner instanceof Piglin || owner instanceof Illusioner || owner instanceof Drowned)) {
+			arrow.pickup = AbstractArrow.Pickup.ALLOWED;
+		} else if (entity instanceof AbstractArrow arrow && arrow.pickup == AbstractArrow.Pickup.DISALLOWED && McaCompat.isMca(arrow.getOwner())) {
 			arrow.pickup = AbstractArrow.Pickup.ALLOWED;
 		}
 	}
@@ -474,6 +487,29 @@ public final class MobAmmo {
 			mob.getNavigation().moveTo(nearest, FETCH_SPEED);
 		}
 		return true;
+	}
+
+	/**
+	 * The nearest thrown weapon of {@code mob}'s (a javelin, trident or boomerang) lying at rest within {@link #FETCH_RANGE} of it
+	 * that it could pick up, of a kind it carries (so it would pick it up when it gets there), or null. For a fighter going back for
+	 * what it threw while its foe is not on top of it ({@link WeaponSense}).
+	 */
+	static @Nullable Entity nearestThrown(ServerLevel level, Mob mob) {
+		Entity nearest = null;
+		double best = Double.MAX_VALUE;
+		boolean javelins = carries(mob, Kind.JAVELINS), boomerangs = carries(mob, Kind.BOOMERANGS);
+		for (Entity e : level.getEntities(mob, mob.getBoundingBox().inflate(FETCH_RANGE), e -> e instanceof ItemEntity || e instanceof AbstractArrow)) {
+			ItemStack stack = stackOf(e);
+			if (stack == null || !(javelins && is(stack, Kind.JAVELINS) && !stack.is(Items.COBBLESTONE) || boomerangs && is(stack, Kind.BOOMERANGS))) {
+				continue;
+			}
+			double d = mob.distanceToSqr(e);
+			if (d < best) {
+				best = d;
+				nearest = e;
+			}
+		}
+		return nearest;
 	}
 
 	/** The stack an item or a resting arrow/javelin/trident would give, or null if it can't be picked up. */

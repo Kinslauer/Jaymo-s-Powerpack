@@ -17341,3 +17341,222 @@ Not tested in a running game: site choice, ground levelling and building overlap
 - `monsters/Critter.mobInteract` (maggots only, main hand), the bait looked up by its id `jaymospowers:maggots`.
 - Supply unchanged: once a body has lain unseen half a day (10 min), one maggot at a time comes to it, and another comes about 5 s after you take one, up to 4 near you. Taking them also stops them eating the body.
 - Built; not played.
+
+## 0.12.79 (2026-11-25): overcome faints once an encounter, shake fainted folk awake (#2150)
+
+- **Once an encounter**: after fainting at the sight of something overwhelming, a player or one of the folk isn't overcome again until nothing overwhelming has been in their sight for 60 s (`Overcome.SPENT`, `ENCOUNTER_GAP`). The unease still climbs and shows (cold edges, heartbeat; folk still say so and may withdraw), but they keep their feet. Before, the unease went back to 35 after a faint and you could faint again a few seconds after waking.
+- **Shake them awake**: sneak + use on one of the folk lying out cold from a fright (`Overcome.shake`) shakes them by the shoulder: they come round, cry out and run from what overcame them, as one who withdraws does (or just come round, if it's gone). They still lie out 15 s otherwise.
+- Built; not played.
+
+## 0.12.80 (2026-11-25): explorer maps never make chunks on the server thread (#2148)
+
+- **Fix**: the Deck crashed (watchdog, 60 s) twice on 2026-11-24, 10:45 PM and 11:12 PM, from vanilla's explorer map (`ExplorationMapFunction`) in a wandering trader's offers: once when a downed trader was finished off (Droppable Villager Trades makes its offers on death), once from a roaming caravan's trader (`RoamingCaravans.goods` asks for its offers). Vanilla's structure search makes each likely chunk on the server thread. Now every explorer map (cartographer and wandering trader trades, shipwreck, ocean ruin and ancient city chest maps) finds its structure with Scout on the server thread, over the same search radius, with no chunk made, and a village map checks the shared village pool's draw so it points at a village that will really stand. Alex's Caves' underground cabin maps are routed the same way. The Labyrinth Compass (looked up every 100 ticks while held) and the ruin-folk's map to another people's city use Scout too, and a held compass keeps its answer while its holder stays within 8 chunks instead of searching every 5 s. Off the server thread vanilla's search runs as before.
+- **Scout**: an underground structure (ancient cities in the deep dark) is judged by the biomes down the column, not the surface biome. The cheap placement cut (frequency, exclusion zone) runs before any height or biome sampling, so spacing-1 sets (buried treasure, mineshaft maps) don't sample thousands of spots; a start already stored where that cut now fails (a pack changed the frequency after the world made it) isn't found.
+- **Differs from vanilla**: Scout trusts the prediction instead of loading the chunk to confirm it, and can't add a reference (that needs the chunk). Maps that skip known structures still leave out starts the structure cache or saved chunks show as already claimed, but a start not made yet can't be told claimed, so two maps may point at the same structure. In a One Dimension world it searches the Overworld band, and concentric-ring placements (strongholds) are not searched. Moog's structure lib's replacement structure search (on `ChunkGenerator`) is bypassed for these maps; it is inactive in this pack's config.
+- `ExplorationMapScoutMixin`, `CabinMapScoutMixin` (a `@Pseudo` mixin in the Alex's Caves config), `Scout`, `LabyrinthCompass`, `RuinFolk`. The farmhand's farmhouse hunt is switched off (`FarmhandHome.SEARCH_OFF`), so it is left as it is. Not built locally; CI builds it. Not played.
+
+## 0.12.81 (2026-11-25): Bounty boards against a wall; plains towns always have a working windmill, a butcher and an infirmary (#2151)
+
+- **Bounty boards** (Andy: "it should be against a wall, with the notices facing out, its always in the middle of a walkway"): a town's board now only goes up with every block of its back against a solid wall, its notices facing out, and with at least 16 open blocks in front of it (`BOARD_OPEN_LEAST`), so it never narrows a lane. It looks up to 16 blocks from the bell (was 8). A board already standing free is moved once to such a wall the next time its town loads. `Bounties.backed`, `boardSpot`, `boards`.
+- **Plains towns' musts** (Andy: "plains villages like these REQUIRE one, they also require a healer and butcher"): `TownNeeds` looks at every settlement on plains land every 30 s. One with no working windmill, butcher's shop or infirmary gets it: Epic Structures: Villages' two windmill towers (which Kitchen makes turn), a butcher or infirmary piece of the village, or one its builders put up all count. A missing one is staked as a forced project for the builders and finished whole as soon as no player is within 48 blocks, one building per check.
+- **The windmill** (`grain_mill`, "Windmill"): a new 13 x 6 design, a 5 x 5 stone-and-timber tower under a hipped roof with Kitchen's turning windmill on the back wall. Its shaft runs through the wall into Kitchen's grindstone in the mill room upstairs (ladder up, hay and a barrel below). The 13-block width keeps the sails' sweep clear. Builders never pick it on their own; it goes up only where a plains town lacks a windmill.
+- Why the windmills seemed gone: nothing was removed. Kitchen still turns Epic's two plains windmill towers, unchanged since October, but those towers are random pieces of the village jigsaw, so many plains villages never got one.
+- Built; not played. Not checked in game: the windmill's look, its sails turning, and boards finding a wall in every village layout. A town with no wall spot that fits gets no board until one does.
+
+## 0.12.82 (2026-11-25): hollow among the dead - the Hollow walk with the hordes, and a kill makes a captain (#2144)
+
+- **The Hollow walk with the dead** (Andy: "Hollow of all kinds except vampire should be among the zombie and skeleton hordes at night and otherwise"): with MCA, Hollow villagers walk among the zombies and skeletons: Pallids most often (4 in 10), Zombie Hollow and Skeleton Hollow (a quarter each) and Reapers (1 in 10). The Wraith, the vampire's thrall, is never among them. A horde of the dead or of skeletons brings one along half the time, and by day or night one may stand up in place of a zombie or skeleton 24-64 blocks from a player. They can be talked to.
+- **A finite number** (Andy: "a new world should spawn with a finite amount, and that number can increase or decrease. the number should be 6"): a new world has 6. While fewer than that walk, another stands up among the dead. The count falls by one each time one dies for good (a captain due back doesn't count as gone), and rises by one, 1 time in 4, when the Hollow or the dead kill a villager and take them.
+- **Promoted only by a kill** (Andy: "if ever ANY of them kill you is when they are promoted"): the raised's captains no longer rise from the land by chance. One is made when one of the Hollow, or a zombie or skeleton, kills a player, and he starts at rank 1 with no strengths or moves. He gains a strength for each player he kills, learns from each death when he comes back (75%, as before), and gets his own move at rank 4. The titled dead are the Hollow's lieutenants.
+- **How they fight**: a Zombie Hollow or a Reaper as a zombie, a Skeleton Hollow as a skeleton with its bow. A Pallid fights with the class he had in life (Andy: "pallids should fight with their old class abilities and weapons"): its starting weapons and armour and its strengths. Warlords and Brutes hit harder, Brutes are tougher, Thieves and Monks are faster, Paladins and Monks take less damage, Rangers and Marksmen shoot, Mages, Sorcerers and Warlocks throw a fire bolt every 5 s at a foe out of reach, and Clerics and Druids heal the most hurt of their army (or themselves) every 10 s.
+- **The Pallid lead** (Andy: "the pallids are intelligent hollow and will end up leading armies of the skeleton and zombies, as another faction"): a Pallid made a captain calls up 2 of the dead (1 more a rank) and gathers the dead near him, up to 10. They keep with him and go for whoever he fights.
+- **The same man back**: a captain's kind, class and saved self (face, name, blood) are kept, so when he comes back it's him again, in the next of the dead to walk his land.
+- The dead never target the Hollow, and they count as outlaws (killing one is no crime). Without MCA the raised keep their zombies and skeletons.
+- `HollowCaptains` (new), `Captains` (slew, raisedDead), `Rivals` (loaded, roamer), `ZombieHordes`, `Workers.step`, `Outlaws`, `McaBridge`/`McaCompat` (hollowBody, saved, untree), `ZombieBlightMixin`.
+- Built (compileJava); not played. Not done: other class abilities (a Tinkerer's gadgets, a Rider's horse, spells beyond the bolt), daylight burning.
+
+## 0.12.83 (2026-11-25): Toughness: Grit and gear let you take more hits (#2155)
+
+- **Toughness** (new, `Toughness`): every player has it. It's a base of 20 (Andy's pick), plus one per point of Grit, plus 4 per point of armour toughness worn (full diamond +32, netherite +48; broken pieces give nothing).
+- **Shrug:** every blow (a hit, a shot, a blast; not falls, fire, drowning, hunger, bleeding, and nothing on the downed) lands lighter, before armour: 0.6 x t / (t + 100), never past 40%. New character 10%, Grit 30 20%, Grit 100 33%, Grit 100 in netherite 38%. It comes after the Hearth cap, and the parts' pools (head, body, limbs) take what's left, so a blow that would have blacked out the head or body may not now. Jaymo's Powers' finishing step (its `wounds` damage) isn't a blow and is left alone.
+- **Poise:** a blow that arrives at 0.04 x toughness damage or less doesn't knock you back (`PoiseKnockbackMixin`): new character 0.8, Grit 50 2.8, Grit 100 4.8, Grit 100 in netherite 6.7.
+- Grit keeps its armour and knockback resistance. Its K screen line now says how much it takes off every blow, and hovering it shows your whole toughness (with gear), the share off every blow and the poise.
+- Built; not played. Numbers in the PR are from a model of plain blows (no crits, combos, red swings, bleeding or armour breaking).
+
+## 0.12.84 (2026-11-25): Hearth's hit cap no longer softens the blow that downs you (#2157)
+
+- In Hearth, the cap that keeps any one hit to a fifth of your health also caught Jaymo's Powers' finishing step (the `jaymospowers:wounds` damage that ends a body once a blow has blacked out its head or torso, or once a downed body runs out). Capped, it took 4 health instead of downing you. Now it's left alone (`WorldTiers.hearthHit`), so a blacked-out torso or head downs you in Hearth as everywhere else. The blow that blacked it out is still capped.
+- Built; not played.
+
+## 0.12.85 (2026-11-25): fighting AI - weapon sense, breaking off to mend, shields, NPC eyes, danger sense, getting there, band styles (#2159)
+
+Andy: "the AI in these mods is exactly what our MCA and npcs have been missing." Inspired by Hostile Humans (CoconutQualityModding, code by Craft1x) and Hostile Humans Unified (Felix_xing); ideas only, none of their code (their licences can't go into Kingdoms). 39 behaviours Andy ticked, spec in `docs/HostileHumans-Plan.md`. Applies to MCA villagers (guards, archers, companions, rangers, enlisted), Folk (realm folk, barbarians, orcs, goblins, pirates, bandits, smugglers) and illagers.
+- **Weapon sense**: a fighter picks its weapon from what it really carries (loaded gun, then bow or crossbow with arrows, then throwing weapon, then its best blade), from both hands and an MCA villager's pack, and re-picks when ammo runs out or the range changes. A shooter rushed inside 6 blocks (4 with a loaded crossbow) draws its blade and goes back to the bow past 9 or once the fight ends. Each weapon keeps its range (bow 12-22, crossbow 14-26, javelin and boomerang 6-16, pistol 5-12, musket 14-28, spear 6-14), preferring a wall corner and leaning out to shoot (Andy: "pillagers struggle with this especially, remember the cover system and leaning"; pillagers now stop at 26 blocks instead of walking up to 8). Shooters sidestep while drawing and lean round corners. Throwers go back for their javelins. Fighters throw harmful splash potions they carry at 4-10 blocks, never into a melee with a friend. Javelins are never thrown during an arrest or at a downed body. `WeaponSense`, `RangedTactics` (BAND, FETCH), `CrossbowGoalAmmoMixin`, `Orcs` (rangers trade bow and crossbow by the bands).
+- **Boomerangs** (Andy: "add the boomerang to desert bandit and other ranger npc weapon pool"): with WeaponMod loaded, desert and badlands bandits (iron), forest rangers (wood) and orc rangers (stone) carry 2-3, thrown at 6-16 blocks. Caught on the way back it's thrown again; missed, it lies where it fell and the thrower fetches it. `Boomerangs`, `WeaponModBoomerangs`, `MobAmmo` BOOMERANGS.
+- **Breaking off and mending**: under 20% health a fighter falls back along a checked path (no lava, fire or harmful drop, never past a foe) for up to 8 s or 16 blocks, calling "falling back" or "cover me". Once no foe is within 8 blocks it mends with what it carries (bandage, plain food first, healing or regeneration potion; bowls and bottles kept), spending the item; nothing heals from nothing. At 35% it says "back in" and returns to its leader, post or foe. The fearless and reckless hold to 10%, the timid break at 30%, a band leader near holds the band 5% longer and shouts. Cornered, they fight on; with nothing to mend with they fall back once a fight. GUARD and MEDIC friends within 8 blocks step between the hurt one and its chasers for 5 s. Fighting Folk carry a 3-slot belt pouch (bread, dried meat or kelp by people, a linen bandage for soldiers and medics with Powers loaded, a rare potion) that drops on death and is taken with a downed body's weapons. `BreakOff`, `BeltPouch`, `Callouts`, `Comrades`, lang part `break-off.json`.
+- **Shields and blows**: shield bearers step every arrow, bolt, javelin and bullet ahead (10 ticks, real drag and gravity) and raise the shield in time for one that will hit them from the front; they watch any shooter in sight drawing, loaded or aiming at them. A raised shield holds 6 ticks; a blocked blow opens a 10-tick counter. No shooting with the shield up: a crossbowman waits loaded behind it and lowers it to fire; bows and two-handed weapons never raise one, and a foe in reach always comes before guarding. Heavy weapons (axe, great sword, hammer, mace) sometimes jump for a falling critical (x1.5); every weapon waits its full swing time, no spam. Fighters step back between blows to their weapon's reach (Better Combat reach, else by weapon type), never off a drop or into lava; vanilla hit reach is unchanged. `ShieldSense`, `Blows`, `WeaponModFlight`, `MobShields`, `MobCombat`, `MobBlowMixin`, `McaShieldFireMixin`, `MeleeAttackGoalMixin`, `McaMeleeSwingMixin`.
+- **NPC eyes**: NPCs fighting NPCs now see by the same cone, light, sneaking and distance rules players face, with a foe they're already fighting seen at full range. Sight also tries the chest, shoulders and feet, so a shoulder round a corner is seen (players too); shooters still need a clear line to where they aim. Folk lose a foe they can't see and search its last spot like monsters; posted guards and waiting companions only turn and look, and searchers go back to their post or leader. Hit from behind by a foe it didn't see, a fighter stops and turns for up to a second. Anything at its feet within 3 blocks in front is seen. A fighter who sees a foe tells up to 3 fighters of its side within 12 blocks for 10 s (never civilians or children). **Dev view** (Andy: "accessed through spectator mode"): an operator in spectator, or anyone in a dev world, looking at an NPC sees its view cone, its foe, the spots it remembers and why it's acting, on their own screen. `NpcEyes`, `Senses`, `LivingEntitySightMixin`, `ComradesSightMixin`, `NpcEyesClient`, lang part `npc-eyes.json`.
+- **Danger sense**: fighters strike a creeper first, then back out of its blast once it hisses; everyone runs from lit TNT, TNT minecarts and dynamite (ours or WeaponMod's), whoever lit it; the blast run beats every other move. A burning fighter steps out of fire, makes for water within 8 blocks and never paths into lava. In water they swim on to the fight or make for the bank nearest the foe, and leave the water after a fight. Stuck in a cobweb with a blade, they cut it (only the web goes). `DangerSense`, `CreeperFlight`.
+- **Getting there**: a melee fighter whose path fails or makes no headway for 2 s tries ways round on rings of 8, 16 and 24 blocks, remembering dead ends for 5 s. Shot at by a foe it can't reach, it hides behind something that blocks the shooter, waits 2 s and tries again. Fighters open fence gates and wooden trapdoors on their path and press a button or flip a lever on their side of an iron door (a flipped lever goes back after); a fitted lock (`Locks`) keeps them out, and only doors they opened are shut behind them. Fighters plan paths up and down ladders and vines and climb them. In a boat or minecart with a foe within 6 blocks, they get out. All trial paths share one budget of 12 a tick. `Detours`, `Hiding`, `Passages`, `Climbing`, `Disembark`, `PathProbes`, `Doorways`, `Cover`, `WalkNodeEvaluatorMixin`, `GroundPathNavigationMixin`, `PathNavigationAccessor`.
+- **Band styles**: orcs and barbarians leap in from 3-6.5 blocks (landing checked) and their heavy blows slow the struck for 1.5 s. Realm soldiers with shields advance behind them at 80% speed, harder to knock back, firmer with shield-bearing neighbours, and lower the shield to swing once in reach. Rangers, road veterans and veteran realm bowmen loose two arrows 5 ticks apart, each spent from the quiver. Bandits and revealed assassins in no plate roll sideways out of a blow they see coming (a visible roll with its own body animation, once per 3.5 s, landing checked); the dodged swing is spent. 40% of bandits and every assassin fight with a blade in each hand; bandits' shields ride on their backs and come to hand when they're shot at. `BandStyles`, `NpcDodge`, `DualBlades`, `NpcRollPose`, `BackGearLayer`, `McaDoubleShotMixin`, `Formations`.
+- **A real draught** (Andy chose "Give them a real draught"): band members no longer heal 40% from a draught they never carried. Each grown fighter of a band (camps, villages, realms, illagers) carries one real healing potion in its pack or belt pouch, put there the first time it's seen and restocked once a day while out of a fight if it has none. It drinks it when it falls back badly hurt, and it can be looted. `PackUse`.
+- **No free arrows for MCA**: MCA archers and crossbowmen now spend every arrow from their quiver and stop shooting when it's empty; their arrows can be picked up. `McaShieldFireMixin`, `MobAmmo`.
+- Built; not played. Not checked in game: every behaviour above, that the new mixins apply at runtime, the roll and back-gear look, tuning feel and tick cost.
+
+## 0.12.86 (2026-11-25): vampire and werewolf seizures fight like the new fighting AI (#2162)
+
+- Andy: "the symbiotes' and other takeovers (giant, vampire, werewolf) should also get the aggression and AI from the new implementation for MCA. they are the most playerlike and aggressive."
+- **Footwork**: while the blood, the wolf or a sentient blade has you, it no longer stands still at its prey. It circles at arm's length and changes side every 1.5 s. The wolf and the blade hop into each blow so it lands falling as a critical hit; `Seizures` waits up to 6 ticks for the hop.
+- **Dodging**: arrows and other shots coming at you are sidestepped (`client/TakeoverDodge`).
+- **Aggression**: if something other than its prey hits you within 6 blocks while the prey is out of reach, it turns on the attacker.
+- Built (compileJava + compileClientJava); not played.
+
+## 0.12.87 (2026-11-25): villagers tell the red and white symbiotes from the black (#2164)
+
+- Fear cries, "we know what you are" lines and gossip now have their own families for the **red** symbiote (the bloody one, the killer) and the **white** one (the quiet warrior of the old songs, in his white cloak), read from Powers' `symbiote_red` / `symbiote_white` tags; the black one keeps its lines (`Oddities.strain`, lang part `talk-odd-strains.json`).
+- Built; not played.
+
+## 0.12.88 (2026-11-25): tree debris only when a player brought the tree down (#2165)
+
+- Falling trees leave drops only when a player caused the fall: they cut it, a tree they cut (ours or Felled's) knocked it over, or they've taken an axe to it since (`FallingTree.byPlayer`, saved). Trees brought down by storms, fire, giants, tornadoes, loose wood or a woodcutter's stray knock leave nothing: no saplings, sticks or apples from their leaves, nothing from the leaves and blocks they smash on the way down. A woodcutter's own tree still goes into his bag.
+- A player's fallen tree still drops its leaves a few at a time as it lies, but those only give drops while a player is within 32 blocks (`DEBRIS_WATCH`); otherwise they wither to nothing.
+- Loose bare logs falling like sand no longer turn into item drops when they can't land as a block.
+- Fixes villages and forests filling with hundreds of item drops after a storm (lag). Built; not played.
+
+## 0.12.89 (2026-11-25): skill bar: symbiote lash, rupture, nightstep, onslaught (#2169)
+
+- Four new Powers moves on the skill bar for a bonded web slinger: Tendril Lash, Rupture (red), Nightstep (black), Crowned Onslaught; Shroud's description now says it is Carapace / Aegis / Shroud by strain. Data and lang only (`move_*` spells, `power_moves.json`, `weapon_forms` tag).
+- Built; not played.
+
+## 0.12.90 (2026-11-25): Waking villages into kingdoms no longer freezes the server (#2171)
+
+- The server crashed on its watchdog (Deck, 2026-11-25, a new world waking snowy villages into kingdoms). Looking up which structure starts in a village's chunk (`PoolPick.starts`) asked for the chunk from the server thread, and there Minecraft waits until the chunk is made, running other queued chunk loads meanwhile; the server stopped ticking. It now asks from a background thread, which only queues the request, so the kingdom wake (`TownWakes`) and the capital's search (`StoryGround`) wait for it without holding up the server.
+- Built by CI; not played.
+
+## 0.12.91 (2026-11-25): class items show up in JEI under the class's name (#2174)
+
+- **Class item tags** (Andy: "all items related to classes should get some type of tag so typing the class name in jei
+  gets you all the related items"): fifteen item tags, `jaymoskingdoms:class/<class>` (shown as "Cleric's Gear" and so
+  on), one for each class. Each holds the class's casting focus, the weapons it is trained with (`ClassPerks.trainedAs`:
+  a Thief's light blades, a Warlord's two-handed weapons, a Paladin's swords and bludgeons...), the armour made for it
+  (the Paladin's, Warlord's, Ranger's and Hedge Mage's sets, Templar and Reverent plate, the Scoundrel's wrappings, the
+  RPG Series' robes and armours), and what only it uses: scrolls a Cleric, Druid or Warlock can learn
+  (`ClassCasters.ALLOWED`; a Mage gets every scroll), tomes, the Rider's tack and lances, the Tinkerer's stations and
+  gadgets, a Monk's fist gear, the weapon schools' masks. Other mods' items are optional, so a missing mod drops out.
+  `kingdoms/tools/class_item_tags.py` writes the tags (run it again after changing a list; it reads the scroll lists from
+  `ClassCasters`).
+- **JEI search** (`client/compat/ClassJei`): every item in a class's tag gets the class's name as a JEI search alias, so
+  typing `cleric` (or `ranger`, `tinkerer`...) in JEI's search lists all of them beside anything named so. The alias is
+  the class's name key, so it follows the game's language. `$class/cleric` finds the tag itself. Needs JEI's "Search
+  Extra Ingredient Names" option, which is on by default.
+- A loading hint says so.
+- Built; not played (JEI's search not tried in game).
+
+## 0.12.92 (2026-11-25): Building a camp or village at a chunk's edge no longer freezes the server (#2173)
+
+- Levelling the ground for a camp, Blossom village, farmstead, watch post or castle (`CampBuildings.level`) set each block with neighbour shape updates. At the circle's edge those read the block next door, and when that was in a chunk not loaded yet the server thread made the chunk; the server stopped ticking and the watchdog crashed it (Deck, 2026-11-25). The levelling now skips neighbour shape updates (`CampBuildings.QUIET`, as the goblin buildings and mines already do).
+- Built by CI; not played.
+
+## 0.12.93 (2026-11-25): The numpad's other keys stay quiet while the cleric's medallion board is up (#2176)
+
+- With the board up, keypad 3, 5, 7 and 9 still opened Jade's recipes, Jade's narrator, the boon screen and toggled combat mode as they laid marks (Andy's clip, 2026-11-25). The earlier block only stopped a press on its way in, and something in the pack got presses past it.
+- Now the block also sits where a binding is read: while the board is up, every binding but the nine marks (and the medallion key) that sits on the numpad reads as not held and its presses are thrown away, however they arrived. Presses left waiting on those bindings are cleared each tick too, so nothing fires the moment the board is lowered.
+- With the board down the numpad works as before for everything bound to it.
+- Built in the cloud; not played.
+
+## 0.12.94 (2026-11-25): Written starts: hand-built starts like an adventure map, and the Hearthkeeper's way-hut (#2153)
+
+- **New road, "Brought in from the dark"** (open from day one): you wake in a place built by hand, raised for you out in the wild on level ground, at least 96 blocks from any settlement, from your own setting-out point. A party mate who takes it after you wakes in yours. Never in the Aether; its land is made behind the loading screen.
+- **Write your own** (`docs/WrittenStarts.md`): build it in creative with the chests filled exactly as you want, mark it with Data structure blocks (`spawn`, `place:<key>`, `gate:<key>`), save it with a structure block, and add a start JSON (`data/<ns>/written_starts/`) and a tale (`"start": {"by": "written"}`). The tale's places `"at": "written"` are the build's marks; a step's `"opens"` opens its gates (doors, trapdoors and fence gates swing open, bars and rubble are taken away). `"bare": true` wakes you with only what the build and the tale give.
+- **Shared starts** (Andy: "both, chosen per start"): `"shared": true` raises the build once for the whole world and every newcomer who draws it wakes there, each with their own tale; `"at": [x, z]` or `[x, y, z]` puts it exactly where you say, unturned. Its chests aren't refilled.
+- **The way-hut** (the first one, `tools/written_starts.py`): a Hearthkeeper's stone hut with a cold hearth, a cot and the keeper's chest. Read the keeper's slate, and the iron trapdoor to the store under the floor opens; go down; keep the hut through your first night; find the nearest town.
+- `WrittenStarts`, `LifeStory` (the road), `Tales.written` and `opens`, `RoadLocks`, `tools/tale_check.py`; lore placement "Way-huts" in Lore.md for Andy to approve.
+- Built in the cloud; not played. The build's placement, gates and the tale were not run in a game.
+
+## 0.12.95 (2026-11-25): Fae Woods: Psithurism in the Blossom land, hot springs, one sky for balloons (#2179)
+
+- **Psithurism** (when it's in the pack; it waits on a Fabric Loader update. Kingdoms reaches it only by registry id, `PsithurismCompat`): Blossom houses use its paper wall blocks for windows, small tatami for floors, dark cherry logs for posts and beams and dark cherry planks for the veranda deck. Without it they look as before.
+- **Onsen**: a Blossom village now and then has a hot spring beyond its fields (a rim of ashino stone bricks round a pool of Psithurism's onsen water, a stone lantern). In winter snow monkeys walk up to 32 blocks to soak in it (`SnowMonkey`), and a player soaking in it in winter (or a cold biome) has the cold lifted off their body heat (+55 on Kitchen's scale through `BodyHeat.addWeather`, our own seasons decide winter).
+- **One sky**: balloon ships (airships and the sky folk's ferries) now feel the wind of their height with its gusts (`Winds.aloft`, from Jaymo's Powers' balloon wind): a gentle push while under way, and the let-go drift goes the way of that layer.
+- **FantasyMountsCompat**: a stub only. Fantasy Mounts is not in the pack (its author has not agreed), and its ids could not be read, so the stag, treant, luna moth and jackalope near Sylvan havens, wardens riding stags and bond-unlocked mount levels are still to do.
+- Built; not played.
+
+## 0.12.96 (2026-11-25): errand books, and a rare errand to a buried ruin (#2179)
+
+- **Errand books** (`ErrandBooks`, new): a town errand taken off the board now also gives a written book in the giver's hand: who asked, their settlement, where they were (coordinates, distance and bearing from where you stood), and that the errand goes back to them. It goes when the quest does.
+- **A rare errand**: after 8 town errands finished (`RARE_AFTER`), the next one pulled off a board has a 1 in 4 chance (`RARE_CHANCE`) of being instead a fetch to a buried trail ruin (`QuestBoard.dig`, the existing dig quest), told in its own book. The count starts over when it is taken.
+- Words are in the book text and the quest log only. Lang part `errand-books.json`.
+- Built; not played.
+
+## 0.12.97 (2026-11-25): Glow-wood creatures, the spore-rot's risen, and the Myceliarch (#2179)
+
+- **Ported from Spore & Stem** (Apache-2.0, code and art; licence and notice under `licenses/spore-and-stem/`), ids renamed to `jaymoskingdoms:`, in `glowwood/creatures/` (client in `client/glowwood/`).
+- **Sporeling** (tended fungi; tamed with a truffle, 1 in 3; follows, sits; sheds a mushroom of its kind every 5-10 min; breeds on truffles). It spreads mushrooms only on shaded, damp ground near giant caps, so cutting the giants stops it.
+- **Truffler** (sniffs and digs truffles, 0.15 chance a dig, roots out truffle soil), **Glowmoth** (drawn to light and glowcaps; lumen spores), **Bloatshroom** and **Mimicap** (only in deep, roofed, dark woods, never within 64 blocks of a haven), **Shambler** (rises from what dies carrying the rot, never within 64 blocks of a Sylvan haven; wilts in full sun).
+- The truffle is Kitchen's `jaymoskitchen:truffle`, found by id; without Kitchen a brown mushroom stands in. Kitchen-only loot and the mycoleather and fruiting heart recipes use optional tags / load conditions.
+- **Havens** (`GlowHavenLife`): a Sylvan or mixed haven that is not dark and has giants keeps up to 6 sporelings, 2 trufflers and (at night) 6 glowmoths, scaled by its giants, while a player is within 72 blocks. Sparse natural spawns by wild giants and in forest biomes.
+- **Myceliarch** (boss; Fruiting Heart on mycelium, mycelial soil, podzol or moss): 300 health, 10 armour, 40-block leash, breaks no blocks. Slam with a spore-ring tell, root eruption line, spore nova, brood call, second bloom with spore rain. Our boss bar. Drops Spore Heart, mycoleather, lumen spores.
+- **Items**: Bloomreaver, Crown of the Bloom (sporelings trust the wearer; spore ward), mycoleather armour, spawn eggs.
+- The rot's infections go through the Powers effect `jaymospowers:mycosis` by id (nothing infects without Powers); Circle of Spores druids get a spore ward.
+- Skipped: Sporemaw and its spore glob use, spore bomb, the Myceliarch film, BossTurns/Posture, natural shambler spawns, the lore overlay messages.
+- Compiled; not played.
+
+## 0.12.98 (2026-11-25): the Deep beasts rise from the Abyssal Chasm (#2179)
+
+- **Deep Lancer, Deep Gloomwing, Deep Behemoth**: three sea beasts, shapes ported from the Rim mod (CC0, ThePoupyBuTers; `kingdoms/art/deep-LICENSE.txt`, `deep-CREDITS.md`, `tools/rim_port.py`), repainted violet with amber glow and renamed. They rise out of the Abyssal Chasm on a schedule that grows every few days (a tier a visit), each alarm bell tolls as one nears (`AlarmBells.toll`), and the biggest come last.
+- **Living**: they hunger (a meal lasts a day, then they hunt harder), keep a territory and go home when hurt (retreat under a third of their health, return when mended), and a fish or meat given by hand makes a friend that holds off for a time.
+- **Darktide**: one that dies can be raised and commanded like any dead (it carries the no-corpse tag); a commanded beast skips its own hunger and retreat.
+- **Loot**: each leaves fish, bone and prismarine; they are tagged as giants for per-part wounds.
+- Built; not played. The Gloomwing does not fly; five other Rim species are not ported; no sounds.
+
+## 0.12.99 (2026-11-25): glow-woods round Sylvan havens - giant glowcaps, bouncecaps and inkcaps, fungal woods, fairy rings, skeps (#2179)
+
+- **Giant fungi** (ported from Spore & Stem, Apache-2.0, licence and notice in `licenses/spore-and-stem/`): the **glowcap** (a slender stem under a wide parasol, luminous gills hanging with drifting motes), the **bouncecap** (a puffy dome that bounces you with no fall damage and its own boing) and the **inkcap** (a tall bell that drips ink). The three small mushrooms grow them with bone meal (40%, when there is room); they spread by themselves only in the dark or on mycelium.
+- **Fungal woods**: each giant gives a wood set (stem, stripped stem, hyphae, stripped hyphae, planks, stairs, slab, fence, fence gate, door, trapdoor, button, pressure plate), axe-strippable, counted as logs and planks and not flammable like nether stems; and the **glowcap lantern** (made with glowcap gills, which need shears). Black dye from an inkcap.
+- **Haven glow-woods**: a Sylvan haven (and the Sylvan houses of a mixed one) grows giants between its house-trees: the first at size 8, another for every 4 past that, at most 12 (half in a mixed haven); never on paths or near buildings, and only on shaded ground, mostly beside one already standing. Autumn doubles the growth, winter stops it. Small bouncecaps stand under the tree houses' platforms (up to 6) and one fairy ring on the green (from size 6). About half the Sylvan houses are built from the haven's own fungal wood (one of the three per haven). A haven that is emptied, burned or fallen goes dark: its giants thin out and are gone within 21 days (faster in winter), each leaving its small mushroom; looked after again, the rot stops.
+- **Skeps**: Sylvan orchards get two straw skeps (vanilla bee boxes) among flowers, and vanilla bees to live in them. Sylvan haven traders sell honey bottles, honeycomb, and their haven's fungal planks and stems.
+- **Wild**: giants and fairy rings only sparsely, by biome tag (`data/jaymoskingdoms/tags/worldgen/biome/has_feature/*`): glowcaps in mushroom fields and underground (lush caves more), bouncecaps in flower forests (1 chunk in 12), meadows (1 in 32) and mushroom fields, inkcaps in dark forests (1 in 8), swamps and mushroom fields; fairy rings of small bouncecaps, glowcaps and inkcaps in plains, meadows and forests, 1 chunk in 48.
+- **Sparkles** (client only, no packets, no new art): at night, soft motes and fireflies drift up from glowcap gills, glowcap lanterns and the fairy rings' mushrooms.
+- Classes: `glowwood/*` (GlowWoods, FungusWood, WoodBlocks, the three cap blocks, GlowcapGillsBlock, FungusBlock, FungusStripping, FungusPlan, HugeFungusFeature and its three shapes, FairyRingFeature), `GlowWoodHavens`, `HavenBuildings` (tree house wood, skeps), `HavenWares`, `Buildings.Kit`, client `GlowSparkles`. Lang in `lang/parts/glowwood.json`.
+- Compiled; not played.
+
+## 0.13.0 (2026-11-25): the wicked harvest - field crows, witch's cauldron, Harvest Lich, ruined barn (#2179)
+
+- **Field crows**: by day, flocks land on open farmland (10 or more open crops) and peck crops back a stage. More open field draws more crows; a field within a Kitchen scarecrow's 16 blocks draws none. They leave at dusk, in rain, or after a few pecks. `FieldCrows`, `Crow`.
+- **Witch's Cauldron**: over soul fire at night, 2 rotten pumpkins (Kitchen) and a full soul jar of an undead kind brew 2 Wicked Resin in three stages. No new ghost appears. `WitchCauldronBlock`.
+- **Harvest Altar**: takes 2 Wicked Resin and raises the Harvest Lich only in late autumn (Kitchen Seasons) at night; otherwise cold smoke and the resin stays. `HarvestAltarBlock`.
+- **Harvest Lich**: boss on a skeleton-horse steed; charges, lobs rotten pumpkins, calls up to 3 flying wicked pumpkins that shoot orbs. Drops Spark of the Harvest (wakes scarecrows), resin and gold. `HarvestLich`, `LichSteed`, `WickedPumpkin`, `WickedOrb`, `ThrownRottenPumpkin`, client `LichModel`, `LichRenderer`, `PumpkinRenderers`.
+- **Ruined barn**: `wicked_barn` (standing and ruined), drawn in `tools/small_designs/wicked_barn.py`, rare on plains, sunflower plains and meadow, with the altar, a chest and a scarecrow.
+- Art and ideas from Seasonal: The Wicked Harvest (MIT, Lazurium), licence in `licenses/seasonal/`. Not ported: custom steed model, Lich armour, other Seasonal mobs.
+- Compiled; not played.
+
+## 0.13.1 (2026-11-25): mage wands - cast what you have learned through a wand (#2179)
+
+- **Wands** (Andy: "They should learn spells and cast from the wand"): the amethyst, quartz, emerald and diamond wand, each made from a stick, a plank and its stone (`  F` / ` P ` / `S  `). The plank's wood (oak, birch, cherry or dark oak) is kept in the wand. Nothing new is learned: a wand casts the spells you already know. A Mage, or anyone who casts from a staff (an attuned player, a Cleric, a Druid, a Warlock), uses it as a staff: use casts the spell it is turned to, sneak and use turns it to the next one they know. A Sorcerer casts the spells they have kept (glass, fire's, lightning's, the black flame) through it the same way.
+- **Quality**: the wood and the focus each change how hard the spell hits and how long the wand waits. Woods: oak 100%/100%, birch 95%/80%, cherry 105%/90%, dark oak 115%/110%. Foci: amethyst 110%/100%, quartz 100%/85%, emerald 115%/95%, diamond 130%/90% (strength / wait; they multiply). A glint of the focus's colour shows at the tip as it casts.
+- A wand counts as a staff for spoken magic and the Mage's staff boons. In the hand of someone who has learned nothing it only says so. No iron in the recipe.
+- Classes: `MageWand` (hooks in `Spellcraft`, `ElementSpells#castKnown`, `Arcana#isStaff`); `tools/gen_mage_wands.py` makes the textures, models and recipes. Lang in `lang/parts/mage_wands.json`. Compiled; not played.
+
+## 0.13.2 (2026-11-25): More variety in guards' helms (#2160)
+
+Realm troops can draw their kettle cut, a regional helm, or a third helm suited to their role. Each guard keeps a consistent cut when the settlement can afford it.
+
+## 0.13.3 (2026-11-25): Mordhau harness 1: helms - fifteen new helms, the kettle in each realm's cut, the barbute re-cut (#2160)
+
+- **New helms** (Andy's Mordhau harness picks; our own cubes of the historical helms, nothing of Mordhau's), each with
+  every finish, dents and an icon: the Broad-Brimmed and the Tall Kettle Hat, the Deep Kettle Hat (its pulled-down
+  front with two sights lifts like a visor), the Kettle Sallet (wear a bevor with it for the bevored look), the Archer's
+  Sallet, the Long-Tailed Sallet (its front with one sight lifts), the Gallowglass Helm, the Visored Barbute, the
+  Visored Great Helm, the Flat-Topped Helm, the Nasal Helm, the Spired Helm, the Spectacle Helm (fixed face), the
+  Skullcap (it sits over a mail coif) and the Turban Helm. Open-faced helms show the face; visored ones show it with
+  the visor up.
+- **The kettle hat comes in each realm's cut** (Andy: "different cuts for different realms"): the realms that arm their
+  guards in plate wear the tall cut, the tabard realms the round kettle hat, the half-plate realms the broad brim
+  (`HeraldryWear.KETTLE_CUTS`). A fiefdom wears its overlord's cut; a village or haven has its own by its arms. It
+  goes for the soldiers who wore the kettle hat and for knights whose realm's own helm is the kettle.
+- **The barbute is re-cut**: its T-opening is open now, so the face shows through it.
+- Classes: `HeraldryArmour` (the fifteen helms; not in `HELMS`, so no realm's own helm changes), `HeraldryWear`
+  (`kettle`), `GuardKit` (the kettle cut), `kingdoms/tools/gen_heraldry_armour.py` (the models, `shell` for open
+  faces), the plate, heavy and head armour tags.
+- Built by CI; not played. Not seen in game: how the new helms sit on MCA bodies, the visors lifting, and crests on the
+  pointed helms (their crest heights are guesses).

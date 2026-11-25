@@ -1,0 +1,94 @@
+{
+  "variants": {
+    "facing=north,honey=0": {
+      "model": "jaymoskitchen:block/forage/harvest_hive"
+    },
+    "facing=north,honey=1": {
+      "model": "jaymoskitchen:block/forage/harvest_hive"
+    },
+    "facing=north,honey=2": {
+      "model": "jaymoskitchen:block/forage/harvest_hive"
+    },
+    "facing=north,honey=3": {
+      "model": "jaymoskitchen:block/forage/harvest_hive"
+    },
+    "facing=north,honey=4": {
+      "model": "jaymoskitchen:block/forage/harvest_hive"
+    },
+    "facing=north,honey=5": {
+      "model": "jaymoskitchen:block/forage/harvest_hive_honey"
+    },
+    "facing=east,honey=0": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 90
+    },
+    "facing=east,honey=1": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 90
+    },
+    "facing=east,honey=2": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 90
+    },
+    "facing=east,honey=3": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 90
+    },
+    "facing=east,honey=4": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 90
+    },
+    "facing=east,honey=5": {
+      "model": "jaymoskitchen:block/forage/harvest_hive_honey",
+      "y": 90
+    },
+    "facing=south,honey=0": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 180
+    },
+    "facing=south,honey=1": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 180
+    },
+    "facing=south,honey=2": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 180
+    },
+    "facing=south,honey=3": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 180
+    },
+    "facing=south,honey=4": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 180
+    },
+    "facing=south,honey=5": {
+      "model": "jaymoskitchen:block/forage/harvest_hive_honey",
+      "y": 180
+    },
+    "facing=west,honey=0": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 270
+    },
+    "facing=west,honey=1": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 270
+    },
+    "facing=west,honey=2": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 270
+    },
+    "facing=west,honey=3": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 270
+    },
+    "facing=west,honey=4": {
+      "model": "jaymoskitchen:block/forage/harvest_hive",
+      "y": 270
+    },
+    "facing=west,honey=5": {
+      "model": "jaymoskitchen:block/forage/harvest_hive_honey",
+      "y": 270
+    }
+  }
+}

@@ -834,6 +834,10 @@ public final class KitchenCompat {
 					: com.jaymospowers.core.BladeBlood.NO_BLOOD;
 				com.jaymospowers.core.SeveredPart severed = com.jaymospowers.core.SeveredPart.drop(level, look, part, type.getDimensions().height(),
 					corpse.getYRot(), at.add(0.0, 0.1, 0.0), fling, blood);
+				// drawn as the body lies now: its rot and char (Kitchen's wear) and the blood on it
+				int dressed = what.length >= 6 && what[4] instanceof Integer d ? d : 0;
+				int wear = what.length >= 6 && what[5] instanceof Integer w ? w : 0;
+				severed.lookedAs(dressed, wear, com.jaymospowers.core.blood.Bloodied.corpseBlood(corpse));
 				if (toHand && by instanceof net.minecraft.server.level.ServerPlayer player) {
 					com.jaymospowers.core.Carry.takePart(player, severed);
 				}

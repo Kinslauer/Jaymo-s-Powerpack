@@ -86,6 +86,8 @@ public final class SensesClient {
 			meterAlpha = shown ? Math.min(1.0F, meterAlpha + FADE) : Math.max(0.0F, meterAlpha - FADE);
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosKingdoms.id("awareness"), SensesClient::hud);
+		// (ey-dev) an operator spectating an NPC sees its eyes
+		NpcEyesClient.register();
 	}
 
 	private static void hud(GuiGraphicsExtractor graphics, DeltaTracker delta) {

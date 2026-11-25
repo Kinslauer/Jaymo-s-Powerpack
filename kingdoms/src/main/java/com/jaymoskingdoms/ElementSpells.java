@@ -214,28 +214,37 @@ public final class ElementSpells {
 
 	/** A Sorcerer's pick of {@code spell} on the Magic screen: its wait, its mana, then the cast. */
 	static void castKnown(ServerPlayer player, ServerLevel level, String spell) {
+		castKnown(player, level, spell, 1.0F, 1.0F);
+	}
+
+	/**
+	 * The same, through a wand ({@link MageWand}): {@code power} scales how hard it hits and {@code wait} the wait before it can
+	 * be cast again. True if it went off.
+	 */
+	static boolean castKnown(ServerPlayer player, ServerLevel level, String spell, float power, float wait) {
 		if (!known(player).contains(spell)) {
-			return;
+			return false;
 		}
 		Map<UUID, Long> ready = READY.computeIfAbsent(spell, s -> new HashMap<>());
 		long now = level.getGameTime();
 		if (ready.getOrDefault(player.getUUID(), 0L) > now) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.sorcery_picks.wait", Spellcraft.spellName(spell),
 				(ready.get(player.getUUID()) - now + 19) / 20));
-			return;
+			return false;
 		}
 		if (!Mana.afford(player, Mana.cost(spell)) || !SpellParts.allow(player, spell, null)) {
-			return;
+			return false;
 		}
-		if (!Arcana.cast(spell, level, player, 1.0F)) {
+		if (!Arcana.cast(spell, level, player, power)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
-			return;
+			return false;
 		}
 		SpellParts.spend(player, spell);
 		Mana.cast(player, spell);
-		ready.put(player.getUUID(), now + NewSpells.COOLDOWN.getOrDefault(spell, 20 * 20));
+		ready.put(player.getUUID(), now + Math.round(NewSpells.COOLDOWN.getOrDefault(spell, 20 * 20) * wait));
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		Spellcraft.afterCast(player, level, spell);
+		return true;
 	}
 
 	// ---- the casts -----------------------------------------------------------------------------------------------------------

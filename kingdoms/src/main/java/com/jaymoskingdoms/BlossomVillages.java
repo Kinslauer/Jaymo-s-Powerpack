@@ -441,6 +441,7 @@ public final class BlossomVillages {
 		farmsteads(level, village, bell, random, homes, built);
 		watchTower(level, village, bell, gate, random);
 		ruin(level, village, bell, random);
+		PsithurismCompat.onsen(level, village, bell, random);
 		com.jaymoskingdoms.blossomland.BlossomWilds.plantRound(level, bell, random);
 		for (Spot s : HOUSES) {
 			Blueprint house = Blossom.minka(kit(level, village, random));

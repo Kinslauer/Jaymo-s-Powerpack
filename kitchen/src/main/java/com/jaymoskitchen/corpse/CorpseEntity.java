@@ -257,6 +257,8 @@ public class CorpseEntity extends Entity {
 	 * up to {@code CARCASS_BONES} bones once it's bare. All of its loot, but none of the butcher block's extras.
 	 */
 	public static final int CUT_TICKS = 30, CARCASS_BONES = 2;
+	/** Extra bones (at most) a giant or sea beast leaves when it is cut to the bone. */
+	public static final int GIANT_BONES = 6;
 	/**
 	 * (0.5.31) Andy: "Add dragging". A big carcass is lifted no higher than its legs: held use on it drags it along the
 	 * ground behind you. You're slowed while you haul it, less the stronger you are ({@link Hauling}). A right-click
@@ -3019,6 +3021,10 @@ public class CorpseEntity extends Entity {
 		}
 		// bare: a few bones, and the rest is left to the crows
 		spawnAtLocation(level, new ItemStack(Items.BONE, 1 + random.nextInt(CARCASS_BONES)), 0.3F);
+		EntityType<?> source = sourceType();
+		if (source != null && source.builtInRegistryHolder().is(Corpses.GIANT_CARCASSES)) {
+			spawnAtLocation(level, new ItemStack(Items.BONE, 2 + random.nextInt(GIANT_BONES)), 0.3F);
+		}
 		level.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.3, getZ(), 20, 0.4, 0.2, 0.4, 0.2);
 		play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.cut_up"));
@@ -4468,7 +4474,8 @@ public class CorpseEntity extends Entity {
 	/**
 	 * Told of each part that comes off a body lying dead: the corpse, and {the part (an Integer, one of the
 	 * {@code PART_} bits), where it was (a Vec3), who took or struck it off (an Entity, or null), whether it came away in
-	 * their hand (a Boolean)}. Jaymo's Powers makes it a severed part to carry, kick or throw; without a hook a skeleton's
+	 * their hand (a Boolean), and how the body looks now, its {@link #dressed()} and its {@link #wear()} (Integers), so the
+	 * part is drawn rotted, charred or skinned as the body is}. Jaymo's Powers makes it a severed part to carry, kick or throw; without a hook a skeleton's
 	 * is a loose bone and a zombie's a scrap of rotten flesh. Plain Java types, so it can be set by reflection from a mod
 	 * built against an older Kitchen.
 	 */
@@ -4543,7 +4550,7 @@ public class CorpseEntity extends Entity {
 		java.util.function.BiConsumer<Entity, Object[]> hook = onPart;
 		if (hook != null) {
 			try {
-				hook.accept(this, new Object[] {part, at, by, toHand});
+				hook.accept(this, new Object[] {part, at, by, toHand, dressed(), wear()});
 				return;
 			} catch (RuntimeException | LinkageError e) {
 				com.jaymoskitchen.JaymosKitchen.LOGGER.warn("A corpse-part hook failed: {}", e.toString());

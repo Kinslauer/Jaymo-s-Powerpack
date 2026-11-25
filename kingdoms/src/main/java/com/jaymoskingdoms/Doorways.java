@@ -16,6 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.Path;
@@ -28,6 +29,9 @@ import net.minecraft.world.phys.Vec3;
  * ({@link Workers#step}: a guard leading you to the ruler, the ruler's escort, a ruler on their round), nothing opened
  * them, so the villager walked up to a shut gate and stood there. Now the doors and gates on the path just ahead are
  * opened as they come to them, and shut again once they and whoever follows them ({@code follower}) are through.
+ * <p>
+ * A wooden trapdoor in the way is opened the same way (the fighting AI's doors, {@link Passages}): one at head height on the
+ * path, or one in a floor or a ceiling the path climbs or drops through; never one it would only walk across.
  */
 public final class Doorways {
 	/** Path nodes looked at: the one they're leaving and this many ahead. */
@@ -61,7 +65,8 @@ public final class Doorways {
 				int to = Math.min(path.getNodeCount() - 1, path.getNextNodeIndex() + AHEAD);
 				for (int i = from; i <= to; i++) {
 					BlockPos at = path.getNodePos(i);
-					if (open(level, mob, at) || open(level, mob, at.above())) {
+					BlockPos hatch = hatchOn(level, path, i);
+					if (open(level, mob, at) || open(level, mob, at.above()) || hatch != null && openHatch(level, mob, hatch)) {
 						if (opened == null) {
 							opened = new HashMap<>();
 							OPENED.put(mob.getUUID(), opened);
@@ -102,7 +107,10 @@ public final class Doorways {
 		return !level.getEntitiesOfClass(LivingEntity.class, new AABB(at).expandTowards(0.0, 1.0, 0.0), LivingEntity::isAlive).isEmpty();
 	}
 
-	/** Opens the shut wooden door or fence gate at {@code at}: true if there was one. */
+	/**
+	 * Opens the shut wooden door or fence gate at {@code at}: true if it opened one (one already open is left as it is, and
+	 * isn't shut after: someone else left it so).
+	 */
 	private static boolean open(ServerLevel level, PathfinderMob mob, BlockPos at) {
 		// (0.7.497) a locked door or gate they've no key to stays shut; fence gates skip DoorBlock.setOpen
 		if (Locks.barred(level, at, mob)) {
@@ -110,23 +118,58 @@ public final class Doorways {
 		}
 		BlockState s = level.getBlockState(at);
 		if (s.is(BlockTags.MOB_INTERACTABLE_DOORS) && s.getBlock() instanceof DoorBlock door) {
-			if (!door.isOpen(s)) {
-				door.setOpen(mob, level, s, at, true);
+			if (door.isOpen(s)) {
+				return false;
 			}
+			door.setOpen(mob, level, s, at, true);
 			return true;
 		}
 		if (s.is(BlockTags.FENCE_GATES) && s.hasProperty(FenceGateBlock.OPEN)) {
-			if (!s.getValue(FenceGateBlock.OPEN)) {
-				level.setBlock(at, s.setValue(FenceGateBlock.OPEN, true), 10);
-				level.playSound(null, at, SoundEvents.FENCE_GATE_OPEN, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
-				level.gameEvent(mob, GameEvent.BLOCK_OPEN, at);
+			if (s.getValue(FenceGateBlock.OPEN)) {
+				return false;
 			}
+			level.setBlock(at, s.setValue(FenceGateBlock.OPEN, true), 10);
+			level.playSound(null, at, SoundEvents.FENCE_GATE_OPEN, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
+			level.gameEvent(mob, GameEvent.BLOCK_OPEN, at);
 			return true;
 		}
 		return false;
 	}
 
-	/** Shuts the door or gate at {@code at}: true if there was one. */
+	/** A shut wooden trapdoor. */
+	private static boolean shutHatch(BlockState s) {
+		return s.is(BlockTags.WOODEN_TRAPDOORS) && s.hasProperty(TrapDoorBlock.OPEN) && !s.getValue(TrapDoorBlock.OPEN);
+	}
+
+	/**
+	 * The shut trapdoor in the way at path node {@code i}: at head height, or where its feet go if the path climbs up into it or
+	 * drops down through it (one in a floor it only walks across is left shut). Null if there's none.
+	 */
+	private static @org.jspecify.annotations.Nullable BlockPos hatchOn(ServerLevel level, Path path, int i) {
+		BlockPos at = path.getNodePos(i);
+		if (shutHatch(level.getBlockState(at.above()))) {
+			return at.above();
+		}
+		if (!shutHatch(level.getBlockState(at))) {
+			return null;
+		}
+		boolean through = i > 0 && path.getNodePos(i - 1).getY() < at.getY() || i + 1 < path.getNodeCount() && path.getNodePos(i + 1).getY() < at.getY();
+		return through ? at : null;
+	}
+
+	/** Opens the shut trapdoor at {@code at} (not one locked against it): true if it did. */
+	private static boolean openHatch(ServerLevel level, PathfinderMob mob, BlockPos at) {
+		if (Locks.barred(level, at, mob)) {
+			return false;
+		}
+		BlockState s = level.getBlockState(at);
+		level.setBlock(at, s.setValue(TrapDoorBlock.OPEN, true), 10);
+		level.playSound(null, at, SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
+		level.gameEvent(mob, GameEvent.BLOCK_OPEN, at);
+		return true;
+	}
+
+	/** Shuts the door, gate or trapdoor at {@code at}: true if there was one. */
 	private static boolean close(ServerLevel level, PathfinderMob mob, BlockPos at) {
 		BlockState s = level.getBlockState(at);
 		if (s.is(BlockTags.MOB_INTERACTABLE_DOORS) && s.getBlock() instanceof DoorBlock door) {
@@ -139,6 +182,14 @@ public final class Doorways {
 			if (s.getValue(FenceGateBlock.OPEN)) {
 				level.setBlock(at, s.setValue(FenceGateBlock.OPEN, false), 10);
 				level.playSound(null, at, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
+				level.gameEvent(mob, GameEvent.BLOCK_CLOSE, at);
+			}
+			return true;
+		}
+		if (s.is(BlockTags.WOODEN_TRAPDOORS) && s.hasProperty(TrapDoorBlock.OPEN)) {
+			if (s.getValue(TrapDoorBlock.OPEN)) {
+				level.setBlock(at, s.setValue(TrapDoorBlock.OPEN, false), 10);
+				level.playSound(null, at, SoundEvents.WOODEN_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
 				level.gameEvent(mob, GameEvent.BLOCK_CLOSE, at);
 			}
 			return true;

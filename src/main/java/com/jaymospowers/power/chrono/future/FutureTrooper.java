@@ -66,7 +66,7 @@ public class FutureTrooper extends PathfinderMob implements RangedAttackMob {
 
 	/** Who a trooper fights on sight (players besides): the androids and their mechs, the Omens, and the dead. */
 	static boolean hostileTo(LivingEntity entity) {
-		return entity.isAlive() && (entity instanceof FutureAndroid || entity instanceof FutureMech || entity instanceof FutureOmen
+		return entity.isAlive() && (entity instanceof FutureAndroid || entity instanceof FutureMech && !(entity instanceof FutureRig) || entity instanceof FutureOmen
 			|| entity instanceof Zombie);
 	}
 

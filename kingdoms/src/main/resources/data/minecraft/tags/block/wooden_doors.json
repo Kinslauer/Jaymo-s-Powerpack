@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "jaymoskingdoms:sliding_door"
+    "jaymoskingdoms:sliding_door",
+    "jaymoskingdoms:glowcap_door",
+    "jaymoskingdoms:bouncecap_door",
+    "jaymoskingdoms:inkcap_door"
   ]
 }

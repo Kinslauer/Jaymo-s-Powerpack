@@ -674,8 +674,8 @@ public final class ZFighterPodTrip {
 				return spot;
 			}
 		}
-		// nowhere flat turned up: the old way down, the world's pad
-		return ZFighterSpace.pad(level, dest);
+		// nowhere flat turned up: the old way down, the world's pad (not given a pod of its own: yours is landing on it)
+		return ZFighterSpace.pad(level, dest, false);
 	}
 
 	/** The flight is over: the pod drops out of the sky over the landing, with you in it. */

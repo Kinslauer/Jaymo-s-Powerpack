@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jaymoskitchen:block/rotten_pumpkin_top",
+    "side": "jaymoskitchen:block/rotten_pumpkin_side"
+  }
+}

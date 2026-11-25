@@ -141,6 +141,32 @@ public final class AlarmBells {
 		return best;
 	}
 
+	/**
+	 * A great beast (the deep ones, {@link com.jaymoskingdoms.deep.DeepBeast}) has come onto a town's land: the bell tolls by
+	 * itself, with no one to ring it, and every guard of the town within {@link #CALL_REACH} turns on the beast. Answered
+	 * once in {@link #GAP} ticks per town, like a bell rung by hand. True if guards answered.
+	 */
+	public static boolean toll(ServerLevel level, LivingEntity beast) {
+		Faction f = Factions.at(level.getServer(), level, beast.blockPosition());
+		if (f == null || f.fallen() || f.type() == FactionType.BARBARIAN) {
+			return false;
+		}
+		long now = level.getGameTime();
+		Long last = LAST.get(f.id());
+		if (last != null && now - last < GAP) {
+			return false;
+		}
+		LAST.put(f.id(), now);
+		int answered = answer(level, beast.blockPosition(), CALL_REACH, beast, m -> true);
+		Vec3 at = beast.position();
+		for (ServerPlayer p : level.players()) {
+			if (p.distanceToSqr(at) <= HEARD * HEARD * 4.0) {
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bell.beast", f.name()));
+			}
+		}
+		return answered > 0;
+	}
+
 	private static void falseAlarm(ServerLevel level, ServerPlayer player, Faction f, long now) {
 		String key = player.getUUID() + "|" + f.id();
 		long day = level.getGameTime() / 24000L;

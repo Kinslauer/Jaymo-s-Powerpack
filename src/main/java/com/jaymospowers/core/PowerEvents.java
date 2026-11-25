@@ -47,9 +47,11 @@ public final class PowerEvents {
 			(payload, ctx) -> Powers.choose(ctx.player(), payload.power()));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			PowerInput.clear(handler.player);
+			UltimateHold.forget(handler.player);
 			Mastery.forget(handler.player);
 			Affinity.forget(handler.player);
 		});
+		UltimateHold.init();
 		Callings.register();
 		AwakeningDeeds.register();
 		com.jaymospowers.power.web.CraterSpider.register();

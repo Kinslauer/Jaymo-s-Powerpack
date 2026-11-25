@@ -1,0 +1,41 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#jaymospowers:boxing_gear",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:hand_wraps",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:leather_cestus",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_cestus",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:steel_cestus",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:leather_bracers",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_bracers",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:steel_bracers",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_knuckles",
+      "required": false
+    }
+  ]
+}

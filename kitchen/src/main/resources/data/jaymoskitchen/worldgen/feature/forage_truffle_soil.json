@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:ore",
+  "size": 8,
+  "discard_chance_on_air_exposure": 0.3,
+  "targets": [
+    {
+      "target": {
+        "predicate_type": "minecraft:block_match",
+        "block": "minecraft:dirt"
+      },
+      "state": {
+        "Name": "jaymoskitchen:truffle_soil"
+      }
+    }
+  ]
+}

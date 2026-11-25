@@ -469,6 +469,54 @@ public final class KitchenCompat {
 		return (barrel == net.minecraft.world.level.block.Blocks.AIR ? net.minecraft.world.level.block.Blocks.BARREL : barrel).defaultBlockState();
 	}
 
+	/** Kitchen's year is 84 days (21 to a season, 7 to each early, mid and late part); late autumn is days 56 to 62. */
+	private static final int LATE_AUTUMN_FIRST = 56, LATE_AUTUMN_LAST = 62;
+
+	/** Late autumn, the harvest in; false without Kitchen's seasons. The wicked harvest's altar answers only then. */
+	public static boolean lateAutumn(net.minecraft.world.level.Level level) {
+		int day = dayOfYear(level);
+		return day >= LATE_AUTUMN_FIRST && day <= LATE_AUTUMN_LAST;
+	}
+
+	private static @Nullable Method crowGuard;
+	private static boolean crowGuardLooked;
+
+	/**
+	 * Whether one of Kitchen's scarecrows (a carved pumpkin on its head) stands within 16 blocks of {@code crop} and so
+	 * keeps crows off it ({@code Scarecrows.guardedFromCrows}); false without Kitchen.
+	 */
+	public static boolean guardedFromCrows(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos crop) {
+		if (!crowGuardLooked) {
+			crowGuardLooked = true;
+			if (FabricLoader.getInstance().isModLoaded(MOD)) {
+				try {
+					crowGuard = Class.forName("com.jaymoskitchen.farmwater.Scarecrows").getMethod("guardedFromCrows",
+						net.minecraft.world.level.Level.class, net.minecraft.core.BlockPos.class);
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for scarecrows to keep crows off: {}", e.toString());
+				}
+			}
+		}
+		if (crowGuard == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(crowGuard.invoke(null, level, crop));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen scarecrow call failed: {}", e.toString());
+			return false;
+		}
+	}
+
+	/** One of Kitchen's items by id (its rotten pumpkin, the Spark of the Harvest), or null without Kitchen or without that item. */
+	public static net.minecraft.world.item.@Nullable Item item(String path) {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return null;
+		}
+		return net.minecraft.core.registries.BuiltInRegistries.ITEM
+			.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD, path)).orElse(null);
+	}
+
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;

@@ -1,0 +1,11 @@
+{
+  "gui.jaymoskingdoms.eyes.why.0": "At ease",
+  "gui.jaymoskingdoms.eyes.why.1": "Fighting: foe in sight",
+  "gui.jaymoskingdoms.eyes.why.2": "Fighting: foe out of sight",
+  "gui.jaymoskingdoms.eyes.why.3": "Searching where it last saw a foe",
+  "gui.jaymoskingdoms.eyes.why.4": "Listening to a sound",
+  "gui.jaymoskingdoms.eyes.why.5": "Turning to a blow it didn't see",
+  "gui.jaymoskingdoms.eyes.why.6": "Told of a foe by a friend, going to look",
+  "gui.jaymoskingdoms.eyes.why.7": "Going back to where it was",
+  "gui.jaymoskingdoms.eyes.blind": "%1$s (blind %2$s s)"
+}

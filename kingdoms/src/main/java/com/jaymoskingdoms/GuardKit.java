@@ -155,7 +155,7 @@ public final class GuardKit {
 
 	/** One guard's settlement, as his kit is chosen for it. */
 	private record Ctx(ServerLevel level, Faction f, int who, Climate land, int kind, boolean templar, boolean grim, GreatWars.@Nullable Creed creed,
-		boolean ironRich, int field, long hash, @Nullable String tag, String finish) {
+		boolean ironRich, int field, long hash, int helmCut, @Nullable String tag, String finish) {
 		boolean is(int mask) {
 			return (this.who & mask) != 0;
 		}
@@ -253,7 +253,7 @@ public final class GuardKit {
 		long h = f.id() * 0x9E3779B97F4A7C15L + 0x632BE59BD9B4E019L;
 		h = (h ^ h >>> 31) * 0xBF58476D1CE4E5B9L;
 		return new Ctx(level, f, who, land, kind, realm && FrontierWear.templar(server, f), hold != null && hold.isGrim(),
-			realm ? GreatWars.creed(server, f) : null, IronVeins.near(level, f), Outfits.rgb(Outfits.heraldry(f, server).field()), h ^ h >>> 29,
+			realm ? GreatWars.creed(server, f) : null, IronVeins.near(level, f), Outfits.rgb(Outfits.heraldry(f, server).field()), h ^ h >>> 29, Math.floorMod(m.getUUID().hashCode(), 3),
 			realm ? HeraldryWear.realmTag(server, f) : null, realm ? HeraldryWear.knightFinish(server, f, land) : "");
 	}
 
@@ -803,6 +803,17 @@ public final class GuardKit {
 	 * of the rest, the realm's own shape for its veterans and leaders. The frog-mouth helm is for the joust, never issued.
 	 */
 	private static @Nullable String helm(Ctx c) {
+		if (c.realm() && c.is(MIL | SOL | ARCH | GUN)) {
+			if (c.helmCut() == 0) {
+				return HeraldryWear.kettle(c.f());
+			}
+			if (c.helmCut() == 1) {
+				return c.in(COLD) ? "spectacle_helm" : c.land() == Climate.DESERT ? "turban_helm" : "nasal_helm";
+			}
+			if (c.is(ARCH)) return "archers_sallet";
+			if (c.is(MIL)) return "skullcap";
+			return c.in(COLD) ? "gallowglass_helm" : c.in(DRY) ? "morion" : "lobster_tail";
+		}
 		GreatWars.Creed creed = c.creed();
 		List<String> by = new ArrayList<>();
 		if (c.is(SOL | KN) && creed == GreatWars.Creed.COIN) {
@@ -826,9 +837,10 @@ public final class GuardKit {
 			}
 		}
 		if (by.isEmpty()) {
-			// (a kingdom's soldiers too: its own of the kettle hat and the lobster tail, so not every realm's are alike)
+			// (a kingdom's soldiers too: its own of the kettle hat and the lobster tail, so not every realm's are alike; the
+			// kettle in the realm's own cut, HeraldryWear.KETTLE_CUTS)
 			if (c.is(MIL | SOL | ARCH | GUN) && c.kind(VILLAGE | HAVEN | FIEF) || c.is(SOL) && c.kind(KINGDOM)) {
-				by.add("kettle_hat");
+				by.add(HeraldryWear.kettle(c.f()));
 			}
 			if (c.is(KN | VET)) {
 				by.add("sallet");

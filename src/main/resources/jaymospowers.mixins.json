@@ -29,6 +29,7 @@
 		"ArmourWearLivingMixin",
 		"BlowsLivingMixin",
 		"EdgeLivingMixin",
+		"SilverSearMixin",
 		"BlowsPlayerMixin",
 		"PlayerCritMixin",
 		"PlayerCritAttributesMixin",
@@ -90,6 +91,7 @@
 		"DismemberMobMixin",
 		"DismemberGameEventMixin",
 		"ExplosionLogMixin",
+		"ExplosionReturnMixin",
 		"DownedMobMixin",
 		"PredatorEatMixin",
 		"DownedHealMixin",
@@ -140,7 +142,9 @@
 		"SnowballStingMixin",
 		"LivingEntityHitKindsMixin",
 		"PlayerArrowPickMixin",
-		"AbstractArrowTippedMixin"
+		"AbstractArrowTippedMixin",
+		"NanRotationDiagnosticMixin",
+		"PenguinSwimPitchMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

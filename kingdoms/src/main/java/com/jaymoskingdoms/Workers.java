@@ -103,6 +103,23 @@ public final class Workers {
 			// (0.7.619) a player's Bane, or one of its band, in a villager's body: their own doings
 			return Banes.villagerStep(level, w);
 		}
+		if (HollowCaptains.is(mob)) {
+			// one of the risen dead's captains, a Hollow man: the dead's fight, and his captain's ways
+			return HollowCaptains.step(level, w);
+		}
+		if (DangerSense.brainStep(mob)) {
+			// out of fire or lava, to water, or out of the water after a fight: its brain waits
+			return true;
+		}
+		if (BreakOff.brainStep(mob)) {
+			// badly hurt it has broken off (or a friend is stepping in front of one who has): its brain waits; before the
+			// captains', caravans' and crews' own steps, so they break off too (rulers and the like BreakOff leaves out itself)
+			return true;
+		}
+		if (BandStyles.brainStep(mob)) {
+			// (fighting AI patch 7) its band's style in a fight; rolling out of a blow (a bandit, an assassin), its brain waits
+			return true;
+		}
 		if (SwornCaptains.free(mob)) {
 			// (0.7.433) a captain sworn to a player: at their side, his brain his own (and never taken onto a roster)
 			return SwornCaptains.step(level, w);
@@ -147,6 +164,14 @@ public final class Workers {
 		}
 		if (RangedTactics.brainStep(mob)) {
 			// (0.7.184) a guard whose shots keep failing is on the move to a better place: its brain waits
+			return true;
+		}
+		if (Blows.brainStep(mob)) {
+			// a melee fighter just after its blow steps back to its weapon's reach: its brain waits
+			return true;
+		}
+		if (Hiding.brainStep(mob) || Detours.brainStep(mob)) {
+			// no way to the shooter (gone to cover a while) or to its foe (a way round): its brain waits
 			return true;
 		}
 		if (mob.tickCount % Standing.EVERY == 0 && (w.role() == Folk.GUARD || Rulers.leaderRole(w.role()) || mob.hasAttached(Standing.LINES))) {

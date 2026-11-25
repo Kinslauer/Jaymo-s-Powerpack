@@ -141,6 +141,8 @@ public final class Ship extends Entity {
 	 * (blocks a tick, at a fresh wind), and how fast a balloon lets down till she lies on the ground or the water (blocks a tick).
 	 */
 	static final double DRIFT_SEA = 0.02, DRIFT_AIR = 0.05, LET_DOWN = 0.008;
+	/** How hard the wind at her height (layers and gusts, {@link Winds#aloft}) pushes a balloon ship that is under way (blocks a tick, at a fresh wind). */
+	static final double LAYER_PUSH = 0.012;
 
 	/** One block of the ship, in its own frame. */
 	public record Piece(int state, int x, int y, int z) {
@@ -765,9 +767,14 @@ public final class Ship extends Entity {
 			gather = HELD_GATHER;
 			this.towed = Vec3.ZERO;
 		}
+		if (flying && !drifting && this.riding <= 0 && this.heldFast <= 0) {
+			// under way in the air, she is still pushed by the wind of her height, gusts and all
+			this.towed = this.towed.add(Winds.aloft(level, from.x, from.y, from.z).scale(LAYER_PUSH * Winds.strength(level, from.x, from.z)));
+		}
 		if (drifting && this.riding <= 0 && this.heldFast <= 0) {
-			// nobody at her wheel: she drifts on the wind, and a balloon lets down slowly till she lies on the ground
-			this.towed = this.towed.add(Winds.way().scale((flying ? DRIFT_AIR : DRIFT_SEA) * Winds.strength(level, from.x, from.z)));
+			// nobody at her wheel: she drifts on the wind (a balloon, on the wind of her height), and lets down slowly till she lies on the ground
+			Vec3 way = flying ? Winds.aloft(level, from.x, from.y, from.z) : Winds.way();
+			this.towed = this.towed.add(way.scale((flying ? DRIFT_AIR : DRIFT_SEA) * Winds.strength(level, from.x, from.z)));
 			if (flying) {
 				this.aloft = Math.max(level.getMinY() + SKY_HEADROOM, this.aloft - LET_DOWN);
 			}

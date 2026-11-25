@@ -249,6 +249,12 @@ public final class Pirates {
 		return target instanceof Villager && !Barbarians.isCampVillager(target) || target instanceof IronGolem;
 	}
 
+	/** Whether {@code pirate}'s flintlock is loaded and ready to fire at {@code now} (game time); false for one that has never been looked at. */
+	static boolean pistolReady(PathfinderMob pirate, long now) {
+		Long ready = PISTOL.get(pirate);
+		return ready != null && now >= ready;
+	}
+
 	/** A pirate's own tick (from {@link Folk#customServerAiStep}): pistols at a foe close by, and shouts in a fight. */
 	static void tick(ServerLevel level, Folk folk) {
 		fight(level, folk, folk.role());

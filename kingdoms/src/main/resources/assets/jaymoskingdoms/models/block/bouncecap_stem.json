@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jaymoskingdoms:block/bouncecap_stem_top",
+    "side": "jaymoskingdoms:block/bouncecap_stem"
+  }
+}

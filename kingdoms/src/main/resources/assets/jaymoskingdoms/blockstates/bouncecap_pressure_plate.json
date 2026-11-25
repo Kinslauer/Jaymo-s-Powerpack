@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "jaymoskingdoms:block/bouncecap_pressure_plate"
+    },
+    "powered=true": {
+      "model": "jaymoskingdoms:block/bouncecap_pressure_plate_down"
+    }
+  }
+}

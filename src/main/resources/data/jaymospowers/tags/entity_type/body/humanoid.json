@@ -15,6 +15,8 @@
 		"minecraft:piglin",
 		"minecraft:piglin_brute",
 		"minecraft:zombified_piglin",
-		"minecraft:enderman"
+		"minecraft:enderman",
+		{"id": "jaymospowers:frostborn_siege_rig", "required": false},
+		{"id": "jaymospowers:tinkerer_colossus", "required": false}
 	]
 }

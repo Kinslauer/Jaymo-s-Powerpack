@@ -1,0 +1,485 @@
+{
+  "ambientocclusion": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "cap": "jaymoskingdoms:block/fungus/inkcap_cap",
+    "cap_side": "jaymoskingdoms:block/fungus/inkcap_cap_side",
+    "gills": "jaymoskingdoms:block/fungus/inkcap_gills",
+    "stem": "jaymoskingdoms:block/fungus/inkcap_stem",
+    "particle": "jaymoskingdoms:block/fungus/inkcap_cap"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        3,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7.0,
+            13,
+            9.0,
+            16.0
+          ],
+          "texture": "#stem"
+        },
+        "south": {
+          "uv": [
+            7.0,
+            13,
+            9.0,
+            16.0
+          ],
+          "texture": "#stem"
+        },
+        "east": {
+          "uv": [
+            7.0,
+            13,
+            9.0,
+            16.0
+          ],
+          "texture": "#stem"
+        },
+        "west": {
+          "uv": [
+            7.0,
+            13,
+            9.0,
+            16.0
+          ],
+          "texture": "#stem"
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        3,
+        5.5
+      ],
+      "to": [
+        10.5,
+        9,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5.5,
+            10,
+            10.5,
+            16.0
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            5.5,
+            10,
+            10.5,
+            16.0
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            5.5,
+            10,
+            10.5,
+            16.0
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            5.5,
+            10,
+            10.5,
+            16.0
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            5.5,
+            5.5,
+            10.5,
+            10.5
+          ],
+          "texture": "#cap"
+        },
+        "down": {
+          "uv": [
+            5.5,
+            5.5,
+            10.5,
+            10.5
+          ],
+          "texture": "#gills"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        9,
+        6
+      ],
+      "to": [
+        10,
+        11,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6.0,
+            7,
+            10.0,
+            9
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            6.0,
+            7,
+            10.0,
+            9
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            6.0,
+            7,
+            10.0,
+            9
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            6.0,
+            7,
+            10.0,
+            9
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            6.0,
+            6.0,
+            10.0,
+            10.0
+          ],
+          "texture": "#cap"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        11,
+        6.5
+      ],
+      "to": [
+        9.5,
+        12.5,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6.5,
+            5,
+            9.5,
+            6.5
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            6.5,
+            5,
+            9.5,
+            6.5
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            6.5,
+            5,
+            9.5,
+            6.5
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            6.5,
+            5,
+            9.5,
+            6.5
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            6.5,
+            6.5,
+            9.5,
+            9.5
+          ],
+          "texture": "#cap"
+        }
+      }
+    },
+    {
+      "from": [
+        7.25,
+        12.5,
+        7.25
+      ],
+      "to": [
+        8.75,
+        13,
+        8.75
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7.25,
+            4,
+            8.75,
+            4.5
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            7.25,
+            4,
+            8.75,
+            4.5
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            7.25,
+            4,
+            8.75,
+            4.5
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            7.25,
+            4,
+            8.75,
+            4.5
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            7.25,
+            7.25,
+            8.75,
+            8.75
+          ],
+          "texture": "#cap"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        4,
+        1,
+        4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7.5,
+            15,
+            8.5,
+            16.0
+          ],
+          "texture": "#stem"
+        },
+        "south": {
+          "uv": [
+            7.5,
+            15,
+            8.5,
+            16.0
+          ],
+          "texture": "#stem"
+        },
+        "east": {
+          "uv": [
+            7.5,
+            15,
+            8.5,
+            16.0
+          ],
+          "texture": "#stem"
+        },
+        "west": {
+          "uv": [
+            7.5,
+            15,
+            8.5,
+            16.0
+          ],
+          "texture": "#stem"
+        }
+      }
+    },
+    {
+      "from": [
+        2.5,
+        1,
+        2.5
+      ],
+      "to": [
+        4.5,
+        5,
+        4.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7.0,
+            12,
+            9.0,
+            16.0
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            7.0,
+            12,
+            9.0,
+            16.0
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            7.0,
+            12,
+            9.0,
+            16.0
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            7.0,
+            12,
+            9.0,
+            16.0
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            7.0,
+            7.0,
+            9.0,
+            9.0
+          ],
+          "texture": "#cap"
+        },
+        "down": {
+          "uv": [
+            7.0,
+            7.0,
+            9.0,
+            9.0
+          ],
+          "texture": "#gills"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        5,
+        3
+      ],
+      "to": [
+        4,
+        6,
+        4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7.5,
+            8,
+            8.5,
+            9
+          ],
+          "texture": "#cap_side"
+        },
+        "south": {
+          "uv": [
+            7.5,
+            8,
+            8.5,
+            9
+          ],
+          "texture": "#cap_side"
+        },
+        "east": {
+          "uv": [
+            7.5,
+            8,
+            8.5,
+            9
+          ],
+          "texture": "#cap_side"
+        },
+        "west": {
+          "uv": [
+            7.5,
+            8,
+            8.5,
+            9
+          ],
+          "texture": "#cap_side"
+        },
+        "up": {
+          "uv": [
+            7.5,
+            7.5,
+            8.5,
+            8.5
+          ],
+          "texture": "#cap"
+        }
+      }
+    }
+  ]
+}

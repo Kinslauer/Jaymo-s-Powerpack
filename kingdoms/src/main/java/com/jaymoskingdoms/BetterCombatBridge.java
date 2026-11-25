@@ -42,6 +42,28 @@ final class BetterCombatBridge {
 		}
 	}
 
+	/**
+	 * (fighting AI patch 3, ml-crit) The weapon's Better Combat category ("axe", "claymore", "hammer", "dagger", ...; its own
+	 * namespace, if it has one, dropped), or null if Better Combat doesn't know it or gives it none.
+	 */
+	static @Nullable String category(ItemStack weapon) {
+		if (!MobCombat.ENABLED || weapon.isEmpty()) {
+			return null;
+		}
+		WeaponAttributes attributes;
+		try {
+			attributes = WeaponRegistry.getAttributes(weapon);
+		} catch (RuntimeException e) {
+			return null;
+		}
+		String category = attributes == null ? null : attributes.category();
+		if (category == null || category.isBlank()) {
+			return null;
+		}
+		int colon = category.indexOf(':');
+		return colon >= 0 ? category.substring(colon + 1) : category;
+	}
+
 	/** The pose a two-handed weapon is held in with none of its own (Better Combat's two-handed sword grip). */
 	static final String DEFAULT_TWO_HANDED_POSE = "bettercombat:pose_two_handed_sword";
 

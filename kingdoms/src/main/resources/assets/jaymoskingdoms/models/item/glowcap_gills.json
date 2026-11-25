@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:block/glowcap_gills_tip"
+  }
+}

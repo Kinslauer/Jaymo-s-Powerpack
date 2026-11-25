@@ -1,0 +1,14 @@
+{
+  "type": "jaymoskingdoms:huge_glowcap",
+  "height": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 4,
+    "max_inclusive": 7
+  },
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 2,
+    "max_inclusive": 3
+  },
+  "any_ground": true
+}

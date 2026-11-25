@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskitchen:block/forage/deathcap"
+      },
+      {
+        "model": "jaymoskitchen:block/forage/deathcap",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/forage/deathcap",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/forage/deathcap",
+        "y": 270
+      }
+    ]
+  }
+}

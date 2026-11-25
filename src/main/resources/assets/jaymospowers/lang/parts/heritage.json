@@ -6,5 +6,12 @@
 	"message.jaymospowers.heritage.thunderclap.cooldown": "Thunderclap gathers again in %s s",
 	"message.jaymospowers.heritage.thunderclap.no_sky": "Thunderclap needs the open sky",
 	"message.jaymospowers.heritage.sunflare.cooldown": "Sunflare gathers again in %s s",
-	"message.jaymospowers.heritage.sunflare.no_sun": "Sunflare needs the daylight"
+	"message.jaymospowers.heritage.sunflare.no_sun": "Sunflare needs the daylight",
+	"hud.jaymospowers.heritage.woodpath": "Wood path",
+	"hud.jaymospowers.heritage.woodpath.full": "Wood path: let go to walk the wood",
+	"message.jaymospowers.heritage.woodpath.cooldown": "The wood path opens again in %s s",
+	"hud.jaymospowers.ultimate_hold": "Ultimate gathering",
+	"hud.jaymospowers.ultimate_hold.full": "Held charged: let go to loose it",
+	"message.jaymospowers.ultimate_hold.slipped": "The charge slips away",
+	"message.jaymospowers.ultimate_hold.faded": "The held charge fades"
 }

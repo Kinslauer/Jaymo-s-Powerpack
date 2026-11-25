@@ -1,6 +1,7 @@
 package com.jaymospowers.compat;
 
 import com.jaymospowers.JaymosPowers;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -18,7 +19,8 @@ public final class SubtleEffectsCompat {
 	}
 
 	public static void init() {
-		if (FabricLoader.getInstance().isModLoaded("subtle_effects")) {
+		// a game's own server only: on a dedicated server its config class needs client classes and fails to load
+		if (FabricLoader.getInstance().isModLoaded("subtle_effects") && FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
 			ServerLifecycleEvents.SERVER_STARTED.register(server -> noBones());
 		}
 	}

@@ -87,6 +87,23 @@ public final class TakenOut {
 		ASKED.removeIf(id -> server.getPlayerList().getPlayer(id) == null);
 	}
 
+	/**
+	 * A faint mashed out of before its look ({@link Fainting}): those round them get it now, so mashing never slips a
+	 * captor's or a guard's hands. Returns whether they were taken (and so stay out); false if nobody has them, or this
+	 * black was already looked at.
+	 */
+	static boolean takeNow(ServerPlayer player) {
+		if (!blackedOut(player) || !ASKED.add(player.getUUID())) {
+			return false;
+		}
+		Mortality.Taken taken = Mortality.takenBy(player, null);
+		if (taken == null) {
+			return false;
+		}
+		take(player, taken);
+		return true;
+	}
+
 	/** In the black: put where they were taken, and out cold a while longer there with the wake's line, then they come round. */
 	private static void take(ServerPlayer player, Mortality.Taken taken) {
 		ServerLevel to = player.level().getServer().getLevel(taken.at().dimension());

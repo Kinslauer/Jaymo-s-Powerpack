@@ -154,6 +154,8 @@ public final class Future {
 		FutureFlashlights.init();
 		FutureMachines.init();
 		FutureOmens.init();
+		FutureRigs.init();
+		FutureCars.init();
 		FutureOmenPilots.init();
 		FutureCities.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));

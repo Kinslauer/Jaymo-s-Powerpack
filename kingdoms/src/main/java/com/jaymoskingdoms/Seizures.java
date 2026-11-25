@@ -47,6 +47,14 @@ public final class Seizures {
 	/** The prey lost (dead, gone, too far: blocks) for this long, and it lets go. */
 	static final double LOST_RANGE = 48.0;
 	static final int LOST_TICKS = 60;
+	/**
+	 * (Andy, 2026-11-25: takeovers get the new MCA fighting AI: "they are the most playerlike and aggressive".) A blow
+	 * that's due waits up to {@code CRIT_WAIT} ticks for the body to be falling from its hop (SeizureClient), so it lands
+	 * as a critical hit; struck by something other than its prey within {@code TURN_ON_RANGE}, it turns on that one
+	 * unless its prey is in reach.
+	 */
+	static final int CRIT_WAIT = 6;
+	static final double TURN_ON_RANGE = 6.0;
 
 	/** What has you. */
 	public enum Kind {
@@ -154,6 +162,11 @@ public final class Seizures {
 		ServerPlayNetworking.registerGlobalReceiver(Struggle.TYPE, (payload, context) -> struggle(context.player()));
 		ServerPlayNetworking.registerGlobalReceiver(GiveIn.TYPE, (payload, context) -> giveIn(context.player()));
 		ServerTickEvents.END_SERVER_TICK.register(Seizures::tick);
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (entity instanceof ServerPlayer player && damageTaken > 0.0F && source.getEntity() instanceof LivingEntity by) {
+				turnOn(player, by);
+			}
+		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				end(player, End.CUT);
@@ -312,6 +325,10 @@ public final class Seizures {
 					end(player, End.SATED);
 				}
 			} else {
+				if (player.onGround() && now < hold.nextBlow + CRIT_WAIT) {
+					// (waiting on the hop, so the blow lands falling)
+					continue;
+				}
 				hold.nextBlow = now + BLOW_EVERY;
 				player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 				if (hold.kind != Kind.BLADE) {
@@ -321,6 +338,20 @@ public final class Seizures {
 				player.resetAttackStrengthTicker();
 			}
 		}
+	}
+
+	/** Struck while something has you: it turns on whoever did it, unless its prey is right there (see {@link #TURN_ON_RANGE}). */
+	private static void turnOn(ServerPlayer player, LivingEntity by) {
+		Hold hold = HOLDS.get(player.getUUID());
+		if (hold == null || hold.kind == Kind.CHANGE || by == player || by.getId() == hold.target || !by.isAlive() || ownBeast(by)
+			|| by.distanceTo(player) > TURN_ON_RANGE) {
+			return;
+		}
+		Entity prey = player.level().getEntity(hold.target);
+		if (prey instanceof LivingEntity living && living.isAlive() && living.distanceTo(player) <= REACH) {
+			return;
+		}
+		retarget(player, hold, by, 0);
 	}
 
 	/** Whether {@code e} is a player's own beast (never its prey). */

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymoskingdoms:block/inkcap_slab"
+    },
+    "type=double": {
+      "model": "jaymoskingdoms:block/inkcap_planks"
+    },
+    "type=top": {
+      "model": "jaymoskingdoms:block/inkcap_slab_top"
+    }
+  }
+}

@@ -193,7 +193,8 @@ public final class FelledCompat {
 					if (sx * sx + sz * sz < STUMP * STUMP || !level.getBlockState(pos).is(BlockTags.LOGS)) {
 						continue;
 					}
-					if (Trees.knock(level, pos, heading, null, Trees.FELL_MOST) > 0) {
+					// (a Felled tree is always one a player cut: what it knocks over is their doing, FallingTree#byPlayer)
+					if (Trees.knock(level, pos, heading, null, Trees.FELL_MOST, 0.0F, true) > 0) {
 						level.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.4F, 0.5F);
 						level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
 					}

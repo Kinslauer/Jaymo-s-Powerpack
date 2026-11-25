@@ -1,0 +1,172 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "minecraft:bow",
+      "required": false
+    },
+    {
+      "id": "#minecraft:enchantable/bow",
+      "required": false
+    },
+    {
+      "id": "minecraft:crossbow",
+      "required": false
+    },
+    {
+      "id": "#minecraft:enchantable/crossbow",
+      "required": false
+    },
+    {
+      "id": "#minecraft:arrows",
+      "required": false
+    },
+    {
+      "id": "#minecraft:axes",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:hand_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:tinker_hand_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:tinker_longbow",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:recurve_bow",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:echo_bow",
+      "required": false
+    },
+    "jaymoskingdoms:tattered_quiver",
+    "jaymoskingdoms:net",
+    "jaymoskingdoms:concussive_arrow",
+    {
+      "id": "jaymospowers:broadhead_arrow",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:headed_arrow",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_arrow",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:steel_arrow",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:tinker_arrow",
+      "required": false
+    },
+    {
+      "id": "archers:small_quiver",
+      "required": false
+    },
+    {
+      "id": "archers:medium_quiver",
+      "required": false
+    },
+    {
+      "id": "archers:large_quiver",
+      "required": false
+    },
+    {
+      "id": "archers:composite_longbow",
+      "required": false
+    },
+    {
+      "id": "archers:crystal_longbow",
+      "required": false
+    },
+    {
+      "id": "archers:crystal_shortbow",
+      "required": false
+    },
+    {
+      "id": "archers:mechanic_shortbow",
+      "required": false
+    },
+    {
+      "id": "archers:royal_longbow",
+      "required": false
+    },
+    {
+      "id": "archers:netherite_longbow",
+      "required": false
+    },
+    {
+      "id": "archers:netherite_shortbow",
+      "required": false
+    },
+    {
+      "id": "archers:aether_longbow",
+      "required": false
+    },
+    {
+      "id": "archers:archer_armor_head",
+      "required": false
+    },
+    {
+      "id": "archers:archer_armor_chest",
+      "required": false
+    },
+    {
+      "id": "archers:archer_armor_legs",
+      "required": false
+    },
+    {
+      "id": "archers:archer_armor_feet",
+      "required": false
+    },
+    {
+      "id": "archers:ranger_armor_head",
+      "required": false
+    },
+    {
+      "id": "archers:ranger_armor_chest",
+      "required": false
+    },
+    {
+      "id": "archers:ranger_armor_legs",
+      "required": false
+    },
+    {
+      "id": "archers:ranger_armor_feet",
+      "required": false
+    },
+    {
+      "id": "archers:netherite_ranger_armor_head",
+      "required": false
+    },
+    {
+      "id": "archers:netherite_ranger_armor_chest",
+      "required": false
+    },
+    {
+      "id": "archers:netherite_ranger_armor_legs",
+      "required": false
+    },
+    {
+      "id": "archers:netherite_ranger_armor_feet",
+      "required": false
+    },
+    "jaymoskingdoms:ranger_helmet",
+    "jaymoskingdoms:ranger_chestplate",
+    "jaymoskingdoms:ranger_leggings",
+    "jaymoskingdoms:ranger_boots",
+    "jaymoskingdoms:ranger_steel_helmet",
+    "jaymoskingdoms:ranger_steel_chestplate",
+    "jaymoskingdoms:ranger_steel_leggings",
+    "jaymoskingdoms:ranger_steel_boots"
+  ]
+}
