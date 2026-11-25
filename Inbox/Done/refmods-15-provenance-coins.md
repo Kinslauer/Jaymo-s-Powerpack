@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: claude-cloud
 from: coordinator
 asked: 2026-11-24
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
-claimed_by: 
-pr: 
+claimed_by: claude-cloud
+pr: 2097
 suggested_owns: []
 ---
 # Reference Mods Patch 15: Provenance, coins and goods
