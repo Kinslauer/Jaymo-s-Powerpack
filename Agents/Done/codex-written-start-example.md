@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Andy asked for an example of the attached hand-built starts idea.
 branch: codex/written-start-example
 pr: 2177
@@ -32,3 +32,4 @@ owns:
 ## Done
 The saved shelter, fixed supplies, gate and five-step tale are on draft PR #2177. Template, all tales, PR checks and Kingdoms build pass. Exterior, room and cellar block previews inspected and shown to Andy. The example datapack selects this build for both shipped entries in a test world; it requires PR #2153. No Java changes, merges or deployment. In-game placement and progression remain untested. The vault sync was busy with another sync when retried; this live note is saved locally.
 - 2026-11-25 07:33 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-25 13:24 PR #2177 is merged into master; moved to Agents/Done.

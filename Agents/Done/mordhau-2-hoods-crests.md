@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: mordhau-2-hoods-crests
 branch: claude/mordhau-2-hoods-crests
 with: claude (PC worker, Opus 5.5)
@@ -39,3 +39,4 @@ track 1's royal helms wear), antlers, mantling, bevor, armet wrapper, gorget. Ou
 ## Done
 - PR #2178 (draft until Andy approves the previews in Assets/mordhau-2-hoods-crests/). 25 new pieces: 15 hoods and hats, the arming cap, 4 coif cuts, orle, helm crown, antlers, mantling, the armet wrapper; any regalia crown goes over a helm in the crest place; hats hidden under a helm; the sallet hides a bevor/wrapper; the tournament champion gets the victor's wreath. Lore: five (new) paragraphs after "The spectacle helm".
 - Not played: compiles in CI and the pack boots; drawing, recipes (incl. second colour), forging and the wreath prize untested in game. Skipped: the spiked lowered coif (row allowed it).
+- 2026-11-25 13:24 PR #2178 is merged into master; moved to Agents/Done.
