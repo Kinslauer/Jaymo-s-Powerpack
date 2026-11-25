@@ -32,6 +32,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.forms.LassoPose.extract(entity, state, partialTicks);
 		PickpocketPose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.BioAbsorbPose.extract(entity, state, partialTicks);
+		com.jaymoskingdoms.client.TreePushPose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.BloodGrabPose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.RubberEngulf.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.HandshakePose.extract(entity, state, partialTicks);
@@ -82,6 +83,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		PullerPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		PickpocketPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.BioAbsorbPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymoskingdoms.client.TreePushPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.BloodGrabPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.RubberEngulf.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.BioForms.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);

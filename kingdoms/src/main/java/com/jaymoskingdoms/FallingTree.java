@@ -15,10 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -191,6 +193,19 @@ public final class FallingTree extends Entity {
 	/** Which way it falls (radians: 0 is east, along +x; a quarter turn is south, +z). */
 	public static final AttachmentType<Float> HEADING = AttachmentRegistry.create(JaymosKingdoms.id("falling_tree_heading"),
 		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
+	/**
+	 * On someone leaning into a fallen tree's log with both hands (Andy: "your character should animate both hands on it
+	 * and pushing, only moving it when you have sufficient strength"): the middle of the log they push, for every screen
+	 * to draw them at it. The weak push as hard as the strong; only the strong move it ({@link #shove}).
+	 */
+	public static final AttachmentType<Vec3> PUSHING = AttachmentRegistry.create(JaymosKingdoms.id("pushing_tree"),
+		builder -> builder.syncWith(Vec3.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** Who pushed a fallen tree, and the last tick they did. */
+	private static final Map<LivingEntity, Long> PUSHERS = new WeakHashMap<>();
+	/** How far it has to move (blocks) before the log pushed is told every screen again. */
+	static final double PUSH_RESYNC = 0.25;
+	/** A log pushed is within this of straight ahead (the cosine of the angle off the way they go). */
+	static final double AHEAD = 0.6;
 	/** How far over it leans (degrees from upright). */
 	private static final EntityDataAccessor<Float> LEAN = SynchedEntityData.defineId(FallingTree.class, EntityDataSerializers.FLOAT);
 	/** Lying still on the ground (down, not flying, held or going into a woodcutter's bag): its logs are solid. */
@@ -244,6 +259,15 @@ public final class FallingTree extends Entity {
 			.clientTrackingRange(10)
 			.updateInterval(1)
 			.build(key));
+		// those who stopped pushing take their hands off
+		ServerTickEvents.END_SERVER_TICK.register(server -> PUSHERS.entrySet().removeIf(e -> {
+			LivingEntity who = e.getKey();
+			if (who.isAlive() && e.getValue() >= who.level().getGameTime()) {
+				return false;
+			}
+			who.removeAttached(PUSHING);
+			return true;
+		}));
 	}
 
 	/**
@@ -799,9 +823,7 @@ public final class FallingTree extends Entity {
 	 * what holds it up, it falls on or drops at its next look ({@link #rest}).
 	 */
 	private void shove(ServerLevel level, List<Piece> pieces) {
-		if (this.lean() < LYING || this.propped) {
-			return;
-		}
+		boolean lying = this.lean() >= LYING && !this.propped;
 		Quaternionf turn = turn(this.lean(), this.heading());
 		List<Vec3> logs = new ArrayList<>();
 		Vec3 middle = Vec3.ZERO;
@@ -826,11 +848,7 @@ public final class FallingTree extends Entity {
 		inertia = Math.max(inertia, 1.0);
 		double vx = 0.0, vz = 0.0, spin = 0.0;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(0.5),
-			e -> e.isAlive() && !e.isSpectator() && !e.noPhysics && !e.isPassenger())) {
-			int brawn = brawn(e);
-			if (brawn < SHOVE_BRAWN) {
-				continue;
-			}
+			e -> e.isAlive() && !e.isSpectator() && !e.noPhysics && !e.isPassenger() && e.onGround() && !e.isSwimming() && !e.isSleeping())) {
 			Vec3 way = pushing(e);
 			if (way == null) {
 				continue;
@@ -841,7 +859,8 @@ public final class FallingTree extends Entity {
 			double nearest = Double.MAX_VALUE;
 			for (Vec3 at : logs) {
 				double dx = at.x - e.getX(), dz = at.z - e.getZ();
-				if (dx * way.x + dz * way.z <= 0.0 || !new AABB(at, at).inflate(0.5).intersects(reach)) {
+				// (ahead of them, not one they're only brushing past)
+				if (dx * way.x + dz * way.z <= AHEAD * Math.sqrt(dx * dx + dz * dz) || !new AABB(at, at).inflate(0.5).intersects(reach)) {
 					continue;
 				}
 				double d = dx * dx + dz * dz;
@@ -851,6 +870,16 @@ public final class FallingTree extends Entity {
 				}
 			}
 			if (touched == null) {
+				continue;
+			}
+			// hands on it: everyone strains at it, and only the strong move it
+			PUSHERS.put(e, level.getGameTime());
+			Vec3 was = e.getAttached(PUSHING);
+			if (was == null || was.distanceToSqr(touched) > PUSH_RESYNC * PUSH_RESYNC) {
+				e.setAttached(PUSHING, touched);
+			}
+			int brawn = brawn(e);
+			if (!lying || brawn < SHOVE_BRAWN) {
 				continue;
 			}
 			double speed = SHOVE_SPEED * Math.min(1.0, (double)brawn * LOGS_PER_BRAWN / n);
