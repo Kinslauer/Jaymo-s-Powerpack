@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Build Andy's 42 Visceral gore picks; PixelGore pick list waiting on picks
 branch: claude/project-thread-9k4io3
 with: cloud thread (Reason Art project)
@@ -21,3 +21,4 @@ owns:
 
 ## Notes
 - Visceral picks: https://claude.ai/artifact/3NMtJdzmLuH1WyzbYV672f (db picks/andy).
+- 2026-11-25 18:10 No sign of work for 30 min: marked stalled (whoever ran it stopped).
