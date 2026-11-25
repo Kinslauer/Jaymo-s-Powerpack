@@ -3,7 +3,7 @@ status: in-review
 task: mordhau-4-legs
 branch: claude/mordhau-4-legs
 with: claude (T3 thread, Sonnet 5.5)
-pr: 2186
+pr: 2187
 mods: kingdoms, powers
 versions: 
 started: 2026-11-25
@@ -35,3 +35,4 @@ owns:
 ## Done
 - 2026-11-25 4:54 PM Queued behind track 3 in the same thread; starts when track 3's PR is up.
 - 2026-11-25 5:10 PM Draft PR #2186. 15 rows: 27 new pieces + the HOSE place (last Slot, hose layer in UnderArmourLayer, slot on the harness screen). Lore: 2 (new) paragraphs. Not played; Java compiled only by CI.
+- 2026-11-25 5:21 PM PR #2186 closed (no CI: not based on master); replaced by draft #2187 from the same branch to master, which also holds #2185's commits until that merges. Previews regenerated with a true front/side/back.

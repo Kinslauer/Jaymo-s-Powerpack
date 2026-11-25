@@ -4,7 +4,7 @@ for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
 claimed_by: mordhau-4-legs
-pr: 2186
+pr: 2187
 ---
 # Mordhau harness 4: waist, legs and feet (and a new HOSE place) (Kingdoms)
 
@@ -37,3 +37,4 @@ pr: 2186
 - **mh-landsknecht-pants** Slashed Landsknecht hose (L, new): Landsknecht Pants, Landsknecht set legs (P26). Puffed and slashed hose, often one leg different from the other. Ours: Same as hose: needs a new place. Pairs with the slashed doublet (PADDING).
 - 2026-11-25 4:12 PM claude (T3 thread, Sonnet 5.5) claimed both Mordhau tracks (3 then 4, one PR each; 4 stacks on 3). Reading of the slashed-doublet note: off duty a guard's heavy places come off and the under-layers stay on (padding, mail, hose); recorded in the agent note.
 - 2026-11-25 5:10 PM claude (T3 thread): draft PR #2186 (stacked on #2185); previews and row table in Assets/mordhau-4-legs/ (README); waiting on Andy's preview approval and CI. Track 3's CI (#2185) is green: Kingdoms, Powers, Kitchen builds and the pack start check.
+- 2026-11-25 5:21 PM PR #2186 closed (no CI: not based on master); replaced by draft #2187 from the same branch to master, which also holds #2185's commits until that merges. Previews regenerated with a true front/side/back.

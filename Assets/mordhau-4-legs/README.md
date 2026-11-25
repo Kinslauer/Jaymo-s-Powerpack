@@ -1,13 +1,13 @@
 # Mordhau harness 4: waist, legs and feet, and the HOSE place: previews and row table
 
-Each picture is one piece worn on a grey figure, seen (left to right) three-quarter, **side**, **front** three-quarter, **back** and a second
-three-quarter view. Drawn with `tools/bbmodel_preview.py` from the baked models and sheets, the way the game draws them; not screenshots
+Each picture is one piece worn on a grey figure, seen (left to right) from the **front**, the **side**, the **back**, then **three-quarter
+front** and **three-quarter back**. Drawn with `tools/bbmodel_preview.py` from the baked models and sheets, the way the game draws them; not screenshots
 from the game. Cloth is shown tinted in the colour an undyed one shows (the game tints it with the piece's dye); `_gilded` is the same
 piece in that finish; `_over_leg_harness` is a skirt or tassets worn over cuisses, greaves and sabatons. The figure's legs are drawn short,
 as in every harness preview.
 
 Nothing here has been played. Java compiles in CI only (Andy plays on this PC, so no Gradle here); the generator
-(`kingdoms/tools/gen_heraldry_legs.py`) and these pictures were run here. This branch is stacked on track 3 (PR #2185).
+(`kingdoms/tools/gen_heraldry_legs.py`) and these pictures were run here. The PR (#2187) is based on master so CI runs; it contains track 3's commits (PR #2185) until that merges, so merge #2185 first. #2186, the first try (based on #2185's branch), was closed: no CI runs on a PR that is not to master.
 
 | Pick (row) | What it is now | Picture |
 |---|---|---|

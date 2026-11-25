@@ -62,3 +62,4 @@ pr: 2185
 - 2026-11-25 07:33 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.
 - 2026-11-25 4:12 PM claude (T3 thread, Sonnet 5.5) claimed both Mordhau tracks (3 then 4, one PR each; 4 stacks on 3). Reading of the slashed-doublet note: off duty a guard's heavy places come off and the under-layers stay on (padding, mail, hose); recorded in the agent note.
 - 2026-11-25 4:59 PM claude (T3 thread): draft PR #2185 up; previews and row table in Assets/mordhau-3-body/ (README); waiting on Andy's preview approval and CI (Java is compiled only by CI). Guard reading is in the PR body and the README.
+- 2026-11-25 5:21 PM Review fixes pushed (brigandine belt, linen shirt recipe, gold finishes cost gold, true front/side/back previews). Note for Andy: guards now show the quilted coat where they showed mail (it was drawn as mail by mistake). #2185 should merge before #2187.
