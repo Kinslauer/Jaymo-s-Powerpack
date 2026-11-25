@@ -3,6 +3,7 @@
 	"package": "com.jaymospowers.mixin.alexscaves",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"CabinMapScoutMixin",
 		"FerrocaveStoneMixin",
 		"MagneticCaveStoneMixin",
 		"NuclearBombFutureMixin",

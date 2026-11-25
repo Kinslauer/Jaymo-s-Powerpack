@@ -40,8 +40,9 @@ public class LabyrinthCompass extends Item {
 
 	/** The nearer of the nearest great labyrinth and the nearest middling one, or null. */
 	private static @Nullable BlockPos nearest(ServerLevel level, BlockPos from) {
-		BlockPos great = level.findNearestMapStructure(Labyrinths.ALWAYS, from, REACH, false);
-		BlockPos some = level.findNearestMapStructure(Labyrinths.SOME, from, REACH, false);
+		// (Scout, not findNearestMapStructure: that makes chunks on the server thread, past the watchdog)
+		BlockPos great = com.jaymoskingdoms.Scout.nearest(level, Labyrinths.ALWAYS, from, REACH);
+		BlockPos some = com.jaymoskingdoms.Scout.nearest(level, Labyrinths.SOME, from, REACH);
 		if (great == null || some == null) {
 			return great != null ? great : some;
 		}

@@ -1,0 +1,4 @@
+# explorer maps never make chunks on the server thread
+- **Fix**: the Labyrinth Compass (looked up every 100 ticks while held) and the ruin-folk's map to another people's city used vanilla's structure search on the server thread, which makes each likely chunk and can run past the 60 s watchdog (the Deck crashed this way on 2026-11-24 from an explorer map in Powers). Both now use Scout, which predicts the place without making a chunk, over the same search radius.
+- **Differs from vanilla**: Scout trusts the prediction instead of loading the chunk to confirm it. In a One Dimension world it searches the Overworld band.
+- `LabyrinthCompass`, `RuinFolk`. The farmhand's farmhouse hunt is switched off (`FarmhandHome.SEARCH_OFF`), so it is left as it is. Not built locally; CI builds it. Not played.
