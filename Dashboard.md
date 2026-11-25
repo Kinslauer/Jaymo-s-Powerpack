@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:05). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:35). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -13,6 +13,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/mordhau-1-helms|mordhau-1-helms]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/mordhau-2-hoods-crests|mordhau-2-hoods-crests]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
@@ -25,6 +27,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2132 Villager screen opens into talk: everything is a spoke on the talk wheel, only Gift and Trade stay buttons (Kingdoms, 2026-11-25)
+- [ ] #2131 The Wither's own look, animations and voice (Kingdoms, 2026-11-25)
+- [ ] #2130 End plants no longer break End worldgen (Kitchen, 2026-11-25)
+- [ ] #2129 worn totems and villagers who carry one (Powers, 2026-11-25)
+- [ ] #2128 Gravity metal fixes: no dupes from torn chunks, no weapon minting (Powers, 2026-11-25)
 - [ ] #2127 three primitive hide sets, each with a dark make (Powers, Kingdoms, 2026-11-25)
 - [ ] #2126 weighty movement - the walk carries weight (Powers, 2026-11-25)
 - [ ] #2125 Gravity: iron answers first (the X-Men mod's Magnetism, worked in) (Powers, 2026-11-25)
@@ -80,16 +87,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2063 Your coin at a glance, and money bags in chests (Kingdoms, 2026-11-24)
 - [ ] #2062 Adrenaline kicks in once, going down included (Powers, 2026-11-24)
 - [ ] #2061 A blast close by knocks you out cold (Powers, 2026-11-24)
-- [ ] #2060 Cleric's medallion board: numpad sigils cast spells and great prayers, sneak to bind (Kingdoms, 2026-11-24)
-- [ ] #2059 A body only spills the blood it holds (Powers, 2026-11-24)
-- [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
-- [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
-- [ ] #2056 Three blows on the ground and you're finished (Powers, 2026-11-24)
-- …and 515 older ones.
+- …and 520 older ones.
 
 ## Health
 
-13 problems in the notes: [[Health]].
+14 problems in the notes: [[Health]].
 
 ## Last week
 
