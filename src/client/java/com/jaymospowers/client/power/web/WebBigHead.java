@@ -78,6 +78,8 @@ final class WebBigHead {
 			LivingEntityRenderer.getOverlayCoords(state, 0.0F), state.outlineColor);
 		collector.order(2).submitModel(head, state, poseStack, RenderTypes.eyes(GLOW), LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
 			state.outlineColor);
+		// (cornered, starving or panicking: the head splits into a crown of petals)
+		WebBloom.submit(poseStack, collector, lightCoords, state);
 		poseStack.popPose();
 	}
 
