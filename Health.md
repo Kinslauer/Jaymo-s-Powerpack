@@ -1,13 +1,12 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 08:26). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 09:55). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**12 problems.**
+**11 problems.**
 
 ## Statuses the pipeline doesn't know
 
-- [[Agents/Hostile Humans fighting AI|Hostile Humans fighting AI]]: `status: review` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 - [[Agents/corpse-limbs-drag-arm-digger-pits|corpse-limbs-drag-arm-digger-pits]]: `status: stopped` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 
 ## Stalled agent notes
