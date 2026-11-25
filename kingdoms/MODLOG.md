@@ -17382,3 +17382,8 @@ Not tested in a running game: site choice, ground levelling and building overlap
 - **Poise:** a blow that arrives at 0.04 x toughness damage or less doesn't knock you back (`PoiseKnockbackMixin`): new character 0.8, Grit 50 2.8, Grit 100 4.8, Grit 100 in netherite 6.7.
 - Grit keeps its armour and knockback resistance. Its K screen line now says how much it takes off every blow, and hovering it shows your whole toughness (with gear), the share off every blow and the poise.
 - Built; not played. Numbers in the PR are from a model of plain blows (no crits, combos, red swings, bleeding or armour breaking).
+
+## 0.12.84 (2026-11-25): Hearth's hit cap no longer softens the blow that downs you (#2157)
+
+- In Hearth, the cap that keeps any one hit to a fifth of your health also caught Jaymo's Powers' finishing step (the `jaymospowers:wounds` damage that ends a body once a blow has blacked out its head or torso, or once a downed body runs out). Capped, it took 4 health instead of downing you. Now it's left alone (`WorldTiers.hearthHit`), so a blacked-out torso or head downs you in Hearth as everywhere else. The blow that blacked it out is still capped.
+- Built; not played.
