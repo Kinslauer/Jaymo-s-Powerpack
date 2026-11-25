@@ -292,6 +292,12 @@ public final class WindPower implements Power {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 2.0F, 0.5F);
 	}
 
+	/** The Lance, the Dome and the Thunder Dive are each one press: they can be held charged and loosed on release (UltimateHold). */
+	@Override
+	public boolean ultimateHeld(Player player) {
+		return true;
+	}
+
 	/** Cyclone Lance (C, ascended only): an instant spear of wind along the look direction. In the Thunderhead, mid-air and looking down, it is the {@link WindThunderDive} instead. */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {

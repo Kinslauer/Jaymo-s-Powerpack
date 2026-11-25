@@ -215,6 +215,12 @@ public final class ResonancePower implements Power {
 		}
 	}
 
+	/** The Boom and the Shriek are one press: they can be held charged and loosed on release (UltimateHold). */
+	@Override
+	public boolean ultimateHeld(Player player) {
+		return true;
+	}
+
 	/** C: Sonic Boom (ascended), or Shriek (corrupted; when both, sneak for Shriek). */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
