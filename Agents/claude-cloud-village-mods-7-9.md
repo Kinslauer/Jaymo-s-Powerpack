@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: village-mods-7-ctov-tidal-towns, village-mods-8-swamp-goblins, village-mods-9-own-company
 branch: claude/project-thread-2p25nc
 with: 
@@ -28,3 +28,4 @@ owns:
 - underground-stoneborn-goblin-villages left alone: on hold by Andy (2026-11-19).
 
 ## Done
+- 2026-11-25 16:35 No sign of work for 30 min: marked stalled (whoever ran it stopped).
