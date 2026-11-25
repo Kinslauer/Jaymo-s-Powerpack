@@ -35,6 +35,9 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import com.jaymospowers.tinkering.smithing.Grade;
+import com.jaymospowers.tinkering.smithing.Grades;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -81,6 +84,10 @@ public final class PodParts {
 	/** (0.18.51) A part block's wear (a worn one is mended at a rack), and a keel's mend grade. */
 	public static final BooleanProperty DAMAGED = BooleanProperty.create("damaged");
 	public static final IntegerProperty GRADE = IntegerProperty.create("grade", 0, PodGrades.MAX_GRADE);
+	/** The forging grade a part was hammered to: a {@link Grade} ordinal + 1, or 0 when nobody graded it (it counts as Well Forged). */
+	public static final IntegerProperty FORGED = IntegerProperty.create("forged", 0, Grade.values().length);
+	/** How many module sockets a keel has. */
+	public static final IntegerProperty SOCKETS = IntegerProperty.create("sockets", PodModules.FEWEST_SOCKETS, PodModules.MOST_SOCKETS);
 	/** The research that teaches the canopy's infusion. */
 	public static final String CANOPY_RESEARCH = "pod_canopy";
 
@@ -154,6 +161,7 @@ public final class PodParts {
 			EssenceList.of(Essence.CRYSTAL, 8, Essence.AIR, 6), List.of("infusion"), 0, 2, 1));
 		SalvageRack.init();
 		PodGrades.init();
+		PodTravel.init();
 	}
 
 	// ---------------------------------------------------------------- lookups
@@ -180,6 +188,11 @@ public final class PodParts {
 
 	/** A part as an item, worn or sound; a keel also remembers the pod's mend {@code grade}. */
 	public static ItemStack stackOf(PodPart part, boolean damaged, int grade) {
+		return stackOf(part, damaged, grade, 0, PodModules.FEWEST_SOCKETS);
+	}
+
+	/** As {@link #stackOf(PodPart, boolean, int)}, remembering the part's forging grade ({@link #FORGED}) and a keel's sockets. */
+	public static ItemStack stackOf(PodPart part, boolean damaged, int grade, int forged, int sockets) {
 		ItemStack stack = new ItemStack(item(part));
 		BlockItemStateProperties props = BlockItemStateProperties.EMPTY;
 		boolean any = false;
@@ -191,6 +204,14 @@ public final class PodParts {
 			props = props.with(GRADE, grade);
 			any = true;
 		}
+		if (forged > 0) {
+			props = props.with(FORGED, forged);
+			any = true;
+		}
+		if (part == PodPart.KEEL && sockets > PodModules.FEWEST_SOCKETS) {
+			props = props.with(SOCKETS, sockets);
+			any = true;
+		}
 		if (any) {
 			stack.set(DataComponents.BLOCK_STATE, props);
 		}
@@ -199,8 +220,14 @@ public final class PodParts {
 
 	/** The block of a part as the pod gives it up: worn or sound, a keel with its grade. */
 	public static BlockState stateOf(PodPart part, boolean damaged, int grade) {
-		BlockState state = block(part).defaultBlockState().setValue(DAMAGED, damaged);
-		return part == PodPart.KEEL ? state.setValue(GRADE, Math.max(0, Math.min(PodGrades.MAX_GRADE, grade))) : state;
+		return stateOf(part, damaged, grade, 0, PodModules.FEWEST_SOCKETS);
+	}
+
+	/** As {@link #stateOf(PodPart, boolean, int)}, with the part's forging grade and a keel's sockets. */
+	public static BlockState stateOf(PodPart part, boolean damaged, int grade, int forged, int sockets) {
+		BlockState state = block(part).defaultBlockState().setValue(DAMAGED, damaged).setValue(FORGED, Math.max(0, Math.min(Grade.values().length, forged)));
+		return part == PodPart.KEEL ? state.setValue(GRADE, Math.max(0, Math.min(PodGrades.MAX_GRADE, grade)))
+			.setValue(SOCKETS, Math.max(PodModules.FEWEST_SOCKETS, Math.min(PodModules.MOST_SOCKETS, sockets))) : state;
 	}
 
 	/**
@@ -265,7 +292,7 @@ public final class PodParts {
 			return Attach.NONE;
 		}
 		boolean worn = CarryBlock.stateOf(carried).getValue(DAMAGED);
-		if (!pod.attach(part, worn)) {
+		if (!pod.attach(part, worn, CarryBlock.stateOf(carried).getValue(FORGED))) {
 			Component message = pod.nextFree(part) < 0
 				? Component.translatable("message.jaymospowers.pod.full", nameOf(part))
 				: Component.translatable("message.jaymospowers.pod.needs_first", nameOf(PodPart.ORDER.get(PodPart.ORDER.indexOf(part) - 1)));
@@ -329,6 +356,8 @@ public final class PodParts {
 		int bit = pod.outermost();
 		boolean[] wasDamaged = new boolean[1];
 		int grade = pod.grade();
+		int forged = bit == 0 ? 0 : pod.forgedAt(bit);
+		int sockets = pod.sockets();
 		PodPart part = bit == 0 ? null : pod.detach(bit, wasDamaged);
 		if (part == null) {
 			if (bit == 0) {
@@ -342,12 +371,12 @@ public final class PodParts {
 			boolean keel = part == PodPart.KEEL;
 			settingKeel = keel;
 			try {
-				level.setBlock(spot, stateOf(part, wasDamaged[0], grade), Block.UPDATE_ALL);
+				level.setBlock(spot, stateOf(part, wasDamaged[0], grade, forged, sockets), Block.UPDATE_ALL);
 			} finally {
 				settingKeel = false;
 			}
 		} else {
-			drop(level, at, stackOf(part, wasDamaged[0], grade));
+			drop(level, at, stackOf(part, wasDamaged[0], grade, forged, sockets));
 		}
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 0.8F, wasDamaged[0] ? 1.3F : 1.0F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 0.5F, 1.2F);
@@ -355,6 +384,14 @@ public final class PodParts {
 			: wasDamaged[0] ? "message.jaymospowers.pod.worn_off" : "message.jaymospowers.pod.detached", nameOf(part)).withStyle(ChatFormatting.GRAY));
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 8, 0.4, 0.5, 0.4, 0.2);
 		if (part == PodPart.KEEL) {
+			// what the pod carried stays: its hold's goods and every module fall out beside it
+			for (ItemStack stack : pod.holdContents()) {
+				drop(level, at, stack);
+			}
+			PodModules.Kind module;
+			while ((module = PodModules.remove(pod)) != null) {
+				drop(level, at, new ItemStack(PodModules.item(module)));
+			}
 			pod.discard();
 		}
 	}
@@ -414,12 +451,12 @@ public final class PodParts {
 		PartBlock(BlockBehaviour.Properties properties, VoxelShape shape) {
 			super(properties);
 			this.shape = shape;
-			registerDefaultState(defaultBlockState().setValue(DAMAGED, false));
+			registerDefaultState(defaultBlockState().setValue(DAMAGED, false).setValue(FORGED, 0));
 		}
 
 		@Override
 		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-			builder.add(DAMAGED);
+			builder.add(DAMAGED, FORGED);
 		}
 
 		@Override
@@ -445,6 +482,31 @@ public final class PodParts {
 			if (grade != null && grade > 0) {
 				builder.accept(Component.translatable("tooltip.jaymospowers.pod.keel_grade", PodGrades.roman(grade)).withStyle(ChatFormatting.GOLD));
 			}
+			Integer sockets = props.get(SOCKETS);
+			if (sockets != null && sockets > PodModules.FEWEST_SOCKETS) {
+				builder.accept(Component.translatable("tooltip.jaymospowers.pod.keel_sockets", sockets).withStyle(ChatFormatting.AQUA));
+			}
+			Grade forged = forgedOf(stack);
+			if (forged != null) {
+				builder.accept(Component.translatable("tooltip.jaymospowers.pod.forged", forged.displayName()));
+			}
+		}
+
+		/** A part hammered at the Smithing Anvil carries its grade onto the block it is set down as. */
+		@Override
+		protected @Nullable BlockState getPlacementState(BlockPlaceContext context) {
+			BlockState state = super.getPlacementState(context);
+			Grade forged = state == null ? null : Grades.of(context.getItemInHand());
+			return forged == null || state.getValue(FORGED) > 0 ? state : state.setValue(FORGED, forged.ordinal() + 1);
+		}
+
+		/** The forging grade of a part item: the block state it keeps, else the smithing grade it was hammered to. */
+		static @Nullable Grade forgedOf(ItemStack stack) {
+			Integer kept = stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(FORGED);
+			if (kept != null && kept > 0) {
+				return Grade.values()[Math.min(kept, Grade.values().length) - 1];
+			}
+			return Grades.of(stack);
 		}
 	}
 
@@ -452,13 +514,13 @@ public final class PodParts {
 	private static final class KeelBlock extends PartBlock {
 		KeelBlock(BlockBehaviour.Properties properties, VoxelShape shape) {
 			super(properties, shape);
-			registerDefaultState(defaultBlockState().setValue(GRADE, 0));
+			registerDefaultState(defaultBlockState().setValue(GRADE, 0).setValue(SOCKETS, PodModules.FEWEST_SOCKETS));
 		}
 
 		@Override
 		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 			super.createBlockStateDefinition(builder);
-			builder.add(GRADE);
+			builder.add(GRADE, SOCKETS);
 		}
 
 		@Override
@@ -468,8 +530,9 @@ public final class PodParts {
 			}
 			PodEntity pod = new PodEntity(PodEntity.TYPE, server);
 			pod.setPos(Vec3.atBottomCenterOf(pos));
-			pod.attach(PodPart.KEEL, false);
+			pod.attach(PodPart.KEEL, false, state.getValue(FORGED));
 			pod.setGrade(state.getValue(GRADE));
+			pod.setSockets(state.getValue(SOCKETS));
 			server.removeBlock(pos, false);
 			server.addFreshEntity(pod);
 			server.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS, 0.7F, 0.9F);

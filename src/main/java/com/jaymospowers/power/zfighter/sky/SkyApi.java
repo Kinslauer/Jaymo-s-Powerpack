@@ -43,6 +43,16 @@ public final class SkyApi {
 		return Component.translatable("space.jaymospowers.dest." + ZFighterSpace.DESTS[world].key());
 	}
 
+	/** Whether {@code player} has a pinch of stardust to trade for a hint (a stargazer's talk). */
+	public static boolean hasStardust(ServerPlayer player) {
+		return com.jaymospowers.power.zfighter.pod.PodStardust.has(player);
+	}
+
+	/** Trades a pinch of stardust for one line of hint about the sky; null when the player has none. */
+	public static Component hint(ServerPlayer player) {
+		return com.jaymospowers.power.zfighter.pod.PodStardust.hint(player);
+	}
+
 	/** How many trips {@code player} has flown in a pod (0: before they had one). */
 	public static int flights(ServerPlayer player) {
 		return player.getAttachedOrElse(ZFighterPodTrip.FLIGHTS, 0);

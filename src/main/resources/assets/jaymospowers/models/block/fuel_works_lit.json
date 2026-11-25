@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "jaymospowers:block/fuel_works_side",
+    "down": "jaymospowers:block/fuel_works_top",
+    "up": "jaymospowers:block/fuel_works_top",
+    "north": "jaymospowers:block/fuel_works_front_lit",
+    "east": "jaymospowers:block/fuel_works_side",
+    "south": "jaymospowers:block/fuel_works_side",
+    "west": "jaymospowers:block/fuel_works_side"
+  }
+}

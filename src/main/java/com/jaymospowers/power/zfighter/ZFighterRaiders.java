@@ -198,6 +198,8 @@ public final class ZFighterRaiders {
 			boolean chief = i == 0;
 			ZFighterPatrol.Flier flier = ZFighterPatrol.land(level, ground, random.nextInt(NAMES), f -> stepOut(band, f, chief));
 			flier.pod.addTag(TAG);
+			// a raider's keel has the fewest sockets
+			flier.pod.setSockets(com.jaymospowers.power.zfighter.pod.PodModules.FEWEST_SOCKETS);
 			strip(flier.pod, random);
 			band.pods.add(flier.pod);
 		}

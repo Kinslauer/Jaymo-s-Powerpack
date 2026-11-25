@@ -3,7 +3,10 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
+import com.jaymospowers.power.zfighter.pod.PodClass;
 import com.jaymospowers.power.zfighter.pod.PodGrades;
+import com.jaymospowers.power.zfighter.pod.PodLegs;
+import com.jaymospowers.power.zfighter.pod.PodBeacons;
 import com.jaymospowers.power.zfighter.pod.PodParts;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.serialization.Codec;
@@ -115,6 +118,10 @@ public final class ZFighterPodTrip {
 		int grade;
 		/** (0.18.56) A Starlit Lens on the mast, carried to the pod that lands. */
 		boolean lens;
+		/** What else the pod carries (sockets, modules, forging, the hold), the share of the flight its class takes, and whether it has landing legs. */
+		PodEntity.@Nullable Extras extras;
+		float flightScale = 1.0F;
+		boolean legs = true;
 		@Nullable UUID guest;
 		@Nullable ResourceKey<Level> to;
 		@Nullable BlockPos ground;
@@ -271,6 +278,9 @@ public final class ZFighterPodTrip {
 		trip.finished = pod.finished();
 		trip.grade = pod.grade();
 		trip.lens = pod.lens() && pod.has(PodPart.MAST, 0);
+		trip.extras = pod.extras();
+		trip.flightScale = PodClass.of(pod).flight;
+		trip.legs = PodLegs.lands(pod);
 		// (0.18.50) a second seat: whoever else is aboard comes along
 		ServerPlayer guest = null;
 		for (Entity rider : pod.getPassengers()) {
@@ -301,6 +311,9 @@ public final class ZFighterPodTrip {
 		pod.setFinished(trip.finished);
 		pod.setGrade(trip.grade);
 		pod.setLens(trip.lens);
+		if (trip.extras != null) {
+			pod.applyExtras(trip.extras);
+		}
 		pod.setYRot(yaw);
 		pod.setHovering(true);
 		// tagged once it is in the world, so the load check doesn't take it for a leftover
@@ -411,6 +424,11 @@ public final class ZFighterPodTrip {
 				}
 				double left = at.y - ground.getY();
 				double speed = Mth.clamp(left * DESCENT_EASE, DESCENT_SLOW, DESCENT_FAST);
+				if (!trip.legs) {
+					// no landing legs: only the cabin comes down, under a chute
+					speed = Math.min(speed, PodLegs.CHUTE_SPEED);
+					PodLegs.chute(level, at);
+				}
 				if (left <= speed || --trip.ticks <= 0) {
 					touchDown(player, trip);
 					return true;
@@ -458,7 +476,7 @@ public final class ZFighterPodTrip {
 	private static void showFlight(ServerPlayer player, Trip trip) {
 		int cost = ZFighterSpace.cost(trip.dest, trip.from);
 		trip.phase = Phase.FLIGHT;
-		trip.ticks = flightTicks(cost);
+		trip.ticks = Math.max(1, Math.round(flightTicks(cost) * trip.flightScale));
 		if (ZFighterSpace.skirtsHollow(ZFighterSpace.indexOf(trip.from), trip.dest)) {
 			// the Hollow's pull drags the pod off course: the trip runs long
 			trip.ticks = Math.round(trip.ticks * HOLLOW_STRETCH);
@@ -617,7 +635,10 @@ public final class ZFighterPodTrip {
 			}
 			if (to != null) {
 				trip.to = to.dimension();
-				trip.ground = groundAt(to, home.pos());
+				// a landing beacon: the pod comes down beside it
+				to.getChunk(home.pos().getX() >> 4, home.pos().getZ() >> 4);
+				BlockPos spot = to.getBlockState(home.pos()).is(PodBeacons.BLOCK) ? home.pos().east(PodBeacons.BESIDE) : home.pos();
+				trip.ground = groundAt(to, spot);
 			} else {
 				ServerLevel overworld = server.overworld();
 				trip.to = overworld.dimension();
@@ -637,7 +658,7 @@ public final class ZFighterPodTrip {
 			to = server.overworld();
 		}
 		trip.to = to.dimension();
-		trip.ground = ground(to, dest);
+		trip.ground = ground(to, dest, player);
 	}
 
 	/** {@code pos} if you can stand there, otherwise the open ground at its column. */
@@ -655,8 +676,13 @@ public final class ZFighterPodTrip {
 	}
 
 	/** Open ground anywhere on a far world: a random flat dry spot (a cave floor on Cinder, a wreck's deck in the Maw). */
-	private static BlockPos ground(ServerLevel level, ZFighterSpace.Dest dest) {
+	private static BlockPos ground(ServerLevel level, ZFighterSpace.Dest dest, ServerPlayer player) {
 		RandomSource random = level.getRandom();
+		// where the pilot last lifted off from this world, unless they asked for somewhere new
+		BlockPos marked = PodMarks.landing(level, dest, player);
+		if (marked != null) {
+			return marked;
+		}
 		if (dest.kind() == ZFighterSpace.Kind.WRECKS) {
 			MawWorld.build(level);
 			List<BlockPos> decks = MawWorld.decks();
@@ -741,9 +767,12 @@ public final class ZFighterPodTrip {
 		level.playSound(null, at, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.6F, 0.6F);
 		level.playSound(null, at, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.7F);
 		Shakes.send(player, 0.6F, Vec3.atCenterOf(at));
-		if (!pod.complete() || trip.battered) {
+		// no landing legs: the fins, bell, tank and mast are torn off and the tank is empty, instead of a hard landing
+		boolean torn = PodLegs.tearOff(level, pod, player);
+		if (!torn && (!pod.complete() || trip.battered)) {
 			hardLanding(level, player, guest, pod);
 		}
+		PodScanner.wind(player, pod);
 		ZFighterSpace.Dest dest = trip.dest == ZFighterSpace.HOME_INDEX ? null : ZFighterSpace.DESTS[trip.dest];
 		if (trip.dest == ZFighterSpace.HOME_INDEX) {
 			// (0.18.52) a pod flown out and landed home again: the deed that opens Dread
@@ -792,9 +821,11 @@ public final class ZFighterPodTrip {
 		int shaken = SHAKEN_MIN + random.nextInt(SHAKEN_MAX - SHAKEN_MIN + 1);
 		for (int i = 0; i < shaken && !loose.isEmpty(); i++) {
 			boolean[] was = new boolean[1];
-			PodPart part = pod.detach(loose.remove(random.nextInt(loose.size())), was);
+			int bit = loose.remove(random.nextInt(loose.size()));
+			int forged = pod.forgedAt(bit);
+			PodPart part = pod.detach(bit, was);
 			if (part != null) {
-				ItemStack stack = PodParts.itemOf(part, was[0]);
+				ItemStack stack = PodParts.stackOf(part, was[0], 0, forged, com.jaymospowers.power.zfighter.pod.PodModules.FEWEST_SOCKETS);
 				Block.popResource(level, pod.blockPosition().above(), stack);
 			}
 		}
@@ -809,6 +840,9 @@ public final class ZFighterPodTrip {
 		pod.setFinished(trip.finished);
 		pod.setGrade(trip.grade);
 		pod.setLens(trip.lens);
+		if (trip.extras != null) {
+			pod.applyExtras(trip.extras);
+		}
 		pod.setFuel(fuel);
 		return pod;
 	}

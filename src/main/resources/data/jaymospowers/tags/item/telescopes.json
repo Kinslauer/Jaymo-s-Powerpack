@@ -1,0 +1,6 @@
+{
+  "values": [
+    "minecraft:spyglass",
+    {"id": "jaymoskingdoms:telescope", "required": false}
+  ]
+}

@@ -74,6 +74,16 @@ CUBES = [
     ("grade_1", "brass", 9, 4, 9, 4, 1, 4), ("grade_1", "brass", -13, 4, 9, 4, 1, 4), ("grade_1", "brass", 9, 4, -13, 4, 1, 4), ("grade_1", "brass", -13, 4, -13, 4, 1, 4),
     ("grade_2", "brass", 9, 6, 9, 4, 1, 4), ("grade_2", "brass", -13, 6, 9, 4, 1, 4), ("grade_2", "brass", 9, 6, -13, 4, 1, 4), ("grade_2", "brass", -13, 6, -13, 4, 1, 4),
     ("grade_3", "brass", 9, 8, 9, 4, 1, 4), ("grade_3", "brass", -13, 8, 9, 4, 1, 4), ("grade_3", "brass", 9, 8, -13, 4, 1, 4), ("grade_3", "brass", -13, 8, -13, 4, 1, 4),
+    # the fitted modules, each drawn at a socket on the hull's upper side (PodRenderer moves them to the socket); the landing legs are the fins
+    ("mod_hold", "iron", -3, 0, -2, 6, 4, 4),
+    ("mod_seat", "brass", -2, 0, -2, 4, 5, 4),
+    ("mod_extra_tank", "brass_band", -2, 0, -2, 4, 8, 4),
+    ("mod_kick_stage", "brass", -2, 0, -2, 4, 3, 4), ("mod_kick_stage", "iron", -1, 3, -1, 2, 2, 2),
+    ("mod_scanner", "iron", -1, 0, -1, 2, 4, 2), ("mod_scanner", "beacon", -2, 4, -2, 4, 1, 4),
+    ("mod_ki_cannon", "iron", -2, 0, -2, 4, 4, 4), ("mod_ki_cannon", "red", -1, 4, -1, 2, 3, 2),
+    ("mod_shield", "iron", -2, 0, -1, 4, 7, 2), ("mod_shield", "brass", -1, 7, -1, 2, 1, 2),
+    ("mod_mining_beam", "iron", -2, 0, -2, 4, 3, 4), ("mod_mining_beam", "red", -1, 3, -1, 2, 4, 2),
+    ("mod_tow_line", "brass", -1, 0, -1, 2, 6, 2), ("mod_tow_line", "iron", -2, 6, -2, 4, 2, 4),
 ]
 
 
@@ -97,7 +107,7 @@ def face(img, x, y, w, h, c, edge=True):
 MATERIALS = {
     "iron": IRON, "brass": BRASS, "brass_band": BRASS, "bone": BONE, "bone_front": BONE, "bone_right": BONE,
     "bone_back": BONE, "bone_left": BONE,
-    "glass": GLASS, "scorch": SCORCH, "beacon": BEACON,
+    "glass": GLASS, "scorch": SCORCH, "beacon": BEACON, "red": RED,
 }
 
 

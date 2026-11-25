@@ -5,6 +5,7 @@ import com.jaymospowers.power.zfighter.ZFighterAtlas;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
 import com.jaymospowers.power.zfighter.ZFighterSpaceMissions;
 import com.jaymospowers.power.zfighter.fuel.PodFuel;
+import com.jaymospowers.power.zfighter.pod.PodClass;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -61,6 +62,11 @@ public class ZFighterStarMapScreen extends Screen {
 		ZFighterSpace.GIANT, ZFighterSpace.VERDANT, ZFighterSpace.MAW};
 
 	private final int fuel;
+	/** The tank's size, the return stages packed, the pod's class, the worlds with a remembered landing, and whether the next landing is to be somewhere new. */
+	private final int maxFuel, stages, clazz, marked;
+	private boolean newSpot;
+	/** What a trip from here to each world burns (the last: home), and what the way home from each world burns. */
+	private final List<Integer> there, back;
 	/** (0.18.50) The grade of the fuel in the tank (0: empty). */
 	private final int grade;
 	/** (0.18.53) The star charts read: bit w is destination w. */
@@ -69,16 +75,23 @@ public class ZFighterStarMapScreen extends Screen {
 	private float scale = 1.0F;
 	private int ox, oy;
 
-	public ZFighterStarMapScreen(int fuel, int grade, int read) {
+	public ZFighterStarMapScreen(ZFighterSpace.Open open) {
 		super(Component.translatable("screen.jaymospowers.zfighter_space"));
-		this.fuel = fuel;
-		this.grade = grade;
-		this.read = read;
+		this.fuel = open.fuel();
+		this.maxFuel = open.maxFuel();
+		this.grade = open.grade();
+		this.read = open.read();
+		this.stages = open.stages();
+		this.clazz = open.clazz();
+		this.marked = open.marked();
+		this.newSpot = (open.flags() & ZFighterSpace.Open.NEW_SPOT) != 0;
+		this.there = open.there();
+		this.back = open.back();
 	}
 
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(ZFighterSpace.Open.TYPE,
-			(payload, ctx) -> ctx.client().gui.setScreen(new ZFighterStarMapScreen(payload.fuel(), payload.grade(), payload.read())));
+			(payload, ctx) -> ctx.client().gui.setScreen(new ZFighterStarMapScreen(payload)));
 	}
 
 	@Override
@@ -208,6 +221,9 @@ public class ZFighterStarMapScreen extends Screen {
 		if (index != ZFighterSpace.HOME_INDEX && isHere(player, index)) {
 			return Component.translatable("screen.jaymospowers.zfighter_space.you_are_here");
 		}
+		if (needsStage(player) && !player.isCreative() && this.stages < 1) {
+			return Component.translatable("screen.jaymospowers.zfighter_space.no_stage");
+		}
 		int cost = cost(player, index);
 		if (this.fuel < cost) {
 			return Component.translatable("screen.jaymospowers.zfighter_space.short", cost - this.fuel);
@@ -223,8 +239,17 @@ public class ZFighterStarMapScreen extends Screen {
 		return !player.isCreative() && this.grade < PodFuel.needed(index);
 	}
 
+	/** Lifting off from a far world takes a return stage. */
+	private boolean needsStage(LocalPlayer player) {
+		return ZFighterSpace.needsStage(player.level().dimension());
+	}
+
 	private int cost(LocalPlayer player, int index) {
-		return player.isCreative() ? 0 : ZFighterSpace.cost(index, player.level().dimension());
+		if (player.isCreative()) {
+			return 0;
+		}
+		int at = index == ZFighterSpace.HOME_INDEX ? this.there.size() - 1 : index;
+		return at >= 0 && at < this.there.size() ? this.there.get(at) : ZFighterSpace.cost(index, player.level().dimension());
 	}
 
 	private Component status(int index, ZFighterSpaceMissions.Data data) {
@@ -275,9 +300,9 @@ public class ZFighterStarMapScreen extends Screen {
 
 	private void fuelGauge(GuiGraphicsExtractor graphics) {
 		int right = PANEL_W - 8;
-		UiStyle.lineRight(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.fuel_grade", this.fuel, ZFighterSpace.MAX_FUEL,
+		UiStyle.lineRight(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.fuel_grade", this.fuel, this.maxFuel,
 			PodFuel.roman(this.grade)), right, 7, 96, GOLD);
-		UiStyle.bar(graphics, right - 96, 19, 96, 5, this.fuel / (float)ZFighterSpace.MAX_FUEL, 0xFFFF9A30);
+		UiStyle.bar(graphics, right - 96, 19, 96, 5, this.fuel / (float)this.maxFuel, 0xFFFF9A30);
 	}
 
 	private void map(GuiGraphicsExtractor graphics, LocalPlayer player, double mx, double my, boolean dark) {
@@ -385,6 +410,24 @@ public class ZFighterStarMapScreen extends Screen {
 				ty += 10;
 			}
 		}
+		if (index == ZFighterSpace.HOME_INDEX && !dark) {
+			UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.pod_class", PodClass.values()[Math.max(0, Math.min(this.clazz, PodClass.values().length - 1))].displayName()), x + 2, ty, w - 6,
+				UiStyle.DIM);
+			ty += 10;
+		}
+		if (index != ZFighterSpace.HOME_INDEX && !here && !dark && index < this.back.size()) {
+			// what it takes to lift off again from there: fuel for the way home, and a return stage
+			int home = player.isCreative() ? 0 : this.back.get(index);
+			int need = cost(player, index) + home;
+			boolean shortFuel = this.maxFuel < need;
+			UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.back", home, player.isCreative() ? 0 : 1, this.stages),
+				x + 2, ty, w - 6, !player.isCreative() && (this.stages < 1 || this.fuel < need) ? RED : UiStyle.DIM);
+			ty += 10;
+			if (shortFuel) {
+				UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.back_tank", need), x + 2, ty, w - 6, RED);
+				ty += 10;
+			}
+		}
 		List<Component> titles = ZFighterSpaceMissions.titles(player);
 		if (!titles.isEmpty() && index == ZFighterSpace.HOME_INDEX) {
 			StringBuilder joined = new StringBuilder();
@@ -399,6 +442,10 @@ public class ZFighterStarMapScreen extends Screen {
 		if (here && planet >= 0 && !data.settled(planet)) {
 			boolean running = ZFighterSpaceMissions.mode(data.of(planet)) != 0;
 			button(graphics, mbox, Component.translatable(running ? "screen.jaymospowers.zfighter_space.abandon" : "screen.jaymospowers.zfighter_space.begin"),
+				true, UiStyle.over((int)mx, (int)my, mbox[0], mbox[1], mbox[2], mbox[3]));
+		}
+		if (!here && index != ZFighterSpace.HOME_INDEX && index >= 0 && (this.marked & 1 << index) != 0) {
+			button(graphics, mbox, Component.translatable(this.newSpot ? "screen.jaymospowers.zfighter_space.spot_new" : "screen.jaymospowers.zfighter_space.spot_marked"),
 				true, UiStyle.over((int)mx, (int)my, mbox[0], mbox[1], mbox[2], mbox[3]));
 		}
 		// the fuel and the launch
@@ -445,6 +492,12 @@ public class ZFighterStarMapScreen extends Screen {
 			return true;
 		}
 		int[] mbox = missionBox();
+		if (UiStyle.over((int)mx, (int)my, mbox[0], mbox[1], mbox[2], mbox[3]) && !isHere(player, this.picked) && this.picked >= 0 && (this.marked & 1 << this.picked) != 0) {
+			this.newSpot = !this.newSpot;
+			click(1.0F);
+			ClientPlayNetworking.send(new ZFighterSpace.Command(ZFighterSpace.TOGGLE_SPOT, 0));
+			return true;
+		}
 		int planet = this.picked == ZFighterSpace.HOME_INDEX ? -1 : ZFighterSpaceMissions.planetAt(this.picked);
 		if (UiStyle.over((int)mx, (int)my, mbox[0], mbox[1], mbox[2], mbox[3]) && planet >= 0 && isHere(player, this.picked)) {
 			ZFighterSpaceMissions.Data data = ZFighterSpaceMissions.of(player);

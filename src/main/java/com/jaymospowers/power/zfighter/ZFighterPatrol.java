@@ -576,6 +576,8 @@ public final class ZFighterPatrol {
 	/** A pod nobody can take (0.18.49: a complete pod entity, locked by {@link #POD_TAG}). */
 	static PodEntity pod(ServerLevel level, Vec3 at) {
 		PodEntity pod = PodEntity.spawn(level, at, true, ZFighterSpace.MAX_FUEL);
+		// a Patrol keel has every socket
+		pod.setSockets(com.jaymospowers.power.zfighter.pod.PodModules.MOST_SOCKETS);
 		pod.addTag(POD_TAG);
 		return pod;
 	}
@@ -921,6 +923,12 @@ public final class ZFighterPatrol {
 					ZFighterPatrolRelief.of(player).done()),
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		}
+		// a pinch of stardust for one line of hint about the sky
+		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.stardust", com.jaymospowers.power.zfighter.pod.PodStardust.has(player), () -> {
+			Component hint = com.jaymospowers.power.zfighter.pod.PodStardust.hint(player);
+			ZFighterNpcs.ask(player, man, hint == null ? Component.translatable("talk.jaymospowers.stardust.none") : hint,
+				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
+		}));
 		ZFighterNpcs.ask(player, man, words, options);
 	}
 
@@ -966,7 +974,8 @@ public final class ZFighterPatrol {
 		player.setAttached(MEMBER, new Member(0, 0L));
 		ServerLevel level = player.level();
 		// (0.18.49) a pod is no longer an item: a complete one, full of fuel, is set down beside the new officer
-		PodEntity.spawn(level, ZFighterPodTrip.roomFor(level, player.blockPosition()), true, ZFighterSpace.MAX_FUEL);
+		PodEntity.spawn(level, ZFighterPodTrip.roomFor(level, player.blockPosition()), true, ZFighterSpace.MAX_FUEL)
+			.setSockets(com.jaymospowers.power.zfighter.pod.PodModules.MOST_SOCKETS);
 		ZFighterSagas.give(player, new ItemStack(LICENSE));
 		// (0.18.53) and the chart of Rustfall, where the Patrol's work is
 		ZFighterSagas.give(player, com.jaymospowers.power.zfighter.sky.Charts.stack(ZFighterSpace.RUSTFALL));
