@@ -49,6 +49,35 @@ public final class Winds {
 		return new Vec3(Math.cos(a), 0.0, Math.sin(a));
 	}
 
+	/** Powers' {@code HotAirBalloon.wind(Level, x, y, z)}: the wind by height with its gusts (null before it's looked up, or without Powers). */
+	private static java.lang.invoke.@org.jspecify.annotations.Nullable MethodHandle layered;
+	private static boolean lookedForLayers;
+
+	/**
+	 * The wind a balloon feels at a place: a different way at each height, harder in gusts. It is Jaymo's Powers' own balloon
+	 * wind ({@code rough.HotAirBalloon}), read by reflection so airships, ferries and balloons share one sky; without Powers it
+	 * is the sea's wind ({@link #way}).
+	 */
+	public static Vec3 aloft(Level level, double x, double y, double z) {
+		if (!lookedForLayers) {
+			lookedForLayers = true;
+			try {
+				layered = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.rough.HotAirBalloon"), "wind",
+					java.lang.invoke.MethodType.methodType(Vec3.class, Level.class, double.class, double.class, double.class));
+			} catch (ReflectiveOperationException e) {
+				layered = null;
+			}
+		}
+		if (layered != null) {
+			try {
+				return (Vec3) layered.invoke(level, x, y, z);
+			} catch (Throwable e) {
+				layered = null;
+			}
+		}
+		return way();
+	}
+
 	/** The angle (degrees, 0 to 180) between a ship heading {@code yaw} and the way the wind blows. */
 	public static float offWind(float yaw) {
 		double fx = -Mth.sin(yaw * Mth.DEG_TO_RAD), fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
