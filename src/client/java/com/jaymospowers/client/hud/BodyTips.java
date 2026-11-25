@@ -18,7 +18,7 @@ import net.minecraft.world.phys.EntityHitResult;
  * comes up, one {@link TipCard} says how it works: someone down in front of you (the body menu on a tap of use, the drag on
  * a hold, the revive), someone you could execute (a hold of attack), someone you stand behind unseen with a weapon in hand
  * (the stealth kill), a lasso in your hand (throw, hogtie, then the menu),
- * yourself downed (getting up), and yourself downed with a wall beside you (sitting up against it and rising up it). Each
+ * a live maggot (taken for bait with a tap of use), yourself downed (getting up), and yourself downed with a wall beside you (sitting up against it and rising up it). Each
  * is shown once per player, flagged {@code body_tip.<player uuid>.<part>} in {@code config/jaymospowers-client.properties};
  * one waits until the card before it is gone, as {@link UiTips}' do. Keys are named by their bindings.
  */
@@ -27,6 +27,8 @@ public final class BodyTips {
 	static final int EVERY = 10, SETTLE_TICKS = 200;
 	/** The lasso, by its item id (Jaymo's Kingdoms). */
 	private static final String LASSO = "jaymoskingdoms:lasso";
+	/** The maggot at a body, by its entity id (Jaymo's Kingdoms). */
+	private static final String MAGGOT = "jaymoskingdoms:maggot";
 
 	private BodyTips() {
 	}
@@ -69,6 +71,10 @@ public final class BodyTips {
 			}
 			if (!shown(player, "stealth_kill") && Finishers.stealthKillable(player, body)) {
 				offer(player, "stealth_kill", key("key.sneak"), key("key.attack"));
+				return;
+			}
+			if (!shown(player, "maggot") && MAGGOT.equals(BuiltInRegistries.ENTITY_TYPE.getKey(body.getType()).toString())) {
+				offer(player, "maggot", key("key.use"));
 				return;
 			}
 		}
