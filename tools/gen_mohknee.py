@@ -9,9 +9,6 @@ import json
 import os
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'kingdoms', 'src', 'main', 'resources', 'data')
-# continents, erosion and ridges live in a built-in pack that Jaymo's Kingdoms leaves out when Tectonic is loaded
-SHAPE = os.path.join(ROOT, '..', 'resourcepacks', 'continent_shape', 'data')
-SHAPE_FILES = ('continents.json', 'erosion.json', 'ridges.json')
 
 # ---- tuning (mirrored in Mohknee.java) ----
 CENTRE = (28000, 0)        # the land's middle (block x, z): due east of the world's origin
@@ -45,8 +42,7 @@ def ref(name):
 
 
 def write(path, obj):
-    shape = path.startswith('minecraft/worldgen/density_function/overworld/') and path.endswith(SHAPE_FILES)
-    path = os.path.join(SHAPE if shape else ROOT, path)
+    path = os.path.join(ROOT, path)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', newline='\n') as f:
         json.dump(obj, f, indent=2)
