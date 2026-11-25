@@ -332,6 +332,8 @@ public final class WebSymbiote {
 	 * for {@code SLINGER_FIGHT_MAX} ticks at the most (WebSymbioteInfection ends it sooner, into the slinger).
 	 */
 	public static final int SLINGER_FIGHT_MAX = 3600;
+	/** Ticks past a slinger fight's end that its slinger is still remembered (for WebSymbioteInfection to take over). */
+	public static final long SLINGER_FOE_GRACE = 40L;
 	public static final int TAKEOVER_LIMIT = 1200;
 	public static final int TAKEOVER_RELIEF = 20;
 	/** The hold is told to the client again this many ticks before it would run out. */
@@ -1127,7 +1129,7 @@ public final class WebSymbiote {
 		boolean slingerFight;
 		long slingerFightUntil;
 		/** The web slinger it was sent at, kept until {@link WebSymbioteInfection} has dealt with the fight's end. */
-		@org.jspecify.annotations.Nullable java.util.UUID slingerId;
+		java.util.@org.jspecify.annotations.Nullable UUID slingerId;
 		boolean suitBeforeTakeover;
 		/** Living Armor: when it came out, and when it was last used (see ARMOR_IDLE_TICKS). */
 		long armorOnAt;
@@ -2670,12 +2672,12 @@ public final class WebSymbiote {
 	 * The web slinger it is fighting through {@code host}, or null. It lives in the Live state (so it goes with it), and
 	 * is dropped once the fight's time is well past, so an old fight can't send a later bond after them.
 	 */
-	static @org.jspecify.annotations.Nullable java.util.UUID slingerFoe(ServerPlayer host) {
+	static java.util.@org.jspecify.annotations.Nullable UUID slingerFoe(ServerPlayer host) {
 		Live live = host.getAttached(LIVE);
 		if (live == null || live.slingerId == null) {
 			return null;
 		}
-		if (host.level().getGameTime() > live.slingerFightUntil + 40L) {
+		if (host.level().getGameTime() > live.slingerFightUntil + SLINGER_FOE_GRACE) {
 			live.slingerId = null;
 		}
 		return live.slingerId;
@@ -3924,12 +3926,13 @@ public final class WebSymbiote {
 			return;
 		}
 		if (live.slingerFight && (now >= live.slingerFightUntil || target == null || !target.isAlive()
-			|| target.distanceTo(player) > WebSymbioteInfection.WEB_SENSE_RANGE)) {
+			|| target.distanceTo(player) > WebSymbioteInfection.WEB_SENSE_RANGE || Powers.has(player, WebPower.INSTANCE))) {
 			// the fight with the slinger is over (never a kill to feed on: WebSymbioteInfection takes it from here)
 			endTakeover(player, live);
 			return;
 		}
-		if (target == null || !target.isAlive() || target.distanceTo(player) > (live.redHunt ? WebRedHunt.RANGE : TAKEOVER_ESCAPE)) {
+		if (target == null || !target.isAlive() || target.distanceTo(player)
+			> (live.slingerFight ? WebSymbioteInfection.WEB_SENSE_RANGE : live.redHunt ? WebRedHunt.RANGE : TAKEOVER_ESCAPE)) {
 			boolean dead = target != null && !target.isAlive();
 			if (dead && live.hunting && live.feedStage == FEED_KILL) {
 				// the hunt's kill: on to the corpse, still at the wheel
