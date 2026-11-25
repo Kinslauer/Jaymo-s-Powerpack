@@ -313,6 +313,28 @@ public final class WebTendrilCombos {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.4F);
 	}
 
+	/**
+	 * The clap without a click (the two-foe reflex, {@link WebSlamReflex}): both tendrils hold a creature and have reached
+	 * it, and the clap begins as {@link #attack} would begin it. False if they don't yet (or it's already under way).
+	 */
+	static boolean startClap(ServerPlayer player) {
+		if (active(player) || WebTendrils.crossing(player) || !WebTendrils.reached(player, WebNet.MAIN) || !WebTendrils.reached(player, WebNet.OFF)) {
+			return false;
+		}
+		WebTendrils.Grips grips = player.getAttachedOrElse(WebTendrils.GRIPS, WebTendrils.Grips.NONE);
+		ServerLevel level = player.level();
+		Entity main = grips.right() < 0 ? null : level.getEntity(grips.right());
+		Entity off = grips.left() < 0 ? null : level.getEntity(grips.left());
+		if (!creature(main) || !creature(off)) {
+			return false;
+		}
+		player.setAttached(WebTendrils.COMBO, new WebTendrils.Combo(CLAP, level.getGameTime(), main.getId(), off.getId()));
+		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.2F, 0.4F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.4F);
+		return true;
+	}
+
 	private static boolean validTarget(ServerPlayer player, LivingEntity target) {
 		if (target == player || !target.isAlive() || target.isSpectator() || target.level() != player.level()) {
 			return false;

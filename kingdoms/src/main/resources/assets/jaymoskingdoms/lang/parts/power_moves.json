@@ -20,5 +20,13 @@
   "spell.jaymoskingdoms.move_consume.name": "Consume",
   "spell.jaymoskingdoms.move_consume.description": "Symbiote. It feeds on a corpse, as from the X menu.",
   "spell.jaymoskingdoms.move_shroud.name": "Shroud",
-  "spell.jaymoskingdoms.move_shroud.description": "Symbiote. You go unseen until you strike, as from the X menu."
+  "spell.jaymoskingdoms.move_shroud.description": "Symbiote. The Shroud tile of the X menu: the black one hardens into a Carapace, the white one raises an Aegis (from the Integrated stage), the red one goes unseen until it strikes.",
+  "spell.jaymoskingdoms.move_lash.name": "Tendril Lash",
+  "spell.jaymoskingdoms.move_lash.description": "Symbiote. The tendrils sweep round you and whip every enemy in reach once; harder with the bond's stage.",
+  "spell.jaymoskingdoms.move_rupture.name": "Rupture",
+  "spell.jaymoskingdoms.move_rupture.description": "Symbiote, red strain, suited. Leap onto prey in reach, pin it and stab it through; what it kills, it carries and feeds on.",
+  "spell.jaymoskingdoms.move_nightstep.name": "Nightstep",
+  "spell.jaymoskingdoms.move_nightstep.description": "Symbiote, black strain, suited. In the dark, step from shadow to shadow a few blocks off; further at night.",
+  "spell.jaymoskingdoms.move_onslaught.name": "Crowned Onslaught",
+  "spell.jaymoskingdoms.move_onslaught.description": "Symbiote, whole bond, big suit. Tendrils rise round the head and strike in volleys of two for several seconds; spends fury."
 }

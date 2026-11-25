@@ -387,6 +387,11 @@ public final class WebPower implements Power {
 		WebSymbioteTalk.register();
 		WebMeeting.register();
 		WebFury.register();
+		WebCarapace.register();
+		WebAegis.register();
+		WebRupture.register();
+		WebOnslaught.register();
+		WebSlamReflex.register();
 		WebGoo.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.WingsBrake.TYPE, (payload, ctx) -> INSTANCE.onWingsBrake(ctx.player(), payload.on()));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {

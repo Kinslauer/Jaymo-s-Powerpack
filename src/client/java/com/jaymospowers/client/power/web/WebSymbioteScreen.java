@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.web;
 
+import com.jaymospowers.power.web.WebLash;
 import com.jaymospowers.power.web.WebNet;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.web.WebSymbioteCollect;
@@ -72,8 +73,8 @@ final class WebSymbioteScreen extends Screen {
 	 * The extra chips along the top inside the ring, shown only while they can be used: Wings (a whole bond), Burst (the
 	 * anti strain) and Steed (on a horse). Their pick values, lang names, and the row's top (offset from the centre).
 	 */
-	private static final int[] EXTRAS = {WebSymbiote.WINGS_TOGGLE, WebSymbiote.CLEANSE, WebSymbiote.STEED_TOGGLE};
-	private static final String[] EXTRA_NAMES = {"wings", "cleanse", "steed"};
+	private static final int[] EXTRAS = {WebSymbiote.WINGS_TOGGLE, WebSymbiote.CLEANSE, WebSymbiote.STEED_TOGGLE, WebSymbiote.LASH};
+	private static final String[] EXTRA_NAMES = {"wings", "cleanse", "steed", "lash"};
 	private static final int EXTRA_Y = -50, EXTRA_H = 11, EXTRA_GAP = 3;
 
 	private int selected = -1;
@@ -235,7 +236,7 @@ final class WebSymbioteScreen extends Screen {
 			boolean on = suit ? form > WebSymbiote.FORM_SKIN : i == WebSymbiote.CRAWL && state.has(WebSymbioteState.CRAWL);
 			boolean picked = i == selected;
 			UiStyle.wheelTile(graphics, x, y, TILE, slot, picked, picked ? ACCENT : ready && affordable ? 0x60FFFFFF : UiStyle.ROW_ALT);
-			graphics.item(new ItemStack(ICONS[i]), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
+			graphics.item(new ItemStack(i == WebSymbiote.SHROUD ? shroudIcon(player) : ICONS[i]), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
 			if (!ready) {
 				int shade = (int)Math.ceil((TILE - 2) * Math.min(1.0, left / (double)WebSymbiote.COOLDOWN[i]));
 				graphics.fill(x + 1, y + 1 + (TILE - 2) - shade, x + TILE - 1, y + TILE - 1, 0xB0000000);
@@ -322,7 +323,7 @@ final class WebSymbioteScreen extends Screen {
 		} else if (selected >= 0) {
 			// in the big body, the Spike Burst is a roar
 			String key = selected >= WebSymbiote.ABILITIES ? chipName(selected)
-				: selected == WebSymbiote.SPIKES && WebSymbiote.bulked(player) ? "roar" : NAMES[selected];
+				: selected == WebSymbiote.SPIKES && WebSymbiote.bulked(player) ? "roar" : selected == WebSymbiote.SHROUD ? shroudName(player) : NAMES[selected];
 			name = Component.translatable("ability.jaymospowers.web_symbiote." + key);
 			UiStyle.lineCentred(graphics, font, name, cx, cy + NAME_Y, 2 * INNER - 24, UiStyle.TEXT);
 		}
@@ -346,7 +347,7 @@ final class WebSymbioteScreen extends Screen {
 	/** The extra chips that can be used now, each {pick, x, y, width}, centred as a row along the top of the ring. */
 	private int[][] extras(final LocalPlayer player, final int cx, final int cy) {
 		boolean[] shown = {WebSymbioteWings.available(player) || WebSymbioteWings.out(player), WebSymbioteCleanse.available(player),
-			WebSymbioteSteed.available(player)};
+			WebSymbioteSteed.available(player), WebSymbiote.tendrilsUnlocked(player)};
 		int[] widths = new int[EXTRAS.length];
 		int total = -EXTRA_GAP, count = 0;
 		for (int i = 0; i < EXTRAS.length; i++) {
@@ -365,6 +366,24 @@ final class WebSymbioteScreen extends Screen {
 			}
 		}
 		return out;
+	}
+
+	/** The Shroud tile's icon by strain: the black one's Carapace (a scute), the white one's Aegis (a shield), the red one's Shroud (ink). */
+	private static Item shroudIcon(final LocalPlayer player) {
+		return switch (WebSymbiote.state(player).kind()) {
+			case BLACK -> Items.TURTLE_SCUTE;
+			case WHITE -> Items.SHIELD;
+			default -> ICONS[WebSymbiote.SHROUD];
+		};
+	}
+
+	/** The Shroud tile's name key by strain ({@code carapace}, {@code aegis}, {@code shroud}). */
+	private static String shroudName(final LocalPlayer player) {
+		return switch (WebSymbiote.state(player).kind()) {
+			case BLACK -> "carapace";
+			case WHITE -> "aegis";
+			default -> "shroud";
+		};
 	}
 
 	private static String extraName(final int pick) {
@@ -422,6 +441,17 @@ final class WebSymbioteScreen extends Screen {
 			}
 			return Component.translatable(state.satiety() < WebSymbioteCleanse.COST && !player.isCreative() ? "gui.jaymospowers.web_symbiote.hungry"
 				: "gui.jaymospowers.web_symbiote.cleanse_ready", WebSymbioteCleanse.COST);
+		}
+		if (selected == WebSymbiote.LASH) {
+			if (!WebSymbiote.tendrilsUnlocked(player)) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.tendrils_locked");
+			}
+			long left = cooldowns.end(WebSymbiote.LASH) - now;
+			if (left > 0) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
+			}
+			return Component.translatable(state.satiety() < WebLash.COST && !player.isCreative() ? "gui.jaymospowers.web_symbiote.hungry"
+				: "gui.jaymospowers.web_symbiote.lash_ready", WebLash.COST);
 		}
 		if (selected == WebSymbiote.STEED_TOGGLE) {
 			return Component.translatable(WebSymbioteSteed.riding(player) ? "gui.jaymospowers.web_symbiote.steed_out" : "gui.jaymospowers.web_symbiote.steed_in");

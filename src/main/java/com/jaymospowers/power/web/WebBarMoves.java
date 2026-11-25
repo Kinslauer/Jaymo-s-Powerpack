@@ -4,6 +4,7 @@ import com.jaymospowers.combat.HitStreak;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.finisher.Finishers;
 import com.jaymospowers.core.wounds.Downed;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,25 +20,26 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.21.25) Andy: "can all of web's unarmed moves go to the bar? symbiote included?" Web's bare-handed moves on the RPG
  * skill bar ({@code combat/Takedowns#moves}, shown with an empty hand while locked on), in a fixed order so a slot keeps
- * its key. Nine keys at most:
+ * its key. Ten keys, and more while a strain or form opens them:
  * <ul>
  * <li>Any web slinger: Takedown, Finish (a downed foe: a plain finish mid-streak, or one of the symbiote's executions
  * while suited), Counter (in Spider-Sense's window after a dodge).</li>
  * <li>Without the symbiote: Webbed Fists.</li>
  * <li>Bonded: Weapon Arm (it forms and strikes at the foe), Grab (seize a foe up to a cow's size in the hand; holding
- * one, maul it; the tendrils full, a combo), and the radial's fighting picks: Tendril, Spikes, Consume, Shroud. The Suit
+ * one, maul it; the tendrils full, a combo), and the radial's fighting picks: Tendril, Spikes, Consume, Shroud (Carapace for the black one, Aegis for the white), and Lash (the sweep). Then, while open: Nightstep (black, suited), Rupture (red, suited), the crowned onslaught (whole bond, big suit). The Suit
  * and Wall Crawl stay on X.</li>
  * </ul>
  * Each goes at the lock-on foe, else the one in sights, by the same checks as its own key.
  */
 public final class WebBarMoves {
 	public static final String TAKEDOWN = "takedown", FINISH = "finish", COUNTER = "counter", FISTS = "fists", ARM = "arm", GRAB = "grab",
-		TENDRIL = "tendril", SPIKES = "spikes", CONSUME = "consume", SHROUD = "shroud";
+		TENDRIL = "tendril", SPIKES = "spikes", CONSUME = "consume", SHROUD = "shroud", LASH = "lash",
+		NIGHTSTEP = "nightstep", RUPTURE = "rupture", ONSLAUGHT = "onslaught";
 	/** A finish reaches this far (blocks, past half the body's width). */
 	static final double FINISH_REACH = 3.5;
 
 	private static final List<String> PLAIN = List.of(TAKEDOWN, FINISH, COUNTER, FISTS);
-	private static final List<String> BONDED = List.of(TAKEDOWN, FINISH, COUNTER, ARM, GRAB, TENDRIL, SPIKES, CONSUME, SHROUD);
+	private static final List<String> BONDED = List.of(TAKEDOWN, FINISH, COUNTER, ARM, GRAB, TENDRIL, SPIKES, CONSUME, SHROUD, LASH);
 
 	private WebBarMoves() {
 	}
@@ -47,7 +49,22 @@ public final class WebBarMoves {
 		if (!Powers.has(player, WebPower.INSTANCE)) {
 			return List.of();
 		}
-		return WebSymbiote.isBonded(player) ? BONDED : PLAIN;
+		if (!WebSymbiote.isBonded(player)) {
+			return PLAIN;
+		}
+		// (the moves a strain or a form opens come after the fixed ones: Nightstep for the black one suited, Rupture for
+		// the red one suited, the crowned onslaught at a whole bond in the big suit)
+		List<String> out = new ArrayList<>(BONDED);
+		if (WebNightstep.available(player)) {
+			out.add(NIGHTSTEP);
+		}
+		if (WebRupture.available(player)) {
+			out.add(RUPTURE);
+		}
+		if (WebOnslaught.available(player)) {
+			out.add(ONSLAUGHT);
+		}
+		return out;
 	}
 
 	/** {@code move} from the bar at {@code target} (null: none in sights). False if it didn't go. */
@@ -110,6 +127,18 @@ public final class WebBarMoves {
 			case SHROUD -> {
 				WebSymbiote.use(player, WebSymbiote.SHROUD);
 				return true;
+			}
+			case LASH -> {
+				return WebLash.use(player);
+			}
+			case NIGHTSTEP -> {
+				return WebNightstep.use(player);
+			}
+			case RUPTURE -> {
+				return WebRupture.use(player, target);
+			}
+			case ONSLAUGHT -> {
+				return WebOnslaught.use(player);
 			}
 			default -> {
 				return false;
