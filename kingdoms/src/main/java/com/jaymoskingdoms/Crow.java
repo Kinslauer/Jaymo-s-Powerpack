@@ -1,7 +1,9 @@
 package com.jaymoskingdoms;
 
 import com.mojang.serialization.Codec;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -32,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -81,6 +84,17 @@ public final class Crow extends Parrot {
 	/** Between its calls (ticks; the parrot's is 80). */
 	static final int CALL_INTERVAL = 200;
 
+	// ---- tuning: a field flock ({@link FieldCrows}) ----
+	/** How far (blocks across, up and down) a flock crow looks for a crop to peck. */
+	static final int FIELD_REACH = 8, FIELD_REACH_UP = 3;
+	/** 1 in this many ticks a flock crow on the ground sets out to peck, and ticks between its pecks. */
+	static final int FIELD_PECK_ODDS = 30, FIELD_PECK_SPACING = 18;
+	/** A crow is full after this many pecks and leaves; a flock crow leaves for good after this many ticks in any case. */
+	static final int FIELD_FILL = 3, FIELD_LIFE = 9600;
+	/** The chance a crow goes for a crop a scarecrow guards, and how many times it turns back from one before it gives up the field. */
+	static final float BOLD_CHANCE = 0.12F;
+	static final int FIELD_SHY_LIMIT = 3;
+
 	private static final Codec<Map<String, Long>> FRIENDS = Codec.unboundedMap(Codec.STRING, Codec.LONG);
 	public static EntityType<Crow> TYPE;
 
@@ -89,6 +103,9 @@ public final class Crow extends Parrot {
 	private final Map<UUID, Long> friends = new HashMap<>();
 	private boolean leaving;
 	private int leftTicks;
+	/** One of a day's flock on open farmland ({@link FieldCrows}), not a hanging tree's: its pecks, how often it turned back from a guarded crop, its age. */
+	private boolean field;
+	private int fed, shy, fieldAge;
 	/** Set while the parrot's own step runs (it would copy a mob's voice), so nothing is said in it. */
 	private boolean mute;
 	private float nextFlap = 1.0F;
@@ -112,6 +129,15 @@ public final class Crow extends Parrot {
 		this.setPersistenceRequired();
 	}
 
+	/** One of a flock that has come down to the fields for the day: it has no tree, and goes at dusk or when it has had enough. */
+	void joinFlock() {
+		this.field = true;
+	}
+
+	boolean isFlock() {
+		return this.field;
+	}
+
 	// ---- goals ----
 
 	@Override
@@ -122,6 +148,7 @@ public final class Crow extends Parrot {
 		this.goalSelector.addGoal(3, new ComeForFood());
 		this.goalSelector.addGoal(4, new Bring());
 		this.goalSelector.addGoal(5, new Peck());
+		this.goalSelector.addGoal(5, new PeckCrops());
 		this.goalSelector.addGoal(6, new ReturnToPerch());
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
 	}
@@ -452,6 +479,106 @@ public final class Crow extends Parrot {
 		}
 	}
 
+	/**
+	 * A flock crow on open farmland by day: down beside a crop that has begun to grow and pecks it back a stage. A crop a
+	 * scarecrow guards is let alone (but for the odd bold bird), and a crow that keeps finding the scarecrow's fields turns
+	 * its flock elsewhere; a crow that has pecked its fill is gone.
+	 */
+	private final class PeckCrops extends Goal {
+		private @Nullable BlockPos crop;
+		private int age;
+
+		PeckCrops() {
+			this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+		}
+
+		@Override
+		public boolean canUse() {
+			if (!Crow.this.field || Crow.this.leaving || Crow.this.getRandom().nextInt(FIELD_PECK_ODDS) != 0 || Crow.this.stranger() != null) {
+				return false;
+			}
+			this.crop = Crow.this.pickCrop();
+			return this.crop != null;
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			BlockPos at = this.crop;
+			return at != null && !Crow.this.leaving && this.age < 400 && Crow.this.stranger() == null
+				&& Crow.this.level().getBlockState(at).getBlock() instanceof CropBlock block && block.getAge(Crow.this.level().getBlockState(at)) > 0;
+		}
+
+		@Override
+		public void start() {
+			this.age = 0;
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void tick() {
+			BlockPos at = this.crop;
+			if (at == null || !(Crow.this.level() instanceof ServerLevel level)) {
+				return;
+			}
+			this.age++;
+			Vec3 spot = new Vec3(at.getX() + 0.5, at.getY() + 0.1, at.getZ() + 0.5);
+			if (Crow.this.position().distanceToSqr(spot) > 1.8) {
+				Crow.this.flyTo(spot, 1.0);
+				return;
+			}
+			Crow.this.getNavigation().stop();
+			Crow.this.getLookControl().setLookAt(spot.x, spot.y, spot.z);
+			if (this.age % FIELD_PECK_SPACING == 0) {
+				BlockState state = level.getBlockState(at);
+				if (state.getBlock() instanceof CropBlock block && block.getAge(state) > 0) {
+					level.setBlock(at, block.getStateForAge(block.getAge(state) - 1), 3);
+					level.playSound(null, at, SoundEvents.CROP_BREAK, Crow.this.getSoundSource(), 0.5F, 1.5F);
+				}
+				if (++Crow.this.fed >= FIELD_FILL) {
+					Crow.this.leave();
+				}
+			}
+		}
+
+		@Override
+		public void stop() {
+			this.crop = null;
+		}
+	}
+
+	/** Starts flying off for good. */
+	private void leave() {
+		this.leaving = true;
+		this.leftTicks = 0;
+	}
+
+	/** A crop near it that has begun to grow and lies open to the sky, or null; a guarded one is left (but for a bold bird). */
+	private @Nullable BlockPos pickCrop() {
+		BlockPos here = this.blockPosition();
+		List<BlockPos> found = new ArrayList<>();
+		for (BlockPos at : BlockPos.betweenClosed(here.offset(-FIELD_REACH, -FIELD_REACH_UP, -FIELD_REACH), here.offset(FIELD_REACH, FIELD_REACH_UP, FIELD_REACH))) {
+			BlockState state = this.level().getBlockState(at);
+			if (state.getBlock() instanceof CropBlock block && block.getAge(state) > 0 && this.level().canSeeSky(at)) {
+				found.add(at.immutable());
+			}
+		}
+		if (found.isEmpty()) {
+			return null;
+		}
+		BlockPos pick = found.get(this.getRandom().nextInt(found.size()));
+		if (KitchenCompat.guardedFromCrows(this.level(), pick) && this.getRandom().nextFloat() >= BOLD_CHANCE) {
+			if (++this.shy >= FIELD_SHY_LIMIT) {
+				this.leave();
+			}
+			return null;
+		}
+		return pick;
+	}
+
 	/** Home to its perch when nothing else is asked of it. */
 	private final class ReturnToPerch extends Goal {
 		ReturnToPerch() {
@@ -490,8 +617,11 @@ public final class Crow extends Parrot {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
-		if (this.perch == null) {
+		if (this.perch == null && !this.field) {
 			this.perch = this.blockPosition();
+		}
+		if (this.field && !this.leaving && (++this.fieldAge > FIELD_LIFE || !FieldCrows.daylight(level))) {
+			this.leave();
 		}
 		if (this.leaving) {
 			this.leftTicks++;
@@ -613,6 +743,7 @@ public final class Crow extends Parrot {
 		this.friends.forEach((id, day) -> known.put(id.toString(), day));
 		output.store("Friends", FRIENDS, known);
 		output.putBoolean("Leaving", this.leaving);
+		output.putBoolean("Field", this.field);
 	}
 
 	@Override
@@ -629,5 +760,6 @@ public final class Crow extends Parrot {
 			}
 		});
 		this.leaving = input.getBooleanOr("Leaving", false);
+		this.field = input.getBooleanOr("Field", false);
 	}
 }

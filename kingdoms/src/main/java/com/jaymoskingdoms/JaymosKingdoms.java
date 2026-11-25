@@ -635,6 +635,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// village mods 6, small structures: the tree sites (the hollow oak's hermit, the lookout's bandits, the hanging
 		// tree's crows) and the changing maze under a necromancer's crypt (their attachments load with them)
 		TreeSites.register();
+		FieldCrows.register();
+		com.jaymoskingdoms.harvest.WickedHarvest.register();
 		CryptMaze.register();
 		// and the druids' cave gardens, tended while their druid lives
 		CaveGardens.register();
