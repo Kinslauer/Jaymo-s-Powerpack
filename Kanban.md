@@ -28,6 +28,7 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · 💻 Odysseus · claimed
+- [ ] [[Agents/claude-cloud-village-mods-7-9|claude-cloud-village-mods-7-9]] · 💻 Odysseus · running
 
 
 ## In review
