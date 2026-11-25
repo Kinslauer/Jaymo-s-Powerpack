@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,7 +33,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · 💻 Odysseus · claimed
-- [ ] [[Agents/gravity-magnetism|gravity-magnetism]] · 💻 Odysseus · running
+- [ ] [[Agents/gravity-magnetism|gravity-magnetism]] · 💻 Odysseus · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2125 · running
+- [ ] [[Agents/primitive-hide-sets|primitive-hide-sets]] · 💻 Odysseus · running
 
 
 ## In review
