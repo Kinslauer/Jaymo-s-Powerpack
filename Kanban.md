@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 15:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 16:08). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,9 +19,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · open
-- [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · for 💻 Odysseus · open
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
-- [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · for 💻 Odysseus · open
 
 
 ## Being built
@@ -30,6 +28,8 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · 💻 Odysseus · claimed
+- [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · mordhau-3-body · claimed
+- [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · mordhau-4-legs · claimed
 - [ ] [[Agents/claude-cloud-village-mods-7-9|claude-cloud-village-mods-7-9]] · 💻 Odysseus · running
 
 
