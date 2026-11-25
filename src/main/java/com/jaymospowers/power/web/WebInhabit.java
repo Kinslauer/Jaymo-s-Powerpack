@@ -133,7 +133,7 @@ public final class WebInhabit {
 					WebRedHunt.end(level, mob);
 				}
 				entity.removeAttached(HOST);
-				com.jaymospowers.core.Oddities.unmark(entity, com.jaymospowers.core.Oddities.SYMBIOTE);
+				WebSymbioteStrains.oddUnmark(entity);
 				// (out comes the same strain it went in as)
 				WebSymbioteStrains.mark(WebSymbioteBlob.release(level, entity.position()), WebSymbioteStrains.of(entity)).spurn(entity);
 			}
@@ -154,7 +154,7 @@ public final class WebInhabit {
 		int stay = hostile ? HOSTILE_MIN + mob.getRandom().nextInt(HOSTILE_MAX - HOSTILE_MIN + 1)
 			: CALM_MIN + mob.getRandom().nextInt(CALM_MAX - CALM_MIN + 1);
 		mob.setAttached(HOST, now + stay);
-		com.jaymospowers.core.Oddities.mark(mob, com.jaymospowers.core.Oddities.SYMBIOTE);
+		WebSymbioteStrains.oddMark(mob, strain);
 		if (hostile) {
 			boost(mob, Attributes.MAX_HEALTH, "inhabit_health", HEALTH_BONUS, AttributeModifier.Operation.ADD_VALUE);
 			boost(mob, Attributes.ATTACK_DAMAGE, "inhabit_damage", DAMAGE_BONUS, AttributeModifier.Operation.ADD_VALUE);
@@ -251,7 +251,7 @@ public final class WebInhabit {
 		host.removeAttached(HOST);
 		host.removeAttached(WebSymbioteStrains.KIND);
 		WebRedHunt.end(level, host);
-		com.jaymospowers.core.Oddities.unmark(host, com.jaymospowers.core.Oddities.SYMBIOTE);
+		WebSymbioteStrains.oddUnmark(host);
 		host.removeAttached(WebBehemoth.STRIKE);
 		host.removeAttached(WebBehemoth.SLAM);
 		HOSTS.remove(host);

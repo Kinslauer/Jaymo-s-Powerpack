@@ -95,6 +95,14 @@ public final class WebSymbioteMind {
 	/** Hunt: it hunts below this satiety (instead of {@link WebSymbiote#HUNGRY_HUNT_BELOW}), this often at each feeding check. */
 	static final int HUNT_BELOW = 75;
 	static final float HUNT_CHANCE = 0.25F;
+	/**
+	 * The red one (Andy, 2026-11-25: "the red suit's standard should be hunt. you have to unlock at ease and protect me
+	 * later trust levels, it is supposed to be an extremely aggressive version"): its order is Hunt from the bond on, and
+	 * falls back to it whenever trust is under what the order it holds needs. Protect Me opens at {@code RED_PROTECT_TRUST}
+	 * (then obeys by the usual roll), At ease at {@code RED_EASE_TRUST}: "at 80-100 trust, it allows you to control it.
+	 * meaning at ease will let you retract and control the suit as normal" ({@link #redControlled}).
+	 */
+	public static final int RED_PROTECT_TRUST = 50, RED_EASE_TRUST = 80;
 
 	// ===== mood ======================================================================================================
 	/** The moods, in saved order. */
@@ -331,7 +339,35 @@ public final class WebSymbioteMind {
 	/** Its mind (a new bond's trust starts level with its bond). */
 	public static Mind mind(Player player) {
 		Mind mind = player.getAttached(MIND);
-		return mind != null ? mind : new Mind(Mth.clamp(WebSymbiote.state(player).bond(), 0, TRUST_MAX), ORDER_NONE, 0, REQ_NONE, 0L, 0, 0L, 0L);
+		return mind != null ? mind : new Mind(Mth.clamp(WebSymbiote.state(player).bond(), 0, TRUST_MAX), standing(player), 0, REQ_NONE, 0L, 0, 0L, 0L);
+	}
+
+	/** Bonded to the red one (either side). */
+	public static boolean red(Player player) {
+		return WebSymbiote.isBonded(player) && WebSymbioteStrains.of(player) == WebSymbioteStrain.RED;
+	}
+
+	/** The order it holds when none is given (or it drops one): Hunt for the red one, else at ease. */
+	public static int standing(Player player) {
+		return red(player) ? HUNT : ORDER_NONE;
+	}
+
+	/** The trust an order needs before it will even hear it (0: any; the red one's Protect Me and At ease, see {@link #RED_EASE_TRUST}). */
+	public static int orderTrust(Player player, int order) {
+		if (!red(player)) {
+			return 0;
+		}
+		return order == PROTECT ? RED_PROTECT_TRUST : order == ORDER_NONE ? RED_EASE_TRUST : 0;
+	}
+
+	/**
+	 * The red one lets you have the suit (either side: the mind is synced to its owner): At ease, trusting you
+	 * {@link #RED_EASE_TRUST} or more. Then it is the suit as the black one is: no struggle to shed the big body, none of
+	 * its own hunts, its takeovers no more often than the black one's.
+	 */
+	public static boolean redControlled(Player player) {
+		Mind mind = player.getAttached(MIND);
+		return red(player) && mind != null && mind.order == ORDER_NONE && mind.trust >= RED_EASE_TRUST;
 	}
 
 	public static Mood mood(Player player) {
@@ -378,7 +414,8 @@ public final class WebSymbioteMind {
 
 	private static boolean ordered(Player player, int order) {
 		Mind mind = player.getAttached(MIND);
-		return mind != null && mind.order == order && mind.trust >= ORDER_BREAK;
+		// (the red one's Hunt is its nature, not an order it can drop)
+		return mind != null && mind.order == order && (mind.trust >= ORDER_BREAK || order == standing(player));
 	}
 
 	/** The health share under which it fights for you: {@code base}, or more on the Protect order. */
@@ -579,6 +616,14 @@ public final class WebSymbioteMind {
 			return;
 		}
 		Mind mind = mind(player);
+		if (mind.trust < orderTrust(player, order) && !player.isCreative()) {
+			// the red one won't hear of it yet: it hunts until it trusts you this much
+			if (order != mind.order) {
+				addStress(player, 1);
+				WebSymbiote.whisper(player, "order.red.locked." + ORDER_NAMES[order], orderTrust(player, order));
+			}
+			return;
+		}
 		if (order == ORDER_NONE) {
 			if (mind.order != ORDER_NONE) {
 				write(player, mind.withOrder(ORDER_NONE));
@@ -622,7 +667,7 @@ public final class WebSymbioteMind {
 		Mind mind = player.getAttached(MIND);
 		boolean fresh = mind == null;
 		if (fresh) {
-			mind = new Mind(Mth.clamp(state.bond(), 0, TRUST_MAX), ORDER_NONE, 0, REQ_NONE, 0L, 0, 0L, 0L);
+			mind = new Mind(Mth.clamp(state.bond(), 0, TRUST_MAX), standing(player), 0, REQ_NONE, 0L, 0, 0L, 0L);
 		}
 		Mind before = mind;
 		boolean creative = player.isCreative();
@@ -693,9 +738,14 @@ public final class WebSymbioteMind {
 		run.stage = stage;
 
 		// standing orders
-		if (mind.order != ORDER_NONE && mind.trust < ORDER_BREAK) {
-			mind = mind.withOrder(ORDER_NONE);
+		int standing = standing(player);
+		if (mind.order != standing && mind.trust < ORDER_BREAK) {
+			mind = mind.withOrder(standing);
 			WebSymbiote.whisper(player, "order.defy");
+		} else if (mind.order != standing && mind.trust < orderTrust(player, mind.order) && !creative) {
+			// the red one: trust fell under what its order needs (or it was given it as the black one), so it hunts again
+			mind = mind.withOrder(standing);
+			WebSymbiote.whisper(player, "order.red.revert");
 		}
 		if (mind.order == PROTECT && !creative) {
 			protect(player, run, now);
