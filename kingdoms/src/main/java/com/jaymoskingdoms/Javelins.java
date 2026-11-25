@@ -119,7 +119,7 @@ final class Javelins {
 	private static void tick(ServerLevel level, PathfinderMob folk, int faction) {
 		// ((0.7.292) a villager's foe is its brain's)
 		LivingEntity foe = Rulers.target(folk);
-		if (foe == null || !foe.isAlive() || folk.isPassenger() || Downed.isDowned(folk)) {
+		if (foe == null || !foe.isAlive() || Downed.isDowned(foe) || folk.isPassenger() || Downed.isDowned(folk)) {
 			return;
 		}
 		long now = level.getGameTime();
@@ -136,7 +136,9 @@ final class Javelins {
 		}
 		boolean above = foe.getY() - folk.getY() >= ABOVE;
 		boolean bowman = d > BOWMAN && (holdsBow(foe) || foe instanceof Folk f && f.role() == Folk.ARCHER);
-		if (!above && !bowman && !(d > BOWMAN && UNREACHABLE.getOrDefault(folk, false))) {
+		// (weapon sense: with javelins left, a foe in the throwing band is thrown at before the blade is drawn)
+		boolean first = WeaponSense.throwsFirst(folk, d);
+		if (!above && !bowman && !first && !(d > BOWMAN && UNREACHABLE.getOrDefault(folk, false))) {
 			return;
 		}
 		NEXT.put(folk, now + COOLDOWN + level.getRandom().nextInt(JITTER));

@@ -314,7 +314,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		ItemStack hand = this.getMainHandItem();
 		// (0.7.184) after enough failed shots it puts the bow away and fights hand to hand for a while
 		// (out of arrows it draws its blade too: MobAmmo)
-		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand) && !RangedTactics.melee(this)
+		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand) && !RangedTactics.melee(this) && !WeaponSense.swapping(this)
 			&& (this.level().isClientSide() || MobAmmo.has(this, MobAmmo.Kind.ARROWS));
 	}
 
@@ -457,6 +457,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		// (0.7.184) a shooter whose shots keep failing moves (RangedTactics)
 		this.goalSelector.addGoal(0, new RangedTactics.RepositionGoal(this));
+		// weapon sense: blade when rushed, the weapon's distance band, strafing and leaning, going for what was thrown
+		this.goalSelector.addGoal(0, new WeaponSense.SenseGoal(this));
 		this.goalSelector.addGoal(1, new Shoot(this));
 		// (0.7.85) disarmed, it goes for a weapon before anything else (Rearm)
 		this.goalSelector.addGoal(1, new Rearm.Fetch(this));
@@ -905,7 +907,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				// (0.5.64) a gunner fires his cannon (Cannon.tick); only a foe too close for it gets his arrows
 				return false;
 			}
-			return this.archer.shooting() && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
+			return this.archer.shooting() && !WeaponSense.swapping(this.archer) && target != null && target.isAlive() && !Downed.isDowned(target)
+				&& this.archer.distanceTo(target) <= ARCHER_RANGE;
 		}
 
 		@Override
