@@ -1007,3 +1007,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-24, Andy (Reference Mods PR #2120): vanilla spiders are not Druid wild shapes ("no"); they stay out.
 - 2026-11-24 (Andy): "approve lore": the 7 Alex's Caves lore placements in Lore.md are canon.
+
+- 2026-11-24 (worn-totems thread, PR #2129): Andy approved the lore paragraph "The last old totems" (old heirloom totems, worn or held, some villagers/illagers/evokers carry one).
