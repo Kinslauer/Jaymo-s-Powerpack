@@ -80,6 +80,7 @@ public final class GiftTales {
 			return Component.translatable("dialogue.chat.jaymoskingdoms.gift_none");
 		}
 		if (Recollections.refuses(villager, player)) {
+			RefusalHints.hintStanding(player, villager);
 			return Component.translatable("dialogue.chat.jaymoskingdoms.gift_refused");
 		}
 		add(player, ASKED, villager);

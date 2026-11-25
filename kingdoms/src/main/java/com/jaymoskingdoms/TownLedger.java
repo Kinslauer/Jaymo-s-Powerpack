@@ -63,6 +63,7 @@ public final class TownLedger {
 		ServerLevel level = (ServerLevel)speaker.level();
 		if (Reputation.get(player, f.id()) <= Reputation.HOSTILE) {
 			Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.ledger.refused"), Speech.RED);
+			RefusalHints.hint(player, speaker, RefusalHints.Cause.REPUTE, Component.literal(f.name()));
 			return;
 		}
 		ItemStack book = book(level.getServer(), f, speaker.getName().getString());

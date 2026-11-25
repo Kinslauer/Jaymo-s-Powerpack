@@ -158,6 +158,8 @@ public final class Audiences {
 		}
 		if (Reputation.get(player, f.id()) < MIN_REPUTATION + Lifestyle.courtShift(player)) {
 			say(level, guard, "refused", f, null);
+			// (refusal hints) your name in his realm
+			RefusalHints.hint(player, guard, RefusalHints.Cause.REPUTE, Component.literal(f.name()));
 			level.playSound(null, guard.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 0.9F);
 			return;
 		}

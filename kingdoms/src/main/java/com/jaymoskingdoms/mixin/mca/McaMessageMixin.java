@@ -81,6 +81,11 @@ abstract class McaMessageMixin {
 		} finally {
 			jaymoskingdoms$garbling = false;
 		}
+		// (refusal hints) a no MCA words with its reason (a gift they don't want, a ring), shown to one who heard only gibberish
+		if (!Languages.understands(player, speaker) && speaker instanceof net.minecraft.world.entity.LivingEntity living
+			&& message.message().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t) {
+			com.jaymoskingdoms.RefusalHints.foreignLine(player, living, t.getKey());
+		}
 	}
 
 	/** (0.7.203) The MCA villager whose talk menu {@code player} has open (MCA's question line names no speaker). */

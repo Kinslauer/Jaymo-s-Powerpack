@@ -462,6 +462,8 @@ public final class Handshakes {
 			Speech.say(level, villager, Component.translatable("handshake.jaymoskingdoms.refused"), Speech.WHITE, 12.0);
 			level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 1.0F);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.refused").withStyle(ChatFormatting.GRAY), true);
+			// (refusal hints) and why: a grudge, a dislike, a bad mood, a sour temper, too few hearts, or only bad luck
+			RefusalHints.hint(player, villager, RefusalHints.handRefused(player, villager));
 			return;
 		}
 		shake(player, villager, now, false);
@@ -909,7 +911,11 @@ public final class Handshakes {
 		}
 		villager.getLookControl().setLookAt(player);
 		// (the cold word once; a hand held out again after it annoys them: Introductions#refusal)
-		Component words = offered ? Introductions.refusal(player, villager, () -> Introductions.waryLine(villager, player))
+		Component words = offered ? Introductions.refusal(player, villager, () -> {
+				// (refusal hints) the first no to your hand says why they mind you
+				RefusalHints.hintWary(player, villager);
+				return Introductions.waryLine(villager, player);
+			})
 			: Introductions.waryOpening(player, villager);
 		Speech.say(level, villager, words, Speech.WHITE, 12.0);
 		if (Introductions.shuns(player, villager)) {
