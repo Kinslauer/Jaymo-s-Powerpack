@@ -8292,3 +8292,8 @@ The symbiote does things in the world now, not only on your screen.
 
 - The symbiote HUD (`WebSymbioteHud`) made its three order icons (shield, sword, ender eye) as the class loaded, during the client's start, before items are ready ("Components not bound yet"), so every client crashed on launch. The icons are now made when drawn.
 - Built by CI; checked against the crash report; not played.
+
+## 0.27.58 (2026-11-25): No Subtle Effects error on a dedicated server's start (#2173)
+
+- Turning off Subtle Effects' skeleton bone particles (`SubtleEffectsCompat`) now runs only in a game's own server. On a dedicated server Subtle Effects' config class needs client classes, so it failed with a long `LocalPlayer` error in the log at every start. Each client still turns the bones off itself when it joins.
+- Built by CI; not played.
