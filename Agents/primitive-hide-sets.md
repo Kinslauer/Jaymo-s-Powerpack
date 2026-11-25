@@ -35,5 +35,6 @@ they can have a darker variation made from darker hides".
 
 ## Done
 Draft PR #2127 (waits on Andy's look at Assets/primitive-hide-sets/). Six sets: Caveman (b, existing ids), Trapper's (a),
-Barbarian (c), and Dark makes (bear fur / hardened leather in the leather's place, or a light piece + charcoal or coal).
+Barbarian (c), and Dark makes (bear fur / hardened leather / war hide in the leather's place, or a light piece + charcoal or coal).
+Head acf666031b; CI was still running at handback (no Auto-fix here: the parent watches it).
 Lore.md: "The hide-wearers" (new). All 24 icons pass audit.py; pr_checks passes. Not seen in game; CI compiles.
