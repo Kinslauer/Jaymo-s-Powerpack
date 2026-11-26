@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -33,6 +34,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
@@ -71,6 +73,8 @@ public final class Warmth {
 	 */
 	static final boolean CLIMATE_MAP = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
 
+	/** The status icon of a newcomer's first-wake grace ({@link BodyHeat#CLEMENCY}). */
+	public static net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> CLEMENCY_EFFECT;
 	public static HearthBlock HEARTH_BLOCK;
 	public static HearthBlock ICEBOX_BLOCK;
 	public static BlockEntityType<HearthEntity> HEARTH_ENTITY;
@@ -89,6 +93,8 @@ public final class Warmth {
 	}
 
 	static void register() {
+		CLEMENCY_EFFECT = Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, JaymosKitchen.id("clemency"),
+			new ClemencyEffect());
 		LINING = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKitchen.id("lining"),
 			DataComponentType.<Lining>builder().persistent(Lining.CODEC).networkSynchronized(Lining.STREAM_CODEC).build());
 		HEARTH_BLOCK = block("hearth", p -> new HearthBlock(false, p), BlockBehaviour.Properties.of()
@@ -218,6 +224,70 @@ public final class Warmth {
 		return air;
 	}
 
+	// ---- the room fill (the hearth's, and the fires') ----
+
+	/**
+	 * How far a walk of open air goes: {@code range} blocks across, {@code height} up and down, no further than
+	 * {@code manhattan} blocks by steps, at most {@code cells} cells; {@code skyStops}: air that sees the sky is outside, and
+	 * isn't entered.
+	 */
+	record Walk(int range, int height, int manhattan, int cells, boolean skyStops) {
+	}
+
+	/**
+	 * Walks the air from {@code seeds} the way warmth spreads: through open air, open doors, gates and trapdoors, never
+	 * through stone, closed doors or panes ({@link HearthEntity#open}). Every cell looked at, open or not, goes to
+	 * {@code seen} with its state (a hot block is a cell that blocks the walk; the walk still sees it). The cells of open air
+	 * are returned. {@code centre} is a block the walk
+	 * starts beside and never enters (the hearth itself); with {@code seedsOpen} the seeds are taken as open air whatever they are
+	 * (where a player stands). {@code seen} gets {@code at} as a shared mutable position: copy it to keep it.
+	 */
+	static LongOpenHashSet fill(ServerLevel level, BlockPos centre, java.util.List<BlockPos> seeds, boolean seedsOpen, Walk walk,
+		java.util.function.@org.jspecify.annotations.Nullable BiConsumer<BlockPos, BlockState> seen) {
+		LongOpenHashSet room = new LongOpenHashSet();
+		LongOpenHashSet looked = new LongOpenHashSet();
+		LongOpenHashSet forced = new LongOpenHashSet();
+		it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue queue = new it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue();
+		if (!seedsOpen) {
+			looked.add(centre.asLong());
+		}
+		for (BlockPos seed : seeds) {
+			if (looked.add(seed.asLong())) {
+				queue.enqueue(seed.asLong());
+			}
+			if (seedsOpen) {
+				forced.add(seed.asLong());
+			}
+		}
+		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+		while (!queue.isEmpty() && room.size() < walk.cells()) {
+			long packed = queue.dequeueLong();
+			at.set(packed);
+			if (at.distManhattan(centre) > walk.manhattan() || Math.abs(at.getX() - centre.getX()) > walk.range()
+				|| Math.abs(at.getY() - centre.getY()) > walk.height() || Math.abs(at.getZ() - centre.getZ()) > walk.range()) {
+				continue;
+			}
+			if (!com.jaymoskitchen.Loaded.made(level, at)) {
+				continue;
+			}
+			BlockState state = level.getBlockState(at);
+			if (seen != null) {
+				seen.accept(at, state);
+			}
+			if (!forced.contains(packed) && (!HearthEntity.open(level, at, state) || walk.skyStops() && level.canSeeSky(at))) {
+				continue;
+			}
+			room.add(packed);
+			for (Direction d : Direction.values()) {
+				long next = BlockPos.offset(packed, d);
+				if (looked.add(next)) {
+					queue.enqueue(next);
+				}
+			}
+		}
+		return room;
+	}
+
 	// ---- drinks ----
 
 	/** A warm ({@code hot}) or cold drink, felt for {@link #DRINK_TICKS}. */
@@ -251,7 +321,37 @@ public final class Warmth {
 		return Math.max(-NORTH_MOST, Math.min(NORTH_MOST, (float) (z - spawnZ) / 1000.0F * NORTH_COLD));
 	}
 
-	/** How damp the air is (0 to 1): the share of the land round {@code at} that is sea, shore or river. */
+	/** Biomes whose air is wet like the shore's: swamps, bogs and marshes (a data tag, so other mods' wetlands can join). */
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome> DAMP_AIR =
+		net.minecraft.tags.TagKey.create(Registries.BIOME, JaymosKitchen.id("damp_air"));
+	/**
+	 * (Biome feel tags) Lands whose own temperature gives the wrong feel say how they feel instead: the land's push in body
+	 * heat, before the sun, the night and the height. Strongest first; a biome in none of them goes by its temperature.
+	 */
+	public static final float[] FEEL_PUSH = {55.0F, 35.0F, 15.0F, 0.0F, -12.0F, -28.0F, -50.0F};
+	private static final net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome>[] FEELS = feels(
+		"feels_scorching", "feels_hot", "feels_warm", "feels_mild", "feels_cool", "feels_cold", "feels_frozen");
+
+	@SuppressWarnings("unchecked")
+	private static net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome>[] feels(String... names) {
+		net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome>[] tags = new net.minecraft.tags.TagKey[names.length];
+		for (int i = 0; i < names.length; i++) {
+			tags[i] = net.minecraft.tags.TagKey.create(Registries.BIOME, JaymosKitchen.id(names[i]));
+		}
+		return tags;
+	}
+
+	/** How the land at {@code biome} feels when a feel tag says so, in body heat; null when its own temperature is right. */
+	static @org.jspecify.annotations.Nullable Float feel(net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome) {
+		for (int i = 0; i < FEELS.length; i++) {
+			if (biome.is(FEELS[i])) {
+				return FEEL_PUSH[i];
+			}
+		}
+		return null;
+	}
+
+	/** How damp the air is (0 to 1): the share of the land round {@code at} that is sea, shore, river, swamp or bog. */
 	static float dampness(ServerLevel level, BlockPos at) {
 		int wet = 0, n = 0;
 		for (int dx = -1; dx <= 1; dx++) {
@@ -263,7 +363,7 @@ public final class Warmth {
 				n++;
 				var biome = level.getBiome(p);
 				if (biome.is(net.minecraft.tags.BiomeTags.IS_OCEAN) || biome.is(net.minecraft.tags.BiomeTags.IS_BEACH)
-					|| biome.is(net.minecraft.tags.BiomeTags.IS_RIVER)) {
+					|| biome.is(net.minecraft.tags.BiomeTags.IS_RIVER) || biome.is(DAMP_AIR)) {
 					wet += dx == 0 && dz == 0 ? 2 : 1;
 				}
 			}

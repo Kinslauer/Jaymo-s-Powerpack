@@ -363,6 +363,16 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for harness warmth: {}", e.toString());
 		}
+		// a rickshaw's hood and a carriage's roof keep the sun off the rider; a wind dragon is no warm-blooded mount
+		try {
+			Class<?> bodyHeat = Class.forName("com.jaymoskitchen.climate.BodyHeat");
+			bodyHeat.getMethod("addShade", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) WagonShade::canopy);
+			bodyHeat.getMethod("addColdMount", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<Entity>) WagonShade::coldMount);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for shade under a canopy or warm mounts: {}", e.toString());
+		}
 		// (0.7.477) an Emberborn drinks fire and lava, and water only hisses on their tongue
 		try {
 			Class.forName("com.jaymoskitchen.climate.Thirst").getMethod("setFireDrinker", java.util.function.Predicate.class)
@@ -1234,6 +1244,22 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Kitchen corpse call {} failed: {}", method.getName(), e.toString());
 			return null;
+		}
+	}
+
+	/**
+	 * A final Reincarnate makes a brand-new character: Kitchen's first-wake grace from the cold and heat
+	 * ({@code BodyHeat.newCharacter}) is theirs again. Nothing without Kitchen, or a Kitchen too old for it.
+	 */
+	static void newCharacter(net.minecraft.server.level.ServerPlayer player) {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return;
+		}
+		try {
+			Class.forName("com.jaymoskitchen.climate.BodyHeat").getMethod("newCharacter", net.minecraft.server.level.ServerPlayer.class)
+				.invoke(null, player);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for a new character's first-wake grace: {}", e.toString());
 		}
 	}
 }

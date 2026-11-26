@@ -1,0 +1,59 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:fire",
+    "#minecraft:campfires",
+    {
+      "id": "jaymospowers:firepit",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:bonfire",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:bonfire_edge",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:forge_hearth",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:smeltery_controller",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:seared_melter",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:coke_oven",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:brick_blast_furnace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:rig_forge",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:outpost_campfire",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:ambrosium_campfire",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:signal_brazier",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:sunken_hearth",
+      "required": false
+    }
+  ]
+}

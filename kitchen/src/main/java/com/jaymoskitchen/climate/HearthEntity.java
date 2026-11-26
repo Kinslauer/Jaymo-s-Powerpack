@@ -1,6 +1,5 @@
 package com.jaymoskitchen.climate;
 
-import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -118,34 +117,11 @@ public class HearthEntity extends BlockEntity {
 
 	/** Walks the room and hands it to {@link Warmth}. */
 	void scan(ServerLevel level) {
-		LongOpenHashSet room = new LongOpenHashSet();
-		LongOpenHashSet seen = new LongOpenHashSet();
-		LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
-		seen.add(worldPosition.asLong());
+		java.util.List<BlockPos> seeds = new java.util.ArrayList<>(6);
 		for (Direction d : Direction.values()) {
-			long next = worldPosition.relative(d).asLong();
-			seen.add(next);
-			queue.enqueue(next);
+			seeds.add(worldPosition.relative(d));
 		}
-		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
-		while (!queue.isEmpty() && room.size() < MAX_CELLS) {
-			long packed = queue.dequeueLong();
-			at.set(packed);
-			if (at.distManhattan(worldPosition) > REACH * 2 || Math.abs(at.getX() - worldPosition.getX()) > REACH
-				|| Math.abs(at.getY() - worldPosition.getY()) > REACH || Math.abs(at.getZ() - worldPosition.getZ()) > REACH) {
-				continue;
-			}
-			if (!com.jaymoskitchen.Loaded.made(level, at) || !open(level, at, level.getBlockState(at)) || level.canSeeSky(at)) {
-				continue;
-			}
-			room.add(packed);
-			for (Direction d : Direction.values()) {
-				long next = BlockPos.offset(packed, d);
-				if (seen.add(next)) {
-					queue.enqueue(next);
-				}
-			}
-		}
+		LongOpenHashSet room = Warmth.fill(level, worldPosition, seeds, false, new Warmth.Walk(REACH, REACH, REACH * 2, MAX_CELLS, true), null);
 		Warmth.set(level, worldPosition, cold(), room);
 	}
 

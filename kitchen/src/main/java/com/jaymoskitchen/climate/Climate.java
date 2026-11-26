@@ -126,8 +126,9 @@ public final class Climate {
 			BodyHeat.forget(handler.player.getUUID());
 			Stamina.forget(handler.player.getUUID());
 		});
-		// 90 seconds' grace from the cold and heat on spawning into the world and on coming back from dying
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> BodyHeat.grace(handler.player));
+		// 90 seconds' grace from the cold and heat on spawning into the world and on coming back from dying, and a newcomer's
+		// first wake gets ten minutes of it, once
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> BodyHeat.joined(handler.player));
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			if (!alive) {
 				BodyHeat.grace(newPlayer);

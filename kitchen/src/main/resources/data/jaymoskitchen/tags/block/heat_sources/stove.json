@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskitchen:stove",
+    "jaymoskitchen:endstone_stove",
+    "jaymoskitchen:firebox",
+    "minecraft:furnace",
+    "minecraft:smoker",
+    "minecraft:blast_furnace",
+    {
+      "id": "cookingforblockheads:oven",
+      "required": false
+    }
+  ]
+}
