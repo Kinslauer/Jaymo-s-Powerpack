@@ -1,6 +1,6 @@
 ---
 status: open
-for: any
+for: apollo
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
 claimed_by: 
@@ -21,3 +21,6 @@ Not picked: clay soldiers, Clay Warfare colours/buffs/remote/book.
 ## Rules
 - Lore first (who grants divine powers, which patron gods; who carries symbiotes). Seven patron gods + The Truth are canon.
 - Builds on existing systems as the rows say (Chronomancy, weather, lightning, alchemy; xenoforms, GeckoLib layers). No slash commands for player features. Plan doc first, then patches.
+
+## Notes
+- 2026-11-26 15:47 YOUTH delegated this to apollo (Claude approved): build Andy's 4 picks from scratch; the sources are All Rights Reserved, so copy no code or art
