@@ -8536,3 +8536,11 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - Andy: "how do you load a cannon? there should be a popup with a tutorial". New `client.hud.GunTips`: the first time the crosshair finds a Ship's Cannon (block) or a Field Mortar (entity), or one is in your main hand, a tip card in the top right says how to load and fire it. Ship's Cannon: use with gunpowder, then shot (any of the seven kinds), then flint and steel or a fire charge; look up or down to lay it; attack at the helm fires a broadside; a chest, barrel or hopper behind the breech plus a redstone pulse loads and fires it. Field Mortar: use with a Mortar Shell, then use again to fire. Once per player each (`gun_tip.<uuid>.<part>` in the client config), waits for any card already up, off with /tips off. Text in `lang/parts/gun_tips.json`.
 - The Ship's Cannon's wrong-order lines (gunpowder first, now shot, loaded, not loaded) are now in `hint_keys.txt`, so they show as tip cards instead of over the hotbar.
 - Built; not played.
+
+## 0.27.89 (2026-11-26): /texturelook vanilla|reason - switch the pack's retexture packs off and back on (#2230)
+
+- **`/texturelook vanilla`** (client command): switches off every resource pack the pack uses to change how vanilla and other mods look: the Reason look, 3D items and mushrooms, bushy leaves and grass edges, and the downloaded Pixel Perfection Fidelity, Medieval Items, Framed Glass Panes, Red Bricks, Medieval Tactical Shield, Re-covered books, Fancy Crops, 3D ladders and doors, Fabulous Fences, Armored Legacy, Canoe boats and Better Horses. The choice is kept (config/jaymospowers-vanilla-look), so launches and updates don't switch them back on or download them.
+- **`/texturelook reason`** switches them all back on in their usual pack order (Pixel Perfection Fidelity at the bottom, Medieval Items just above it), downloading any that are missing. `/texturelook` alone says which look you're on.
+- Stays on either way: our mods' own art for their new items, blocks and mobs, the 3D guns, Klei_Wright's tundra art, the fixes packs, music, the medieval MCA villagers, Tissou's future zombies, Tiered Shields' textures and the Fresh Animations packs (motion, not textures).
+- Classes: TextureLook (new), PackResourcePacks (skips those packs while the vanilla look is picked), JaymosPowersClient.
+- Built; not played.
