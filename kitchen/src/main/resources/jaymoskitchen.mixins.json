@@ -46,6 +46,7 @@
 		"OvenMenuMixin",
 		"PlayerMixin",
 		"ProjectileWeaponItemMixin",
+		"RawMilkConsumableMixin",
 		"ScavengerFedMixin",
 		"RottenPumpkinMixin",
 		"ScavengerSightMixin",

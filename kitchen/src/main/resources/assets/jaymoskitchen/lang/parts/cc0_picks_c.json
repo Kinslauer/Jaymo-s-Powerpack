@@ -14,5 +14,7 @@
 	"item.jaymoskitchen.powder_gland": "Powder Gland",
 	"item.jaymoskitchen.wood_ash": "Wood Ash",
 	"item.jaymoskitchen.lye": "Lye",
-	"item.jaymoskitchen.soap": "Soap"
+	"item.jaymoskitchen.soap": "Soap",
+	"tooltip.jaymoskitchen.milk.raw": "Raw",
+	"tooltip.jaymoskitchen.milk.pasteurised": "Pasteurised"
 }
