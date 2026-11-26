@@ -524,6 +524,19 @@ public final class Banks {
 		tell(player, "deposited", Money.text(town, milli), Money.text(town, v.balance(player.getUUID()) + milli));
 	}
 
+	/**
+	 * (Andy, 2026-11-26) A Coin realm's family keeps its savings with the realm's counting house: {@code milli} put to
+	 * {@code player}'s name there, the coin itself in the realm's strongroom (its treasury), as a deposit would be.
+	 */
+	static void endow(ServerPlayer player, Faction realm, long milli) {
+		MinecraftServer server = player.level().getServer();
+		if (milli <= 0L) {
+			return;
+		}
+		Vault v = intoTreasury(server, realm, vault(server, realm), milli);
+		put(server, realm, v.withBalance(player.getUUID(), v.balance(player.getUUID()) + milli));
+	}
+
 	private static void withdraw(ServerPlayer player, Faction town, Faction realm, long milli) {
 		MinecraftServer server = player.level().getServer();
 		Vault v = vault(server, realm);

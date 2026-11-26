@@ -3330,12 +3330,44 @@ final class LifeStoryScreen extends Screen {
 			boolean mine = r.id() == picked;
 			graphics.fill(x + 1, y + 1, x + CARD_W - 1, y + CARD_H - 1, mine ? Ui.ROW_PICKED : i == hover ? Ui.ROW_HOVER : Ui.ROW_ALT);
 			graphics.fill(x + 1, y + 1, x + CARD_W - 1, y + 3, realmRgb(r));
-			if (!mine) {
+			// (Andy, 2026-11-26: the picked card stood empty) the picked one's figure is back on its card once it has walked over
+			if (!mine || r.id() != walkRealm || System.currentTimeMillis() - walkAt >= WALK_MS) {
 				drawRealmFolk(graphics, r, x + 4, y + CARD_TOP, x + CARD_W - 4, y + CARD_H - CARD_FOOT, false, mouseX, mouseY);
 			}
-			Ui.line(graphics, this.font, Component.literal(r.name()), x + 4, y + CARD_H - CARD_FOOT + 2, CARD_W - 8, mine ? ACCENT : i == hover ? Ui.TEXT : Ui.DIM);
+			// its patron's glyph in the corner
+			com.jaymoskingdoms.Patron theirs = com.jaymoskingdoms.Patron.byKey(r.patron());
+			if (theirs != null) {
+				graphics.pose().pushMatrix();
+				graphics.pose().translate(x + CARD_W - 12, y + 5);
+				graphics.pose().scale(0.625F, 0.625F);
+				drawGlyph(graphics, com.jaymoskingdoms.JaymosKingdoms.id("textures/block/shrine_glyph_" + theirs.key + ".png"), 0, 0);
+				graphics.pose().popMatrix();
+			}
+			cardName(graphics, r.name(), x + 4, y + CARD_H - CARD_FOOT + 2, CARD_W - 8, mine ? ACCENT : i == hover ? Ui.TEXT : Ui.DIM);
 		}
 	}
+
+	/** (Andy, 2026-11-26: "Ardengar(") A realm's name on its card, drawn smaller when it is longer than the card, so all of it shows at once. */
+	private void cardName(GuiGraphicsExtractor graphics, String name, int x, int y, int width, int colour) {
+		int w = this.font.width(name);
+		if (w <= width) {
+			graphics.text(this.font, name, x, y, colour);
+			return;
+		}
+		float k = Math.max(CARD_NAME_MIN_SCALE, width / (float)w);
+		if (w * k > width) {
+			Ui.line(graphics, this.font, Component.literal(name), x, y, width, colour);
+			return;
+		}
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x, y + (1.0F - k) * this.font.lineHeight / 2.0F);
+		graphics.pose().scale(k, k);
+		graphics.text(this.font, name, 0, 0, colour);
+		graphics.pose().popMatrix();
+	}
+
+	/** The smallest a realm's name is drawn on its card before it slides instead. */
+	static final float CARD_NAME_MIN_SCALE = 0.6F;
 
 	/**
 	 * The realm page's left: the review card. The person of the realm picked walks over from its card and stands on it, over
@@ -3364,18 +3396,46 @@ final class LifeStoryScreen extends Screen {
 				free++;
 			}
 		}
+		Answer faith = picked(Question.FAITH);
+		com.jaymoskingdoms.Patron patron = faith == null ? null : faith.patron();
+		// (Andy, 2026-11-26) what this realm gives its own: its land's and creed's points, its patron, the Crown's goodwill or Coin's account
+		List<Component> realmGifts = new ArrayList<>();
+		if (r != null) {
+			boolean gives = com.jaymoskingdoms.RealmGifts.GIVING.contains(keyOf(picked(s.question)));
+			com.jaymoskingdoms.Patron theirs = com.jaymoskingdoms.Patron.byKey(r.patron());
+			if (theirs != null) {
+				realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.patron", theirs.named()).withColor(0xFF000000 | theirs.colour));
+			}
+			if (!r.creed().isEmpty()) {
+				realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.creed", Component.translatable("creed.jaymoskingdoms." + r.creed())));
+			}
+			if (gives) {
+				points.merge(com.jaymoskingdoms.RealmGifts.landStat(com.jaymoskingdoms.Climate.byId(r.climate())), 1, Integer::sum);
+				com.jaymoskingdoms.Stats.Stat creedStat = com.jaymoskingdoms.RealmGifts.creedStat(r.creed());
+				if (creedStat != null) {
+					points.merge(creedStat, 1, Integer::sum);
+				}
+				if (theirs != null && theirs == patron) {
+					realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.kindred", com.jaymoskingdoms.RealmGifts.KINDRED_FAVOUR));
+				}
+				if ("crown".equals(r.creed())) {
+					realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.crown", com.jaymoskingdoms.RealmGifts.CROWN_GOODWILL));
+				} else if ("coin".equals(r.creed())) {
+					realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.coin", com.jaymoskingdoms.RealmGifts.COIN_PURSE));
+				}
+			} else {
+				realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.none").withColor(Ui.DIM));
+			}
+		}
+		// (a story answer's point is worth GIFT_STEP, as Stats.fromStory counts it)
 		for (var e : points.entrySet()) {
 			good.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + e.getKey().key()),
-				e.getValue() * com.jaymoskingdoms.Stats.STEP));
+				e.getValue() * com.jaymoskingdoms.Stats.GIFT_STEP));
 		}
 		if (free > 0) {
 			good.add(Component.translatable("gui.jaymoskingdoms.story.gives.free", free * com.jaymoskingdoms.Stats.STEP));
 		}
-		Answer faith = picked(Question.FAITH);
-		com.jaymoskingdoms.Patron patron = faith == null ? null : faith.patron();
-		if (r != null) {
-			good.add(Component.translatable("gui.jaymoskingdoms.story.review.realm", r.name()));
-		}
+		good.addAll(realmGifts);
 		int bottom = y + panelH() - FOOTER - 2;
 		// the faith, its glyph beside it, at the foot of the card
 		net.minecraft.resources.Identifier faithGlyph = faith == null ? null : glyph(faith);
