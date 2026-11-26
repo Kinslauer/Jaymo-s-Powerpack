@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:07). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:08). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,6 +22,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Agents/anaconda-jungle-hunters|anaconda-jungle-hunters]] · 💻 Odysseus · running
 - [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · running
 - [ ] [[Agents/youth-delegates-ready|youth-delegates-ready]] · 💻 Odysseus · running
 
