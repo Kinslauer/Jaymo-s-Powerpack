@@ -16,7 +16,6 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · for any · open
-- [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · open
 
 
 ## Being built
@@ -52,6 +51,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-6|hunters-road-6]] · for any · blocked
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · for any · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
+- [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
 
 
 ## Done
