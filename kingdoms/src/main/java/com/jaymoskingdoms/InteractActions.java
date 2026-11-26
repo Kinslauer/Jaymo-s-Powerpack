@@ -56,8 +56,10 @@ public final class InteractActions {
 	public static final String STEEL = BlossomSteel.ACTION;
 	/** Clean the Goods: a speakeasy's fence takes the realms' marks off stolen things, for a cut ({@link StolenGoods}). */
 	public static final String CLEAN = "clean";
+	/** Ask About the Weather: a cartographer tells which season is coming ({@link WeatherWise}). */
+	public static final String WEATHER = "weather";
 	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE, STORY,
-		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED, HELM, HIRE_HELM, PASSAGE, STEEL, CLEAN);
+		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED, HELM, HIRE_HELM, PASSAGE, STEEL, CLEAN, WEATHER);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -129,6 +131,7 @@ public final class InteractActions {
 			case PASSAGE -> BlossomTraders.offers(player, v) || SteamAirships.offers(player, v);
 			case STEEL -> BlossomSteel.offers(player, v);
 			case CLEAN -> v.entityTags().contains(Underworld.FENCE_TAG) && StolenGoods.carries(player, -1);
+			case WEATHER -> WeatherWise.is(v) && KitchenCompat.season(v.level()) != null;
 			default -> false;
 		};
 	}
@@ -254,6 +257,10 @@ public final class InteractActions {
 			}
 			case CLEAN -> {
 				return StolenGoods.clean(player, v);
+			}
+			case WEATHER -> {
+				WeatherWise.ask(player, (Villager)v);
+				return null;
 			}
 			case SEAL, DEED -> {
 				Faction realm = guardRealm(player, v);

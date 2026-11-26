@@ -172,6 +172,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// clothes for the sun, the ranger's leaf cloak, and the herbalist's belt charms
 		LeafCloak.register();
 		ClimateWear.register();
+		ClimateVisits.register();
+		WeatherWise.register();
+		Notices.register();
+		HearthFolk.register();
 		HerbalistWares.register();
 		Buildings.register();
 		Construction.register();
