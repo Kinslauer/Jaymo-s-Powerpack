@@ -111,10 +111,10 @@ public final class DragonsClient {
 		EntityRenderers.register(Dragons.IGNIVORUS_DRAGON, c -> new WindDragonRenderer<>(c, "ignivorus", new KintsugiDragonModel(true), IGNIVORUS_SHADOW,
 			IGNIVORUS_SCALE, KINTSUGI_REACH).ownDeath());
 		EntityRenderers.register(Dragons.AETHERION_DRAGON, c -> new AetherionDragonRenderer(c, AETHERION_SHADOW, AETHERION_SCALE, AETHERION_REACH));
-		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R,
-			KeyMapping.Category.register(JaymosKingdoms.id("dragons"))));
-		biteKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_bite", InputConstants.KEY_G,
-			KeyMapping.Category.register(JaymosKingdoms.id("dragons"))));
+		// one category for both keys: registering it twice stops the game starting
+		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("dragons"));
+		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R, category));
+		biteKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_bite", InputConstants.KEY_G, category));
 		RubbleParticle.register();
 		ClientTickEvents.END_CLIENT_TICK.register(DragonsClient::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("dragon"), DragonsClient::hud);
