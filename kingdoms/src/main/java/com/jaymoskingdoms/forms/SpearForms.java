@@ -21,6 +21,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -36,6 +37,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.camel.Camel;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -50,7 +54,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>Spear Lunge: a long lunge (longer than the rapier's) that runs the first foe in the way through, and goes on into a
  * second one behind it.
- * <li>Couched Lance: only while you control a mount (a horse, a Cavalry mount, a pig, a camel...). The lance is couched for
+ * <li>Couched Lance: only on horseback, a horse you steer (a donkey, mule or zebra too, never a pig, camel, llama, goat,
+ * elephant or dragon; the same rule as Powers' lance, {@code LanceCouch.horseback}). The lance is couched for
  * {@value #COUCH_TICKS} ticks; the first foe it meets is hit for damage that grows with how fast the mount is going, and a
  * foe in the saddle is knocked out of it. Riders hit harder ({@link #RIDER_BONUS}). Kingdoms' mounted guards that carry a spear
  * charge too ({@link #charge}, called from {@code Cavalry}).
@@ -196,9 +201,22 @@ public final class SpearForms {
 		}
 	}
 
-	/** Whether {@code player} controls a mount (the saddle of a horse, a Cavalry mount, a pig, a camel...): what Couched Lance needs. */
+	/** Mount kinds that are not horses, by words in their entity ids (war elephants, great goats, dragons...). */
+	private static final String[] NOT_HORSES = {"camel", "llama", "elephant", "goat", "dragon"};
+
+	/** Whether {@code player} steers a horse (not a pig, camel, llama, goat, elephant or dragon): what Couched Lance needs. */
 	static boolean mounted(ServerPlayer player) {
-		return player.getVehicle() instanceof LivingEntity mount && mount.getControllingPassenger() == player;
+		if (!(player.getVehicle() instanceof AbstractHorse horse) || horse.getControllingPassenger() != player
+			|| horse instanceof Camel || horse instanceof Llama) {
+			return false;
+		}
+		String id = BuiltInRegistries.ENTITY_TYPE.getKey(horse.getType()).getPath();
+		for (String word : NOT_HORSES) {
+			if (id.contains(word)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** Whether a Pinning Throw is holding a foe for {@code player} (their hand is empty of the spear until it is tugged back). */

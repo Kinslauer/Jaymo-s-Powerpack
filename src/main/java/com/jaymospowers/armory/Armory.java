@@ -59,7 +59,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>Daggers, hatchets, primitive spears, throwing sticks and the harpoon are held back and thrown like a trident
  * ({@link ThrowingWeaponItem}); kunai and throwing stars fly at a flick and stack. (0.18.64) Knives parry rather than
  * throw, and Balkon's knife and our dagger swap held damage ({@link KnifeGuard}).</li>
- * <li>The lance, couched on a moving mount, hits harder the faster you ride ({@link #LANCE_CHARGE}).</li>
+ * <li>The lance, only on horseback: right-click couches it like Kingdoms' Couched Lance ({@link LanceCouch}), and its swings
+ * hit harder the faster you ride ({@link #LANCE_CHARGE}).</li>
  * <li>The flanged mace and the war axe knock a raised shield aside, like an axe.</li>
  * <li>The machete cuts through leaves, vines and crops fast.</li>
  * <li>The round shield blocks like a shield and comes up a little quicker.</li>
@@ -275,9 +276,11 @@ public final class Armory {
 		RapierItem.init();
 		PatronWeapons.init();
 		Lash.init();
+		LanceCouch.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker
-				&& entity.level() instanceof ServerLevel level && isLance(attacker.getMainHandItem())) {
+				&& entity.level() instanceof ServerLevel level && isLance(attacker.getMainHandItem()) && !LanceCouch.striking
+				&& LanceCouch.horseback(attacker)) {
 				charge(level, attacker, entity);
 			}
 		});
@@ -296,14 +299,14 @@ public final class Armory {
 		return LANCES.containsValue(stack.getItem());
 	}
 
-	/** A couched lance: the faster the mount, the harder it lands, and the further it throws the target back. */
+	/** A lance swung from horseback: the faster the horse, the harder it lands, and the further it throws the target back. */
 	private static void charge(ServerLevel level, LivingEntity rider, LivingEntity target) {
 		Entity mount = rider.getVehicle();
 		if (mount == null || !target.isAlive()) {
 			return;
 		}
 		Vec3 move = mount.getKnownMovement();
-		double speed = Math.max(move.horizontalDistance(), mount.position().subtract(mount.xo, mount.yo, mount.zo).horizontalDistance());
+		double speed = LanceCouch.speed(mount);
 		if (speed < LANCE_MIN_SPEED) {
 			return;
 		}
