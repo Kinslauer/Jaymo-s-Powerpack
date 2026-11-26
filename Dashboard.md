@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 02:04). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:15). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -24,16 +24,17 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/symbiote-113-picks|symbiote-113-picks]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
-- [[Agents/youth-delegates-ready|youth-delegates-ready]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/youth-delegates-ready|youth-delegates-ready]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-8 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
+7 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2211 fire engulfs faster, burns longer, buildings crumble (Kingdoms, 2026-11-26)
 - [ ] #2208 Reason look pack replaces Excalibur; art check on PRs (Powers, 2026-11-26)
 - [ ] #2207 The salmon run: salmon swim upriver in autumn, spawn in the headwaters and die there (Powers, Kingdoms, 2026-11-26)
 - [ ] #2206 Giant mushrooms repainted in the pack's vanilla style (Kingdoms, 2026-11-26)
@@ -93,12 +94,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2143 Life story: no more stuck on "On to your looks" (Kingdoms, 2026-11-25)
 - [ ] #2142 Wall knocks only from real knocks: plain jumps and your own sprint-jumps never hurt (Powers, 2026-11-25)
 - [ ] #2141 fallen trees are solid (Kingdoms, 2026-11-25)
-- [ ] #2140 Squashed bugs and spiders burst in their own blood (Powers, Kingdoms, 2026-11-25)
-- …and 587 older ones.
+- …and 588 older ones.
 
 ## Health
 
-19 problems in the notes: [[Health]].
+20 problems in the notes: [[Health]].
 
 ## Last week
 
