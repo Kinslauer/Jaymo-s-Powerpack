@@ -1185,3 +1185,4 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26: Andy approved the town crier lore paragraph ("The town crier", Lore.md) and the crier replacing court verdict chat lines (PR #2236).
 - 2026-11-26 11:44 AM ET (Andy): approved the "Hard words for the crier" lore and merging PR #2238 (crier grudges: attacks and hits on the town crier).
 - 2026-11-26 11:57 AM ET (Andy, Dragonforge thread): dragons stay out of the Overworld until one is slain, "the only exception is the kingdom's having their own dragon tamers"; on the card he chose "Add a tamer and real dragons": realm dragons matched to the seat's land plus an MCA dragon tamer (RealmDragons, Professions.DRAGON_TAMER).
+- 2026-11-26 12:04 PM ET (Andy, Dragonforge thread): "approve" the lore line "Realm dragons and their tamers" (replaces "Realm wyverns" in Lore.md).
