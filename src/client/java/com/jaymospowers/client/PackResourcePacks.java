@@ -165,26 +165,13 @@ final class PackResourcePacks {
 	 */
 	private static final List<String> RETIRED = List.of("Fluid & Foolish");
 
-	/** (0.19.72) Andy: Excalibur and its additions optional and off by default. Fetched, never switched on here. */
-	static final List<Pack> OPTIONAL = List.of(
-		// (0.19.65; optional and off by default since 0.19.72) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0:
-		// shipped unchanged, never edited or built on, with a link to its official page on the pack's page): the whole game redrawn in its darker, earthier medieval
-		// style. Version 26.3_01, fetched from Modrinth (project hJAzl1Bs). Downloaded into resourcepacks/ but never
-		// switched on by us: /excalibur on (ExcaliburLook) puts it at the bottom of the pack order, so Fresh Animations,
-		// its patch below, our 3D items and every other pack draw over it. Our own textures' graded copies are the
-		// built-in excalibur_style pack (tools/excalibur_style, docs/Excalibur-Style.md); none of its pixels are in them.
-		new Pack("Excalibur", "jaymospowers-excalibur-v1", "Excalibur", "Excalibur_V26.3_01.zip",
-			"https://cdn.modrinth.com/data/hJAzl1Bs/versions/lk2oxwrP/Excalibur_V26.3_01.zip",
-			"97348d602be6def05fdfa9eee339ac64be5badd6", false, BASE),
-		// (0.19.65) "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; all rights reserved, but its page lets
-		// modpacks include it unchanged, never reupload or alter it): Fresh Animations' mobs drawn in Excalibur's style.
-		// Version 1.10.5 Hotfix 1 for 26.3, fetched from Modrinth (project yiTthr0O). It's made against Fresh
-		// Animations 1.10.5 and we ship 1.11.1; the mobs it covers bring their own models, so they still match. It sits
-		// just above Fresh Animations, under Better Horses, so donkeys and mules keep Better Horses' look. Also only switched
-		// on by /excalibur on.
-		new Pack("Excalibur's Fresh Animations", "jaymospowers-excalibur-fa-v1", "EFA_", "EFA_1.10.5 Hotfix 1.zip",
-			"https://cdn.modrinth.com/data/yiTthr0O/versions/UmkPWet8/EFA_1.10.5%20Hotfix%201.zip",
-			"0380c78d4e0086b6cade7597a4b57f14d06616ec", false, "FreshAnimations"));
+	/**
+	 * Excalibur and its Fresh Animations patch, retired for the pack's own Reason look (Andy, 2026-11-26). /excalibur
+	 * used to switch them on; they're switched off once, by these file name prefixes, and the files left in
+	 * resourcepacks/ are the player's to keep or delete.
+	 */
+	private static final List<String> EXCALIBUR = List.of("Excalibur", "EFA_");
+	private static final String EXCALIBUR_OFF = "jaymospowers-excalibur-retired-v1";
 
 	private PackResourcePacks() {
 	}
@@ -198,7 +185,26 @@ final class PackResourcePacks {
 		for (Pack pack : PACKS) {
 			enableOnce(minecraft, pack);
 		}
-		ExcaliburLook.start(minecraft);
+		retireExcalibur(minecraft);
+	}
+
+	/** Once per install: takes Excalibur, its patch and our old excalibur_style pack out of the selected packs. */
+	private static void retireExcalibur(Minecraft minecraft) {
+		Path marker = FabricLoader.getInstance().getConfigDir().resolve(EXCALIBUR_OFF);
+		if (Files.exists(marker)) {
+			return;
+		}
+		if (minecraft.options.resourcePacks.removeIf(id -> id.endsWith("excalibur_style")
+			|| EXCALIBUR.stream().anyMatch(prefix -> id.startsWith("file/" + prefix)))) {
+			minecraft.options.loadSelectedResourcePacks(minecraft.getResourcePackRepository());
+			minecraft.options.save();
+			minecraft.reloadResourcePacks();
+		}
+		try {
+			Files.writeString(marker, "Jaymo's Powers switched the retired Excalibur look off once. The Reason look replaces it.\n");
+		} catch (IOException e) {
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
+		}
 	}
 
 	private static void enableOnce(Minecraft minecraft, Pack pack) {

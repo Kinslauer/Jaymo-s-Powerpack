@@ -202,11 +202,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D guns"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.ALWAYS_ENABLED);
-		// modded items redrawn in vanilla's style (tools/vanilla_style, docs/Vanilla-Style.md); on by default, and
-		// switching it off in Resource Packs shows each mod's own art again
+		// the Reason look: the pack's own art style, clean vanilla-plus, over our mods and other mods' script-made or
+		// off-style textures (tools/vanilla_style, docs/Vanilla-Style.md). Its id stays vanilla_style so players' choice
+		// carries over; on by default, and switching it off in Resource Packs shows each mod's own art again
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("vanilla_style"),
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
-			net.minecraft.network.chat.Component.literal("Jaymo's Powers: vanilla-style items"),
+			net.minecraft.network.chat.Component.literal("Reason look"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		// (Motion patch 5) vanilla tools, bow, compass, clock, totem, brush, saddle and bottles solid in hand, 3D mushrooms
 		// and dripstone (tools/gen_held_3d.py); on by default, switched off in Resource Packs for the flat look
@@ -226,15 +227,6 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Klei_Wright's Tundra art"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
-		// (0.19.72) the optional Excalibur look (ExcaliburLook, docs/Excalibur-Style.md): our own textures graded toward
-		// Excalibur's colours (tools/excalibur_style) and calmer leaves (Excalibur's leaves hang fringes off every leaf
-		// block that repeat like a hall of mirrors inside a canopy; plain leaf cubes turned at random instead). Off by
-		// default; /excalibur on switches it on with Excalibur and its Fresh Animations patch, in the right order.
-		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("excalibur_style"),
-			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
-			net.minecraft.network.chat.Component.literal("Jaymo's Powers: Excalibur colours and leaves"),
-			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
-		ExcaliburLook.init();
 		// the Medieval Music pack empties the warped forest's music: this gives it three Nether tracks of the pack's. Not on by
 		// default: PackResourcePacks puts it just above the music pack when that is switched on (it points at that pack's files)
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("medieval_music_gaps"),
