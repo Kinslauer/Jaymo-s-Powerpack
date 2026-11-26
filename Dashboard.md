@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:52). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 17:02). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,6 +27,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2241 Dragon nests and dragon domains (Dragonforge picks, part 2) (Kingdoms, 2026-11-26)
+- [ ] #2240 Allays and the Sylvan: freeing caged allays, haven allays, a Sylvan's fall caught (Kingdoms, 2026-11-26)
+- [ ] #2239 fire alarm runs through town, everyone fights fires, twisters send people running, no stray Templar plate (Kingdoms, 2026-11-26)
 - [ ] #2238 Town crier: listeners who don't like the news shout, fight him or hire a blade (Kingdoms, 2026-11-26)
 - [ ] #2236 Town crier: verdicts are cried by the seat, not sent to chat (Kingdoms, 2026-11-26)
 - [ ] #2235 fire smoke settles low too, and makes you sick (Kingdoms, 2026-11-26)
@@ -84,10 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2166 the Verdant World is land again; pod landings and pads keep off the sea, and no second pod (Powers, 2026-11-25)
 - [ ] #2165 tree debris only when a player brought the tree down (Kingdoms, 2026-11-25)
 - [ ] #2164 red symbiote - hunts first, trust unlocks orders, takes over in its big body, fights you for the small suit (Powers, Kingdoms, 2026-11-25)
-- [ ] #2163 severed limbs lie where they are and look like the body they came off (Powers, Kitchen, 2026-11-25)
-- [ ] #2162 symbiote, ape and mob-host takeovers fight with their whole kit (Powers, Kingdoms, 2026-11-25)
-- [ ] #2161 Penguins no longer flood the server log with NaN rotation errors (Powers, 2026-11-25)
-- …and 608 older ones.
+- …and 611 older ones.
 
 ## Health
 
