@@ -1871,11 +1871,13 @@ public final class Captains {
 		Meeting m = c.met().get(player.getStringUUID());
 		c = c.met(player.getUUID(), new Meeting(m == null ? 1 : m.times() + 1, "killed", now));
 		bind(level, c, killer, false);
-		if (risen && HollowCaptains.is(killer)) {
-			// (one of the Hollow who walk with the dead, made a captain by the kill: his look kept, a Pallid's army called up)
-			HollowCaptains.keep(server, c.id(), killer);
-			HollowCaptains.muster(level, c, killer);
-		}
+				if (risen && HollowCaptains.is(killer)) {
+					// (one of the Hollow who walk with the dead, made a captain by the kill: his look kept, a Pallid's army called up)
+					HollowCaptains.keep(server, c.id(), killer);
+					HollowCaptains.muster(level, c, killer);
+					// Add this captain to the player's ladder (intersecting allowed - a captain can be on multiple ladders)
+					HollowCaptains.addToLadder(player, c.id());
+				}
 		// (his head, at the height of the scene: orcs always, anyone else now and then)
 		boolean takes = Rivals.side(c.tribe()) == Rivals.Side.ORC || random.nextFloat() < HEAD_TAKING;
 		scene(level, killer, player, c.id(), risen, takes ? player.getUUID() : null);
