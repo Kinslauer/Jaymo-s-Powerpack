@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,6 +15,7 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for ☀️ Apollo · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for ☀️ Apollo · open
+- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
 
 
 ## Being built
@@ -35,7 +36,6 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · blocked
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · blocked
-- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · blocked
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
 - [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · stalled
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
