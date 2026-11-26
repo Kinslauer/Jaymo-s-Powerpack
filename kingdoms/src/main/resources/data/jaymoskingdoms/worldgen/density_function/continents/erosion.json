@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:lerp",
+    "alpha": "jaymoskingdoms:continents/open",
+    "first": {
+      "type": "minecraft:noise",
+      "noise": "minecraft:erosion_large",
+      "shift_x": "minecraft:shift_x",
+      "shift_z": "minecraft:shift_z",
+      "xz_scale": 0.25,
+      "y_scale": 0.0
+    },
+    "second": {
+      "type": "minecraft:add",
+      "left": 0.3,
+      "right": {
+        "type": "minecraft:mul",
+        "left": 0.12,
+        "right": {
+          "type": "minecraft:noise",
+          "noise": "minecraft:erosion_large",
+          "shift_x": "minecraft:shift_x",
+          "shift_z": "minecraft:shift_z",
+          "xz_scale": 0.25,
+          "y_scale": 0.0
+        }
+      }
+    }
+  }
+}
