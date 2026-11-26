@@ -85,10 +85,12 @@ def mohknee(name, obj):
     write('jaymoskingdoms/worldgen/density_function/mohknee/' + name + '.json', obj)
 
 
-# the home world: its continents and climate are tools/gen_continents.py's; its erosion and ridges as before the far land
+# the home world: its continents, climate and erosion (with its open country) are tools/gen_continents.py's; its ridges
+# twice as wide as the game's (Mohknee keeps the game's own, below)
 HOME_CONTINENTS = 'jaymoskingdoms:continents/shape'
-mohknee('home_erosion', noise('minecraft:erosion_large', 0.25))
-mohknee('home_ridges', noise('minecraft:ridge', 0.25))   # the game's own: Kingdoms never changed it before
+RIDGE_SCALE = 0.125   # the ridge (weirdness) noise's xz scale: half the game's 0.25, as Tectonic's ridge scale (MIT): biome
+#                       variants twice as wide, rivers half as many and wider
+mohknee('home_ridges', noise('minecraft:ridge', RIDGE_SCALE))
 
 mohknee('wobble', {'type': 'minecraft:cache', 'input': noise('minecraft:continentalness', 0.5)})
 mohknee('distance', {'type': 'minecraft:cache', 'input': add(distance(*CENTRE), mul(WOBBLE, ref('wobble')))})
@@ -123,10 +125,11 @@ write('minecraft/worldgen/density_function/overworld/temperature.json',
 write('minecraft/worldgen/density_function/overworld/vegetation.json',
       band('jaymoskingdoms:continents/vegetation', 'minecraft:vegetation', ISLAND_CLIMATE[1], *VEGETATION))
 write('minecraft/worldgen/density_function/overworld/erosion.json',
-      {'type': 'minecraft:cache', 'input': band('home_erosion', 'minecraft:erosion', ISLAND_CLIMATE[2], *EROSION)})
+      {'type': 'minecraft:cache', 'input': band('jaymoskingdoms:continents/erosion', 'minecraft:erosion', ISLAND_CLIMATE[2], *EROSION)})
 # an island has no river valley through it (the higher sea would drown half of it): its ridges noise is held high
 write('minecraft/worldgen/density_function/overworld/ridges.json',
-      {'type': 'minecraft:cache', 'input': lerp(ref('island_climate'), ref('home_ridges'), ISLAND_RIDGES)})
+      {'type': 'minecraft:cache', 'input': lerp(ref('island_climate'), lerp(ref('climate'), ref('home_ridges'), noise('minecraft:ridge', 0.25)),
+                                                ISLAND_RIDGES)})
 # one village on each island, at its middle: the island structure with only_at, offered every chunk by its own set
 # (SharedPools.OWN_PLACES keeps that set out of the shared village pool)
 write('jaymoskingdoms/worldgen/structure/crossing_isle_village.json', {
