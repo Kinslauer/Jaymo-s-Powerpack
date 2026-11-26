@@ -65,8 +65,11 @@ public final class TownCrier {
 		}
 	}
 
-	/** One piece of news: the line ({@code crier.jaymoskingdoms.<key>}, its number picked), who it's about, and the rest. */
-	record Cry(String key, Named who, List<Component> rest, long at) {
+	/**
+	 * One piece of news: the line ({@code crier.jaymoskingdoms.<key>}, its number picked), who it's about, and the rest;
+	 * {@code outcome} is what came of it (a sentence's key, or a ranger's "fined" or "taken"), for those who hear it ({@link CrierGrudges}).
+	 */
+	record Cry(String key, Named who, List<Component> rest, String outcome, long at) {
 		Component words(ServerLevel level, ServerPlayer viewer) {
 			Object[] args = new Object[this.rest.size() + 1];
 			args[0] = this.who.to(level, viewer);
@@ -110,7 +113,8 @@ public final class TownCrier {
 			post.news.pollFirst();
 		}
 		String line = "crier.jaymoskingdoms." + key + "." + level.getRandom().nextInt(LINES);
-		post.news.addLast(new Cry(line, Named.of(who), List.of(rest), level.getGameTime()));
+		String outcome = key.substring(key.lastIndexOf('.') + 1);
+		post.news.addLast(new Cry(line, Named.of(who), List.of(rest), outcome, level.getGameTime()));
 	}
 
 	// ---- the tick ------------------------------------------------------------------------------------------------------
@@ -180,6 +184,8 @@ public final class TownCrier {
 			// each hears the names they know, in the crier's tongue
 			Speech.privately(crier, p, Languages.heard(p, crier, cry.words(level, p)), COLOR);
 		}
+		// whoever by him doesn't like what he's just cried may do something about it
+		CrierGrudges.heard(level, f, crier, cry.who().id(), cry.outcome());
 		post.opened = !post.news.isEmpty();
 		post.next = now + (post.opened ? OPEN_TICKS + GAP_TICKS / 2 : GAP_TICKS);
 	}
