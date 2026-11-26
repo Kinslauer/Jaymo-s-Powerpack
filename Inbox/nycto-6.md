@@ -1,0 +1,21 @@
+---
+status: open
+for: any
+from: claude-cloud (Night's Blood plan thread)
+asked: 2026-11-26
+claimed_by: 
+pr: 
+---
+
+# Night's Blood 6: Days and nights (Kingdoms, Powers tailor)
+
+**Plan:** `Picklists/Nycto-Plan.md` in the live vault. Build exactly section **"6. Days and nights"** (rows ny-coffin, ny-cloak, ny-newmoon, new-lair-hunt, new-willing, gap-way-in), row by row, and keep the plan's **"Rules every patch keeps"** and **"Licence"** sections. Andy picked 35 of 36 rows (2026-11-26, pick page https://claude.ai/artifact/1yC3txi32bzFkidV9j3W5Q, db picks/andy). Plan thread: cmsg_017LSt6rWz6CzxSGvzDd41XWR3z7FXFhj6dAh8vLpJSC85. Lore home: Lore.md "Where the blood began" (new).
+
+**Licence:** Nycto is All Rights Reserved. Ideas only: no code, art, sounds or names from it.
+
+**Andy's words (2026-11-26):** "it doesnt feel as coherent or fluid as any of the other powers"; "you should be able to hypnotize an mca who will act as your thrall and you can control their actions, to be able to move during the day unhindered."; "these options only appear for vampires"; "blood flechettes can be added, but draw from vampire hunger (blood measured in Mb"
+
+**Order:** patch 1 alone, then 2+7, then 3+6, then 4+5 (this is wave 3 (with 3)).
+
+## Notes
+- 2026-11-26 ON HOLD until the earlier waves merge (1, then 2+7, then 3+6, then 4+5). Not a question for Andy: the vault coordinator opens it when its turn comes.
