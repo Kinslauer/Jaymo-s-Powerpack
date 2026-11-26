@@ -23,6 +23,7 @@ kanban-plugin: board
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for ☀️ Apollo · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
