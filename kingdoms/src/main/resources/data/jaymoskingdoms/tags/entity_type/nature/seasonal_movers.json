@@ -1,0 +1,29 @@
+{
+ "values": [
+  "jaymoskingdoms:muskox",
+  {
+   "id": "cubeanimals:reindeer",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:bison",
+   "required": false
+  },
+  {
+   "id": "naturalist:bison",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:bison",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:antilope",
+   "required": false
+  },
+  {
+   "id": "naturalist:zebra",
+   "required": false
+  }
+ ]
+}

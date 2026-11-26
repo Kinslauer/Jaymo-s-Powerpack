@@ -87,6 +87,16 @@ public final class FedPredators {
 	}
 
 	/** Whether {@code mob} has eaten lately. */
+	/** {@code mob} has eaten (a fish at the run, a kill it kept): fed as after a kill. */
+	public static void feed(Mob mob) {
+		mob.setAttached(FED_UNTIL, mob.level().getGameTime() + FED_TICKS);
+	}
+
+	/** {@code mob} goes hungry again (driven off its kill, out of its den). */
+	public static void starve(Mob mob) {
+		mob.removeAttached(FED_UNTIL);
+	}
+
 	public static boolean fed(Mob mob) {
 		Long until = mob.getAttached(FED_UNTIL);
 		return until != null && mob.level().getGameTime() < until;

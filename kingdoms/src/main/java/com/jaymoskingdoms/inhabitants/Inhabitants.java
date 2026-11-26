@@ -43,6 +43,13 @@ public final class Inhabitants {
 	public static EntityType<ImpalerSpike> IMPALER_SPIKE;
 	/** Youth, the wood-wisp Hermes answers players through (no spawn egg; only /youth calls it). */
 	public static EntityType<YouthWisp> YOUTH_WISP;
+	/** The beaver of the rivers, ported from Eager Beavers (CC0), and its call. */
+	public static EntityType<Beaver> BEAVER;
+	public static net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> BEAVER_AMBIENT;
+	/** Its pelt, which it drops when killed. */
+	public static net.minecraft.world.item.Item BEAVER_PELT;
+	/** Where beavers live: river biomes (its own tag). */
+	static final TagKey<Biome> HAS_BEAVER = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_beaver"));
 
 	/** The beetle's natural spawn: its weight among the ambient mobs, and how many come together. */
 	static final int BEETLE_WEIGHT = 6, BEETLE_MIN = 2, BEETLE_MAX = 4;
@@ -75,6 +82,14 @@ public final class Inhabitants {
 			Impaler.createAttributes());
 		WARPED_CLAM = Beasts.type("warped_clam", EntityType.Builder.of(WarpedClam::new, MobCategory.CREATURE).sized(1.0F, 0.45F).clientTrackingRange(8),
 			WarpedClam.createAttributes());
+		BEAVER = Beasts.type("beaver", EntityType.Builder.of(Beaver::new, MobCategory.CREATURE).sized(0.7F, 0.6F).clientTrackingRange(8),
+			Beaver.createAttributes());
+		BEAVER_AMBIENT = Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, JaymosKingdoms.id("beaver_ambient"),
+			net.minecraft.sounds.SoundEvent.createVariableRangeEvent(JaymosKingdoms.id("beaver_ambient")));
+		ResourceKey<net.minecraft.world.item.Item> pelt = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("beaver_pelt"));
+		BEAVER_PELT = Registry.register(BuiltInRegistries.ITEM, pelt, new net.minecraft.world.item.Item(new net.minecraft.world.item.Item.Properties().setId(pelt)));
+		net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents.modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.INGREDIENTS)
+			.register(output -> output.accept(BEAVER_PELT));
 		ResourceKey<EntityType<?>> spike = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("impaler_spike"));
 		IMPALER_SPIKE = Registry.register(BuiltInRegistries.ENTITY_TYPE, spike, EntityType.Builder.<ImpalerSpike>of(ImpalerSpike::new, MobCategory.MISC)
 			.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(10).build(spike));
@@ -96,6 +111,8 @@ public final class Inhabitants {
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_IMPALER), MobCategory.MONSTER, IMPALER, Impaler.SPAWN_WEIGHT, 1, 1);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_WARPED_CLAM), MobCategory.CREATURE, WARPED_CLAM, WarpedClam.SPAWN_WEIGHT, CLAM_MIN, CLAM_MAX);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_BOGRE), MobCategory.MONSTER, BOGRE, Bogre.SPAWN_WEIGHT, 1, 1);
+		SpawnPlacements.register(BEAVER, SpawnPlacementTypes.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Beaver::checkSpawn);
+		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_BEAVER), MobCategory.CREATURE, BEAVER, Beaver.SPAWN_WEIGHT, Beaver.SPAWN_MIN, Beaver.SPAWN_MAX);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_BARROW_BEETLE), MobCategory.AMBIENT, BARROW_BEETLE, BEETLE_WEIGHT, BEETLE_MIN, BEETLE_MAX);
 	}
 }

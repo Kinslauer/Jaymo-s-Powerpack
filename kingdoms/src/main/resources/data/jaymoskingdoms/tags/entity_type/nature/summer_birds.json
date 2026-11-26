@@ -1,0 +1,28 @@
+{
+ "values": [
+  {
+   "id": "naturalist:duck",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:hummingbird",
+   "required": false
+  },
+  {
+   "id": "naturalist:butterfly",
+   "required": false
+  },
+  {
+   "id": "naturalist:dragonfly",
+   "required": false
+  },
+  {
+   "id": "naturalist:firefly",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:toucan",
+   "required": false
+  }
+ ]
+}
