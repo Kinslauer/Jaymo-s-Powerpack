@@ -13,5 +13,8 @@
   "hud.jaymoskingdoms.dragon_slam": "Dive slam",
   "message.jaymoskingdoms.dragon.wanders": "%s will keep about here.",
   "message.jaymoskingdoms.dragon.horn_called": "Your horn carries. Dragons answering: %s",
-  "name.jaymoskingdoms.realm_wyvern": "Wyvern of %s"
+  "name.jaymoskingdoms.realm_wyvern": "Wyvern of %s",
+  "name.jaymoskingdoms.realm_dragon": "Dragon of %s",
+  "entity.minecraft.villager.jaymoskingdoms.dragon_tamer": "Dragon Tamer",
+  "npc_task.jaymoskingdoms.trade.dragon_tamer": "Keeping the realm's dragon"
 }

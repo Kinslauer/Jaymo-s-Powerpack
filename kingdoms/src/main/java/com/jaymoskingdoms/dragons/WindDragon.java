@@ -243,6 +243,8 @@ public abstract class WindDragon extends AbstractHorse {
 	private int callLeft;
 	/** The kingdom (faction id) whose seat it guards, or -1 ({@code RealmDragons}). */
 	int realm = -1;
+	/** A realm dragon's tamer (a villager, {@code RealmDragons}), whose foes it takes on. */
+	@Nullable UUID keeper;
 	/** Whether it has laid its nest ({@link DragonNests}): a wild one lays one, once. */
 	boolean nested;
 
@@ -760,7 +762,8 @@ public abstract class WindDragon extends AbstractHorse {
 		boolean riderBreath = this.isTamed() && this.riderBreathUntil >= this.tickCount && !exhausted();
 		if (this.breathTicks > 0 || riderBreath) {
 			Vec3 aim = riderBreath ? this.riderAim : this.breathAim();
-			boolean griefing = riderBreath || level.getGameRules().get(GameRules.MOB_GRIEFING);
+			// (a realm's dragon never sets its own seat alight)
+			boolean griefing = riderBreath || !realmGuard() && level.getGameRules().get(GameRules.MOB_GRIEFING);
 			breathe(level, mouth(), aim, griefing);
 			if (this.breathTicks > 0) {
 				this.breathTicks--;
@@ -1739,6 +1742,9 @@ public abstract class WindDragon extends AbstractHorse {
 		this.home = this.tameHome;
 		LivingEntity owner = this.getOwner();
 		LivingEntity threat = owner != null && owner.level() == this.level() ? owner.getLastHurtByMob() : null;
+		if (threat == null && this.keeper != null && level.getEntity(this.keeper) instanceof LivingEntity tamer) {
+			threat = tamer.getLastHurtByMob();
+		}
 		if (!valid(threat) || threat == this || DragonBreath.spared(this, threat) || threat.distanceToSqr(this.tameHome) > PATROL_RANGE * PATROL_RANGE) {
 			threat = this.tickCount % 10 == 0 ? monsterNearHome(level) : this.foe;
 		}
@@ -2095,6 +2101,9 @@ public abstract class WindDragon extends AbstractHorse {
 			output.putDouble("dragon_home_z", this.tameHome.z);
 		}
 		output.putInt("dragon_realm", this.realm);
+		if (this.keeper != null) {
+			output.putString("dragon_keeper", this.keeper.toString());
+		}
 		output.putBoolean("dragon_nested", this.nested);
 		output.putInt("dragon_grounded", this.groundedLeft);
 		output.putLong("dragon_calm_until", this.calmUntil);
@@ -2113,6 +2122,12 @@ public abstract class WindDragon extends AbstractHorse {
 		this.tameHome = Double.isNaN(homeY) ? null
 			: new Vec3(input.getDoubleOr("dragon_home_x", 0.0), homeY, input.getDoubleOr("dragon_home_z", 0.0));
 		this.realm = input.getIntOr("dragon_realm", -1);
+		try {
+			String keeper = input.getStringOr("dragon_keeper", "");
+			this.keeper = keeper.isEmpty() ? null : UUID.fromString(keeper);
+		} catch (IllegalArgumentException e) {
+			this.keeper = null;
+		}
 		this.nested = input.getBooleanOr("dragon_nested", false);
 		this.calmUntil = input.getLongOr("dragon_calm_until", 0L);
 		this.hunters.clear();
