@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 09:59). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 10:00). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -9,7 +9,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 2026-11-26 09:35 Cloud Claude 2026-11-26: Andy's questions for this task are on the tick page https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (db picks/andy)…
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
-- [[Inbox/structures-4-mohknee|structures-4-mohknee]] · 2026-11-26 09:58 Cloud Claude: Andy left the ores question on the Waiting on Andy page at its suggestion (blossom steel from iron sand; barbarians rough iron a…
+- [[Inbox/structures-4-mohknee|structures-4-mohknee]] · 2026-11-26 09:59 Andy 2026-11-26 answered the open ores question: blossom kingdoms keep iron sand and folded steel as they are; barbarians get Ashlands rock ir…
 
 ## Stuck
 
@@ -91,7 +91,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2148 explorer maps never make chunks on the server thread (Kingdoms, 2026-11-25)
 - [ ] #2147 The Nightmare haunts from the dark instead of acting as an enderman (Kingdoms, 2026-11-25)
 - [ ] #2146 Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (Powers, Kingdoms, 2026-11-25)
-- …and 593 older ones.
+- …and 535 older ones.
 
 ## Health
 
