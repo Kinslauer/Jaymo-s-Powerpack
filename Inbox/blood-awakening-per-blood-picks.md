@@ -1,6 +1,6 @@
 ---
 status: open
-for: any
+for: quill
 from: Andy (decision card, 2026-11-24)
 asked: 2026-11-24
 claimed_by: 
