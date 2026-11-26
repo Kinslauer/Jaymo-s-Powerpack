@@ -73,7 +73,7 @@ public final class LeafCloak {
 		choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.leaf_cloak", PRICE), Money.canPay(player, Money.worth(PRICE)), p -> {
 			if (Money.charge(p, Money.worth(PRICE))) {
 				p.getInventory().placeItemBackInInventory(new ItemStack(CLOAK), Prediction.SERVER_ONLY);
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.ranger.leaf_cloaked").withStyle(net.minecraft.ChatFormatting.DARK_GREEN));
+				p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.ranger.leaf_cloaked").withStyle(net.minecraft.ChatFormatting.DARK_GREEN));
 			}
 		}));
 	}

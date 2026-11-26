@@ -12,6 +12,8 @@
   "speech.jaymoskingdoms.herbalist.wares": "I put stones in the fire at night and clay in the stream by day. Take one to wear at your belt: warm in the cold, cool in the heat.",
   "speech.jaymoskingdoms.herbalist.pouch": "A hot-stone pouch (%1$s)",
   "speech.jaymoskingdoms.herbalist.flask": "A cold-clay flask (%1$s)",
+  "gui.button.herbalist_wares": "Belt Charms",
+  "speech.jaymoskingdoms.herbalist.none": "I've nothing to sell you.",
   "speech.jaymoskingdoms.herbalist.leave": "Not today.",
   "message.jaymoskingdoms.herbalist.sold": "The herbalist hands you the %1$s."
 }

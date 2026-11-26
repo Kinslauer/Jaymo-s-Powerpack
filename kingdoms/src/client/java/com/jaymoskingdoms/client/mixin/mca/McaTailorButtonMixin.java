@@ -22,6 +22,12 @@ abstract class McaTailorButtonMixin {
 	private void jaymoskingdoms$tailorsOnly(MCAButton apiButton, AbstractDynamicScreen screen, CallbackInfo ci) {
 		String id = apiButton.identifier();
 		boolean costume = id.equals("gui.button.costume") || id.equals("gui.button.costume_table") || id.equals("gui.button.trade_hat");
+		if (id.equals("gui.button.herbalist_wares") && !FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			AbstractWidget self = (AbstractWidget)(Object)this;
+			self.visible = false;
+			self.active = false;
+			return;
+		}
 		if (!id.equals("gui.button.tailor") && !costume) {
 			return;
 		}

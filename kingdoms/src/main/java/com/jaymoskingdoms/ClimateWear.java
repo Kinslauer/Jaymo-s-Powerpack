@@ -131,7 +131,7 @@ public final class ClimateWear {
 			return;
 		}
 		String job = BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath();
-		boolean tailor = job.equals("shepherd");
+		boolean tailor = Tailors.is(v);
 		if (!tailor && !job.equals("farmer")) {
 			return;
 		}

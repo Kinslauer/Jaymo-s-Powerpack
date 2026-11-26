@@ -74,6 +74,12 @@ abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 			cir.setReturnValue(true);
 			return;
 		}
+		// the monastery herbalist's belt charms
+		if (command.equals(com.jaymoskingdoms.HerbalistWares.COMMAND)) {
+			com.jaymoskingdoms.HerbalistWares.ask(player, this.entity);
+			cir.setReturnValue(true);
+			return;
+		}
 		if (command.equals(com.jaymoskingdoms.TailorCostumes.SEW_COMMAND)) {
 			com.jaymoskingdoms.TailorCostumes.sew(player, this.entity);
 			cir.setReturnValue(true);

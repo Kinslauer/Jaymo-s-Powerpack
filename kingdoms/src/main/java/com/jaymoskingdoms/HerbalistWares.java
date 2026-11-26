@@ -4,15 +4,14 @@ import com.jaymoskingdoms.money.Money;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.util.Prediction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -32,27 +31,13 @@ public final class HerbalistWares {
 		FLASK = Identifier.fromNamespaceAndPath("jaymospowers", "cold_clay_flask"),
 		EQUINOX = Identifier.fromNamespaceAndPath("jaymospowers", "equinox_charm");
 
+	/** The MCA command (the button's id, less "gui.button."). */
+	public static final String COMMAND = "herbalist_wares";
+
 	private HerbalistWares() {
 	}
 
 	static void register() {
-		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(entity instanceof Worker w) || w.role() != IllagerSites.HERBALIST
-				|| !entity.isAlive()) {
-				return InteractionResult.PASS;
-			}
-			Optional<Item> pouch = BuiltInRegistries.ITEM.getOptional(POUCH), flask = BuiltInRegistries.ITEM.getOptional(FLASK);
-			if (pouch.isEmpty() && flask.isEmpty()) {
-				return InteractionResult.PASS;
-			}
-			List<Menus.Choice> choices = new ArrayList<>();
-			pouch.ifPresent(item -> choices.add(sale(sp, item, POUCH_PRICE, "pouch")));
-			flask.ifPresent(item -> choices.add(sale(sp, item, FLASK_PRICE, "flask")));
-			choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.herbalist.leave"), p -> {
-			}));
-			Menus.ask(sp, w.mob(), Component.translatable("speech.jaymoskingdoms.herbalist.wares"), choices);
-			return InteractionResult.SUCCESS;
-		});
 		// the rare one: now and then in a chest of the monastery's store
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
 			String path = table.unwrapKey().map(key -> key.identifier().getPath()).orElse("");
@@ -62,11 +47,27 @@ public final class HerbalistWares {
 		});
 	}
 
+	/** The Belt Charms button: the herbalist lays out what they make. */
+	public static void ask(ServerPlayer player, Villager villager) {
+		ServerLevel level = (ServerLevel)villager.level();
+		Optional<Item> pouch = BuiltInRegistries.ITEM.getOptional(POUCH), flask = BuiltInRegistries.ITEM.getOptional(FLASK);
+		if (!(villager instanceof Worker w) || w.role() != IllagerSites.HERBALIST || pouch.isEmpty() && flask.isEmpty()) {
+			Speech.tell(level, villager, player, Component.translatable("speech.jaymoskingdoms.herbalist.none"), Speech.WHITE);
+			return;
+		}
+		List<Menus.Choice> choices = new ArrayList<>();
+		pouch.ifPresent(item -> choices.add(sale(player, item, POUCH_PRICE, "pouch")));
+		flask.ifPresent(item -> choices.add(sale(player, item, FLASK_PRICE, "flask")));
+		choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.herbalist.leave"), p -> {
+		}));
+		Menus.ask(player, villager, Component.translatable("speech.jaymoskingdoms.herbalist.wares"), choices);
+	}
+
 	private static Menus.Choice sale(ServerPlayer player, Item item, int price, String key) {
 		return Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.herbalist." + key, price), Money.canPay(player, Money.worth(price)), p -> {
 			if (Money.charge(p, Money.worth(price))) {
 				p.getInventory().placeItemBackInInventory(new ItemStack(item), Prediction.SERVER_ONLY);
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.herbalist.sold", new ItemStack(item).getHoverName()));
+				p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.herbalist.sold", new ItemStack(item).getHoverName()));
 			}
 		});
 	}
