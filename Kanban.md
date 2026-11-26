@@ -4,13 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:18). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:33). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
-- [ ] [[Inbox/codex-reference-dinos-venom-restart|codex-reference-dinos-venom-restart]] · for any · open
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · for any · open
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for 🔥 Prometheus · open
