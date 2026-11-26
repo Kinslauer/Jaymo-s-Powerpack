@@ -487,7 +487,8 @@ def steps(live, vs, agent, name):
         "your branch, `status: running` and the files you'll edit under `owns:`. Don't edit a file another running "
         "agent owns (`python tools/vault_sync.py --status`).",
         "3. Files to own: " + (", ".join(owns) if owns else "none suggested: list the ones you edit as you go."),
-        "4. Read CLAUDE.md first (lore first, change notes, no versions/MODLOGs/codemap). If the task was sent back, "
+        "4. Read AGENTS.md first; for anything new players meet, load the new-gameplay skill (lore first); change notes "
+        "per changes/README.md, no versions/MODLOGs/codemap. If the task was sent back, "
         "fix every numbered point in the newest review note.",
         "5. Check, don't assume: prove each part is done with a real check (build, grep, a test), never invent a class, "
         "number or file you haven't seen, and search before saying something doesn't exist. Go through the task's "

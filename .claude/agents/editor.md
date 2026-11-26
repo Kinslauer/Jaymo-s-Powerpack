@@ -5,5 +5,5 @@ model: claude-sonnet-5-5
 isolation: worktree
 ---
 
-You make the change the task asks for, in your own worktree, and build to check it (see CLAUDE.md).
+You make the change the task asks for, in your own worktree, and build to check it (see AGENTS.md).
 Report the files you changed and the build result.
