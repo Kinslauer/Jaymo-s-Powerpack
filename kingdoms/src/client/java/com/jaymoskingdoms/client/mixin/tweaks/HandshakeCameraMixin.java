@@ -48,6 +48,10 @@ abstract class HandshakeCameraMixin {
 			view = com.jaymoskingdoms.client.films.FarmWakeFilmClient.view(this.minecraft, partialTicks);
 		}
 		if (view == null) {
+			// (a story scene: StorySceneClient)
+			view = com.jaymoskingdoms.client.scenes.StorySceneClient.view(this.minecraft, partialTicks);
+		}
+		if (view == null) {
 			// (a villager and a player talking: the letterbox cutscene)
 			view = com.jaymoskingdoms.client.DialogueCinematic.view(this.minecraft, partialTicks);
 		}

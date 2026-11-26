@@ -1,0 +1,102 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "angler_land": {
+   "animation_length": 0.75,
+   "bones": {
+    "right_arm": {
+     "rotation": {
+      "0.00": {
+       "vector": [
+        -75,
+        -15,
+        8
+       ],
+       "easing": "easeOutQuad"
+      },
+      "0.30": {
+       "vector": [
+        -155,
+        -10,
+        12
+       ],
+       "easing": "easeOutQuad"
+      },
+      "0.50": {
+       "vector": [
+        -120,
+        -10,
+        10
+       ],
+       "easing": "easeOutQuad"
+      },
+      "0.75": {
+       "vector": [
+        -45,
+        -10,
+        5
+       ],
+       "easing": "easeOutQuad"
+      }
+     }
+    },
+    "left_arm": {
+     "rotation": {
+      "0.00": {
+       "vector": [
+        -55,
+        25,
+        0
+       ],
+       "easing": "easeOutQuad"
+      },
+      "0.30": {
+       "vector": [
+        -100,
+        20,
+        -8
+       ],
+       "easing": "easeOutQuad"
+      },
+      "0.75": {
+       "vector": [
+        -25,
+        10,
+        -5
+       ],
+       "easing": "easeOutQuad"
+      }
+     }
+    },
+    "torso": {
+     "rotation": {
+      "0.00": {
+       "vector": [
+        -8,
+        0,
+        0
+       ],
+       "easing": "easeOutQuad"
+      },
+      "0.30": {
+       "vector": [
+        -16,
+        0,
+        0
+       ],
+       "easing": "easeOutQuad"
+      },
+      "0.75": {
+       "vector": [
+        0,
+        0,
+        0
+       ],
+       "easing": "easeOutQuad"
+      }
+     }
+    }
+   }
+  }
+ }
+}

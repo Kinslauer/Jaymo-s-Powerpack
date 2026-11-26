@@ -73,7 +73,7 @@ public final class ShipCannonBlock extends Block {
 	 * no one at it; and how far past the block's face the shot leaves it.
 	 */
 	static final float ELEVATION = 1.5F, LOWEST = -6.0F, HIGHEST = 15.0F;
-	static final double MUZZLE = 0.9;
+	public static final double MUZZLE = 0.9;
 	/** (0.7.490) How hard a ship is shoved back by a gun firing (blocks, taken up at her next move). */
 	static final double RECOIL = 0.04;
 	/**
@@ -278,8 +278,20 @@ public final class ShipCannonBlock extends Block {
 	/** What a pulse does: powder, then a ball, out of the store behind the breech if it isn't loaded; then it fires. Its next state. */
 	private BlockState pulse(ServerLevel level, BlockPos pos, BlockState state) {
 		Direction f = state.getValue(FACING);
+		Load load = fromStore(level, pos, f, state.getValue(LOAD));
+		if (!load.loaded()) {
+			level.playSound(null, pos, SoundEvents.DISPENSER_FAIL, SoundSource.BLOCKS, 1.0F, 0.8F);
+			return state.setValue(LOAD, load);
+		}
+		ShotKind kind = ShotKind.of(load);
+		level.scheduleTick(pos, this, RECOIL_TICKS);
+		fire(level, Vec3.atCenterOf(pos), f.getStepX(), f.getStepZ(), null, null, kind == null ? ShotKind.ROUND : kind);
+		return state.setValue(LOAD, Load.EMPTY).setValue(RECOILED, true);
+	}
+
+	/** {@code load} topped up out of the store behind the breech of the gun at {@code pos}: a powder, then a ball, real ones, spent. */
+	private static Load fromStore(ServerLevel level, BlockPos pos, Direction f, Load load) {
 		Container store = HopperBlockEntity.getContainerAt(level, pos.relative(f.getOpposite()));
-		Load load = state.getValue(LOAD);
 		if (load == Load.EMPTY && store != null && !spend(store, s -> s.is(Items.GUNPOWDER)).isEmpty()) {
 			load = Load.POWDER;
 		}
@@ -290,14 +302,42 @@ public final class ShipCannonBlock extends Block {
 				load = kind == null ? Load.SHOT : kind.load();
 			}
 		}
+		return load;
+	}
+
+	/**
+	 * A gun set in the world with its gunner beside it (a long ship's guns, {@code DeckGuns}): the shot she's loaded with,
+	 * loading her first out of the store behind her breech if she isn't (powder, then a ball, spent from it); null if
+	 * she can't be (not a gun, still run back from her last shot, or nothing left to load).
+	 */
+	public static @Nullable ShotKind ready(ServerLevel level, BlockPos pos) {
+		BlockState state = level.getBlockState(pos);
+		if (!(state.getBlock() instanceof ShipCannonBlock) || state.getValue(RECOILED)) {
+			return null;
+		}
+		Load load = state.getValue(LOAD);
 		if (!load.loaded()) {
-			level.playSound(null, pos, SoundEvents.DISPENSER_FAIL, SoundSource.BLOCKS, 1.0F, 0.8F);
-			return state.setValue(LOAD, load);
+			load = fromStore(level, pos, state.getValue(FACING), load);
+			level.setBlock(pos, state.setValue(LOAD, load), Block.UPDATE_ALL);
+			if (load.loaded()) {
+				level.playSound(null, pos, SoundEvents.SAND_PLACE, SoundSource.BLOCKS, 0.8F, 0.7F);
+			}
 		}
 		ShotKind kind = ShotKind.of(load);
-		level.scheduleTick(pos, this, RECOIL_TICKS);
-		fire(level, Vec3.atCenterOf(pos), f.getStepX(), f.getStepZ(), null, null, kind == null ? ShotKind.ROUND : kind);
-		return state.setValue(LOAD, Load.EMPTY).setValue(RECOILED, true);
+		return load.loaded() ? (kind == null ? ShotKind.ROUND : kind) : null;
+	}
+
+	/** The loaded gun at {@code pos} fired along {@code dir} (laid by {@code gunner}); false if she wasn't loaded. */
+	public static boolean fireLaid(ServerLevel level, BlockPos pos, Vec3 dir, net.minecraft.world.entity.@Nullable Entity gunner) {
+		BlockState state = level.getBlockState(pos);
+		if (!(state.getBlock() instanceof ShipCannonBlock gun) || !state.getValue(LOAD).loaded() || state.getValue(RECOILED)) {
+			return false;
+		}
+		ShotKind kind = ShotKind.of(state.getValue(LOAD));
+		level.setBlock(pos, state.setValue(LOAD, Load.EMPTY).setValue(RECOILED, true), Block.UPDATE_ALL);
+		level.scheduleTick(pos, gun, RECOIL_TICKS);
+		fireAlong(level, Vec3.atCenterOf(pos), dir, gunner, null, kind == null ? ShotKind.ROUND : kind);
+		return true;
 	}
 
 	/** One of what {@code what} takes, out of {@code store} (empty: it has none). */

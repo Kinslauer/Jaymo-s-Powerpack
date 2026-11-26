@@ -8426,3 +8426,8 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - **No blood on limbs that are gone** (`client/blood/LimbCut`, `BloodCoatLayer`): Andy, of a guard whose legs the zombies ate, "the red you see IS the blood drawn in the wrong place, its attached to limbs that arent there". The blood and dirt overlay now has the lost parts (each arm, leg and the head, with the sleeve, trouser or hat over it) cut out of its texture before it's drawn, on living bodies (`Dismembered.MISSING`) and on Kitchen corpses (`Severed.KEY`), MCA villagers too. Only square overlays in the player skin layout are cut.
 - **Owls leave downed players be** (`Downed.SPARE_DOWNED`, tag `jaymospowers:spare_downed`: Cube Animals' barn owl): Andy, "owls should no longer finish downed players". Their blows on a downed player do nothing, and they drop them as a target.
 - Built with Gradle; not played.
+
+## 0.27.77 (2026-11-26): Tissou's zombie sounds stay on (#2203)
+
+- **Zombie sounds back**: Tissou's Zombie Pack (its zombie, husk and zombie villager groans, and the future's zombie skins) had dropped out of the selected resource packs, so zombies sounded like the game's own again; it was only ever switched on once per install. It's now kept on like the medieval villagers pack: switched back on at any launch it's found off. A player who'd rather not have it creates `config/jaymospowers-tissou-zombies-off` (`PackResourcePacks`).
+- Not run in game: couldn't see Andy's options or log from here, so why it dropped out is a guess (the same thing happened to the medieval villagers pack on 2026-11-04).

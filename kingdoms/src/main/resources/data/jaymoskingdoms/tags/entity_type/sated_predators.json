@@ -60,6 +60,10 @@
 			"required": false
 		},
 		{
+			"id": "alexsmobs:anaconda",
+			"required": false
+		},
+		{
 			"id": "bearminimum:brown_bear",
 			"required": false
 		},

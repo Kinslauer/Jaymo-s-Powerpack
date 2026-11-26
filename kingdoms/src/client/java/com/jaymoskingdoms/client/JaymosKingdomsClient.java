@@ -97,6 +97,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.films.BossIntroClient.register();
 		// the Family farmhand's wake-up talk, letterboxed (FarmhandWake)
 		com.jaymoskingdoms.client.films.FarmWakeFilmClient.register();
+		com.jaymoskingdoms.client.scenes.StorySceneClient.register();
+		com.jaymoskingdoms.client.scenes.SpokenSpells.register();
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// a handgonne's or an arquebus's ball (EarlyGuns)
 		EntityRenderers.register(com.jaymoskingdoms.GunBall.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.5F, false));
@@ -142,6 +144,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.oldage.OldAgeClient.register();
 		// (0.7.206) whaling: great whales, their carcasses, harpoons and their lines
 		com.jaymoskingdoms.client.whaling.GreatWhaleRenderer.register();
+		AnglerFloatRenderer.register();
 		MobAnimations.register();
 		PullerPose.register();
 		// 0.5.50: a pickpocket's arm in the pocket

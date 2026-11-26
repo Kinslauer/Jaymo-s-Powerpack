@@ -45,8 +45,8 @@ final class Jobs {
 	static final double AT_SITE = 3.0;
 	/** How far a villager without a trade is sent for a job site. */
 	static final int SITE_RANGE = 96;
-	/** A batch: raw ore smelted (with one coal), meat cooked, cobblestone cut, fish caught. */
-	static final int SMELT = 8, COOK = 8, CUT = 8, FISH = 2;
+	/** A batch: raw ore smelted (with one coal), meat cooked, cobblestone cut (a fisherman lands his fish one at a time: Anglers). */
+	static final int SMELT = 8, COOK = 8, CUT = 8;
 	/** A fisherman fishes open water this near them (blocks across). */
 	static final int FISH_WATER = 10;
 	/** The mason cuts only cobblestone over this (the builders' share is kept). */
@@ -215,18 +215,17 @@ final class Jobs {
 		}
 		if (trade.is(VillagerProfession.FISHERMAN)) {
 			// (Andy, 2026-11-19: no food out of nowhere) only with open water by their barrel to fish: they cast into it and
-			// land what bites; a barrel with no water near catches nothing
+			// (Andy, 2026-11-26: "all npcs should have to fight fish and be seen doing so") fight what bites, in view
+			// (Anglers); what they land goes into the stores, a fish that tears free doesn't. A barrel with no water near catches nothing
+			if (Anglers.angling(v)) {
+				return true;
+			}
 			BlockPos water = water(level, v.blockPosition());
 			if (water == null) {
 				return false;
 			}
-			v.getLookControl().setLookAt(water.getX() + 0.5, water.getY() + 0.9, water.getZ() + 0.5);
-			v.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-			level.playSound(null, water, net.minecraft.sounds.SoundEvents.FISHING_BOBBER_SPLASH, net.minecraft.sounds.SoundSource.NEUTRAL, 0.6F, 1.0F);
-			level.sendParticles(ParticleTypes.SPLASH, water.getX() + 0.5, water.getY() + 1.0, water.getZ() + 0.5, 12, 0.3, 0.05, 0.3, 0.1);
-			level.sendParticles(ParticleTypes.FISHING, water.getX() + 0.5, water.getY() + 1.0, water.getZ() + 0.5, 6, 0.3, 0.0, 0.3, 0.05);
-			Storage.put(level, f, level.getRandom().nextInt(3) == 0 ? Items.SALMON : Items.COD, 1 + level.getRandom().nextInt(FISH));
-			return true;
+			net.minecraft.world.phys.Vec3 spot = new net.minecraft.world.phys.Vec3(water.getX() + 0.5, water.getY() + 0.9, water.getZ() + 0.5);
+			return Anglers.cast(level, v, spot, fish -> Storage.put(level, f, fish));
 		}
 		if (trade.is(VillagerProfession.FARMER)) {
 			// the harvest it carries, but for what it keeps to sow and bake

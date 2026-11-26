@@ -16,12 +16,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Items;
@@ -49,9 +46,7 @@ final class Fishers {
 	static final long FISHING = 20L * 60L * 4L;
 	static final double ARRIVE = 14.0;
 	static final double SAIL = 0.6;
-	/** A splash of her lines every this many thinks while she fishes. */
-	static final int SPLASH_EVERY = 4;
-	/** Her catch, landed into the realm's stores: cod and salmon (at least, at most), and what it earns the realm. */
+	/** Her catch if nobody saw her fish (her hands' own catch otherwise), landed into the realm's stores: cod and salmon (at least, at most), and what it earns the realm. */
 	static final int COD_LEAST = 12, COD_MOST = 32, SALMON_LEAST = 4, SALMON_MOST = 16;
 	static final long CATCH_PROFIT = 10L;
 	/** Her crew besides her skipper. */
@@ -210,7 +205,7 @@ final class Fishers {
 				crew.mode = "homeward";
 				crew.bound = crew.home;
 			} else {
-				lines(level, ship);
+				// (her hands fish over her sides: Provisions, Corsairs' deckwork)
 				return new float[] {ship.getYRot(), 0.0F};
 			}
 		}
@@ -235,24 +230,6 @@ final class Fishers {
 		return new float[] {Fleet.bearing(ship, crew.bound.getX() + 0.5, crew.bound.getZ() + 0.5), (float)(d < 30.0 ? SAIL * 0.5 : SAIL)};
 	}
 
-	/** Her lines over the side: a splash now and then, and now and then a fish. */
-	private static void lines(ServerLevel level, Ship ship) {
-		RandomSource random = level.getRandom();
-		if (random.nextInt(SPLASH_EVERY) != 0) {
-			return;
-		}
-		double side = random.nextBoolean() ? 3.5 : -3.5;
-		double yaw = ship.getYRot() * Mth.DEG_TO_RAD;
-		double x = ship.getX() + Math.cos(yaw) * side + (random.nextDouble() - 0.5) * 6.0;
-		double z = ship.getZ() + Math.sin(yaw) * side + (random.nextDouble() - 0.5) * 6.0;
-		double y = level.getSeaLevel();
-		level.playSound(null, x, y, z, SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.NEUTRAL, 0.5F, 0.9F + random.nextFloat() * 0.2F);
-		level.sendParticles(ParticleTypes.FISHING, x, y, z, 6, 0.3, 0.0, 0.3, 0.05);
-		if (random.nextInt(3) == 0) {
-			level.sendParticles(ParticleTypes.SPLASH, x, y, z, 10, 0.2, 0.1, 0.2, 0.1);
-		}
-	}
-
 	/** She's home: her catch into the realm's stores, a little for its treasury, and she's warped in (gone). */
 	private static void landed(ServerLevel level, Ship ship, Crew crew) {
 		MinecraftServer server = level.getServer();
@@ -260,8 +237,14 @@ final class Fishers {
 		RandomSource random = level.getRandom();
 		if (f != null) {
 			if (Storage.loaded(level, f)) {
-				Storage.put(level, f, Items.COD, Mth.nextInt(random, COD_LEAST, COD_MOST));
-				Storage.put(level, f, Items.SALMON, Mth.nextInt(random, SALMON_LEAST, SALMON_MOST));
+				// what her hands landed on the grounds; a voyage made out of anyone's sight (nobody there to fish) brings home the usual
+				Map<net.minecraft.world.item.Item, Integer> caught = Provisions.takeCatch(crew);
+				if (caught.isEmpty()) {
+					Storage.put(level, f, Items.COD, Mth.nextInt(random, COD_LEAST, COD_MOST));
+					Storage.put(level, f, Items.SALMON, Mth.nextInt(random, SALMON_LEAST, SALMON_MOST));
+				} else {
+					caught.forEach((item, n) -> Storage.put(level, f, item, n));
+				}
 			}
 			Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() + CATCH_PROFIT));
 			Boat b = boat(server, f.id());

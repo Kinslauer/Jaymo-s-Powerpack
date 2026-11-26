@@ -199,6 +199,10 @@ public final class Shrine extends Block {
 			// two in the paired harness, side by side: sworn back to back (FantasyArmorCompat)
 			return InteractionResult.SUCCESS;
 		}
+		if (MidnightBargain.atShrine(sp, pos)) {
+			// a Warlock at midnight who hasn't made the bargain: whatever answers (MidnightBargain)
+			return InteractionResult.SUCCESS;
+		}
 		long today = Math.floorDiv(server.getOverworldClockTime(), DAY);
 		Long last = sp.getAttached(PRAYED);
 		if (last != null && last == today) {
