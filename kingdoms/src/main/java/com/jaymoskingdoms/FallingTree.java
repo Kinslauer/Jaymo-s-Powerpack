@@ -120,9 +120,10 @@ public final class FallingTree extends Entity {
 	 * (0.7.588) Andy: "keep the trees as physics items until they are broken by the player ... a leaning tree broken in
 	 * the middle will break into two". Down, it stays this (never blocks): an axe takes {@link #LOG_CHOPS} strokes at a
 	 * log to break it out, a leaf one. Its leaves drop off as it lies, up to {@link #LEAF_FALL} every
-	 * {@link #LEAF_FALL_TICKS}; a leaf further than {@link #LEAF_HOLD} from any of its wood falls at once.
+	 * {@link #LEAF_FALL_TICKS}; a leaf further than {@link #LEAF_HOLD} from any of its wood falls at once. (Each time some
+	 * drop, the whole tree is sent to everyone watching again and drawn anew, so they go a few at a time, not two by two.)
 	 */
-	static final int LOG_CHOPS = 3, LEAF_FALL = 2, LEAF_FALL_TICKS = 10, LEAF_HOLD = 3;
+	static final int LOG_CHOPS = 3, LEAF_FALL = 6, LEAF_FALL_TICKS = 30, LEAF_HOLD = 3;
 	/**
 	 * Andy, 2026-11-25 (a village buried in tree debris after a storm, and the lag with it): "those should disappear quicker
 	 * if no players are nearby, or the drops shouldnt spawn at all if a player didnt chop the tree or cause the fall". A
