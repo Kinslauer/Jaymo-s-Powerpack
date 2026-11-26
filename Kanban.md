@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for any · open
 - [ ] [[Inbox/codex-reference-dinos-venom-restart|codex-reference-dinos-venom-restart]] · for any · open
-- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · open
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · for any · open
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for any · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
@@ -25,6 +24,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · claimed
 
 
 ## In review
