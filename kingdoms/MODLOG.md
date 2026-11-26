@@ -17831,3 +17831,8 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Spawn eggs and dragon eggs**: about 100 eggs are vanilla's spotted egg in each mob's two colours, lit from the top-left.
 - **Mob skins**: the old dead (risen, husks, mutants), horse coats, lords, builders, chiefs, barbarians, camp shamans, dragon hides, legends, champions, creatures and the rest lose their per-pixel jitter and are painted in a few tones; stains, holes, marks and stripes stay.
 - Art only; checked with the art check, not played.
+
+## 0.13.35 (2026-11-26): Open art sets, batch 1: engineer's hammer icon (#2214)
+
+- The **Engineer's Hammer** icon is now Shade's CC0 16x16 steel hammer, used as it is (`tools/open_art/apply.py`, credits in `docs/Vanilla-Style.md`).
+- Built; not played.

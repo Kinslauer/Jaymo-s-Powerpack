@@ -8500,3 +8500,9 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - Left out: the aircraft and the warship (credited to Pine-san), the port and offshore districts and Lost Cities' oil rig (they stand in sea the Maw doesn't have). Pomkots Mechs blocks became a chest and a smithing table, 1.20.1 grass/chain ids got their 26.3 names, and water became air.
 - `MawCities` sets the profile's world style to `jaymospowers:maw`; 1,939 assets in `data/jaymospowers/lostcities/*/maw/` plus `worldstyles/maw.json`, made by `tools/pomkot_maw_port.py`; licence in `licenses/pomkots-world/LICENSE`.
 - Every asset decoded with Lost Cities 26.3's own codecs and every block state checked against 26.3's block report. Not played: Maw chunks already generated keep their old ruins, and how the new districts sit under the broken world hasn't been seen in game.
+
+## 0.27.84 (2026-11-26): Open art sets, batch 1: machines and far-world rock (#2214)
+
+- The **Gravity Machine** (every face, off and running), the **Fuel Works**' sides and top and the **Landing Beacon**'s base now use Militech's machine casings (LutherDev, MIT); the far worlds' **moon, Glacia and Verdant rock** use the CC0 16x16 Block Texture Set's stone, glacier ice and serpentine. Other artists' pixels as they are, no repaint (`tools/open_art/apply.py`, credits in `docs/Vanilla-Style.md`).
+- **Pods by who flies them** (Andy's pick): your **Space Pod**'s icon is now a ship from Master484's CC0 16x16 Ship Collection, and on the pod's flight screen a **raider's pod** is a red fighter and a **derelict** an old pod, each its own ship instead of the same tinted picture (`PodFlightScreen`). Galactic Patrol pods never show on the flight screen, so they have no ship yet; each pod type's matching model comes later.
+- Built; not played.
