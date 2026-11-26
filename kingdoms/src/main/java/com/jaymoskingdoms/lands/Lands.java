@@ -191,4 +191,20 @@ public final class Lands {
 	public static ResourceKey<Biome>[] all() {
 		return ALL.clone();
 	}
+
+	/**
+	 * True on a thread while the game builds its built-in registries' Overworld biome list
+	 * ({@code MultiNoiseBiomeSourceParameterLists.bootstrap}, which TaCZ runs at start). Those registries hold only the game's
+	 * own biomes, so our lands must stay out of that list or building them fails ("No value registered for key
+	 * jaymoskingdoms:salt_desert"). A world's own list is read with the data packs' biomes and still gets them.
+	 */
+	private static final ThreadLocal<Boolean> BUILT_IN = ThreadLocal.withInitial(() -> false);
+
+	public static void buildingBuiltIn(boolean on) {
+		BUILT_IN.set(on);
+	}
+
+	public static boolean buildingBuiltIn() {
+		return BUILT_IN.get();
+	}
 }
