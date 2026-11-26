@@ -36,10 +36,6 @@
       "required": false
     },
     {
-      "id": "jaymospowers:rig_forge",
-      "required": false
-    },
-    {
       "id": "jaymospowers:outpost_campfire",
       "required": false
     },

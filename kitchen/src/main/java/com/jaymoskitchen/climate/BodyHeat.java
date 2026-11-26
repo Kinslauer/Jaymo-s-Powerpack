@@ -140,7 +140,7 @@ public final class BodyHeat {
 	static final int CHILL_RANGE = 5, CHILL_HEIGHT = 3, CHILL_CELLS = 700;
 	static final int FIRE_RANGE = 20;
 	/** The most air a walk from you looks through for a fire, near and far (a fire's warmth fills its room, not the stone round it). */
-	static final int NEAR_CELLS = 700, FAR_CELLS = 4000;
+	static final int NEAR_CELLS = 700, FAR_CELLS = 8000;
 	/**
 	 * Looked for every second this close (and {@link #NEAR_HEIGHT} up and down); the rest of {@link #FIRE_RANGE} every
 	 * {@link #FAR_EVERY} seconds ({@link #FIRE_HEIGHT} up and down).
@@ -699,7 +699,7 @@ public final class BodyHeat {
 			air = Math.min(0.0F, air + warm * WARM_PIECE + (heldWarm ? HELD_WARM : 0.0F) + (warmMount(player) ? MOUNT_WARMTH : 0.0F));
 		} else {
 			air += warm * STUFFY_PIECE - cool * COOL_PIECE - (heldCool ? HELD_COOL : 0.0F);
-			air -= chill(player);
+			if (!spring) air -= chill(player);
 			if (sky && !shaded && level.isBrightOutside() && land > 0.0F) {
 				air += metalArmour(player) * ARMOUR_IN_SUN;
 			}
