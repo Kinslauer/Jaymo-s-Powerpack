@@ -101,3 +101,25 @@ Armour: `python -I tools/vanilla_style/armour.py <vanilla 26.3 assets/minecraft/
 
 Regenerate from the repository root with the vanilla 26.3 `textures/item` folder:
 `python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>`, `powers.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.
+
+## Powers art and other mods (2026-11-26, patches 6 and 7)
+Powers: `tools/gen_fishing_species.py` draws the 32 fish icons (`tools/vanilla_style/fish_icons.py`, one hand-drawn grid per
+species) and the 35 spawn eggs (`spawn_egg.py`, vanilla's egg). `tools/vanilla_style/powers_reason.py` runs after the old
+generators: the dust pile, and `reason_clean`'s smoother plus a fold into few shades for the parts, blocks and skins the
+art check reported (`entity/smoke/puff.png` is an effect and stays).
+Other mods: `python -I tools/vanilla_style/other_mods.py <extracted jars> <vanilla textures>` writes replacements into the pack.
+
+### Credits and licence basis
+| Mod | What the pack replaces | Basis |
+|---|---|---|
+| Cube Animals | 162 entity skins and 58 items, cleaned from its own pixels | CC0 |
+| Vanilla Constructs | 18 diamond buckets, tools and items, cleaned | MIT |
+| Eternal Nether | 8 withered blocks and the netherite bell, cleaned | MIT |
+| Shippy Ships | 19 sail pattern icons, fresh paintings (no pixel copied) | custom limited licence |
+| Cooking for Blockheads | 16 dye colours of oven front, plain and lit (32 blocks), fresh paintings | All Rights Reserved |
+| Stellarity | 7 icons (decayed clover, ender koi, three harvester swords, end city map, Deviant's Light disc), fresh paintings | own limited licence |
+| Knight Armor and Weapons | 4 armour icons: vanilla's iron armour in steel, visor, strap and cloth added | All Rights Reserved |
+
+Left alone on purpose: Simply Tents (every icon is a GeckoLib model sheet, a flat icon would not show), the knight
+weapons and blade/handle parts (custom 3D models or odd sizes), Stellarity's 32 px `_held` and 3D weapon textures (their
+models are drawn at double size), and Stellarity's animated prismatic pearl and punch arrow strips.
