@@ -214,7 +214,8 @@ public final class Thirst {
 			// (0.5.48) the core soaks it up
 			set(player, water(player) + 1);
 		}
-		float drained = DRAINED.getOrDefault(id, 0.0F) + (DRAIN * rate + exerted / EXHAUSTION_POINT) * BodyHeat.thirstFactor(player);
+		float drained = DRAINED.getOrDefault(id, 0.0F) + (DRAIN * rate + exerted / EXHAUSTION_POINT) * BodyHeat.thirstFactor(player)
+			* com.jaymoskitchen.season.Tropics.thirstFactor(player);
 		if (drained >= 1.0F) {
 			set(player, water(player) - 1);
 			drained -= 1.0F;
