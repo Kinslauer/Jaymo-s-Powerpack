@@ -22,3 +22,4 @@ Build the table (plan section 2) so placement and sieges can read it. Greenskins
 
 ## Notes
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: barbarians separate, Humans, or per tribe? Account for later Pallids-as-faction ruling (Decisions.md). FactionType currently describes settlement form; preserve its saved meaning rather than conflating it with peoples/allegiances.
+- 2026-11-26 00:35 Unblocked 2026-11-26: Andy answered both open questions — barbarians are classed by each tribe's own people (not a ninth faction), and the Pallid ruling stands (Pallids are the intelligent Hollow, lead armies of skeletons/zombies as their own faction, Decisions.md 2026-11-25). Build the faction table + relations (FactionType, Relation); Greenskins vs Pillagers never ally; add Pallids as a faction. YOUTH delegated this to Apollo (Claude approved).
