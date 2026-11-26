@@ -209,14 +209,22 @@ final class PackResourcePacks {
 	private PackResourcePacks() {
 	}
 
+	static List<Pack> packs() {
+		return PACKS;
+	}
+
 	static void enableOnce(Minecraft minecraft) {
 		if (minecraft.options.resourcePacks.removeIf(id -> RETIRED.stream().anyMatch(prefix -> id.startsWith("file/" + prefix)))) {
 			minecraft.options.loadSelectedResourcePacks(minecraft.getResourcePackRepository());
 			minecraft.options.save();
 			minecraft.reloadResourcePacks();
 		}
+		boolean vanillaLook = TextureLook.vanilla();
 		for (Pack pack : PACKS) {
-			enableOnce(minecraft, pack);
+			// a player who picked the vanilla look (/texturelook vanilla) gets none of the retexture packs
+			if (!(vanillaLook && TextureLook.isLookPack(pack.prefix()))) {
+				enableOnce(minecraft, pack);
+			}
 		}
 		retireExcalibur(minecraft);
 	}
