@@ -27,4 +27,4 @@ owns:
 
 ## Done
 See changes/kingdoms/claude-project-thread-hbvaa4.md. Built; not played, no dev server run.
-- 2026-11-26 04:26 PR #2201 is merged into master; moved to Agents/Done.
+- 2026-11-26 04:44 PR #2201 is merged into master; moved to Agents/Done.
