@@ -13,6 +13,9 @@ import math, os, random, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image, ImageDraw
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import reason_fold  # noqa: E402
 import gen_dragons as g
 from gen_dragons import rgb, jitter, mix, shade, write, entry, egg, ASSETS, DATA, ITEM, SIZE
 
@@ -455,7 +458,7 @@ def species():
     hides = [hide_texture(i) for i in range(len(HIDES))]
     marks = [marks_texture(i) for i in range(len(MARKS))]
     for i, h in enumerate(hides):
-        h.save(folder + 'hide_%d.png' % i)
+        reason_fold.save(h, folder + 'hide_%d.png' % i)
     for i, m in enumerate(marks):
         m.save(folder + 'marks_%d.png' % i)
     return hides, marks

@@ -35,7 +35,7 @@ def read_png(path):
     if data[:8] != b"\x89PNG\r\n\x1a\n":
         return None
     pos, idat, plte, trns = 8, b"", None, None
-    while pos < len(data):
+    while pos + 8 <= len(data):
         n, kind = struct.unpack(">I4s", data[pos:pos + 8])
         body = data[pos + 8:pos + 8 + n]
         if kind == b"IHDR":
@@ -99,7 +99,10 @@ def faults(path):
     kind = kind_of(p)
     if kind is None or any(s in p for s in SKIP):
         return None
-    png = read_png(path)
+    try:
+        png = read_png(path)
+    except (struct.error, zlib.error, NameError, IndexError):  # a truncated or broken PNG isn't judged
+        png = None
     if png is None:
         return None
     w, h, rows = png

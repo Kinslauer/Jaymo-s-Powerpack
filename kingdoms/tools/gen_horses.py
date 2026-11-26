@@ -27,6 +27,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.dont_write_bytecode = True
 sys.path.insert(0, HERE)
 import gen_equestrian as ge  # noqa: E402  (the coat specs)
+
+# The Reason look (docs/Vanilla-Style.md): the hide's own shading falls in bands of BAND shades and nothing is jittered
+# per pixel, so a coat is a few clear tones with its marks on top, as vanilla's horse is.
+CLEAN = True
+BAND = 9
+FOLD = 40  # the last step: reason_clean folds each sheet into at most this many colours (the painted shading and strands leave near twins)
+sys.path.insert(0, os.path.join(HERE, "..", "..", "tools", "vanilla_style"))
+import reason_clean  # noqa: E402
 import horse_preview as hp  # noqa: E402
 import horse_rig as hr  # noqa: E402
 import bbmodel as bbm  # noqa: E402
@@ -135,7 +143,7 @@ def light(x, c, strength=1.0):
     elif f == "bottom":
         k = 0.8
     else:
-        k = 1.05 - 0.17 * x.t
+        k = 1.05 - 0.17 * (int(x.t * 3) / 3.0 + 1 / 6.0 if CLEAN else x.t)  # (CLEAN: three bands down a side, not a gradient)
         if f in ("front", "back"):
             k -= 0.03
     return scale(c, 1 + (k - 1) * strength)
@@ -297,8 +305,8 @@ def coat(build, breed, name, spec, pxs, seed):
     marks = spec["marks"] | ({"feather"} if build == "draft" else set())
     hair = spec["hair"]
     stripe = spec["stripe"] or shade(hair, -20)
-    noise = ge.NOISE.get(breed, 5)
-    hairn = ge.HAIRN.get(breed, 12)
+    noise = 0 if CLEAN else ge.NOISE.get(breed, 5)
+    hairn = 0 if CLEAN else ge.HAIRN.get(breed, 12)
     tint = spec["tint"] or (34, 28, 26)
     points_y = LEG_TOP + (GROUND - 3 - LEG_TOP) * spec["points_from"] / 9
     m = MAPPERS.get(build)  # (0.7.322) Realistic Horse Genetics' patterns, carried onto this build (rhg.py)
@@ -363,6 +371,9 @@ def coat(build, breed, name, spec, pxs, seed):
         if "leopard" in marks and r in ("leg_a", "head", "muzzle") and m.cover(x, "leopard/leopard") < 0.5:
             col = spec["spot"]
         dark, a = m.colour(x, "shading")
+        if CLEAN:  # the painted shading in four steps and one dark, not a gradient
+            a = round(a * 4) / 4
+            dark = tuple(int(v) // 48 * 48 for v in dark)
         return mix(col, dark, 0.55 * a)
 
     def hide(x):
@@ -459,11 +470,11 @@ def coat(build, breed, name, spec, pxs, seed):
             if ("socks" in marks or "stockings" in marks) and hoof == ge.HOOF:
                 hoof = mix(ge.HOOF_PALE, hoof, 0.35 if h3(x.I, 0, 1, seed) < 0.5 else 0.0)
             col = shade(hoof, 14) if x.face in ("a", "b", "front", "back") and x.J < 2 else hoof
-            col = shade(col, -16) if x.face == "bottom" else shade(col, int(8 * (h3(x.I, x.face == "a", 2, seed) - 0.5)))
+            col = shade(col, -16) if x.face == "bottom" else shade(col, 0 if CLEAN else int(8 * (h3(x.I, x.face == "a", 2, seed) - 0.5)))
             out[(x.X, x.Y)] = light(x, col, 0.6) + (255,)
             continue
         col = hide(x)
-        col = shade(col, int((h3(x.X, x.Y, 10, seed) - 0.5) * 2 * noise) + form(x))
+        col = shade(col, int((h3(x.X, x.Y, 10, seed) - 0.5) * 2 * noise) + (BAND * round(form(x) / BAND) if CLEAN else form(x)))
         if getattr(c, "nostril", False) and x.face in ("front", "a", "b") and 0.3 < x.s < 0.7 and 0.25 < x.t < 0.75:
             col = (38, 26, 24)  # (0.7.322) the nostril's opening
         if "shimmer" in marks and (x.face == "top" or x.t < 0.45) and h3(x.X, x.Y, 11, seed) < 0.07 and eye(x) == 0:
@@ -960,6 +971,8 @@ def main():
     def save(out, build, rel):
         size = hr.ARMOR_TEXTURE if rel.startswith("armor/") else hr.texture_size(rigs[build])
         img = image(out, size)
+        if CLEAN:
+            img = reason_clean.clean(img, FOLD)
         path = os.path.join(OUT, rel + ".png")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         img.save(path)

@@ -35,6 +35,8 @@ import gen_reverent as r  # noqa: E402
 import gen_tomb_undead as kit  # noqa: E402
 from gen_tomb_undead import Builder, shade  # noqa: E402
 
+kit.CLEAN = True  # the Reason look: no per-pixel jitter on the sheets
+
 ROOT = kit.ROOT
 ASSETS = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms")
 DATA = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "data")
@@ -1730,16 +1732,51 @@ def tinted(img, rgb):
 ARMOUR_BONES = "armorHead,armorBody,armorRightArm,armorLeftArm,armorRightLeg,armorLeftLeg,armorRightBoot,armorLeftBoot"
 
 
+ICON_COLOURS = 14
+
+
 def icon(model, out):
-	"""A piece's icon: its model drawn three-quarter and shrunk (gen_reverent.icon)."""
-	r.SOURCE = bake(model, tempfile.mkdtemp(), "piece")
+	"""A piece's icon: its model drawn three-quarter (the view gen_reverent.icon cuts) and shrunk to 14 px by picking
+	texels, not blending them, so it keeps the sheet's own few shades (the Reason look, docs/Vanilla-Style.md); the
+	outline is the darkest shade of what it wraps, as vanilla's icons have."""
+	src = bake(model, tempfile.mkdtemp(), "piece")
 	os.makedirs(os.path.dirname(out), exist_ok=True)
-	cwd = os.getcwd()
-	os.chdir(ROOT)
-	try:
-		r.icon(ARMOUR_BONES, out)
-	finally:
-		os.chdir(cwd)
+	with tempfile.TemporaryDirectory() as tmp:
+		subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "bbmodel_bake.py"), src, tmp, "piece", "--keep", ARMOUR_BONES],
+			check=True, capture_output=True, cwd=ROOT)
+		subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "bbmodel_preview.py"), tmp, "piece", tmp + "/sheet.png"],
+			check=True, capture_output=True, cwd=ROOT)
+		view = Image.open(tmp + "/sheet.png").convert("RGB").crop((720, 0, 1080, 360))
+	rgba = Image.new("RGBA", view.size)
+	vp, o = view.load(), rgba.load()
+	for y in range(view.height):
+		for x in range(view.width):
+			if vp[x, y] != r.BG:
+				o[x, y] = vp[x, y] + (255,)
+	img = rgba.crop(rgba.getbbox())
+	side = max(img.size)
+	square = Image.new("RGBA", (side, side))
+	square.paste(img, ((side - img.width) // 2, (side - img.height) // 2))
+	small = square.resize((14, 14), Image.NEAREST)
+	# the sheet's edge and lame shades stack into near twins: fold them into at most ICON_COLOURS
+	alpha = small.getchannel("A")
+	small = small.convert("RGB").quantize(ICON_COLOURS, method=Image.Quantize.MEDIANCUT).convert("RGBA")
+	small.putalpha(alpha)
+	ico = Image.new("RGBA", (16, 16))
+	ico.paste(small, (1, 1))
+	px = ico.load()
+	edge = {}
+	for y in range(16):
+		for x in range(16):
+			if px[x, y][3]:
+				continue
+			near = [px[x + dx, y + dy] for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))
+				if 0 <= x + dx < 16 and 0 <= y + dy < 16 and px[x + dx, y + dy][3]]
+			if near:
+				edge[x, y] = shade(min(near, key=lambda c: c[0] * 3 + c[1] * 6 + c[2])[:3], 0.42) + (255,)
+	for p, c in edge.items():
+		px[p] = c
+	ico.save(out)
 
 
 def item(name, model):
