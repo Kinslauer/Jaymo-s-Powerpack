@@ -4,7 +4,11 @@ Run from the repo root: python -I tools/gen_champions.py"""
 import json
 import os
 import random
+import sys
 from PIL import Image
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'kingdoms', 'tools'))
+import vanilla_egg  # noqa: E402
 
 OUT = 'kingdoms/src/main/resources/assets/jaymoskingdoms/'
 
@@ -89,18 +93,8 @@ def skin(name):
 
 def egg(name):
     s = P[name]
-    rnd = random.Random('egg' + name)
-    img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    for x in range(16):
-        for y in range(16):
-            dx, dy = (x - 7.5) / 5.2, (y - 8.0) / (6.8 if y < 8 else 7.6)
-            if dx * dx + dy * dy <= 1.0:
-                k = 1.0 - 0.25 * ((x - 5) ** 2 + (y - 5) ** 2) ** 0.5 / 8.0
-                img.putpixel((x, y), shade(s['egg'], k) + (255,))
-    for _ in range(14):
-        x, y = rnd.randrange(16), rnd.randrange(16)
-        if img.getpixel((x, y))[3]:
-            img.putpixel((x, y), shade(s['egg'], 0.55) + (255,))
+    # the Reason look's spawn egg: vanilla's spotted egg in the patron's colour and trim (kingdoms/tools/vanilla_egg.py)
+    img = vanilla_egg.egg(s['egg'], s['eye'] if s['trim'] == s['egg'] else s['trim'])
     os.makedirs(OUT + 'textures/item', exist_ok=True)
     img.save(OUT + 'textures/item/%s_spawn_egg.png' % name)
     os.makedirs(OUT + 'models/item', exist_ok=True)

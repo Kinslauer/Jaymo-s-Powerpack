@@ -20,6 +20,9 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "kingdoms" / "tools"))
+import vanilla_egg  # noqa: E402
+
 # Rim's file stem -> our id
 SPECIES = {
     "knifehead": "deep_lancer",
@@ -84,17 +87,9 @@ def repaint_glow(src: Path, dst: Path) -> None:
 
 
 def egg(out: Path, ours: str, spot: tuple) -> None:
-    """The spawn egg: a violet egg with amber speckles, its item and model files beside it."""
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    px = img.load()
-    for y in range(16):
-        for x in range(16):
-            dx, dy = (x - 7.5) / 5.2, (y - 8.0) / (6.6 if y > 7 else 7.6)
-            if dx * dx + dy * dy <= 1.0:
-                shade = 1.0 - 0.25 * (dx + dy)
-                px[x, y] = (int(78 * shade), int(44 * shade), int(120 * shade), 255)
-    for x, y in spot:
-        px[x, y] = (240, 170, 50, 255)
+    """The spawn egg: vanilla's spotted egg in violet and amber, its item and model files beside it."""
+    # the Reason look's spawn egg: vanilla's spotted egg, violet with amber (kingdoms/tools/vanilla_egg.py)
+    img = vanilla_egg.egg((78, 44, 120), (240, 170, 50))
     img.save(out / f"textures/item/{ours}_spawn_egg.png")
     (out / "models/item").mkdir(parents=True, exist_ok=True)
     (out / "items").mkdir(parents=True, exist_ok=True)

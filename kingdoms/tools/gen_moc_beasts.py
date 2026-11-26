@@ -9,6 +9,12 @@ dragons/Wyverns.java, the winged and horned horses in equestrian/WonderHorses.ja
 Run from kingdoms/: python3 tools/gen_moc_beasts.py"""
 import json, os, random, shutil
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import reason_fold  # noqa: E402
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 
 MOC = 'tools/mocreatures/'
 SRC = '/home/user/src/moc/src/main/resources/assets/mocreatures/textures/models/'
@@ -40,17 +46,8 @@ def write(path, obj):
 
 
 def egg_icon(name, shell, spot, seed, spiky=False):
-    rnd = random.Random(seed)
-    img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    px = img.load()
-    for y in range(16):
-        for x in range(16):
-            dx, dy = (x - 7.5) / 5.4, (y - 8.0) / 7.2
-            if dx * dx * (1.0 + 0.3 * (8.0 - y) / 7.2) + dy * dy <= 1.0:
-                c = spot if rnd.random() < (0.28 if spiky else 0.16) else shell
-                shade = 1.0 + 0.25 * (1.0 - (x + y) / 14.0) - 0.2
-                px[x, y] = tuple(max(0, min(255, int(v * shade))) for v in c) + (255,)
-    img.save(ITEM + name + '.png')
+    """The Reason look's egg: vanilla's spotted egg (vanilla_egg.py) in the beast's two colours."""
+    vanilla_egg.save(ITEM + name + '.png', tuple(shell[:3]), tuple(spot[:3]))
 
 
 def spine_icon():
@@ -91,7 +88,7 @@ if __name__ == '__main__':
         shutil.copyfile(original(src), ENTITY + dst + '.png')
     for i, src in enumerate(HIDES):
         img = Image.open(original(src)).convert('RGBA')
-        img.save(DRAGON + 'hide_%d.png' % i)
+        reason_fold.save(img, DRAGON + 'hide_%d.png' % i)
         # (no glowing marks: its original has none; an empty sheet is what the renderer's glow layer draws)
         Image.new('RGBA', img.size, (0, 0, 0, 0)).save(DRAGON + 'marks_%d.png' % i)
 

@@ -6,6 +6,9 @@ and evoker, and their three spawn eggs' icons. The outfits follow vanilla's thre
 Run from kingdoms/: python3 tools/gen_reaped.py [preview.png]"""
 import math, os, random, sys
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 
 ASSETS = 'src/main/resources/assets/jaymoskingdoms/'
 ENT = ASSETS + 'textures/entity/reaped/'
@@ -224,24 +227,8 @@ def reaped(name, seed):
 
 
 def egg(name, base, spot):
-    """A spawn egg's icon, 16x16: an egg in the look's cloth with bone spots and one red one."""
-    rnd = random.Random(name)
-    img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    px = img.load()
-    rows = {2: (6, 9), 3: (5, 10), 4: (4, 11), 5: (4, 11), 6: (3, 12), 7: (3, 12), 8: (3, 12), 9: (3, 12), 10: (3, 12), 11: (4, 11),
-            12: (4, 11), 13: (6, 9)}
-    spots = {(6, 4), (9, 6), (5, 8), (10, 10), (7, 11), (8, 3), (11, 8), (4, 6)}
-    for y, (a, b) in rows.items():
-        for x in range(a, b + 1):
-            c = jitter(rgb(spot), 6, rnd) if (x, y) in spots else jitter(rgb(base), 6, rnd)
-            if x == a or x == b or y in (2, 13):
-                c = tuple(int(ch * 0.62) for ch in c[:3]) + (255,)
-            elif x == a + 1 and y < 8:
-                c = tuple(min(255, int(ch * 1.25)) for ch in c[:3]) + (255,)
-            px[x, y] = c
-    px[7, 7] = RED_HOT
-    px[8, 7] = rgb(0x7A0010)
-    img.save(ITEM + name + '_spawn_egg.png')
+    """A spawn egg's icon, 16x16: vanilla's spotted egg (vanilla_egg.py) in the look's cloth with bone spots."""
+    vanilla_egg.save(ITEM + name + '_spawn_egg.png', rgb(base)[:3], rgb(spot)[:3])
 
 
 # ---- a preview: the model drawn from two sides, box by box, far faces first -------------------------------------------------
