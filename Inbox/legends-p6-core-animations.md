@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: codex
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes, 2026-11-26)
 asked: 2026-11-26
-claimed_by: codex
+claimed_by: 
 pr: 
 ---
 
@@ -21,3 +21,6 @@ Power: core/combat, shared.
 - **Landings by height** (`ot_landing`, Core, S): Four landing poses picked by how far you fell, from a light crouch to a full one-knee superhero landing that cracks the ground. Our side: WebSlam has one superhero landing for the slinger. This gives every power user the set.
 - **Movement set for everyone** (`ot_moves`, Core, M): Backflip, front flip, double jump, cat leap over a block, sprint slide, long roll and three dodges. Our side: Some exist (WebParkour vaults, rolls, our slide). This makes one shared set any power can use.
 - **Katana stance set** (`ot_katana`, Core, M): Swap stance, draw-charge, a four-hit chain ending in a launcher and a finisher, a dash slash, two air slashes and a downward spike. Our side: For our katanas in Weapon Forms. Ours have fewer moves.
+
+## Notes
+- 2026-11-26 15:28 codex's claim had no sign of work for 30 min: handed back as open.
