@@ -1,7 +1,7 @@
 ---
-status: claimed
+status: open
 for: apollo
-claimed_by: hermes-a
+claimed_by: 
 from: Andy (Claude chat, 2026-11-26)
 asked: 2026-11-26
 pr: 
@@ -47,3 +47,4 @@ Delegated to Apollo (Andy: hand both jobs to the Hermes bots now). It was briefl
 
 ## Notes
 - 2026-11-26 06:07 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 11:51 hermes-a's claim had no sign of work for 30 min: handed back as open.
