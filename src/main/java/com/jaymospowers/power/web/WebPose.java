@@ -59,10 +59,27 @@ public record WebPose(int kind, long start, int side) {
 	 * Not tricks, so nothing cuts them short and they hold off the next trick while they play.
 	 */
 	public static final int RISING_BLOW = 28, DIVE_KICK = 29, SPIN_STRIKE = 30;
+	/**
+	 * More ways off a released web, the loop over an anchor and the barrel roll (Legends patch 1, our own hand-made poses):
+	 * a swan dive laid out with the arms wide, a pike (legs straight, folded at the hips) over forwards, a tucked
+	 * sideways roll, a back flip with a half twist, and a handspring over the hands. {@link #LOOP_FLIP} is the whole body
+	 * going round over the hand on a swing that loops its anchor ({@code WebLoop}); {@link #DIVE_ROLL} is one turn of the
+	 * barrel roll of a dive (sent again, with a side of 2 or -2, to keep it going). All of them are tricks, numbered past
+	 * the strikes so nothing saved moves.
+	 */
+	public static final int SWAN_DIVE = 31, PIKE_FLIP = 32, SIDE_ROLL = 33, TWIST_FLIP = 34, HANDSPRING = 35, DIVE_ROLL = 36, LOOP_FLIP = 37;
+	public static final int FIRST_EXTRA_TRICK = SWAN_DIVE, LAST_EXTRA_TRICK = LOOP_FLIP;
+	/**
+	 * Hanging by the hands under a webline ({@link WebLineRide}); not a trick: it lasts as long as the attachment
+	 * {@link WebLineRide#RIDE} says so.
+	 */
+	public static final int LINE_HANG = 38;
 
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
 	public static final int RAGDOLL_TICKS = 40;
+	/** The loop over the anchor lasts as long as the loop does, between these (ticks). */
+	public static final int LOOP_MIN_TICKS = 20, LOOP_MAX_TICKS = 140;
 
 	public static final StreamCodec<ByteBuf, WebPose> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_INT, WebPose::kind,
@@ -85,6 +102,11 @@ public record WebPose(int kind, long start, int side) {
 			case DOUBLE_FRONT, DOUBLE_BACK -> 22;
 			case BUTTERFLY -> 16;
 			case RISING_BLOW, SPIN_STRIKE -> 14;
+			case SWAN_DIVE, TWIST_FLIP -> 18;
+			case PIKE_FLIP, SIDE_ROLL -> 14;
+			case HANDSPRING, DIVE_ROLL -> 16;
+			// (the loop says how long it will take, in the side; see WebTricks)
+			case LOOP_FLIP -> Math.max(LOOP_MIN_TICKS, Math.min(LOOP_MAX_TICKS, Math.abs(side)));
 			case DIVE_KICK -> 40;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
 			case SPIKES -> WebSymbiote.SPIKE_POSE_TICKS;
@@ -93,7 +115,7 @@ public record WebPose(int kind, long start, int side) {
 	}
 
 	public static boolean trick(int kind) {
-		return kind >= FIRST_TRICK && kind <= LAST_TRICK || kind == BACK_FLIP || acro(kind);
+		return kind >= FIRST_TRICK && kind <= LAST_TRICK || kind == BACK_FLIP || acro(kind) || kind >= FIRST_EXTRA_TRICK && kind <= LAST_EXTRA_TRICK;
 	}
 
 	/** The acrobatics' own kinds: the standing backflip and the mid-air tricks that are new with it. */

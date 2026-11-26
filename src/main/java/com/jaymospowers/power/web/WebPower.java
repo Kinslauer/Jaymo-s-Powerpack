@@ -333,6 +333,7 @@ public final class WebPower implements Power {
 		Webbed.register();
 		WebHitches.register();
 		WebBridges.register();
+		WebLineRide.register();
 		WebTendrils.register();
 		WebSymbioteCollect.register();
 		WebSymbioteMind.register();
@@ -633,12 +634,12 @@ public final class WebPower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
-		return inGrace(player) || WebSymbiote.allowsFloating(player) || WebParkour.clinging(player) || WebSkim.skimming(player);
+		return inGrace(player) || WebSymbiote.allowsFloating(player) || WebParkour.clinging(player) || WebSkim.skimming(player) || WebLineRide.riding(player);
 	}
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
-		return inGrace(player) || WebSkim.skimming(player) || WebAirStrikes.diving(player) || WebSymbioteWings.out(player);
+		return inGrace(player) || WebSkim.skimming(player) || WebAirStrikes.diving(player) || WebSymbioteWings.out(player) || WebLineRide.riding(player);
 	}
 
 	@Override
