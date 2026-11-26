@@ -17,3 +17,7 @@ Before editing, read every `.claude/rules/*.md` whose `paths:` list matches the 
 them by itself; you have to open them). Andy's words for things, and their names in the code, are in
 `docs/vault/Context/Glossary.md`. What waits on Andy and what's stuck is on `Live/Dashboard.md`; problems in the live
 notes are on `Live/Health.md`.
+
+When Andy has to pick from a list (pick lists, checklists, questions before building), follow the skill
+`.agents/skills/pick-page/SKILL.md`: write the list in the vault, run `tools/pick_page.py` to make a page he can
+tick in his browser, and give him that page's link, never the raw markdown.
