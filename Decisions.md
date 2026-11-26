@@ -1134,3 +1134,5 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26 (Andy, Hermes Training): asked the art bots to run Ink Studio (siliconjungle/shapeshift-labs-ink-studio, MIT) in their passes. Only its pixel-art lint is useful to us: E:/hermes/tools/texture_lint.py (pinned copy de64555) now runs in Prometheus's job and Codex's AGENTS.md on new 16x16/32x32 item and block textures; CHECK lines are advice to fix or explain, not a gate.
 - 2026-11-26: Andy approved the lore for village mods 7-9 (raft towns, swamp goblins, a company of your own) and the ten Mordhau harness paragraphs ("Approved lore"). Guard mail question still open.
 - 2026-11-26 (Andy, guard under-layers): "Guards should vary their gear by realm and climate, more mail and leather in the warm, quilting and plate in the north. Either can wear either too its just rarer and more situation specific, like northern archers in leather, and southern legionnairres in plate"
+
+- 2026-11-26 Andy approved the lore paragraph "Warm mail, northern plate" (guard gear by climate, PR #2189).
