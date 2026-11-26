@@ -1,7 +1,7 @@
 ---
-status: claimed
+status: open
 for: apollo
-claimed_by: hermes-a
+claimed_by: 
 from: Andy (Claude chat, 2026-11-26)
 asked: 2026-11-26
 pr: 
@@ -44,3 +44,6 @@ they should all have their own ladders, and the captains can intersect." One PR 
 
 ## Delegation note (YOUTH, 2026-11-26)
 Delegated to Apollo (Andy: hand both jobs to the Hermes bots now). It was briefly claimed by hermes-fixer/Hephaestus, but Hephaestus is on the stop list since Nov 21 and this is not narrow-bug-only work (adds 12 captains per player, own ladders, intersecting captains), so it goes to Apollo.
+
+## Notes
+- 2026-11-26 06:07 hermes-a's claim had no sign of work for 30 min: handed back as open.

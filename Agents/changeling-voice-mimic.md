@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: changeling-voice-mimic
 branch: t3/changeling-voice-mimic
 pr:
@@ -40,3 +40,4 @@ Andy assigned this Inbox task to Apollo. Use Simple Voice Chat for short, in-mem
 What a player will see, and what wasn't tested.
 
 Codex took over from Apollo on Andy's instruction, November 26. Inspecting the missing player-stalking hook before implementation. Owns additionally ChangelingVoiceCompat.java and fabric.mod.json for optional SVC wiring.
+- 2026-11-26 06:07 No sign of work for 30 min: marked stalled (whoever ran it stopped).
