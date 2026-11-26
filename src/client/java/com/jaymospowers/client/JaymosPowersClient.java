@@ -83,6 +83,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		AfkCinematicFishing.init();
 		com.jaymospowers.client.bits.Mentions.init();
 		com.jaymospowers.client.bits.ItemShareClient.init();
+		com.jaymospowers.client.bits.PullApartClient.init();
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
