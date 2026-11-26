@@ -68,6 +68,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
 		com.jaymospowers.client.hud.AdvancementPins.init();
+		com.jaymospowers.client.hud.PackWeightClient.init();
 		// (Andy, 2026-11-23) what the keys do to whoever's under the crosshair: stealth kill, a body, Kingdoms' lines
 		com.jaymospowers.client.hud.ContextHints.init();
 		// (Andy, 2026-11-20) a tap of use on a body: the body menu
@@ -297,6 +298,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.armory.GunHandling.init();
 		com.jaymospowers.client.armory.MusketSights.init();
 		com.jaymospowers.client.armory.BodyWeaponsLayer.init();
+		com.jaymospowers.client.armory.WeaponWheelScreen.register();
 		com.jaymospowers.client.armory.guns.AnimatedGunModel.init();
 		com.jaymospowers.client.armory.HeldItems.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load

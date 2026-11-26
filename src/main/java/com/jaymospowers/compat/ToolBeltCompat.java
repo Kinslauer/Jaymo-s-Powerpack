@@ -2,11 +2,13 @@ package com.jaymospowers.compat;
 
 import com.jaymospowers.baubles.Baubles;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
 public final class ToolBeltCompat {
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("travelertoolbelt");
 	private static final String NAMESPACE = "travelertoolbelt";
+	private static final String HELPER = "com.tiviacz.travelertoolbelt.ToolBeltHelper";
 
 	private ToolBeltCompat() {
 	}
@@ -74,6 +77,46 @@ public final class ToolBeltCompat {
 			List<ItemStack> worn = Baubles.worn(player);
 			worn.set(Baubles.BELT_SLOT, belt.copy());
 			Baubles.setWorn(player, worn);
+		}
+	}
+
+	/**
+	 * What the worn tool belt holds, slot by slot (empty where a slot is empty, and a hip item, purse or lantern, counts
+	 * as empty: it works from the belt and isn't drawn); an empty list without a worn belt. Server, and the wearer's client.
+	 */
+	public static List<ItemStack> tools(Player player) {
+		ItemStack belt = worn(player);
+		if (belt.isEmpty()) {
+			return List.of();
+		}
+		return belt.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).itemCopies()
+			.map(stack -> Baubles.hipItem(stack) ? ItemStack.EMPTY : stack).toList();
+	}
+
+	/** Whether the belt takes {@code stack} (the mod's own rule, or a hip item); false without the mod. */
+	public static boolean holds(ItemStack stack) {
+		if (!LOADED || stack.isEmpty()) {
+			return false;
+		}
+		try {
+			return (boolean)Class.forName(HELPER).getMethod("isItemValid", ItemStack.class).invoke(null, stack);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Swaps the main hand with the worn belt's slot {@code slot} by the mod's own tool swap (its sound, its rules), which
+	 * the mixin then syncs back ({@code ToolBeltHelperMixin}). Nothing without the mod.
+	 */
+	public static void swap(ServerPlayer player, int slot) {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			Class.forName(HELPER).getMethod("swapTool", Player.class, int.class, int.class).invoke(null, player, slot, 0);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't swap a tool belt tool", e);
 		}
 	}
 

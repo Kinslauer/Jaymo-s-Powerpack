@@ -43,7 +43,8 @@ import org.jspecify.annotations.Nullable;
  * back up with a small rebound, deeper the harder the landing ({@link #SQUASH_DROP}); in first person your view sinks
  * with it (never the field of view). Off the ground the legs tuck up a little ({@link #TUCK_KNEE}).</li>
  * <li><b>Heavier gear, heavier body.</b> Armour (by {@link ArmourKind#load}, plate the most) and a two-handed weapon or
- * polearm in hand make all of it slower and deeper ({@link #ARMOUR_WEIGHT}, {@link #HEAVY_WEAPON}).</li>
+ * polearm in hand make all of it slower and deeper ({@link #ARMOUR_WEIGHT}, {@link #HEAVY_WEAPON}), and so does a pack
+ * loaded past what the body bears ({@link com.jaymospowers.core.PackWeight#over}, {@link #OVERLOAD_WEIGHT}).</li>
  * </ul>
  * It gives way to every pose of ours: the whole-body parts under any pose but the armed stance
  * ({@link PoseTakeover#posedOtherwise}: the crawl, dodge rolls, ledges, parkour, falls, slides, carries...), the arms and
@@ -88,8 +89,8 @@ public final class BodyWeight {
 	static final float VIEW_SINK = 0.6F;
 	/** Off the ground: the legs' tuck (knees and thighs, radians) and how fast it comes and goes (a share a tick). */
 	static final float TUCK_KNEE = 0.55F, TUCK_THIGH = 0.3F, TUCK_EASE = 0.25F;
-	/** The weight of gear: a full suit of plate adds this much, a two-handed weapon or polearm this much; at most this. */
-	static final float ARMOUR_WEIGHT = 0.4F, HEAVY_WEAPON = 0.3F, MAX_WEIGHT = 1.7F;
+	/** The weight of gear: a full suit of plate adds this much, a two-handed weapon or polearm this much, a full overload this much; at most this. */
+	static final float ARMOUR_WEIGHT = 0.4F, HEAVY_WEAPON = 0.3F, OVERLOAD_WEIGHT = 0.4F, MAX_WEIGHT = 1.7F;
 	/** How often the gear is weighed again (ticks). */
 	static final int WEIGH_TICKS = 20;
 	// ================================================================================================================
@@ -222,7 +223,7 @@ public final class BodyWeight {
 
 	/** How heavy {@code player} moves: 1 bare-handed in no armour, more with plate and a great weapon. */
 	private static float weigh(Player player) {
-		float w = 1.0F + ArmourKind.load(player) * ARMOUR_WEIGHT;
+		float w = 1.0F + ArmourKind.load(player) * ARMOUR_WEIGHT + com.jaymospowers.core.PackWeight.over(player) * OVERLOAD_WEIGHT;
 		Armed.Kind kind = Armed.kind(player.getMainHandItem());
 		if (kind == Armed.Kind.TWO_HAND || kind == Armed.Kind.POLE) {
 			w += HEAVY_WEAPON;

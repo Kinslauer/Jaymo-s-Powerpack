@@ -419,6 +419,7 @@ public final class Mortality {
 		SpawnCalm.register();
 		Afflictions.register();
 		Scars.register();
+		DeathToll.register();
 		Karma.register();
 	}
 
@@ -1457,6 +1458,7 @@ public final class Mortality {
 			} else {
 				injure(player, wake.cause, wake.sub);
 			}
+			DeathToll.woke(player);
 			player.setAttached(SURVIVOR, true);
 			tendTaken(player, line);
 		}
@@ -1656,6 +1658,7 @@ public final class Mortality {
 		HeartCrystals.onFinalDeath(player);
 		Afflictions.clear(player);
 		Scars.clear(player);
+		DeathToll.clear(player);
 		Breaks.clearAll(player);
 		Wounds.healAll(player);
 		player.removeAttached(Lodged.LODGED);
@@ -1696,6 +1699,7 @@ public final class Mortality {
 		player.removeAttached(SURVIVOR);
 		Afflictions.clear(player);
 		Scars.clear(player);
+		DeathToll.clear(player);
 		Breaks.clearAll(player);
 		Wounds.healAll(player);
 		player.removeAttached(Lodged.LODGED);
