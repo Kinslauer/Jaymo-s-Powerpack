@@ -28,7 +28,17 @@ final class WebTrickClient {
 	/** Only a real trip through the air ends in a landing trick (ticks off the ground). */
 	static final int MIN_AIR_TICKS = 8;
 
+	/**
+	 * The nine flips off a released web: the five for a web let go going up, the six for one let go going out or down
+	 * (the corkscrew and the front flip are in both). No flip is picked that is one of the last two done, so a long run
+	 * of swings never repeats itself.
+	 */
+	private static final int[] RELEASE_UP = {WebPose.FRONT_FLIP, WebPose.BACK_FLIP, WebPose.CORKSCREW, WebPose.TWIST_FLIP, WebPose.PIKE_FLIP};
+	private static final int[] RELEASE_OUT = {WebPose.CORKSCREW, WebPose.CARTWHEEL, WebPose.FRONT_FLIP, WebPose.SIDE_ROLL, WebPose.SWAN_DIVE,
+		WebPose.HANDSPRING};
+
 	private int busyUntil;
+	private int beforeLastKind = -1;
 	/** When (the player's tick count) the last web was let go of; a strike out of the swing needs it recent. */
 	private int releasedAt = Integer.MIN_VALUE / 2;
 	private int lastKind = -1;
@@ -86,10 +96,11 @@ final class WebTrickClient {
 		}
 		int kind;
 		if (v.y > 0.35) {
-			// thrown upward: tuck and go over, or lay out and twist
-			kind = pick(player, WebPose.FRONT_FLIP, WebPose.CORKSCREW, WebPose.FRONT_FLIP);
+			// thrown upward: tuck and go over (forwards, backwards, folded at the hips, with a half twist) or lay out and twist
+			kind = pick(player, RELEASE_UP);
 		} else {
-			kind = pick(player, WebPose.CORKSCREW, WebPose.CARTWHEEL, WebPose.FRONT_FLIP);
+			// thrown out level or down: a corkscrew, a cartwheel, a roll, a swan dive, a handspring or a front flip
+			kind = pick(player, RELEASE_OUT);
 		}
 		send(player, kind);
 	}
@@ -158,18 +169,44 @@ final class WebTrickClient {
 		return posed || WebSymbioteClient.driving();
 	}
 
-	/** One of the given tricks, at random, but not the one just done. */
+	/** One of the given tricks, at random, but not one of the last two done. */
 	private int pick(LocalPlayer player, int... kinds) {
-		for (int tries = 0; tries < 4; tries++) {
+		for (int tries = 0; tries < 8; tries++) {
 			int kind = kinds[player.getRandom().nextInt(kinds.length)];
+			if (kind != lastKind && kind != beforeLastKind) {
+				return kind;
+			}
+		}
+		for (int kind : kinds) {
 			if (kind != lastKind) {
 				return kind;
 			}
 		}
-		return kinds[0] == lastKind ? kinds[1] : kinds[0];
+		return kinds[0];
+	}
+
+	/** Nothing else has the body, so a move of the swing's own (the loop, the roll) may start. */
+	boolean idle(LocalPlayer player) {
+		return free(player);
+	}
+
+	/** Like {@link #idle}, but a flip still going may be cut into (a dodge, a ragdoll or a takeover still may not). */
+	boolean mayInterrupt(LocalPlayer player) {
+		return !blocked(player);
+	}
+
+	/** A move of the swing's own has the body for {@code ticks}: no trick starts over it. */
+	void busy(LocalPlayer player, int ticks) {
+		busyUntil = Math.max(busyUntil, player.tickCount + ticks);
+	}
+
+	/** The pose {@code kind} turning to {@code side}, asked for by a move of the swing's own (the loop, the barrel roll). */
+	void sendMove(int kind, int side) {
+		ClientPlayNetworking.send(new WebTricks.Trick(kind, side));
 	}
 
 	private void send(LocalPlayer player, int kind) {
+		beforeLastKind = lastKind;
 		lastKind = kind;
 		busyUntil = player.tickCount + new WebPose(kind, 0L, 1).ticks();
 		ClientPlayNetworking.send(new WebTricks.Trick(kind, player.getRandom().nextBoolean() ? 1 : -1));

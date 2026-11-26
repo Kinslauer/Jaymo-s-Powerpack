@@ -67,7 +67,7 @@ public final class WebArms {
 	/** This frame's pose: an arm's aim is null when that hand has no web out. Angles are model-part radians. */
 	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings, float lean,
 		float brake, float dive, float swayPitch, float swayRoll, float armSway, float legSway, float limbRoll, boolean airborne,
-		float drive, float pump, float tuck, float heave, float torsoX, float torsoY, float torsoZ) {
+		float drive, float pump, float tuck, float heave, float torsoX, float torsoY, float torsoZ, WebSwingPoses.Frame poses) {
 	}
 
 	/**
@@ -210,6 +210,8 @@ public final class WebArms {
 		float torsoY, torsoYVel, prevTorsoY;
 		float torsoZ, torsoZVel, prevTorsoZ;
 		@Nullable Vec3 lastCatch;
+		/** The swing's phase poses (reach, pull, swing through, let go) and the look this web has ({@link WebSwingPoses}). */
+		final WebSwingPoses.State poses = new WebSwingPoses.State();
 	}
 
 	private static final Map<Integer, Body> BODIES = new HashMap<>();
@@ -472,6 +474,7 @@ public final class WebArms {
 		float pitchWant = airborne ? Mth.clamp((float)(forwardSpeed * SWAY_PER_SPEED - v.y * SWAY_PER_RISE), -SWAY_MAX, SWAY_MAX) : 0.0F;
 		float rollWant = airborne ? Mth.clamp((float)(rightSpeed * SWAY_PER_SPEED), -SWAY_MAX, SWAY_MAX) : 0.0F;
 		tickDrive(body, v, forwardSpeed, airborne && swinging);
+		body.poses.tick(v, airborne && swinging, main != null ? main : off);
 		// driving the swing, the body banks into a turn (toward its inside, as the rope pulls it round)
 		rollWant += bank(body.lastMotion, v) * body.drive;
 		body.lastMotion = v;
@@ -762,7 +765,7 @@ public final class WebArms {
 			!player.onGround() && !player.isInWater(), Mth.lerp(partialTicks, body.prevDrive, body.drive) * amount,
 			Mth.lerp(partialTicks, body.prevPump, body.pump), Mth.lerp(partialTicks, body.prevTuck, body.tuck),
 			Mth.lerp(partialTicks, body.prevHeave, body.heave) * amount, Mth.lerp(partialTicks, body.prevTorsoX, body.torsoX),
-			Mth.lerp(partialTicks, body.prevTorsoY, body.torsoY), Mth.lerp(partialTicks, body.prevTorsoZ, body.torsoZ)));
+			Mth.lerp(partialTicks, body.prevTorsoY, body.torsoY), Mth.lerp(partialTicks, body.prevTorsoZ, body.torsoZ), body.poses.frame(partialTicks)));
 	}
 
 	/** An arm's {xRot, yRot} pointing it along its web, relative to the body (as the bow-aiming pose does it). */
@@ -886,6 +889,10 @@ public final class WebArms {
 			+ drift(age, 2.3F), 0.0F, Mth.lerp(drive, 0.08F + pose.legSide() * 0.9F, 0.06F + splay) + pose.limbRoll() * 0.15F, amount);
 		set(humanoid.leftLeg, Mth.lerp(drive, pose.legTrail() * 0.8F - 0.05F - flop + legLag * 0.9F, pose.pump() - rightLead + legLag * 0.3F)
 			+ drift(age, 5.9F), 0.0F, Mth.lerp(drive, -0.08F + pose.legSide() * 0.7F, -0.06F - splay) + pose.limbRoll() * 0.15F, amount);
+		if (pose.wings() <= 0.001F && pose.airborne() && drive > 0.001F) {
+			// reach, pull, swing through and let go, each in one of four looks (Legends patch 1's hand-made swing poses)
+			WebSwingPoses.apply(humanoid, pose.poses(), mainRight, pose.mainArm() == null, pose.offArm() == null, drive);
+		}
 		heave(humanoid, avatar, pose, mainRight);
 	}
 

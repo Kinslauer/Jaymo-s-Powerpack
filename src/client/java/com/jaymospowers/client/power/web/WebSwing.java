@@ -244,6 +244,8 @@ public final class WebSwing {
 	// zip / yank-to
 	WebNet.@Nullable Pull pull;
 	private int pullTicks;
+	/** The fastest the current zip has carried you (blocks/tick): what a spring off its end kicks with ({@link WebSpring}). */
+	private double pullPeak;
 	/** The zip is aimed at a ledge: it rides all the way in and throws you over it ({@link WebLedge}). */
 	private boolean pullLedge;
 	private int stuckTicks;
@@ -254,6 +256,14 @@ public final class WebSwing {
 	private final WebTrickClient tricks = new WebTrickClient();
 	/** Hanging head down from a line above ({@link WebUpsideClient}). */
 	private final WebUpsideClient upside = new WebUpsideClient();
+	/** Wind lanes found in the terrain for the web wings ({@link WebWindLanes}). */
+	private final WebWindLanes windLanes = new WebWindLanes();
+	/** Going right round over the anchor ({@link WebLoop}). */
+	private final WebLoop loop = new WebLoop();
+	/** Riding a webline, and bending it to fling off ({@link WebLineRideClient}). */
+	final WebLineRideClient lineRide = new WebLineRideClient();
+	/** Kicking off the spot a zip carried you to ({@link WebSpring}): the zip that just arrived, for a press of Jump a moment later. */
+	private final WebSpring spring = new WebSpring();
 	/** Settled into a balanced crouch on a narrow top ({@link WebPerchClient}). */
 	private final WebPerchClient perch = new WebPerchClient();
 
@@ -276,6 +286,10 @@ public final class WebSwing {
 		tricks.reset();
 		upside.reset();
 		perch.reset();
+		loop.reset();
+		lineRide.reset();
+		spring.reset();
+		windLanes.reset();
 	}
 
 	private static LocalPlayer player() {
@@ -284,16 +298,16 @@ public final class WebSwing {
 
 	/** Braced in the slingshot: the jump bar takes the XP bar's place ({@code RunMovesClient}). */
 	public boolean slingshotShown() {
-		return slinging;
+		return slinging || lineRide.bending();
 	}
 
-	/** How far the slingshot is drawn (0-1), and where its orange peak starts. */
+	/** How far the slingshot (or a webline you stand on, bent to fling off) is drawn (0-1), and where its orange peak starts. */
 	public float slingDrawn() {
-		return slingDraw;
+		return lineRide.bending() ? lineRide.draw() : slingDraw;
 	}
 
 	public float slingPeak() {
-		return slingPeak;
+		return lineRide.bending() ? lineRide.peak() : slingPeak;
 	}
 
 	/** Both webs stuck: the slingshot is possible. */
@@ -557,6 +571,8 @@ public final class WebSwing {
 		pullTicks = 0;
 		stuckTicks = 0;
 		pullJumpHeld = player.input.keyPresses.jump();
+		pullPeak = 0.0;
+		spring.reset();
 		lastPos = player.position();
 		pullLedge = WebLedge.launch(player, pull) != null;
 	}
@@ -578,6 +594,16 @@ public final class WebSwing {
 			swingLockout--;
 		}
 		tricks.tick(player, attached(), flying, wingsTicks > 0, diving, apexY);
+		if (!attached()) {
+			loop.reset();
+		}
+		if (pull == null) {
+			// a press of Jump just after a zip arrived kicks off the spot (WebSpring)
+			Vec3 sprung = spring.tick(player);
+			if (sprung != null) {
+				springOff(player, sprung);
+			}
+		}
 		// the swing's momentum builds while on a web, and is lost on the ground
 		if (attached()) {
 			if (player.getDeltaMovement().length() >= momentum * RAMP_AT) {
@@ -841,6 +867,8 @@ public final class WebSwing {
 			swingEnergy = 0.5 * v.lengthSqr() + gravity * body.y;
 		}
 		wasTaut = taut;
+		// looking up with forward held on a fast upswing: round over the top of the anchor (WebLoop)
+		loop.tick(player, strands, body, v, taut, tricks);
 		v = pendulum(v, body, gravity, air);
 		if (hang) {
 			// gently: never faster up or down than the rope is being drawn in or let out
@@ -881,9 +909,18 @@ public final class WebSwing {
 		Vec3 tangent = v.subtract(along);
 		double moving = Math.max(0.0, swingEnergy - gravity * body.y);
 		swingEnergy = gravity * body.y + moving * PENDULUM_DRAG;
-		// never more than the speed cap's worth
-		swingEnergy = Math.min(swingEnergy, gravity * body.y + 0.5 * momentum * momentum);
+		// never more than the speed cap's worth (a loop over the anchor has the whole cap: WebLoop)
+		double capSpeed = loop.active() ? Math.max(momentum, MAX_SPEED) : momentum;
+		swingEnergy = Math.min(swingEnergy, gravity * body.y + 0.5 * capSpeed * capSpeed);
 		double speed = Math.sqrt(2.0 * Math.max(0.0, swingEnergy - gravity * body.y));
+		if (loop.active()) {
+			// going over the top: never slower than keeps the rope taut at this height
+			double need = loop.minSpeed(strands, body, gravity);
+			if (speed < need) {
+				speed = need;
+				swingEnergy = gravity * body.y + 0.5 * need * need;
+			}
+		}
 		if (tangent.lengthSqr() < 1.0E-6) {
 			// dead still at the top of the arc: gravity starts it back down next tick
 			return v;
@@ -1319,7 +1356,10 @@ public final class WebSwing {
 				m = m.add((look.x / lookHorizontal * moveHorizontal - m.x) * 0.1, 0.0, (look.z / lookHorizontal * moveHorizontal - m.z) * 0.1);
 			}
 			m = m.multiply(0.99, 0.98, 0.99);
+			// a wind lane between the buildings or over a cliff pushes the glide along it (WebWindLanes)
+			m = windLanes.boost(player, m);
 		}
+		windLanes.tick(player);
 		if (diving) {
 			if (m.length() > DIVE_MAX_SPEED) {
 				m = m.normalize().scale(DIVE_MAX_SPEED);
@@ -1330,8 +1370,9 @@ public final class WebSwing {
 			}
 			return;
 		}
-		if (m.length() > WINGS_MAX_SPEED) {
-			m = m.normalize().scale(WINGS_MAX_SPEED);
+		double topSpeed = WINGS_MAX_SPEED + windLanes.extra();
+		if (m.length() > topSpeed) {
+			m = m.normalize().scale(topSpeed);
 		}
 		player.setDeltaMovement(m);
 		if (player.tickCount % 4 == 0) {
@@ -1377,6 +1418,7 @@ public final class WebSwing {
 		}
 		pullJumpHeld = jump;
 		pullTicks++;
+		pullPeak = Math.max(pullPeak, player.getDeltaMovement().length());
 		Vec3 dest = pull.target();
 		double arrive = 0.9;
 		if (pull.entityId() >= 0) {
@@ -1402,7 +1444,8 @@ public final class WebSwing {
 			finishPull(player, pull);
 			return;
 		}
-		if (flingOut || pull.entityId() < 0 && !pullLedge && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown()) {
+		// (Jump held through the zip carries it all the way in, to spring off the spot: WebSpring)
+		if (flingOut || pull.entityId() < 0 && !pullLedge && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown() && !jump) {
 			// let go early: momentum carries on, with a kick up
 			this.pull = null;
 			Vec3 v = player.getDeltaMovement();
@@ -1419,6 +1462,12 @@ public final class WebSwing {
 
 	private void finishPull(LocalPlayer player, WebNet.Pull pull) {
 		this.pull = null;
+		// Jump held as it arrives kicks off the spot at once; a press in the next few ticks does too (WebSpring)
+		Vec3 sprung = spring.arrive(player, pull, pullPeak, player.input.keyPresses.jump());
+		if (sprung != null) {
+			springOff(player, sprung);
+			return;
+		}
 		Direction face = pull.face() >= 0 && pull.face() < Direction.values().length ? Direction.values()[pull.face()] : null;
 		Vec3 v = player.getDeltaMovement();
 		Vec3 thrown = WebLedge.launch(player, pull);
@@ -1451,13 +1500,37 @@ public final class WebSwing {
 		play(player, SoundEvents.SLIME_SQUISH_SMALL, 0.5F, 1.5F);
 	}
 
+	/** The kick off the end of a zip ({@link WebSpring}): off with its speed, still in the swing's free flight, and a flip if it's fast enough. */
+	private void springOff(LocalPlayer player, Vec3 velocity) {
+		player.setDeltaMovement(velocity);
+		flying = true;
+		flightCap = Math.max(momentum, velocity.length());
+		play(player, SoundEvents.SLIME_JUMP, 0.8F, 1.3F);
+		play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.5F, 1.5F);
+		puff(player, player.position().add(0.0, 1.0, 0.0), 6);
+		tricks.released(player);
+	}
+
+	/** Flung off a webline you were standing on ({@link WebLineRideClient}): free flight with the fling's speed. */
+	void flung(LocalPlayer player, Vec3 velocity) {
+		player.setDeltaMovement(velocity);
+		flying = true;
+		flightCap = Math.max(MAX_SPEED, velocity.length());
+		for (Strand strand : strands) {
+			strand.keyHeld = false;
+		}
+		swingLockout = SLING_LOCKOUT;
+		tricks.released(player);
+	}
+
 	private static boolean free(LocalPlayer player, BlockPos pos) {
 		return player.level().getBlockState(pos).getCollisionShape(player.level(), pos).isEmpty();
 	}
 
 	private Vec3 cap(Vec3 v) {
 		double speed = v.length();
-		return speed > momentum ? v.scale(momentum / speed) : v;
+		double limit = loop.active() ? Math.max(momentum, MAX_SPEED) : momentum;
+		return speed > limit ? v.scale(limit / speed) : v;
 	}
 
 	private static double rnd(LocalPlayer player) {

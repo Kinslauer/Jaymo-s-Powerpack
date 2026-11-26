@@ -58,7 +58,9 @@ public final class WebTricks {
 				return;
 			}
 		}
-		WebPower.pose(player, trick.kind(), trick.side() < 0 ? -1 : 1);
+		// (a barrel roll that carries on is sent with a side of 2 or -2, so its pose doesn't ease in again)
+		int side = trick.side() < 0 ? -1 : 1;
+		WebPower.pose(player, trick.kind(), trick.kind() == WebPose.DIVE_ROLL && Math.abs(trick.side()) == 2 ? side * 2 : side);
 		WebStunts.trick(player, trick.kind());
 		double x = player.getX(), y = player.getY(), z = player.getZ();
 		switch (trick.kind()) {

@@ -106,6 +106,16 @@ public final class HudArrange extends Screen {
 		}).bounds(this.width / 2 - 68, by, 64, 16).build());
 		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.hud_arrange.done"), b -> onClose())
 			.bounds(this.width / 2 + 4, by, 64, 16).build());
+		// the web slinger's Zip landing marker (the ring on the block Zip would carry you to) can be turned off here
+		addRenderableWidget(FlatButton.builder(zipMarkerLabel(), b -> {
+			com.jaymospowers.client.power.web.WebZipMarker.setEnabled(!com.jaymospowers.client.power.web.WebZipMarker.enabled());
+			b.setMessage(zipMarkerLabel());
+		}).bounds(this.width / 2 - 68, by - 20, 136, 16).build());
+	}
+
+	private static Component zipMarkerLabel() {
+		return Component.translatable(com.jaymospowers.client.power.web.WebZipMarker.enabled()
+			? "screen.jaymospowers.hud_arrange.zip_marker_on" : "screen.jaymospowers.hud_arrange.zip_marker_off");
 	}
 
 	/** A piece's box, never smaller than can be grabbed. */
