@@ -3372,12 +3372,14 @@ public class CorpseEntity extends Entity {
 	 * drawn on the body, an arm lets go of what it held, and the bites start over for the next part.
 	 */
 	/**
-	 * Picked over: a body built with limbs that has none left to eat (head, guts and limbs all gone), only its trunk.
-	 * Most eaters leave it there; only a horde or a blood moon finishes it ({@link Scavengers}).
+	 * Picked over: a body built with limbs whose head and guts are eaten (Andy, 2026-11-25: "they should focus on the head
+	 * and body, then move on. so the hordes will be the ones to start the limbs and finish"). Most eaters leave it there
+	 * with its limbs on; only a horde or a blood moon goes on to the limbs and the trunk ({@link Scavengers}).
 	 */
 	boolean pickedOver() {
 		RagdollRig.Shape shape = rig().shape;
-		return !isFish() && (shape == RagdollRig.Shape.HUMANOID || shape == RagdollRig.Shape.QUADRUPED) && nextPart() == 0;
+		return !isFish() && (shape == RagdollRig.Shape.HUMANOID || shape == RagdollRig.Shape.QUADRUPED)
+			&& (missing() & PART_HEAD) != 0 && gutted;
 	}
 
 	/** Bites taken toward the part being torn at now. */

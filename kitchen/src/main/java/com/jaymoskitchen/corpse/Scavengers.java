@@ -47,7 +47,7 @@ import org.jspecify.annotations.Nullable;
  * limb at a time, giving players more time to recover their party members or revive a fallen MCA." So a body is eaten a
  * part at a time ({@link CorpseEntity#nextPart}): the head (the brains), then the belly (the guts), then each arm and leg, are torn off and eaten there beside
  * it ({@link #CHEW_TICKS}, the part in its mouth), and only then is the trunk torn open. A flier comes down onto the
- * ground to eat; a lone eater or two leave the trunk, and only a horde or a blood moon eats a body whole
+ * ground to eat; a lone eater or two eat the head and the guts and move on, and only a horde or a blood moon goes on to the limbs
  * ({@link #finishes}); no more than {@link #MAX_EATERS} tear at one body at once, the rest wait their turn. A full scavenger
  * leaves what's left. Feeding, it notices less ({@link #FEEDING_SIGHT}, {@code ScavengerSightMixin}): the skittish ones
  * ({@link #SKITTISH}: vultures, foxes, coyotes) let a sneaking player come closer before they bolt, a moment after they
@@ -319,9 +319,11 @@ public final class Scavengers {
 
 	/**
 	 * Andy (2026-11-25): "the only time someone should be completely devoured is during an encounter with a horde (as they
-	 * all will want a bite) and during blood moons". Whether {@code eater} goes on to tear open a body that's
-	 * {@link CorpseEntity#pickedOver picked over}: when it's ravenous, or when {@link #HORDE} scavengers or more are about
-	 * the body (within {@link #HORDE_REACH}). Otherwise the trunk is left lying, with what it wore.
+	 * all will want a bite) and during blood moons", then "they should focus on the head and body, then move on. so the
+	 * hordes will be the ones to start the limbs and finish". Whether {@code eater} goes on eating a body that's
+	 * {@link CorpseEntity#pickedOver picked over} (head and guts gone), its limbs and then its trunk: when it's ravenous, or
+	 * when {@link #HORDE} scavengers or more are about the body (within {@link #HORDE_REACH}). Otherwise the body is left
+	 * lying with its limbs on and what it wore.
 	 */
 	private static boolean finishes(ServerLevel level, Mob eater, CorpseEntity body) {
 		return ravenous(eater) || level.getEntitiesOfClass(Mob.class, body.getBoundingBox().inflate(HORDE_REACH),
@@ -595,7 +597,7 @@ public final class Scavengers {
 				mob.playAmbientSound();
 			}
 			if (body.pickedOver() && !finishes(level, mob, body)) {
-				// (only the trunk is left: it leaves that lying, unless a horde is at it or the moon is red)
+				// (the head and guts are gone: it leaves the rest lying, unless a horde is at it or the moon is red)
 				body = null;
 				return;
 			}
