@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:42). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,12 +27,14 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2236 Town crier: verdicts are cried by the seat, not sent to chat (Kingdoms, 2026-11-26)
 - [ ] #2234 Maggots come as a writhing heap that splats underfoot (Kingdoms, 2026-11-26)
 - [ ] #2233 Reincarnate link on the character page (Powers, Kingdoms, 2026-11-26)
 - [ ] #2232 Dragon keys no longer stop the game starting (Kingdoms, 2026-11-26)
 - [ ] #2231 Dyed and grey sheep no longer sprout stray boxes (Powers, 2026-11-26)
 - [ ] #2230 /texturelook vanilla|reason - switch the pack's retexture packs off and back on (Powers, 2026-11-26)
 - [ ] #2229 cannon loading tip cards (Powers, 2026-11-26)
+- [ ] #2228 face parts - snouts, beaks, fangs and horns on the painted faces (Kingdoms, 2026-11-26)
 - [ ] #2227 Dragonforge mechanics for our dragons (parts, bite, dive slam, sprint flight, tremor, horn, home patrols, realm wyverns) (Kingdoms, 2026-11-26)
 - [ ] #2226 lance couching from the saddle (Powers, Kingdoms, 2026-11-26)
 - [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
@@ -85,9 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2161 Penguins no longer flood the server log with NaN rotation errors (Powers, 2026-11-25)
 - [ ] #2160 Smithing anvil: the new harness helms, the barbute and spangenhelm, painted barbutes (Powers, Kingdoms, 2026-11-25)
 - [ ] #2159 fighting AI - weapon sense, breaking off to mend, shields, NPC eyes, danger sense, getting there, band styles (Kingdoms, 2026-11-25)
-- [ ] #2158 symbiote in hosts without the Web - every ability, a fight for the suit, a duel with the slinger (Powers, 2026-11-25)
-- [ ] #2157 Hearth's hit cap no longer softens the blow that downs you (Kingdoms, 2026-11-25)
-- …and 546 older ones.
+- …and 606 older ones.
 
 ## Health
 
