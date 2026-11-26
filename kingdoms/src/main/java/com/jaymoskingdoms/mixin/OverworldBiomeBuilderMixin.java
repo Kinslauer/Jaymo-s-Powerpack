@@ -21,6 +21,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class OverworldBiomeBuilderMixin {
 	@Inject(method = "addBiomes", at = @At("TAIL"))
 	private void jaymoskingdoms$lands(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer, CallbackInfo ci) {
+		if (Lands.buildingBuiltIn()) {
+			return;
+		}
 		ResourceKey<Biome>[] all = Lands.all();
 		for (int i = 0; i < all.length; i++) {
 			consumer.accept(Pair.of(Lands.parked(i), all[i]));
