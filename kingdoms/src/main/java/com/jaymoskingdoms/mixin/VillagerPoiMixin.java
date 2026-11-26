@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 /** A villager looks for a bed, workplace or bell farther out, and not for a workplace or bell at bedtime ({@link VillagerFixes}). */
 @Mixin(AcquirePoi.class)
 abstract class VillagerPoiMixin {
-	@ModifyConstant(method = "lambda$create$3", constant = @Constant(intValue = 48))
+	@ModifyConstant(method = "lambda$create$3", constant = @Constant(intValue = 48), require = 0)
 	private static int jaymoskingdoms$range(int range, @Local(argsOnly = true) PathfinderMob body) {
 		return body instanceof Villager ? Math.max(range, VillagerFixes.POI_RANGE) : range;
 	}
