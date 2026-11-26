@@ -1137,3 +1137,4 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26 (parent thread, on #2188): stolen pieces must not regenerate, but a stripped person must still get back what was not taken and be issued a new part's harness: the harness_taken mark is per place and cleared only by a deliberate new issue (first kit, new settlement, new recruit's knight harness, coronation); a gunner/archer flip is not one.
 
 - 2026-11-26 Andy approved the lore paragraph "Warm mail, northern plate" (guard gear by climate, PR #2189).
+- 2026-11-26: Andy said "merge" on PR #2190 (all 40 climate picks); merged.
