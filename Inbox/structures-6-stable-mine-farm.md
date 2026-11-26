@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: blocked
 for: bacchus
 from: coordinator
 asked: 2026-11-24
