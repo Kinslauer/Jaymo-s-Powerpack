@@ -35,3 +35,4 @@ Reading of the notes: `ba-biobuilt-dmg` is replaced by Engulf turning into a gra
 - 2026-11-26 14:47 Claude delegated this to Codex.
 - 2026-11-26 14:52 Codex hit its usage limit (back 6:51 PM); moved to Gemini (antigravity).
 - 2026-11-26 15:28 gemini's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 15:36 Gemini opened patch 1 as PR #2251 (Plain, Mountain, Elemental/Sky groups; plan in docs/Blood-Awakening-Per-Blood-Plan.md) before its quota ran out. Later patches follow after review.
