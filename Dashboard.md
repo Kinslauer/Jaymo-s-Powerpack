@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 02:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -12,7 +12,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Stuck
 
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/codex-downed-harness-loot|codex-downed-harness-loot]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -27,6 +26,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2190 Belt charms: hot-stone pouch, cold-clay flask, equinox charm (Powers, Kingdoms, Kitchen, 2026-11-26)
+- [ ] #2188 most people wear harness: everyday shirts, hose, hoods and cloaks (Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2187 Mordhau harness 4: more harness at the smith's anvil (Powers, Kingdoms, 2026-11-26)
 - [ ] #2185 Mordhau harness 3: more harness at the smith's anvil (Powers, Kingdoms, 2026-11-26)
 - [ ] #2184 harness furs and turbans count for body heat; straw hats keep the sun off (Kingdoms, Kitchen, 2026-11-26)
@@ -85,9 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2128 Gravity metal fixes: no dupes from torn chunks, no weapon minting (Powers, 2026-11-25)
 - [ ] #2127 three primitive hide sets, each with a dark make (Powers, Kingdoms, 2026-11-25)
 - [ ] #2126 weighty movement - the walk carries weight (Powers, 2026-11-25)
-- [ ] #2125 Gravity: iron answers first (the X-Men mod's Magnetism, worked in) (Powers, 2026-11-25)
-- [ ] #2122 Trade hats (Powers, Kingdoms, 2026-11-25)
-- …and 571 older ones.
+- …and 573 older ones.
 
 ## Health
 
