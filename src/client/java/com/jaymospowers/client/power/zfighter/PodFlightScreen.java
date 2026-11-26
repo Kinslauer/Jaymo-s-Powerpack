@@ -54,8 +54,10 @@ public class PodFlightScreen extends Screen {
 	/** Where the sun is (yaw, pitch). */
 	static final float SUN_YAW = 110.0F, SUN_PITCH = 35.0F;
 
-	private static final Identifier POD = JaymosPowers.id("textures/gui/space_pod_flight.png");
-	private static final int POD_W = 48, POD_H = 34;
+	/** Pods by who flies them: a raider's and a derelict's, each its own ship (Master484's CC0 ship set, 16 px). */
+	private static final Identifier RAIDER_POD = JaymosPowers.id("textures/gui/pod_raider.png"),
+		WRECK_POD = JaymosPowers.id("textures/gui/pod_wreck.png");
+	private static final int SHIP = 16;
 
 	private int lastShot = -1, shotFlash, shotAt = -1, lastNotice = -1, noticeAge = NOTICE_TICKS, noticeId, noticeArg;
 	private boolean autoWas;
@@ -338,7 +340,7 @@ public class PodFlightScreen extends Screen {
 				}
 			}
 			case PodFlight.WRECK -> {
-				pod(graphics, p, o.r() * 2.0F, 0x70000000);
+				pod(graphics, WRECK_POD, p, o.r() * 2.0F, 0x70000000);
 				if (o.f() <= 0.0F) {
 					ZFighterSpaceArt.disc(graphics, p[0], p[1], r * 1.2F, 0x50000000);
 				} else if (o.id() == s.toolTarget()) {
@@ -346,7 +348,7 @@ public class PodFlightScreen extends Screen {
 				}
 			}
 			case PodFlight.RAIDER -> {
-				pod(graphics, p, o.r() * 2.2F, 0x30FF2020);
+				pod(graphics, RAIDER_POD, p, o.r() * 2.2F, 0x30FF2020);
 				bracket(graphics, p[0], p[1], r * 1.5F + 4.0F, o.f() >= 0.99F ? 0xFFFF7060 : 0xFFFFB040);
 			}
 			case PodFlight.BOLT -> {
@@ -381,20 +383,27 @@ public class PodFlightScreen extends Screen {
 		}
 	}
 
-	/** The pod's picture (side on) at a point, as big across as {@code across} blocks, with a tint laid over it. */
-	private void pod(GuiGraphicsExtractor graphics, float[] p, float across, int tint) {
+	/** A pod's ship picture at a point, as big across as {@code across} blocks, its pixels darkened by {@code tint}. */
+	private void pod(GuiGraphicsExtractor graphics, Identifier ship, float[] p, float across, int tint) {
 		float px = across * p[2];
 		if (px < 5.0F) {
 			ZFighterSpaceArt.disc(graphics, p[0], p[1], Math.max(1.5F, px * 0.5F), 0xFFC8D0E0);
 			return;
 		}
-		float scale = px / POD_W;
+		float scale = px / SHIP;
 		graphics.pose().pushMatrix();
-		graphics.pose().translate(p[0] - px / 2.0F, p[1] - POD_H * scale / 2.0F);
+		graphics.pose().translate(p[0] - px / 2.0F, p[1] - px / 2.0F);
 		graphics.pose().scale(scale, scale);
-		graphics.blit(RenderPipelines.GUI_TEXTURED, POD, 0, 0, 0.0F, 0.0F, POD_W, POD_H, POD_W, POD_H);
-		graphics.fill(0, 0, POD_W, POD_H, tint);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, ship, 0, 0, 0.0F, 0.0F, SHIP, SHIP, SHIP, SHIP, shade(tint));
 		graphics.pose().popMatrix();
+	}
+
+	/** The colour a tint's dark veil (alpha) and hue leave a white pixel at, so only the ship's pixels are shaded. */
+	private static int shade(int tint) {
+		float a = (tint >>> 24) / 255.0F;
+		int r = Math.round(255 * (1 - a) + ((tint >> 16) & 0xFF) * a), g = Math.round(255 * (1 - a) + ((tint >> 8) & 0xFF) * a),
+			b = Math.round(255 * (1 - a) + (tint & 0xFF) * a);
+		return 0xFF000000 | r << 16 | g << 8 | b;
 	}
 
 	private void bracket(GuiGraphicsExtractor graphics, float cx, float cy, float r, int colour) {
