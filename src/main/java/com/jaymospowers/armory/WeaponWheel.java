@@ -19,13 +19,14 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ShieldItem;
 
 /**
  * The weapon wheel (Weapon Wheel's idea, CC0, by henalne; {@code client/armory/WeaponWheelScreen} draws it): one key
  * opens a ring of what the body carries, sorted by kind (blades, axes, long arms, pistols, shields, tools, the worn tool
  * belt's tools, and bare fists), and the pick comes to hand. A hotbar weapon is simply drawn (its slot selected, so the
- * others stay where they hang); a shield goes to the off hand; the back slot's item swaps with the hand as the back-slot
+ * others stay where they hang); a shield or a stack of arrows goes to the off hand; the back slot's item swaps with the hand as the back-slot
  * key does ({@link BackSlot}); a belt tool swaps out of the belt the way the belt's own menu does; fists put the held
  * thing away. The server checks every pick against what is really there.
  */
@@ -67,14 +68,22 @@ public final class WeaponWheel {
 		}
 	}
 
-	/** A hotbar weapon: drawn; a shield: to the off hand, what was there taking its slot. */
+	/** Whether {@code stack} goes to the off hand when picked (a shield, arrows), not the main hand. Both sides. */
+	public static boolean offHand(ItemStack stack) {
+		return stack.getItem() instanceof ShieldItem || stack.is(ItemTags.ARROWS);
+	}
+
+	/** A hotbar weapon: drawn; a shield or arrows: to the off hand, what was there taking its slot. */
 	private static void hotbar(ServerPlayer player, int slot) {
 		Inventory inventory = player.getInventory();
-		if (slot < 0 || slot >= Inventory.getSelectionSize() || !BodyWeapons.carriedOnBody(inventory.getItem(slot))) {
+		if (slot < 0 || slot >= Inventory.getSelectionSize()) {
 			return;
 		}
 		ItemStack stack = inventory.getItem(slot);
-		if (stack.getItem() instanceof ShieldItem) {
+		if (!BodyWeapons.carriedOnBody(stack) && !offHand(stack)) {
+			return;
+		}
+		if (offHand(stack)) {
 			inventory.setItem(slot, player.getOffhandItem());
 			player.setItemInHand(InteractionHand.OFF_HAND, stack);
 			equipped(player);

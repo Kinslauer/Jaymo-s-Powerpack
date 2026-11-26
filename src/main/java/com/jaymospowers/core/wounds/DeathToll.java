@@ -26,7 +26,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 /**
  * What a wake costs (Mortal Burden's idea, CC0, by osinnanna: a burden each death adds and time takes away). Each time one
  * left for dead wakes ({@link Mortality}), the body has paid for it: {@link #TOLL_PER_WAKE} of most health is gone (up to
- * {@link #MAX_TOLL}), and a weakness and a heaviness in the hands linger a while after they come round. Unlike a scar
+ * {@link #MAX_TOLL}), and a weakness and a heaviness in the hands linger a while after they come round (and, once the toll
+ * is heavy, {@link #HEAVY_TOLL}, a dragging step too). Unlike a scar
  * ({@link Scars}) the health comes back: always, slowly, and faster for one who is cared for: wounds seen to (nothing
  * bleeding, every break set), well fed (Kitchen's Nourishment or Comfort), and a night slept in a bed. A new life
  * ({@link Mortality#endLife}) or a new body ({@link Mortality#shedGifts}) starts without it. Nothing is said in chat:
@@ -43,6 +44,8 @@ public final class DeathToll {
 	static final int NIGHT_MENDS = 2;
 	/** How long the weakness and the heavy hands linger after a wake (ticks), and how much longer for each point of toll. */
 	static final int LINGER_TICKS = 20 * 60 * 2, LINGER_PER_TOLL = 20 * 20;
+	/** At this toll or more the wake weighs on the step too (Mortal Burden's grief): a slowness for as long. */
+	static final int HEAVY_TOLL = MAX_TOLL;
 	/** Kitchen's good meals (looked up by id, so nothing without Kitchen). */
 	private static final Identifier NOURISHMENT = Identifier.fromNamespaceAndPath("jaymoskitchen", "nourishment"),
 		COMFORT = Identifier.fromNamespaceAndPath("jaymoskitchen", "comfort");
@@ -86,6 +89,9 @@ public final class DeathToll {
 		int linger = LINGER_TICKS + LINGER_PER_TOLL * toll;
 		player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, linger, 0, false, false, true));
 		player.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, linger, 0, false, false, true));
+		if (toll >= HEAVY_TOLL) {
+			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, linger, 0, false, false, true));
+		}
 		UNTOLD.add(player.getUUID());
 	}
 

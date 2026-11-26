@@ -27,8 +27,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The weapon wheel (Weapon Wheel's idea, CC0, by henalne; the server side is {@link WeaponWheel}). The 0 key, held: a
- * ring of eight kinds, clockwise from the top (blades, axes, long arms, pistols, bare fists, shields, tools, the worn
- * tool belt), each showing one of what the body carries of that kind: the hotbar's weapons and tools, the back slot's
+ * ring of eight kinds, clockwise from the top (blades, axes, long arms, pistols, bare fists, the off hand's shields and
+ * arrows, tools, the worn tool belt), each showing one of what the body carries of that kind: the hotbar's weapons and tools, the back slot's
  * item and the belt's tools. Point at a kind and let go (or click) to bring it to hand; Q and E, or the mouse wheel,
  * step through a kind with more than one. A quick tap leaves the wheel open until a click, the key again, or Escape. In
  * the middle, the pick's name, where it's carried and how worn it is. It doesn't pause, and the world stays in view.
@@ -134,7 +134,7 @@ public final class WeaponWheelScreen extends Screen {
 	}
 
 	private void add(int source, int index, ItemStack stack) {
-		BodyWeapons.Kind kind = BodyWeapons.kind(stack);
+		BodyWeapons.Kind kind = stack.is(net.minecraft.tags.ItemTags.ARROWS) ? BodyWeapons.Kind.SHIELD : BodyWeapons.kind(stack);
 		if (kind == null) {
 			return;
 		}
@@ -263,7 +263,7 @@ public final class WeaponWheelScreen extends Screen {
 			return player.getMainHandItem().isEmpty();
 		}
 		return entry.source() == WeaponWheel.HOTBAR && entry.index() == player.getInventory().getSelectedSlot()
-			&& BodyWeapons.kind(entry.stack()) != BodyWeapons.Kind.SHIELD;
+			&& !WeaponWheel.offHand(entry.stack());
 	}
 
 	@Override
@@ -357,11 +357,11 @@ public final class WeaponWheelScreen extends Screen {
 			status = Component.translatable("screen.jaymospowers.weapon_wheel.in_hand");
 		} else {
 			status = switch (entry.source()) {
-				case WeaponWheel.BACK -> Component.translatable(BodyWeapons.kind(stack) == BodyWeapons.Kind.SHIELD
+				case WeaponWheel.BACK -> Component.translatable(WeaponWheel.offHand(stack)
 					? "screen.jaymospowers.weapon_wheel.from_back_off_hand" : "screen.jaymospowers.weapon_wheel.from_back");
 				case WeaponWheel.BELT -> Component.translatable("screen.jaymospowers.weapon_wheel.from_belt");
 				case WeaponWheel.FISTS -> Component.translatable("screen.jaymospowers.weapon_wheel.put_away");
-				default -> Component.translatable(BodyWeapons.kind(stack) == BodyWeapons.Kind.SHIELD
+				default -> Component.translatable(WeaponWheel.offHand(stack)
 					? "screen.jaymospowers.weapon_wheel.off_hand" : "screen.jaymospowers.weapon_wheel.from_hotbar", entry.index() + 1);
 			};
 		}
