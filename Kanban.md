@@ -4,13 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:48). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · open
-- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for ☀️ Apollo · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for ☀️ Apollo · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for ☀️ Apollo · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
@@ -22,11 +21,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · 🪶 Quill · #2209 · writing
+- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · claimed
 
 
 ## In review
 
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
