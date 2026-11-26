@@ -3,9 +3,10 @@ type: picklist
 source: Clay Soldiers + Clay Warfare + Symbiotes Unleashed + Symbiote Extra Visuals + Hand of God
 url: https://modrinth.com/mod/clay-soldiers · https://modrinth.com/datapack/clay-warfare · https://www.curseforge.com/minecraft/mc-mods/symbiotes-unleashed-extra-visuals · https://www.curseforge.com/minecraft/mc-mods/symbiotes-unleashed · https://www.curseforge.com/minecraft/mc-mods/hand-of-god
 licence: Clay Soldiers MIT · Clay Warfare All Rights Reserved (community reuse with credit) · Symbiotes Unleashed All Rights Reserved · Symbiote Extra Visuals All Rights Reserved · Hand of God unknown
-status: waiting-for-picks
+status: picked
 created: 2026-11-21
 tags: [inbox, picklist, small-armies]
+picked: 2026-11-26
 ---
 
 **Pick on the page, not here:** https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (with the other questions waiting on Andy; ticks and notes save to db picks/andy). This file is the source draft.
@@ -52,24 +53,24 @@ Tick what you want, add a note under any row, then set `status: picked`.
 
 ## Symbiotes Unleashed / Extra Visuals
 
-- [ ] **Living tentacle animations** `M` ^su-tentacles
+- [x] **Living tentacle animations** `M` ^su-tentacles
   Animated tentacles, organic armor movement, dynamic symbiote visuals on a host entity.
   For us: GeckoLib animation layer on an existing mob — tentacle bones on our xeno or parasite mobs, not a new entity.
   Notes:
 
-- [ ] **Symbiote host possession** `L` ^su-host
+- [x] **Symbiote host possession** `L` ^su-host
   A symbiote bonds to a player or mob, changes their look and abilities.
   For us: Powers already has xenoforms and ultimates — this is a skin and a passive on top, not a new system.
   Notes:
 
 ## Hand of God
 
-- [ ] **Nine divine powers** `L` ^hog-powers
+- [x] **Nine divine powers** `L` ^hog-powers
   Control Sun and Moon, time, matter, reality and lightning — god-like player abilities with visual effects.
   For us: Powers already has time (Chronomancy), weather, lightning, matter (alchemy). This is a power school, not new mechanics.
   Notes:
 
-- [ ] **Sun and Moon control** `M` ^hog-celestial
+- [x] **Sun and Moon control** `M` ^hog-celestial
   Move or freeze the Sun and Moon.
   For us: Kingdoms' world time or Powers' existing celestial hooks.
   Notes:
