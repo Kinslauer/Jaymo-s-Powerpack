@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: codex
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes, 2026-11-26)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: codex
 pr: 
 ---
 
