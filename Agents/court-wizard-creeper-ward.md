@@ -1,5 +1,5 @@
 ---
-status: running
+status: blocked
 task: Court wizards ward their kingdom against creepers - prevent/rewind creeper explosions, weaken creepers inside, repel some at the edge
 branch: claude/court-wizard-creeper-ward
 with:
