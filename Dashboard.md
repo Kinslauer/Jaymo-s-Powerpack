@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:15). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:22). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -7,6 +7,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Questions for you:**
 - [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 2026-11-26 00:46 Question for Andy: when a per-blood upgrade is ticked, does it add to the shared rule (halved waits + 1.5x duration) for that blood, or replac…
+- [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · 2026-11-26 02:18 Question: Before implementing changeling voice mimic, I need clarification:
 - [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · 2026-11-26 01:56 Question: Need clarification on ward upkeep, break conditions, prevention vs rewind, weakening numbers, repulsion chance/visual, ward radius.
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
@@ -15,7 +16,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
-- [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -28,13 +28,15 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-7 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
+7 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2212 CC0 picks: pack weight, death toll, weapon wheel, coyote time, better chainmail, axe throw, rust, falling snow, snores, clumsy undead, soap scrub, leaves on Fast, eight new pack mods (Powers, Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2211 fire engulfs faster, burns longer, buildings crumble (Kingdoms, 2026-11-26)
+- [ ] #2210 Medieval resource packs under the Reason look (Powers, Kingdoms, 2026-11-26)
 - [ ] #2208 Reason look pack replaces Excalibur; art check on PRs (Powers, 2026-11-26)
 - [ ] #2207 The salmon run: salmon swim upriver in autumn, spawn in the headwaters and die there (Powers, Kingdoms, 2026-11-26)
 - [ ] #2206 Giant mushrooms repainted in the pack's vanilla style (Kingdoms, 2026-11-26)
@@ -92,9 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2145 Dodge key: tap to dodge, hold to roll, hold longer to go prone (Powers, 2026-11-25)
 - [ ] #2144 hollow among the dead - the Hollow walk with the hordes, and a kill makes a captain (Kingdoms, 2026-11-25)
 - [ ] #2143 Life story: no more stuck on "On to your looks" (Kingdoms, 2026-11-25)
-- [ ] #2142 Wall knocks only from real knocks: plain jumps and your own sprint-jumps never hurt (Powers, 2026-11-25)
-- [ ] #2141 fallen trees are solid (Kingdoms, 2026-11-25)
-- …and 588 older ones.
+- …and 590 older ones.
 
 ## Health
 
