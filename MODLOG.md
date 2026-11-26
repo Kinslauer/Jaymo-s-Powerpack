@@ -8556,3 +8556,7 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - Hidden or refused ("You can't reincarnate right now.") while downed, carried, left for dead, in Limbo or the Other World, held for revival, just woken, or still making a character.
 - `Reincarnate` (payload `jaymospowers:reincarnate`, `Reincarnate.can`), `Mortality.chooseToEnd`, `ZFighterAfterlife.storyAhead`, client `ReincarnateLink`.
 - Built; not played.
+
+## 0.27.92 (2026-11-26): Friends' zip installs Fabric API 0.165.2 (#2237)
+
+- The friends' CurseForge zip still had CurseForge download Fabric API 0.164.0 after the pack moved to 0.165.2 for Psithurism, so a fresh import would not start ("Psithurism requires 0.165.0 or later of Fabric API", Jamuu, 2026-11-26). Its CurseForge file id now points at 0.165.2 (9417647).
