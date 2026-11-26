@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,7 +16,7 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for ☀️ Apollo · open
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for ☀️ Apollo · open
-- [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · for any · open
+- [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · for ☀️ Apollo · open
 
 
 ## Being built
