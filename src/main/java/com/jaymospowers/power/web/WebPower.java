@@ -474,6 +474,7 @@ public final class WebPower implements Power {
 		player.removeAttached(TETHER);
 		player.removeAttached(WINGS);
 		WebTendrils.releaseAll(player, false);
+		WebAttacks.forget(player);
 	}
 
 	@Override
@@ -543,14 +544,16 @@ public final class WebPower implements Power {
 		if (WebSymbioteBody.onUltimate(player, down)) {
 			return;
 		}
-		if (down && player.isShiftKeyDown() && mastered(player)) {
-			if (player.getLastClientInput().jump()) {
-				// Sneak + Jump + C: Web Storm, the dome that draws them in
-				WebStorm.use(player);
-			} else if (!WebHunt.begin(player)) {
-				// Sneak + C with a foe locked on, once ascended: the Hunting Dive; else Web Blossom
-				WebBlossom.use(player);
+		if (down && mastered(player) && !player.isShiftKeyDown() && player.getLastClientInput().backward()) {
+			// Back + Jump + C: Web Storm, the dome that draws them in; Back + C with a foe locked on: the Hunting Dive.
+			// Each takes the key only when it starts; otherwise C does what it always did
+			if (player.getLastClientInput().jump() && WebStorm.use(player) || WebHunt.begin(player)) {
+				return;
 			}
+		}
+		if (down && player.isShiftKeyDown() && mastered(player)) {
+			// Sneak + C: Web Blossom, as it always was
+			WebBlossom.use(player);
 			return;
 		}
 		if (Power.super.ultimateAnswers(player)) {

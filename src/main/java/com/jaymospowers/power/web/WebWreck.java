@@ -31,11 +31,13 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Wrecking ball: with both swing webs stuck near each other in the ground, a punch gathers the loose debris around them (dropped
- * items and falling blocks within {@link #GATHER}; a corpse near adds its weight but is left lying) into a ball held on both
- * lines ({@link WebPose#WRECK_SWING}), and swings it round you. It knocks foes down, swats arrows and other missiles out of the air
- * ({@link WebWhip}'s sweep does the same for a creature), and letting go of the punch throws it along your look to smash where it
- * lands. Needs {@link #LEAST} pieces. Sent as a {@link WebWhip.Hold} of mode {@link WebWhip#BALL}.
+ * Wrecking ball: standing on the ground, with both swing webs stuck near each other in the top faces of blocks below you, a punch
+ * gathers the loose debris around them into a ball held on both lines ({@link WebPose#WRECK_SWING}), and swings it round you. The
+ * dropped items within {@link #GATHER} are carried in the ball, whole, and put back down where it lands or ends (never destroyed);
+ * falling blocks and a corpse near add their weight but are left where they are. It knocks foes down, turns arrows and other
+ * missiles aside (slowed and dropped, never deleted), and letting go of the punch throws it along your look to smash where it
+ * lands. Needs {@link #LEAST} pieces. Sent as a {@link WebWhip.Hold} of mode {@link WebWhip#BALL}; the server checks the anchors
+ * ({@link #groundAnchor}) and that you are on the ground, so a swing in the air is never taken from you.
  */
 public final class WebWreck {
 	/** How far from the webs debris is gathered (blocks), the fewest pieces that make a ball, and the most that count. */
@@ -60,6 +62,8 @@ public final class WebWreck {
 	private static final class Ball {
 		final int pieces;
 		final BlockState look;
+		/** The dropped items it carries, put back down whole when it ends. */
+		final java.util.List<net.minecraft.world.item.ItemStack> carried;
 		final long start;
 		double angle;
 		Vec3 at;
@@ -68,7 +72,8 @@ public final class WebWreck {
 		long flightStart;
 		final Map<Integer, Long> hit = new HashMap<>();
 
-		Ball(int pieces, BlockState look, long start, double angle) {
+		Ball(int pieces, BlockState look, java.util.List<net.minecraft.world.item.ItemStack> carried, long start, double angle) {
+			this.carried = carried;
 			this.pieces = pieces;
 			this.look = look;
 			this.start = start;
@@ -87,9 +92,21 @@ public final class WebWreck {
 	private WebWreck() {
 	}
 
-	/** A punch with both webs on the ground near each other: gather and swing. */
+	/**
+	 * Whether {@code anchor} is a web stuck in the top face of a block below {@code feet}: solid and sturdy on top, open above,
+	 * and no higher than the feet. Both sides (the client asks before it sends the punch, the server again before it acts).
+	 */
+	public static boolean groundAnchor(net.minecraft.world.level.Level level, Vec3 anchor, Vec3 feet) {
+		BlockPos below = BlockPos.containing(anchor.x, anchor.y - 0.05, anchor.z);
+		if (anchor.y > feet.y + 0.3 || Math.abs(anchor.y - (below.getY() + 1.0)) > 0.3) {
+			return false;
+		}
+		return level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP) && level.getBlockState(below.above()).getCollisionShape(level, below.above()).isEmpty();
+	}
+
+	/** A punch with both webs in the ground near each other: gather and swing. */
 	static void begin(ServerPlayer player) {
-		if (!player.isAlive() || player.isSpectator() || !Powers.has(player, WebPower.INSTANCE) || LIVE.containsKey(player.getUUID()) || WebWhip.active(player)) {
+		if (!player.onGround() || !player.isAlive() || player.isSpectator() || !Powers.has(player, WebPower.INSTANCE) || LIVE.containsKey(player.getUUID()) || WebWhip.active(player)) {
 			return;
 		}
 		ServerLevel level = player.level();
@@ -100,7 +117,8 @@ public final class WebWreck {
 		WebLine main = player.getAttached(WebPower.line(WebNet.MAIN));
 		WebLine off = player.getAttached(WebPower.line(WebNet.OFF));
 		if (main == null || off == null || main.kind() != WebLine.SWING || off.kind() != WebLine.SWING || main.entityId() >= 0 || off.entityId() >= 0
-			|| main.anchor().distanceTo(off.anchor()) > WebWhip.NEAR || main.anchor().distanceTo(player.position()) > WebWhip.RANGE) {
+			|| main.anchor().distanceTo(off.anchor()) > WebWhip.NEAR || main.anchor().distanceTo(player.position()) > WebWhip.RANGE
+			|| !groundAnchor(level, main.anchor(), player.position()) || !groundAnchor(level, off.anchor(), player.position())) {
 			return;
 		}
 		Vec3 centre = main.anchor().add(off.anchor()).scale(0.5);
@@ -129,12 +147,12 @@ public final class WebWreck {
 			return;
 		}
 		int total = Math.min(MOST, pieces + corpses * CORPSE_WEIGHT);
+		java.util.List<net.minecraft.world.item.ItemStack> carried = new java.util.ArrayList<>();
 		for (ItemEntity item : items) {
+			// taken up into the ball whole; it puts them back down when it ends
 			level.sendParticles(ParticleTypes.POOF, item.getX(), item.getY() + 0.2, item.getZ(), 3, 0.1, 0.1, 0.1, 0.02);
+			carried.add(item.getItem().copy());
 			item.discard();
-		}
-		for (FallingBlockEntity block : falling) {
-			block.discard();
 		}
 		if (look == null) {
 			look = level.getBlockState(BlockPos.containing(centre.x, centre.y - 0.5, centre.z));
@@ -145,7 +163,7 @@ public final class WebWreck {
 		WebPower.handOverSwings(player);
 		ServerPlayNetworking.send(player, new WebWhip.Taken());
 		Vec3 away = centre.subtract(player.position());
-		Ball ball = new Ball(total, look, now, Math.atan2(away.z, away.x));
+		Ball ball = new Ball(total, look, carried, now, Math.atan2(away.z, away.x));
 		ball.at = ball.at(player);
 		LIVE.put(player.getUUID(), ball);
 		WebPower.pose(player, WebPose.WRECK_SWING, 1);
@@ -183,7 +201,7 @@ public final class WebWreck {
 		ServerLevel level = player.level();
 		long t = level.getGameTime() - ball.start;
 		if (!player.isAlive() || player.isSpectator()) {
-			LIVE.remove(player.getUUID());
+			drop(level, player, ball);
 			return;
 		}
 		if (ball.thrown) {
@@ -218,9 +236,14 @@ public final class WebWreck {
 		// and swats arrows and the like out of the air
 		for (Projectile p : level.getEntitiesOfClass(Projectile.class, new AABB(ball.at, ball.at).inflate(SWAT_REACH),
 			p -> p.isAlive() && p.getOwner() != player && p.position().distanceTo(ball.at) <= SWAT_REACH)) {
+			// turned aside, not deleted: it loses its speed and drops
 			level.sendParticles(ParticleTypes.CRIT, p.getX(), p.getY(), p.getZ(), 6, 0.1, 0.1, 0.1, 0.2);
 			level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 0.8F, 1.3F);
-			p.discard();
+			Vec3 off = p.position().subtract(ball.at);
+			off = off.lengthSqr() < 1.0E-4 ? Vec3.ZERO : off.normalize().scale(0.15);
+			p.setDeltaMovement(off.x, -0.1, off.z);
+			p.needsSync = true;
+			p.syncVelocity = true;
 		}
 	}
 
@@ -244,9 +267,7 @@ public final class WebWreck {
 		if (!met) {
 			return;
 		}
-		LIVE.remove(player.getUUID());
-		READY.put(player.getUUID(), level.getGameTime() + COOLDOWN);
-		player.removeAttached(WebPower.POSE);
+		drop(level, player, ball);
 		float damage = THROW_BASE + THROW_PER_PIECE * ball.pieces;
 		for (LivingEntity e : foes(level, player, ball.at, THROW_REACH + 1.0)) {
 			e.setInvulnerableTime(0);
@@ -264,6 +285,20 @@ public final class WebWreck {
 		com.jaymospowers.core.Shakes.heavy(player, ball.at, 12.0, 3.0F);
 	}
 
+	/** The ball ends where it is: what it carried is put back down, whole, and the move is over. */
+	private static void drop(ServerLevel level, ServerPlayer player, Ball ball) {
+		LIVE.remove(player.getUUID());
+		READY.put(player.getUUID(), level.getGameTime() + COOLDOWN);
+		player.removeAttached(WebPower.POSE);
+		Vec3 at = ball.at != null ? ball.at : player.position();
+		for (net.minecraft.world.item.ItemStack stack : ball.carried) {
+			ItemEntity item = new ItemEntity(level, at.x, at.y, at.z, stack);
+			item.setDeltaMovement((level.getRandom().nextDouble() - 0.5) * 0.3, 0.2, (level.getRandom().nextDouble() - 0.5) * 0.3);
+			level.addFreshEntity(item);
+		}
+		ball.carried.clear();
+	}
+
 	/** The ball's look: rubble of the gathered kind, with web through it. */
 	private static void puff(ServerLevel level, Ball ball, int count) {
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ball.look), ball.at.x, ball.at.y, ball.at.z, count, 0.25, 0.25, 0.25, 0.05);
@@ -278,6 +313,10 @@ public final class WebWreck {
 	}
 
 	static void forget(ServerPlayer player) {
+		Ball ball = LIVE.get(player.getUUID());
+		if (ball != null && player.level() instanceof ServerLevel level) {
+			drop(level, player, ball);
+		}
 		LIVE.remove(player.getUUID());
 		READY.remove(player.getUUID());
 	}

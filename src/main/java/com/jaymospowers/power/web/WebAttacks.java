@@ -1,6 +1,8 @@
 package com.jaymospowers.power.web;
 
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
@@ -16,8 +18,16 @@ final class WebAttacks {
 	}
 
 	static void register() {
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+		// every move ends (and gives back what it carries) when its slinger leaves, changes world or the server stops
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.getPlayer()));
+		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, origin, destination) -> forget(player));
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				forget(player);
+			}
 			WebStrikeLines.clearAll();
+			WebUptilt.clearAll();
+			WebPin.clearAll();
 			WebZipStrike.clearAll();
 			WebSurf.clearAll();
 			WebDiveSlam.clearAll();
@@ -31,6 +41,8 @@ final class WebAttacks {
 
 	/** Every tick, for a web slinger. */
 	static void tick(ServerPlayer player) {
+		WebUptilt.tick(player);
+		WebPin.tick(player);
 		WebZipStrike.tick(player);
 		WebSurf.tick(player);
 		WebDiveSlam.tick(player);
@@ -46,6 +58,8 @@ final class WebAttacks {
 	static void forget(ServerPlayer player) {
 		WebStrikeLines.clear(player);
 		WebStrikeLines.forget(player);
+		WebUptilt.forget(player);
+		WebPin.forget(player);
 		WebZipStrike.forget(player);
 		WebSurf.forget(player);
 		WebDiveSlam.forget(player);
@@ -58,6 +72,7 @@ final class WebAttacks {
 
 	/** Hauled along by one of these (a dive, a ride, a hunt, a zip at a foe): the movement check leaves them be. */
 	static boolean moving(ServerPlayer player) {
-		return WebDiveSlam.diving(player) || WebSurf.surfing(player) || WebHunt.hunting(player) || WebZipStrike.flying(player);
+		return WebDiveSlam.diving(player) || WebSurf.surfing(player) || WebHunt.hunting(player) || WebZipStrike.flying(player)
+			|| WebUptilt.arcing(player) || WebPin.pulling(player);
 	}
 }

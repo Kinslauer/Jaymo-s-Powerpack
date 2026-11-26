@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -21,11 +19,12 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Web storm (Sneak + Jump + C, once every ability is unlocked, the pull-in partner of {@link WebBlossom}, which throws outward):
+ * Web storm (Back + Jump + C, once every ability is unlocked, the pull-in partner of {@link WebBlossom}, which throws outward):
  * spin a dome of web lines out from both wrists to the blocks around you ({@link WebPose#WEB_STORM}), drawing the creatures that are
  * a fight for you in toward you for {@link #PULL_TICKS}, then burst the dome and web them all
  * ({@link WebStrength#cocoon}). It needs {@link #LEAST_ANCHORS} blocks within {@link #REACH} to hold the dome from, and
- * (like a blossom) a shot of a shooter's fluid unless the suit's own mass does it.
+ * (like a blossom) a shot of a shooter's fluid unless the suit's own mass does it. Bosses and
+ * anything too big to haul ({@link WebHaul#haulable}) are not drawn in.
  */
 public final class WebStorm {
 	/** How far the dome reaches (blocks), how many lines it casts to find its blocks, and the fewest it must find. */
@@ -50,18 +49,16 @@ public final class WebStorm {
 	private WebStorm() {
 	}
 
-	static void use(ServerPlayer player) {
+	/** The dome: true if it was cast; false (nothing used) when there is no shot, no anchors or nobody to draw in, so the key goes on to what it did before. */
+	static boolean use(ServerPlayer player) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		if (LIVE.containsKey(player.getUUID()) || now < READY.getOrDefault(player.getUUID(), 0L) || WebPower.ragdolled(player)) {
-			return;
+			return false;
 		}
 		boolean dark = WebSymbiote.suitShown(player) || WebSymbiote.isToggled(player, WebSymbioteState.ARMOR);
 		if (!dark && WebShooters.shotHand(player) < 0) {
-			player.sendOverlayMessage(Component.translatable(WebShooters.worn(player) != null
-				? "message.jaymospowers.web_shot.dry" : "message.jaymospowers.web_shot.no_shooters").withStyle(ChatFormatting.GRAY));
-			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.35F, 1.8F);
-			return;
+			return false;
 		}
 		Vec3 centre = player.position().add(0.0, player.getBbHeight() * 0.6, 0.0);
 		List<Vec3> anchors = new ArrayList<>();
@@ -75,14 +72,13 @@ public final class WebStorm {
 			}
 		}
 		List<LivingEntity> found = new ArrayList<>();
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(centre, centre).inflate(SEES), e -> WebBlossom.fight(player, e))) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(centre, centre).inflate(SEES), e -> WebBlossom.fight(player, e) && WebHaul.haulable(e))) {
 			if (e.distanceToSqr(player) <= SEES * SEES && player.hasLineOfSight(e)) {
 				found.add(e);
 			}
 		}
 		if (anchors.size() < LEAST_ANCHORS || found.isEmpty()) {
-			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.4F, 2.0F);
-			return;
+			return false;
 		}
 		if (!dark) {
 			WebShooters.fire(player, WebShooters.shotHand(player), false);
@@ -96,6 +92,7 @@ public final class WebStorm {
 		LIVE.put(player.getUUID(), new Live(anchors, ids, now, dark));
 		WebPower.pose(player, WebPose.WEB_STORM, 1);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 0.9F);
+		return true;
 	}
 
 	/** Every tick, per web slinger. */

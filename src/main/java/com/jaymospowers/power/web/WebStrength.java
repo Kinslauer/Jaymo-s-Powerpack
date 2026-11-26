@@ -228,7 +228,7 @@ public final class WebStrength {
 			}
 		}
 		int ticks = net.minecraft.util.Mth.lerpInt((charge - PIN_CHARGE) / (1.0F - PIN_CHARGE), PIN_TICKS_MIN, PIN_TICKS_MAX);
-		bind(level, target, at, ticks, true, dark);
+		bind(level, target, at, ticks, true, dark, false);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
@@ -239,7 +239,7 @@ public final class WebStrength {
 		} else {
 			at = target.position();
 		}
-		bind(level, target, at, ticks, true, dark);
+		bind(level, target, at, ticks, true, dark, true);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
@@ -250,11 +250,11 @@ public final class WebStrength {
 
 	/** Spun up where it stands: a layer of web on it ({@link Webbed}), held fast for {@code ticks} or till it's out of the web. */
 	static void cocoon(ServerLevel level, LivingEntity target, int ticks, boolean dark) {
-		bind(level, target, target.position(), ticks, false, dark);
+		bind(level, target, target.position(), ticks, false, dark, false);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
 	}
 
-	private static void bind(ServerLevel level, LivingEntity target, Vec3 at, int ticks, boolean pinned, boolean dark) {
+	private static void bind(ServerLevel level, LivingEntity target, Vec3 at, int ticks, boolean pinned, boolean dark, boolean holdPlayer) {
 		WebTraps.ensnare(level, target, COCOON_SLOWNESS, ticks, dark);
 		target.setDeltaMovement(Vec3.ZERO);
 		target.syncVelocity = true;
@@ -265,7 +265,7 @@ public final class WebStrength {
 		Bind old = BINDS.get(target.getUUID());
 		boolean wasPinned = old != null && old.pinned() && clock < old.until();
 		long until = Math.max(clock + ticks, old == null ? 0L : old.until());
-		BINDS.put(target.getUUID(), new Bind(level.dimension(), target instanceof Player ? null : (wasPinned && !pinned ? old.at() : at), until, pinned || wasPinned));
+		BINDS.put(target.getUUID(), new Bind(level.dimension(), target instanceof Player && !holdPlayer ? null : (wasPinned && !pinned ? old.at() : at), until, pinned || wasPinned));
 		level.sendParticles(dark ? WebSymbiote.dust(1.4F) : ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
 			24, target.getBbWidth() * 0.5, target.getBbHeight() * 0.5, target.getBbWidth() * 0.5, 0.02);
 	}

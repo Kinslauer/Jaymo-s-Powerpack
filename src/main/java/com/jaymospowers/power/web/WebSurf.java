@@ -19,8 +19,8 @@ import net.minecraft.world.phys.Vec3;
  * Ride a launched foe: kick a creature into the air ({@link com.jaymospowers.mortal.AirCombo}), zip onto it
  * ({@link WebZipStrike}) and you stand on its back as it flies ({@link WebPose#SURF}). Where you look, it goes: the sides and
  * ahead push it along, looking steeply down drives it down, up holds it aloft. Into a wall or the ground it crashes
- * ({@link #CRASH_BASE} damage and more for the speed, and the ground breaks as a slam's does), and you kick off clear. Sneak
- * or Jump gets off early; it also ends after {@link #MAX_TICKS}. Only a creature (not another player: their flight is their
+ * ({@link #CRASH_BASE} damage and more for the speed, and the ground breaks as a slam's does), and you kick off clear. a fresh press of Sneak
+ * or Jump (not one still held from the zip) gets off early; it also ends after {@link #MAX_TICKS}. Only a creature (not another player: their flight is their
  * own client's) and only for as long as it is in the air.
  */
 public final class WebSurf {
@@ -41,10 +41,14 @@ public final class WebSurf {
 		final long start;
 		/** How fast it was going last tick (blocks/tick), for what it hits. */
 		double lastSpeed;
+		/** Whether Sneak and Jump were held last tick: only a fresh press gets off, not the key still held from the zip. */
+		boolean wasShift, wasJump;
 
-		Live(int target, long start) {
+		Live(int target, long start, boolean shift, boolean jump) {
 			this.target = target;
 			this.start = start;
+			this.wasShift = shift;
+			this.wasJump = jump;
 		}
 	}
 
@@ -55,7 +59,7 @@ public final class WebSurf {
 
 	/** Stands {@code player} on {@code foe}'s back. */
 	static void begin(ServerPlayer player, LivingEntity foe) {
-		LIVE.put(player.getUUID(), new Live(foe.getId(), player.level().getGameTime()));
+		LIVE.put(player.getUUID(), new Live(foe.getId(), player.level().getGameTime(), player.getLastClientInput().shift(), player.getLastClientInput().jump()));
 		WebPower.pose(player, WebPose.SURF, 1);
 		ServerLevel level = player.level();
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.9F);
@@ -79,8 +83,11 @@ public final class WebSurf {
 			return;
 		}
 		var input = player.getLastClientInput();
-		if (t >= MAX_TICKS || t > 4 && (input.shift() || input.jump()) || player.distanceTo(foe) > 8.0) {
-			end(player, foe, input.jump());
+		boolean freshShift = input.shift() && !live.wasShift, freshJump = input.jump() && !live.wasJump;
+		live.wasShift = input.shift();
+		live.wasJump = input.jump();
+		if (t >= MAX_TICKS || freshShift || freshJump || player.distanceTo(foe) > 8.0) {
+			end(player, foe, freshJump);
 			return;
 		}
 		Vec3 v = foe.getDeltaMovement();

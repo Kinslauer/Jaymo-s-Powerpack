@@ -523,13 +523,15 @@ public final class WebSwing {
 	}
 
 	/**
-	 * Both webs stuck in the ground close together: a punch there gathers the loose debris into a wrecking ball
+	 * On the ground, both webs stuck in the top faces of blocks below you, close together: a punch there gathers the loose debris into a wrecking ball
 	 * ({@link com.jaymospowers.power.web.WebWhip#BALL}), and letting go throws it.
 	 */
-	private boolean ballReady() {
+	private boolean ballReady(LocalPlayer player) {
 		Strand a = strands[WebNet.MAIN], b = strands[WebNet.OFF];
-		return a.attached && b.attached && a.travel <= 0 && b.travel <= 0 && a.entityId < 0 && b.entityId < 0
-			&& a.anchor.distanceTo(b.anchor) <= com.jaymospowers.power.web.WebWhip.NEAR;
+		return player.onGround() && a.attached && b.attached && a.travel <= 0 && b.travel <= 0 && a.entityId < 0 && b.entityId < 0
+			&& a.anchor.distanceTo(b.anchor) <= com.jaymospowers.power.web.WebWhip.NEAR
+			&& com.jaymospowers.power.web.WebWreck.groundAnchor(player.level(), a.anchor, player.position())
+			&& com.jaymospowers.power.web.WebWreck.groundAnchor(player.level(), b.anchor, player.position());
 	}
 
 	/** Which whip mode the punch being held started (so letting go says the same). */
@@ -564,7 +566,7 @@ public final class WebSwing {
 			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true, com.jaymospowers.power.web.WebWhip.SHOCK));
 			return true;
 		}
-		if (punched && ballReady()) {
+		if (punched && ballReady(player)) {
 			punchHeld = true;
 			punchMode = com.jaymospowers.power.web.WebWhip.BALL;
 			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true, com.jaymospowers.power.web.WebWhip.BALL));

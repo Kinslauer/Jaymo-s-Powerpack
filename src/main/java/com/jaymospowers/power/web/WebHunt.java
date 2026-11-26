@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Hunting dive, the ascended web slinger's ultimate (Sneak + C with a foe locked on, once ascended; a film plays,
+ * Hunting dive, the ascended web slinger's ultimate (Back + C (with a foe locked on), once ascended; a film plays,
  * {@link UltimateFilm#CUTS}): leap back from the foe, then dive at it over and over from different sides, {@link #PASSES}
  * strikes in the air with the two lines drawn to it for each pass ({@link WebPose#HUNT_DIVE}), ending in a stomp that
  * pins it to the ground ({@link WebStrength#pinAt}). Gone if the foe dies, strays further than {@link #RANGE} or after
@@ -73,7 +73,7 @@ public final class WebHunt {
 		return LIVE.containsKey(player.getUUID());
 	}
 
-	/** Sneak + C: false if it isn't a hunt (not ascended, nothing locked on, or still resting). */
+	/** Back + C: false if it isn't a hunt (not ascended, nothing locked on, or still resting). */
 	static boolean begin(ServerPlayer player) {
 		if (!Fate.isAscended(player) || LIVE.containsKey(player.getUUID()) || WebPower.ragdolled(player) || WebSymbiote.driving(player)) {
 			return false;
@@ -81,7 +81,7 @@ public final class WebHunt {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		LivingEntity foe = LockOn.target(player);
-		if (foe == null || !foe.isAlive() || foe == player || foe.distanceTo(player) > RANGE || foe instanceof Player other && !player.canHarmPlayer(other)) {
+		if (foe == null || !foe.isAlive() || foe == player || foe.distanceTo(player) > RANGE || !WebPin.pinnable(player, foe)) {
 			return false;
 		}
 		if (now < READY.getOrDefault(player.getUUID(), 0L)) {
@@ -198,7 +198,7 @@ public final class WebHunt {
 		}
 		foe.setInvulnerableTime(0);
 		foe.hurtServer(level, player.damageSources().mobAttack(player), STOMP_DAMAGE);
-		if (foe.isAlive()) {
+		if (foe.isAlive() && WebPin.pinnable(player, foe)) {
 			Vec3 ground = WebHaul.ground(level, foe.position(), foe);
 			WebStrength.pinAt(level, foe, ground, PIN_TICKS, WebSymbiote.suitShown(player));
 		}

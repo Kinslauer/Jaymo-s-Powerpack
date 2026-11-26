@@ -1,5 +1,6 @@
 package com.jaymospowers.power.web;
 
+import com.jaymospowers.core.Debris;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +25,9 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Two-line dive slam: in the air, look steeply down ({@link #LOOK_DOWN} degrees or more) at the ground ahead and press Zip
- * with Sneak held, and both webs shoot into it ({@link WebPose#DIVE_SLAM}). They haul you down at {@link #SPEED}, the two lines
+ * Two-line dive slam: already falling ({@link #FALLING} blocks or more, so a Zip from a standstill with Sneak held carries you in as it
+ * always did), look steeply down ({@link #LOOK_DOWN} degrees or more) at the ground ahead and press Zip with Sneak held, and both
+ * webs shoot into it ({@link WebPose#DIVE_SLAM}). They haul you down at {@link #SPEED}, the two lines
  * drawn the whole way, into a slam that hurts everything near the landing and webs it. From any height at all
  * ({@link #LEAST_DROP} blocks and up); the harder you land, the more it hurts and the wider it breaks the ground
  * ({@link WebImpacts#smash}). No fall damage on the way. Zip's own cooldown applies.
@@ -34,13 +36,15 @@ public final class WebDiveSlam {
 	/** How steeply down the look must be (degrees below flat), how far the webs reach (blocks), and the least drop that is worth it. */
 	public static final float LOOK_DOWN = 55.0F;
 	public static final double REACH = 64.0, LEAST_DROP = 2.5;
+	/** Already falling: the fall so far (blocks) and how fast it is going down (blocks/tick). */
+	public static final double FALLING = 3.0, FALLING_SPEED = 0.5;
 	/** How fast the lines haul you (blocks/tick), and the longest dive (ticks). */
 	static final double SPEED = 2.4;
 	static final int MAX_TICKS = 100;
 	/** The slam: how far it reaches (blocks), its damage (a base and more per block fallen, capped), the throw out and up, and the web each foe gets. */
 	static final double RADIUS = 4.5, OUT = 0.5, UP = 0.7;
 	static final float BASE = 7.0F, PER_BLOCK = 0.35F, MOST = 22.0F;
-	static final int WEB_TICKS = 70, STRAYS = 12;
+	static final int WEB_TICKS = 70, STRAYS = 12, ROOF = 6;
 
 	private record Live(Vec3 anchor, long start, double fromY) {
 	}
@@ -57,6 +61,7 @@ public final class WebDiveSlam {
 	static boolean start(ServerPlayer player) {
 		if (LIVE.containsKey(player.getUUID()) || !player.isShiftKeyDown() || player.onGround() || player.isInWater() || player.isInLava()
 			|| player.isFallFlying() || player.getAbilities().flying || player.isPassenger() || player.getXRot() < LOOK_DOWN
+			|| player.fallDistance < FALLING || player.getDeltaMovement().y > -FALLING_SPEED
 			|| WebPower.swingingNow(player) || WebPower.pulling(player) || WebPower.ragdolled(player) || WebSymbiote.driving(player)) {
 			return false;
 		}
@@ -154,8 +159,22 @@ public final class WebDiveSlam {
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.2, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND, SoundSource.PLAYERS, (float)Math.min(1.4, 0.8 + speed * 0.3), 0.8F);
 		com.jaymospowers.core.Shakes.heavy(player, at, 14.0, (float)Math.min(9.0, 3.0 + speed * 3.0));
-		WebImpacts.smash(level, at.add(0.0, -0.5, 0.0), speed, player);
+		// the ground breaks by the superhero landing's rules (WebSlam: its smash speed, at most 0.6 over), never under a roof
+		if (open(level, player)) {
+			Debris.smash(level, at.subtract(0.0, 0.5, 0.0), WebSlam.SMASH_SPEED + Math.min(0.6, dropped * 0.02), player);
+		}
 		WebPower.pose(player, WebPose.HERO_LAND, 1);
+	}
+
+	/** Open sky over the landing: nothing solid within {@link #ROOF} blocks above the head (so a roof or a ceiling is never broken). */
+	private static boolean open(ServerLevel level, ServerPlayer player) {
+		BlockPos head = player.blockPosition().above(2);
+		for (int dy = 0; dy < ROOF; dy++) {
+			if (!level.getBlockState(head.above(dy)).getCollisionShape(level, head.above(dy)).isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	static void forget(ServerPlayer player) {
