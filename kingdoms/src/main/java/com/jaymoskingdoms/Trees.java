@@ -540,16 +540,18 @@ public final class Trees {
 	}
 
 	/**
-	 * (0.5.25) A player's axe stroke at a tree's log is a chop, not a break (unless they're sneaking or in creative, or it
-	 * isn't a tree): the log cracks deeper ({@link ChoppedLog}), and the tree comes down whole on the chop that makes up
-	 * {@link #needed} for its size. False keeps the block (the chop was done here instead).
+	 * (0.5.25) A player's axe stroke at a tree's log is a chop, not a break (unless they're in creative, or it isn't a
+	 * tree): the log cracks deeper ({@link ChoppedLog}), and the tree comes down whole on the chop that makes up
+	 * {@link #needed} for its size. False keeps the block (the chop was done here instead). Sneaking no longer breaks a
+	 * standing tree's log outright (Timberrr's rule, Andy: the tree falls "only once you've chopped through the trunk ...
+	 * not on the first log broken"); a build's logs, which aren't a tree, break as ever.
 	 */
 	private static boolean breaking(Level level, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.@Nullable BlockEntity be) {
 		if (needsAxe(player, state)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.needs_axe").withStyle(ChatFormatting.GRAY));
 			return false;
 		}
-		if (!(level instanceof ServerLevel server) || player.isShiftKeyDown() || player.isCreative() || !state.is(BlockTags.LOGS)) {
+		if (!(level instanceof ServerLevel server) || player.isCreative() || !state.is(BlockTags.LOGS)) {
 			return true;
 		}
 		ItemStack tool = player.getMainHandItem();
@@ -1041,9 +1043,17 @@ public final class Trees {
 		return below.isFaceSturdy(level, pos.below(), Direction.UP);
 	}
 
-	/** The leaves these logs hold that no other wood does. */
+	/**
+	 * The leaves these logs hold that no other wood does (PrimeTimber's pick, CC0): living leaves only, of the logs' own
+	 * kind (oak leaves for an oak; leaves of no wood of their own, such as azalea's, go with any), each going with the
+	 * wood nearest it. A leaf as near another tree's wood (or a build's, or the stump's) as these logs stays with it.
+	 */
 	static List<BlockPos> leavesOf(ServerLevel level, List<BlockPos> logs) {
 		Set<BlockPos> wood = new HashSet<>(logs);
+		Set<String> kinds = new HashSet<>();
+		for (BlockPos p : logs) {
+			kinds.add(kind(level, p, level.getBlockState(p)));
+		}
 		List<BlockPos> leaves = new ArrayList<>();
 		Set<BlockPos> looked = new HashSet<>();
 		Deque<BlockPos> grow = new ArrayDeque<>(logs);
@@ -1055,7 +1065,7 @@ public final class Trees {
 					continue;
 				}
 				BlockState s = level.getBlockState(n);
-				if (s.getBlock() instanceof LeavesBlock && !s.getValue(LeavesBlock.PERSISTENT) && !heldElsewhere(level, n, wood)) {
+				if (s.getBlock() instanceof LeavesBlock && !s.getValue(LeavesBlock.PERSISTENT) && leafOf(s, kinds) && !heldElsewhere(level, n, wood)) {
 					leaves.add(n);
 					grow.add(n);
 				}
@@ -1064,7 +1074,12 @@ public final class Trees {
 		return leaves;
 	}
 
-	/** The logs that come down when {@code cut} is cut: it and those joined to it above (not far off), lowest-found first. */
+	/**
+	 * The logs that come down when {@code cut} is cut: it and those joined to it above (not far off), lowest-found first.
+	 * Only the tree's own (PrimeTimber's pick, CC0): logs of the cut one's kind of wood, none a player set, and none of
+	 * another tree standing beside it (an upright run of its wood on ground of its own). Where two crowns' branches touch,
+	 * each branch log goes with the trunk it's nearest by way of the wood; one as near to both stays.
+	 */
 	static List<BlockPos> trunk(ServerLevel level, BlockPos cut) {
 		List<BlockPos> logs = new ArrayList<>();
 		Set<BlockPos> seen = new HashSet<>();
@@ -1081,6 +1096,26 @@ public final class Trees {
 			seen.add(cut);
 			open.addFirst(cut);
 		}
+		String kind = null;
+		for (BlockPos q : open) {
+			kind = kind(level, q, level.getBlockState(q));
+			if (kind != null) {
+				break;
+			}
+		}
+		final String own = kind;
+		open.removeIf(q -> !ownWood(level, q, own));
+		seen.retainAll(open);
+		if (open.isEmpty()) {
+			return logs;
+		}
+		Set<Long> columns = new HashSet<>();
+		for (BlockPos q : open) {
+			columns.add(BlockPos.asLong(q.getX(), 0, q.getZ()));
+		}
+		List<BlockPos> start = new ArrayList<>(open);
+		// the trunks of the trees beside it this one's wood runs into
+		Set<BlockPos> others = new HashSet<>();
 		while (!open.isEmpty() && logs.size() < FELL_MOST) {
 			BlockPos at = open.poll();
 			logs.add(at);
@@ -1089,22 +1124,163 @@ public final class Trees {
 					continue;
 				}
 				BlockPos q = n.immutable();
-				if (!seen.contains(q) && level.getBlockState(q).is(BlockTags.LOGS)) {
-					seen.add(q);
+				if (seen.contains(q) || !ownWood(level, q, own)) {
+					continue;
+				}
+				seen.add(q);
+				if (!columns.contains(BlockPos.asLong(q.getX(), 0, q.getZ())) && standing(level, q, own)) {
+					others.add(q);
+				} else {
 					open.add(q);
 				}
 			}
 		}
+		return others.isEmpty() ? logs : nearest(level, cut, start, others, new HashSet<>(logs), own);
+	}
+
+	/**
+	 * Of {@code mine} (the logs found from {@code start}), those nearer by way of the wood to {@code start} than to any of
+	 * the trunks beside it ({@code others}): both spread through the wood at once, a log going to whichever reaches it
+	 * first, and one both reach together going to neither (PrimeTimber's split of touching trees).
+	 */
+	private static List<BlockPos> nearest(ServerLevel level, BlockPos cut, List<BlockPos> start, Set<BlockPos> others, Set<BlockPos> mine,
+		@Nullable String own) {
+		java.util.Map<BlockPos, Integer> owner = new java.util.HashMap<>(), dist = new java.util.HashMap<>();
+		Deque<BlockPos> open = new ArrayDeque<>();
+		for (BlockPos p : start) {
+			owner.put(p, 0);
+			dist.put(p, 0);
+			open.add(p);
+		}
+		for (BlockPos p : others) {
+			owner.put(p, 1);
+			dist.put(p, 0);
+			open.add(p);
+		}
+		int looked = 0;
+		while (!open.isEmpty() && ++looked < FELL_MOST * 4) {
+			BlockPos at = open.poll();
+			int who = owner.get(at), d = dist.get(at) + 1;
+			if (who < 0) {
+				continue;
+			}
+			for (BlockPos n : BlockPos.betweenClosed(at.offset(-1, -1, -1), at.offset(1, 1, 1))) {
+				if (n.getY() <= cut.getY() || Math.abs(n.getX() - cut.getX()) > FELL_SPREAD + 2 || Math.abs(n.getZ() - cut.getZ()) > FELL_SPREAD + 2) {
+					continue;
+				}
+				BlockPos q = n.immutable();
+				Integer had = dist.get(q);
+				if (had == null) {
+					if (!mine.contains(q) && !ownWood(level, q, own)) {
+						continue;
+					}
+					owner.put(q, who);
+					dist.put(q, d);
+					open.add(q);
+				} else if (had == d && owner.get(q) != who) {
+					owner.put(q, -1);
+				}
+			}
+		}
+		List<BlockPos> logs = new ArrayList<>();
+		for (BlockPos p : mine) {
+			Integer who = owner.get(p);
+			if (who != null && who == 0) {
+				logs.add(p);
+			}
+		}
+		logs.sort(Comparator.comparingInt(BlockPos::getY));
 		return logs;
 	}
 
-	/** Some other log (not the felled tree's) within reach of these leaves: they stay. */
-	private static boolean heldElsewhere(ServerLevel level, BlockPos leaf, Set<BlockPos> felled) {
-		for (BlockPos q : BlockPos.betweenClosed(leaf.offset(-3, -3, -3), leaf.offset(3, 3, 3))) {
-			if (!felled.contains(q) && level.getBlockState(q).is(BlockTags.LOGS)) {
-				return true;
+	/** Wood of the tree's own kind ({@code own}; any kind when it's not known), and not a log a player set. */
+	private static boolean ownWood(ServerLevel level, BlockPos pos, @Nullable String own) {
+		BlockState state = level.getBlockState(pos);
+		if (!state.is(BlockTags.LOGS) || Placed.any(level, pos)) {
+			return false;
+		}
+		String kind = kind(level, pos, state);
+		return own == null || kind == null || own.equals(kind);
+	}
+
+	/** Whether {@code pos} is in a trunk of its own: an upright run of {@code own} wood straight down to ground that isn't wood. */
+	private static boolean standing(ServerLevel level, BlockPos pos, @Nullable String own) {
+		BlockPos.MutableBlockPos at = pos.mutable();
+		for (int i = 0; i < FELL_SPREAD * 4; i++) {
+			BlockState state = level.getBlockState(at);
+			if (!state.is(BlockTags.LOGS)) {
+				return i > 0 && state.isFaceSturdy(level, at, Direction.UP);
 			}
+			if (state.hasProperty(BlockStateProperties.AXIS) && state.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y
+				|| !own(level, at.immutable(), state, own)) {
+				return false;
+			}
+			at.move(Direction.DOWN);
 		}
 		return false;
+	}
+
+	private static boolean own(ServerLevel level, BlockPos pos, BlockState state, @Nullable String own) {
+		String kind = kind(level, pos, state);
+		return own == null || kind == null || own.equals(kind);
+	}
+
+	/**
+	 * A log's kind of wood (PrimeTimber's family): {@code minecraft:oak} for an oak log or its wood, stripped or not;
+	 * {@code minecraft:crimson} for a crimson stem or hyphae. A half-chopped log is the log it was. Null when its name
+	 * doesn't say.
+	 */
+	static @Nullable String kind(ServerLevel level, BlockPos pos, BlockState state) {
+		BlockState real = state.is(ChoppedLog.BLOCK) ? ChoppedLog.real(level, pos, state) : state;
+		Identifier id = BuiltInRegistries.BLOCK.getKey(real.getBlock());
+		String path = id.getPath();
+		if (path.startsWith("stripped_")) {
+			path = path.substring("stripped_".length());
+		}
+		for (String end : WOOD_ENDS) {
+			if (path.endsWith(end) && path.length() > end.length()) {
+				return id.getNamespace() + ":" + path.substring(0, path.length() - end.length());
+			}
+		}
+		return null;
+	}
+
+	private static final String[] WOOD_ENDS = {"_log", "_wood", "_stem", "_hyphae"};
+
+	/** Whether leaves {@code leaf} go with wood of these {@code kinds}: their own kind, or leaves of no wood of their own. */
+	private static boolean leafOf(BlockState leaf, Set<String> kinds) {
+		Identifier id = BuiltInRegistries.BLOCK.getKey(leaf.getBlock());
+		String path = id.getPath();
+		if (!path.endsWith("_leaves") || kinds.contains(null)) {
+			return true;
+		}
+		String kind = id.getNamespace() + ":" + path.substring(0, path.length() - "_leaves".length());
+		if (kinds.contains(kind)) {
+			return true;
+		}
+		// azalea's leaves (on oak) and the like name no wood: they go with any tree
+		Identifier ns = Identifier.fromNamespaceAndPath(id.getNamespace(), kind.substring(kind.indexOf(':') + 1) + "_log");
+		Identifier stem = Identifier.fromNamespaceAndPath(id.getNamespace(), kind.substring(kind.indexOf(':') + 1) + "_stem");
+		return !BuiltInRegistries.BLOCK.containsKey(ns) && !BuiltInRegistries.BLOCK.containsKey(stem);
+	}
+
+	/**
+	 * Some other wood (not the felled tree's: a tree beside it, its stump, a build) is as near these leaves as the felled
+	 * wood is, within reach: they stay with it. The leaf goes with the nearest wood, as PrimeTimber splits touching crowns.
+	 */
+	private static boolean heldElsewhere(ServerLevel level, BlockPos leaf, Set<BlockPos> felled) {
+		int ours = Integer.MAX_VALUE, theirs = Integer.MAX_VALUE;
+		for (BlockPos q : BlockPos.betweenClosed(leaf.offset(-3, -3, -3), leaf.offset(3, 3, 3))) {
+			if (!level.getBlockState(q).is(BlockTags.LOGS)) {
+				continue;
+			}
+			int d = Math.abs(q.getX() - leaf.getX()) + Math.abs(q.getY() - leaf.getY()) + Math.abs(q.getZ() - leaf.getZ());
+			if (felled.contains(q)) {
+				ours = Math.min(ours, d);
+			} else {
+				theirs = Math.min(theirs, d);
+			}
+		}
+		return theirs != Integer.MAX_VALUE && theirs <= ours;
 	}
 }
