@@ -105,7 +105,8 @@ public class DownedHarnessMenu extends AbstractContainerMenu {
 		if (!slot.hasItem()) {
 			return ItemStack.EMPTY;
 		}
-		ItemStack stack = slot.getItem();
+		// (a copy is moved: the piece on them stays whole until the slot is set, which is when it is seen to be taken)
+		ItemStack stack = slot.getItem().copy();
 		ItemStack moved = stack.copy();
 		if (!moveItemStackTo(stack, OWN, this.slots.size(), true)) {
 			return ItemStack.EMPTY;
