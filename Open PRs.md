@@ -1,18 +1,13 @@
 ---
-updated: 2026-11-26 15:27
+updated: 2026-11-26 16:30
 ---
 # Open PRs
 
-10 open, as of 2026-11-26 15:27. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+11 open, as of 2026-11-26 16:30. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
 - **Branch:** `claude/structures-1-siege-camps` · **Updated:** 2026-11-26 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2215](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2215) Rig Hail + Tinker suits, bolted-on Rigs, cut limbs off bodies; headless Blockbench MCP + GeckoLib setup
-- **Branch:** `claude/project-thread-tmy26l` · **Updated:** 2026-11-26 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
@@ -55,3 +50,13 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `t3/mohknee-rare-structure-starts` · **Updated:** 2026-11-26 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[mohknee-rare-structure-starts]]
+
+## [#2251](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2251) Blood Awakening per-blood upgrades, Patch 1 (Plain, Mountain & Elemental/Sky)
+- **Branch:** `t3/blood-awakening-per-blood-patch-1` · **Updated:** 2026-11-26 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2252](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2252) Pull wool, rocks, leather and more apart in the inventory
+- **Branch:** `claude/project-thread-sjbnh0` · **Updated:** 2026-11-26 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note

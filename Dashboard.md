@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:10). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -41,12 +41,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-15 waiting for a bot, 3 being built, 8 in review: see [[Kanban]].
+14 waiting for a bot, 2 being built, 8 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2253 NPC controls by the crosshair - downed and tied-up bodies (Powers, Kingdoms, 2026-11-26)
 - [ ] #2247 Alex's Mobs: old spawn files mended, blobfish deeper (Powers, Kingdoms, 2026-11-26)
 - [ ] #2246 Bands sleep until you approach (Powers, 2026-11-26)
 - [ ] #2244 executions finish, and finishing blows don't gib (Powers, 2026-11-26)
@@ -106,12 +107,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2174 class items show up in JEI under the class's name (Kingdoms, 2026-11-25)
 - [ ] #2173 No Subtle Effects error on a dedicated server's start (Powers, Kingdoms, 2026-11-25)
 - [ ] #2172 The game starts again (the symbiote HUD crashed it on launch) (Powers, 2026-11-25)
-- [ ] #2171 Waking villages into kingdoms no longer freezes the server (Kingdoms, 2026-11-25)
-- …and 617 older ones.
+- …and 618 older ones.
 
 ## Health
 
-24 problems in the notes: [[Health]].
+23 problems in the notes: [[Health]].
 
 ## Last week
 
