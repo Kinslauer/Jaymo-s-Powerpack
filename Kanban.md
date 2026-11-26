@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -24,6 +24,7 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · codex-bleed-out-coma · claimed
 - [ ] [[Agents/anaconda-jungle-hunters|anaconda-jungle-hunters]] · 💻 Odysseus · running
 - [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · running
+- [ ] [[Agents/story-scenes|story-scenes]] · 💻 Odysseus · running
 
 
 ## In review
