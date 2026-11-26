@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,7 +15,7 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for ☀️ Apollo · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for ☀️ Apollo · open
-- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
+- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for ☀️ Apollo · open
 
 
 ## Being built
