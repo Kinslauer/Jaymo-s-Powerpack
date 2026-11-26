@@ -22,11 +22,11 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · 🪶 Quill · #2209 · writing
 
 
 ## In review
 
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
