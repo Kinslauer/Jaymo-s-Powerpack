@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:56). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 02:04). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -7,6 +7,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Questions for you:**
 - [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 2026-11-26 00:46 Question for Andy: when a per-blood upgrade is ticked, does it add to the shared rule (halved waits + 1.5x duration) for that blood, or replac…
+- [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · 2026-11-26 01:56 Question: Need clarification on ward upkeep, break conditions, prevention vs rewind, weakening numbers, repulsion chance/visual, ward radius.
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/structures-4-mohknee|structures-4-mohknee]] · 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: ores for blossom kingdoms and barbarian tribes. Keep distinct from already merged continen…
@@ -23,11 +24,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/symbiote-113-picks|symbiote-113-picks]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
-- [[Agents/youth-delegates-ready|youth-delegates-ready]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/youth-delegates-ready|youth-delegates-ready]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-8 waiting for a bot, 3 being built, 0 in review: see [[Kanban]].
+8 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -97,7 +98,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-20 problems in the notes: [[Health]].
+19 problems in the notes: [[Health]].
 
 ## Last week
 
