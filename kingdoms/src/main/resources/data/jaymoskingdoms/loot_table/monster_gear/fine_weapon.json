@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:equipment",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:tag",
+          "name": "jaymoskingdoms:monster_gear/fine_weapons",
+          "expand": true
+        }
+      ]
+    }
+  ]
+}
