@@ -1,11 +1,11 @@
 ---
-status: blocked
+status: in-review
 for: bacchus
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
 claimed_by: hermes-b
-pr: 
+pr: 2217
 suggested_owns:
   - kingdoms data/jaymoskingdoms/structure (new nbt), worldgen pools
   - kingdoms Stables.java, Mines.java hooks
