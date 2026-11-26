@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: apollo
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
 claimed_by: hermes-a
-pr: 
+pr: 2216
 suggested_owns:
   - kingdoms FactionType.java, Relation.java
   - kingdoms lang/parts/factions.json
