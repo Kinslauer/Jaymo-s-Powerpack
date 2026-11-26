@@ -14,6 +14,7 @@ kanban-plugin: board
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · for any · open
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for any · open
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
+- [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
 
 
 ## Being built
