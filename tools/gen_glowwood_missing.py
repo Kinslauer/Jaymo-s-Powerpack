@@ -1,5 +1,7 @@
 """Draws the glow-wood (inkcap, glowcap, bouncecap) textures that the glow-woods' models name but no file supplied, so
-their mushroom trees, planks and items stopped rendering as purple and black squares. Also the snail slime icon.
+their mushroom trees, planks and items stopped rendering as purple and black squares. Also the snail slime icon, and two
+particle textures other mods name but never shipped (drawn here, our own art, not theirs): Knight Armor and Weapons'
+broken throwing axe and Psithurism's onsen water.
 
     python3 -I tools/gen_glowwood_missing.py
 
@@ -13,7 +15,8 @@ from pathlib import Path
 
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parent.parent / "kingdoms/src/main/resources/assets/jaymoskingdoms/textures"
+ASSETS = Path(__file__).resolve().parent.parent / "kingdoms/src/main/resources/assets"
+ROOT = ASSETS / "jaymoskingdoms/textures"
 BLOCK, ITEM, FUNGUS = ROOT / "block", ROOT / "item", ROOT / "block/fungus"
 KINDS = ["inkcap", "glowcap", "bouncecap"]
 
@@ -149,6 +152,36 @@ def snail_slime(rnd):
     return img
 
 
+def broken_axe():
+    """A throwing axe snapped short: a stub of haft and a chipped head (only its break particles use it)."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    wood, wood_dark = (122, 86, 52, 255), (86, 58, 34, 255)
+    steel, steel_dark, edge = (150, 156, 164, 255), (98, 104, 112, 255), (214, 220, 226, 255)
+    for i in range(7):
+        img.putpixel((3 + i, 12 - i), wood)
+        img.putpixel((4 + i, 12 - i), wood_dark)
+    for x, y in ((10, 4), (10, 5), (11, 4), (11, 5), (11, 6), (12, 3), (12, 4), (12, 5), (12, 6), (12, 7), (13, 4), (13, 5),
+                 (13, 6), (9, 4), (9, 5)):
+        img.putpixel((x, y), steel)
+    for x, y in ((13, 3), (14, 4), (14, 5), (13, 7)):
+        img.putpixel((x, y), edge)
+    for x, y in ((9, 6), (10, 6), (11, 7)):
+        img.putpixel((x, y), steel_dark)
+    return img
+
+
+def onsen_water(rnd):
+    """Warm, milky spring water (only its particles use it: the water itself is drawn by the fluid renderer)."""
+    img = Image.new("RGBA", (16, 16))
+    deep, mid, milk = (88, 168, 176), (124, 196, 196), (186, 224, 216)
+    for y in range(16):
+        for x in range(16):
+            r = rnd.random()
+            c = milk if r < 0.15 else mid if r < 0.65 else deep
+            img.putpixel((x, y), c + (200,))
+    return img
+
+
 def main():
     rnd = random.Random(2179)
     for kind in KINDS:
@@ -165,6 +198,10 @@ def main():
     hanging(gills, rnd, True).save(BLOCK / "glowcap_gills_tip.png")
     lantern_icon().save(ITEM / "glowcap_lantern.png")
     snail_slime(rnd).save(ITEM / "snail_slime.png")
+    for path, img in ((ASSETS / "knightarmorweapons/textures/item/knight_throwing_axe_broken.png", broken_axe()),
+                      (ASSETS / "psithurism/textures/block/onsen_water.png", onsen_water(rnd))):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        img.save(path)
     print("drawn")
 
 

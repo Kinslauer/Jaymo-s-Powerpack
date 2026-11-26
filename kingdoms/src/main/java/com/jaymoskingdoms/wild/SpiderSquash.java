@@ -48,8 +48,8 @@ import net.minecraft.world.phys.AABB;
  * other mods' ants, caterpillars, cockroaches, flies, snails and slugs) are squashed and struck down the same way, by the
  * same size tiers. A squashed bug leaves no body: it bursts flat in its own blood, a few drops and a splat sized to it
  * (Powers' {@code BladeBlood.squashed}). A squashed spider spatters the same, beside its legs.
- * <p>Andy: snails "should squash into slime and you should be able to collect it." A squashed snail or slug ({@link #SLIMY})
- * leaves its slime on the ground as well, an item to pick up (Kingdoms' snail slime; four make a slimeball).
+ * <p>Andy: snails "should squash into slime and you should be able to collect it." A squashed snail or slug's ({@link #SLIMY})
+ * splat can be scraped up with a right click, as Kingdoms' snail slime ({@link SnailSlime}; four make a slimeball).
  */
 public final class SpiderSquash {
 	// ================================================================================================================
@@ -220,12 +220,9 @@ public final class SpiderSquash {
 		if (bug) {
 			// a small wet crunch (no body for Kitchen to burst)
 			level.playSound(null, spider.getX(), spider.getY(), spider.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.NEUTRAL, 0.5F, 1.3F);
-			if (spider.getType().builtInRegistryHolder().is(SLIMY) && com.jaymoskingdoms.monsters.MocWild.SNAIL_SLIME != null) {
-				// Andy: "they should squash into slime and you should be able to collect it": a snail's slime left where it burst
-				net.minecraft.world.entity.item.ItemEntity slime = new net.minecraft.world.entity.item.ItemEntity(level, spider.getX(), spider.getY() + 0.05,
-					spider.getZ(), new net.minecraft.world.item.ItemStack(com.jaymoskingdoms.monsters.MocWild.SNAIL_SLIME), 0.0, 0.05, 0.0);
-				slime.setDefaultPickUpDelay();
-				level.addFreshEntity(slime);
+			if (spider.getType().builtInRegistryHolder().is(SLIMY)) {
+				// Andy: snails "should squash into slime and you should be able to collect it": right-click the splat
+				SnailSlime.burst(level, spider);
 			}
 		} else if (!KITCHEN) {
 			// (Kitchen squelches as it bursts the body; without it, the squelch is ours)
