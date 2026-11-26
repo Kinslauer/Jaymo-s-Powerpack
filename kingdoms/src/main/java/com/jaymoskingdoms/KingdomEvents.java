@@ -226,6 +226,10 @@ public final class KingdomEvents {
 		if (founded != null && village.id().startsWith(Havens.CTOV)) {
 			Havens.ctov(level, founded);
 		}
+		// (village mods patch 7) a Tidal Towns raft is the Tideborn's, moored to the sea's trade (TidalTowns)
+		if (founded != null && village.id().equals(TidalTowns.ID)) {
+			TidalTowns.found(level, founded);
+		}
 	}
 
 	/** The chunks within {@code radius} of {@code center} that no standing faction holds (packed). */

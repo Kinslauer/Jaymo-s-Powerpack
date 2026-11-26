@@ -208,6 +208,15 @@ public final class Havens {
 		JaymosKingdoms.LOGGER.info("{} stands in one of ChoiceTheorem's villages: a haven ({})", f.name(), haven.isEmpty() ? "none: purist" : haven);
 	}
 
+	/**
+	 * (Village mods patch 7, Andy's pick tt_tideborn) A raft town of Tidal Towns ({@link TidalTowns}) is the sea folk's:
+	 * always a Tideborn haven, whatever the share or its temper, its people standing and those born there Tideborn.
+	 */
+	static void tidal(ServerLevel level, Faction f) {
+		make(level, f, Heritage.Kind.TIDEBORN.key());
+		JaymosKingdoms.LOGGER.info("{} stands on a raft town out at sea: a Tideborn haven", f.name());
+	}
+
 	/** (0.7.521) The key prefix of a ChoiceTheorem village's haven in {@link #HAVENS}, and its structures' namespace. */
 	static final String CTOV = "ctov:";
 	/** (0.7.521) About one human in this many in a ChoiceTheorem village's haven stays there, for a reason. */

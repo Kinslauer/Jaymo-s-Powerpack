@@ -147,6 +147,13 @@ public final class FollowersScreen extends Screen {
 			}).bounds(x, y + i * ROW, COL_W, 18)
 				.tooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.followers.order." + kind + ".desc"))).build());
 		}
+		if (this.target < 0 && ClientPlayNetworking.canSend(com.jaymoskingdoms.Company.Pick.TYPE)) {
+			// (village mods rc2_groups) which group of your company the orders go to: the next one each press
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.company.next_group"),
+				b -> ClientPlayNetworking.send(new com.jaymoskingdoms.Company.Pick()))
+				.bounds(RosterLayout.listX(left0()), RosterLayout.bodyY(top0()) + RosterLayout.ROW + 6, RosterLayout.LIST_W, 18)
+				.tooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.company.next_group.desc"))).build());
+		}
 		if (!ClientPlayNetworking.canSend(Formations.Give.TYPE)) {
 			return;
 		}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:big_dripleaf",
+    "minecraft:fern"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:umbrella_leaf"
+  }
+}

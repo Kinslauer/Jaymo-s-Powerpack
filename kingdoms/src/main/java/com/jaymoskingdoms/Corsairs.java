@@ -714,7 +714,7 @@ final class Corsairs implements Ship.Captaincy {
 				continue;
 			}
 			// (0.7.490) a ship to fight first, else the shore her cove is raiding
-			Vec3 dir = foe != null ? this.lay(level, ship, gun, foe) : this.layAt(level, ship, gun, crew.shore, Vec3.ZERO);
+			Vec3 dir = foe != null ? lay(level, ship, gun, foe) : layAt(level, ship, gun, crew.shore, Vec3.ZERO);
 			if (dir != null && ship.fireGunAlong(level, gun, dir, gunner)) {
 				crew.lastFired = (int)now;
 				if (gunner instanceof net.minecraft.world.entity.Mob m) {
@@ -726,19 +726,19 @@ final class Corsairs implements Ship.Captaincy {
 	}
 
 	/** How the gun at {@code gun} is laid on {@code foe} (her hull, led as she sails), or null if it doesn't bear. */
-	private @Nullable Vec3 lay(ServerLevel level, Ship ship, long gun, Ship foe) {
+	static @Nullable Vec3 lay(ServerLevel level, Ship ship, long gun, Ship foe) {
 		Hull h = foe.hull();
 		if (h == null) {
 			return null;
 		}
-		return this.layAt(level, ship, gun, new Vec3(foe.getX(), foe.getY() + h.minY + Math.max(1.0, h.draft + 0.6), foe.getZ()), foe.drift());
+		return layAt(level, ship, gun, new Vec3(foe.getX(), foe.getY() + h.minY + Math.max(1.0, h.draft + 0.6), foe.getZ()), foe.drift());
 	}
 
 	/**
 	 * (0.7.490) How the gun at {@code gun} is laid on the point {@code aim} (a target moving {@code drift} a tick, led), or null
 	 * if it doesn't bear. The shot it holds sets how fast and how far it flies.
 	 */
-	private @Nullable Vec3 layAt(ServerLevel level, Ship ship, long gun, Vec3 aim, Vec3 drift) {
+	private static @Nullable Vec3 layAt(ServerLevel level, Ship ship, long gun, Vec3 aim, Vec3 drift) {
 		double[] way = ship.gunWay(gun);
 		ShotKind kind = ship.gunKind(gun);
 		if (way == null || kind == null) {

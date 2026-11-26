@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "MM",
+    "MM"
+  ],
+  "key": {
+    "M": "minecraft:red_mushroom"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:red_toadstool_cap"
+  }
+}

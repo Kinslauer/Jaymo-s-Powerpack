@@ -70,7 +70,9 @@ public final class SharedPools {
 		List<Holder<StructureSet>> group = new ArrayList<>();
 		for (Holder<StructureSet> h : sets) {
 			List<StructureSet.StructureSelectionEntry> entries = h.value().structures();
+			// (village mods patch 7) Tidal Towns' rafts keep their own spacing: in the pool every deep-ocean village spot would take one
 			if (!entries.isEmpty() && !h.unwrapKey().map(k -> k.identifier().equals(OWN_PLACES)).orElse(false)
+				&& entries.stream().noneMatch(e -> TidalTowns.is(e.structure()))
 				&& entries.stream().allMatch(e -> which.test(e.structure()))) {
 				group.add(h);
 			}

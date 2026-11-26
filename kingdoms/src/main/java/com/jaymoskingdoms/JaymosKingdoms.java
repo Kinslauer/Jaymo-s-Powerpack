@@ -510,6 +510,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.491) Hordes patch 4: the greenskin king city (warpath, tribute pacts, the horde oath)
 		HordeCity.register();
 		GreenMarket.register();
+		// village mods patch 8: the swamp goblins' blocks, their stilt villages, and the goblin band
+		SwampBlocks.register();
+		GoblinBands.register();
+		SwampGoblins.register();
 		BorderClashes.register();
 		TribePacts.register();
 		Tails.register();
@@ -835,6 +839,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.forms.Styles.register();
 		Levelled.register();
 		Followers.register();
+		// village mods patch 9: your own company
+		Company.register();
 		// the shared fighting brain, friend and foe (docs/Pawn-Plan.md)
 		Comrades.register();
 		Callouts.register();

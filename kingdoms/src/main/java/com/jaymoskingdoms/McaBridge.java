@@ -2565,4 +2565,51 @@ final class McaBridge {
 		done.put(id.toString(), at);
 		v.setAttached(FORGOTTEN, Map.copyOf(done));
 	}
+
+	// ---- (village mods patch 9) your own company: Company ------------------------------------------------------------
+
+	/** {@code v}'s hearts for {@code player}; 0 for anyone not of MCA. */
+	static int hearts(Villager v, net.minecraft.server.level.ServerPlayer player) {
+		return v instanceof VillagerEntityMCA m ? m.getVillagerBrain().getMemoriesForPlayer(player).getHearts() : 0;
+	}
+
+	/** {@code v} is MCA's hired help just now. */
+	static boolean mercenary(Villager v) {
+		return v instanceof VillagerEntityMCA m && m.getProfession() == ProfessionsMCA.MERCENARY;
+	}
+
+	/**
+	 * {@code v} signs on: MCA's mercenary (so MCA counts the tie and they follow and fight), clothes kept, for
+	 * {@code contract} ticks. Returns the job they leave (its registry id), to go back to when they're let go; null if not MCA.
+	 */
+	static @Nullable String signOn(Villager v, int contract) {
+		if (!(v instanceof VillagerEntityMCA m)) {
+			return null;
+		}
+		String job = v.getVillagerData().profession().unwrapKey().map(k -> k.identifier().toString()).orElse("");
+		String clothes = m.getClothes();
+		m.makeMercenary();
+		// (making them a mercenary dresses them again: they keep their own clothes)
+		m.setClothes(clothes);
+		m.setDespawnDelay(contract);
+		return job;
+	}
+
+	/** A paid soldier's contract runs on {@code contract} ticks more (MCA ends a mercenary's when it runs out). */
+	static void keepOn(Villager v, int contract) {
+		if (v instanceof VillagerEntityMCA m && m.getDespawnDelay() < contract) {
+			m.setDespawnDelay(contract);
+		}
+	}
+
+	/** {@code v} leaves your company: back to {@code job} (their old work, if it's still a job), the contract torn up. */
+	static void release(Villager v, String job) {
+		if (!(v instanceof VillagerEntityMCA m)) {
+			return;
+		}
+		stopFollowing(v);
+		m.setDespawnDelay(0);
+		VillagerProfession old = job.isEmpty() ? null : BuiltInRegistries.VILLAGER_PROFESSION.getValue(net.minecraft.resources.Identifier.tryParse(job));
+		m.setProfession(old != null ? old : BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NONE).value());
+	}
 }

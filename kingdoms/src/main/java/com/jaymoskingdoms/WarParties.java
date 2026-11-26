@@ -485,6 +485,7 @@ final class WarParties {
 				Faction target = Factions.get(server, out.target);
 				Entity lead = out.soldiers.stream().map(level::getEntity).filter(e -> e instanceof Worker).findFirst().orElse(null);
 				BlockPos at = lead != null ? lead.blockPosition() : out.lastAt != null ? out.lastAt : target != null ? target.seat() : player.blockPosition();
+				Company.march(level, player);
 				return new Joined(true, Component.translatable("message.jaymoskingdoms.war.joined", name(Factions.get(server, out.faction)), name(target), at.getX(), at.getZ()));
 			}
 			if (out != null) {
@@ -512,6 +513,7 @@ final class WarParties {
 				continue;
 			}
 			party.players.add(player.getUUID());
+			Company.march(level, player);
 			return new Joined(true, Component.translatable("message.jaymoskingdoms.war.called", mine.name(), target.name(), target.seat().getX(), target.seat().getZ()));
 		}
 		return new Joined(false, Component.translatable("message.jaymoskingdoms.war.join_none", mine.name()));
