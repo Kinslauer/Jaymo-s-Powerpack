@@ -149,8 +149,41 @@ final class PackResourcePacks {
 		// MUSIC_TAG, its SHA-1 from the .sha1 file beside it (empty sha1 here); kept on, "jaymospowers-medieval-music-off"
 		// in config/ keeps it off. Sits at the bottom of the file packs, and our small warped forest pack just above it
 		// (MUSIC_GAPS, put in place when this one is switched on).
+		// Medieval and future packs, Andy's picks (2026-11-26, after the script-painted Reason art fell short): each fetched
+		// from Modrinth, never shipped in our jar. Credits and licences in docs/Vanilla-Style.md.
+		// "Pixel Perfection Fidelity" (by SourAlien, from XSSheep's Pixel Perfection; CC BY, its source CC BY-SA, so it's
+		// only ever fetched as it is): a cozy medieval 16x retexture of the whole game, R2.0 for 26.2-26.3 (project
+		// JTabr6nO). Andy: "this can be the reason base", so it sits at the bottom, under the Reason look.
+		new Pack("Pixel Perfection Fidelity", "jaymospowers-pixel-perfection-v1", "Pixel Perfection Fidelity",
+			"Pixel Perfection Fidelity vR2.0-88.97  26.2-26.3.zip",
+			"https://cdn.modrinth.com/data/JTabr6nO/versions/TFXxAeiO/Pixel%20Perfection%20Fidelity%20vR2.0-88.97%20%2026.2-26.3.zip",
+			"e45b72d6a45da3c997e95a1f47257603f932bb9e", true, BASE),
+		// "Medieval Items!" (by its Modrinth author, CC BY 4.0): medieval redraws of about 760 vanilla items, 1.2 (project
+		// L6chz93w), just above Pixel Perfection Fidelity so its items win. Andy: "dont change the axe", so its axes are
+		// taken out of the file once it's downloaded (STRIPPED) and the game's own axes show.
+		new Pack("Medieval Items", "jaymospowers-medieval-items-v1", "MedievalItems", "MedievalItems.zip",
+			"https://cdn.modrinth.com/data/L6chz93w/versions/myGf8ZHi/MedievalItems.zip",
+			"5c8227f530da2302dd662acc2c7677fd29c95f4b", true, "Pixel Perfection Fidelity"),
+		// "Framed Glass Panes" (by Kai1907, MIT): leaded frames on glass panes, V97 (project phbz5GXB).
+		new Pack("Framed Glass Panes", "jaymospowers-framed-glass-panes-v1", "Framed Glass Panes", "Framed Glass Panes V97 MC26.3.zip",
+			"https://cdn.modrinth.com/data/phbz5GXB/versions/EW9ZB3YA/Framed%20Glass%20Panes%20V97%20MC26.3.zip",
+			"652969338ba1b6990f1b829ea717a1fbcf41b1e9", true),
+		// "Red Bricks" (by Lobster Project, MIT): redder clay bricks, 1.0.5 (project D05iZg4c).
+		new Pack("Red Bricks", "jaymospowers-red-bricks-v1", "RedBricks", "RedBricks 26.2+.zip",
+			"https://cdn.modrinth.com/data/D05iZg4c/versions/Yallap1R/RedBricks%2026.2%2B.zip",
+			"0c94a4da2a83cfce7abdd283f51b478f941038a3", false),
+		// "Medieval Tactical Shield" (MIT): a bigger shield through Entity Model Features, 1.1 for 1.21.8 (project pwDKTTxF).
+		new Pack("Medieval Tactical Shield", "jaymospowers-tactical-shield-v1", "Medieval Tactical Shield", "Medieval Tactical Shield 1.1.zip",
+			"https://cdn.modrinth.com/data/pwDKTTxF/versions/c45rsgJs/Medieval%20Tactical%20Shield%201.1.zip",
+			"7ae438c32f8d74c2df3cf1898fcf9db5cc9a4b3b", true),
 		new Pack("Jaymo Medieval Music", PackResourcePacks.MUSIC_MARKER, "Jaymo Medieval Music", "Jaymo Medieval Music.zip", PackResourcePacks.MUSIC_URL,
 			"", false, BASE, true));
+
+	/**
+	 * Files taken out of a pack right after it's downloaded, by its file name prefix: what each entry's name ends with.
+	 * Only for packs whose licence allows changes (Medieval Items!, CC BY 4.0: Andy kept the game's own axes).
+	 */
+	private static final java.util.Map<String, String> STRIPPED = java.util.Map.of("MedievalItems", "_axe.png");
 
 	static final String MUSIC_MARKER = "jaymospowers-medieval-music";
 	/** The release the music zip is an asset of, and the asset names GitHub gives it (spaces become dots). */
@@ -323,6 +356,10 @@ final class PackResourcePacks {
 				Files.deleteIfExists(part);
 				return null;
 			}
+			String strip = STRIPPED.get(pack.prefix());
+			if (strip != null) {
+				strip(part, strip);
+			}
 			Files.move(part, target, StandardCopyOption.REPLACE_EXISTING);
 			com.jaymospowers.JaymosPowers.LOGGER.info("Downloaded {} ({}) into resourcepacks/", pack.file(), pack.what());
 			return pack.file();
@@ -334,6 +371,23 @@ final class PackResourcePacks {
 			}
 			return null;
 		}
+	}
+
+	/** Rewrites the zip {@code file} without the entries whose names end with {@code suffix}. */
+	private static void strip(Path file, String suffix) throws IOException {
+		Path out = file.resolveSibling(file.getFileName() + ".strip");
+		try (java.util.zip.ZipInputStream in = new java.util.zip.ZipInputStream(Files.newInputStream(file));
+				java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(Files.newOutputStream(out))) {
+			for (java.util.zip.ZipEntry entry; (entry = in.getNextEntry()) != null; ) {
+				if (entry.getName().endsWith(suffix)) {
+					continue;
+				}
+				zip.putNextEntry(new java.util.zip.ZipEntry(entry.getName()));
+				in.transferTo(zip);
+				zip.closeEntry();
+			}
+		}
+		Files.move(out, file, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	/** A pack with no fixed SHA-1 (a file of ours on a release) says its own, in the file beside it: the url plus ".sha1". */

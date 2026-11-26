@@ -123,3 +123,20 @@ Other mods: `python -I tools/vanilla_style/other_mods.py <extracted jars> <vanil
 Left alone on purpose: Simply Tents (every icon is a GeckoLib model sheet, a flat icon would not show), the knight
 weapons and blade/handle parts (custom 3D models or odd sizes), Stellarity's 32 px `_held` and 3D weapon textures (their
 models are drawn at double size), and Stellarity's animated prismatic pearl and punch arrow strips.
+
+### Packs under and beside the Reason look (2026-11-26)
+After the script-painted art fell short, Andy picked openly licensed packs instead (pick list
+https://claude.ai/artifact/DJgp8W4XAaLJPyuTMVxBED). The game fetches each one from Modrinth on first launch
+(`client/PackResourcePacks`); none is copied into our jars.
+
+| Pack | Author | Licence | Where it sits |
+|---|---|---|---|
+| Pixel Perfection Fidelity R2.0 | SourAlien, from XSSheep's Pixel Perfection | CC BY 4.0 (its source CC BY-SA 4.0) | the base, under the Reason look |
+| Medieval Items! 1.2 | its Modrinth author (project L6chz93w) | CC BY 4.0; changed: its axe textures are removed on download, at Andy's request | just above Pixel Perfection Fidelity |
+| Framed Glass Panes V97 | Kai1907 | MIT | on top |
+| Red Bricks 1.0.5 | Lobster Project | MIT | on top |
+| Medieval Tactical Shield 1.1 | its Modrinth author (project pwDKTTxF) | MIT | on top |
+
+Don't copy pixels from Pixel Perfection Fidelity into our own textures: share-alike would then cover them. New art for our
+own items goes to an art agent, starting from the CC0 and MIT sources Andy picked (OpenGameArt weapon, RPG item, block
+and ship sets; Computercraft Greentech, CC Industrialized, Militech, Wares Recalibration, Vanilla Military, Starlight 16x).
