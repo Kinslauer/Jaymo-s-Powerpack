@@ -17955,3 +17955,8 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - A realm dragon's breath never hurts villagers and never burns or breaks blocks unless someone is riding it.
 - Realm wyverns that already exist stay as they are and get a tamer.
 - Compiled (main and client); not played.
+
+## 0.13.51 (2026-11-26): Youth's ears unpack the voice model on the server (#2243)
+
+- **Youth's ears**: the speech model never unpacked on a server, so saying "youth" in voice chat never called the wisp. The log showed `bad zip entry vosk-model-small-en-us-0.15/am/`: the server's config folder is the relative path `./config`, and the zip-safety check compared each file's cleaned-up path against the temp folder's uncleaned one, so it refused the first entry. `YouthEars.unzip` now makes the temp folder's path absolute first.
+- Built; the path check was tested with the Deck's Java (jshell). Not played: hearing a voice call on the server still needs checking.
