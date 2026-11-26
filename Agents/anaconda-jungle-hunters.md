@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Fix the anaconda model and make anacondas jungle ambush hunters
 branch: claude/project-thread-k10pz4
 with: Claude (Reason Art project thread)
-pr: 
+pr: 2205
 mods: kingdoms
 versions: 
 started: 2026-11-26
@@ -19,7 +19,7 @@ owns:
 ## Plan
 - Spawns: AM's own homes are swamps + a few Terralith biomes (its forge:is_swamp tag never matches on Fabric). Moved to jungles, mangroves, rivers with a jungle within 32 blocks.
 - Ambush: lies still in water or on a leafy branch, climbs a tree unseen, drops/surges onto prey, no fall damage; sated_predators.
-- Model: waiting on Andy to say what looks wrong.
+- Model: AMBlockPos truncates toward zero (wrong block at negative x/z); floored + lift buried segments. Test server: 43% buried -> 0%.
 
 ## Notes
 - Parallel crocodile thread: PR #2200 (DeathRoll), kept separate.
