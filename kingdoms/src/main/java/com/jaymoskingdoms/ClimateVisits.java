@@ -96,7 +96,13 @@ final class ClimateVisits {
 	 */
 	static boolean free(Mob mob) {
 		return mob instanceof PathfinderMob pm && pm.isAlive() && !pm.isBaby() && !pm.isSleeping() && !pm.isPassenger() && !Downed.isDowned(pm)
-			&& !Captives.bound(pm) && !visiting(pm) && !HearthFolk.errand(pm) && !TalkBusy.occupied(pm) && Approaches.free(pm) && !Firesides.sitting(pm);
+			&& !Captives.bound(pm) && !alarmed(pm) && !visiting(pm) && !HearthFolk.errand(pm) && !TalkBusy.occupied(pm) && Approaches.free(pm) && !Firesides.sitting(pm);
+	}
+
+	/** A vanilla villager in a panic or a raid (MCA's villagers' own flight is {@link TalkBusy}'s and {@link Approaches}' to know). */
+	static boolean alarmed(Mob mob) {
+		return mob instanceof Villager v && (v.getBrain().isActive(net.minecraft.world.entity.schedule.Activity.PANIC)
+			|| v.getBrain().isActive(net.minecraft.world.entity.schedule.Activity.RAID) || v.getBrain().isActive(net.minecraft.world.entity.schedule.Activity.PRE_RAID));
 	}
 
 	/** Sends {@code mob} over to {@code player}; false if either is already on an errand. */

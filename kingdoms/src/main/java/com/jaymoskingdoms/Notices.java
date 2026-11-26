@@ -66,6 +66,7 @@ public final class Notices {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Notices::tick);
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> NEXT.remove(handler.getPlayer().getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			NEXT.clear();
 			BLANKETS.clear();
@@ -75,6 +76,10 @@ public final class Notices {
 	private static void tick(MinecraftServer server) {
 		if (server.getTickCount() % LOOK != 0) {
 			return;
+		}
+		if (server.getTickCount() % 6000 == 0) {
+			long gone = server.overworld().getGameTime();
+			BLANKETS.values().removeIf(until -> until <= gone);
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (!(player.level() instanceof ServerLevel level) || player.isSpectator() || Downed.isDowned(player) || PowersCompat.fainted(player)

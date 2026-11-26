@@ -68,6 +68,7 @@ public final class WeatherWise {
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(WeatherWise::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TOLD.clear());
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> TOLD.remove(handler.getPlayer().getUUID()));
 	}
 
 	/** A cartographer: the weather-wise. */
@@ -183,8 +184,9 @@ public final class WeatherWise {
 			if (day < SEASON_DAYS - WARN_DAYS || year < 0 || Math.floorMod(level.getOverworldClockTime(), 24000L) >= NIGHT) {
 				continue;
 			}
-			int season = Math.floorDiv(year, SEASON_DAYS);
-			if (TOLD.getOrDefault(player.getUUID(), -1) == season) {
+			// the season counted from the world's start (the year's own day wraps), by the day it began
+			int season = (int)(Math.floorDiv(level.getOverworldClockTime(), 24000L) - day);
+			if (TOLD.getOrDefault(player.getUUID(), Integer.MIN_VALUE) == season) {
 				continue;
 			}
 			Mob best = null;
@@ -197,14 +199,15 @@ public final class WeatherWise {
 					best = v;
 				}
 			}
-			if (best != null && ClimateVisits.start(player, best, new ClimateVisits.Script() {
-				@Override
-				public @Nullable BlockPos reach(ServerLevel l, ServerPlayer p, Mob mob) {
-					say(l, mob, p, "warn");
-					return null;
-				}
-			})) {
-				TOLD.put(player.getUUID(), season);
+			if (best != null) {
+				ClimateVisits.start(player, best, new ClimateVisits.Script() {
+					@Override
+					public @Nullable BlockPos reach(ServerLevel l, ServerPlayer p, Mob mob) {
+						say(l, mob, p, "warn");
+						TOLD.put(p.getUUID(), season);
+						return null;
+					}
+				});
 			}
 		}
 	}

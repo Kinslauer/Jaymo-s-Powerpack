@@ -411,7 +411,8 @@ public final class HearthFolk {
 		if (m.isSleeping() || Harness.get(m, Harness.Slot.OVER).isEmpty() && !put(m, HeraldryArmour.stack("cloak"))) {
 			return;
 		}
-		if (Harness.get(m, Harness.Slot.HOOD).isEmpty()) {
+		// (the hood is a harness place: it never replaces a helm, but isn't worn over one)
+		if (Harness.get(m, Harness.Slot.HOOD).isEmpty() && m.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty()) {
 			put(m, HeraldryArmour.stack(fur ? "fur_hood" : "hood"));
 		}
 	}
