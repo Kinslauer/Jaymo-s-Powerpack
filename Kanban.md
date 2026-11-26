@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,7 +36,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
-- [ ] [[Agents/climate-picks|climate-picks]] · 💻 Odysseus · #2190 · stalled
 - [ ] [[Agents/codex-downed-harness-loot|codex-downed-harness-loot]] · 💻 Odysseus · #2188 · stalled
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
