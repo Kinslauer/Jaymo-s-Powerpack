@@ -229,6 +229,8 @@ public class CorpseEntity extends Entity {
 	/** The parts a body can lose, as {@link #missing()} bits (the same bits Jaymo's Powers' Dismember uses). */
 	public static final int PART_HEAD = 1, PART_RIGHT_ARM = 2, PART_LEFT_ARM = 4, PART_RIGHT_LEG = 8, PART_LEFT_LEG = 16;
 	public static final int LIMBS = PART_RIGHT_ARM | PART_LEFT_ARM | PART_RIGHT_LEG | PART_LEFT_LEG, ALL_PARTS = LIMBS | PART_HEAD;
+	/** {@link #nextPart}: not a part but the belly, torn open and its guts pulled out (the body is gutted, nothing is missing). */
+	static final int GUTS = 32;
 	/**
 	 * Struck where it lies, the chance a part is knocked off it for each point of the blow's damage: bare bones, rotten
 	 * flesh, and a fresh body under a blade (nothing else cuts one up); never more than {@link #APART_MOST} a blow.
@@ -3337,19 +3339,23 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * Andy (2026-11-23): "all scavengers and body eaters should go limb at a time, giving players more time to recover
-	 * their party members". The part a scavenger tears off next, as a {@code PART_} bit: an arm or a leg it still has (any),
-	 * then the head; 0 once only the trunk is left, or for a body not built with limbs (a fish, a critter, a slime, a
-	 * snake), which is torn open whole.
+	 * their party members", and (2026-11-25) "they should also prioritize brains, then guts/entrails, then limbs". The part a
+	 * scavenger tears off next, as a {@code PART_} bit: the head, then the belly ({@link #GUTS}, if it isn't gutted yet),
+	 * then an arm or a leg it still has (any); 0 once only the trunk is left, or for a body not built with limbs (a fish, a
+	 * critter, a slime, a snake), which is torn open whole.
 	 */
 	int nextPart() {
 		RagdollRig.Shape shape = rig().shape;
 		if (isFish() || shape != RagdollRig.Shape.HUMANOID && shape != RagdollRig.Shape.QUADRUPED) {
 			return 0;
 		}
-		int left = LIMBS & ~missing();
-		if (left == 0) {
-			left = PART_HEAD & ~missing();
+		if ((missing() & PART_HEAD) == 0) {
+			return PART_HEAD;
 		}
+		if (!gutted) {
+			return GUTS;
+		}
+		int left = LIMBS & ~missing();
 		if (left == 0) {
 			return 0;
 		}
@@ -3371,6 +3377,13 @@ public class CorpseEntity extends Entity {
 	}
 
 	void eatPart(ServerLevel level, int part) {
+		if (part == GUTS) {
+			// (the guts it didn't finish fall out first, while there's anything soft left to throw)
+			Gibs.gutsPulled(this, level);
+			setGutted();
+			bites = 0;
+			return;
+		}
 		setMissing(missing() | part);
 		dropHeld(level, part, partPosition(part));
 		dropWorn(level, part, partPosition(part));
@@ -3380,7 +3393,7 @@ public class CorpseEntity extends Entity {
 	/**
 	 * (0.4.35) Torn open at last: what it carried spills on the ground (the meat for the scavengers, leather and the
 	 * like for whoever comes by), with the bones the eater left ({@link Gibs#bonesLeft}), what it wore and held, and the
-	 * body is gone. Everything but the meat is remains no mob takes up ({@link Corpses#REMAINS_TAG}). Returns the dropped meat.
+	 * body is gone. Returns the dropped meat.
 	 */
 	List<net.minecraft.world.entity.item.ItemEntity> tearApart(ServerLevel level) {
 		List<net.minecraft.world.entity.item.ItemEntity> meat = new ArrayList<>();
@@ -3408,10 +3421,6 @@ public class CorpseEntity extends Entity {
 		}
 		for (ItemStack stack : spill) {
 			net.minecraft.world.entity.item.ItemEntity dropped = spawnAtLocation(level, stack.copy(), 0.3F);
-			if (dropped != null && !stack.has(DataComponents.FOOD)) {
-				// (the meat is the scavengers' to finish; the rest stays where it fell)
-				Corpses.remains(dropped);
-			}
 			if (dropped != null && player) {
 				dropped.setUnlimitedLifetime();
 			}
@@ -3420,7 +3429,7 @@ public class CorpseEntity extends Entity {
 			}
 		}
 		for (ItemStack stack : kept) {
-			net.minecraft.world.entity.item.ItemEntity dropped = Corpses.remains(spawnAtLocation(level, stack, 0.3F));
+			net.minecraft.world.entity.item.ItemEntity dropped = spawnAtLocation(level, stack, 0.3F);
 			if (dropped != null && player) {
 				dropped.setUnlimitedLifetime();
 			}
@@ -4721,8 +4730,6 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(LOOK, tag.toString());
 		if (!stack.isEmpty()) {
 			net.minecraft.world.entity.item.ItemEntity dropped = new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, stack);
-			// (it fell off the body: no zombie at the meal takes it up)
-			Corpses.remains(dropped);
 			level.addFreshEntity(dropped);
 		}
 	}

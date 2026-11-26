@@ -45,7 +45,7 @@ import org.jspecify.annotations.Nullable;
  * Andy (2026-11-23, a clip of vultures making off with his body while he watched from Limbo): "vultures should land and
  * pick at the body limb from limb, until disturbed by other mobs or players ... all scavengers and body eaters should go
  * limb at a time, giving players more time to recover their party members or revive a fallen MCA." So a body is eaten a
- * part at a time ({@link CorpseEntity#nextPart}): each arm and leg, then the head, are torn off and eaten there beside
+ * part at a time ({@link CorpseEntity#nextPart}): the head (the brains), then the belly (the guts), then each arm and leg, are torn off and eaten there beside
  * it ({@link #CHEW_TICKS}, the part in its mouth), and only then is the trunk torn open. A flier comes down onto the
  * ground to eat; no more than {@link #MAX_EATERS} tear at one body at once, the rest wait their turn. A full scavenger
  * leaves what's left. Feeding, it notices less ({@link #FEEDING_SIGHT}, {@code ScavengerSightMixin}): the skittish ones
@@ -722,15 +722,16 @@ public final class Scavengers {
 	 * flesh falls away in patches as the meal goes on ({@link CorpseEntity#eaten}).
 	 */
 	private static float eatenShare(CorpseEntity body, int bites, int needed) {
-		int lost = Integer.bitCount(body.missing() & CorpseEntity.ALL_PARTS);
-		int stages = lost > 0 || body.nextPart() != 0 ? Integer.bitCount(CorpseEntity.ALL_PARTS) + 1 : 1;
+		// (the belly torn open is a stage of its own, between the head and the limbs)
+		int lost = Integer.bitCount(body.missing() & CorpseEntity.ALL_PARTS) + (body.gutted() ? 1 : 0);
+		int stages = lost > 0 || body.nextPart() != 0 ? Integer.bitCount(CorpseEntity.ALL_PARTS) + 2 : 1;
 		return Math.min(0.99F, (lost + Math.min(1.0F, bites / (float) Math.max(1, needed))) / stages);
 	}
 
 	/**
 	 * One bite into {@code body} by {@code eater}, its jaws coming in along {@code in}: the body is dragged a little after
-	 * them and blood flies. Each {@code needed} bites tear off its next part ({@link CorpseEntity#nextPart}: the arms and
-	 * legs, then the head), and that's returned; with none left, the trunk is torn open: its meat spilled for the
+	 * them and blood flies. Each {@code needed} bites tear off its next part ({@link CorpseEntity#nextPart}: the head, the
+	 * belly, then the arms and legs), and that's returned; with none left, the trunk is torn open: its meat spilled for the
 	 * scavengers, a villager's grave emptied, the body gone ({@link #GONE}). {@link #BITTEN} for a bite and no more.
 	 */
 	private static int tear(ServerLevel level, net.minecraft.world.entity.Entity eater, CorpseEntity body, Vec3 in, int needed) {
@@ -755,7 +756,7 @@ public final class Scavengers {
 		}
 		int part = body.nextPart();
 		if (part != 0) {
-			// a limb (or the head) comes away
+			// the head, the guts or a limb comes away
 			body.eatPart(level, part);
 			com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.3, body.getZ(), 25, 0.3, 0.15, 0.3, 0.2);
 			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 0.8F, 0.7F);

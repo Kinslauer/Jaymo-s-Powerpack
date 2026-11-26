@@ -214,20 +214,41 @@ public final class Gibs {
 			}
 		}
 		if (insides.soft()) {
-			for (int i = scaled(EATEN_ORGANS_MIN + random.nextInt(EATEN_ORGANS_MAX - EATEN_ORGANS_MIN + 1), width); i > 0; i--) {
-				throwPiece(level, at, Vec3.ZERO, width, Gib.ORGAN, insides, size, life, REMAINS_SPEED);
-			}
-			for (int i = scaled(EATEN_GUT_ROPES, width); i > 0; i--) {
-				throwPiece(level, at, Vec3.ZERO, width, Gib.GUTS, insides, size, life, REMAINS_SPEED);
-			}
-			entrails(level, at, Vec3.ZERO, Math.min(ENTRAILS_CAP, scaled(EATEN_ENTRAILS_MIN + random.nextInt(EATEN_ENTRAILS_MAX - EATEN_ENTRAILS_MIN + 1),
-				width)), EATEN_ENTRAILS_REACH);
+			guts(level, at, width, insides, size, life, random);
 		}
 		if (insides.clothes()) {
 			for (int i = 2 + random.nextInt(2); i > 0; i--) {
 				throwPiece(level, at, Vec3.ZERO, width, Gib.TATTERS, insides, size, life, REMAINS_SPEED);
 			}
 		}
+	}
+
+	/**
+	 * Andy (2026-11-25): scavengers go for "brains, then guts/entrails, then limbs". {@code corpse} torn open at the belly
+	 * and its guts pulled out ({@link CorpseEntity#GUTS}): the organs and ropes of gut the eater didn't finish, and gut
+	 * piles on the ground. After this it's gutted, and nothing soft is left in it for {@link #eaten}.
+	 */
+	static void gutsPulled(CorpseEntity corpse, ServerLevel level) {
+		Insides insides = Insides.of(corpse);
+		EntityType<?> type = corpse.sourceType();
+		double width = type == null ? corpse.getBbWidth() : type.getWidth() * corpse.bodyScale();
+		if (!insides.soft() || width < GORE_MIN_WIDTH) {
+			return;
+		}
+		int life = corpse.isPlayerCorpse() ? PLAYER_REMAINS_LIFE : REMAINS_LIFE;
+		guts(level, corpse.position().add(0.0, 0.2, 0.0), width, insides, goreSize(width), life, level.getRandom());
+	}
+
+	/** The guts an eaten body leaves ({@link #eaten}, {@link #gutsPulled}). */
+	private static void guts(ServerLevel level, Vec3 at, double width, Insides insides, float size, int life, RandomSource random) {
+		for (int i = scaled(EATEN_ORGANS_MIN + random.nextInt(EATEN_ORGANS_MAX - EATEN_ORGANS_MIN + 1), width); i > 0; i--) {
+			throwPiece(level, at, Vec3.ZERO, width, Gib.ORGAN, insides, size, life, REMAINS_SPEED);
+		}
+		for (int i = scaled(EATEN_GUT_ROPES, width); i > 0; i--) {
+			throwPiece(level, at, Vec3.ZERO, width, Gib.GUTS, insides, size, life, REMAINS_SPEED);
+		}
+		entrails(level, at, Vec3.ZERO, Math.min(ENTRAILS_CAP, scaled(EATEN_ENTRAILS_MIN + random.nextInt(EATEN_ENTRAILS_MAX - EATEN_ENTRAILS_MIN + 1),
+			width)), EATEN_ENTRAILS_REACH);
 	}
 
 	/**

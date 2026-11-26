@@ -56,6 +56,8 @@ public final class BloodCoatLayer {
 	static final RenderStateDataKey<ArmourGrime.Grime> GRIME = RenderStateDataKey.create(() -> "jaymospowers:body_grime");
 	private static final String DRESSING = "com.jaymoskitchen.client.corpse.CorpseDressing";
 	private static final boolean MCA = FabricLoader.getInstance().isModLoaded("mca");
+	/** Kitchen's parts a body has lost (its {@code Severed.KEY}, by name), or null without it. */
+	private static @Nullable RenderStateDataKey<Integer> kitchenMissing;
 
 	private BloodCoatLayer() {
 	}
@@ -77,6 +79,7 @@ public final class BloodCoatLayer {
 			((List<BiConsumer<Entity, EntityRenderState>>) dressing.getField("BODY").get(null)).add(BloodCoatLayer::corpseBody);
 			((List<BiConsumer<Entity, AvatarRenderState>>) dressing.getField("EXTRACT").get(null)).add(BloodCoatLayer::corpseBody);
 			((List<BiConsumer<AvatarRenderState, Object[]>>) dressing.getField("SUBMIT").get(null)).add(BloodCoatLayer::submitPlayerCorpse);
+			kitchenMissing = (RenderStateDataKey<Integer>) Class.forName("com.jaymoskitchen.client.corpse.Severed").getField("KEY").get(null);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosPowers.LOGGER.warn("Jaymo's Kitchen has no body hook (older Kitchen?): corpses are drawn without their blood", e);
 		}
@@ -161,8 +164,9 @@ public final class BloodCoatLayer {
 			if (coat == null && dead == null && grime == null || state.isInvisible) {
 				return;
 			}
+			int gone = gone(state);
 			// an MCA body is drawn by MCA's own layers: the dirt and blood go on those, over its skin and clothes
-			if (MCA && McaBlood.submit(this.renderer, state, texture -> paints(texture, coat, dead, grime, true), poseStack, collector,
+			if (MCA && McaBlood.submit(this.renderer, state, texture -> paints(texture, coat, dead, grime, true, gone), poseStack, collector,
 				lightCoords)) {
 				return;
 			}
@@ -174,15 +178,33 @@ public final class BloodCoatLayer {
 			}
 			// (0.20.66) a body in the player's layout wears the blood over its outer layer too
 			boolean layered = this.getParentModel() instanceof PlayerModel;
-			for (Identifier painted : paints(skin, coat, dead, grime, layered)) {
+			for (Identifier painted : paints(skin, coat, dead, grime, layered, layered ? gone : 0)) {
 				renderColoredCutoutModel(this.getParentModel(), painted, poseStack, collector, lightCoords, state, -1, 1);
 			}
 		}
 	}
 
-	/** The pictures to lay over a body drawn from {@code skin}: its dirt, then its blood (a corpse's in place of a coat). */
+	/**
+	 * The parts {@code state}'s body has lost ({@code Dismember} bits): a living one's ({@link
+	 * com.jaymospowers.client.Dismembered#MISSING}) or a corpse's (Kitchen's, eaten or torn off or faded).
+	 */
+	private static int gone(LivingEntityRenderState state) {
+		Integer living = state.getData(com.jaymospowers.client.Dismembered.MISSING);
+		Integer dead = kitchenMissing == null ? null : state.getData(kitchenMissing);
+		return (living == null ? 0 : living) | (dead == null ? 0 : dead);
+	}
+
 	static List<Identifier> paints(@Nullable Identifier skin, Bloodied.@Nullable Coat coat, Bloodied.@Nullable Blood dead,
 		ArmourGrime.@Nullable Grime grime, boolean layered) {
+		return paints(skin, coat, dead, grime, layered, 0);
+	}
+
+	/**
+	 * The pictures to lay over a body drawn from {@code skin}: its dirt, then its blood (a corpse's in place of a coat),
+	 * with the parts in {@code gone} cut out of them ({@link LimbCut}), so no blood shows where a limb was eaten or torn off.
+	 */
+	static List<Identifier> paints(@Nullable Identifier skin, Bloodied.@Nullable Coat coat, Bloodied.@Nullable Blood dead,
+		ArmourGrime.@Nullable Grime grime, boolean layered, int gone) {
 		if (skin == null) {
 			return List.of();
 		}
@@ -191,10 +213,10 @@ public final class BloodCoatLayer {
 			: coat != null ? ArmourGrimeTextures.skin(skin, coat, layered) : null;
 		List<Identifier> paints = new ArrayList<>(2);
 		if (dirty != null) {
-			paints.add(dirty);
+			paints.add(LimbCut.cut(dirty, gone));
 		}
 		if (painted != null) {
-			paints.add(painted);
+			paints.add(LimbCut.cut(painted, gone));
 		}
 		return paints;
 	}

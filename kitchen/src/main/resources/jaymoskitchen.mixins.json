@@ -46,7 +46,6 @@
 		"OvenMenuMixin",
 		"PlayerMixin",
 		"ProjectileWeaponItemMixin",
-		"RemainsPickupMixin",
 		"ScavengerFedMixin",
 		"RottenPumpkinMixin",
 		"ScavengerSightMixin",
