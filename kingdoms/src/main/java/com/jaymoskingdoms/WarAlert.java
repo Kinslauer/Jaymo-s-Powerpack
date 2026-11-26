@@ -238,7 +238,7 @@ final class WarAlert {
 		hide(level, f, band, now);
 	}
 
-	private static @Nullable BlockPos findBell(ServerLevel level, BlockPos seat) {
+	static @Nullable BlockPos findBell(ServerLevel level, BlockPos seat) {
 		BlockPos best = null;
 		for (BlockPos p : BlockPos.betweenClosed(seat.offset(-BELL_SEARCH, -BELL_SEARCH, -BELL_SEARCH), seat.offset(BELL_SEARCH, BELL_SEARCH, BELL_SEARCH))) {
 			if (level.getBlockState(p).getBlock() instanceof BellBlock && (best == null || p.distSqr(seat) < best.distSqr(seat))) {
