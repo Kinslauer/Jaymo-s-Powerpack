@@ -1143,3 +1143,4 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26: Andy said "merge" on PR #2192 (realm patrons and gifts); merged.
 - 2026-11-26 (Andy, spawned on Moog's long ship with no helm): "all ships should [have a helm] at this point"; "if you cant get the pillagers to man that, cannons and all, then give it to the pirates". Built as pillagers: helm at generation for every Moog boat, long ship = illager garrison with rail guns fed from real powder barrels.
 - 2026-11-25 (Andy, on agents showing the board differently): "can you make it consistent across the vault?" Every agent shows the board as Live/Kanban.md: its five lanes (Waiting for a bot, Being built, In review, Needs Andy, Done), names, order and worker labels; the Hermes board in E:/hermes/kanban is the bots' job queue, not the Kanban. PR #2202.
+- 2026-11-25: Andy said "merge" on PR #2202 (one board layout, Kanban.md five lanes); merged.
