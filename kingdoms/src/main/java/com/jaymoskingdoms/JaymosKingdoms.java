@@ -1295,6 +1295,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		RisenLooks.register();
 		// the Awakening picks: the Warding Hush (the Lantern Warden's, and a scroll) and Rot (the Ash Whisperer's)
 		HushWard.register();
+		// chat, toasts and advancement lines wait till a joining player can see the world
+		JoinHush.register();
 		AshRot.register();
 		ArtKeys.register();
 		// the Cleric's medallion board (the medallion key and the number keys as its marks)
