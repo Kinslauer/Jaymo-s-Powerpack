@@ -26,9 +26,9 @@ import net.minecraft.world.phys.AABB;
  * {@link #SICK_AT} seconds of thick smoke they turn sick (nausea, topped up while they stay in it). Out of it, or in thin
  * enough smoke, the chest clears a little faster than it filled.
  * <ul>
- * <li>Indoors the smoke is thinner ({@link #INDOORS}); staying low there (crouched, crawling, prone or lying) keeps under it
- * ({@link #INDOORS_LOW}), so the chest clears even with the house burning next door. Out in the open the smoke settles
- * low and staying low does not help.</li>
+ * <li>Indoors the smoke is thinner ({@link #INDOORS}). Staying low keeps you under the worst of it, indoors or out
+ * (Andy: "it should help outdoors too, prone being the best, but less across the board"): crouched it is
+ * {@link #CROUCHED} of itself, crawling, prone or lying {@link #PRONE}. It slows the sickness; it doesn't stop it.</li>
  * <li>Under water no smoke is breathed. Creative and spectator players are left alone.</li>
  * </ul>
  * No chat line, no hint: the screen swimming is the sign. Kept in memory only, so a restart clears everyone's chest.
@@ -46,8 +46,8 @@ public final class SmokeSickness {
 	/** Seconds of thick smoke before the nausea sets in (Andy: "after a long time"), and the most kept past that (so
 	 * someone who stayed in it a long while is sick a little while after stepping out). */
 	static final float SICK_AT = 150.0F, MOST = SICK_AT + 60.0F;
-	/** Indoors the smoke is this much of itself, and only this much for one who stays low. */
-	static final float INDOORS = 0.6F, INDOORS_LOW = 0.1F;
+	/** Indoors the smoke is this much of itself; crouched, and crawling, prone or lying, it is this much again. */
+	static final float INDOORS = 0.6F, CROUCHED = 0.75F, PRONE = 0.45F;
 	/** How long the nausea lasts when given (ticks), and topped up once it has less than this left. */
 	static final int NAUSEA_TICKS = 200, TOP_UP = 100;
 	/** How far round each player humanoids are looked at (blocks). */
@@ -146,15 +146,22 @@ public final class SmokeSickness {
 				break;
 			}
 		}
-		if (dose > 0.0F && !level.canSeeSky(BlockPos.containing(ex, ey, ez))) {
-			dose *= low(who) ? INDOORS_LOW : INDOORS;
+		if (dose <= 0.0F) {
+			return 0.0F;
 		}
-		return dose;
+		if (!level.canSeeSky(BlockPos.containing(ex, ey, ez))) {
+			dose *= INDOORS;
+		}
+		return dose * low(who);
 	}
 
-	/** Crouched, crawling or prone (out of water), or lying down. */
-	static boolean low(LivingEntity who) {
+	/** How much of the smoke one keeps under by staying low: crawling or prone (out of water) or lying down most, crouched
+	 * a little, standing none. */
+	static float low(LivingEntity who) {
 		Pose pose = who.getPose();
-		return who.isCrouching() || pose == Pose.CROUCHING || pose == Pose.SLEEPING || (pose == Pose.SWIMMING && !who.isInWater());
+		if (pose == Pose.SLEEPING || (pose == Pose.SWIMMING && !who.isInWater())) {
+			return PRONE;
+		}
+		return who.isCrouching() || pose == Pose.CROUCHING ? CROUCHED : 1.0F;
 	}
 }
