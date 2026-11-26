@@ -23,6 +23,4 @@ owns:
 - 
 
 ## Done
-- 2026-11-24 22:40 No sign of work for 30 min: marked stalled (whoever ran it stopped).
-PR #2120: all 12 patches built and compiled (Powers + Kingdoms), pr_checks pass. 18 change notes under changes/*/refmods-*.md. 41 (new) Lore.md paragraphs for Andy. Not played, no server boot. Open questions in the PR body (spiders as shapes, barbarian women of rank, villagers squaring up when hit).
-- 2026-11-24 23:54 PR #2120 is merged into master; moved to Agents/Done.
+- 2026-11-24 17:21 No sign of work for 30 min: marked stalled (whoever ran it stopped).

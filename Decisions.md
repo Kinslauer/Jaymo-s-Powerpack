@@ -948,6 +948,16 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Applies to:** Desktop Reference Mods (Dino-26.3-1.2.0.jar and symbiote-1.20.1-1.0.1.jar); proposed Powers integration. Compatibility assessment only so far.
 - **Agent:** codex-reference-dinos-venom.
 
+### 2026-11-24: Otherworld comparison and Fabric request
+- **Decided:** Andy asked: port Otherworld DnD to Fabric, then create a picklist of what it has and our pack does not; he will move differing models and textures himself.
+- **Applies to:** Otherworld research; target clarification pending, assumed existing 26.3 pack.
+- **Agent:** otherworld-fabric-picklist
+
+
+### 2026-11-24: Reference mods are Andy's own creations
+- **Decided:** "yes they were made with claude and gpt" in response to whether Amber Age and Symbiote are his mods. Reuse of his supplied code and art is authorized for the requested integration. Andy then asked "are you working?"; implementation has started in separate Venom-head and Verdant-dinosaur tracks.
+- **Applies to:** Dino-26.3-1.2.0.jar and symbiote-1.20.1-1.0.1.jar. Venom head only, dinosaurs on Verdant.
+- **Agent:** codex-reference-dinos-venom.
 ### 2026-11-24: Downed fire and blows (after #2056)
 - **Decided:** "revert to falls and bleeding dont count, fire knocks unconcious instantly. any corpse. they die after burning for 6s"
 - **Applies to:** Inbox downed-knockout-three-hits (Powers `Downed`): falls and bleeding stay out of the three blows; anyone downed who burns passes out at once and dies after 6 s of burning.
@@ -970,25 +980,53 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Decided:** "downed and crippled should be two different things, a suffienct blow, to the legs forces you into a ragdoll then prone, but you can roll to recover. downed is what happens after losing your hearts".
 - **Agent:** claude-cloud.
 
+### 2026-11-24: Every structure needs a reason to be where it is (asked, not yet built)
+- **Asked:** after the clip "the last consul" (a Pillared ruins city whose huts generated inside Structory's outcast-villager horse barn, -1157 73 234 on the Deck world): "there should be an algorithm or something written that runs checks like this before anything is generated. something that consults the lore, and logic giving everything a reason to be there ... it should still be procedural just fostering linear or story based progression from the enviornment". And on the Ruin Keepers: "they should explain the lore behind all this." Earlier related ruling: 2026-11-22 ship helm (a crewed ship's skipper needs a reason to be there).
+- **Status:** plan offered to Andy in the "Port Otherworld DnD to Fabric" thread; waiting on his picks.
+- **Agent:** claude (PC).
 ### 2026-11-24: Ruin Keepers tell the lore in talk
 - **Decided:** "Yes, hints in their talk" (decision card): the Keepers tell their people, why the city fell, the consul in the tomb, why they stay and take emeralds, and the map to the next city, as hints in talk. A (new) Lore.md paragraph goes to Andy first.
 - **Agent:** claude-cloud.
 
+### 2026-11-24: Two symbiote bodies; the red one hunts
+- **Decided:** "keep our combined black suit from 2080, and place our mechanics tendrils blades and scripts onto the narrow taller slender body. also when the symbiotes affect non web humanoids they will use these forms for combat, the red symbiote will primarily be in this form hunting others. up to 500 blocks away, nothing is safe. it may need new gecko libbed animations to match the new body. use inspiration for its movement from the venom 2 movie". On who is prey and how far: "Everyone is prey; load terrain for pursuit" (players, villagers, pets and allies; chunks load for the chase and are released when it ends).
+- **Applies to:** Powers, web symbiote (red strain body, symbiote-taken humanoids, WebInhabit), on top of PR #2080.
+- **Agent:** codex-reference-dinos-venom (handed to a red-symbiote-body worker).
+- **Added (same day):** "the black is not against killing, though it will only do so to satisfy its needs. it ultimately seeks a proper host, (web)". The black strain in a taken humanoid kills to feed, not for sport, and keeps looking for a web slinger to bond; only the red hunts everything.
 ### 2026-11-24: Coins patch: strongbox yes, shop stall no
 - **Decided:** From Reference Mods patch 15, build the strongbox at home (G7) but not the shop stall (G6), keeping the 2026-11-23 "no shop block" ruling.
 - **Agent:** claude-cloud.
 
 - 2026-11-24 (Andy, Vanilla+ patch I card): King's Roads already lays settlement roads, so patch I becomes "Also link a realm's towns": besides its nearest neighbours, every town in a realm gets a road to its capital.
+
+### 2026-11-24: The symbiote bodies' tendrils, stance and moves (red-symbiote-body, PR #2096)
+- **Decided (Andy, during the work):** the red body's tendrils "should extend out and down in front from the shoulders ... more like an encompassing ball than a cape", then "retain them all, there should be a visible abundance of tendrils and they should differ in size thickness and length ... they should stay on the back/rear of the model and shoulders, never out the front"; "adapt them well to the climb and walk animation as that will be the red suit's favored movement method"; "when done, black should get a similar treatment"; "the idle pose needs more of an exaggerated hunch like the reference, and even more curled while using tendrils, retaining the slight ragdoll on movement"; "the arms and knees should bend too, its far too stiff looking"; then stills and two videos of the two strains' fight in the second film and its concept art ("one more pass with animations similar to these"; "how the symbiotes morph their bodies into their attacks and movements and weaponry").
+- **Built as:** a crown of 8 tendrils of different sizes plus 14 strands off the back and shoulders on both bodies; wall walk from those roots, a ground skitter at a run; a deep hunch with bent elbows and knees, rearing up with tendrils raised while they work (the later stills), a pounce off the ground; the weapon arm grows out of the forearm; the black big body crouches wide and low when upright. Taken from the films: feel only.
+- **Open for Andy:** the red host's lifetime for the 500-block hunt (default taken: its time and its wasting both run at 15% while it hunts; each kill it feeds on adds 45 s).
+- **Applies to:** Powers, web symbiote (WebSlender, WebHulk, WebTendrilLayer, WebRedHunt).
+- **Agent:** red-symbiote-body.
 - 2026-11-24 (Andy, Vanilla+ thread): "work straight through, one PR. let me know is there are issues": patches A-K go out as one PR from this thread, not one PR per patch.
 - 2026-11-24 (Andy, illager tongue): illagers speak the tongue uncovered in Alex's Caves: unknown words in the Cave Tablets' glyphs (minecraft:alt), and translating a tablet at a Spelunkery Table teaches it (PR #2098, merged). Lore "The tablets' tongue" approved.
 - 2026-11-24 (Andy): approved Lore "What the keepers tell" and "What goods remember".
 - 2026-11-24 (Andy, Vanilla+ thread): approved the "camps' other hands" lore paragraph (patch G). Ender's Delight "is NOT ARR": its Modrinth page gives MIT (the jar's mods.toml says All Rights Reserved, a template default), so its strange eclair texture is used with the MIT notice.
+
+### 2026-11-24: A red-bonded web slinger is hunted from inside until bond 30
+- **Decided:** on "a player bonded to the red strain controls their own body and doesn't [hunt]": "only after achieving 30 or higher bond, you have to fight the hunts off as more powerful takeovers till then". Below bond 30 the red strain drives its web-slinger host out on hunts as stronger takeovers that the player must fight off; from 30 up the player keeps control.
+- **Also:** Andy approved the Lore.md paragraph "The red one's own shape, and its hunt".
+- **Applies to:** Powers, web symbiote (red strain, takeovers, PR #2096).
+- **Agent:** codex-reference-dinos-venom → red-symbiote-body.
 - 2026-11-24 (Andy, Alex's Caves thread): "i want to target world gen first": the world-gen track (biome placement under Mohknee, Magnetic Caves in Aether stone) goes first, as its own PR.
 - 2026-11-24 (Andy, Vanilla+ thread): port Ender's Delight's crops and dishes ("port them"), chorus dishes too (card: "Port all of it, chorus too"), past the old "except chorus fruit" rule.
 
 - 2026-11-24 (Andy, patron colossus thread): approved the lore paragraph "The patrons' colossi" (PR #2103, merged); asked for the hunt to bring a random tornado, earthquake or tsunami (PR #2104).
 - 2026-11-24 4:34 PM ET (Andy, Alex's Caves thread, PR #2105): "yes bring it back with our theme": Alex's neodymium nodes stay, every scarlet/azure texture recoloured (scarlet = ferrosite-sand rust, azure = magnetic-shroom slate blue).
 - 2026-11-24 (Andy, Vanilla+ thread): approved the Lore paragraph "The End's larder" (Ender's Delight port).
+- **Added (same day):** on whether a new host (not yet able to break takeovers) can fight the red's forced hunt: "yeah let them struggle". And the forced-hunt lore sentence: "approved".
+
+### 2026-11-24: Takeovers use everything they have; the black digs straight to its prey
+- **Decided:** "i need the pathing improved. last time i tested the black suit would constantly get stuck during takeovers, despite having access to extreme mobility and destruction. if it sees something underground or in a building or otherwise behind blocks, it can dig STRAIGHT there, using its tendril rip, it is extremely strong and should act like it. that means the AI should use all of its abilities to the best of it's ability".
+- **Applies to:** Powers, web symbiote takeovers (WebTakeoverPath and the takeover drive), all strains.
+- **Agent:** codex-reference-dinos-venom (coordinator), takeover-pathing workflow.
 - 2026-11-24 4:43 PM ET (Andy, Alex's Caves thread): approved Lore "The deep places under the far land".
 - 2026-11-24 4:44 PM ET (Andy, Alex's Caves thread): "the same dinos in the prehistoric cave should spawn on verdant and vice versa. there should also be barbaric warrior born found training by fighting the dinos": Alex's Primordial Caves dinos also on the Verdant World, the Verdant World's dinos (PR #2099) also in the Primordial Caves, and wild barbaric Warrior-born there train by fighting them.
 
@@ -998,15 +1036,31 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 5:05 PM ET (Andy, Alex's Caves thread): cave band Warrior-born get their own look later: "they should vary, not all shirtless but all in primitive hide".
 
 - 2026-11-24 5:38 PM ET (Andy, Alex's Caves thread): chasm wild Tideborn "should ease up on you as you build relation with the lurkers who stalk you, either through trades or defense": tied to Alex's Deep One reputation.
+
+### 2026-11-24: Mordhau's armour, modelled for our harness
+- **Decided:** "can you see all the gear available in Mordhau? i'd like the armor pieces modeled for our character's harness". Picked 84 of 109 rows on https://claude.ai/artifact/KdZEYgBpSEGYBdFB2ZubCk. Notes: kettle hat "different cuts for different realms"; "you will see guards opt to remove their armor and stay within the harness gear, as it is too much to remove and store".
+- **Applies to:** Kingdoms harness (HeraldryArmour and friends). Our own models of the historical armour; nothing copied from Mordhau. Four tracks in Inbox: mordhau-1-helms, mordhau-2-hoods-crests, mordhau-3-body, mordhau-4-legs.
+- **Agent:** claude (PC coordinator thread).
 - 2026-11-24 (Andy, decision card): Candy Cavity Rubber-folk = "Home ground + newborns": now and then a newborn Rubber-folk villager climbs out of the Candy Cavity and walks to the nearest town (Kingdoms RubberNewborns). No Tinkerer vat ruins.
 - 2026-11-24 (Andy): "you should be able to escort the rubberfolk to a village when you meet them after born": sneak + right-click a newborn Rubber-folk to have it follow you; any town you bring it into keeps it (RubberNewborns, PR #2116).
 - 2026-11-24 (Andy): newborn Rubber-folk escort is done through talk, never shift-right-click: "you should have to talk to it and convince it or answer its request. it should all be done through talk". A newborn calls out to you; "Lost?" in its talk menu offers take it / point the way / not now (PR #2116).
 - 2026-11-24 (Andy): "spiders should not attack during the day anymore": every spider kind (tarantulas, leaf-hiding spiders, woodland flyers) hunts only in the dark, fights back when hit, as vanilla spiders do.
 
+### 2026-11-24: Three primitive hide sets, each with a darker make
+- **Decided:** shown three redrawn Caveman hide icon sets (a-refined, b-slot-first, c-beast): "sorry i want all 3, and they can have a darker variation made from darker hides".
+- **Read as:** three separate primitive hide armour sets (hood, tunic, pants, boots), one per drawn style, each with its own icons and worn look, and each with a darker version crafted from darker hides. Names and lore placement go to Andy with the previews.
+- **Applies to:** Powers armory (caveman set and its new siblings), vanilla_style and excalibur_style packs.
+- **Agent:** claude (PC coordinator thread).
 - 2026-11-24 6:44 PM ET (Andy, refmods thread, PR #2120): villagers "flee if you unsheathe and swing or shoot, or loose an arrow within city limits"; paper parasols "only women in civilization" (none in barbarian camps).
 
 - 2026-11-24, Andy (Reference Mods PR #2120): vanilla spiders are not Druid wild shapes ("no"); they stay out.
 - 2026-11-24 (Andy): "approve lore": the 7 Alex's Caves lore placements in Lore.md are canon.
+- 2026-11-24 (Andy): merged the waterskin redesign (#2124): stitched hide bag, round iron canteen, two-bulb glass flask of dragon's breath.
+- 2026-11-24, Andy (Gravity magnetism, PR #2125): no Magnetic Forge screen for Gravity ("no" to it as a follow-up).
+- 2026-11-25, Andy (Gravity magnetism, PR #2125): Tear Loose works on players too ("yes"); a player's weapon is flung away from them.
+- 2026-11-25, Andy (Gravity magnetism, PR #2125): "a max mastery gravity user should be able to pull it in hand everytime": at the last Mastery rank, Tear Loose puts the weapon straight into your hand.
+- 2026-11-25 (Andy): "approve": the "Iron answers first" lore placement (Gravity feels metal as the heaviest weight) is canon.
+- 2026-11-25 (Andy): "merge": PR #2128 (Gravity metal fixes) merged.
 
 - 2026-11-24 (worn-totems thread, PR #2129): Andy approved the lore paragraph "The last old totems" (old heirloom totems, worn or held, some villagers/illagers/evokers carry one).
 
@@ -1017,8 +1071,12 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-25 (Andy, Hand of God thread): Hand of God (onikoox, ARR) borrowed as ideas: its time manipulation and super speed effects go to Chrono, its heat vision beam is the look of Frostborn's beam, its electrokinesis is what he wants from Stormborn's Thunderhead, and the rest of its powers go to Nadir.
 
 - 2026-11-25 (Andy, Hand of God thread): all five of its other powers go on Nadir (telekinesis, Void erase, finger-snap to dust, sun/moon throw, reality wave). The sun and moon throw deals damage equal to the largest meteor or Spirit Bomb and really damages the world; only the biome wave restores afterward ("it is just a visual effect").
+- 2026-11-24 9:47 PM (Andy): switch the kept world's End from Enderscape's terrain to Stellarity's (disable enderscape:new_terrain, new_end_cities, new_strongholds; nobody had been to the End), with a pbdr since master moved.
 - 2026-11-25 (Andy, Hand of God thread): merged PR #2134 (Frostborn heat-vision beam, Thunderhead electrokinesis, Chrono slow time fx, five Nadir moves).
 - 2026-11-25 (Andy): approved the lore paragraph "What the void's hand can do" (Nadir's Hand of God moves).
+- 2026-11-24 11:20 PM (Andy): explorer-map crash fix: hold for round 3 (ancient city maps, village-map draw winner) rather than ship round 2 first.
+- 2026-11-25 12:16 AM (Andy): yes to a temporary one-shot stack-trace log for the server's 'Invalid entity rotation: NaN' spam, to find its source.
+- 2026-11-25 12:40 AM (Andy, symbiote, non-web hosts): "the blob should give you all the abilities that it has" without the Web Slinger power (no web power needed for the suit ladder up to the big body). "i dont think you should be able to pull the suit off manually without web. it will fight you off everytime you try. the most you can get is the mask."
 - 2026-11-25 (Andy, Reason Art thread "Replace named undead with hollow NPCs"): the named zombies and skeletons (raised captains) become Hollow NPCs (Skeleton, Pallid or Zombie look) "so they can speak, and will return from the dead"; at first they fight like their plain zombie/skeleton counterparts and only learn as they progress.
 - 2026-11-25 (Andy, same thread): the Pallids are the intelligent Hollow and lead armies of skeletons and zombies as another faction; the raised captain ladder works mainly through Pallids; zombies and skeletons gain titles again (as lieutenants). Pallids fight with their old class abilities and weapons. Return chance stays 75%.
 - 2026-11-25 (hollow-captains, PR #2144): Hollow of every kind but the Wraith (vampire's) walk among zombie/skeleton hordes day and night; a new world has 6, -1 on a true death, +1 (25%) when the dead kill a villager; raised captains made only when a Hollow or one of the dead kills a player. Andy: "Hollow of all kinds except vampire should be among the zombie and skeleton hordes... if ever ANY of them kill you is when they are promoted... the number should be 6"
@@ -1027,16 +1085,47 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-25 (Andy, "Make silver blades sear monsters" thread): silver blades sear the undead, werewolves and other monsters along the slash (extra damage, stun, animated hot cut); a silver sword sheathes on the back beside a second sword, Witcher style (idea only).
 - 2026-11-25 (Andy, "Make silver blades sear monsters" thread, PR #2154): approved the lore paragraph "Silver sears what the Warden puts down" ("approved lore").
 - 2026-11-25 (Andy, "Balance fights: Grit and toughness" thread): Grit gives toughness, toughness shrugs part of every blow so fights take more hits (few decisive hits kept as the feel); every player starts with a small base of 20 toughness (picked on the card over keeping the default or a base of 40).
+- 2026-11-25 1:00 AM (Andy, symbiote in hosts without the Web power): big body at bond 60 (their held bond). Black and red still leave such a host for a web slinger within range or when hungry, but on meeting a slinger the suit first fights the slinger on its own; close to losing, it binds to the slinger; it also detaches and binds if the slinger is downed. Without Web the suit can't come off, only the mask, and the player has to fight it every time. Add a trust test command.
 - 2026-11-25 (Andy, "Balance fights: Grit and toughness" thread, PR #2155): approved the lore paragraph "A hide that takes a blow"; and "fix": the Hearth 20% hit cap no longer catches the finishing step when a blacked-out torso or head downs you.
 - 2026-11-25 (Andy, "Plan porting Hostile Humans AI to our NPCs" thread): rewrite Hostile Humans' fighting AI ideas ourselves (no code copied), all 39 rows of the pick page ticked. Notes: dev view through spectator mode; pillagers struggle with distance bands, use the cover system and leaning; archers lean round corners while strafing; add the boomerang to desert bandits' and other ranger NPCs' weapon pool.
+
+- 2026-11-25 (Andy, symbiote non-web hosts, #2158): confirmed all four: the big body at bond 60 has no time-out of its own; the bell and bottle still pour the symbiote off a host without Web, with no fight; breaking free of a takeover still locks the suit off for a minute; a slinger fight is an ordinary-strength hold.
 - 2026-11-25: Andy chose "Give them a real draught": band members' free 40% daily draught (PackUse) becomes a real healing potion in their pack, restocked once a day out of a fight (PR #2159).
+
+
+## 2026-11-25 - Codex: hand-built start example
+Andy: "can you make one of these as an example?" Supplied Hand-built starts (adventure-map style).md. Applies to a concrete example using the written-start system in PR #2153.
+
+- 2026-11-25 (Andy): fix the penguin NaN log spam (Ambient Creatures' Penguin.travel), "if that would help yes" -> PR #2161, merged.
+- 2026-11-25 (Andy): the next pbdr starts a NEW WORLD, but only when Andy says go ("something else is coming to master").
+- 2026-11-25 (Andy): for that new-world pbdr, the current world can be deleted ("the current one can be deleted"), not kept as a backup. One-time ruling; the pbdr skill's never-delete rule stands otherwise.
+- 2026-11-25 (Andy): Deck cleanup: emptied Trash, deleted world-backup-2026-11-17-0835 and -11-22-2040, emptied ~/Downloads; kept the shader cache.
 - 2026-11-25 (Andy, red suit thread, PR #2164): approved the lore paragraph "Three colours, three names" (villagers tell black, red and white apart; white = the quiet warrior of the old songs; the red one hunts first and trusts its host into control).
 - 2026-11-25 (Andy, Reason Art thread "Pick Symbiote 1.1.3 ideas to adapt"): picked 49 of 54 rows from the Symbiote 1.1.3 jar pick page (ideas only, ARR); not picked: arm vein mining, longer reach, gear over shell, the graft, the lab. Plan: docs/Symbiote113-Plan.md.
 - 2026-11-25 (Andy, same thread, row notes): Carapace becomes the black strain's Shroud tile and Aegis the white's; big bodies congeal through doors and 1x2 gaps and form whole again; while you sleep the blob really leaves and roams the world during the night skip.
 - 2026-11-25 (Andy, same thread): approved the lore paragraph "What it does when you aren't looking" (molting and the cast skin, the blob roaming while the host sleeps, elder against young).
+- 2026-11-25 (Andy): second new-world pbdr (0.27.49): delete the old world too ("Delete this broken one").
+
+### 2026-11-25: Guard helms and northern and sands lore
+- Andy: "they should alternate between both, and a third per realm"; approved the gallowglass, turban helm and spectacle helm lore. Applies to Kingdoms guard issue, PR #2160.
 - 2026-11-25 (Fae Woods picks): Andy picked 37 rows from Spore & Stem + 11 mods (https://claude.ai/artifact/8MNDHjgDZ2Tg93bfsQsbG4); plan docs/FaeWoods-Plan.md. Cars: "only 4 cars and only in the future". Rim: Frostborn/Tinkerer rigs only in the future against hordes and mutants; sea monsters from the abyssal cave that Darktide can command when dead. God Wand: "can we make powerful mage wands and spells from it?" Unbound: a new list for our pods only, using only our worlds.
+
+### 2026-11-25: Any crown can be worn over a helm
+- **Decided:** "you should be able to wear any crown" (on the Mordhau harness 2 helm crown). Read as: every crown (the rulers' crowns, tiara, circlet, coronet and the new helm crown) goes over a helm in the crest place, and anyone may wear one (no royals-only rule for the helm crown).
+- **Applies to:** Kingdoms harness (Harness.slotOf, HeraldryLayer, gen_heraldry_hoods.py), branch claude/mordhau-2-hoods-crests.
+- **Agent:** mordhau-2-hoods-crests.
 - 2026-11-25 (Andy, Fae Woods thread): mage wands: "They should learn spells and cast from the wand" (a caster's learned spells, cast through a wand); Rim's sea beasts "can keep the shapes" (repainted and renamed); Fantasy Mounts ships only after its author says yes ("ok"); approved the lore paragraph "The glow-woods".
+
+### 2026-11-25: Mordhau headwear previews and lore
+- Andy approved the previews for PR #2178 and its five lore entries.
+- 2026-11-25, Mordhau helm previews (#2160): Andy said "helms look incredible"; recorded as visual sign-off.
+
+
+## 2026-11-25 - Codex: merge the written-start example
+Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start dependency #2153 before moving the example to master. Merge attempts failed at GitHub; both PRs remain open. No deployment requested.
 - 2026-11-25: Andy chose to move the whole pack to Fabric Loader 0.20.1 and Fabric API 0.165 so Psithurism can ship (Fae Woods, PR #2179).
 - 2026-11-25: Andy's pod-travel picks (Unbound list): 21 of the 22 build-ours rows; note on tr_cockpit: make the aerclouds beneath the Aether transparent and add cloud seas between Aether isles so pods can go straight through.
 - 2026-11-25 (Andy, Mordhau harness thread): "Merge all, t3 should have 2": track 3 (covered finish + the rest of the picks) also builds the two flat-top looks track 1 (#2160) left out: the Royal flat top (flat_top_helm + track 2's crest_crown, #2178) and the Covered flat top (flat_top_helm in track 3's covered finish). Approved all previews and lore for tracks 1 and 2.
 - 2026-11-25: Andy approved the six Fae Woods lore paragraphs (Wicked Harvest, errand books, heartwood wands and the wood-way, rigs/street cars/deep beasts, stardust and the logbook, Patrol posts/found keels/tow line), and ruled that ground that grows back (terrain return) drops nothing.
+
+- 2026-11-25 3:00 PM: "Pbdr new world 5k": new world (old one kept as world-old-20261125-150755) and Chunky pregen radius 5000. Then "Merge" for #2181/#2182 and "yes to the loader sync": the Deck pbdr now sets the server launcher's Fabric Loader to the pack's loader_version before each restart, keeping the old launcher as fabric-server-launch.jar.loader-<old>. Also yes to a CI data check for the 26.3 shapes that broke the start (in #2182).

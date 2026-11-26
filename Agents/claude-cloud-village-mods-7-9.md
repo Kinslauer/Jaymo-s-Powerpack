@@ -1,5 +1,5 @@
 ---
-status: done
+status: stalled
 task: village-mods-7-ctov-tidal-towns, village-mods-8-swamp-goblins, village-mods-9-own-company
 branch: claude/project-thread-2p25nc
 with: 
@@ -28,7 +28,4 @@ owns:
 - underground-stoneborn-goblin-villages left alone: on hold by Andy (2026-11-19).
 
 ## Done
-- 2026-11-25 21:25 No sign of work for 30 min: marked stalled (whoever ran it stopped).
-
-## Finished 2026-11-25
-PR #2183 open (patches 7-9). Cards 7, 8, 9 set to in-review. Three (new) Lore.md paragraphs added for Andy: raft towns, swamp goblins, a company of your own.
+- 2026-11-25 16:35 No sign of work for 30 min: marked stalled (whoever ran it stopped).

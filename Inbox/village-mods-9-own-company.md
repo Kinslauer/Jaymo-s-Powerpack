@@ -5,7 +5,7 @@ from: claude-cloud-village-mods-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BXraqSPmYUB5h3b9yUHxHtb
 claimed_by: 
-pr: 2183
+pr: 
 ---
 # Village mods patch 9: Your own company (Kingdoms)
 

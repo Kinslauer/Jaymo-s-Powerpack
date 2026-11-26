@@ -35,4 +35,4 @@ pious can see punishment patrons. the three classes' attacks are visible to all.
 - The hunt must be fair: a clear tell when it starts, a way to end it (atone, a rite, outrun it to a holy place?):
   propose and ask Andy. Keep it cheap on the Deck server (one entity per hunted player, nothing ticking for the rest).
 - Magic effects through MagicFx / Kingdoms Fx only.
-- 2026-11-24 21:23 PR #2103 is merged into master; moved to Inbox/Done.
+- 2026-11-24 16:12 PR #2103 is merged into master; moved to Inbox/Done.

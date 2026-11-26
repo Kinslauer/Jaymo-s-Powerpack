@@ -1,0 +1,41 @@
+---
+status: done
+for: claude
+from: claude (PC coordinator thread)
+asked: 2026-11-24
+claimed_by: 
+pr: 2160
+---
+# Mordhau harness 1: helms (Kingdoms)
+
+**Andy (2026-11-24):** "can you see all the gear available in Mordhau? i'd like the armor pieces modeled for our character's harness". He ticked 84 of 109 rows on https://claude.ai/artifact/KdZEYgBpSEGYBdFB2ZubCk (the picks below are this track's share, copied from that page's store).
+
+**Rules:** our own models of the historical armour each piece is based on, made the way the harness already makes its pieces (kingdoms/tools/gen_heraldry_armour.py, bbmodels in kingdoms/src/main/resources/assets/jaymoskingdoms/bbmodels/heraldry_*.json, HeraldryArmour, HeraldryWear, HeraldryForging, Harness). Mordhau's meshes, textures and names-as-brands belong to Triternion and are not copied. "have" rows need no new model: check the piece is reachable (several "have" pieces have no recipe and are worn only by knights) and add the finish/re-cut the row names. Lore first: rows marked "Lore check" get a (new) Lore.md paragraph for Andy (who makes and wears it). Previews of every new or re-cut piece (worn, front/side/back) to E:/Jaymo Vault Live/Assets/<track>/ for Andy before merging. One PR per track, branch claude/mordhau-1-helms, change note changes/kingdoms/claude-mordhau-1-helms.md, never version=/MODLOG/codemap. Tuning in constants; player text in lang parts. CI compiles (Andy plays on this PC).
+
+**Andy's notes to carry:** on the kettle hat, "different cuts for different realms"; on the slashed doublet, "you will see guards opt to remove their armor and stay within the harness gear, as it is too much to remove and store" (read in the body track: off duty or in town, guards take off the heavy pieces and keep only the harness's under-layers on; confirm the reading with Andy if it changes much).
+
+## Picked
+### Helms (HEAD)
+- **mh-kettle** Kettle hat (S, have): Kettle, Spanish Kettle, Eisenhut, Vanguard's Kettle (+ Orle, Strap). A round iron bowl with a wide brim (chapel de fer, 13th-15th c.). The Spanish and Eisenhut cuts differ only in brim width and bowl height. Ours: HEAD: have kettle_hat. Orle = torse (see Crests). The Spanish and Eisenhut brims are only a brim re-cut if wanted. **Andy: different cuts for different realms**
+- **mh-kettle-slitted** Deep German kettle with sight slits (S, variant): Slitted Kettle, German Kettle (+ Raised). 15th c. German kettle with a deeper bowl and a brim pulled down at the front, with eye slits cut into the brim. Ours: HEAD: variant of kettle_hat (deeper bowl, front brim dropped, two slit cutouts).
+- **mh-kettle-sallet** Kettle sallet (S, variant): Kettle Sallet / Kettle Sallet Bevored (Patch 22). 15th c. hybrid: a sallet skull and tail with a short kettle brim all round; worn with or without a bevor. Ours: HEAD: variant of sallet (visor removed, short brim added). The bevored version is that plus bevor (NECK). It is built from sallet, so it already carries a bevor; the bevorless cut hides it.
+- **mh-sallet-open** Open and long-tailed German sallet (S, variant): Archer's Sallet, German Sallet (+ Plume, Raised, Raised Plume). An open-faced 15th c. sallet with no visor, and the German cut with a very long tail and a sight slit in the skull. Ours: HEAD: variant of sallet. Leave out the visor bone for the archer's sallet; lengthen the tail and close the front to a slit for the German one. Plumes = crest_plume.
+- **mh-gallowglass** Gallowglass conical bascinet (S, variant): Gallowglass Helm (Patch 20). 14th-16th c. the Scottish gallowglass mercenaries' (serving Irish lords) tall conical open bascinet over mail. Ours: HEAD: variant of houndskull_bascinet. Taller, more pointed skull, no visor.
+- **mh-barbute** Barbute (S, have): Barbute (+ Raised), Painted Barbute Raised, Veterans Barbute (+ Raised, Plume, Trim), Veterans Helm (+ Plume), Heavy Barbute, Champion's Barbute (B guesses this is the crowned heavy barbute). 15th c. Italian deep helm with a T or Y face opening. Ours: HEAD: have barbute. Painted finish, crest_plume, and the crown (see Crests) cover the variants. The crowned look needs the new crown (mh-crown).
+- **mh-barbute-visor** Visored barbute (S, variant): Barbute Visor, Painted Barbute Visor. A barbute with a plate closing the face opening. Ours: HEAD: variant of barbute with a visor bone added over the T opening.
+- **mh-greathelm-visored** Visored great helm (S, variant): Visored Greathelm / Visored Greathelm Raised (Patch 25), Visored Flat Top. A late 13th-14th c. great helm whose face plate is hinged and lifts. Ours: HEAD: variant of great_helm. The face front becomes a visor bone. great_helm is now 'fixed' face; this one would be 'visored'.
+- **mh-flattop-open** Open flat-topped helm (S, variant): Flat Top, Royal Flat Top, Covered Flat Top (+ Orle). Early 13th c. cylindrical flat-topped helm with the face open or only a nasal or partial face plate. Ours: HEAD: variant of great_helm with the face plate cut away (open face, sight ~1). Crown = crown crest; cover = covered finish; orle = torse. The covered look needs the new covered finish (mh-covered).
+- **mh-conical-nasal** Conical nasal helm (S, variant): Norman Casque (+ No Nasal Guard), Nasal Helmet (P24), Rus Conical (P25), Spangenhelm (+ stripped). The 11th-12th c. one-piece conical helm with a nasal, the taller pointed Rus helm, and the earlier riveted spangenhelm. Ours: HEAD: have spangenhelm for the riveted version. The Norman casque (smooth one-piece cone, no mail curtain) and the tall Rus cone are S re-cuts of it.
+- **mh-spectacle** Spectacle helm (M, new): Viking Helmet, Rus spectacle helmet (P24). A 10th c. Gjermundbu-type round helm with an iron spectacle guard round the eyes and nose and a mail curtain. Ours: HEAD: new model (rounded skull with a ridge, spectacle mask, mail curtain). Fixed face.
+- **mh-skullcap** Skullcap (cervelliere) (M, new): Skullcaps (P24), Mail Skullcap (P25). A plain round iron cap worn alone or over a mail coif, crusade era. Ours: HEAD: new small model (open, sight 1). With mail_coif (HOOD) it gives the mail skullcap.
+- **mh-turban-helm** Turban helm (S, variant): Turban Helmet, Turban Helmet With Nasal Guard (P25), Sultan set helm (P24), Eastern Helmet (+ Nasal Guard, datamined). A tall, fluted, bulbous Ottoman/Mamluk helm with a spike, a nasal and a mail aventail. Ours: HEAD: variant of veiled_helm (spiked helm with mail veil). The bulbous fluted bowl and a nasal in place of the veil would be a re-cut.
+
+## Notes
+- 2026-11-24 20:22 Question for Andy (from the helms worker): the 15 new helms are forgeable at the smithing anvil, and the kettle comes in each realm's cut on its soldiers; no guard is issued the others yet (GuardKit is Andy's wardrobe list). Should guards wear any of them (turban helm for the sands' soldiers, spectacle or gallowglass helm in the north, archer's sallet for archers, skullcap for militia)?
+- 2026-11-24 22:35 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.
+- 2026-11-25 claude (helms worker): reclaimed; the claim lapsed while the session was down, the work was not lost. Draft PR #2160 is up; previews in Assets/mordhau-1-helms/. Left as claimed, not in-review, until Andy OKs the previews.
+- 2026-11-25 07:33 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as changes.
+
+- Andy answered 2026-11-25: three helm choices per realm. The three helm lore entries are approved.
+- 2026-11-25: Andy signed off on the helm previews: "helms look incredible".
+- 2026-11-25 13:11 PR #2160 is merged into master; moved to Inbox/Done.

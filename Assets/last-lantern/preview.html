@@ -1,0 +1,23 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+body{margin:0;color:var(--foreground);font-family:var(--font-sans)}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+button{font:inherit;background:var(--secondary);color:var(--secondary-foreground);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;cursor:pointer}
+button[aria-pressed=true]{background:var(--primary);color:var(--primary-foreground)}
+img{width:100%;height:auto;border-radius:var(--radius)}
+p{color:var(--muted-foreground);margin:12px 0 0}
+[hidden]{display:none}
+</style>
+<nav aria-label="Build views">
+<button aria-pressed="true" onclick="show(0)">Exterior</button>
+<button aria-pressed="false" onclick="show(1)">Inside</button>
+<button aria-pressed="false" onclick="show(2)">Cellar</button>
+</nav>
+<img src="E:/Jaymo Vault Live/Assets/last-lantern/exterior.png" alt="A stone way-hut with a pitched spruce roof and a covered porch">
+<img hidden src="E:/Jaymo Vault Live/Assets/last-lantern/room.png" alt="Room cutaway showing the cot, hearth, table and hatch">
+<img hidden src="E:/Jaymo Vault Live/Assets/last-lantern/cellar.png" alt="Cellar cutaway showing the ladder, chest and barrel">
+<p>Saved block grid, shown in flat colours. Cutaways hide the roof and near walls. These are not game screenshots.</p>
+<script>
+function show(n){document.querySelectorAll('img').forEach((e,i)=>e.hidden=i!==n);document.querySelectorAll('button').forEach((e,i)=>e.setAttribute('aria-pressed',String(i===n)));}
+</script>

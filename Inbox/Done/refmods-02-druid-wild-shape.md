@@ -30,5 +30,4 @@ Owns: kingdoms WildShapes, Druids, Druid tree.
 - **W9 Call a beast to your side** (Otherworld Origins, size S). Call a wild beast of a kind you've studied out of the brush to fight beside you for a while, even when none is about. We have: Pack Leader gathers beasts already nearby.
 
 ## Notes
-- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
-- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

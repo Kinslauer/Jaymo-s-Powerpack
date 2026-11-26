@@ -28,5 +28,4 @@ Owns: kingdoms villagers, vampires, Senses, journal.
 - **P7 A rope to lead people** (Psycho Villagers, size S). A rope lead for a hogtied or collared captive, tied off on a fence post. We have: Hogties, collars, Stretchy Leash.
 
 ## Notes
-- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
-- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

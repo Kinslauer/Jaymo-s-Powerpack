@@ -28,5 +28,4 @@ Andy decided 2026-11-24 17:18Z: "icy has far better models and implementations, 
 - The ticked rows R1-R11 come from Icy's itself now; check each one works in the pack and note any that doesn't.
 
 ## Notes
-- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
-- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

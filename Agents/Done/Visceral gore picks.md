@@ -20,4 +20,6 @@ owns:
 
 ## Notes
 - Visceral picks: https://claude.ai/artifact/3NMtJdzmLuH1WyzbYV672f (db picks/andy).
-- 2026-11-25 18:10 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+- 2026-11-25: all 8 tracks built, reviewed, fixed; PR #2133 opened. Not run in game. Kingdoms standalone runServer fails on pre-existing big_golem spawn entries (anvil_ruins, court_ruins).
+- 2026-11-24 23:18 PR #2133 is merged into master; moved to Agents/Done.

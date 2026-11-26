@@ -27,5 +27,4 @@ Andy (H1): the hoverboard uses the arsenal's bomb glider model.
 - **H5 Crash at speed** (Hoverboards, size S). Hit a wall fast and you're flung off, ragdolled, and the board skids away. We have: Ragdolls with capped flings.
 
 ## Notes
-- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
-- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
