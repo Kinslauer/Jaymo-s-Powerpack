@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:25). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -16,6 +16,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Stuck
 
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -31,6 +32,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2204 story scenes and the Warlock's midnight bargain, spoken spells (Kingdoms, 2026-11-26)
+- [ ] #2201 ships rigged when they're made; pillager long ships sail; crews fish for their food; every NPC fights its fish in view (Kingdoms, 2026-11-26)
 - [ ] #2199 Alone in the wild never leaves you on the sea (Kingdoms, 2026-11-26)
 - [ ] #2197 Mobs slow down under heavy weapons; no blood on lost limbs; owls spare the downed (Powers, Kitchen, 2026-11-26)
 - [ ] #2196 Ki Cell has its icon and name (Powers, Kingdoms, 2026-11-26)
@@ -89,13 +92,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2137 Corpse hint drops "search the body" when nothing is left (Powers, Kitchen, 2026-11-25)
 - [ ] #2136 Riders no longer start with a spare saddle (Kingdoms, 2026-11-25)
 - [ ] #2135 journal map page shows Xaero's minimap, World map button (Kingdoms, 2026-11-25)
-- [ ] #2134 Hand of God effects: heat-vision Frost beam, Thunderhead electrokinesis, Chrono slow time, five Nadir moves (Powers, 2026-11-25)
-- [ ] #2133 Visceral gore: deeper wounds, hit reactions, armour holes, takedowns, gore reader (Powers, Kingdoms, Kitchen, 2026-11-25)
-- …and 580 older ones.
+- …and 582 older ones.
 
 ## Health
 
-18 problems in the notes: [[Health]].
+19 problems in the notes: [[Health]].
 
 ## Last week
 

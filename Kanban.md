@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,9 +12,9 @@ kanban-plugin: board
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for any · open
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for ☀️ Apollo · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for ☀️ Apollo · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for ☀️ Apollo · open
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for ☀️ Apollo · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · open
 
 
@@ -22,14 +22,11 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · codex-bleed-out-coma · claimed
-- [ ] [[Agents/anaconda-jungle-hunters|anaconda-jungle-hunters]] · 💻 Odysseus · running
-- [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · running
 
 
 ## In review
 
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
-- [ ] [[Agents/ship-helms-pillager-crews|ship-helms-pillager-crews]] · 💻 Odysseus · #2201 · in-review
 
 
 ## Needs Andy
@@ -40,6 +37,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · blocked
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · blocked
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
+- [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · stalled
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 - [ ] [[Agents/symbiote-113-picks|symbiote-113-picks]] · 💻 Odysseus · stalled
