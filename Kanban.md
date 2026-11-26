@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:56). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:57). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,6 +15,7 @@ kanban-plugin: board
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for any · open
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
+- [ ] [[Inbox/hunters-road-2|hunters-road-2]] · for any · open
 
 
 ## Being built
