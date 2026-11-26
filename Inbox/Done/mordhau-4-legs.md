@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
@@ -39,3 +39,6 @@ pr: 2187
 - 2026-11-25 5:10 PM claude (T3 thread): draft PR #2186 (stacked on #2185); previews and row table in Assets/mordhau-4-legs/ (README); waiting on Andy's preview approval and CI. Track 3's CI (#2185) is green: Kingdoms, Powers, Kitchen builds and the pack start check.
 - 2026-11-25 5:21 PM PR #2186 closed (no CI: not based on master); replaced by draft #2187 from the same branch to master, which also holds #2185's commits until that merges. Previews regenerated with a true front/side/back.
 - 2026-11-25 5:40 PM claude (T3 thread): merged the body track's puffed slashed doublet into this branch (5167428419).
+
+## Notes
+- 2026-11-25 19:34 PR #2187 is merged into master; moved to Inbox/Done.
