@@ -1,9 +1,9 @@
 ---
-status: claimed
-for: gemini
+status: open
+for: any
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
-claimed_by: gemini
+claimed_by: 
 pr: 
 ---
 
