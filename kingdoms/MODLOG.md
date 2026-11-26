@@ -17868,3 +17868,11 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Realm wyverns**: about one kingdom in six keeps a wyvern at its seat that belongs to the realm (tamed, no owner) and keeps it like a wandering tamed dragon; one slain is replaced after 3 days (`RealmDragons`).
 - Sounds (bite, bond, horn, four roars, tremor) and the rubble particle frames are Dragonforge's (RochStudio), used with Andy's permission (`licenses/dragonforge-NOTICE.txt`).
 - Compiled (main and client); not played.
+
+## 0.13.40 (2026-11-26): face parts - snouts, beaks, fangs and horns on the painted faces (#2228)
+
+- Andy: "some of the heritage looks have flat faces. nonhumans should get protruding features like biobuilts". The looks whose animal or monster faces were only painted on the skin now have real boxes on the head (client `FaceParts`, one table): muzzles and noses on the Beastfolk (first look), Canine, Feline and Kitsune; a beak on the Avian; fangs on the Arachnid; a snake snout with fangs on the Serpen; a lizard snout and brow on the Scalebound; swept-back horns on every Dragonblood (first look, Goldscale, Rimewyrm, Stormwyrm, Venomscale); a shark snout and toothed jaw on the Greyfin; a snout and toothed jaw on the Moray; lips on the Spinepuff; mandibles on the Shellclaw; a tube snout on the Weedfrond; a jaw on the Skeleton.
+- No new art: every box is cut from a texture the pack already ships (the looks' own parts sheets, the anglerfish jaw, and vanilla's chicken beak, spider, goat horn, dolphin and skeleton). `kingdoms/tools/face_parts_preview.py --check` proves every face lands on painted texels.
+- Players and villagers, in the character creator too; hidden under a helmet, hood, mask or costume, on the invisible and on a Bio-built form.
+- Not changed: looks that already had real parts (Stoneborn brow, Tideborn fins, the other sea looks, Verdant antennae, goblins and orcs, Divine halo, Bio-built forms) and the plain-faced bloods (Frostborn, Endborn, Deepborn, Emberborn, Rubber-folk, elves, Zombie, Wraith, Reaper).
+- Built (compileClientJava); not seen in game.
