@@ -25,6 +25,9 @@ BB_DISPLAY="${BB_DISPLAY:-:99}"
 BB_CDP_PORT="${BB_CDP_PORT:-9222}"
 BB_MCP_URL="${BB_MCP_URL:-http://127.0.0.1:3000/bb-mcp}"
 PLUGIN_URL="${PLUGIN_URL:-https://jasonjgardner.github.io/blockbench-mcp-plugin/mcp.js}"
+# GeckoLib's own Blockbench plugin (GeckoLib model format + .geo.json/.animation.json export; MIT), from the
+# official plugin list (jsDelivr serves the GitHub repo; github.com itself is blocked in cloud sessions).
+GECKOLIB_URL="${GECKOLIB_URL:-https://cdn.jsdelivr.net/gh/JannisX11/blockbench-plugins@master/plugins/geckolib/geckolib.js}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP="$BB_HOME/app"
 BB_BIN="${BB_BIN:-$APP/files/bin/Blockbench/blockbench}"
@@ -71,8 +74,9 @@ if [[ ! -x "$BB_BIN" ]]; then
   rm -rf "$BB_HOME/repo"   # 300+ MB of compressed objects, not needed after checkout
 fi
 
-# 3. The MCP plugin (stable build) and its permissions.
+# 3. The MCP plugin (stable build), the GeckoLib plugin, and the MCP plugin's permissions.
 [[ -f "$BB_HOME/mcp.js" ]] || curl -fsSL -o "$BB_HOME/mcp.js" "$PLUGIN_URL"
+[[ -f "$BB_HOME/geckolib.js" ]] || curl -fsSL -o "$BB_HOME/geckolib.js" "$GECKOLIB_URL"
 mkdir -p "$USERDATA"
 [[ -f "$USERDATA/plugin_permissions.json" ]] || \
   echo '{"mcp":{"allowed":{"process":true,"net":true,"fs":true}}}' > "$USERDATA/plugin_permissions.json"
@@ -84,11 +88,9 @@ DISPLAY="$BB_DISPLAY" nohup "$BB_BIN" --no-sandbox --user-data-dir="$USERDATA" \
 for _ in $(seq 60); do curl -s -m 2 "http://127.0.0.1:$BB_CDP_PORT/json" | grep -q Blockbench && break; sleep 1; done
 sleep 3   # let Blockbench finish loading installed plugins
 
-# 5. First run: install the plugin from the local file (the "false" skips the confirm dialog).
-#    Blockbench remembers it, so later starts load it by themselves.
-if ! mcp_up; then
-  BB_PLUGIN="$BB_HOME/mcp.js" BB_CDP="http://127.0.0.1:$BB_CDP_PORT" node "$HERE/install_plugin.cjs"
-fi
+# 5. Install the plugins from the local files (the "false" skips the confirm dialog); ones already
+#    installed are skipped. Blockbench remembers them, so later starts load them by themselves.
+BB_PLUGINS="geckolib=$BB_HOME/geckolib.js,mcp=$BB_HOME/mcp.js" BB_CDP="http://127.0.0.1:$BB_CDP_PORT" node "$HERE/install_plugin.cjs"
 for _ in $(seq 30); do mcp_up && break; sleep 1; done
 if mcp_up; then
   echo "Blockbench MCP server up at $BB_MCP_URL"

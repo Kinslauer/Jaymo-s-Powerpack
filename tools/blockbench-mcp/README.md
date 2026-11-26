@@ -1,8 +1,9 @@
 # Headless Blockbench MCP
 
 Runs Blockbench desktop (5.2.x, from Flathub) under a virtual display with the
-[Blockbench MCP plugin](https://jasonjgardner.github.io/blockbench-mcp-plugin/) loaded, so Claude can build and
-export models (cubes, groups, Java block/item JSON, `.bbmodel`, glTF, GeckoLib) with no screen.
+[Blockbench MCP plugin](https://jasonjgardner.github.io/blockbench-mcp-plugin/) and GeckoLib's own Blockbench plugin
+(4.2.x) loaded, so Claude can build, animate and export models (Java block/item JSON, Java entity, `.bbmodel`, glTF,
+GeckoLib `.geo.json` + `.animation.json`) with no screen.
 Tested in a Claude cloud session (Ubuntu 24.04): first run ~40 s, later starts load the plugin by themselves.
 
 ```bash
@@ -21,6 +22,8 @@ node bbmcp_call.mjs create_project '{"name":"stool","format":"java_block"}' \
 BB_IMG=/tmp/stool.png node bbmcp_call.mjs capture_screenshot '{"max_size":600}'
 ```
 
+- GeckoLib: make the project with format `geckolib_model` (or convert one). The MCP plugin's 10 `geckolib_*` tools
+  (settings, validate, easings, `geckolib_export_model`, `geckolib_export_animations`) appear only in such a project.
 - Most tools appear only once a project is open (`create_project` first); 17 are there before that.
 - The plugin gets its process/net/fs permissions up front (`plugin_permissions.json`), the same as clicking
   "Always allow" in Blockbench, so exports to a path don't stop on a dialog.
