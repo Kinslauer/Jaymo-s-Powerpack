@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,6 +18,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · open
+- [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · for codex · open
 
 
 ## Being built
