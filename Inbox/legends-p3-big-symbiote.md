@@ -28,3 +28,6 @@ Rules:
 - Build: compileClientJava. Run tools/pr_checks.py.
 
 PR body: each row, what you built, classes, keys, every deviation from the plan, what you couldn't check.
+
+## Notes
+- 2026-11-26 18:30 YOUTH delegated this to apollo (Claude approved): multi-system Java in the big-suit code (WebHulk, WebBrute, WebFury, WebLeap, WebSlam, takeover struggle); branch from claude/project-thread-aaw9tm and open the PR against that branch, NOT master, and never merge it
