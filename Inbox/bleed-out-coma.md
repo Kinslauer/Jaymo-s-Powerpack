@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: coordinator
 from: Andy (desktop session "Andy's three clips", 2026-11-23)
 asked: 2026-11-23
-claimed_by:
+claimed_by: codex-bleed-out-coma
 pr:
 suggested_owns:
   - src/main/java/com/jaymospowers/core/wounds/ (a new class for the coma; small hooks in Downed, BleedOut)
