@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 12:45
+updated: 2026-11-26 14:33
 ---
 # Open PRs
 
-7 open, as of 2026-11-26 12:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+8 open, as of 2026-11-26 14:33. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -38,5 +38,10 @@ Andy merges only on "merge", one at a time.
 
 ## [#2225](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2225) Claude coordinates and reviews; work runs on Codex, then Gemini, then Hermes
 - **Branch:** `claude-md-gemini-antigravity` · **Updated:** 2026-11-26 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2245](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2245) Hollow captains: 12 per player, own ladders, intersecting captains
+- **Branch:** `claude/hollow-captains-fix` · **Updated:** 2026-11-26 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
