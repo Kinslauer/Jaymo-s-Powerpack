@@ -5,13 +5,14 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.ChunkPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -263,7 +264,8 @@ public final class CreeperWard {
         }
 
         // Find creepers near warded chunks (within 8 blocks of boundary)
-        for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, creeper -> creeper.isAlive())) {
+        net.minecraft.world.phys.AABB searchBox = new net.minecraft.world.phys.AABB(-1024, -64, -1024, 1024, 320, 1024);
+        for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, searchBox, Creeper::isAlive)) {
             ChunkPos creeperChunk = creeper.chunkPosition();
             // Check if creeper is just outside a warded chunk
             boolean atEdge = false;
@@ -317,9 +319,10 @@ public final class CreeperWard {
      */
     private static void weakenCreepersInWards(ServerLevel level) {
         Map<String, List<Long>> wards = level.getAttachedOrElse(WARDS, Map.of());
+        net.minecraft.world.phys.AABB searchBox = new net.minecraft.world.phys.AABB(-1024, -64, -1024, 1024, 320, 1024);
         if (wards.isEmpty()) {
             // No wards: restore all weakened creepers
-            for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, Creeper::isAlive)) {
+            for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, searchBox, Creeper::isAlive)) {
                 if (creeper.getPersistentData().contains("ward_weakened")) {
                     restoreCreeperFromWard(creeper);
                 }
@@ -334,7 +337,7 @@ public final class CreeperWard {
         }
 
         // Check all creepers in the level
-        for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, Creeper::isAlive)) {
+        for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, searchBox, Creeper::isAlive)) {
             ChunkPos creeperChunk = creeper.chunkPosition();
             boolean inWard = wardedChunks.contains(creeperChunk.toLong());
             boolean wasWeakened = creeper.getPersistentData().getBoolean("ward_weakened");
