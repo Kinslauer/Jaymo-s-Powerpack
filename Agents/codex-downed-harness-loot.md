@@ -2,7 +2,7 @@
 status: in-review
 task:
 branch: codex/downed-harness-loot
-with: claude (T3 sub-agent of thread b48e4ca8, Sonnet 5.5)
+with: claude (T3 sub-agents of thread b48e4ca8, Sonnet 5.5)
 pr: 2188
 mods: kitchen, kingdoms
 versions:
@@ -12,6 +12,7 @@ owns:
   - kitchen/src/client/java/com/jaymoskitchen/client/corpse/CorpseLootScreen.java, kitchen lang part corpse_harness.json
   - kingdoms/src/main/java/com/jaymoskingdoms/Everyday.java (new), HeraldryWear.java (two additive call sites)
   - kingdoms/src/main/java/com/jaymoskingdoms/DownedHarnessMenu.java (new), client/DownedHarnessScreen.java (new), Harness.java (menu type, taken tag, dress gate), Downed.java (the "harness" body-menu row), GuardKit.java (two skip lines), HeraldryWear.java (one gate), HeraldryClient.java (screen registration), lang parts body_menu.json + harness-downed.json
+  - kingdoms/src/main/java/com/jaymoskingdoms/Rulers.java (two Harness.issued lines: crown, retitle)
   - E:/Jaymo Vault Live/Lore.md (one (new) paragraph: What ordinary people wear)
   - changes/kitchen/codex-downed-harness-loot.md, changes/kingdoms/codex-downed-harness-loot.md
 ---
@@ -49,3 +50,8 @@ owns:
 ## Done (retry)
 - 2026-11-26 PR #2188 head c2ed877: living-downed screen built (Kingdoms `DownedHarnessMenu` + `DownedHarnessScreen`, body-menu row "Take their harness", lang part downed_harness.json); `Harness.TAKEN_TAG` stops every re-dress (Harness.dress, GuardKit sweep/harness/forget, HeraldryWear restyle clear); Kitchen `CorpseHarness` now reads `fabric:attachments` -> `jaymoskingdoms:harness` (checked in fabric-data-attachment-api-v1 2.2.34); shift-click moves a copy so the take is always marked. Lore paragraph extended. PR body, change notes and Decisions updated.
 - Not played; compiled only by CI. Open limits are in the PR body.
+
+## 2026-11-26 lifecycle fix (T3 sub-agent, Sonnet 5.5), head b9bc730
+- Regression from the retry: the blanket `harness_taken` tag stopped GuardKit restoring untouched heavy pieces after off duty, and left promotions/knighthoods/coronations without harness or crest. Replaced by a tag per place (`jaymoskingdoms.harness_taken.<place>`): `Harness.dress`, GuardKit's kit/look-over and restyle skip only those places; `Harness.issued` clears them on a deliberate new issue (a guard's first kit or a new settlement's, `HeraldryWear.knight` for a new recruit, `Rulers.crown`/retitle). A gunner/archer flip or demotion is NOT a new issue (repeatable). Rank rise doesn't exist for GuardKit guards (rank is from the UUID; recruits with RANK aren't kitted by it).
+- Fabric pin checked: pack pins fabric-api 0.165.2 (installed in E:/CurseForge/Instances/Jaymo's Powers/mods too), bundling data-attachment 2.2.34; `fabric:attachments` + EntityMixin on saveWithoutId/load confirmed by javap; serializing classes identical in 0.161.0/0.162.0/0.165.2.
+- Open limits: `McaBridge.convertGuard` makes a fresh villager who gets a first kit (pre-existing); free cloth floor returns with any new issue; not played; compiled only by CI.
