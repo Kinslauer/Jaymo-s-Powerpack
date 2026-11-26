@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 15:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 15:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,7 +18,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · for codex · open
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 
@@ -40,6 +39,7 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · #2248 · in-review
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · gemini · #2250 · in-review
+- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · gemini · #2251 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
