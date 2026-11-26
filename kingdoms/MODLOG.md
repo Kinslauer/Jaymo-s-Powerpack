@@ -17756,3 +17756,8 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **The strike**: a player or an animal it hunts that walks under its branch (3 blocks across, up to 16 below) or comes within 4.5 blocks of its water is struck at once: it drops or surges onto it, and Alex's own attack coils and squeezes. Sneaking halves the reach. It takes no fall damage.
 - **Fed**: it joins the `sated_predators` (after a kill it lets players, villagers and animals be for two days), and feeding it its own foods by hand counts the same, so a snake that's looked after leaves its keeper alone.
 - `wild/Anacondas`, `mixin/alexsmobs/` (all skipped without Alex's Mobs). The body fix was measured on a test server; the spawns and the hunting are compile-checked only, not played.
+
+## 0.13.29 (2026-11-26): Giant mushrooms repainted in the pack's vanilla style (#2206)
+
+- The giant **glowcap, bouncecap and inkcap** textures (Spore & Stem's own, made by its art script: flat, noisy and loud beside vanilla's huge mushrooms) are repainted to sit with vanilla: caps in two close shades with a few soft spots (the inkcap with shaggy scales), the cap's inside softly mottled, stems in fine vertical fibres (the glowcap's with two faint glowing threads), stem tops with a rind and a pale core, planks in four boards with one staggered joint each, and the glowcap's gill curtains as hanging strands that glow at the tips. 23 textures, painted by `tools/fungus_wood_textures.py` (our own pixels, no vanilla art copied). Doors, trapdoors, the lantern and the item icons are unchanged.
+- Built; not played.
