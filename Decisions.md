@@ -1164,3 +1164,6 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26 (Andy, Nature picks thread): "merge then finish the rest in one pr" -> #2200 merged; nature patches 1-7 (salmon run through beavers) go out as one PR, #2207.
 - 2026-11-26 (Reason Art, pack art scan): Andy picked all 25 repaint/setup rows (everything but TaCZ): Reason look pack on by default, retire Excalibur, one style guide, art check on PRs, and every repaint group in Kingdoms, Powers and the 7 third-party sets.
 - 2026-11-26 (Andy, Nature picks thread): "merge approve" -> lore "The run" and "The beavers" approved; merge #2207.
+- 2026-11-26 (Andy, CC0 picks thread): picked 39 CC0/MIT rows (all but Ghillie Suit, Blink Eye, ActionHunger, Working Graves), "do it here, one PR". Torches burn 40 min; lamps up to 3 days on whale oil; coyote time is a skill-tree perk; lasso stays tied, drops when swapped off, off hand leads captives.
+- 2026-11-26 (Andy, CC0 picks thread): Cutout Leaves on by default (Fast preset and low-end mode keep it).
+- 2026-11-26 (Andy, CC0 picks thread, card): lanterns capped at 3 days too (whale oil 3, ambergris 2, coal 1, tallow 0.5), replacing the 2026-11-12 long lanterns.
