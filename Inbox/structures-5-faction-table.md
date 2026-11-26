@@ -1,6 +1,6 @@
 ---
 status: open
-for: any
+for: apollo
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
