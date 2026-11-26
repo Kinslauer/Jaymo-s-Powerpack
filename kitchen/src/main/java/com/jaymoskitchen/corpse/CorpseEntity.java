@@ -3371,6 +3371,15 @@ public class CorpseEntity extends Entity {
 	 * {@code part} torn off and eaten by a scavenger (no severed part is left lying: it's in the eater's mouth): no longer
 	 * drawn on the body, an arm lets go of what it held, and the bites start over for the next part.
 	 */
+	/**
+	 * Picked over: a body built with limbs that has none left to eat (head, guts and limbs all gone), only its trunk.
+	 * Most eaters leave it there; only a horde or a blood moon finishes it ({@link Scavengers}).
+	 */
+	boolean pickedOver() {
+		RagdollRig.Shape shape = rig().shape;
+		return !isFish() && (shape == RagdollRig.Shape.HUMANOID || shape == RagdollRig.Shape.QUADRUPED) && nextPart() == 0;
+	}
+
 	/** Bites taken toward the part being torn at now. */
 	int biteCount() {
 		return bites;

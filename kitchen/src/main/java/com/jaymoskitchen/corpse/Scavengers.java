@@ -47,7 +47,8 @@ import org.jspecify.annotations.Nullable;
  * limb at a time, giving players more time to recover their party members or revive a fallen MCA." So a body is eaten a
  * part at a time ({@link CorpseEntity#nextPart}): the head (the brains), then the belly (the guts), then each arm and leg, are torn off and eaten there beside
  * it ({@link #CHEW_TICKS}, the part in its mouth), and only then is the trunk torn open. A flier comes down onto the
- * ground to eat; no more than {@link #MAX_EATERS} tear at one body at once, the rest wait their turn. A full scavenger
+ * ground to eat; a lone eater or two leave the trunk, and only a horde or a blood moon eats a body whole
+ * ({@link #finishes}); no more than {@link #MAX_EATERS} tear at one body at once, the rest wait their turn. A full scavenger
  * leaves what's left. Feeding, it notices less ({@link #FEEDING_SIGHT}, {@code ScavengerSightMixin}): the skittish ones
  * ({@link #SKITTISH}: vultures, foxes, coyotes) let a sneaking player come closer before they bolt, a moment after they
  * notice ({@link #REACT}), and a bigger scavenger or a monster drives any of them off it ({@link #DISPLACE}). One driven
@@ -306,6 +307,31 @@ public final class Scavengers {
 		}
 	}
 
+	/**
+	 * Andy (2026-11-25): "during blood moons, every zombie is ravenous so they will not stop feasting until done". Under a
+	 * Blood Moon (Jaymo's Kingdoms' {@code Moons}) a monster is never fed or full: it hunts and eats on, and finishes
+	 * the bodies it eats ({@link #finishes}).
+	 */
+	static boolean ravenous(Mob mob) {
+		return mob instanceof net.minecraft.world.entity.monster.Enemy && mob.level() instanceof ServerLevel level
+			&& com.jaymoskitchen.compat.MoonCompat.bloodMoon(level.getServer());
+	}
+
+	/**
+	 * Andy (2026-11-25): "the only time someone should be completely devoured is during an encounter with a horde (as they
+	 * all will want a bite) and during blood moons". Whether {@code eater} goes on to tear open a body that's
+	 * {@link CorpseEntity#pickedOver picked over}: when it's ravenous, or when {@link #HORDE} scavengers or more are about
+	 * the body (within {@link #HORDE_REACH}). Otherwise the trunk is left lying, with what it wore.
+	 */
+	private static boolean finishes(ServerLevel level, Mob eater, CorpseEntity body) {
+		return ravenous(eater) || level.getEntitiesOfClass(Mob.class, body.getBoundingBox().inflate(HORDE_REACH),
+			other -> other.isAlive() && HUNGERS.containsKey(other)).size() >= HORDE;
+	}
+
+	/** Scavengers about a body that make a horde, and how near it they must be (blocks). */
+	private static final int HORDE = 4;
+	private static final double HORDE_REACH = 8.0;
+
 	/** A fed monster moves at this share of its speed ({@link #fedPace}). */
 	private static final double FED_PACE = 0.7;
 	private static final net.minecraft.resources.Identifier FED_PACE_ID = JaymosKitchen.id("fed_pace");
@@ -332,12 +358,12 @@ public final class Scavengers {
 		net.minecraft.world.item.@Nullable ItemStack mouthful;
 
 		boolean full(Mob mob) {
-			return mob.level().getGameTime() < fullUntil;
+			return mob.level().getGameTime() < fullUntil && !ravenous(mob);
 		}
 
 		/** It has eaten lately: a part swallowed within {@link #SATED_TICKS}, or a full stomach. */
 		boolean fed(Mob mob) {
-			return mob.level().getGameTime() < satedUntil || full(mob);
+			return (mob.level().getGameTime() < satedUntil || full(mob)) && !ravenous(mob);
 		}
 
 		boolean scared(Mob mob) {
@@ -415,7 +441,7 @@ public final class Scavengers {
 				return body != null;
 			}
 			List<CorpseEntity> bodies = mob.level().getEntitiesOfClass(CorpseEntity.class, mob.getBoundingBox().inflate(SMELL),
-				corpse -> corpse.isCarrionFor(mob));
+				corpse -> corpse.isCarrionFor(mob) && (!corpse.pickedOver() || mob.level() instanceof ServerLevel at && finishes(at, mob, corpse)));
 			body = null;
 			double best = Double.MAX_VALUE;
 			for (CorpseEntity corpse : bodies) {
@@ -567,6 +593,11 @@ public final class Scavengers {
 			if (mob.getRandom().nextInt(3) == 0) {
 				// growling over it
 				mob.playAmbientSound();
+			}
+			if (body.pickedOver() && !finishes(level, mob, body)) {
+				// (only the trunk is left: it leaves that lying, unless a horde is at it or the moon is red)
+				body = null;
+				return;
 			}
 			int torn = tear(level, mob, body, in, needed());
 			if (torn == GONE) {
