@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,9 +15,7 @@ kanban-plugin: board
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for any · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
-- [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for any · open
-- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for ☀️ Apollo · open
 - [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · for codex · open
 - [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · open
 
@@ -25,6 +23,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · claimed
+- [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · claimed
 
 
 ## In review
