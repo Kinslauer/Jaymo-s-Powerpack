@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 15:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 15:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,20 +13,20 @@ kanban-plugin: board
 - [ ] [[Inbox/codex-reference-dinos-venom-restart|codex-reference-dinos-venom-restart]] · for any · open
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · for any · open
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for any · open
-- [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · for any · open
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
+- [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · for codex · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · gemini · claimed
-- [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · codex · claimed
-- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · gemini · claimed
+- [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · gemini · claimed
 
 
 ## In review
