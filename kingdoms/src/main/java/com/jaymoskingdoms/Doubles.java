@@ -428,6 +428,7 @@ public final class Doubles {
 				} else if (copy.distanceTo(player) < SLIP_RANGE) {
 					slip(level, copy, player, real, now);
 				}
+				ChangelingLures.notice(copy, player, now);
 			}
 		}
 		if (now % (EVERY * 30) == 0) {
@@ -534,7 +535,7 @@ public final class Doubles {
 		Doubts.raise(level, copy.blockPosition());
 		// (a copy on a throne: off it, the ruler's blood keeps it, and the realm hears of it)
 		StolenCrowns.unmasked(level, copy, by);
-		if (Math.floorMod((int) (copy.getAttached(COPY).getMostSignificantBits() >>> 13), CHANGELING_IN) == 0 && stealable(copy)) {
+		if (changelingCopy(copy) && stealable(copy)) {
 			changeling(level, copy, by);
 			return;
 		}
@@ -587,6 +588,12 @@ public final class Doubles {
 			break;
 		}
 		Speech.say(level, copy, Component.translatable("talk.jaymoskingdoms.changeling.found." + level.getRandom().nextInt(3), wore), Speech.WHITE, UNMASK_SEEN);
+	}
+
+	/** The same fixed choice used when a stolen face comes off. */
+	static boolean changelingCopy(Villager copy) {
+		UUID real = copy.getAttached(COPY);
+		return real != null && Math.floorMod((int) (real.getMostSignificantBits() >>> 13), CHANGELING_IN) == 0;
 	}
 
 	/** Where a villager lives (their bed), or null: MCA's home, else the vanilla villager's. */
