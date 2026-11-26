@@ -51,6 +51,8 @@ public final class BlossomSteel {
 	public static final String ACTION = "ask_steel";
 	/** A dug river sand or gravel gives iron sand this often, and how many blows fold a bloom. */
 	static final float SAND_CHANCE = 0.15F;
+	/** Black sand dug in the ashlands gives iron sand this often. */
+	static final float ASH_SAND_CHANCE = 0.3F;
 	static final int FOLDS = 6;
 	/** How near the smith must stand. */
 	static final double NEAR = 6.0;
@@ -83,6 +85,12 @@ public final class BlossomSteel {
 
 	/** Sand or gravel dug from under a river's water on Mohknee: now and then, iron sand with it. */
 	private static void dug(Level level, Player player, BlockPos pos, BlockState state) {
+		// the black sand of the ashlands is where the fires wash it from: more of it holds iron than a riverbed's
+		if (level instanceof ServerLevel ash && !player.isCreative() && state.is(TerrainFeatures.BLACK_SAND) && ash.getBiome(pos).is(com.jaymoskingdoms.lands.Lands.ASHLANDS)
+			&& ash.getRandom().nextFloat() < ASH_SAND_CHANCE) {
+			Block.popResource(level, pos, new ItemStack(IRON_SAND));
+			return;
+		}
 		if (!(level instanceof ServerLevel server) || player.isCreative() || !(state.is(Blocks.SAND) || state.is(Blocks.GRAVEL))
 			|| !com.jaymoskingdoms.seas.Mohknee.on(level, pos) || !level.getBiome(pos).is(BiomeTags.IS_RIVER)
 			|| !level.getFluidState(pos.above()).is(FluidTags.WATER) || server.getRandom().nextFloat() >= SAND_CHANCE) {

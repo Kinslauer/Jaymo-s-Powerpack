@@ -32,7 +32,7 @@ import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
  * <li>Starts: every life story's start is set out from, and put down in, the temperate lands ({@code LifeStory}).</li>
  * </ul>
  * Only the Overworld (or the Overworld's band of a One Dimension world) has a climate here; Mohknee's is mild by its own
- * density function. What spawns where already follows the map, since the biomes do (their spawn lists,
+ * density function, except the ashlands ({@link com.jaymoskingdoms.lands.Lands}), which are read as hot. What spawns where already follows the map, since the biomes do (their spawn lists,
  * {@code wild.PredatorRanges}).
  */
 public final class HarshLands {
@@ -90,7 +90,10 @@ public final class HarshLands {
 	/** The climate's temperature at (x, z): the number the land's biomes were picked by (biome noise only, nothing made). */
 	static float temperature(ServerLevel level, int x, int z) {
 		Climate.Sampler sampler = level.getChunkSource().randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED);
-		return Climate.unquantizeCoord(sampler.sample(x >> 2, 0, z >> 2).temperature());
+		Climate.TargetPoint point = sampler.sample(x >> 2, 0, z >> 2);
+		float temperature = Climate.unquantizeCoord(point.temperature());
+		// the ashlands are hot whatever Mohknee's mild map says (climate track E)
+		return com.jaymoskingdoms.lands.Lands.volcanic(x, z, point.continentalness()) ? Math.max(temperature, com.jaymoskingdoms.lands.Lands.VOLCANIC_TEMPERATURE) : temperature;
 	}
 
 	/** The steps for a temperature. */

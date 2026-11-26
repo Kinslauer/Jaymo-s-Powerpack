@@ -42,6 +42,8 @@
     {
       "id": "minecraft:pale_garden",
       "required": false
-    }
+    },
+    "jaymoskingdoms:steppe_plains",
+    "jaymoskingdoms:steam_valley"
   ]
 }
