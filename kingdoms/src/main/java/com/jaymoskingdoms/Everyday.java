@@ -7,6 +7,7 @@ import java.util.Set;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
@@ -16,7 +17,8 @@ import net.minecraft.world.item.ItemStack;
  * its under-layers (a shirt, a tunic or a vest; hose or breeches) and the hood and cloak are what ordinary people wear, so
  * most of a settlement's people wear them: its working folk (farmers, miners, woodcutters, carters, builders, stable hands),
  * and the villagers who are not guards (a guard's kit is {@link GuardKit}'s, a knight's {@link HeraldryWear}'s, a raider's
- * and a bandit's their own).
+ * and a bandit's their own). Never a fighter of any kind (a camp's raider, an orc, a goblin, a pirate, an assassin), nor anyone
+ * of a barbarian camp, however they work: Lore.md has the camps in hides and leather.
  * <p>
  * Plain cloth gives no armour, so dressing a crowd changes no fight: it only shows on the body, and on the body's loot
  * screen when it falls (Jaymo's Kitchen's). Plate stays where Lore.md puts it ("Plate belongs to knights and to those who can
@@ -54,9 +56,21 @@ final class Everyday {
 
 	/** A working person of {@code folk}'s settlement (not a fighter or a ruler) puts on their everyday dress; from {@link HeraldryWear#folk}. */
 	static void folk(Folk folk, Climate climate) {
-		if (!folk.combatant() && !Rulers.leaderRole(folk.role())) {
+		if (!folk.combatant() && !Rulers.leaderRole(folk.role()) && !fighterOrCamp(folk) && !Barbarians.isBarbarian(folk)) {
 			dress(folk, climate);
 		}
+	}
+
+	/** A camp's person or a fighter by role, folk or villager: a raider, an orc or goblin, a pirate, an assassin, or one of a camp's workers. */
+	private static boolean fighterOrCamp(LivingEntity e) {
+		if (Barbarians.isCampVillager(e) || Orcs.isOrc(e)) {
+			return true;
+		}
+		if (e instanceof Worker w) {
+			Folk.Role role = Folk.role(w.role());
+			return Barbarians.villagerRole(w.role()) || role != null && role.combatant();
+		}
+		return false;
 	}
 
 	/** The villagers round each player who are not yet dressed are, once. */
@@ -78,7 +92,7 @@ final class Everyday {
 	/** A grown villager no one has dressed or armed: not a guard (a kit's), not already in harness, not a ruler or someone downed. */
 	private static boolean undecided(Villager v) {
 		return v.isAlive() && !v.isBaby() && !v.entityTags().contains(TAG) && !v.hasAttached(Harness.WORN) && !Downed.isGuard(v) && !Downed.isDowned(v)
-			&& !Rulers.is(v) && v.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) == null;
+			&& !Rulers.is(v) && !fighterOrCamp(v) && v.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) == null;
 	}
 
 	/** Puts {@code mob}'s everyday dress on it, if it is one of the {@link #SHARE}: a shirt, hose, and for some a hood and a cloak. */
