@@ -24,3 +24,4 @@ Build the three structures (original builds, not copies) and place them by track
 ## Notes
 - 2026-11-25 23:20 YOUTH delegated this to bacchus (Claude approved): self-contained worldgen structures; track 2 is done (PR #2085)
 - 2026-11-26 04:05 Blocked: PR #2217 CI 'Build Powers' check is red due to Modrinth HTTP 429 rate limiting while downloading dependencies (shared-advancements, betterping, item-highlighter) plus a pre-existing libs/jaymos-kitchen jar version warning. Unrelated to my data-only Kingdoms change (stable/mine/farm nbt + worldgen + PlacementReasons tag entries + change note). Local sh ./gradlew build passes and tools/pr_checks.py passes. PR is pushed claude/structures-6-stable-mine-farm -> master, ready to hand in once CI checks clear; will retry vault.py --set status=in-review pr=2217.
+- 2026-11-26 04:09 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
