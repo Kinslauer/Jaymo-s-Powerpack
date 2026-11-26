@@ -58,6 +58,11 @@ public final class Crocodiles {
 					hunt(croc, !croc.isBaby() && (croc.isInWater() || croc.level().isDarkOutside()));
 					if (!croc.isBaby() && croc.getTarget() == null) {
 						takePrey(croc);
+						if (croc.getTarget() == null && croc.level() instanceof net.minecraft.server.level.ServerLevel level) {
+							// (nothing in sight: it goes where the fish crowd, or where the herds come down to drink and cross)
+							FishEaters.shoals(level, croc);
+							HerdWays.crocodile(level, croc);
+						}
 					}
 					if (!croc.isBaby()) {
 						// (the villagers who see it keep clear, warn the rest and call the guards)

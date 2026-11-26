@@ -5,4 +5,5 @@
 - **Spring**: the small salmon of each bed that took (up to 8) come up from it and drift down to the sea, and the banks round a bed where many died grow lusher: grass and ferns, now and then a berry bush.
 - **A fished-out river runs thin**: each 64-block reach of river remembers how many spawned on its beds, and next autumn's run there is twice that plus 2 (12 the first year, 40 at most). Catch-and-release puts the same fish back in the run.
 - **Fishers work the run** (lore "The run", for Andy to approve): by day in autumn a fisherman villager near you walks down to the run and takes a salmon now and then, but always leaves 2 of a school to go on to the beds. Salmon fetches half at a fisherman's on a run river while the run is in.
+- **Spring shallows** (`fishing/SpringShallows`): in spring the river and lake fish that bite better in spring than in winter come into water 2 blocks deep or less and splash there, and where 3 or more of a kind gather within 8 blocks a young one is born every 2 minutes (at most 12 of that kind within 32).
 - Built with Gradle; not played.

@@ -167,6 +167,7 @@ public final class FishingReal {
         Fishermen.init();
         // the salmon run (Andy's nature picks): autumn upriver, the beds, the spent, spring's young
         SalmonRun.init();
+        SpringShallows.init();
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(server -> Tackle.kitchen());
         FishingPayloads.register();
         ServerTickEvents.END_SERVER_TICK.register(server -> {

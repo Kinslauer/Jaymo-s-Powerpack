@@ -66,6 +66,9 @@ public final class InhabitantsClient {
 	static final DataTicket<Boolean> LORD_DORMANT = DataTicket.create("jaymoskingdoms_lord_dormant", Boolean.class);
 	static final DataTicket<Float> LORD_SINCE_WOKE = DataTicket.create("jaymoskingdoms_lord_since_woke", Float.class);
 
+	/** The beaver as Eager Beavers draws it: four-fifths size. */
+	static final float BEAVER_SCALE = 0.8F, BEAVER_SHADOW = 0.4F;
+
 	private InhabitantsClient() {
 	}
 
@@ -73,6 +76,12 @@ public final class InhabitantsClient {
 		EntityRenderers.register(Inhabitants.BARROW_BEETLE,
 			context -> new InhabitantRenderer<BarrowBeetle>(context, "barrow_beetle", 1.0F, BEETLE_SHADOW, "head"));
 		EntityRenderers.register(Inhabitants.DRAUGR, DraugrRenderer::new);
+		// the beaver carries what it holds (a log, a stick, a sapling) in its front paws, its leg3 bone
+		EntityRenderers.register(Inhabitants.BEAVER, context -> {
+			InhabitantRenderer<com.jaymoskingdoms.inhabitants.Beaver> r = new InhabitantRenderer<>(context, "beaver", BEAVER_SCALE, BEAVER_SHADOW, "head");
+			r.withRenderLayer(new com.geckolib.renderer.layer.builtin.ItemInHandGeoLayer<>(context, r, "leg3", "leg4"));
+			return r;
+		});
 		EntityRenderers.register(com.jaymoskingdoms.wild.nest.SpiderNests.BROOD_QUEEN,
 			context -> new InhabitantRenderer<com.jaymoskingdoms.wild.nest.BroodQueen>(context, "brood_queen", 1.0F, QUEEN_SHADOW, "head"));
 		com.jaymoskingdoms.client.inhabitants.fts.NetherBeastsClient.register();
