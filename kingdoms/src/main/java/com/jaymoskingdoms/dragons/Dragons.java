@@ -245,6 +245,7 @@ public final class Dragons {
 			return net.minecraft.world.InteractionResult.PASS;
 		});
 		RealmDragons.register();
+		DragonDomains.register();
 		ServerTickEvents.END_SERVER_TICK.register(Dragons::nether);
 		// testing (op): /kingdom dragon [notus|boreas|zephyrus|eurus|aeolus|stegonaut|varasuchus|ignivorus|aetherion] [tame]: a wild one (Notus unless named), or a
 		// tamed, saddled one, at your side
