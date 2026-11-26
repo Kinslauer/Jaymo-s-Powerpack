@@ -157,6 +157,11 @@ public final class Thirst {
 		return player.getAttachedOrElse(WATER, MAX);
 	}
 
+	/** For other mods (by reflection): a salty bite's thirst (Kingdoms' salted food): {@code by} off the water, with no drink told of. */
+	public static void parch(ServerPlayer player, int by) {
+		set(player, water(player) - by);
+	}
+
 	static void set(ServerPlayer player, int water) {
 		water = Mth.clamp(water, 0, MAX);
 		if (water == MAX) {

@@ -778,7 +778,8 @@ public final class VillageStyles {
 	/** Whether {@code pos} is Mohknee's dry land (any biome but sea, river and beach), as the Blossom villages read it. */
 	static boolean dryMohknee(ServerLevel level, BlockPos pos) {
 		var biome = level.getBiome(pos);
-		return Mohknee.on(level, pos) && !biome.is(BiomeTags.IS_OCEAN) && !biome.is(BiomeTags.IS_RIVER) && !biome.is(BiomeTags.IS_BEACH);
+		return Mohknee.on(level, pos) && !biome.is(BiomeTags.IS_OCEAN) && !biome.is(BiomeTags.IS_RIVER) && !biome.is(BiomeTags.IS_BEACH)
+			&& !biome.is(com.jaymoskingdoms.lands.Lands.ASHLANDS);
 	}
 
 	/** Whether {@code blossom} blocks stand (the Blossom land's blocks are registered). */

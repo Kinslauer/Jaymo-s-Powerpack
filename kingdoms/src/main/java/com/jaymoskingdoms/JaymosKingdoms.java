@@ -637,6 +637,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		AtiCompounds.register();
 		// underground rivers' lanterns, jungle pillar crowns, volcanic islands and lit lava tunnels
 		TerrainFeatures.register();
+		// (climate track E) the steam valley, ashlands, salt pans and steppe: their blocks, features and the cold steppe night
+		com.jaymoskingdoms.lands.Lands.register();
 		// kingdoms' seats the world generates whole: a castle with its square, garden, barracks and homes round it
 		SeatCompounds.register();
 		// village mods 6, small structures: the tree sites (the hollow oak's hermit, the lookout's bandits, the hanging
