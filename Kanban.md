@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 22:59). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 23:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for ☀️ Apollo · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
+- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
