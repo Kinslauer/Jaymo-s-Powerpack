@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 20:40). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 20:41). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
-- [ ] [[Inbox/nycto-2|nycto-2]] · for any · open
 
 
 ## Being built
@@ -58,6 +57,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
 - [ ] [[Inbox/hunters-road-10|hunters-road-10]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
+- [ ] [[Inbox/nycto-2|nycto-2]] · for any · blocked
 
 
 ## Done
