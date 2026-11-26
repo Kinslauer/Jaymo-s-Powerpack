@@ -1264,4 +1264,51 @@ public final class KitchenCompat {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for a new character's first-wake grace: {}", e.toString());
 		}
 	}
+
+	/** Kitchen's body heat ({@code BodyHeat.body(Player)}) and where it turns freezing and overheating, looked up the first time. */
+	private static boolean heatLooked;
+	private static @Nullable Method BODY_HEAT;
+	private static float freezing = -60.0F, overheating = 60.0F;
+
+	private static void lookForHeat() {
+		if (heatLooked) {
+			return;
+		}
+		heatLooked = true;
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return;
+		}
+		try {
+			Class<?> bodyHeat = Class.forName("com.jaymoskitchen.climate.BodyHeat");
+			BODY_HEAT = bodyHeat.getMethod("body", net.minecraft.world.entity.player.Player.class);
+			freezing = bodyHeat.getField("FREEZING").getFloat(null);
+			overheating = bodyHeat.getField("OVERHEATING").getFloat(null);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for villagers to notice your body heat: {}", e.toString());
+		}
+	}
+
+	/** {@code player}'s body heat (-100 frozen to 100 baking), or NaN without Kitchen's body heat. */
+	static float bodyHeat(net.minecraft.world.entity.player.Player player) {
+		lookForHeat();
+		if (BODY_HEAT == null) {
+			return Float.NaN;
+		}
+		try {
+			return (Float)BODY_HEAT.invoke(null, player);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return Float.NaN;
+		}
+	}
+
+	/** Body heat at or below this is freezing (Kitchen's {@code BodyHeat.FREEZING}); at or above {@link #overheating()}, overheating. */
+	static float freezing() {
+		lookForHeat();
+		return freezing;
+	}
+
+	static float overheating() {
+		lookForHeat();
+		return overheating;
+	}
 }

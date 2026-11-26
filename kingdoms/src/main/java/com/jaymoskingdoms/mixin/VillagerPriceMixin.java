@@ -28,6 +28,8 @@ abstract class VillagerPriceMixin {
 		com.jaymoskingdoms.HeraldryWear.offers((Villager)(Object)this, player);
 		// the sun hats on farmers' and tailors' counters, desert garb on a hot land's tailor's
 		com.jaymoskingdoms.ClimateWear.offers((Villager)(Object)this, player);
+		// cartographers know the weather: thermometers, waterskins, the almanac, the land's climate clothes
+		com.jaymoskingdoms.WeatherWise.offers((Villager)(Object)this, player);
 		// (0.7.519) and a trade charter partner's people pay less
 		com.jaymoskingdoms.Treaties.prices((Villager)(Object)this, player);
 		// (0.7.523) and how they feel about you: fond ones charge less, sour ones more
