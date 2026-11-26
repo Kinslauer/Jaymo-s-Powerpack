@@ -514,6 +514,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// their creatures: sporelings, trufflers, glowmoths, the old woods' mimicaps and bloatshrooms, the spore-rot's shamblers and the Myceliarch
 		com.jaymoskingdoms.glowwood.creatures.GlowCreatures.register();
 		GlowHavenLife.register();
+		Allays.register();
 		// (0.7.490) Havens expand: their works, land and sworn order
 		HavenGrowth.register();
 		// (0.7.490) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
