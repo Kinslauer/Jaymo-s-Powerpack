@@ -4,12 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 03:07). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 03:08). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
-- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · for ☀️ Apollo · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · open
@@ -19,6 +18,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · 🍇 Bacchus · claimed
 
 
 ## In review
