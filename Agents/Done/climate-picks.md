@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: done
 task: Climate picks (Tough As Nails / Serene Seasons / Biomes O' Plenty ideas)
 branch: claude/project-thread-mhtf6n
 with: cloud thread "temperature / damage system"
-pr: 
+pr: 2190
 mods: kitchen, kingdoms, powers
 versions: 
 started: 2026-11-26
@@ -25,3 +25,5 @@ owns:
 
 ## Done
 - 2026-11-26 01:31 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+All 40 picks built in PR #2190 (tracks A-F, each verified). Lore: 17 (new) paragraphs in Lore.md. Not played.
+- 2026-11-26 01:37 PR #2190 is merged into master; moved to Agents/Done.
