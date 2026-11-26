@@ -4,13 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 06:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 06:17). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
-- [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for any · open
 - [ ] [[Inbox/codex-reference-dinos-venom-restart|codex-reference-dinos-venom-restart]] · for any · open
@@ -28,6 +27,7 @@ kanban-plugin: board
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · claimed
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · 🪶 Quill · #2217 · writing
+- [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · claimed
 
 
 ## In review
