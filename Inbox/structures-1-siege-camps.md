@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: apollo
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: 
+claimed_by: hermes-a
 pr: 
 suggested_owns:
   - kingdoms Camps.java, Sieges.java, SiegeTrain.java

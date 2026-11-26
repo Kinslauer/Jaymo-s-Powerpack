@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Helms on every ship at generation; the long ship crewed by pillagers with working cannons
 branch: claude/project-thread-hbvaa4
 with: cloud thread "Add helms and crews to ships"
@@ -27,3 +27,4 @@ owns:
 
 ## Done
 See changes/kingdoms/claude-project-thread-hbvaa4.md. Built; not played, no dev server run.
+- 2026-11-25 23:30 PR #2201 is merged into master; moved to Agents/Done.

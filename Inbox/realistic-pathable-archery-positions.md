@@ -23,3 +23,4 @@ Andy wants archery positions to be realistic and pathable — players (and arche
 
 Gameplay/mechanics task. Likely touches archery AI, mob pathfinding, or player-accessible elevated positions. Determine which mod owns archer behavior (Powers combat, Kingdoms mobs, or a combat overhaul) and where position/pathing logic lives.
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: #2159 supplies ladder/vine and combat pathing but does not prove generated firing posts reachable. WallArchers.enlist snaps to posts. Validate real access, standing clearance and firing sight; reuse existing pathing.
+- 2026-11-25 23:25 YOUTH delegated this to apollo (Claude approved): archer pathing and elevated positions across AI systems

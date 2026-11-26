@@ -1,6 +1,6 @@
 ---
 status: open
-for: any
+for: apollo
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
@@ -25,3 +25,4 @@ changes/kingdoms/<branch>.md.
 ## Notes
 - 2026-11-24 13:21 changeling-voice-mimic's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: stalled agent note has no PR. Inspect recoverable branch/work before restarting; no completion established. Keep microphone clips memory-only, session-only, and honour voice-chat opt-out.
+- 2026-11-25 23:26 YOUTH delegated this to apollo (Claude approved): SVC mic buffer plus changeling kidnappers; own remake, nothing copied from Gigarachne

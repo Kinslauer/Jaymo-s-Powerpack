@@ -24,3 +24,9 @@ owns:
 ## Notes
 - See Decisions.md 2026-11-25 10:50 PM.
 - 2026-11-25 23:24 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+## Done
+Youth delegated 5 Ready jobs after Claude's yes (4 Apollo, 1 Bacchus) and posted in Bot alerts; Apollo claimed
+structures-1-siege-camps. Held: aqueduct-curse (2 placement tracks at a time), mohknee and faction-table (Andy's
+questions), blood-awakening picks (Andy's list). Not tested: a full bot run on a delegated task. Each `assign` takes
+~100 s (two vault syncs).
