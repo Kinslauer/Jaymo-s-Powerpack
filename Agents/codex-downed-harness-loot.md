@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: stalled
 task:
 branch: codex/downed-harness-loot
 with: claude (T3 sub-agents of thread b48e4ca8, Sonnet 5.5)

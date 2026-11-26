@@ -1135,3 +1135,5 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26: Andy approved the lore for village mods 7-9 (raft towns, swamp goblins, a company of your own) and the ten Mordhau harness paragraphs ("Approved lore"). Guard mail question still open.
 - 2026-11-26 (Andy, guard under-layers): "Guards should vary their gear by realm and climate, more mail and leather in the warm, quilting and plate in the north. Either can wear either too its just rarer and more situation specific, like northern archers in leather, and southern legionnairres in plate"
 - 2026-11-26 (parent thread, on #2188): stolen pieces must not regenerate, but a stripped person must still get back what was not taken and be issued a new part's harness: the harness_taken mark is per place and cleared only by a deliberate new issue (first kit, new settlement, new recruit's knight harness, coronation); a gunner/archer flip is not one.
+
+- 2026-11-26 Andy approved the lore paragraph "Warm mail, northern plate" (guard gear by climate, PR #2189).
