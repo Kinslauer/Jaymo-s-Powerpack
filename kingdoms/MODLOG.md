@@ -17881,3 +17881,8 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 
 - The game crashed on start ("Category 'jaymoskingdoms:dragons' is already registered"): the dragon breath and the new bite key each registered the Dragons key category. They now share one. `DragonsClient`.
 - Built by CI; not played.
+
+## 0.13.42 (2026-11-26): Reincarnate hint mentions the character page link (#2233)
+
+- Loading hint 110 now says you can choose to reincarnate yourself from the H menu's character page (Jaymo's Powers' new Reincarnate link).
+- Built; not played.

@@ -8549,3 +8549,10 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 
 - **Sheep undercoat** (`SheepUndercoatMixin`): the game draws a dyed sheep's undercoat (the coat in its wool colour that shows once it's sheared) under the wool as well. Fresh Animations reshapes the sheep and its wool but has no undercoat model, so the undercoat stayed vanilla's shape in vanilla's place and poked out of grey, black and dyed sheep as flat boxes; Pixel Perfection Fidelity's solid undercoat made them plain to see. It's no longer drawn under wool (it's never seen there), and on a sheared sheep only when the undercoat's shape matches the sheep's. With Fresh Animations on, a sheared dyed sheep shows its bare skin, as sheared sheep did before the undercoat came in.
 - White sheep were never affected. Built; not played.
+
+## 0.27.91 (2026-11-26): Reincarnate link on the character page (#2233)
+
+- **Reincarnate by choice**: the H menu's character page has a Reincarnate link on its Record panel (with Jaymo's Kingdoms). It asks once more ("Reincarnate?", the yes button greyed for 2 s), then ends the character as a final death does: black at once, moved to the world's spawn, everything wiped (`Mortality.endLife`), and the life story told anew with MCA's creator first.
+- Hidden or refused ("You can't reincarnate right now.") while downed, carried, left for dead, in Limbo or the Other World, held for revival, just woken, or still making a character.
+- `Reincarnate` (payload `jaymospowers:reincarnate`, `Reincarnate.can`), `Mortality.chooseToEnd`, `ZFighterAfterlife.storyAhead`, client `ReincarnateLink`.
+- Built; not played.
