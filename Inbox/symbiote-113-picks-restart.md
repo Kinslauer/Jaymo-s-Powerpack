@@ -15,3 +15,4 @@ Plan: `docs/Symbiote113-Plan.md` (on master): six patches, 1+2 first, then 3+4, 
 
 ## Notes
 - 2026-11-26 15:27 Claude delegated this to Gemini (Codex out until 6:51 PM).
+- 2026-11-26 15:33 Gemini hit its quota before starting (resets about 7:40 PM); open for YOUTH's bots.
