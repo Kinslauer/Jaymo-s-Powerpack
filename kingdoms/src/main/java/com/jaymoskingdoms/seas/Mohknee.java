@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
  * numbers below are that tool's: change both together. This class only answers where the land is, for everything
  * that must know: Blossom settlements rise only here ({@code BlossomVillages}), every settlement here is of the
  * Blossom land whatever biome its bell stands in ({@code Palette}), and the home continent's villages and other
- * mods' surface buildings are not started here ({@code MohkneeStructureMixin}).
+ * mods' surface buildings are kept rare here ({@code MohkneeStructureMixin}).
  * <p>
  * Ships top out at 0.8 blocks a tick ({@code Ship.FASTEST}): the crossing is two days and nights for an ordinary ship.
  * Only new chunks take the land's shape, so a world already explored past {@link #CENTRE_X} - {@link #edge()} blocks
