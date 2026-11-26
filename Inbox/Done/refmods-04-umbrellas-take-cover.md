@@ -28,5 +28,4 @@ Owns: kingdoms wardrobe/MCA outfits, Mohknee; powers item.
   - Andy's note: "villagers also need to run for cover at night, near fire, or monsters. only the brave and guards should ever fight"
 
 ## Notes
-- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
-- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

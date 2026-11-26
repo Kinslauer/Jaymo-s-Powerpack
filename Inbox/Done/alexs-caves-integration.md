@@ -80,5 +80,4 @@ as the pattern for an optional-mod compat class. Write every piece's lore as `(n
   `SkyWrecks`).
 - Not decided: whether Alex's **Game Controller** counts as a future item (Andy didn't pick it).
 - 2026-11-24 21:23 Track 1 (world gen) in PR #2105; the other tracks (Rubber-folk, flood, Luxtructosaurus, Toxic Caves, future items, neodymium recolour) still to do.
-- 2026-11-24 21:42 PR #2105 is merged into master; moved to Inbox/Done.
-- 2026-11-24: only track 1 (world gen + neodymium recolour) is done, merged in PR #2105. Still open: Candy Cavity/Rubber-folk, Primordial/flood, Luxtructosaurus demon, Toxic Caves/Obsidian Stoneborn, future items, sub model for the space pod. Lore "The deep places under the far land" awaits Andy.
+- 2026-11-24 16:50 PR #2105 is merged into master; moved to Inbox/Done.

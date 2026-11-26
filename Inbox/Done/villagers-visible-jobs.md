@@ -26,4 +26,4 @@ Later (not picked yet): 5. fletcher, librarian, cleric, mason, leatherworker, sh
 - 2026-11-21 23:40 Put on the vault by the cloud thread "Put pending work on the vault". Being built by cloud Claude in thread cmsg_017LSt6rWz6CzxSGvzDd41XWCtfvV54qFpSdJetNTeKw36; bots leave it.
 - 2026-11-24 17:59 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
 - 2026-11-24 18:50 2026-11-24 PR #2090: rows 1-4 built (row 4: Kitchen Butchers town work on the hook, Farmers slaughter surplus for a butcher). Compiles; not played.
-- 2026-11-25 01:53 PR #2090 is merged into master; moved to Inbox/Done.
+- 2026-11-24 15:22 PR #2090 is merged into master; moved to Inbox/Done.

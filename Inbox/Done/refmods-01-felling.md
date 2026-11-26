@@ -50,4 +50,4 @@ then it leaves a carved stump."
 - Check the pack's felling mods and our own felling (grep `docs/codemap/*.md` for fell, chop, stump, trunk) so this
   replaces the current rule cleanly and doesn't fight another mod's tree capitator.
 - Cheap on the Deck server: the connectivity check runs only when a cut finishes a ring, not every tick.
-- 2026-11-24 18:50 PR #2089 is merged into master; moved to Inbox/Done.
+- 2026-11-24 13:50 PR #2089 is merged into master; moved to Inbox/Done.

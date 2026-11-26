@@ -51,4 +51,4 @@ around for 30s"
 - Nothing started: this note is the whole brief.
 - 2026-11-24 17:58 2026-11-24 Andy, new ruling on #2056 vs 'any damage': "revert to falls and bleeding dont count, fire knocks unconcious instantly. any corpse. they die after burning for 6s". Being finished by cloud Claude in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR.
 - 2026-11-24 17:58 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
-- 2026-11-24 18:10 PR #2079 is merged into master; moved to Inbox/Done.
+- 2026-11-24 13:11 PR #2079 is merged into master; moved to Inbox/Done.

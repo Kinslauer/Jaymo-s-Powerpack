@@ -23,4 +23,4 @@ chat is not installed or the friend never spoke. Players opted out of voice chat
 changes/kingdoms/<branch>.md.
 
 ## Notes
-- 2026-11-24 18:46 changeling-voice-mimic's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 13:21 changeling-voice-mimic's claim had no sign of work for 30 min: handed back as open.

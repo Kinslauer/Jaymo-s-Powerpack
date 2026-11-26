@@ -42,5 +42,4 @@ commands, no discovery chat text. Change note under changes/powers/<branch>.md.
 
 ## Notes
 - 2026-11-24 16:54 Pick-list rows S1-S8 for the bio scanner and tracking are on https://claude.ai/artifact/Fu1jDwywXNKSGj6mmU65fg; build from Andy's ticks there.
-- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
-- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
