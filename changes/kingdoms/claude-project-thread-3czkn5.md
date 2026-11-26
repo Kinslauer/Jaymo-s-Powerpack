@@ -1,5 +1,0 @@
-# swamp fire lag - fallen trees drawn lighter, windfall goes in a minute
-- **Fallen trees draw far less**: a felled tree lying as a Fallen Tree redrew every block of itself every frame, all six faces of each, building it all afresh. Now what it draws is worked out once per shape and kept: blocks with tree on all six sides are left out (a leaf behind other pieces, as the pack's leaf culling does for a canopy; a log only behind solid wood), and faces turned to the tree's own wood aren't drawn (`FallingTreeRenderer`).
-- **Windfall goes sooner**: sticks, saplings (and mangrove propagules), apples and leaves that nobody threw now lie a minute instead of five, anywhere (a burning wood's leaves decay all at once and drop them by the hundred). Anything a player throws, and every other item, keeps the usual five minutes (`Windfall`, `ItemEntityAccessor`).
-- A lying tree sheds its leaves 6 every 1.5 s instead of 2 every half second (same pace), so it's resent to everyone and redrawn a third as often.
-- Built; not played.
