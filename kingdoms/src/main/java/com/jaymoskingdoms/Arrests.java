@@ -213,6 +213,12 @@ final class Arrests {
 		haul(level, a, level.getGameTime());
 	}
 
+	/** {@code e} is in a guard's hands: run down and halted, being beaten down, marched or judged (not just chased). */
+	static boolean caught(Entity e) {
+		Arrest a = ARRESTS.get(e.getUUID());
+		return a != null && a.stage != Stage.CHASE;
+	}
+
 	/** (0.7.132) {@code guard} is taking someone to judgement just now. */
 	static boolean busy(Entity guard) {
 		return escorting(guard);
