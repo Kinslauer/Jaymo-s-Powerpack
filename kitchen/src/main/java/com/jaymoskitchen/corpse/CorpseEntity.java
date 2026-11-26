@@ -229,6 +229,8 @@ public class CorpseEntity extends Entity {
 	/** The parts a body can lose, as {@link #missing()} bits (the same bits Jaymo's Powers' Dismember uses). */
 	public static final int PART_HEAD = 1, PART_RIGHT_ARM = 2, PART_LEFT_ARM = 4, PART_RIGHT_LEG = 8, PART_LEFT_LEG = 16;
 	public static final int LIMBS = PART_RIGHT_ARM | PART_LEFT_ARM | PART_RIGHT_LEG | PART_LEFT_LEG, ALL_PARTS = LIMBS | PART_HEAD;
+	/** {@link #nextPart}: not a part but the belly, torn open and its guts pulled out (the body is gutted, nothing is missing). */
+	static final int GUTS = 32;
 	/**
 	 * Struck where it lies, the chance a part is knocked off it for each point of the blow's damage: bare bones, rotten
 	 * flesh, and a fresh body under a blade (nothing else cuts one up); never more than {@link #APART_MOST} a blow.
@@ -674,6 +676,11 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** The rig of its body: the dead mob's real standing size (so babies and scaled mobs fit), a player's 0.6 by 1.8. */
+	/** Built like a person (its rig is a humanoid's). */
+	boolean humanoid() {
+		return rig().shape == RagdollRig.Shape.HUMANOID;
+	}
+
 	private RagdollRig rig() {
 		if (rigCache == null) {
 			if (rigShape < 0 || rigWidth <= 0.0F || rigHeight <= 0.0F) {
@@ -3332,18 +3339,26 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * Andy (2026-11-23): "all scavengers and body eaters should go limb at a time, giving players more time to recover
-	 * their party members". The part a scavenger tears off next, as a {@code PART_} bit: an arm or a leg it still has (any),
-	 * then the head; 0 once only the trunk is left, or for a body not built with limbs (a fish, a critter, a slime, a
-	 * snake), which is torn open whole.
+	 * their party members", and (2026-11-25) zombies "should also prioritize brains, then guts/entrails", they "focus on
+	 * the head and body, then move on", while deer and the other scavengers "will moreso go for limbs and then body and
+	 * move, most leaving the head alone". The part {@code eater} tears off next, as a {@code PART_} bit: for a monster
+	 * ({@link #brainsFirst}) the head, then the belly ({@link #GUTS}, if it isn't gutted yet), then the limbs; for anyone
+	 * else an arm or a leg (any), then the belly, then the head. Past the belly only a horde or a blood moon goes on
+	 * ({@link #pickedOver}). 0 once only the trunk is left, or for a body not built with limbs (a fish, a critter, a slime,
+	 * a snake), which is torn open whole.
 	 */
-	int nextPart() {
+	int nextPart(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity eater) {
 		RagdollRig.Shape shape = rig().shape;
 		if (isFish() || shape != RagdollRig.Shape.HUMANOID && shape != RagdollRig.Shape.QUADRUPED) {
 			return 0;
 		}
-		int left = LIMBS & ~missing();
+		int first = brainsFirst(eater) ? PART_HEAD : LIMBS, then = brainsFirst(eater) ? LIMBS : PART_HEAD;
+		int left = first & ~missing();
 		if (left == 0) {
-			left = PART_HEAD & ~missing();
+			if (!gutted) {
+				return GUTS;
+			}
+			left = then & ~missing();
 		}
 		if (left == 0) {
 			return 0;
@@ -3356,16 +3371,40 @@ public class CorpseEntity extends Entity {
 		return part;
 	}
 
+	/** Whether {@code eater} goes for the head first: a monster (a zombie, an ogre), after the brains. */
+	static boolean brainsFirst(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity eater) {
+		return eater instanceof net.minecraft.world.entity.monster.Enemy;
+	}
+
 	/**
 	 * {@code part} torn off and eaten by a scavenger (no severed part is left lying: it's in the eater's mouth): no longer
 	 * drawn on the body, an arm lets go of what it held, and the bites start over for the next part.
 	 */
+	/**
+	 * Picked over, for {@code eater}: a body built with limbs whose first parts ({@link #nextPart}: the head for a monster,
+	 * the limbs for anyone else) and guts are eaten. Most eaters leave it there; only a horde or a blood moon goes on to
+	 * the rest and the trunk ({@link Scavengers}).
+	 */
+	boolean pickedOver(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity eater) {
+		RagdollRig.Shape shape = rig().shape;
+		int first = brainsFirst(eater) ? PART_HEAD : LIMBS;
+		return !isFish() && (shape == RagdollRig.Shape.HUMANOID || shape == RagdollRig.Shape.QUADRUPED)
+			&& (missing() & first) == first && gutted;
+	}
+
 	/** Bites taken toward the part being torn at now. */
 	int biteCount() {
 		return bites;
 	}
 
 	void eatPart(ServerLevel level, int part) {
+		if (part == GUTS) {
+			// (the guts it didn't finish fall out first, while there's anything soft left to throw)
+			Gibs.gutsPulled(this, level);
+			setGutted();
+			bites = 0;
+			return;
+		}
 		setMissing(missing() | part);
 		dropHeld(level, part, partPosition(part));
 		dropWorn(level, part, partPosition(part));
@@ -3374,7 +3413,8 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * (0.4.35) Torn open at last: what it carried spills on the ground (the meat for the scavengers, leather and the
-	 * like for whoever comes by), with a bone or two, what it wore and held, and the body is gone. Returns the dropped meat.
+	 * like for whoever comes by), with the bones the eater left ({@link Gibs#bonesLeft}), what it wore and held, and the
+	 * body is gone. Returns the dropped meat.
 	 */
 	List<net.minecraft.world.entity.item.ItemEntity> tearApart(ServerLevel level) {
 		List<net.minecraft.world.entity.item.ItemEntity> meat = new ArrayList<>();
@@ -3384,8 +3424,11 @@ public class CorpseEntity extends Entity {
 			// nothing that was meat to a person: the flesh itself, then
 			spill.add(new ItemStack(Items.ROTTEN_FLESH, 1 + random.nextInt(2)));
 		}
-		if (kind != CorpseKind.FISH) {
-			spill.add(new ItemStack(Items.BONE, 1 + random.nextInt(2)));
+		// (Andy: "that npc died and there was one intestine and no bones") the bones the eater couldn't crack, as many as a
+		// body this size has to leave
+		int boneCount = Gibs.bonesLeft(this, random);
+		if (boneCount > 0) {
+			spill.add(new ItemStack(Items.BONE, boneCount));
 		}
 		// what it wore and held, and a player's hotbar, are left lying where it was eaten (a player's for good, never
 		// despawning, so nothing of theirs is lost to it)
@@ -4707,7 +4750,8 @@ public class CorpseEntity extends Entity {
 		}
 		this.entityData.set(LOOK, tag.toString());
 		if (!stack.isEmpty()) {
-			level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, stack));
+			net.minecraft.world.entity.item.ItemEntity dropped = new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, stack);
+			level.addFreshEntity(dropped);
 		}
 	}
 

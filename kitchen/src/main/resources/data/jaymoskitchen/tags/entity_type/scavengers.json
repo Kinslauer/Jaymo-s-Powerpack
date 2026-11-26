@@ -25,6 +25,10 @@
 		{ "id": "naturalist:komodo_dragon", "required": false },
 		{"id": "jaymoskingdoms:grizzly", "required": false},
 		{"id": "bearminimum:brown_bear", "required": false},
-		{"id": "bearminimum:black_bear", "required": false}
+		{"id": "bearminimum:black_bear", "required": false},
+		{ "id": "naturalist:deer", "required": false },
+		{ "id": "cubeanimals:reddeer", "required": false },
+		{ "id": "cubeanimals:roedeer", "required": false },
+		{ "id": "cubeanimals:reindeer", "required": false }
 	]
 }
