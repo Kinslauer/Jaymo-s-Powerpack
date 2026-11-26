@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,13 +16,13 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for ☀️ Apollo · open
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for ☀️ Apollo · open
+- [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · for ☀️ Apollo · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · claimed
-- [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 🔨 Hephaestus · claimed
 
 
 ## In review
@@ -34,7 +34,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
-- [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · blocked
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · blocked
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 🪶 Quill · blocked
