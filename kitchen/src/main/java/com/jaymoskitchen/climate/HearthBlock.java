@@ -35,7 +35,7 @@ public class HearthBlock extends BaseEntityBlock {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
-	/** True for the icebox. */
+	/** True for the icebox. (A climate stove, {@link RegulatorBlock}, says it in its state instead: {@link RegulatorBlock#COLD}.) */
 	public final boolean cold;
 
 	public HearthBlock(boolean cold, BlockBehaviour.Properties properties) {
@@ -47,6 +47,16 @@ public class HearthBlock extends BaseEntityBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(FACING, LIT);
+	}
+
+	/** Whether this one is cooling its room: an icebox, or a climate stove loaded with ice. */
+	public static boolean cooling(BlockState state) {
+		return state.getBlock() instanceof HearthBlock hearth && (hearth.cold || state.hasProperty(RegulatorBlock.COLD) && state.getValue(RegulatorBlock.COLD));
+	}
+
+	/** Whether this one is a fire that warms its room (and boils water held to it): a hearth, or a climate stove loaded with fuel. */
+	public static boolean warm(BlockState state) {
+		return state.getBlock() instanceof HearthBlock && !cooling(state);
 	}
 
 	@Override

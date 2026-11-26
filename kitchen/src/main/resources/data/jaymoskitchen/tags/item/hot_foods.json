@@ -1,0 +1,141 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskitchen:hot_cocoa",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:hot_chocolate",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:frostcap_tea",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:tea",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:pumpkin_pie_slice",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:apple_pie_slice",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:chocolate_pie_slice",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:chorus_pie_slice",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:sweet_berry_pie",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:apple_tart",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:shepherds_pie",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:lemon_tart",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:peach_cobbler",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:meat_pasty",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:strawberry_tart",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:white_apple_tart",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:fish_pie",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:stuffed_potato",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:roast_chicken",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:roast_mutton",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:lemon_chicken",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:roast_duck",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:mammoth_roast",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:kirrid_roast",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:skyfall_roast",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:roasted_mutton_chops",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:steak_and_potatoes",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:honey_glazed_chicken",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:glazed_pork_chop",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:honey_bun",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:pancakes",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:hash_browns",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:willow_bark_tea",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:chamomile_tea",
+      "required": false
+    }
+  ]
+}

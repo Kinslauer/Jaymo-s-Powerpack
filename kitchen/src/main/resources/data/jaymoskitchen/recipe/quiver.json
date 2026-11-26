@@ -8,7 +8,7 @@
   ],
   "key": {
     "L": "minecraft:leather",
-    "S": "minecraft:string"
+    "S": "#c:strings"
   },
   "result": {
     "id": "jaymoskitchen:quiver"

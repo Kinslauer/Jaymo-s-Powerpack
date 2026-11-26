@@ -139,6 +139,12 @@ public final class MillJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.HEARTH_BLOCK, note("hearth"));
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.ICEBOX_BLOCK, note("icebox"));
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.THERMOMETER, note("thermometer"));
+		// (climate patch) the climate stove, the rain barrel, the air gauge, bowls of water and sinew
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.REGULATOR_BLOCK, note("regulator"));
+		registration.addIngredientInfo(com.jaymoskitchen.climate.HouseBlocks.RAIN_BARREL_ITEM, note("rain_barrel"));
+		registration.addIngredientInfo(com.jaymoskitchen.climate.HouseBlocks.GAUGE_ITEM, note("air_gauge"));
+		registration.addIngredientInfo(com.jaymoskitchen.climate.WaterBowls.WATER_BOWL, note("water_bowl"));
+		registration.addIngredientInfo(com.jaymoskitchen.corpse.Sinew.SINEW, note("sinew"));
 		registration.addIngredientInfo(Items.LOOM, note("lining"));
 		// unpurified water and the ways to purify it
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Climate.CLEAN_WATER, note("purifying_water"));

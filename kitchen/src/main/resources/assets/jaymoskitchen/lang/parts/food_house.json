@@ -1,0 +1,18 @@
+{
+	"item.jaymoskitchen.ice_cream": "Ice Cream",
+	"item.jaymoskitchen.water_bowl": "Bowl of Water",
+	"item.jaymoskitchen.clean_water_bowl": "Bowl of Clean Water",
+	"item.jaymoskitchen.sinew": "Sinew",
+	"block.jaymoskitchen.regulator": "Climate Stove",
+	"block.jaymoskitchen.rain_barrel": "Rain Barrel",
+	"block.jaymoskitchen.air_gauge": "Air Gauge",
+	"message.jaymoskitchen.gauge.hot": "Air gauge: the signal is stronger the hotter the air",
+	"message.jaymoskitchen.gauge.cold": "Air gauge: the signal is stronger the colder the air",
+	"jei.jaymoskitchen.regulator": "A hearth and an icebox in one block. Load it with coal, charcoal, logs, planks or sticks and it warms the closed room round it; load it with ice, packed ice, blue ice or a snow block and it cools the room instead. It does one thing at a time: whatever you loaded last decides, and swaps out what was in it.",
+	"jei.jaymoskitchen.rain_barrel": "Set it out under the open sky. While rain falls on it, it fills with clean rainwater, up to four fillings. Use a glass bottle, a waterskin or an empty bowl on it to draw water off. A comparator reads how full it is.",
+	"jei.jaymoskitchen.air_gauge": "Hang it on a wall. It reads how cold or hot the air is where it hangs, and gives redstone a signal of 0 to 15 from freezing to overheating. Use it to turn its setting: stronger the hotter, or stronger the colder.",
+	"jei.jaymoskitchen.water_bowl": "Use an empty wooden bowl on still water. The water is as unclean as a pond bottle's until you boil it over a fire. Drinking it gives the bowl back; bowls of water stack four high.",
+	"jei.jaymoskitchen.sinew": "Butchering a big animal properly (on the block, on the hook, or by a town butcher) sometimes gives sinew. It works as string: it is in the strings tag, and it crafts into string one for one.",
+	"message.jaymoskitchen.regulator.still_burning": "It is still burning: let the fuel run out before loading ice",
+	"message.jaymoskitchen.regulator.still_cold": "It is still cold: let the ice run out before loading fuel"
+}

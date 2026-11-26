@@ -840,7 +840,7 @@ public final class BodyHeat {
 	 * Whether a block from the heat tags is burning now: a lit stove (or anything with {@code lit}), a boiler with heat in
 	 * it, an oven whose fire is lit (a block entity that says so); blocks with no way of being unlit (fire, lava, magma) are.
 	 */
-	private static boolean lit(ServerLevel level, BlockPos pos, BlockState state) {
+	static boolean lit(ServerLevel level, BlockPos pos, BlockState state) {
 		if (state.hasProperty(BlockStateProperties.LIT)) {
 			return state.getValue(BlockStateProperties.LIT);
 		}
