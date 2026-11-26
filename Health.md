@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 10:01). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**18 problems.**
+**11 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -12,27 +12,13 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 ## Stalled agent notes
 
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/hollow-captains-fix|hollow-captains-fix]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/symbiote-113-picks|symbiote-113-picks]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/youth-delegates-ready|youth-delegates-ready]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## Missing PR numbers
 
 - [[Agents/hollow-captains|hollow-captains]]: in review with no `pr:`.
-
-## Agent notes whose task is done
-
-- [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
-
-## Questions waiting on Andy
-
-- [[Agents/wither-model|wither-model]]: blocked since 2026-11-19.
-- [[Inbox/narrator-missing-lines|narrator-missing-lines]]: blocked since 2026-11-19: 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]]: blocked since 2026-11-19: 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 
 ## Tasks for nobody
 
@@ -40,3 +26,7 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/bleed-out-npc-items|bleed-out-npc-items]]: `for: coordinator` matches no bot or agent, so no one will claim it.
 - [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]]: `for: any (needs Andy's PC: the folder is local)` matches no bot or agent, so no one will claim it.
 - [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]]: `for: coordinator` matches no bot or agent, so no one will claim it.
+
+## Project memory
+
+- The memory index is 18 KB; only the first 16 KB load in a new thread. Shorten entries to one line and move detail into topic files.

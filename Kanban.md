@@ -4,14 +4,23 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 10:02). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
+- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · open
+- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · ☀️ Apollo · open
+- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · open
+- [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · open
+- [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
+- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for any · open
+- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for any · open
+- [ ] [[Inbox/codex-reference-dinos-venom-restart|codex-reference-dinos-venom-restart]] · for any · open
+- [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · for any · open
+- [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 
 
 ## Being built
@@ -30,32 +39,21 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
-- [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
-- [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 🪶 Quill · blocked
-- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · ☀️ Apollo · blocked
-- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · blocked
-- [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · blocked
-- [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · stalled
-- [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
-- [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
-- [ ] [[Agents/symbiote-113-picks|symbiote-113-picks]] · 💻 Odysseus · stalled
-- [ ] [[Agents/wither-model|wither-model]] · 💻 Odysseus · blocked
-- [ ] [[Agents/youth-delegates-ready|youth-delegates-ready]] · 💻 Odysseus · stalled
+- [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 
 
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/mordhau-4-legs|mordhau-4-legs]]
-- [x] [[Inbox/Done/mordhau-3-body|mordhau-3-body]]
-- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
-- [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
-- [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
-- [x] [[Inbox/Done/mordhau-2-hoods-crests|mordhau-2-hoods-crests]]
-- [x] [[Inbox/Done/mordhau-1-helms|mordhau-1-helms]]
-- [x] [[Inbox/Done/wither-model|wither-model]]
+- [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
+- [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
+- [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
+- [x] [[Inbox/Done/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]
+- [x] [[Inbox/Done/zfighter-gaps-5-training|zfighter-gaps-5-training]]
+- [x] [[Inbox/Done/zfighter-gaps-4-forms|zfighter-gaps-4-forms]]
+- [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
+- [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
 
 
 %% kanban:settings

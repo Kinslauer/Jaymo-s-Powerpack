@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Kanban cleanup approved by Andy
 branch: none (vault cleanup; code gets separate branches)
 pr:
@@ -24,3 +24,4 @@ Andy approved the evidence-backed cleanup plan and asked for questions as they a
 
 ## Notes
 - 2026-11-26 00:07 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-26 Andy (Waiting on Andy page): close it, it did its job.
