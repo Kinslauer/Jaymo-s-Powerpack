@@ -547,10 +547,11 @@ public final class HeraldryWear {
 			}
 			harness(folk, faction, finish);
 		} else {
-			if (folk.hasAttached(Harness.WORN) && !folk.entityTags().contains(Harness.TAKEN_TAG)) {
+			if (folk.hasAttached(Harness.WORN)) {
 				Harness.clear(folk);
 			}
-			// (Andy: "most people should opt for harness gear": a working person's own shirt, hose, hood and cloak)
+			// (Andy: "most people should opt for harness gear": a working person's own shirt, hose, hood and cloak; a place someone
+			// took a piece from stays bare, Harness#dress)
 			Everyday.folk(folk, climate);
 		}
 	}
@@ -571,6 +572,8 @@ public final class HeraldryWear {
 				mob.setItemSlot(slot, piece);
 			}
 		}
+		// (a new recruit's issue, once: what was taken from them as a villager does not keep their knight's harness bare)
+		Harness.issued(mob);
 		harness(mob, f, finish);
 		return true;
 	}

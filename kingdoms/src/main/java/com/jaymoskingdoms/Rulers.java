@@ -356,6 +356,8 @@ public final class Rulers {
 			return null;
 		}
 		PathfinderMob mob = w.mob();
+		// (a coronation is a new issue, once: a crest taken from them as a villager does not keep their crown's crest off)
+		Harness.issued(mob);
 		fit(mob, role, faction);
 		Castle.Keep keep = Factions.keep(s, faction.id());
 		mob.setHomeTo(keep != null ? keep.throne() : faction.seat(), keep != null ? 3 : Folk.HOME_RADIUS);
@@ -480,6 +482,8 @@ public final class Rulers {
 		int role = f.type() == FactionType.FIEFDOM ? Folk.LORD : Folk.KING;
 		if (w.role() != role) {
 			w.enlist(role, f.id());
+			// (a new title is a new issue, once, as a coronation is)
+			Harness.issued(mob);
 			fit(mob, role, f);
 		} else if (mob.tickCount % REGALIA_TICKS == 0 && !Regalia.crowned(mob) && !RoyalDress.nightwear(mob) && !Downed.isDowned(mob)) {
 			if (Regalia.wearsAny(mob) || mob.getAttached(RoyalDress.WEAR) != null) {

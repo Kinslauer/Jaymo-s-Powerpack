@@ -390,10 +390,8 @@ public final class GuardKit {
 		}
 	}
 
+	/** Puts the harness {@code kit} holds on {@code m} (the pieces his kit still has: a place someone took from him is bare, {@link Harness#dress}). */
 	private static void harness(Mob m, Kit kit) {
-		if (m.entityTags().contains(Harness.TAKEN_TAG)) {
-			return;
-		}
 		ItemStack[] pieces = new ItemStack[Harness.SLOTS];
 		for (Harness.Slot slot : Harness.Slot.values()) {
 			pieces[slot.ordinal()] = kit.piece(HARNESS + slot.ordinal()).copy();
@@ -410,8 +408,7 @@ public final class GuardKit {
 				PathfinderMob m = w.mob();
 				ungild(m);
 				Kit kit = m.getAttached(KIT);
-				// (someone took harness off him: he is not looked over and bought for again)
-				if (kit == null || now - kit.reviewed() < REVIEW || m.getTarget() != null || m.entityTags().contains(Harness.TAKEN_TAG)) {
+				if (kit == null || now - kit.reviewed() < REVIEW || m.getTarget() != null) {
 					continue;
 				}
 				Faction f = serves(m);
@@ -459,6 +456,12 @@ public final class GuardKit {
 	private static Kit kit(Ctx c, Mob m, ItemStack[] given) {
 		Kit had = m.getAttached(KIT);
 		boolean keep = had != null && had.realm() == c.f().id() && had.who() == c.who();
+		// A new part is a new issue, paid for from the stores and treasury as ever: his first kit, a new settlement's, or a rank
+		// above his old one (a gunner who lost his gun, or a demotion, is not: nothing taken from him is made good that way).
+		// Else the places someone took a piece from stay bare, so the daily look-over never buys the same piece twice.
+		if (had == null || had.realm() != c.f().id() || c.who() > had.who()) {
+			Harness.issued(m);
+		}
 		if (had != null && !keep && had.realm() == c.f().id()) {
 			for (ItemStack piece : had.pieces()) {
 				if (!piece.isEmpty()) {
@@ -481,7 +484,7 @@ public final class GuardKit {
 				out.set(i, choose(c, shields(c, given[i]), held, given[i], null, null));
 			} else {
 				Harness.Slot slot = Harness.Slot.values()[i - HARNESS];
-				out.set(i, choose(c, harness(c, slot), held, given[i], null, cloth(c, slot)));
+				out.set(i, Harness.wasTaken(m, slot) ? ItemStack.EMPTY : choose(c, harness(c, slot), held, given[i], null, cloth(c, slot)));
 			}
 		}
 		Kit kit = new Kit(c.f().id(), c.who(), c.level().getGameTime(), List.copyOf(out));

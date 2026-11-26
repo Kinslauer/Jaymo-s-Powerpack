@@ -98,10 +98,13 @@ public final class Harness {
 	/** The screen for the harness of someone alive and down ({@link DownedHarnessMenu}), opened with the body's network id. */
 	public static ExtendedMenuType<DownedHarnessMenu, Integer> LOOT_MENU;
 	/**
-	 * On a mob someone took harness from. Nothing dresses it again ({@link #dress}, {@code GuardKit}'s kit and sweep,
-	 * {@code HeraldryWear}'s restyle), so stripping a downed person and getting them up never makes more harness.
+	 * On a mob, one tag for each place someone took a piece from ({@code TAKEN_TAG + place key}). Nothing that dresses a body
+	 * puts a piece back in a place so marked: not {@link #dress}, not a guard's kit put on again or looked over ({@code GuardKit}),
+	 * not a restyle. A stripped person is therefore never re-made by being got up and stripped again, while the places nobody took
+	 * from are put on again as ever (a guard's heavy pieces after he has been off duty). Only a deliberate new issue wipes
+	 * the marks ({@link #issued}).
 	 */
-	public static final String TAKEN_TAG = "jaymoskingdoms.harness_taken";
+	public static final String TAKEN_TAG = "jaymoskingdoms.harness_taken.";
 
 	/** Player → server: open the harness. */
 	public record Open() implements CustomPacketPayload {
@@ -205,23 +208,39 @@ public final class Harness {
 
 	/** Puts each of {@code pieces} in its own place on {@code wearer}, over whatever was there. */
 	public static void dress(LivingEntity wearer, ItemStack... pieces) {
-		if (wearer.entityTags().contains(TAKEN_TAG)) {
-			return;
-		}
 		List<ItemStack> now = new ArrayList<>(worn(wearer));
 		for (ItemStack piece : pieces) {
 			Slot slot = slotOf(piece);
-			if (slot != null) {
+			// (a place someone took a piece from stays bare: see TAKEN_TAG)
+			if (slot != null && !wasTaken(wearer, slot)) {
 				now.set(slot.ordinal(), piece);
 			}
 		}
 		put(wearer, now);
 	}
 
-	/** A piece of {@code place} was taken off {@code wearer} (a loot screen): it is marked so nothing dresses it again, and a guard's kit forgets the piece. */
+	/** Whether a piece of {@code place} was taken off {@code wearer} and nothing has been issued to them since ({@link #TAKEN_TAG}). */
+	public static boolean wasTaken(LivingEntity wearer, Slot place) {
+		return wearer.entityTags().contains(TAKEN_TAG + place.key());
+	}
+
+	/** A piece of {@code place} was taken off {@code wearer} (a loot screen): the place is marked so nothing dresses it again, and a guard's kit forgets the piece. */
 	static void taken(LivingEntity wearer, Slot place) {
-		wearer.addTag(TAKEN_TAG);
+		wearer.addTag(TAKEN_TAG + place.key());
 		GuardKit.forget(wearer, place);
+	}
+
+	/**
+	 * {@code wearer} is deliberately issued equipment for a new part, once: a guard's first kit, his kit in a new settlement or at
+	 * a higher rank (bought from the stores and treasury, {@code GuardKit}), a recruit put into a realm's knights' harness
+	 * ({@code HeraldryWear#knight}), a ruler crowned or given a new title ({@code Rulers}). What was taken from them in their old
+	 * part no longer marks the places: the new part's pieces are paid or given for as a new issue, which the routine dressing
+	 * (putting the kit on again after duty, a restyle, the daily look-over) never is.
+	 */
+	static void issued(LivingEntity wearer) {
+		for (Slot slot : Slot.values()) {
+			wearer.removeTag(TAKEN_TAG + slot.key());
+		}
 	}
 
 	private static void put(LivingEntity wearer, List<ItemStack> worn) {

@@ -116,7 +116,7 @@ public class DownedHarnessMenu extends AbstractContainerMenu {
 		return moved;
 	}
 
-	/** Their harness as a container: every read and write goes to the body ({@link Harness#WORN}). A piece taken marks the body. */
+	/** Their harness as a container: every read and write goes to the body ({@link Harness#WORN}). A piece taken marks its place on the body ({@link Harness#taken}). */
 	private static final class Pieces implements Container {
 		private final Mob body;
 
