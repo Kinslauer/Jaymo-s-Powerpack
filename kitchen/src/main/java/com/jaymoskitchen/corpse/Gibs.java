@@ -186,9 +186,11 @@ public final class Gibs {
 	}
 
 	/**
-	 * A predator has torn {@code corpse} open and eaten it ({@link Scavengers}): what it leaves lies where the body was,
-	 * picked over. Ribs, spine and a few bones, a rope of gut and a gut pile it didn't want, and the tatters of what the
-	 * body wore.
+	 * What a scavenger leaves of {@code corpse} once it has torn the trunk open (Andy, 2026-11-25: "a realistic amount of
+	 * entrails should drop, that npc died and there was one intestine and no bones"): the ribcage, the spine, a man's skull
+	 * (the eater gnaws a head, it can't crack it), shards of bone, the organs and gut it didn't finish (a few, not a blast's
+	 * worth) and gut piles of intestines and offal on the ground, and the tatters of its clothes. A bigger body leaves more
+	 * ({@link #scaled}). The bone items left with them come from {@link #bonesLeft}.
 	 */
 	static void eaten(CorpseEntity corpse, ServerLevel level) {
 		Insides insides = Insides.of(corpse);
@@ -204,19 +206,50 @@ public final class Gibs {
 		if (insides.bones()) {
 			throwPiece(level, at, Vec3.ZERO, width, Gib.RIBS, insides, size, life, REMAINS_SPEED);
 			throwPiece(level, at, Vec3.ZERO, width, Gib.SPINE, insides, size, life, REMAINS_SPEED);
-			for (int i = scaled(1 + random.nextInt(2), width); i > 0; i--) {
+			if (corpse.humanoid()) {
+				throwPiece(level, at, Vec3.ZERO, width, Gib.SKULL, insides, size, life, REMAINS_SPEED);
+			}
+			for (int i = scaled(EATEN_SHARDS_MIN + random.nextInt(EATEN_SHARDS_MAX - EATEN_SHARDS_MIN + 1), width); i > 0; i--) {
 				throwPiece(level, at, Vec3.ZERO, width, Gib.BONE, insides, size, life, REMAINS_SPEED);
 			}
 		}
 		if (insides.soft()) {
-			throwPiece(level, at, Vec3.ZERO, width, Gib.GUTS, insides, size, life, REMAINS_SPEED);
-			entrails(level, at, Vec3.ZERO, 1, 0.5);
+			for (int i = scaled(EATEN_ORGANS_MIN + random.nextInt(EATEN_ORGANS_MAX - EATEN_ORGANS_MIN + 1), width); i > 0; i--) {
+				throwPiece(level, at, Vec3.ZERO, width, Gib.ORGAN, insides, size, life, REMAINS_SPEED);
+			}
+			for (int i = scaled(EATEN_GUT_ROPES, width); i > 0; i--) {
+				throwPiece(level, at, Vec3.ZERO, width, Gib.GUTS, insides, size, life, REMAINS_SPEED);
+			}
+			entrails(level, at, Vec3.ZERO, Math.min(ENTRAILS_CAP, scaled(EATEN_ENTRAILS_MIN + random.nextInt(EATEN_ENTRAILS_MAX - EATEN_ENTRAILS_MIN + 1),
+				width)), EATEN_ENTRAILS_REACH);
 		}
 		if (insides.clothes()) {
 			for (int i = 2 + random.nextInt(2); i > 0; i--) {
 				throwPiece(level, at, Vec3.ZERO, width, Gib.TATTERS, insides, size, life, REMAINS_SPEED);
 			}
 		}
+	}
+
+	/**
+	 * Left by an eaten body (a man's, more or fewer for a bigger or smaller one): shards of bone thrown with the ribs and
+	 * spine; organs and ropes of gut it didn't finish; gut piles on the ground (intestines and offal in turn), and how far
+	 * round the body they lie (blocks); bone items (the long bones of its limbs, picked clean).
+	 */
+	static final int EATEN_SHARDS_MIN = 2, EATEN_SHARDS_MAX = 3, EATEN_ORGANS_MIN = 1, EATEN_ORGANS_MAX = 2, EATEN_GUT_ROPES = 2;
+	static final int EATEN_ENTRAILS_MIN = 2, EATEN_ENTRAILS_MAX = 3;
+	static final double EATEN_ENTRAILS_REACH = 1.1;
+	static final int EATEN_BONES_MIN = 3, EATEN_BONES_MAX = 5;
+
+	/** How many bone items an eaten body leaves ({@link #EATEN_BONES_MIN} to {@link #EATEN_BONES_MAX} for a man, more or fewer by size). */
+	static int bonesLeft(CorpseEntity corpse, RandomSource random) {
+		Insides insides = Insides.of(corpse);
+		EntityType<?> type = corpse.sourceType();
+		double width = type == null ? corpse.getBbWidth() : type.getWidth() * corpse.bodyScale();
+		if (!insides.bones() || width < GORE_MIN_WIDTH) {
+			// (a creeper, a spider, a critter: a bone or two as before; a fish none)
+			return corpse.kind() == CorpseKind.FISH ? 0 : 1 + random.nextInt(2);
+		}
+		return scaled(EATEN_BONES_MIN + random.nextInt(EATEN_BONES_MAX - EATEN_BONES_MIN + 1), width);
 	}
 
 	/** Bite chunks: lumps a bite throws (more when a part comes away), how big beside a blast's, how long they lie (ticks), how hard they fly. */

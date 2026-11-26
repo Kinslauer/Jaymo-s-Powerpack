@@ -216,6 +216,22 @@ public final class Corpses {
 	 */
 	public static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
 	/**
+	 * What a body leaves when it is eaten or a part of it torn off (its gear, its pockets, its bones): Andy, "anything the
+	 * monster couldn't eat is dropped". A dropped item carrying this (scoreboard) tag is never taken up by a mob
+	 * ({@code RemainsPickupMixin}), so a zombie at the meal doesn't walk off in the dead man's helmet or with his spear.
+	 * Players take it up as usual.
+	 */
+	public static final String REMAINS_TAG = "jaymoskitchen.remains";
+
+	/** {@code item} (may be null) is a body's remains ({@link #REMAINS_TAG}); returns it. */
+	static net.minecraft.world.entity.item.@org.jspecify.annotations.Nullable ItemEntity remains(
+		net.minecraft.world.entity.item.@org.jspecify.annotations.Nullable ItemEntity item) {
+		if (item != null) {
+			item.addTag(REMAINS_TAG);
+		}
+		return item;
+	}
+	/**
 	 * (0.5.61) Places other mods say no body is left in (Powers' Other World, where the Judge stands: Andy, "player corpses
 	 * dont spawn in the otherworld"). Whoever dies there, player or mob, leaves no corpse (a player's hotbar drops with the
 	 * rest), and a body already lying there never gets up.

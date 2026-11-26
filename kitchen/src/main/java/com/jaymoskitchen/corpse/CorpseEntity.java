@@ -674,6 +674,11 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** The rig of its body: the dead mob's real standing size (so babies and scaled mobs fit), a player's 0.6 by 1.8. */
+	/** Built like a person (its rig is a humanoid's). */
+	boolean humanoid() {
+		return rig().shape == RagdollRig.Shape.HUMANOID;
+	}
+
 	private RagdollRig rig() {
 		if (rigCache == null) {
 			if (rigShape < 0 || rigWidth <= 0.0F || rigHeight <= 0.0F) {
@@ -3374,7 +3379,8 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * (0.4.35) Torn open at last: what it carried spills on the ground (the meat for the scavengers, leather and the
-	 * like for whoever comes by), with a bone or two, what it wore and held, and the body is gone. Returns the dropped meat.
+	 * like for whoever comes by), with the bones the eater left ({@link Gibs#bonesLeft}), what it wore and held, and the
+	 * body is gone. Everything but the meat is remains no mob takes up ({@link Corpses#REMAINS_TAG}). Returns the dropped meat.
 	 */
 	List<net.minecraft.world.entity.item.ItemEntity> tearApart(ServerLevel level) {
 		List<net.minecraft.world.entity.item.ItemEntity> meat = new ArrayList<>();
@@ -3384,8 +3390,11 @@ public class CorpseEntity extends Entity {
 			// nothing that was meat to a person: the flesh itself, then
 			spill.add(new ItemStack(Items.ROTTEN_FLESH, 1 + random.nextInt(2)));
 		}
-		if (kind != CorpseKind.FISH) {
-			spill.add(new ItemStack(Items.BONE, 1 + random.nextInt(2)));
+		// (Andy: "that npc died and there was one intestine and no bones") the bones the eater couldn't crack, as many as a
+		// body this size has to leave
+		int boneCount = Gibs.bonesLeft(this, random);
+		if (boneCount > 0) {
+			spill.add(new ItemStack(Items.BONE, boneCount));
 		}
 		// what it wore and held, and a player's hotbar, are left lying where it was eaten (a player's for good, never
 		// despawning, so nothing of theirs is lost to it)
@@ -3399,6 +3408,10 @@ public class CorpseEntity extends Entity {
 		}
 		for (ItemStack stack : spill) {
 			net.minecraft.world.entity.item.ItemEntity dropped = spawnAtLocation(level, stack.copy(), 0.3F);
+			if (dropped != null && !stack.has(DataComponents.FOOD)) {
+				// (the meat is the scavengers' to finish; the rest stays where it fell)
+				Corpses.remains(dropped);
+			}
 			if (dropped != null && player) {
 				dropped.setUnlimitedLifetime();
 			}
@@ -3407,7 +3420,7 @@ public class CorpseEntity extends Entity {
 			}
 		}
 		for (ItemStack stack : kept) {
-			net.minecraft.world.entity.item.ItemEntity dropped = spawnAtLocation(level, stack, 0.3F);
+			net.minecraft.world.entity.item.ItemEntity dropped = Corpses.remains(spawnAtLocation(level, stack, 0.3F));
 			if (dropped != null && player) {
 				dropped.setUnlimitedLifetime();
 			}
@@ -4707,7 +4720,10 @@ public class CorpseEntity extends Entity {
 		}
 		this.entityData.set(LOOK, tag.toString());
 		if (!stack.isEmpty()) {
-			level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, stack));
+			net.minecraft.world.entity.item.ItemEntity dropped = new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, stack);
+			// (it fell off the body: no zombie at the meal takes it up)
+			Corpses.remains(dropped);
+			level.addFreshEntity(dropped);
 		}
 	}
 
