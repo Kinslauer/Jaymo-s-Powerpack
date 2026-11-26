@@ -17960,3 +17960,19 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 
 - **Youth's ears**: the speech model never unpacked on a server, so saying "youth" in voice chat never called the wisp. The log showed `bad zip entry vosk-model-small-en-us-0.15/am/`: the server's config folder is the relative path `./config`, and the zip-safety check compared each file's cleaned-up path against the temp folder's uncleaned one, so it refused the first entry. `YouthEars.unzip` now makes the temp folder's path absolute first.
 - Built; the path check was tested with the Deck's Java (jshell). Not played: hearing a voice call on the server still needs checking.
+
+## 0.13.52 (2026-11-26): a jungle equator on the climate map (#2247)
+
+- Andy picked a jungle equator. The game only makes jungle where it's warm (temperature 0.2 to 0.55) and wet, and desert wherever it's hotter. Our heat rose all the way to the equator (0.8 there), so the wet equator's rain fell on desert and the warm band was the dry belt: jungles were all but missing, and with them gorillas, capuchins, toucans, anacondas and the other jungle animals.
+- `continents/temperature` (`tools/gen_continents.py`, `LATITUDE_HEAT` is now a curve over latitude): the north is as cold as before. Heading south it's temperate to about 1,200 blocks, savanna-warm around 1,800, and hottest in the dry belt (about 2,400 to 4,800 blocks south, 0.62 to 0.69 on the coasts, hotter inland: the deserts and badlands), then it eases to 0.34 to 0.42 at the wet equator (about 5,300 to 6,000 blocks south), which grows jungle. Rain is unchanged.
+- The harsh lands follow the heat: the dry belt is now the hottest, harshest land, and the jungle equator is one step warm (two deep inland). Warm seas and their coral now lie off the dry belt, with lukewarm seas at the equator.
+- Needs a new world. Built; not played or measured in a world.
+
+## 0.13.53 (2026-11-26): shore sea life back to the game's numbers (#2247)
+
+- Andy: the sea-life thinning along the shore can go (the old "too many in the water" was one mob overspawning). Coasts, rivers and lakes spawn their fish, squid, dolphins and the rest as the game does again:
+  - no more thinning of the sea's spawns near the coast (only 15% were let through at the shore): `SeaLifeSpawnMixin` and `SeaLife.keep` removed;
+  - the coast's water caps are the game's (fish 20, water creatures 5; they were 10 and 3), `MonsterCapMixin`;
+  - water mobs come in their own group sizes again (at most 2 at the coast and 4 at sea before): `WaterClusterMixin` removed.
+- Open sea keeps its own caps (fish 20, water creatures 8). Cave water creatures stay at 2, and worldgen fish still swim off (`WorldgenFishMixin`, the Deck's watchdog fix).
+- Built; not played.
