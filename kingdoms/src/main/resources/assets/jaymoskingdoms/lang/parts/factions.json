@@ -7,9 +7,5 @@
   "faction_allegiance.jaymoskingdoms.pillager": "Pillager",
   "faction_allegiance.jaymoskingdoms.demon": "Demon",
   "faction_allegiance.jaymoskingdoms.avatar": "Avatar",
-  "faction_allegiance.jaymoskingdoms.pallid": "Pallid",
-  "relation.jaymoskingdoms.allied": "Allied",
-  "relation.jaymoskingdoms.neutral": "Neutral",
-  "relation.jaymoskingdoms.rival": "Rival",
-  "relation.jaymoskingdoms.war": "At War"
+  "faction_allegiance.jaymoskingdoms.pallid": "Pallid"
 }
