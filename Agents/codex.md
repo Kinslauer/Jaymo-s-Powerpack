@@ -11,12 +11,18 @@ owns:
   - src/main/resources/assets/jaymospowers/lang/parts/katana-forms.json
   - src/main/java/com/jaymospowers/freerun/
   - src/main/java/com/jaymospowers/combat/KatanaForms.java
+  - src/main/java/com/jaymospowers/core/jump/PowerJump.java
   - src/main/java/com/jaymospowers/mixin/ImpactShakeMixin.java
   - src/main/java/com/jaymospowers/JaymosPowers.java
   - src/client/java/com/jaymospowers/client/JaymosPowersClient.java
   - src/client/java/com/jaymospowers/client/freerun/
   - src/client/java/com/jaymospowers/client/compat/CoreMotionPal.java
   - src/client/java/com/jaymospowers/client/combat/KatanaFormsClient.java
+  - src/client/java/com/jaymospowers/client/combat/ArmedPose.java
+  - src/client/java/com/jaymospowers/client/moving/BodyWeight.java
+  - src/client/java/com/jaymospowers/client/power/web/WebBodyPose.java
+  - src/client/java/com/jaymospowers/client/power/web/WebParkourPose.java
+  - src/client/java/com/jaymospowers/client/stamina/DodgeRollPose.java
   - changes/powers/legends-p6-core-animations.md
 ---
 # Legends patch 6

@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 20:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 15:35). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -6,18 +6,22 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Questions for you:**
+- [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-26 20:05 ON HOLD until wave 4 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-26 19:58 ON HOLD until wave 1 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
 - [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-26 19:59 ON HOLD until wave 2 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
 - [[Inbox/hunters-road-5|hunters-road-5]] · 2026-11-26 20:00 ON HOLD until wave 3 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
 - [[Inbox/hunters-road-6|hunters-road-6]] · 2026-11-26 20:01 ON HOLD until wave 1 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/hunters-road-7|hunters-road-7]] · 2026-11-26 20:02 ON HOLD until wave 2 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/hunters-road-8|hunters-road-8]] · 2026-11-26 20:03 ON HOLD until wave 3 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/hunters-road-9|hunters-road-9]] · 2026-11-26 20:04 ON HOLD until wave 4 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
 - [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · 2026-11-26 07:21 Design draft complete: Overworld aqueduct structure, SettlementCurse system, 4 board quests (Stem the Flow, Clear the Pillars, Purify the Ston…
 
 ## Stuck
 
+- [[Agents/blood-awakening-per-blood-patch-1|blood-awakening-per-blood-patch-1]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hollow-captains-fix|hollow-captains-fix]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -27,7 +31,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-8 waiting for a bot, 5 being built, 8 in review: see [[Kanban]].
+12 waiting for a bot, 2 being built, 10 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -50,6 +54,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2231 Dyed and grey sheep no longer sprout stray boxes (Powers, 2026-11-26)
 - [ ] #2230 /texturelook vanilla|reason - switch the pack's retexture packs off and back on (Powers, 2026-11-26)
 - [ ] #2229 cannon loading tip cards (Powers, 2026-11-26)
+- [ ] #2228 face parts - snouts, beaks, fangs and horns on the painted faces (Kingdoms, 2026-11-26)
 - [ ] #2227 Dragonforge mechanics for our dragons (parts, bite, dive slam, sprint flight, tremor, horn, home patrols, realm wyverns) (Kingdoms, 2026-11-26)
 - [ ] #2226 lance couching from the saddle (Powers, Kingdoms, 2026-11-26)
 - [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
@@ -92,12 +97,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2172 The game starts again (the symbiote HUD crashed it on launch) (Powers, 2026-11-25)
 - [ ] #2171 Waking villages into kingdoms no longer freezes the server (Kingdoms, 2026-11-25)
 - [ ] #2170 Rig leg kick: taekwondo side kick and combo roundhouse (Powers, 2026-11-25)
-- [ ] #2169 The symbiote saves you (Powers, Kingdoms, 2026-11-25)
-- …and 557 older ones.
+- …and 616 older ones.
 
 ## Health
 
-20 problems in the notes: [[Health]].
+21 problems in the notes: [[Health]].
 
 ## Last week
 
