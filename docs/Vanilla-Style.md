@@ -1,12 +1,16 @@
-# Vanilla style for every modded item
+# The Reason look: one art style for the whole pack
 
-> 2026-11-03: Excalibur's look is optional and off by default (`docs/Excalibur-Style.md`, `/excalibur on`). These
-> redraws are the default look; their graded copies are in the built-in `excalibur_style` pack.
+> 2026-11-26 (Andy): the pack's own resource pack, the **Reason look**, replaces the Excalibur option, aiming for
+> **clean vanilla-plus**. It is the built-in pack `src/main/resources/resourcepacks/vanilla_style` (the id stays, so
+> players' choice carries over; it shows as "Reason look"), on by default. Excalibur, its Fresh Animations patch and
+> the graded `excalibur_style` copies are gone; installs that had them on get them switched off once
+> (`PackResourcePacks.retireExcalibur`). The scan that found what still looks script-made, and Andy's picks of what to
+> repaint, are in the project's `art-overhaul/pack-art-scan/` folder and the Pack Art Scan pick list.
 
-Goal: every item in the pack looks like Mojang drew it. Delivered as the built-in resource pack
-`src/main/resources/resourcepacks/vanilla_style` (on by default; switch it off under Resource Packs to compare).
-Workflow adapted from the game-assets-enhancer skill (audit, style guide, one anchor, reuse over regenerate); its
-fal.ai image generation and parallax parts don't apply to 16px item icons, so the art is painted as pixel grids.
+Goal: everything in the pack looks like one hand drew it, in vanilla Minecraft's style. Our mods' own art is fixed at
+the source (each `tools/gen_*.py`); other mods' textures are replaced in this pack with our own paintings, so their jars
+never change. Workflow adapted from the game-assets-enhancer skill (audit, style guide, one anchor, reuse over
+regenerate); its fal.ai image generation and parallax parts don't apply to 16px art, so the art is painted as pixel grids.
 
 ## Style rules (what the audit measures)
 - **16x16**, one frame per icon. 32px icons come down to 16, except textures on models drawn at double size
@@ -21,6 +25,32 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
   `mushroom_stew`'s bowl, spears could point at vanilla's spears.
 - **5 to 18 colours per icon**, no half-transparent pixels, item fills about half the square, tools on the diagonal
   (handle bottom-left, head top-right).
+
+## Blocks, mobs and worn armour (2026-11-26)
+The item rules above, carried over to everything else.
+- **No per-pixel noise.** Never colour each pixel with a random jitter, a blur or a smooth gradient across a shape:
+  that is what makes art look script-made. Texture is placed by hand (or by a fixed pattern): vanilla stone is
+  clusters of 2 to 4 pixels in 4 or 5 shades, not speckle.
+- **Ramps, not ranges.** Each material gets one ramp of 4 to 7 shades (`tools/vanilla_style/vstyle.py`, `MAT`), and
+  every pixel is one of its steps. A block face stays under about 40 colours, a 64x64 mob sheet under about 60.
+- **Light from above.** On a mob, each part's top face is the light end of its ramp, the sides the middle, the
+  underside one or two steps darker. Faces read at a glance: eyes 1 or 2 pixels, a highlight only where vanilla has one.
+- **Patterns are shapes.** Stripes, spots, markings, trim and heraldry are clean blocks of colour with their own outline
+  shade, never noise or gradients.
+- **Variants are palette swaps.** A finish (blued, russeted, gilded), a dye colour or a coat is the same pixels in
+  another ramp, plus at most a small decal (rivets, gilt edge, etched lines). Dyed variants can be one greyscale base
+  tinted by the game, as vanilla leather is.
+- **Worn armour** starts from vanilla's equipment UVs and shading (`armour.py`); metals use their ramp's mid tone to
+  glint, as vanilla's diamond and gold do.
+- **Shapes before colour.** An icon has to say what it is by its outline: a helm, a cuirass and a greave must not be
+  the same box in three colours.
+- Glows, auras, beams, particles and screens are meant to look different and are not held to these rules.
+
+## The art check (`tools/art_audit.py`)
+`tools/pr_checks.py` runs it on every item and block texture a PR adds or changes, and fails the PR when one has far
+more colours than vanilla ever uses, soft gradients, or half-transparent pixels. Mob skins are only reported. Every
+redraw in this pack passes; the script-made textures it was measured on don't. `python3 tools/art_audit.py --all`
+counts what's left. A deliberate exception goes in `tools/pr_checks_allow.txt` with a reason.
 
 ## Audit (2026-10-16, `tools/vanilla_style/audit.py`)
 1,870 modded item textures measured against vanilla 26.3's 830 (5th-95th percentile of each measure).
@@ -67,7 +97,7 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
   Scouter, Rig, Air Skin and Void Crown were already clean and stay.
 
 Armour: `python -I tools/vanilla_style/armour.py <vanilla 26.3 assets/minecraft/textures folder>` (it needs the
-`item` and `entity/equipment` folders), then `python -I tools/excalibur_style/grade.py` for the graded copies.
+`item` and `entity/equipment` folders).
 
 Regenerate from the repository root with the vanilla 26.3 `textures/item` folder:
 `python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>`, `powers.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.
