@@ -165,6 +165,17 @@ public final class LifeStory {
 	 */
 	static final int FREE_TRIES = 3, FREE_STEP = 480, FREE_WIDEN = 64;
 	/**
+	 * (2026-11-26, Andy woke on the sea at the world's spawn: "i spawned in the ocean") When the wild's ring has no dry land
+	 * by the seed, the nearest that is: read from the seed in rings FAR_LAND_STEP apart out to FAR_LAND blocks from where the
+	 * setting out began, a column every FAR_LAND_SPACING blocks round each (at most FAR_LAND_READS columns read, nothing made
+	 * to read them), and the spot looked for within
+	 * FAR_LAND_NEAR blocks of it. Past that, the nearest standing village, fief or kingdom ({@link #knownLand}): land that's
+	 * there for certain, since a settlement was found on it.
+	 */
+	static final int FAR_LAND = 2048, FAR_LAND_STEP = 64, FAR_LAND_SPACING = 128, FAR_LAND_READS = 1000, FAR_LAND_NEAR = 12;
+	/** How far from a settlement's seat the spot by known land is looked for (blocks). */
+	static final int KNOWN_LAND_MIN = 8, KNOWN_LAND_MAX = 48;
+	/**
 	 * (2026-11-18, Andy: respawns were too close to the last death) A start in the wild or open land is never within
 	 * DEATH_APART blocks of where the player last died, nor further than DEATH_FAR; with no spot in its own ring, the
 	 * start falls back to the DEATH_APART-DEATH_FAR ring round the death. A start that puts them inside a town, kingdom or
@@ -2317,6 +2328,14 @@ public final class LifeStory {
 				wanted.forget();
 			}
 			to = spot(level, start == Start.WILD ? mate : null, spawn, WILD_MIN, WILD_MAX, random);
+			// (2026-11-26, Andy woke on the sea at the world's spawn) a ring with no dry land asked for nothing: the nearest
+			// the seed shows past it, else land a settlement stands on, rather than giving up there and then
+			if (to == null && (wanted == null || wanted.freshChunks.isEmpty())) {
+				to = farWild(level, spawn, random);
+			}
+			if (to == null && (wanted == null || wanted.freshChunks.isEmpty())) {
+				to = knownLand(level, spawn, random, false);
+			}
 		}
 		if (to == null) {
 			if (wanted != null && wanted.waitFor(false)) {
@@ -2325,6 +2344,10 @@ public final class LifeStory {
 			// (Andy 2026-11-14: "yes i want that") given up on: the land made for this start while they waited, rather
 			// than wherever stasis let them down (the world's spawn, where the last life may just have ended)
 			to = wanted != null ? madeGround(level, wanted) : null;
+		}
+		if (to == null) {
+			// (2026-11-26) nor that: a settlement's own land, loaded now, rather than the world's spawn out on the sea
+			to = knownLand(level, spawn, random, true);
 		}
 		if (to == null) {
 			if (!aloft(player.level(), player.blockPosition())) {
@@ -2526,12 +2549,21 @@ public final class LifeStory {
 	/** The same, only where {@code ok} (a column, its y unused), in land already made ({@link #reach}). */
 	private static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random,
 		java.util.function.Predicate<BlockPos> ok) {
+		return ground(level, center, min, max, random, ok, true);
+	}
+
+	/**
+	 * The same; {@code bySeed} false: land known to be there (a settlement's, {@link #knownLand}), so its chunks are asked
+	 * for as they are, without the seed's say or Chunky's edge (a settlement's land was made already when it was found).
+	 */
+	private static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random,
+		java.util.function.Predicate<BlockPos> ok, boolean bySeed) {
 		int[] made = {NEW_CHUNKS};
 		Wanted wanted = WANTED;
 		// (2026-11-20) columns of land not made yet read from the seed, and how many of them came out dry land
 		int[] foreseen = {0, 0};
 		long since = System.nanoTime();
-		if (wanted != null) {
+		if (wanted != null && bySeed) {
 			// (2026-11-17) a start stands you only in the land Chunky has made ({@link Pregen}), where it's known
 			java.util.function.Predicate<BlockPos> given = ok;
 			int asked = wanted.freshChunks.size();
@@ -2697,6 +2729,9 @@ public final class LifeStory {
 		int tries;
 		/** When the first wait began (System.nanoTime), or 0: none yet. */
 		long waitingSince;
+		/** (2026-11-26) The nearest dry land the seed showed past the wild's ring ({@link #farLand}), once read; null: none. */
+		@Nullable BlockPos farLand;
+		boolean farLandRead;
 
 		Wanted(BlockPos origin) {
 			this.origin = origin.immutable();
@@ -3412,6 +3447,124 @@ public final class LifeStory {
 			at = ground(level, DEATH, DEATH_APART, DEATH_FAR, random, ok);
 		}
 		return at;
+	}
+
+	/**
+	 * (2026-11-26, Andy: "i spawned in the ocean") A spot in the wild by the nearest dry land the seed shows round {@code center}
+	 * ({@link #FAR_LAND}), when the wild's own ring had none: the start's ring fell all on the sea. Read once a setting out
+	 * ({@link Wanted#farLand}); its chunks are then asked for as any start's are. Null: the seed shows no free dry land that near.
+	 */
+	private static @Nullable BlockPos farWild(ServerLevel level, BlockPos center, RandomSource random) {
+		java.util.function.Predicate<BlockPos> ok = p -> freeSpot(level, p) && awayFromDeath(p);
+		Wanted wanted = WANTED;
+		BlockPos dry;
+		if (wanted != null && wanted.farLandRead) {
+			dry = wanted.farLand;
+		} else {
+			dry = farLand(level, center, p -> Pregen.inside(level, p) && ok.test(p));
+			if (wanted != null) {
+				wanted.farLandRead = true;
+				wanted.farLand = dry;
+			}
+		}
+		if (dry == null) {
+			return null;
+		}
+		if (wanted != null && level.getChunkSource().getChunkNow(dry.getX() >> 4, dry.getZ() >> 4) == null) {
+			// (the dry column itself is made for the next try, whatever the few drawn round it come to)
+			wanted.want(dry.getX(), dry.getZ());
+		}
+		BlockPos at = ground(level, dry, 0, FAR_LAND_NEAR, random, ok);
+		if (at == null && level.getChunkSource().getChunkNow(dry.getX() >> 4, dry.getZ() >> 4) != null) {
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, dry);
+			if (!aloft(level, top) && standable(level, top)) {
+				at = top;
+			}
+		}
+		return at;
+	}
+
+	/**
+	 * The nearest column to {@code center} that the seed says will be dry ground ({@link #foreseenDry}) and {@code ok} takes,
+	 * read in rings out to {@link #FAR_LAND} ({@link #FAR_LAND_READS} columns at most); null if none. Nothing is made or loaded.
+	 */
+	private static @Nullable BlockPos farLand(ServerLevel level, BlockPos center, java.util.function.Predicate<BlockPos> ok) {
+		long since = System.nanoTime();
+		int reads = 0;
+		BlockPos found = null;
+		rings:
+		for (int r = FAR_LAND_STEP; r <= FAR_LAND; r += FAR_LAND_STEP) {
+			int around = Math.max(8, (int) (2.0 * Math.PI * r / FAR_LAND_SPACING));
+			// (each ring begins at its own angle, so the columns of one don't line up behind the last's)
+			double turn = r * 0.618 * Math.PI;
+			for (int i = 0; i < around; i++) {
+				double angle = turn + i * 2.0 * Math.PI / around;
+				BlockPos column = new BlockPos(center.getX() + Mth.floor(Math.cos(angle) * r), 0, center.getZ() + Mth.floor(Math.sin(angle) * r));
+				if (!ok.test(column)) {
+					continue;
+				}
+				if (reads++ >= FAR_LAND_READS) {
+					break rings;
+				}
+				if (foreseenDry(level, column.getX(), column.getZ())) {
+					found = column;
+					break rings;
+				}
+			}
+		}
+		JaymosKingdoms.LOGGER.info("A start's search past the wild's ring read {} columns from the seed in {} ms: {}", reads,
+			(System.nanoTime() - since) / 1_000_000L, found == null ? "no dry land" : "dry land at " + found.getX() + ", " + found.getZ());
+		return found;
+	}
+
+	/**
+	 * (2026-11-26) A spot by land known to be there: the nearest standing village, fief or kingdom's seat to {@code center}
+	 * ({@link #KNOWN_LAND_MIN}-{@link #KNOWN_LAND_MAX} blocks from it), one nobody else's start took first if any is, for when
+	 * neither the wild's ring nor the seed past it held dry land. Its chunks are asked for as a start's are; {@code now}: none
+	 * will be waited for any more, so the seat's own chunk is loaded here (made already: the settlement was found on it) and
+	 * a spot taken in it. Null: no settlement stands to go by.
+	 */
+	private static @Nullable BlockPos knownLand(ServerLevel level, BlockPos center, RandomSource random, boolean now) {
+		if (level != Factions.level(level.getServer())) {
+			return null;
+		}
+		Faction seat = null;
+		boolean seatFree = false;
+		for (Faction f : Factions.all(level.getServer())) {
+			if (f.seat() == null || f.fallen() || f.type() == FactionType.BARBARIAN || aloft(level, f.seat()) || MILD && !HarshLands.temperate(level, f.seat())) {
+				continue;
+			}
+			boolean free = freePlace(level, f.seat());
+			if (seat == null || free && !seatFree || free == seatFree && flat(f.seat(), center) < flat(seat.seat(), center)) {
+				seat = f;
+				seatFree = free;
+			}
+		}
+		if (seat == null) {
+			return null;
+		}
+		BlockPos at = seat.seat();
+		JaymosKingdoms.LOGGER.info("A start found no dry land by the seed; going by {}'s land at {}, {}", seat.name(), at.getX(), at.getZ());
+		if (!now) {
+			return ground(level, at, KNOWN_LAND_MIN, KNOWN_LAND_MAX, random, p -> freeSpot(level, p), false);
+		}
+		net.minecraft.world.level.chunk.ChunkAccess chunk = level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+		BlockPos any = null;
+		for (int dx = 0; dx < 16; dx += 3) {
+			for (int dz = 0; dz < 16; dz += 3) {
+				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, chunk.getPos().getWorldPosition().offset(dx, 0, dz));
+				if (aloft(level, top) || !standable(level, top)) {
+					continue;
+				}
+				if (openGround(level.getBlockState(top.below()))) {
+					return top;
+				}
+				if (any == null) {
+					any = top;
+				}
+			}
+		}
+		return any;
 	}
 
 	/** Where {@code player} last died in the Overworld (the vanilla record, kept through the new life), or null: nowhere known. */
