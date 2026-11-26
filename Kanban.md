@@ -8,6 +8,7 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for any · open
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
