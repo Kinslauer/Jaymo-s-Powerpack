@@ -52,6 +52,8 @@ public final class MocWild {
 	public static EntityType<SeaRay> MANTA_RAY, STINGRAY;
 	public static EntityType<Jellyfish> JELLYFISH;
 	public static EntityType<Critter> CRICKET, SNAIL, FLY, MAGGOT, ROACH, MOUSE, MOLE;
+	/** What a snail or slug stamped flat leaves behind ({@code wild/SpiderSquash}): its slime, picked up off the ground. */
+	public static Item SNAIL_SLIME;
 	private static final List<Item> EGGS = new ArrayList<>();
 
 	private MocWild() {
@@ -93,6 +95,9 @@ public final class MocWild {
 		MOLE = critter(Critter.Kind.MOLE);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output -> EGGS.forEach(output::accept));
+		ResourceKey<Item> slime = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("snail_slime"));
+		SNAIL_SLIME = Registry.register(BuiltInRegistries.ITEM, slime, new Item(new Item.Properties().setId(slime)));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.insertAfter(net.minecraft.world.item.Items.SLIME_BALL, SNAIL_SLIME));
 
 		ClearCuts.register();
 		SmallLife.register();

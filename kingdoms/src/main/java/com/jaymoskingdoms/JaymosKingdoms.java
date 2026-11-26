@@ -698,6 +698,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.SpiderMinds.register();
 		// small spiders squashed underfoot, bigger ones by a landing jump, and any of them dead to one blow
 		com.jaymoskingdoms.wild.SpiderSquash.register();
+		com.jaymoskingdoms.wild.SnailSlime.register();
 		// medieval picks: one a spider killed (or who died among spiders underground) wakes webbed up in their lair
 		com.jaymoskingdoms.wild.SpiderLairs.register();
 		// spiders leave anyone webbed up, or kept in their lair, be till they're struck
