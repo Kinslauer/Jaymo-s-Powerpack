@@ -1191,3 +1191,4 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26 (Legends thread): Andy picked all 61 Legends rows (pick list https://claude.ai/artifact/EHLGagLabgCmMYK9NuHAjV); the Rig gets several suit-ups incl. one assembling while falling with thrusters stopping the fall; "have codex and gemini take a patch each then check it afterward": patch 6 to Codex (Inbox legends-p6-core-animations), patch 7 to Gemini (legends-p7-zfighter-weapon-moves); Legends Mod Core is LGPL-3.0.
 
 - 2026-11-26 (Codex, Legends patch 6): Andy assigned legends-p6-core-animations to Codex. Keep the LGPL notice with Core files and use our own code, poses and names for ARR add-ons. One Powers PR from master with a change note and no version bump, then Claude reviews.
+- 2026-11-26 Andy approved Lore.md "Where the blood began" (Night's Blood vampire plan, Picklists/Nycto-Plan.md).
