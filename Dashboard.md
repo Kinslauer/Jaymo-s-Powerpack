@@ -69,6 +69,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
 - [ ] #2221 wide flat plains and bigger biomes (open country) (Kingdoms, 2026-11-26)
 - [ ] #2219 world gen no longer freezes on Enderscape's "not in a structure" check (Powers, 2026-11-26)
+- [ ] #2215 Two new Rig suits: Hail and Tinker (Powers, Kitchen, 2026-11-26)
 - [ ] #2214 Open art sets, batch 1: machines and far-world rock (Powers, Kingdoms, 2026-11-26)
 - [ ] #2213 Maw ruins from Pomkot's World (Powers, 2026-11-26)
 - [ ] #2212 CC0 picks: pack weight, death toll, weapon wheel, coyote time, better chainmail, axe throw, rust, falling snow, snores, clumsy undead, soap scrub, leaves on Fast, eight new pack mods (Powers, Kingdoms, Kitchen, 2026-11-26)
@@ -105,8 +106,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2173 No Subtle Effects error on a dedicated server's start (Powers, Kingdoms, 2026-11-25)
 - [ ] #2172 The game starts again (the symbiote HUD crashed it on launch) (Powers, 2026-11-25)
 - [ ] #2171 Waking villages into kingdoms no longer freezes the server (Kingdoms, 2026-11-25)
-- [ ] #2170 Rig leg kick: taekwondo side kick and combo roundhouse (Powers, 2026-11-25)
-- …and 616 older ones.
+- …and 617 older ones.
 
 ## Health
 
