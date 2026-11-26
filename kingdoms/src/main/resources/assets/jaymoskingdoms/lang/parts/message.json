@@ -1021,7 +1021,7 @@
   "message.jaymoskingdoms.form.masterstroke": "A masterstroke needs a fallen foe before you.",
   "message.jaymoskingdoms.form.sealed": "The Eight Signs bind your forms.",
   "message.jaymoskingdoms.form.armless": "With both arms broken you can't do a form.",
-  "message.jaymoskingdoms.form.mounted": "The lance is couched on horseback: mount a horse first.",
+  "message.jaymoskingdoms.form.mounted": "The lance is couched from the saddle, on a mount low enough for it to reach.",
   "message.jaymoskingdoms.form.couched": "Lance couched. Ride at them!",
   "message.jaymoskingdoms.form.pinned": "Pinned! Press again to tug the spear back.",
   "message.jaymoskingdoms.form.hungry": "You are too hungry to put that behind a blow.",

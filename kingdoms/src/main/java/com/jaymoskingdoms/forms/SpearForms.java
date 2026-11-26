@@ -37,9 +37,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.camel.Camel;
-import net.minecraft.world.entity.animal.equine.AbstractHorse;
-import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -54,8 +51,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>Spear Lunge: a long lunge (longer than the rapier's) that runs the first foe in the way through, and goes on into a
  * second one behind it.
- * <li>Couched Lance: only on horseback, a horse you steer (a donkey, mule or zebra too, never a pig, camel, llama, goat,
- * elephant or dragon; the same rule as Powers' lance, {@code LanceCouch.horseback}). The lance is couched for
+ * <li>Couched Lance: only from a mount the lance reaches down from (a horse, a Cavalry mount, a pig, a goat, a llama; never
+ * a camel, an elephant or a dragon; the same rule as Powers' lance, {@code LanceCouch.horseback}). The lance is couched for
  * {@value #COUCH_TICKS} ticks; the first foe it meets is hit for damage that grows with how fast the mount is going, and a
  * foe in the saddle is knocked out of it. Riders hit harder ({@link #RIDER_BONUS}). Kingdoms' mounted guards that carry a spear
  * charge too ({@link #charge}, called from {@code Cavalry}).
@@ -201,17 +198,23 @@ public final class SpearForms {
 		}
 	}
 
-	/** Mount kinds that are not horses, by words in their entity ids (war elephants, great goats, dragons...). */
-	private static final String[] NOT_HORSES = {"camel", "llama", "elephant", "goat", "dragon"};
+	/** The tallest mount a lance still reaches down from (blocks; a horse is 1.6, a llama 1.87, a camel 2.375). */
+	static final float MAX_MOUNT_HEIGHT = 2.0F;
+	/** Mounts the lance never reaches down from whatever their size, by words in their entity ids. */
+	private static final String[] TOO_HIGH = {"camel", "elephant", "mammoth", "dragon", "wyvern"};
 
-	/** Whether {@code player} steers a horse (not a pig, camel, llama, goat, elephant or dragon): what Couched Lance needs. */
+	/**
+	 * Whether {@code player} sits up front on a mount the lance reaches down from (a horse, a Cavalry mount, a pig, a
+	 * goat, a llama...; not anything taller than {@link #MAX_MOUNT_HEIGHT}, a camel, an elephant or a dragon): what Couched
+	 * Lance needs. The same rule as Powers' lance ({@code LanceCouch.horseback}).
+	 */
 	static boolean mounted(ServerPlayer player) {
-		if (!(player.getVehicle() instanceof AbstractHorse horse) || horse.getControllingPassenger() != player
-			|| horse instanceof Camel || horse instanceof Llama) {
+		if (!(player.getVehicle() instanceof LivingEntity mount) || mount.getBbHeight() > MAX_MOUNT_HEIGHT
+			|| mount.getControllingPassenger() != player && mount.getFirstPassenger() != player) {
 			return false;
 		}
-		String id = BuiltInRegistries.ENTITY_TYPE.getKey(horse.getType()).getPath();
-		for (String word : NOT_HORSES) {
+		String id = BuiltInRegistries.ENTITY_TYPE.getKey(mount.getType()).getPath();
+		for (String word : TOO_HIGH) {
 			if (id.contains(word)) {
 				return false;
 			}

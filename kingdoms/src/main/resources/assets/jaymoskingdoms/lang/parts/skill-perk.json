@@ -246,7 +246,7 @@
   "skill.jaymoskingdoms.perk.spear_lunge": "Spear Lunge",
   "skill.jaymoskingdoms.perk.spear_lunge.desc": "Spear form: a long lunge that runs the first foe through and carries on.",
   "skill.jaymoskingdoms.perk.couched_lance": "Couched Lance",
-  "skill.jaymoskingdoms.perk.couched_lance.desc": "Spear form, horseback only: couch the lance and ride your foes down.",
+  "skill.jaymoskingdoms.perk.couched_lance.desc": "Spear form, mounted only (not on camels, elephants or dragons): couch the lance and ride your foes down.",
   "skill.jaymoskingdoms.perk.pinning_throw": "Pinning Throw",
   "skill.jaymoskingdoms.perk.pinning_throw.desc": "Spear masterstroke: throw the spear at a fallen foe and pin it where it lies.",
   "skill.jaymoskingdoms.perk.read_the_ground": "Read the Ground",

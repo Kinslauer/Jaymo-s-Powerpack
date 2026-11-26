@@ -24,9 +24,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.camel.Camel;
-import net.minecraft.world.entity.animal.equine.AbstractHorse;
-import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
@@ -35,24 +32,26 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Couching the Armory lance, the same way Kingdoms' Couched Lance spear form does, without the form: right-click while
- * riding a horse you steer and the lance is couched for {@link #COUCH_TICKS} ticks. The first foe it meets is hit for
- * damage that grows with how fast the horse is going, thrown back, and knocked out of its saddle if it rides. Only on
- * horseback ({@link #horseback}): horses, donkeys, mules, zebras and the like, never a pig, camel, llama, goat, elephant or
- * dragon. On horseback the right-click couches instead of raising the guard ({@code combat.Guard}); on foot it guards as before.
+ * riding and the lance is couched for {@link #COUCH_TICKS} ticks. The first foe it meets is hit for damage that grows
+ * with how fast the mount is going, thrown back, and knocked out of its saddle if it rides. Only from a mount the lance
+ * reaches down from ({@link #horseback}): horses, pigs, goats, llamas and the like, never a camel, moa, elephant or
+ * dragon. Mounted the right-click couches instead of raising the guard ({@code combat.Guard}); on foot it guards as before.
  */
 public final class LanceCouch {
-	/** How long the lance stays couched (ticks), how far ahead it reaches (blocks), the slowest horse that still drives it home (blocks/tick). */
+	/** How long the lance stays couched (ticks), how far ahead it reaches (blocks), the slowest mount that still drives it home (blocks/tick). */
 	static final int COUCH_TICKS = 30;
 	static final double COUCH_REACH = 3.2, COUCH_MIN_SPEED = 0.1;
 	/** The wait before couching again (ticks). */
 	static final int COOLDOWN = 60;
-	/** Its damage (times your attack): a base and what each block/tick of the horse's speed adds (a gallop is about 0.3-0.4), up to a cap. */
+	/** Its damage (times your attack): a base and what each block/tick of the mount's speed adds (a gallop is about 0.3-0.4), up to a cap. */
 	static final float COUCH_BASE = 0.6F, COUCH_PER_SPEED = 8.0F, COUCH_MAX = 4.0F;
-	/** The shove a foe takes (per block/tick of horse speed) and the slowness of one thrown from the saddle (ticks, level). */
+	/** The shove a foe takes (per block/tick of mount speed) and the slowness of one thrown from the saddle (ticks, level). */
 	static final double COUCH_SHOVE = 2.0;
 	static final int UNSEAT_SLOW_TICKS = 40, UNSEAT_SLOW = 2;
-	/** Mount kinds that are not horses, by words in their entity ids (Kingdoms' war elephants, great goats, dragons...). */
-	private static final String[] NOT_HORSES = {"camel", "llama", "elephant", "goat", "dragon"};
+	/** The tallest mount a lance still reaches down from (blocks; a horse is 1.6, a llama 1.87, a camel 2.375, a moa 2.35). */
+	static final float MAX_MOUNT_HEIGHT = 2.0F;
+	/** Mounts the lance never reaches down from whatever their size, by words in their entity ids. */
+	private static final String[] TOO_HIGH = {"camel", "elephant", "mammoth", "dragon", "wyvern"};
 
 	/** A couched lance: until when. */
 	private record Couch(long until) {
@@ -72,9 +71,9 @@ public final class LanceCouch {
 				return InteractionResult.PASS;
 			}
 			if (!horseback(player)) {
-				// (on foot right-click is the guard, so only a rider on something else is told)
-				if (!level.isClientSide() && player.isPassenger()) {
-					player.sendOverlayMessage(Component.translatable("item.jaymospowers.lance.horseback").withStyle(ChatFormatting.GRAY));
+				// (on foot right-click is the guard, so only a rider up too high is told)
+				if (!level.isClientSide() && tooHigh(player)) {
+					player.sendOverlayMessage(Component.translatable("item.jaymospowers.lance.too_high").withStyle(ChatFormatting.GRAY));
 				}
 				return InteractionResult.PASS;
 			}
@@ -89,14 +88,18 @@ public final class LanceCouch {
 		ServerTickEvents.END_SERVER_TICK.register(LanceCouch::tick);
 	}
 
-	/** Whether {@code rider} steers a horse (not a pig, camel, llama, goat, elephant or dragon): where a lance is couched. */
+	/**
+	 * Whether {@code rider} sits up front on a mount low enough for the lance to reach a foe on the ground: a horse,
+	 * donkey, mule, pig, goat, llama and the like. Not on anything taller than {@link #MAX_MOUNT_HEIGHT} (camels, moas,
+	 * war elephants, mammoths) or any dragon or wyvern.
+	 */
 	public static boolean horseback(@Nullable Entity rider) {
-		if (rider == null || !(rider.getVehicle() instanceof AbstractHorse horse) || horse.getControllingPassenger() != rider
-			|| horse instanceof Camel || horse instanceof Llama) {
+		if (rider == null || !(rider.getVehicle() instanceof LivingEntity mount) || mount.getBbHeight() > MAX_MOUNT_HEIGHT
+			|| mount.getControllingPassenger() != rider && mount.getFirstPassenger() != rider) {
 			return false;
 		}
-		String id = BuiltInRegistries.ENTITY_TYPE.getKey(horse.getType()).getPath();
-		for (String word : NOT_HORSES) {
+		String id = BuiltInRegistries.ENTITY_TYPE.getKey(mount.getType()).getPath();
+		for (String word : TOO_HIGH) {
 			if (id.contains(word)) {
 				return false;
 			}
@@ -104,7 +107,12 @@ public final class LanceCouch {
 		return true;
 	}
 
-	/** How hard a lance couched on a horse going {@code speed} blocks/tick lands (times the wielder's attack). */
+	/** Whether {@code rider} is on a mount the lance can't reach down from (too tall, or a dragon). */
+	static boolean tooHigh(Entity rider) {
+		return rider.getVehicle() instanceof LivingEntity && !horseback(rider) && rider.getVehicle().getFirstPassenger() == rider;
+	}
+
+	/** How hard a lance couched on a mount going {@code speed} blocks/tick lands (times the wielder's attack). */
 	static float multiple(double speed) {
 		return Mth.clamp(COUCH_BASE + (float) speed * COUCH_PER_SPEED, COUCH_BASE, COUCH_MAX);
 	}
