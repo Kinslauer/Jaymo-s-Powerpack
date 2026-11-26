@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task:
 branch: codex/downed-harness-loot
 with: claude (T3 sub-agent of thread b48e4ca8, Sonnet 5.5)
@@ -37,3 +37,4 @@ owns:
 ## Notes
 - Vault sync lock was busy (another agent's sync); notes edited by hand.
 - No local Gradle on this PC (Andy plays here): CI compiles.
+- 2026-11-26 01:20 No sign of work for 30 min: marked stalled (whoever ran it stopped).
