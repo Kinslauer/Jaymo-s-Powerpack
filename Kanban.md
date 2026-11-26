@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 15:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -48,6 +48,7 @@ kanban-plugin: board
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · blocked
+- [ ] [[Inbox/hunters-road-10|hunters-road-10]] · for any · blocked
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for any · blocked
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · for any · blocked
 - [ ] [[Inbox/hunters-road-5|hunters-road-5]] · for any · blocked
@@ -55,7 +56,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · for any · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
-- [ ] [[Inbox/hunters-road-10|hunters-road-10]] · for any · blocked
 
 
 ## Done
