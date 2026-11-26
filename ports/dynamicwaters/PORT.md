@@ -137,6 +137,9 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   The walk now reads `WiredRouter.withoutCaves(finalDensity)`: every density function the router takes from a
   `caves/` file stands in as solid rock. Built; not played; new chunks only.
 
+- **Cave mouths beside rivers filled** (`HydrologyManager.caveMouthGround`, ours): before carving, a column near river or
+  lake water (`repairsColumn`) whose top is more than `MOUTH_GAP` (5) under its cave-free ground (`CoarseHeightField.surfaceAt`,
+  which reads the router without caves) is filled back up to that ground with the default block.
 - **Bank guard** (`BankGuard`, `BankGuardMixin`, ours): wraps `wythers:stony_cliffs` (William Wyther's Overhauled
   Overworld) during decoration and puts back the top 6 blocks of low banks next to inland water (within 5 blocks, at most
   8 over it), which that feature read as cliffs and turned to bare stone. Gorges, mountain cliffs and coasts are untouched.

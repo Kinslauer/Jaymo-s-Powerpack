@@ -657,6 +657,23 @@ public class HydrologyManager {
         return filled;
     }
 
+    /** A column this far under the cave-free ground beside a river is a cave mouth cut into the bank. */
+    private static final int MOUTH_GAP = 5;
+
+    /**
+     * Where a cave entrance opened the ground beside a river or lake, the height of the ground without the cave, so the
+     * mouth can be filled back in before the river is carved; {@link Integer#MIN_VALUE} if this column is no cave mouth.
+     * The world's cave entrances otherwise left deep stone pits along streams, which filled with river water and read
+     * as ravines. The coarse ground screens the columns cheaply; the column's own cave-free height decides.
+     */
+    public static int caveMouthGround(int x, int z, int top, net.minecraft.world.level.chunk.ChunkGenerator generator,
+            net.minecraft.world.level.chunk.ChunkAccess chunk, net.minecraft.world.level.levelgen.RandomState randomState) {
+        if (coarseGroundAt(x, z, generator, randomState) - top <= MOUTH_GAP) return Integer.MIN_VALUE;
+        if (!repairsColumn(x, z, generator, chunk, randomState)) return Integer.MIN_VALUE;
+        final int ground = CoarseHeightField.surfaceAt(x, z, generator, randomState);
+        return ground - top > MOUTH_GAP ? ground : Integer.MIN_VALUE;
+    }
+
     private static final int CAVE_GUARD_REACH = 8;
     private static final int CAVE_GUARD_DEPTH = 12;
 
