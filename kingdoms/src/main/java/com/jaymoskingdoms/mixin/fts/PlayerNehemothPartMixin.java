@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 abstract class PlayerNehemothPartMixin {
 	@ModifyVariable(method = "itemAttackInteraction", at = @At("HEAD"), argsOnly = true)
 	private Entity jaymoskingdoms$partIsItsBody(Entity entity) {
-		return entity instanceof NehemothPart part ? part.parent : entity;
+		return entity instanceof NehemothPart part ? part.parent
+			: entity instanceof com.jaymoskingdoms.dragons.DragonPart dragonPart ? dragonPart.parent : entity;
 	}
 }
