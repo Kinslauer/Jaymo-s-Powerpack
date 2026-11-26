@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:59). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 20:00). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -8,6 +8,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 **Questions for you:**
 - [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-26 19:58 ON HOLD until wave 1 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
 - [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-26 19:59 ON HOLD until wave 2 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
+- [[Inbox/hunters-road-5|hunters-road-5]] · see the note
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
 - [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · 2026-11-26 07:21 Design draft complete: Overworld aqueduct structure, SettlementCurse system, 4 board quests (Stem the Flow, Clear the Pillars, Purify the Ston…
@@ -23,7 +24,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-9 waiting for a bot, 5 being built, 8 in review: see [[Kanban]].
+8 waiting for a bot, 5 being built, 8 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
