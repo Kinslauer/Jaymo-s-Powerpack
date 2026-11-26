@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: codex
 from: pc-claude-server-thread
 asked: 2026-11-19
 thread: PC Claude, Deck server thread
 claimed_by: codex
-pr: 
+pr: 2249
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Havens.java
   - kingdoms/src/main/java/com/jaymoskingdoms/Settlers.java
@@ -43,3 +43,4 @@ Both entries are in Decisions.md (2026-11-19, 11:55 AM and 12:30 PM).
 - 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy LIFTED the hold on this task. It is open again for any bot.
 - 2026-11-26 14:35 Claude delegated this to Codex (2:45 PM).
+- 2026-11-26 14:46 Plan PR #2249: questions for Andy at the end
