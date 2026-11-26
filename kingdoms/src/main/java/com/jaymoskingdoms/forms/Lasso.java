@@ -117,8 +117,13 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * Fighting players must be allowed on the server, and party members are never roped. The rope is drawn by every client from
  * the synced {@link #HOLDER} attachment on the held one ({@code LassoRope}), the spin from the holder's use of the lasso, and the
- * hogtie from {@link #TIED} ({@code LassoPose}). The lasso itself stays in your pack; lose it from the pack and the rope is lost
- * too. Nothing here is saved: a rope or a hogtie ends with the server.
+ * hogtie from {@link #TIED} ({@code LassoPose}). Andy: "it shouldnt detach and should drop if you swap off it in your hotbar. so
+ * keep it offhand to lead captives." The rope never snaps: strained past its length by something it can't hold
+ * ({@link #STRAIN_OVER}), it drags you after it instead. It lets go when the lasso leaves your hands (a swap off it on the
+ * hotbar, or dropping it), so a lasso in the off hand leads a captive with the other hand free; otherwise only when you let
+ * go (sneak and use), either of you dies, is downed, or is gone (another world, a teleport past {@link #LOST_AT} rope
+ * lengths), it struggles out, or someone lifts it in their arms. Nothing here is saved: a rope or a hogtie ends with the
+ * server.
  */
 public final class Lasso {
 	// ---- tuning ----
@@ -131,8 +136,12 @@ public final class Lasso {
 	static final double ROPE_LENGTH = 20.0;
 	/** The rope winds in no shorter than this (blocks); past its length it pulls this hard per block over (and the most). */
 	static final double ROPE_LEAST = 1.5, PULL_PER_BLOCK = 0.3, PULL_MOST = 0.5;
-	/** Strained this far past its length (blocks) by something it can't hold, the rope snaps. */
+	/** Hooked on an airship: hanging this far past the rope's length (blocks), you've let go. */
 	static final double SNAP_OVER = 6.0;
+	/** Strained this far past its length (blocks) by something it can't hold, the rope drags the holder too: this hard per block over. */
+	static final double STRAIN_OVER = 3.0, STRAIN_PER_BLOCK = 0.15;
+	/** Farther apart than this many rope lengths (a teleport, not a strain), the rope is lost. */
+	static final double LOST_AT = 2.0;
 	/** Something bigger than a person (its box's volume over a person's) pulls the holder too: this share per size over, at most this. */
 	static final double HEAVY_SHARE = 0.3, HEAVY_MOST = 0.6, PERSON_VOLUME = 0.6 * 0.6 * 1.8;
 	/** How close you must be to hogtie or grab (blocks), how long use is held to hogtie (ticks), and the haul a press gives (blocks). */
@@ -156,8 +165,8 @@ public final class Lasso {
 	static final double FAST_KNOTS = 1.0E12;
 	/** A mob this strong shrugs the loop off. */
 	static final float GREAT_HEALTH = 100.0F;
-	/** Ticks between checks that you still carry a lasso, and how long a pinned mob's slowness is topped up for. */
-	static final int PACK_CHECK = 20, BOUND_SLOW_TICKS = 12;
+	/** How long a pinned mob's slowness is topped up for (ticks). */
+	static final int BOUND_SLOW_TICKS = 12;
 	/** Hooked on an airship: climbing speed up the rope (blocks a tick), how hard the taut rope holds you, and how near the top you're over her rail. */
 	static final double CLIMB_SPEED = 0.22, HANG_PULL = 0.35, OVER_RAIL = 1.6;
 
@@ -777,7 +786,8 @@ public final class Lasso {
 		if (!claims(player, hand, entity) || player.isUsingItem()) {
 			return InteractionResult.PASS;
 		}
-		player.startUsingItem(hand);
+		// (the lasso may be in the other hand: kept in the off hand, it leads with the main hand free)
+		player.startUsingItem(lassoHand(player));
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer holder) {
 			Hold hold = BY_HOLDER.get(holder.getUUID());
 			if (hold != null) {
@@ -788,13 +798,13 @@ public final class Lasso {
 	}
 
 	/**
-	 * Whether {@code player}'s use on {@code entity} is the lasso's: their own rope's, lasso in hand, standing, and not on
+	 * Whether {@code player}'s use on {@code entity} is the lasso's: their own rope's, lasso in either hand, standing, and not on
 	 * someone already hogtied at their side. Both sides alike (the rope and the hogtie are synced). Powers' downed drag and
 	 * revive and its body menu leave such a use alone ({@code Downed.CLAIMED_USES}), so the tying's bar is the only one.
 	 */
 	public static boolean claims(Player player, InteractionHand hand, Entity entity) {
 		Integer holding = player.getAttached(HOLDING);
-		return holding != null && holding == entity.getId() && !player.isShiftKeyDown() && player.getItemInHand(hand).is(ITEM)
+		return holding != null && holding == entity.getId() && !player.isShiftKeyDown() && lassoHand(player) != null
 			&& !(entity instanceof LivingEntity body && hogtied(body) && player.distanceTo(body) <= TIE_REACH);
 	}
 
@@ -1018,14 +1028,9 @@ public final class Lasso {
 		}
 	}
 
-	private static boolean carries(ServerPlayer player) {
-		var inventory = player.getInventory();
-		for (int i = 0; i < inventory.getContainerSize(); i++) {
-			if (inventory.getItem(i).is(ITEM)) {
-				return true;
-			}
-		}
-		return false;
+	/** The hand {@code player} holds a lasso in (the main hand first), or null: the rope is held only while one is. */
+	public static @Nullable InteractionHand lassoHand(Player player) {
+		return player.getMainHandItem().is(ITEM) ? InteractionHand.MAIN_HAND : player.getOffhandItem().is(ITEM) ? InteractionHand.OFF_HAND : null;
 	}
 
 	/**
@@ -1089,9 +1094,14 @@ public final class Lasso {
 				continue;
 			}
 			double dist = holder.distanceTo(held);
-			if (dist > hold.length + SNAP_OVER || dist > ROPE_LENGTH + SNAP_OVER || (holder.tickCount % PACK_CHECK == 0 && !carries(holder))) {
-				level.playSound(null, held.getX(), held.getY(), held.getZ(), SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
-				release(hold, Component.translatable("message.jaymoskingdoms.lasso.snapped"));
+			if (dist > ROPE_LENGTH * LOST_AT) {
+				release(hold, Component.translatable("message.jaymoskingdoms.lasso.lost"));
+				continue;
+			}
+			if (lassoHand(holder) == null) {
+				// (swapped off it on the hotbar, or dropped it: the rope drops with it)
+				level.playSound(null, holder.getX(), holder.getY(), holder.getZ(), SoundEvents.LEAD_UNTIED, SoundSource.PLAYERS, 0.8F, 0.9F);
+				release(hold, Component.translatable("message.jaymoskingdoms.lasso.let_go", held.getDisplayName()));
 				continue;
 			}
 			weigh(holder, hold.mode != Hold.TETHER);
@@ -1121,8 +1131,11 @@ public final class Lasso {
 				double lift = hold.mode != Hold.TIED && to.y > 0.5 && held.onGround() ? 0.2 : 0.0;
 				held.setDeltaMovement(held.getDeltaMovement().add(step.x * (1.0 - back), lift, step.z * (1.0 - back)));
 				held.syncVelocity = true;
-				if (back > 0.0) {
-					holder.setDeltaMovement(holder.getDeltaMovement().subtract(step.x * back, 0.0, step.z * back));
+				// strained past what it gives (something running off, knocked away, too big): it drags you after it, it never snaps
+				double strain = over > STRAIN_OVER ? Math.min(PULL_MOST, (over - STRAIN_OVER) * STRAIN_PER_BLOCK) : 0.0;
+				if (back > 0.0 || strain > 0.0) {
+					Vec3 drag = flat.normalize().scale(strain).add(step.scale(back));
+					holder.setDeltaMovement(holder.getDeltaMovement().subtract(drag.x, 0.0, drag.z));
 					holder.syncVelocity = true;
 				}
 				if (hold.mode == Hold.TIED && held.tickCount % 8 == 0 && held.onGround()) {

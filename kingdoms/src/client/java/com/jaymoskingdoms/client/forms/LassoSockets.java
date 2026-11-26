@@ -15,7 +15,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Where a held lasso's rope leaves its coil, taken from the item as it's drawn (the way Jaymo's Powers finds a flail's
- * handle, its LashSockets): while a player's main-hand lasso is submitted (third person: ItemInHandLayer, your own
+ * handle, its LashSockets): while a player's lasso (in either hand) is submitted (third person: ItemInHandLayer, your own
  * first person: the hands renderer), the item model's own transform carries the top of the coil ({@link #COIL_TIP},
  * in the model's 0-1 space) into the world. Kept per player as an offset from where they're drawn, so the rope stays
  * on the coil however the arm, the body and the camera move. Each capture is stamped with the frame it was drawn in;
@@ -56,12 +56,12 @@ public final class LassoSockets {
 		}
 	}
 
-	/** A player's main-hand item is about to be submitted in third person, drawn at {@code x y z}. */
+	/** A player's held item is about to be submitted in third person, drawn at {@code x y z}. */
 	public static void thirdPerson(int id, ItemStack stack, double x, double y, double z) {
 		holder = inLevel ? holder(id, stack, false, x, y, z) : null;
 	}
 
-	/** Your own main-hand item is about to be submitted in first person. */
+	/** Your own held item is about to be submitted in first person. */
 	public static void firstPerson(ItemStack stack) {
 		Minecraft minecraft = Minecraft.getInstance();
 		holder = minecraft.player == null ? null : holder(minecraft.player.getId(), stack, true, 0.0, 0.0, 0.0);
