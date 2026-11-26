@@ -21,6 +21,8 @@
 		"AetherEdgeMixin",
 		"TemplateUpgradeMixin",
 		"BandSpawnNearPlayersMixin",
+		"BandSleepLevelMixin",
+		"BandSleepBlockEntityMixin",
 		"DirtyAttributesMixin",
 		"NullGoalMixin",
 		"StructureStartPieceIndexMixin",
