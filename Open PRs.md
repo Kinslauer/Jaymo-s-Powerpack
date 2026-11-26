@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 14:53
+updated: 2026-11-26 15:27
 ---
 # Open PRs
 
-9 open, as of 2026-11-26 14:53. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+10 open, as of 2026-11-26 15:27. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -11,7 +11,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2215](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2215) Rig Hail + Tinker suits; headless Blockbench MCP + GeckoLib setup
+## [#2215](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2215) Rig Hail + Tinker suits, bolted-on Rigs, cut limbs off bodies; headless Blockbench MCP + GeckoLib setup
 - **Branch:** `claude/project-thread-tmy26l` · **Updated:** 2026-11-26 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
@@ -50,3 +50,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `codex/underground-settlements-plan` · **Updated:** 2026-11-26 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[codex-underground-settlements-plan]]
+
+## [#2250](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2250) Allow rare mainland villages and surface structures on Mohknee (structures-4-mohknee PR 1)
+- **Branch:** `t3/mohknee-rare-structure-starts` · **Updated:** 2026-11-26 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[mohknee-rare-structure-starts]]
