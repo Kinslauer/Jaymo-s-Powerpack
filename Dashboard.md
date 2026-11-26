@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 08:30). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:19). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,6 +27,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
 - [ ] #2221 wide flat plains and bigger biomes (open country) (Kingdoms, 2026-11-26)
 - [ ] #2219 world gen no longer freezes on Enderscape's "not in a structure" check (Powers, 2026-11-26)
 - [ ] #2214 Open art sets, batch 1: machines and far-world rock (Powers, Kingdoms, 2026-11-26)
@@ -86,12 +87,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2151 Bounty boards against a wall; plains towns always have a working windmill, a butcher and an infirmary (Kingdoms, 2026-11-25)
 - [ ] #2150 faints can be mashed out of (Powers, Kingdoms, 2026-11-25)
 - [ ] #2149 maggots for the hook: taken alive, best river bait, crawl off when dropped (Powers, Kingdoms, 2026-11-25)
-- [ ] #2148 explorer maps never make chunks on the server thread (Kingdoms, 2026-11-25)
-- …and 595 older ones.
+- …and 596 older ones.
 
 ## Health
 
-13 problems in the notes: [[Health]].
+15 problems in the notes: [[Health]].
 
 ## Last week
 
