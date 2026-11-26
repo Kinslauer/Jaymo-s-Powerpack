@@ -38,12 +38,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
-- [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · stalled
-- [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
-- [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
-- [ ] [[Agents/symbiote-113-picks|symbiote-113-picks]] · 💻 Odysseus · stalled
-- [ ] [[Agents/wither-model|wither-model]] · 💻 Odysseus · blocked
-- [ ] [[Agents/youth-delegates-ready|youth-delegates-ready]] · 💻 Odysseus · stalled
 
 
 ## Done
