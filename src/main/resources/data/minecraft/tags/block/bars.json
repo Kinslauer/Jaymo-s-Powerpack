@@ -1,5 +1,12 @@
 {
   "values": [
-    "jaymospowers:arkenium_bars"
+    "jaymospowers:arkenium_bars",
+    "jaymospowers:spotted_iron_bars",
+    "jaymospowers:rusty_iron_bars",
+    "jaymospowers:corroded_iron_bars",
+    "jaymospowers:waxed_iron_bars",
+    "jaymospowers:waxed_spotted_iron_bars",
+    "jaymospowers:waxed_rusty_iron_bars",
+    "jaymospowers:waxed_corroded_iron_bars"
   ]
 }

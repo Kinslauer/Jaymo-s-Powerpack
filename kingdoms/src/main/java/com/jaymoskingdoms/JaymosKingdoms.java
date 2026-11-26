@@ -714,6 +714,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.mineshafts.Mineshafts.register();
 		// GTNH patch 6: marked monsters (and captains' marked traits), and MCA's turned villagers who remember their trade (and their attachments)
 		MarkedMonsters.register();
+		// CC0 picks (MobGear): a datapack's mobgear/<mob> loot table dresses that mob as it spawns
+		MobGearTables.register();
 		TurnedVillagers.register();
 		LOGGER.debug("marked and turned attachments: {} {}", MarkedMonsters.MARKS, TurnedVillagers.TRADE);
 		com.jaymoskingdoms.wild.WolfStalkers.register();

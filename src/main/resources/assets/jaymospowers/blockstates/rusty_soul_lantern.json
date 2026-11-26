@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "jaymospowers:block/rusty_soul_lantern"
+    },
+    "hanging=true": {
+      "model": "jaymospowers:block/rusty_soul_lantern_hanging"
+    }
+  }
+}

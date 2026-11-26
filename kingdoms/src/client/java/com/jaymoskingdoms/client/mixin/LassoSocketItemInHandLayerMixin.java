@@ -20,7 +20,7 @@ abstract class LassoSocketItemInHandLayerMixin {
 	@Inject(method = "submitArmWithItem", at = @At("HEAD"))
 	private void jaymoskingdoms$lassoSocket(ArmedEntityRenderState state, ItemStackRenderState item, ItemStack stack, HumanoidArm arm, PoseStack poseStack,
 		SubmitNodeCollector collector, int light, CallbackInfo ci) {
-		if (state instanceof AvatarRenderState avatar && arm == avatar.mainArm) {
+		if (state instanceof AvatarRenderState avatar) {
 			LassoSockets.thirdPerson(avatar.id, stack, state.x, state.y, state.z);
 		}
 	}

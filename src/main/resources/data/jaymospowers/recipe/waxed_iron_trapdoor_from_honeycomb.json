@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "waxed_iron_trapdoor",
+  "ingredients": [
+    "minecraft:iron_trapdoor",
+    "minecraft:honeycomb"
+  ],
+  "result": {
+    "id": "jaymospowers:waxed_iron_trapdoor",
+    "count": 1
+  }
+}

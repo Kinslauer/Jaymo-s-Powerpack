@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:stone_sword",
+    "minecraft:stone_axe",
+    {
+      "id": "jaymospowers:stone_rapier",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_chain",
+  "textures": {
+    "texture": "jaymospowers:block/waxed_spotted_iron_chain"
+  }
+}
