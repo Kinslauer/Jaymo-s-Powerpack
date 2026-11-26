@@ -47,7 +47,8 @@ public final class ColumnWatch {
     public static void surfaceDone(int x, int z, int y, BlockState top) {
         if (!on(x, z)) return;
         note(x, z, "surface rules done: top y=" + y + " " + block(top));
-        if (top.is(BlockTags.DIRT) || top.is(Blocks.SAND) || top.is(Blocks.GRAVEL)) SOIL_TOP.put(BlockPos.asLong(x, 0, z), y);
+        // 26.3's dirt tag holds only dirt, coarse and rooted dirt (no grass), so watch any top that isn't bare rock
+        if (!top.isAir() && top.getFluidState().isEmpty() && !rock(top)) SOIL_TOP.put(BlockPos.asLong(x, 0, z), y);
     }
 
     public static boolean near(int chunkX, int chunkZ) {
