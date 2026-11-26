@@ -2,15 +2,20 @@ package com.jaymoskingdoms;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -29,6 +34,13 @@ import org.jspecify.annotations.Nullable;
  * other side. It won't jump onto lava, fire, magma or cactus, or out of water, nor onto a roof or any floor with a room
  * under it ({@link #HOLLOW_DEPTH}). With no jump to be had and where it was going below it, it's stranded up there and
  * climbs down ({@link Stranded}).
+ *
+ * <p>After Mobs Attempt Parkour (Barribob, CC0): the beasts that would try it jump too ({@link #LEAPERS}: spiders,
+ * golems, creepers, silverfish, endermites, endermen), each as far as its legs carry ({@link #reach}: a zombie only a
+ * block-wide gap); a strip of water, fire, lava or berry bushes in the way counts as a gap; and a path that wades
+ * through water just ahead is jumped over where the far side is in reach ({@link #wetAhead}). The undead are clumsy at it
+ * (Jaymo's Powers' {@code UndeadLeaps}, by {@link PowersCompat#undeadLeap}): a zombie mostly comes up short, loses a limb
+ * in the fall or struggles in the gap till day; a skeleton falls short half the time and may catch the edge and pull up.
  */
 public final class GapJumps {
 	/** How often (in ticks) a mob at the end of a short path looks for a jump. */
@@ -61,6 +73,15 @@ public final class GapJumps {
 	/** Vanilla's air physics: sideways drag per tick, gravity and vertical drag. */
 	static final double AIR_DRAG = 0.91, GRAVITY = 0.08, FALL_DRAG = 0.98;
 
+	/** The beasts that jump gaps too (data/jaymoskingdoms/tags/entity_type/gap_leapers.json). */
+	static final TagKey<EntityType<?>> LEAPERS = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("gap_leapers"));
+	/** How far a jump carries by the mob's walking speed: under the first speed, under the second, and faster (blocks across). */
+	static final double SLOW_SPEED = 0.24, MID_SPEED = 0.3, SLOW_REACH = 4.0, MID_REACH = 4.5;
+	/** A zombie clears a one-block gap at most. */
+	static final double ZOMBIE_REACH = 2.5;
+	/** Path nodes looked at ahead for water to jump. */
+	static final int WET_AHEAD = 4;
+
 	/** One mob's next look, kept on its navigation. */
 	public static final class State {
 		long next;
@@ -82,7 +103,14 @@ public final class GapJumps {
 			return;
 		}
 		Path path = nav.getPath();
-		if (path == null || path.canReach() || path.getNodeCount() == 0) {
+		if (path == null || path.getNodeCount() == 0) {
+			return;
+		}
+		if (wetAhead(level, mob, nav, path, speed)) {
+			s.next = now + AFTER_JUMP;
+			return;
+		}
+		if (path.canReach()) {
 			return;
 		}
 		Node end = path.getEndNode();
@@ -103,7 +131,7 @@ public final class GapJumps {
 			}
 			return;
 		}
-		Vec3 landing = landing(level, mob, here, goal, far);
+		Vec3 landing = landing(level, mob, here, goal, far, reach(mob));
 		if (landing == null) {
 			s.next = now + AFTER_NOTHING;
 			if (below) {
@@ -125,13 +153,58 @@ public final class GapJumps {
 		}
 	}
 
-	/** Who jumps gaps: the humanoids. Beasts and livestock keep to what they can walk. */
+	/** Who jumps gaps: the humanoids, and the beasts in {@link #LEAPERS}. Livestock keep to what they can walk. */
 	static boolean leaper(Mob mob) {
-		return Temperaments.humanoid(mob) || MobCombat.humanoid(mob);
+		return Temperaments.humanoid(mob) || MobCombat.humanoid(mob) || mob.getType().builtInRegistryHolder().is(LEAPERS);
+	}
+
+	/** How far across {@code mob} can jump: by its walking speed, a zombie a one-block gap at most. */
+	static double reach(Mob mob) {
+		double speed = mob.getAttributeValue(Attributes.MOVEMENT_SPEED);
+		double r = speed < SLOW_SPEED ? SLOW_REACH : speed < MID_SPEED ? MID_REACH : REACH;
+		return mob instanceof net.minecraft.world.entity.monster.zombie.Zombie ? Math.min(r, ZOMBIE_REACH) : r;
+	}
+
+	/**
+	 * A path that wades into water within {@link #WET_AHEAD} steps of a dry-shod mob: it jumps to the dry ground past it, if
+	 * that's in reach and there's a landing. True if it jumped.
+	 */
+	private static boolean wetAhead(ServerLevel level, Mob mob, PathNavigation nav, Path path, double speed) {
+		int from = path.getNextNodeIndex(), last = Math.min(path.getNodeCount() - 1, from + WET_AHEAD);
+		int wet = -1;
+		for (int i = from; i <= last; i++) {
+			if (path.getNode(i).type == PathType.WATER) {
+				wet = i;
+				break;
+			}
+		}
+		if (wet < 0) {
+			return false;
+		}
+		Vec3 here = mob.position();
+		double reach = reach(mob);
+		for (int i = wet + 1; i < path.getNodeCount(); i++) {
+			Node n = path.getNode(i);
+			if (n.type == PathType.WATER) {
+				continue;
+			}
+			Vec3 goal = Vec3.atBottomCenterOf(n.asBlockPos());
+			double far = across(here, goal);
+			if (far > reach + 1.0) {
+				return false;
+			}
+			Vec3 landing = landing(level, mob, here, goal, far + GAIN, reach);
+			if (landing == null) {
+				return false;
+			}
+			leap(mob, nav, here, landing, speed);
+			return true;
+		}
+		return false;
 	}
 
 	/** The best ground across a gap toward {@code goal}: the landing that leaves it nearest its goal. Null if none. */
-	static @Nullable Vec3 landing(ServerLevel level, Mob mob, Vec3 here, Vec3 goal, double far) {
+	static @Nullable Vec3 landing(ServerLevel level, Mob mob, Vec3 here, Vec3 goal, double far, double reach) {
 		Vec3 straight = new Vec3(goal.x - here.x, 0.0, goal.z - here.z).normalize();
 		AABB body = mob.getBoundingBox();
 		if (!level.noCollision(mob, body.move(0.0, 1.0, 0.0))) {
@@ -143,7 +216,7 @@ public final class GapJumps {
 		for (int angle : ANGLES) {
 			Vec3 way = straight.yRot((float) Math.toRadians(angle));
 			boolean gap = false;
-			for (double r = NEAREST; r <= REACH + 1.0E-6; r += STEP) {
+			for (double r = NEAREST; r <= reach + 1.0E-6; r += STEP) {
 				Vec3 at = here.add(way.scale(r));
 				if (!gap) {
 					if (!level.noCollision(mob, body.move(at.x - here.x, 1.0, at.z - here.z))) {
@@ -170,9 +243,15 @@ public final class GapJumps {
 		return best;
 	}
 
-	/** Nothing to stand on at {@code at} for {@link #GAP_DEPTH} blocks down from the floor it stands on now. */
+	/**
+	 * Nothing to stand on at {@code at} for {@link #GAP_DEPTH} blocks down from the floor it stands on now, or what's there
+	 * is to be jumped, not walked: water, lava, fire, berry bushes, a lit campfire, magma, cactus.
+	 */
 	private static boolean drop(ServerLevel level, Vec3 at, int floorY) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(Mth.floor(at.x), floorY, Mth.floor(at.z));
+		if (hazard(level, pos) || hazard(level, pos.above())) {
+			return true;
+		}
 		for (int i = 0; i < GAP_DEPTH; i++) {
 			if (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() || !level.getFluidState(pos).isEmpty()) {
 				return false;
@@ -218,6 +297,12 @@ public final class GapJumps {
 		return false;
 	}
 
+	/** Water or lava, fire, berry bushes, a campfire, magma or cactus at {@code pos}: a strip of it is jumped like a gap. */
+	private static boolean hazard(ServerLevel level, BlockPos pos) {
+		BlockState s = level.getBlockState(pos);
+		return !level.getFluidState(pos).isEmpty() || s.is(BlockTags.FIRE) || s.is(Blocks.SWEET_BERRY_BUSH) || unsafe(s);
+	}
+
 	private static boolean unsafe(BlockState floor) {
 		return floor.is(Blocks.MAGMA_BLOCK) || floor.is(Blocks.CACTUS) || floor.is(BlockTags.CAMPFIRES) || floor.is(Blocks.LAVA);
 	}
@@ -238,10 +323,15 @@ public final class GapJumps {
 
 	/** A running jump sized to come down at {@code to}. */
 	static void leap(Mob mob, PathNavigation nav, Vec3 from, Vec3 to, double speed) {
+		// the clumsy undead put less into it (Powers' UndeadLeaps), and one stuck in a gap doesn't jump at all
+		double effort = PowersCompat.undeadLeap(mob, from, to);
+		if (effort <= 0.0) {
+			return;
+		}
 		Vec3 way = new Vec3(to.x - from.x, 0.0, to.z - from.z);
 		double d = way.length() + OVERSHOOT;
 		int t = airTicks(to.y - from.y);
-		double v = Math.min(TOP_SPEED, d * (1.0 - AIR_DRAG) / (1.0 - Math.pow(AIR_DRAG, t)));
+		double v = Math.min(TOP_SPEED, d * (1.0 - AIR_DRAG) / (1.0 - Math.pow(AIR_DRAG, t))) * effort;
 		Vec3 push = way.normalize().scale(v);
 		float yaw = (float) (Mth.atan2(way.z, way.x) * (180.0 / Math.PI)) - 90.0F;
 		nav.stop();

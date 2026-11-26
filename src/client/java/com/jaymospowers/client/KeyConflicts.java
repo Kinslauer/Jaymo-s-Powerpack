@@ -34,8 +34,10 @@ final class KeyConflicts {
 	 * so opening the character menu also switched Auto HUD on or off; it comes off H (unbound, Controls can set it again).
 	 * v12: TACZ's "Open TAC Config" sat on T, so T opened the gun config screen instead of chat (the Deck's first start,
 	 * 2026-11-24); it comes off T (unbound, its settings are in Mod Menu).
+	 * v13: Dibs! (a CC0 pick) locates a bound villager's bed or workstation on V, the third ability key; it comes off V
+	 * (unbound, Controls can set it again).
 	 */
-	private static final String MARKER = "jaymospowers-keys-v12";
+	private static final String MARKER = "jaymospowers-keys-v13";
 
 	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from} (or one of several, split by |). */
 	private record Move(String from, String to) {
@@ -62,7 +64,8 @@ final class KeyConflicts {
 		Map.entry("key.hide_icons", new Move("key.keyboard.h", "key.keyboard.unknown")),
 		Map.entry("key.takeaseat.sit", new Move("key.keyboard.x", "key.keyboard.unknown")),
 		Map.entry("key.autohud.toggle-hud", new Move("key.keyboard.h", "key.keyboard.unknown")),
-		Map.entry("key.tacz.open_config.desc", new Move("key.keyboard.t", "key.keyboard.unknown")));
+		Map.entry("key.tacz.open_config.desc", new Move("key.keyboard.t", "key.keyboard.unknown")),
+		Map.entry("key.dibs.locate_owner", new Move("key.keyboard.v", "key.keyboard.unknown")));
 
 	/**
 	 * Bump to set JEI's hover keys again. v1 (0.11.15): showRecipe had come unbound in Andy's profile. v2 (0.11.31):

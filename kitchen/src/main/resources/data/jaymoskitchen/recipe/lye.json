@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:water_bucket",
+    "jaymoskitchen:wood_ash",
+    "jaymoskitchen:wood_ash",
+    "jaymoskitchen:wood_ash"
+  ],
+  "result": {
+    "id": "jaymoskitchen:lye",
+    "count": 2
+  }
+}

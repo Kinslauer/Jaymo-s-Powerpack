@@ -1,0 +1,125 @@
+{
+  "inherit": "citystyle_config",
+  "style": "jaymospowers:maw/weathered",
+  "streetblocks": {
+    "border": "y",
+    "wall": "w",
+    "street": "S",
+    "streetbase": "b",
+    "streetvariant": "B",
+    "width": 16,
+    "parts": {
+      "full": "jaymospowers:maw/common/street_full",
+      "straight": "jaymospowers:maw/common/street_straight",
+      "end": "jaymospowers:maw/common/street_end",
+      "bend": "jaymospowers:maw/common/street_bend",
+      "t": "jaymospowers:maw/common/street_t",
+      "none": "jaymospowers:maw/common/street_none",
+      "all": "jaymospowers:maw/common/street_all"
+    }
+  },
+  "parkblocks": {
+    "elevation": "x",
+    "parkelevation": false
+  },
+  "corridorblocks": {
+    "roof": "x",
+    "glass": "+"
+  },
+  "railblocks": {
+    "railmain": "~"
+  },
+  "sphereblocks": {
+    "glass": "Z",
+    "border": "9",
+    "inner": "b"
+  },
+  "selectors": {
+    "buildings": [
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/megasolar/megasolar_cell"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/megasolar/megasolar_tank"
+      },
+      {
+        "factor": 0.01,
+        "value": "jaymospowers:maw/base/base_control_tower"
+      }
+    ],
+    "multibuildings": [
+      {
+        "factor": 0.3,
+        "value": "jaymospowers:maw/megasolar/megasolar_cell_medium"
+      },
+      {
+        "factor": 0.3,
+        "value": "jaymospowers:maw/megasolar/megasolar_cell_huge"
+      },
+      {
+        "factor": 0.03,
+        "value": "jaymospowers:maw/megasolar/megasolar_reactor"
+      }
+    ],
+    "bridges": [
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/common/bridge_open"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/common/bridge_covered"
+      }
+    ],
+    "fronts": [],
+    "stairs": [
+      {
+        "factor": 1.0,
+        "value": "stairs1"
+      },
+      {
+        "factor": 1.0,
+        "value": "stairs2"
+      },
+      {
+        "factor": 1.0,
+        "value": "stairsnormal"
+      },
+      {
+        "factor": 1.0,
+        "value": "stairsbig"
+      }
+    ],
+    "fountains": [],
+    "parks": [
+      {
+        "factor": 1.0,
+        "value": "park_pool"
+      },
+      {
+        "factor": 1.0,
+        "value": "park_plants"
+      },
+      {
+        "factor": 1.0,
+        "value": "park_trees"
+      },
+      {
+        "factor": 1.0,
+        "value": "park_plants_pillars"
+      }
+    ],
+    "raildungeons": [
+      {
+        "factor": 1.0,
+        "value": "rail_dungeon1"
+      },
+      {
+        "factor": 1.0,
+        "value": "rail_dungeon2"
+      }
+    ]
+  }
+}

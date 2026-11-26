@@ -19,6 +19,8 @@ message.jaymoskingdoms.cleric.symbol
 message.jaymoskingdoms.combat_art.none
 message.jaymoskingdoms.cordon.summons_blank
 message.jaymoskingdoms.daily.done
+message.jaymoskingdoms.dealings.kept
+message.jaymoskingdoms.dealings.usual
 message.jaymoskingdoms.dragon.exhausted
 message.jaymoskingdoms.dragon.not_yours
 message.jaymoskingdoms.druid.none
@@ -39,6 +41,7 @@ message.jaymoskingdoms.hard.chains.no_pick
 message.jaymoskingdoms.hidden_blade.jams
 message.jaymoskingdoms.hunter.noquarry
 message.jaymoskingdoms.imbue.no_blade
+message.jaymoskingdoms.lasso.dropped
 message.jaymoskingdoms.lasso.roped
 message.jaymoskingdoms.lasso.you_hogtied
 message.jaymoskingdoms.loan.short
@@ -176,6 +179,7 @@ message.jaymospowers.crucible.dry
 message.jaymospowers.darktide.arms_need_blade
 message.jaymospowers.darktide.blade_only
 message.jaymospowers.darktide.katana_only
+message.jaymospowers.death_toll.hint
 message.jaymospowers.downed.come_round
 message.jaymospowers.downed.down
 message.jaymospowers.downed.kneel_first

@@ -1,0 +1,44 @@
+{
+  "blocks": [
+    {
+      "random": 10,
+      "block": "minecraft:stone"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:cracked_stone_bricks"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:mossy_stone_bricks"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:stone_brick_stairs"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:infested_mossy_stone_bricks"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:stone_brick_slab"
+    },
+    {
+      "random": 3,
+      "block": "minecraft:moss_block"
+    },
+    {
+      "random": 3,
+      "block": "minecraft:iron_bars"
+    },
+    {
+      "random": 3,
+      "block": "minecraft:air"
+    },
+    {
+      "random": 1000,
+      "block": "minecraft:mossy_stone_bricks"
+    }
+  ]
+}

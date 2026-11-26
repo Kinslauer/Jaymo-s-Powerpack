@@ -1,0 +1,61 @@
+{
+  "dimx": 5,
+  "dimz": 9,
+  "buildings": [
+    [
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_pillar_diagonal_east",
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_pillar_diagonal_east",
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_pillar_diagonal_east",
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_pillar_diagonal_east",
+      "jaymospowers:maw/base/base_building_main_empty"
+    ],
+    [
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_wall",
+      "jaymospowers:maw/base/base_building_body00",
+      "jaymospowers:maw/base/base_building_body01",
+      "jaymospowers:maw/base/base_building_body01",
+      "jaymospowers:maw/base/base_building_body01",
+      "jaymospowers:maw/base/base_building_body02",
+      "jaymospowers:maw/base/base_building_wall",
+      "jaymospowers:maw/base/base_building_main_empty"
+    ],
+    [
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_body10",
+      "jaymospowers:maw/base/base_building_body11",
+      "jaymospowers:maw/base/base_building_body11",
+      "jaymospowers:maw/base/base_building_body11",
+      "jaymospowers:maw/base/base_building_body12",
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_main_empty"
+    ],
+    [
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_wall",
+      "jaymospowers:maw/base/base_building_body20",
+      "jaymospowers:maw/base/base_building_body21",
+      "jaymospowers:maw/base/base_building_body21",
+      "jaymospowers:maw/base/base_building_body21",
+      "jaymospowers:maw/base/base_building_body22",
+      "jaymospowers:maw/base/base_building_wall",
+      "jaymospowers:maw/base/base_building_main_empty"
+    ],
+    [
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_pillar_diagonal_west",
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_pillar_diagonal_west",
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_pillar_diagonal_west",
+      "jaymospowers:maw/base/base_building_main_empty",
+      "jaymospowers:maw/base/base_building_pillar_diagonal_west",
+      "jaymospowers:maw/base/base_building_main_empty"
+    ]
+  ]
+}

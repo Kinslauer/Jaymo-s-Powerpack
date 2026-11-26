@@ -1,0 +1,21 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "maxcellars": 0,
+  "parts": [
+    {
+      "floor": 0,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_ground_empty_0"
+    },
+    {
+      "top": false,
+      "part": "jaymospowers:maw/common_empty"
+    },
+    {
+      "top": true,
+      "part": "jaymospowers:maw/common_empty"
+    }
+  ]
+}

@@ -24,6 +24,11 @@
     "#jaymoskitchen:cooking/oily_fish",
     "#jaymoskitchen:cooking/reptile",
     "jaymoskitchen:offal",
-    "jaymoskitchen:intestines"
+    "jaymoskitchen:intestines",
+    "jaymoskitchen:heart",
+    "jaymoskitchen:liver",
+    "jaymoskitchen:kidney",
+    "jaymoskitchen:lung",
+    "jaymoskitchen:tripe"
   ]
 }

@@ -288,6 +288,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		RaidBeasts.register();
 		WitchRaids.register();
 		GolemPathing.register();
+		VillagerFixes.register();
 		Visitors.register();
 		// 0.7.483: every settlement keeps a butcher and a healer
 		TownTrades.register();
@@ -311,6 +312,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		CampfireWard.register();
 		Clearing.register();
 		Herds.register();
+		WeatherShelter.register();
+		LOGGER.debug("dealings attachment: {}", Dealings.DEALINGS);
 		Strays.register();
 		BloodChores.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
@@ -711,6 +714,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.mineshafts.Mineshafts.register();
 		// GTNH patch 6: marked monsters (and captains' marked traits), and MCA's turned villagers who remember their trade (and their attachments)
 		MarkedMonsters.register();
+		// CC0 picks (MobGear): a datapack's mobgear/<mob> loot table dresses that mob as it spawns
+		MobGearTables.register();
 		TurnedVillagers.register();
 		LOGGER.debug("marked and turned attachments: {} {}", MarkedMonsters.MARKS, TurnedVillagers.TRADE);
 		com.jaymoskingdoms.wild.WolfStalkers.register();

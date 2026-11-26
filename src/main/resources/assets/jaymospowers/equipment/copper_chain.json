@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymospowers:copper_chain"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymospowers:copper_chain"
+      }
+    ]
+  }
+}

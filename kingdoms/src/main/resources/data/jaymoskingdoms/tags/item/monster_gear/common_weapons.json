@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:copper_sword",
+    "minecraft:copper_axe",
+    {
+      "id": "jaymospowers:iron_dagger",
+      "required": false
+    }
+  ]
+}

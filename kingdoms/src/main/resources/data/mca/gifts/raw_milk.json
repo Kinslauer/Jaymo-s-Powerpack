@@ -1,0 +1,23 @@
+{
+  "conditions": [
+    {
+      "profession": "minecraft:farmer",
+      "satisfaction_boost": 10
+    },
+    {
+      "personality": "athletic",
+      "satisfaction_boost": 10
+    },
+    {
+      "personality": "stubborn",
+      "satisfaction_boost": 10
+    },
+    {
+      "personality": "odd",
+      "satisfaction_boost": 10
+    }
+  ],
+  "items": {
+    "minecraft:milk_bucket": 4
+  }
+}

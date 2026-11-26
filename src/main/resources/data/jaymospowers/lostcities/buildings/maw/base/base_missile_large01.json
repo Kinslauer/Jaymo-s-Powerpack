@@ -1,0 +1,26 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "allowFillers": false,
+  "minfloors": 2,
+  "maxfloors": 2,
+  "maxcellars": 0,
+  "parts": [
+    {
+      "floor": 0,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_missile_large01_0"
+    },
+    {
+      "floor": 1,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_missile_large01_1"
+    },
+    {
+      "floor": 2,
+      "top": true,
+      "part": "jaymospowers:maw/base/base_missile_large01_2"
+    }
+  ]
+}

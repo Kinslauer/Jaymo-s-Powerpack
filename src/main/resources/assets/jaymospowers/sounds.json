@@ -1170,6 +1170,23 @@
 			}
 		]
 	},
+	"immersive.bed.snore": {
+		"subtitle": "subtitles.jaymospowers.immersive.snore",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/bed/snore_1"
+			},
+			{
+				"name": "jaymospowers:immersive/bed/snore_2"
+			},
+			{
+				"name": "jaymospowers:immersive/bed/snore_3"
+			},
+			{
+				"name": "jaymospowers:immersive/bed/snore_4"
+			}
+		]
+	},
 	"voice.symbiote.say.climb.1": {
 		"sounds": [
 			{

@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * <li>the loop whirling over the holder's head while they hold use, a ring of rope going round faster and wider as it comes up to
  * speed ({@link LassoPose#angle}, {@link LassoPose#radius});</li>
  * <li>the loop in flight ({@link Lasso.Loop}), the loop's model leading the rope;</li>
- * <li>the one it holds ({@link Lasso#HOLDER}), with a noose round their middle.</li>
+ * <li>the one it holds ({@link Lasso#HOLDER}), with a noose round their middle (a hogtied one: a knot on their cords).</li>
  * </ul>
  * The server's rules (reach, pulls, breaking out) are untouched: this is only how the rope looks.
  */
@@ -74,8 +74,9 @@ public final class LassoRope {
 
 	/** The whirling loop's middle: this far over the holder's head (blocks), and ahead of the eyes in your own first-person view. */
 	static final double WHIRL_OVER_HEAD = 0.4, WHIRL_FIRST_UP = 0.55, WHIRL_FIRST_AHEAD = 0.35;
-	/** A hogtied body lies low: its rope is tied this high off its feet (blocks). */
-	static final double TIED_LOW = 0.3;
+	/** A hogtied body lies low: its rope is tied this high off its feet (blocks), in a knot this wide on the cords that bind it
+	 * (not a noose round a body lying across it). */
+	static final double TIED_LOW = 0.3, TIED_KNOT = 0.09;
 
 	/** What a rope's far end is on: nothing (or, {@code whirl} ticks in, the whirling loop), a loop in flight, someone held. */
 	private record End(@Nullable Entity on, float whirl) {
@@ -142,8 +143,8 @@ public final class LassoRope {
 	}
 
 	/**
-	 * Where the rope leaves the holder's hand: the top of the coil as it was last drawn; with none drawn (the lasso in the
-	 * pack or the off hand), roughly the hand.
+	 * Where the rope leaves the holder's hand: the top of the coil as it was last drawn, in whichever hand holds it; with none
+	 * drawn (the hand out of view), roughly that hand.
 	 */
 	private static Vec3 hand(Minecraft minecraft, LivingEntity holder, float partialTick) {
 		boolean first = holder == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
@@ -299,7 +300,7 @@ public final class LassoRope {
 			}
 			PoseStack poseStack = context.poseStack();
 			boolean noose = on instanceof LivingEntity;
-			double round = noose ? on.getBbWidth() * 0.5 + NOOSE_GAP : 0.0;
+			double round = !noose ? 0.0 : Lasso.hogtied(on) ? TIED_KNOT : on.getBbWidth() * 0.5 + NOOSE_GAP;
 			Vec3 neck = noose ? new Vec3(on.getPosition(partialTick).x, tip.y, on.getPosition(partialTick).z).subtract(camera.x, 0.0, camera.z) : null;
 			Vec3 ring = middle == null ? null : middle.subtract(camera);
 			double ringRound = middle == null ? 0.0 : LassoPose.radius(whirl);

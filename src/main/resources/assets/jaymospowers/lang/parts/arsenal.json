@@ -220,5 +220,7 @@
 	"message.jaymospowers.arsenal.hazard.frost": "Your hand closed on powder snow",
 	"message.jaymospowers.arsenal.hazard.charge": "Your hand closed on a lit charge",
 	"message.jaymospowers.arsenal.grab_holding": "Reaching for %s's pack... (keep holding)",
-	"message.jaymospowers.arsenal.pack_empty": "%s has nothing the rift can take"
+	"message.jaymospowers.arsenal.pack_empty": "%s has nothing the rift can take",
+	"tooltip.jaymospowers.axe_throw.gripped": "Throwing grip: hold use to draw it back, let go to throw (right-click it in your pack for a plain grip)",
+	"tooltip.jaymospowers.axe_throw.loose": "Right-click it in your pack to take it in a throwing grip"
 }

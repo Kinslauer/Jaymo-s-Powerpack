@@ -45,8 +45,8 @@ public final class Bait {
 	static ItemStack bait(Player player) {
 		ItemStack main = player.getMainHandItem(), off = player.getOffhandItem();
 		ItemStack other = main.getItem() instanceof FishingRodItem ? off : off.getItem() instanceof FishingRodItem ? main : ItemStack.EMPTY;
-		// offal goes on the hook as it is
-		return other.is(FISH_BAIT) || other.is(com.jaymoskitchen.butchery.Butchery.OFFAL) ? other : ItemStack.EMPTY;
+		// offal, a lung or a liver goes on the hook as it is
+		return other.is(FISH_BAIT) || other.is(com.jaymoskitchen.butchery.Organs.BAIT) ? other : ItemStack.EMPTY;
 	}
 
 	/** A fresh wait of {@code ticks} for a fish to come to the hook at {@code pos}: slower in shallow or roofed water, faster baited. */

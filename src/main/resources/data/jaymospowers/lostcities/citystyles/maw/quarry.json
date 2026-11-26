@@ -1,0 +1,150 @@
+{
+  "inherit": "citystyle_config",
+  "style": "jaymospowers:maw/weathered_quarry",
+  "explosionchance": 0,
+  "buildingsettings": {
+    "minfloors": 0,
+    "mincellars": 0,
+    "maxcellars": 0,
+    "buildingchance": 0.1
+  },
+  "streetblocks": {
+    "border": "Z",
+    "wall": "Z",
+    "street": "Z",
+    "streetbase": "Z",
+    "streetvariant": "Z",
+    "width": 16,
+    "parts": {
+      "full": "jaymospowers:maw/common_void",
+      "straight": "jaymospowers:maw/common_void",
+      "end": "jaymospowers:maw/common_void",
+      "bend": "jaymospowers:maw/common_void",
+      "t": "jaymospowers:maw/common_void",
+      "none": "jaymospowers:maw/common_void",
+      "all": "jaymospowers:maw/common_void"
+    }
+  },
+  "parkblocks": {
+    "parkelevation": false,
+    "elevation": "Z"
+  },
+  "corridorblocks": {
+    "roof": "d",
+    "glass": "+"
+  },
+  "railblocks": {
+    "railmain": "Z"
+  },
+  "sphereblocks": {
+    "glass": "Z",
+    "border": "Z",
+    "inner": "Z"
+  },
+  "selectors": {
+    "buildings": [
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_bulldozer_n"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_bulldozer_e"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_bulldozer_s"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_bulldozer_w"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_excavator_n"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_excavator_e"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_excavator_s"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_excavator_w"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/quarry/quarry_stone_small"
+      },
+      {
+        "factor": 0.03,
+        "value": "jaymospowers:maw/quarry/quarry_cargo_a"
+      },
+      {
+        "factor": 0.03,
+        "value": "jaymospowers:maw/quarry/quarry_cargo_b"
+      }
+    ],
+    "multibuildings": [
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_dump_n"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_dump_e"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_dump_s"
+      },
+      {
+        "factor": 0.025,
+        "value": "jaymospowers:maw/quarry/quarry_dump_w"
+      },
+      {
+        "factor": 0.05,
+        "value": "jaymospowers:maw/quarry/quarry_mega_machine"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/quarry/quarry_office"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/quarry/quarry_stone_middle"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/quarry/quarry_stone_large"
+      }
+    ],
+    "bridges": [
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/common/bridge_open"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/common/bridge_covered"
+      }
+    ],
+    "fronts": [],
+    "stairs": [],
+    "fountains": [],
+    "parks": [],
+    "raildungeons": [
+      {
+        "factor": 1.0,
+        "value": "rail_dungeon1"
+      },
+      {
+        "factor": 1.0,
+        "value": "rail_dungeon2"
+      }
+    ]
+  }
+}

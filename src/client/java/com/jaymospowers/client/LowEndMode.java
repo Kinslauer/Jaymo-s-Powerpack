@@ -59,6 +59,8 @@ public final class LowEndMode {
 	 * again: it had its turn, and if low-end mode is off there now, its player chose that with /lowend off.
 	 */
 	private static final String[] EARLIER_CHECKS = {"checked-v1"};
+	/** Set once Cutout Leaves has been switched back on for this install ({@link #leavesOnce}). */
+	private static final String LEAVES_CHECKED = "leaves-v1";
 
 	private static boolean on;
 	/** Why it switched itself on this launch, said once in chat on joining a world. */
@@ -114,6 +116,7 @@ public final class LowEndMode {
 	private static void checkOnce(Minecraft client) {
 		Properties state = load();
 		on = Boolean.parseBoolean(state.getProperty("on", "false"));
+		leavesOnce(client, state);
 		if (state.containsKey(CHECKED)) {
 			return;
 		}
@@ -132,6 +135,28 @@ public final class LowEndMode {
 			announce = why;
 			JaymosPowers.LOGGER.info("Low-end mode switched on: {}", why);
 		}
+		save(state);
+	}
+
+	/**
+	 * Once per install, Cutout Leaves goes back on where the Fast preset (or low-end mode) had turned it off, so leaves
+	 * aren't drawn solid (FastLeavesMixin keeps it on from now on). A Fast preset is applied again, which now includes
+	 * it and changes nothing else; a Custom one only gets the leaves switched on. Turning it off later is the player's choice.
+	 */
+	private static void leavesOnce(Minecraft client, Properties state) {
+		if (state.containsKey(LEAVES_CHECKED)) {
+			return;
+		}
+		Options options = client.options;
+		if (!options.cutoutLeaves().get()) {
+			if (options.graphicsPreset().get() == GraphicsPreset.FAST) {
+				options.applyGraphicsPreset(GraphicsPreset.FAST);
+			} else {
+				options.cutoutLeaves().set(true);
+			}
+			options.save();
+		}
+		state.setProperty(LEAVES_CHECKED, "true");
 		save(state);
 	}
 

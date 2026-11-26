@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:iron_sword",
+    {
+      "id": "jaymospowers:iron_saber",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_rapier",
+      "required": false
+    }
+  ]
+}

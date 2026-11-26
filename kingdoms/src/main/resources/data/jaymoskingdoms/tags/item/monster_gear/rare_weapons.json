@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:iron_rapier",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_longsword",
+      "required": false
+    },
+    "minecraft:iron_axe"
+  ]
+}

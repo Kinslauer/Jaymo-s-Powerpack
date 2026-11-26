@@ -56,7 +56,7 @@ public final class CaptiveLeads {
 
 	static void register() {
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
-			if (hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel server) || !sp.getMainHandItem().is(Lasso.ITEM)) {
+			if (hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel server) || Lasso.lassoHand(sp) == null) {
 				return InteractionResult.PASS;
 			}
 			var state = level.getBlockState(hit.getBlockPos());
@@ -72,7 +72,7 @@ public final class CaptiveLeads {
 		});
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel server) || player.isShiftKeyDown()
-				|| !sp.getMainHandItem().is(Lasso.ITEM) || !(entity instanceof LivingEntity body) || !POSTED.containsKey(body.getUUID())) {
+				|| Lasso.lassoHand(sp) == null || !(entity instanceof LivingEntity body) || !POSTED.containsKey(body.getUUID())) {
 				return InteractionResult.PASS;
 			}
 			untie(body);

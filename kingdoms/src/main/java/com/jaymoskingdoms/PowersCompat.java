@@ -511,6 +511,38 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code UndeadLeaps.leap(Mob, Vec3, Vec3)}. */
+	private static java.lang.invoke.@Nullable MethodHandle undeadLeap;
+	private static boolean lookedForUndeadLeap;
+
+	/**
+	 * How much of a clean jump {@code mob} puts into its gap jump from {@code from} to {@code to} ({@link GapJumps}): Powers'
+	 * clumsy undead (a zombie mostly comes up short, a skeleton half the time; 0 for a zombie already stuck in a gap). 1
+	 * without Powers.
+	 */
+	public static double undeadLeap(net.minecraft.world.entity.Mob mob, net.minecraft.world.phys.Vec3 from, net.minecraft.world.phys.Vec3 to) {
+		if (!lookedForUndeadLeap) {
+			lookedForUndeadLeap = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					undeadLeap = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.UndeadLeaps"), "leap",
+						java.lang.invoke.MethodType.methodType(double.class, net.minecraft.world.entity.Mob.class, net.minecraft.world.phys.Vec3.class,
+							net.minecraft.world.phys.Vec3.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' clumsy undead (older Powers?)", e);
+				}
+			}
+		}
+		if (undeadLeap == null) {
+			return 1.0;
+		}
+		try {
+			return (double)undeadLeap.invoke(mob, from, to);
+		} catch (Throwable e) {
+			return 1.0;
+		}
+	}
+
 	/** Powers' {@code SeveredPart.takeHead(LivingEntity, UUID, double)}. */
 	private static java.lang.invoke.@Nullable MethodHandle takeHead;
 	private static boolean lookedForTakeHead;

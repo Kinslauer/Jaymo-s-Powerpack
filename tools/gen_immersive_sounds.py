@@ -1,6 +1,6 @@
 """Our own sounds for the parts of ImmersiveFX: Resurrected the pack lost when it came out for lag (PR #1361): footsteps
 by material, armour by material, wading and swimming, steam, fire and bubble jets, workstations, dropped items, the
-stomach, and beds. ImmersiveFX is AGPL and its sounds are recorded, so nothing of it is used: every take here is
+stomach, and beds (and a sleeper's snore, after Snoring Sound, whose own recordings are of unknown source). ImmersiveFX is AGPL and its sounds are recorded, so nothing of it is used: every take here is
 synthesised from noise and tones, the same way as tools/gen_pool_sounds.py.
 
     python3 tools/gen_immersive_sounds.py      (needs numpy and ffmpeg with libvorbis)
@@ -439,6 +439,20 @@ def bed(kind, rng):
     if kind == "turn":
         n, t = clock(1.2)
         return noise(rng, n, 700, 5000) * swell(t, 0.5, 0.2) * 0.45 + creak(rng, t, j(60, 90), 0.25, 0.35) * 0.15
+    if kind == "snore":
+        # a slow breath in with the soft palate fluttering in it (a buzz of pulses through the throat and nose), then a
+        # breath out, sometimes with a little puff of the lips
+        breath_in = j(1.1, 1.6)
+        n, t = clock(breath_in + j(1.3, 1.8))
+        rate = j(26, 44) * (1 + 0.12 * np.sin(2 * np.pi * j(0.5, 1.1) * t))
+        pulses = np.maximum(0.0, np.sin(2 * np.pi * np.cumsum(rate) / RATE)) ** 8
+        throat = band(pulses * (1 + 0.6 * rng.standard_normal(n)), 70, j(650, 950))
+        drawn = swell(t, 0.1 + breath_in * 0.55, breath_in * 0.26)
+        out = swell(t, 0.1 + breath_in + j(0.45, 0.7), j(0.22, 0.32))
+        sound = throat * drawn + noise(rng, n, 250, 1700) * drawn * 0.3 + noise(rng, n, 400, 2600) * out * 0.22
+        if rng.random() < 0.4:
+            sound += band(thump(t, j(110, 160), 40, 0.1 + breath_in + j(0.15, 0.3), 0.3), 60, 600) * 0.15
+        return sound
     raise ValueError(kind)
 
 
@@ -481,6 +495,13 @@ def family(event, folder, takes, make, seed, subtitle=None):
     EVENTS[PREFIX + event] = entry
 
 
+SNORE_SEED = 900
+
+
+def snores():
+    family("bed.snore", "bed/snore", 4, lambda r: bed("snore", r), SNORE_SEED, "snore")
+
+
 def main():
     seed = 1
     materials = ["grass", "stone", "wood", "sand", "gravel", "snow", "metal", "carpet", "mud"]
@@ -515,6 +536,7 @@ def main():
     for kind in ("lie", "rise", "turn"):
         family(f"bed.{kind}", f"bed/{kind}", 3, lambda r, k=kind: bed(k, r), seed, "bed")
         seed += 1
+    snores()
 
     with open(SOUNDS_JSON, encoding="utf-8") as f:
         existing = json.load(f)

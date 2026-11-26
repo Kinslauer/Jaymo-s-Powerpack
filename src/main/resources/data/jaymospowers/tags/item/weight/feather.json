@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:feather",
+    "minecraft:paper",
+    "minecraft:string",
+    "minecraft:sugar",
+    "minecraft:glowstone_dust",
+    "minecraft:redstone",
+    "minecraft:gunpowder"
+  ]
+}

@@ -80,6 +80,12 @@ public final class Blows {
 	static final float BITES = 1.2F, TURNED = 0.8F;
 	/** An arrow whose head has no way of its own with armour does this share of its damage against mail. */
 	static final float ARROW_VS_MAIL = 0.75F;
+	/**
+	 * ...and this share against a body in mail from head to foot (every piece mail and whole): the rings turn it wherever
+	 * it lands (Just Better Chainmail's idea, CC0: there a full set stopped arrows outright; here the bodkin still finds the
+	 * rings, {@link HeadFx#againstArmour}, and the blow that gets through still wears the mail).
+	 */
+	static final float ARROW_VS_FULL_MAIL = 0.35F;
 	// ================================================================================================================
 
 	/**
@@ -178,7 +184,7 @@ public final class Blows {
 		measured = null;
 		if (source.getDirectEntity() instanceof AbstractArrow missile) {
 			return damage <= 0.0F || source.is(DamageTypeTags.BYPASSES_ARMOR) ? damage
-				: damage * missile(missile, source.is(DamageTypes.ARROW), ArmourKind.worn(victim, struck(victim, source)));
+				: damage * missile(victim, missile, source.is(DamageTypes.ARROW), ArmourKind.worn(victim, struck(victim, source)));
 		}
 		if (damage <= 0.0F || !(victim.level() instanceof ServerLevel level) || !(source.getDirectEntity() instanceof LivingEntity attacker)
 			|| source.getEntity() != attacker || attacker == victim) {
@@ -265,14 +271,27 @@ public final class Blows {
 	/**
 	 * The share of its damage an arrow or a thrown weapon does against {@code armour}: an arrowhead's own way with it (a
 	 * bodkin, a swallowtail: {@link HeadFx#againstArmour}), a war dart's thrust, {@link #ARROW_VS_MAIL} for a plain arrow
-	 * meeting mail, and 1 for the rest (a trident, a thrown blade).
+	 * meeting mail ({@link #ARROW_VS_FULL_MAIL} when the whole body is in it), and 1 for the rest (a trident, a thrown blade).
 	 */
-	private static float missile(AbstractArrow missile, boolean arrow, ArmourKind armour) {
+	private static float missile(LivingEntity victim, AbstractArrow missile, boolean arrow, ArmourKind armour) {
 		if (missile instanceof ItemSupplier thrown && thrown.getItem().is(WarArms.WAR_DART)) {
 			return WeaponKind.Blow.THRUST.against(armour);
 		}
 		float head = HeadFx.againstArmour(missile, armour);
-		return arrow && armour == ArmourKind.MAIL && head == 1.0F ? ARROW_VS_MAIL : head;
+		if (arrow && armour == ArmourKind.MAIL && head == 1.0F) {
+			return fullMail(victim) ? ARROW_VS_FULL_MAIL : ARROW_VS_MAIL;
+		}
+		return head;
+	}
+
+	/** Whether {@code body} wears whole mail in all four slots (mailed leather counts: it is mail over padding). */
+	static boolean fullMail(LivingEntity body) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			if (ArmourKind.worn(body, slot) != ArmourKind.MAIL) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** The armour slot over where this blow lands: the lock-on's region when the striker aims through one, else the chest. */

@@ -38,6 +38,10 @@ import org.jspecify.annotations.Nullable;
  * takes that one instead ({@link #choose}, from {@code mixin/wild/PredatorTargetMixin}). Nothing here runs on a timer
  * of its own: it's asked only when the hunter's own search has found something.
  *
+ * <p>Night hunters ({@code jaymoskingdoms:night_hunters}: wolves, foxes, ocelots, feral wolves) take no animal as quarry by
+ * day (Subtly Wild's idea, from its CC0 first release): they hunt from dusk to dawn ({@link WolfStalkers#night}), and in
+ * the mist. What hurts them they still turn on, by day or night.
+ *
  * <p>And polar bears hunt muskox ({@link Muskox}).
  *
  * <p>Andy (2026-11-23): fed, it leaves people be too ({@link #leaves}), unless they hurt it, anger it or come near its
@@ -46,6 +50,8 @@ import org.jspecify.annotations.Nullable;
 public final class FedPredators {
 	/** Hunters that hunt only when hungry. */
 	static final TagKey<EntityType<?>> SATED = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("sated_predators"));
+	/** Hunters that hunt animals only by night. */
+	static final TagKey<EntityType<?>> NIGHT_HUNTERS = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("night_hunters"));
 	/** How long a kill feeds it (ticks: two days). */
 	static final long FED_TICKS = 48000L;
 	/** A stalker's hunt for villagers: with its hunt for players' villager counterpart ({@code VillagerHunters}' 3). */
@@ -126,6 +132,10 @@ public final class FedPredators {
 	 * {@code area}, by its own {@code conditions}), if there is one; else {@code found}.
 	 */
 	public static @Nullable LivingEntity choose(Mob mob, LivingEntity found, Class<? extends LivingEntity> kind, TargetingConditions conditions, AABB area) {
+		if (found instanceof Animal && mob.level() instanceof ServerLevel here && mob.getType().builtInRegistryHolder().is(NIGHT_HUNTERS)
+			&& !WolfStalkers.night(here) && !Mist.covers(here, mob.position())) {
+			return null;
+		}
 		if (!(found instanceof Animal) || !sated(mob) || !(mob.level() instanceof ServerLevel level)) {
 			return found;
 		}

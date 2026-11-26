@@ -52,9 +52,10 @@ public final class GolemPathing {
 		});
 	}
 
-	/** Water costs more on a golem's path, and it steps up higher. */
+	/** Water costs more on a golem's path, so do cactus, berry bushes and rails, it never steps on powder snow ({@link VillagerFixes#avoid}), and it steps up higher. */
 	public static void improve(AbstractGolem golem) {
 		golem.setPathfindingMalus(PathType.WATER, WATER_COST);
+		VillagerFixes.avoid(golem);
 		AttributeInstance step = golem.getAttribute(Attributes.STEP_HEIGHT);
 		if (step != null && step.getBaseValue() < STEP_HEIGHT) {
 			step.setBaseValue(STEP_HEIGHT);

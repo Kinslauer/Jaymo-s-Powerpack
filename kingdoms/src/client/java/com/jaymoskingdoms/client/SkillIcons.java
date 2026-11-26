@@ -73,6 +73,7 @@ final class SkillIcons {
 		put(Skills.Perk.SLIDE, Items.LEATHER_LEGGINGS);
 		put(Skills.Perk.LONG_JUMP, Items.RABBIT_HIDE);
 		put(Skills.Perk.CHARGE_JUMP, Items.SLIME_BALL);
+		put(Skills.Perk.COYOTE_TIME, Items.SCAFFOLDING);
 		put(Skills.Perk.STRONG_SWIMMER, Items.HEART_OF_THE_SEA);
 		put(Skills.Perk.SHOVE, Items.PISTON);
 		put(Skills.Perk.AIM_PARTS, Items.TARGET);

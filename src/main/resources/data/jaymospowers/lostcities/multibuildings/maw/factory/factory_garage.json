@@ -1,0 +1,14 @@
+{
+  "dimx": 2,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/factory/factory_garage00",
+      "jaymospowers:maw/factory/factory_garage01"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_garage10",
+      "jaymospowers:maw/factory/factory_garage11"
+    ]
+  ]
+}
