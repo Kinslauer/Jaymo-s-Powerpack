@@ -1,9 +1,9 @@
 ---
-status: open
-for: apollo
+status: claimed
+for: hephaestus
 from: Andy (Claude chat, 2026-11-26)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: hermes-fixer
 pr: 
 ---
 
