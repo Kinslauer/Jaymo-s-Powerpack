@@ -8,6 +8,7 @@ claimed_by: hermes-a
 pr: 2220
 suggested_owns: []
 writer: hermes-writer
+text_pass: done
 ---
 
 # Realistic and pathable archery positions
