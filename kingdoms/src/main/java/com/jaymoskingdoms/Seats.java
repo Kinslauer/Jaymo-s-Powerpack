@@ -619,3 +619,4 @@ final class Seats {
 			}
 			return false;
 		}
+	}
