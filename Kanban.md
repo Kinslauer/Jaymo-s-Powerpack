@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 23:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:08). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,15 +15,13 @@ kanban-plugin: board
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for ☀️ Apollo · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for ☀️ Apollo · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for ☀️ Apollo · open
+- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · codex-bleed-out-coma · claimed
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · claimed
-- [ ] [[Agents/anaconda-jungle-hunters|anaconda-jungle-hunters]] · 💻 Odysseus · running
-- [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · running
 
 
 ## In review
@@ -39,6 +37,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · blocked
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · blocked
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
+- [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · stalled
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 - [ ] [[Agents/symbiote-113-picks|symbiote-113-picks]] · 💻 Odysseus · stalled
