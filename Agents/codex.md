@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: legends-p6-core-animations
 branch: codex/legends-p6-core-animations
 pr:
@@ -22,3 +22,6 @@ owns:
 # Legends patch 6
 
 Port Core's LGPL player and katana animation data. Connect the landings and shared acrobatics to Powers and the katana set to Weapon Forms. Build and send one PR to Claude for review.
+
+## Notes
+- 2026-11-26 21:03 No sign of work for 30 min: marked stalled (whoever ran it stopped).

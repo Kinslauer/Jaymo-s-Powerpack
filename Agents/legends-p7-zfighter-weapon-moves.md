@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: legends-p7-zfighter-weapon-moves
 branch: gemini/legends-p7-zfighter-weapon-moves
 with: 
@@ -60,3 +60,4 @@ owns:
 
 ## Done
 In progress.
+- 2026-11-26 21:03 No sign of work for 30 min: marked stalled (whoever ran it stopped).
