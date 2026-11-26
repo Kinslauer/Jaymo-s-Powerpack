@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 02:26). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 21:59). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -26,6 +26,10 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2196 Ki Cell has its icon and name (Powers, Kingdoms, 2026-11-26)
+- [ ] #2195 Camps stop crowding; scalebane sellswords live, side with the camp that hires them, and settle in havens as the Scalebound (Kingdoms, 2026-11-26)
+- [ ] #2193 fish fight: the hooked fish fights in plain sight, a hand-made fight plaque, Alt zooms while fishing (Powers, 2026-11-26)
+- [ ] #2192 Realms keep their own patrons and gifts (Kingdoms, 2026-11-26)
 - [ ] #2190 Belt charms: hot-stone pouch, cold-clay flask, equinox charm (Powers, Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2188 most people wear harness: everyday shirts, hose, hoods and cloaks (Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2187 Mordhau harness 4: more harness at the smith's anvil (Powers, Kingdoms, 2026-11-26)
@@ -82,15 +86,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2132 Villager screen opens into talk: everything is a spoke on the talk wheel, only Gift and Trade stay buttons (Kingdoms, 2026-11-25)
 - [ ] #2131 The Wither's own look, animations and voice (Kingdoms, 2026-11-25)
 - [ ] #2130 End plants no longer break End worldgen (Kitchen, 2026-11-25)
-- [ ] #2129 worn totems and villagers who carry one (Powers, 2026-11-25)
-- [ ] #2128 Gravity metal fixes: no dupes from torn chunks, no weapon minting (Powers, 2026-11-25)
-- [ ] #2127 three primitive hide sets, each with a dark make (Powers, Kingdoms, 2026-11-25)
-- [ ] #2126 weighty movement - the walk carries weight (Powers, 2026-11-25)
-- …and 573 older ones.
+- …and 577 older ones.
 
 ## Health
 
-15 problems in the notes: [[Health]].
+14 problems in the notes: [[Health]].
 
 ## Last week
 
