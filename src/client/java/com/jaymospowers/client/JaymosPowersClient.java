@@ -68,6 +68,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
 		com.jaymospowers.client.hud.AdvancementPins.init();
+		com.jaymospowers.client.hud.PackWeightClient.init();
 		// (Andy, 2026-11-23) what the keys do to whoever's under the crosshair: stealth kill, a body, Kingdoms' lines
 		com.jaymospowers.client.hud.ContextHints.init();
 		// (Andy, 2026-11-20) a tap of use on a body: the body menu

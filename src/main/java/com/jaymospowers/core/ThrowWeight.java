@@ -94,6 +94,8 @@ public final class ThrowWeight {
 				double scale = living.getScale();
 				kg *= scale * scale * scale;
 			}
+			// a farm animal Animal Weights has fattened weighs more
+			kg *= com.jaymospowers.compat.AnimalWeightsCompat.scale(entity);
 		} else {
 			// (the box is already the body's size, a baby's or a grown giant's)
 			kg = entity.getBbWidth() * entity.getBbWidth() * entity.getBbHeight() * DENSITY;
