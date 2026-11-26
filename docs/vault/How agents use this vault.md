@@ -61,6 +61,19 @@ name, or `any`), and the files it suggests owning.
 The coordinator never edits an agent note. On a claimed task it only adds lines under *Notes*, except to set
 `in-review` when an agent forgot to, and `sent`/`done` at the end.
 
+## Showing Andy the board
+
+"The board" or "the Kanban" is `Live/Kanban.md`, and it looks the same wherever an agent shows it (Andy, 2026-11-25:
+"can you make it consistent across the vault?"). Obsidian, the Discord board and any page or reply you make use its
+five lanes, with its names, in its order: **Waiting for a bot**, **Being built**, **In review**, **Needs Andy**,
+**Done**. Don't rename, merge, split or add lanes, and don't regroup cards by your own idea of their state: a card sits
+in the lane `Kanban.md` puts it in. Name who's on a card with the same labels (`worker_label` in `tools/vault_sync.py`:
+☀️ Apollo, 🍇 Bacchus, 🔨 Hephaestus, 🔥 Prometheus, 🪶 Quill, 🪽 any Hermes bot, ☁️ Cloud, 💻 Odysseus). Sync first
+(`python tools/vault_sync.py`) so the board is current.
+
+The Hermes board in `E:/hermes/kanban/` (columns Ready, Blocked, To do, Done) is the bots' job queue: it mixes a mirror
+of the Inbox with the Hermes bots' own sub-steps. It isn't the Kanban, so don't show it to Andy as the board.
+
 ## Your own worktree, always
 
 Every agent, Hermes included, works only in **its own git worktree** on its own branch
