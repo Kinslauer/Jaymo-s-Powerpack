@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: open
 for: apollo
 from: coordinator
 asked: 2026-11-24
