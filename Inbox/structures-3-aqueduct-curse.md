@@ -22,3 +22,4 @@ First find which mod places the Overworld aqueduct (ours, Veradexian, is Aether 
 
 ## Notes
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: #2085 explicitly excludes the curse. Identify the Overworld aqueduct and recover full section 5/four quest specifications before implementation; do not invent the missing plan.
+- 2026-11-26 00:31 YOUTH delegated this to Apollo (Claude approved): draft the four aqueduct-curse quests and the cursed-village lift from Lore.md; Andy's yes before any building.
