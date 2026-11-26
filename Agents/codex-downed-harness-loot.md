@@ -11,6 +11,7 @@ owns:
   - kitchen/src/main/java/com/jaymoskitchen/corpse/CorpseHarness.java (new), CorpseEntity.java (additive: the harness read/write beside putGear, openLoot, hasGear), CorpseLoot.java, CorpseLootMenu.java
   - kitchen/src/client/java/com/jaymoskitchen/client/corpse/CorpseLootScreen.java, kitchen lang part corpse_harness.json
   - kingdoms/src/main/java/com/jaymoskingdoms/Everyday.java (new), HeraldryWear.java (two additive call sites)
+  - kingdoms/src/main/java/com/jaymoskingdoms/DownedHarnessMenu.java (new), client/DownedHarnessScreen.java (new), Harness.java (menu type, taken tag, dress gate), Downed.java (the "harness" body-menu row), GuardKit.java (two skip lines), HeraldryWear.java (one gate), HeraldryClient.java (screen registration), lang parts body_menu.json + harness-downed.json
   - E:/Jaymo Vault Live/Lore.md (one (new) paragraph: What ordinary people wear)
   - changes/kitchen/codex-downed-harness-loot.md, changes/kingdoms/codex-downed-harness-loot.md
 ---
@@ -39,3 +40,12 @@ owns:
 ## Done
 - 2026-11-25 Draft PR #2188 (stacked on #2187/#2185, base master). Kitchen: CorpseHarness + harness block on CorpseLootMenu/Screen; Kingdoms: Everyday (80% of working Folk and non-guard villagers in cloth harness, zero armour). Lore: one (new) paragraph, "What ordinary people wear". pr_checks passes; Java compiled only by CI; not played.
 - Not done / open: no screen for the living downed (question for Andy); mob harness doesn't shed with lost limbs; raiders and bandits left on Andy's own wardrobe shares.
+
+## 2026-11-26 retry (T3 sub-agent, Sonnet 5.5): the living downed's screen
+- Andy's parent thread: the screen for the living downed MUST be built, not asked about. Building it in Kingdoms (it owns the harness): a "Take their harness" row on Powers' body menu (`PowersCompat.bodyOption`, like disarm), opening `DownedHarnessMenu` (ExtendedMenuType keyed by the body's entity id, like TackMenu) with the 13 real places, take only, written through `Harness.set`.
+- Checked: no other running agent or open PR touches these files (only #2188). Fabric attachment key verified by `javap` on fabric-data-attachment-api-v1: entity data holds `fabric:attachments` (compound) -> `<id>` per attachment; Kitchen's CorpseHarness now reads exactly that path.
+- Farm guard: GuardKit re-kits guards and re-issues harness every review, and Harness.dress re-dresses mobs, so a stripped body is tagged `jaymoskingdoms.harness_taken` and nothing re-dresses or re-kits it.
+
+## Done (retry)
+- 2026-11-26 PR #2188 head c2ed877: living-downed screen built (Kingdoms `DownedHarnessMenu` + `DownedHarnessScreen`, body-menu row "Take their harness", lang part downed_harness.json); `Harness.TAKEN_TAG` stops every re-dress (Harness.dress, GuardKit sweep/harness/forget, HeraldryWear restyle clear); Kitchen `CorpseHarness` now reads `fabric:attachments` -> `jaymoskingdoms:harness` (checked in fabric-data-attachment-api-v1 2.2.34); shift-click moves a copy so the take is always marked. Lore paragraph extended. PR body, change notes and Decisions updated.
+- Not played; compiled only by CI. Open limits are in the PR body.
