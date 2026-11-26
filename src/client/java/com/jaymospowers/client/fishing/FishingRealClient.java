@@ -1,5 +1,6 @@
 package com.jaymospowers.client.fishing;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.fishing.FishCast;
@@ -33,11 +34,10 @@ import net.minecraft.world.item.ItemStack;
  * Client side of realistic fishing ({@link FishingReal}): while a fish is on the line, holding use reels it in,
  * sending {@link FishingPayloads.ReelInput} to the server each tick. Draws a tension bar so the player can see how
  * close the line is to breaking. (Track A) Scrolling reels too; sneak + scroll turns the drag; the line creaks near its
- * breaking point; the bar shows the drag's slip point and which way the fish runs; a cast bar fills while charging a cast;
+ * breaking point; the line shows the drag's slip point and which way the fish runs; a cast bar fills while charging a cast;
  * and the held rod bends with the strain ({@link #bend}).
  */
 public final class FishingRealClient {
-    private static final int BAR_W = 100, BAR_H = 6;
     /** Strain (share of the breaking point) above which the line creaks, and the slowest and fastest creak (ticks). */
     private static final float CREAK_AT = 0.75F;
     private static final int CREAK_SLOW = 10, CREAK_FAST = 3;
@@ -50,15 +50,23 @@ public final class FishingRealClient {
     /** Flip if the third-person rod bends up instead of down (its pose frame differs from first person's). */
     private static final float THIRD_PERSON_SIGN = 1.0F;
 
-    /** (2026-11-23) The fight's readout: how far below the crosshair it sits, and the colours of the fish's moods. */
+    /** (2026-11-23) The fight's readout: how far below the crosshair it sits. */
     private static final int READOUT_BELOW = 34;
-    private static final int MOOD_REEL = 0xFF70E080, MOOD_EASE = 0xFFFFB040, MOOD_TAKING = 0xFF80D0FF;
+    /** (2026-11-26) The fight's plaque and the cast's, their size; the line's height and its twist (px); the fight's pips. */
+    private static final int PLAQUE_W = 200, PLAQUE_H = 41, CAST_W = 110, CAST_H = 17, ROPE_H = 4, TWIST = 4, PIPS = 8;
+    /** The keys show under the plaque this long into a fight (ticks). */
+    private static final int KEYS_TICKS = 200;
+    /** Hemp, slack line, the plaque's light and faint lettering (the pack's paper tones), an unlit pip, a fish still taking the lure. */
+    private static final int HEMP = 0xFFC9B07A, ROPE_SLACK = 0xFF2A241C, INK_LIGHT = UiStyle.PAPER, INK_FAINT = 0xFFA89878,
+            DIM_PIP = 0xFF4A4236, MOOD_TAKING = 0xFF9EC4CC;
 
     private static int scrollReelTicks;
     private static float scrollNotches;
     private static int creakIn;
     /** (2026-11-23) Sneak + use has let this fish go already (sent once a press). */
     private static boolean releaseSent;
+    /** Use was down last tick: a release is a fresh press, never Shift added to a held reel. */
+    private static boolean useWasDown;
 
     private FishingRealClient() {
     }
@@ -191,6 +199,7 @@ public final class FishingRealClient {
             scrollReelTicks = 0;
             scrollNotches = 0.0F;
             releaseSent = false;
+            useWasDown = minecraft.options.keyUse.isDown();
             return;
         }
         boolean scrolled = scrollReelTicks > 0;
@@ -199,17 +208,18 @@ public final class FishingRealClient {
         }
         if (minecraft.gui.screen() == null) {
             boolean use = minecraft.options.keyUse.isDown();
-            if (use && player.isShiftKeyDown()) {
-                // (Andy, 2026-11-23) sneak + use lets the fish go, once a press, and reels nothing
-                if (!releaseSent) {
-                    releaseSent = true;
+            if (use && !useWasDown) {
+                // (Andy, 2026-11-23) sneak + use lets the fish go; (2026-11-26: "shift shouldnt stop your cast") only a press
+                // of use made while already sneaking: Shift pressed while you hold use to reel changes nothing
+                releaseSent = player.isShiftKeyDown();
+                if (releaseSent) {
                     ClientPlayNetworking.send(new FishingPayloads.ReleaseFish());
                 }
-                ClientPlayNetworking.send(new FishingPayloads.ReelInput(false));
-            } else {
+            } else if (!use) {
                 releaseSent = false;
-                ClientPlayNetworking.send(new FishingPayloads.ReelInput(use || scrolled));
             }
+            useWasDown = use;
+            ClientPlayNetworking.send(new FishingPayloads.ReelInput(!releaseSent && (use || scrolled)));
         }
         // (Track A) the line creaks near its breaking point, faster the closer it gets
         float strain = state.strain();
@@ -248,7 +258,14 @@ public final class FishingRealClient {
         return true;
     }
 
-    /** Draw the tension bar above the hotbar while a fight is live, or the cast bar while charging a cast. */
+    /**
+     * Draw the fight's plaque below the crosshair while a fight is live, or the cast bar while charging a cast. (Andy,
+     * 2026-11-26: "make it less modern looking and fit the pack aesthetic") A dark plate in the pack's gold frame with its
+     * corner diamonds (the screens' {@link UiStyle#frame}, the tip cards' plate), no percentages: the fish and its weight,
+     * what it's doing in words, the line drawn as twisted hemp that reddens as it nears breaking (the drag's slip point a
+     * gold notch on it, a run's way a chevron at its end), the fish's fight left in pips, the drag in diamonds, and the line
+     * out in metres. The keys show under it for the first moments of a fight.
+     */
     private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
@@ -257,56 +274,109 @@ public final class FishingRealClient {
         }
         int w = graphics.guiWidth();
         int h = graphics.guiHeight();
-        int x = w / 2 - BAR_W / 2;
-        int y = h - 40;
+        int cx = w / 2;
         Font font = minecraft.font;
         FishFight state = fight(player);
         if (!state.fighting()) {
             float charge = castCharge(player);
             if (charge >= 0.0F) {
-                bar(graphics, x, y, charge, 0xFF50C8FF);
-                Component label = Component.translatable("hud.jaymospowers.fishing.cast", Math.round(charge * 100));
-                graphics.text(font, label, x + BAR_W / 2 - font.width(label) / 2, y - 10, 0xFFFFFFFF, true);
+                int x = cx - CAST_W / 2, y = h - 52;
+                plate(graphics, x, y, CAST_W, CAST_H, UiStyle.FRAME);
+                Component label = Component.translatable("hud.jaymospowers.fishing.cast");
+                graphics.text(font, label, x + 6, y + 5, INK_LIGHT, true);
+                int rx = x + 10 + font.width(label);
+                rope(graphics, rx, y + 7, x + CAST_W - 7 - rx, charge, HEMP);
             }
             return;
         }
-        // (Andy, 2026-11-23, a fishing gif: "thats what i want our fishing to be like") the readout, below the crosshair: the
-        // fish, its weight and what it's doing; the tension bar; tension, its energy, the line out, the drag; what to do
-        y = h / 2 + READOUT_BELOW;
-        int cx = w / 2;
+        int x = cx - PLAQUE_W / 2;
+        int y = h / 2 + READOUT_BELOW;
+        float strain = state.strain();
+        int moodColour = state.mood() == FishFight.TAKING ? MOOD_TAKING : state.easeOff() ? UiStyle.GOLD : UiStyle.GOOD;
+        plate(graphics, x, y, PLAQUE_W, PLAQUE_H, moodColour);
+        // the fish, its weight, and what it's doing
         com.jaymospowers.fishing.Species sp = com.jaymospowers.fishing.Species.of(state.fishKind());
         Component name = sp == null ? Component.translatable("hud.jaymospowers.fishing.a_fish") : Component.translatable(sp.nameKey());
-        int moodColour = state.mood() == FishFight.TAKING ? MOOD_TAKING : state.easeOff() ? MOOD_EASE : MOOD_REEL;
-        Component title = Component.translatable("hud.jaymospowers.fishing.title", name, String.format(java.util.Locale.ROOT, "%.1f", state.kg()))
-                .append(Component.literal("  "))
-                .append(Component.translatable("hud.jaymospowers.fishing.mood." + state.mood()).withColor(moodColour & 0xFFFFFF));
-        graphics.text(font, title, cx - font.width(title) / 2, y, 0xFFFFFFFF, true);
-        x = cx - BAR_W / 2;
-        int barY = y + 11;
-        float strain = state.strain();
-        bar(graphics, x, barY, strain, strain >= CREAK_AT ? HudStyle.WARN : state.easeOff() ? MOOD_EASE : MOOD_REEL);
-        // the drag's slip point
+        Component mood = Component.translatable("hud.jaymospowers.fishing.mood." + state.mood());
+        int moodW = font.width(mood);
+        Component title = Component.translatable("hud.jaymospowers.fishing.title", name, String.format(java.util.Locale.ROOT, "%.1f", state.kg()));
+        UiStyle.line(graphics, font, title, x + 7, y + 5, PLAQUE_W - 18 - moodW, UiStyle.GOLD);
+        graphics.text(font, mood, x + PLAQUE_W - 7 - moodW, y + 5, moodColour, true);
+        // the line: hemp, reddening near its breaking point, the drag's slip point notched on it, a run's way at its end
+        int ropeX = x + 14, ropeW = PLAQUE_W - 28, ropeY = y + 19;
+        int hemp = strain >= CREAK_AT ? HudStyle.mix(HEMP, UiStyle.BAD, (strain - CREAK_AT) / (1.0F - CREAK_AT)) : HEMP;
+        rope(graphics, ropeX, ropeY, ropeW, strain, hemp);
         int drag = FishRun.drag(FishRun.rodInHand(player));
-        int slipX = x + Math.round(BAR_W * FishRun.DRAG_SLIP[drag - 1]);
-        graphics.fill(slipX, barY - 2, slipX + 1, barY + BAR_H + 2, 0xFF60E0FF);
-        // which way the fish runs
+        int slipX = ropeX + Math.round(ropeW * FishRun.DRAG_SLIP[drag - 1]);
+        graphics.fill(slipX, ropeY - 2, slipX + 1, ropeY + ROPE_H + 2, UiStyle.FRAME);
         if (state.run() != 0) {
-            String arrows = state.run() > 0 ? ">>" : "<<";
-            int ax = state.run() > 0 ? x + BAR_W + 4 : x - 4 - font.width(arrows);
-            graphics.text(font, Component.literal(arrows), ax, barY - 1, HudStyle.GOLD, true);
+            chevron(graphics, state.run() > 0 ? ropeX + ropeW + 4 : ropeX - 5, ropeY + ROPE_H / 2, state.run(), UiStyle.GOLD);
         }
-        int percent = Mth.clamp(Math.round(strain * 100), 0, 100);
-        Component numbers = Component.translatable("hud.jaymospowers.fishing.numbers", percent, Math.round(state.energy() * 100),
-                Math.round(state.lineOut()), Math.round(state.lineMax()), drag, FishRun.DRAG_STEPS);
-        graphics.text(font, numbers, cx - font.width(numbers) / 2, barY + BAR_H + 4, 0xFFFFFFFF, true);
-        Component hint = Component.translatable(state.mood() == FishFight.TAKING ? "hud.jaymospowers.fishing.hint.taking" : "hud.jaymospowers.fishing.hint");
-        graphics.text(font, hint, cx - font.width(hint) / 2, barY + BAR_H + 15, 0xFFB0B0B0, true);
+        // its fight left, the drag, and the line out
+        int rowY = y + 29;
+        Component fightLabel = Component.translatable("hud.jaymospowers.fishing.fight");
+        graphics.text(font, fightLabel, x + 7, rowY, INK_LIGHT, true);
+        int pipX = x + 10 + font.width(fightLabel);
+        int lit = Mth.ceil(Mth.clamp(state.energy(), 0.0F, 1.0F) * PIPS);
+        for (int i = 0; i < PIPS; i++) {
+            int px = pipX + i * 4;
+            graphics.fill(px, rowY + 2, px + 3, rowY + 5, i < lit ? INK_LIGHT : DIM_PIP);
+        }
+        Component dragLabel = Component.translatable("hud.jaymospowers.fishing.drag");
+        int dragX = pipX + PIPS * 4 + 8;
+        graphics.text(font, dragLabel, dragX, rowY, INK_LIGHT, true);
+        int dx = dragX + font.width(dragLabel) + 5;
+        for (int i = 0; i < FishRun.DRAG_STEPS; i++) {
+            diamond(graphics, dx + i * 6, rowY + 3, i < drag ? UiStyle.FRAME : DIM_PIP);
+        }
+        Component spool = Component.translatable("hud.jaymospowers.fishing.spool", Math.round(state.lineOut()), Math.round(state.lineMax()));
+        graphics.text(font, spool, x + PLAQUE_W - 7 - font.width(spool), rowY, INK_FAINT, true);
+        // the keys, for the first moments of a fight
+        long fought = player.level().getGameTime() - state.startTime();
+        if (fought < KEYS_TICKS) {
+            Component keys = Component.translatable("hud.jaymospowers.fishing.keys", Component.keybind("key.use"), Component.keybind("key.sneak"),
+                    Component.keybind("key.jaymospowers.dodge"));
+            UiStyle.lineCentred(graphics, font, keys, cx, y + PLAQUE_H + 3, Math.max(PLAQUE_W, w - 40), INK_FAINT);
+        }
     }
 
-    private static void bar(GuiGraphicsExtractor graphics, int x, int y, float fill, int color) {
-        graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + BAR_H + 1, 0xC0000000);
-        graphics.fill(x, y, x + BAR_W, y + BAR_H, 0xFF202028);
-        graphics.fill(x, y, x + Math.round(BAR_W * Mth.clamp(fill, 0.0F, 1.0F)), y + BAR_H, color);
+    /** The plate the fight and the cast sit on: the tip cards' dark plate in the screens' gold frame, ticked in {@code accent}. */
+    private static void plate(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int accent) {
+        graphics.fill(x, y, x + w, y + h, HudStyle.PLATE);
+        UiStyle.frame(graphics, x, y, w, h, accent);
+    }
+
+    /**
+     * A line drawn as twisted hemp, {@code share} of it taut ({@code colour}), the rest slack and dark: a sunken groove with
+     * a slanted twist every few pixels.
+     */
+    private static void rope(GuiGraphicsExtractor graphics, int x, int y, int w, float share, int colour) {
+        graphics.fill(x - 1, y - 1, x + w + 1, y + ROPE_H + 1, 0xC0000000);
+        graphics.fill(x, y, x + w, y + ROPE_H, ROPE_SLACK);
+        int filled = Math.round(w * Mth.clamp(share, 0.0F, 1.0F));
+        graphics.fill(x, y, x + filled, y + ROPE_H, colour);
+        int twist = HudStyle.mix(colour, 0xFF000000, 0.35F);
+        for (int px = 0; px < filled; px++) {
+            int row = (px % TWIST) * ROPE_H / TWIST;
+            graphics.fill(x + px, y + row, x + px + 1, y + row + 1, twist);
+        }
+    }
+
+    /** A small chevron pointing {@code dir} (1 right, -1 left), its tip at {@code (x, y)}. */
+    private static void chevron(GuiGraphicsExtractor graphics, int x, int y, int dir, int colour) {
+        for (int i = 0; i <= 2; i++) {
+            int px = x - dir * i;
+            graphics.fill(px, y - i, px + 1, y - i + 1, colour);
+            graphics.fill(px, y + i, px + 1, y + i + 1, colour);
+        }
+    }
+
+    /** A little diamond (5 px across) centred on {@code (cx, cy)}. */
+    private static void diamond(GuiGraphicsExtractor graphics, int cx, int cy, int colour) {
+        for (int dy = -2; dy <= 2; dy++) {
+            int half = 2 - Math.abs(dy);
+            graphics.fill(cx - half, cy + dy, cx + half + 1, cy + dy + 1, colour);
+        }
     }
 
     /** How full {@code player}'s cast charge is, 0..1, or -1 when they aren't charging a cast. */
