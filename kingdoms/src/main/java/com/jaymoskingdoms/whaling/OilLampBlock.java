@@ -27,7 +27,7 @@ import net.minecraft.world.phys.BlockHitResult;
 /**
  * (0.7.206) An oil lamp: whale oil burning behind glass, standing or hung like a lantern, brighter than a torch. It holds
  * {@link #MOST_OIL} measures and comes empty (a bottle of whale oil fills it and gives the bottle back); lit, it burns a measure every
- * {@link #BURN_TICKS}, so a full lamp left burning lasts a day, and goes out dry. Use it with an empty hand to light it or
+ * {@link #BURN_TICKS}, so a full lamp left burning lasts three days (Andy: "lamps should be up to 3 days with whale oil"), and goes out dry. Use it with an empty hand to light it or
  * snuff it. In a settlement its folk tend their lamps ({@link Lamplighters}): lit at dusk, snuffed at dawn, filled from
  * the stores while there's oil. (medieval picks) Lit in an abandoned place, it gutters ({@link #GUTTERED}, {@link GutteringLamps}).
  */
@@ -38,7 +38,7 @@ public final class OilLampBlock extends LanternBlock {
 	/** Lit, but guttered down near dark for a moment (an abandoned place's lamp, {@link GutteringLamps}). */
 	public static final BooleanProperty GUTTERED = BooleanProperty.create("guttered");
 	/** Ticks a measure of oil burns. */
-	static final int BURN_TICKS = 6000;
+	static final int BURN_TICKS = 18000;
 	/** Its light, lit. */
 	static final int LIGHT = 15;
 	/** Its light, guttered. */
@@ -96,7 +96,10 @@ public final class OilLampBlock extends LanternBlock {
 		level.setBlock(pos, state.setValue(LIT, lit).setValue(GUTTERED, false), Block.UPDATE_ALL);
 		if (lit) {
 			level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.3F, 1.6F);
-			level.scheduleTick(pos, state.getBlock(), BURN_TICKS);
+			// (snuffed and lit again before its measure was out, its tick is still waiting: one is enough)
+			if (!level.getBlockTicks().hasScheduledTick(pos, state.getBlock())) {
+				level.scheduleTick(pos, state.getBlock(), BURN_TICKS);
+			}
 		} else {
 			level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.3F, 1.8F);
 		}

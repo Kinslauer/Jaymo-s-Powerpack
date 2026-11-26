@@ -10,7 +10,9 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -47,18 +49,23 @@ import net.minecraft.world.level.material.PushReaction;
 
 /**
  * (0.7.17) Torches burn down, the idea of Realistic Torches (remade here; none of its code or art). Every torch, floor
- * or wall, placed by a player, a settlement or world generation, burns about {@link #BURN_TICKS} on average (a chance
- * on each random tick, mixin.TorchBlockMixin), then goes out and is left a {@link #BURNT_TORCH}; rain on a torch open
- * to the sky puts it out much sooner. A burnt torch gives no light and drops a stick. Flint and steel, a fire charge or
+ * or wall, placed by a player, a settlement or world generation, burns {@link #BURN_TICKS} (forty minutes of play, Andy,
+ * from Hardcore Torches: "torch burnout should be 40m"), then goes out on its next random tick (mixin.TorchBlockMixin) and
+ * is left a {@link #BURNT_TORCH}; rain on a torch open to the sky puts it out much sooner. Each torch keeps its own time
+ * ({@link #BURNS_TILL}): one set down by hand or lit again burns the whole forty minutes, while one a settlement or world
+ * generation set, first met, has somewhere between {@link #FIRST_SEEN_LEAST} of that and all of it left, so a village's
+ * torches go out one by one and its folk relight them as they do, never the whole place dark at once. A burnt torch gives no light and drops a stick. Flint and steel, a fire charge or
  * a lit torch in hand lights it again, and villagers (MCA's too) walk over to burnt torches near them and relight them,
  * so a village stays lit as long as its folk are up and about (Andy, 2026-10-14). Folk also light the burnt torches they
  * walk past, and somewhere people live or travel a burnt torch nobody is near to see is lit again ({@link Lamplight}).
  */
 public final class Torches {
-	/** How long a torch burns on average (ticks): two days. */
+	/** How long a torch burns (ticks): forty minutes of play. */
 	static final long BURN_TICKS = 48000L;
-	/** Ticks between a block's random ticks at the default random tick speed (3 per 16x16x16 section a tick). */
-	static final int RANDOM_TICK_EVERY = 4096 / 3;
+	/** A torch nobody lit by hand (world generation, a settlement), first met, has at least this share of {@link #BURN_TICKS} left. */
+	static final float FIRST_SEEN_LEAST = 0.25F;
+	/** A torch the Lanternkeeper keeps ({@link HeritagePaths#keeps}) when it would have burnt out burns this much longer (ticks). */
+	static final long KEPT_MORE = BURN_TICKS / 4;
 	/** A torch in the rain under open sky goes out with 1 chance in this many at each random tick (about 2 minutes). */
 	static final int RAIN_DOUSE_CHANCE = 2;
 	/** How often (ticks) villagers look for burnt torches to relight. */
@@ -73,6 +80,9 @@ public final class Torches {
 	/** Per chunk: packed positions of its burnt torches, for the lamplighters. Saved. */
 	static final AttachmentType<List<Long>> BURNT = AttachmentRegistry.create(JaymosKingdoms.id("burnt_torches"),
 		builder -> builder.persistent(Codec.LONG.listOf()));
+	/** Per chunk: packed torch position (as text) to the game time it burns out. Saved. */
+	static final AttachmentType<Map<String, Long>> BURNS_TILL = AttachmentRegistry.create(JaymosKingdoms.id("torch_burns_till"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
 
 	private Torches() {
 	}
@@ -166,12 +176,60 @@ public final class Torches {
 		return state.is(Blocks.TORCH) || state.is(Blocks.WALL_TORCH);
 	}
 
-	/** A torch's random tick (mixin.TorchBlockMixin): maybe it burns out, sooner in the rain. */
+	/** A torch's random tick (mixin.TorchBlockMixin): out once its time is up, sooner in the rain or a gale. */
 	public static void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		long now = level.getGameTime();
+		boolean spent = now >= burnsTill(level, pos, random);
 		boolean out = level.isRainingAt(pos) ? random.nextInt(RAIN_DOUSE_CHANCE) == 0
-			: FieldWeather.blowsOut(level, pos, random) || random.nextInt((int) (BURN_TICKS / RANDOM_TICK_EVERY)) == 0;
-		if (out && !HeritagePaths.keeps(level, pos, random)) {
+			: FieldWeather.blowsOut(level, pos, random) || spent;
+		if (!out) {
+			return;
+		}
+		if (!HeritagePaths.keeps(level, pos, random)) {
 			goOut(level, pos, state);
+		} else if (spent) {
+			setTill(level, pos, now + KEPT_MORE);
+		}
+	}
+
+	/**
+	 * (mixin.TorchBlockMixin) A torch was set at {@code pos}: by hand ({@code full}) it burns the whole {@link #BURN_TICKS};
+	 * set any other way (a settlement building) it may have burnt a while already, as if lit some time back.
+	 */
+	public static void lit(ServerLevel level, BlockPos pos, boolean full) {
+		long left = full ? BURN_TICKS : firstSeen(level.getRandom());
+		setTill(level, pos, level.getGameTime() + left);
+	}
+
+	/** When the torch at {@code pos} burns out; one never timed (world generation, or burning since before torches kept time) is given a while from now. */
+	private static long burnsTill(ServerLevel level, BlockPos pos, RandomSource random) {
+		Long till = level.getChunkAt(pos).getAttachedOrElse(BURNS_TILL, Map.of()).get(String.valueOf(pos.asLong()));
+		if (till == null) {
+			till = level.getGameTime() + firstSeen(random);
+			setTill(level, pos, till);
+		}
+		return till;
+	}
+
+	private static long firstSeen(RandomSource random) {
+		return (long) (BURN_TICKS * (FIRST_SEEN_LEAST + (1.0F - FIRST_SEEN_LEAST) * random.nextFloat()));
+	}
+
+	/** Sets the torch at {@code pos} to burn till {@code till} (or forgets it, below 0), dropping entries whose torch is gone. */
+	private static void setTill(ServerLevel level, BlockPos pos, long till) {
+		LevelChunk chunk = level.getChunkAt(pos);
+		Map<String, Long> times = new HashMap<>(chunk.getAttachedOrElse(BURNS_TILL, Map.of()));
+		String here = String.valueOf(pos.asLong());
+		times.keySet().removeIf(k -> !k.equals(here) && !burns(level.getBlockState(BlockPos.of(Long.parseLong(k)))));
+		if (till >= 0) {
+			times.put(here, till);
+		} else {
+			times.remove(here);
+		}
+		if (times.isEmpty()) {
+			chunk.removeAttached(BURNS_TILL);
+		} else {
+			chunk.setAttached(BURNS_TILL, times);
 		}
 	}
 
@@ -180,6 +238,7 @@ public final class Torches {
 			? BURNT_WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, state.getValue(WallTorchBlock.FACING))
 			: BURNT_TORCH.defaultBlockState();
 		level.setBlockAndUpdate(pos, burnt);
+		setTill(level, pos, -1);
 		HeritagePaths.forgetLight(level, pos);
 		level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4F, 1.6F);
 		level.sendParticles(ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 6, 0.05, 0.05, 0.05, 0.01);
@@ -202,6 +261,7 @@ public final class Torches {
 			? Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, state.getValue(WallTorchBlock.FACING))
 			: Blocks.TORCH.defaultBlockState();
 		level.setBlockAndUpdate(pos, lit);
+		lit(level, pos, true);
 		forget(level, pos);
 	}
 
@@ -291,9 +351,9 @@ public final class Torches {
 		level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.NEUTRAL, 0.8F, 1.0F);
 	}
 
-	/** Whether {@code state} is a burnt torch or lantern someone could light again. */
+	/** Whether {@code state} is a burnt torch or lantern someone could light again (not one a player snuffed). */
 	static boolean burnt(BlockState state) {
-		return state.is(BURNT_TORCH) || state.is(BURNT_WALL_TORCH) || state.is(Lanterns.BURNT_LANTERN);
+		return state.is(BURNT_TORCH) || state.is(BURNT_WALL_TORCH) || state.is(Lanterns.BURNT_LANTERN) && !Lanterns.snuffed(state);
 	}
 
 	private static Block block(String name, Function<BlockBehaviour.Properties, Block> make, BlockBehaviour.Properties properties) {
