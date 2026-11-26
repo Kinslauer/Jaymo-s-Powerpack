@@ -18,6 +18,7 @@
 		{ "id": "naturalist:bear", "required": false },
 		{ "id": "naturalist:lion", "required": false },
 		{ "id": "naturalist:alligator", "required": false },
+		{ "id": "cubeanimals:crocodile", "required": false },
 		{ "id": "naturalist:hyena", "required": false },
 		{ "id": "naturalist:vulture", "required": false },
 		{ "id": "naturalist:black_bear", "required": false },
