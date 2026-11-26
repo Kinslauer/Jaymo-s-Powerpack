@@ -25,3 +25,4 @@ Build: place 3-4 camps around a kingdom or castle seat; a muster period; the sie
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: retain grouped camps, supply-dependent sieges and victor resource transfer. Camps still clears storage on fall. #2195 fixes NPC crowding, not this task. Do not edit HollowCaptains.java, Captains.java, Rivals.java or Ladders.java while their separate PR owns them.
 - 2026-11-26 02:04 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
 - 2026-11-26 02:07 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-26 02:32 Text pass: reviewed kingdoms siege-camps player text - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/siege-camps.json and changes/kingdoms/structures-1-siege-camps.md; wording already player-facing, committed unchanged as c8b570b976 on claude/structures-1-siege-camps. kingdoms compileJava passed; tools/pr_checks.py passed.
