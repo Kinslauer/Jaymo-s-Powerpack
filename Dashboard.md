@@ -18,6 +18,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
 - [[Inbox/nycto-2|nycto-2]] · 2026-11-26 ON HOLD until the earlier waves merge (1, then 2+7, then 3+6, then 4+5). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/nycto-3|nycto-3]] · 2026-11-26 ON HOLD until the earlier waves merge (1, then 2+7, then 3+6, then 4+5). Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/nycto-4-models|nycto-4-models]] · 2026-11-26 ON HOLD until Night's Blood 2 is in review.
 - [[Inbox/nycto-4|nycto-4]] · 2026-11-26 ON HOLD until the earlier waves merge (1, then 2+7, then 3+6, then 4+5). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/nycto-5|nycto-5]] · 2026-11-26 ON HOLD until the earlier waves merge (1, then 2+7, then 3+6, then 4+5). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/nycto-6|nycto-6]] · 2026-11-26 ON HOLD until the earlier waves merge (1, then 2+7, then 3+6, then 4+5). Not a question for Andy: the vault coordinator opens it when its turn comes.

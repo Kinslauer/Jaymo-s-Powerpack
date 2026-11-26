@@ -63,6 +63,7 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-5|nycto-5]] · for any · blocked
 - [ ] [[Inbox/nycto-6|nycto-6]] · for any · blocked
 - [ ] [[Inbox/nycto-7|nycto-7]] · for any · blocked
+- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · for 🔥 Prometheus · blocked
 
 
 ## Done
