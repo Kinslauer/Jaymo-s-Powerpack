@@ -11,6 +11,9 @@ import json, os, random, shutil
 from PIL import Image
 import sys as _sys
 _sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import reason_fold  # noqa: E402
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
 import vanilla_egg  # noqa: E402
 
 MOC = 'tools/mocreatures/'
@@ -85,7 +88,7 @@ if __name__ == '__main__':
         shutil.copyfile(original(src), ENTITY + dst + '.png')
     for i, src in enumerate(HIDES):
         img = Image.open(original(src)).convert('RGBA')
-        img.save(DRAGON + 'hide_%d.png' % i)
+        reason_fold.save(img, DRAGON + 'hide_%d.png' % i)
         # (no glowing marks: its original has none; an empty sheet is what the renderer's glow layer draws)
         Image.new('RGBA', img.size, (0, 0, 0, 0)).save(DRAGON + 'marks_%d.png' % i)
 

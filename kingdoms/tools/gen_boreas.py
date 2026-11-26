@@ -13,6 +13,9 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gen_dragons as g
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import reason_fold  # noqa: E402
 
 SIZE = g.SIZE
 
@@ -260,7 +263,7 @@ def species(name, hides):
     folder = g.ASSETS + 'textures/entity/dragon/' + name + '/'
     os.makedirs(folder, exist_ok=True)
     for i in range(len(hides)):
-        hide_texture(i).save(folder + 'hide_%d.png' % i)
+        reason_fold.save(hide_texture(i), folder + 'hide_%d.png' % i)
     for i in range(len(MARKS)):
         marks_texture(i).save(folder + 'marks_%d.png' % i)
 

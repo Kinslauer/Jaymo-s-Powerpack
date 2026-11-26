@@ -11,6 +11,9 @@ import json, os, random
 from PIL import Image
 import sys as _sys
 _sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import reason_fold  # noqa: E402
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
 import vanilla_egg  # noqa: E402
 
 RES = 'src/main/resources/'
@@ -315,7 +318,7 @@ def species(name, hides):
     folder = ASSETS + 'textures/entity/dragon/' + name + '/'
     os.makedirs(folder, exist_ok=True)
     for i in range(len(hides)):
-        hide_texture(i).save(folder + 'hide_%d.png' % i)
+        reason_fold.save(hide_texture(i), folder + 'hide_%d.png' % i)
     for i in range(len(MARKS)):
         marks_texture(i).save(folder + 'marks_%d.png' % i)
 
