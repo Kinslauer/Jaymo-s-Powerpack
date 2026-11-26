@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:20). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:31). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,14 +47,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/mordhau-4-legs|mordhau-4-legs]]
-- [x] [[Inbox/Done/mordhau-3-body|mordhau-3-body]]
 - [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
 - [x] [[Inbox/Done/village-mods-6-small-structures|village-mods-6-small-structures]]
 - [x] [[Inbox/Done/village-mods-5-town-life-hats|village-mods-5-town-life-hats]]
 - [x] [[Inbox/Done/village-mods-4-board-work|village-mods-4-board-work]]
 - [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
 - [x] [[Inbox/Done/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]]
+- [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
+- [x] [[Inbox/Done/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]]
 
 
 %% kanban:settings
