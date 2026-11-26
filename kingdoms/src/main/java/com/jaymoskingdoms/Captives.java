@@ -170,6 +170,8 @@ public final class Captives {
 	}
 
 	static void register() {
+		// (what they're doing in their chains is drawn by everyone's client: the type is known before any is sent)
+		CaptiveIdle.init();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Villager v && v.hasAttached(CAPTIVE)) {
 				LOADED.add(v);
@@ -290,6 +292,7 @@ public final class Captives {
 			v.setAttached(BOUND, true);
 		} else {
 			v.removeAttached(BOUND);
+			CaptiveIdle.clear(v);
 		}
 	}
 
@@ -559,6 +562,8 @@ public final class Captives {
 				Doubles.unsteal(level, v);
 			} else if (c.rescuer().isEmpty()) {
 				if (bound(v) && v.isNoAi()) {
+					Player near = level.getNearestPlayer(v, PLEAD_RANGE);
+					CaptiveIdle.step(level, v, near == null || near.isSpectator() ? null : near, now);
 					plead(level, v, now);
 				} else {
 					walkFree(v);

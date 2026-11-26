@@ -228,6 +228,8 @@ public final class HeritageVariants {
 		FELINE(Heritage.Kind.BEASTFOLK, 0xC89A5A, 0.12F, Land.PLAINS, null, null),
 		KITSUNE(Heritage.Kind.BEASTFOLK, 0xE08A4A, 0.14F, Land.FLOWERS, null, Heritage.Kind.SYLVAN),
 		SERPEN(Heritage.Kind.BEASTFOLK, 0x6E9A5A, 0.35F, Land.JUNGLE, null, null),
+		// (Andy, 2026-11-26) the Scalebound: the scalebane sellswords' lizardfolk, of the swamps, and born in the havens that keep them (Havens#scalebound)
+		SCALEBOUND(Heritage.Kind.BEASTFOLK, 0x2E6E52, 0.45F, Land.SWAMP, null, null),
 		// ---- (0.7.490) the Hollow, the risen dead
 		ZOMBIE(Heritage.Kind.HOLLOW, 0x7A9A6E, 0.45F, Land.SWAMP, null, null),
 		SKELETON(Heritage.Kind.HOLLOW, 0xE4E0D0, 0.5F, Land.DEEP, null, null),
@@ -403,6 +405,10 @@ public final class HeritageVariants {
 	 * variant's element standing near. Null: the first look.
 	 */
 	static @Nullable Variant roll(Level level, BlockPos pos, Heritage.Kind kind, RandomSource random) {
+		if (kind == Heritage.Kind.BEASTFOLK && level instanceof ServerLevel server && Havens.scaleboundAt(server, pos)) {
+			// the Beastfolk of a haven that keeps Scalebound are theirs (Havens#scalebound)
+			return Variant.SCALEBOUND;
+		}
 		List<Variant> all = of(kind);
 		float[] weights = new float[all.size()];
 		float base = W_BASE * Math.max(1.0F, all.size() / (float) BASE_SHARE_VARIANTS);

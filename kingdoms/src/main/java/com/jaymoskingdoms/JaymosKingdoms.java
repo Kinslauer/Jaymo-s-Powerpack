@@ -856,6 +856,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Callouts.register();
 		FieldMedics.register();
 		BandLeaders.register();
+		// no knots of fighters: a fight among people takes turns, the rest hold off on a ring
+		Turns.register();
 		BreakOff.register();
 		DangerSense.register();
 		Passages.register();

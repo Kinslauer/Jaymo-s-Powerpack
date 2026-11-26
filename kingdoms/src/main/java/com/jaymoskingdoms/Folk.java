@@ -547,7 +547,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 					|| Sieges.foe(this, player) == Boolean.TRUE)));
 		// and monsters on their land
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,
-			(target, level) -> this.combatant() && (target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper) && !PatronChampions.outsideTown(target)
+			(target, level) -> this.combatant() && !CampBeasts.spares(this, target) && (target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper) && !PatronChampions.outsideTown(target)
 				// (0.6.11) and whatever the symbiote has got into (Oddities)
 				|| Oddities.hunted(target)
 				// (0.7.0) and a vampire that's shown itself tonight (Vampires)
