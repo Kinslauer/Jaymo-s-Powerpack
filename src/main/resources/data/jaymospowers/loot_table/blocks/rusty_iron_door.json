@@ -2,27 +2,23 @@
   "type": "minecraft:block",
   "pools": [
     {
-      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "jaymospowers:rusty_iron_door",
-          "conditions": [
-            {
-              "condition": "minecraft:block_state_property",
-              "block": "jaymospowers:rusty_iron_door",
-              "properties": {
-                "half": "lower"
-              }
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:rusty_iron_door",
+            "state": {
+              "half": "lower"
             }
-          ]
+          },
+          "name": "jaymospowers:rusty_iron_door"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "rolls": 1
     }
   ],
   "random_sequence": "jaymospowers:blocks/rusty_iron_door"

@@ -6,8 +6,8 @@
       "entries": [
         {
           "type": "minecraft:tag",
-          "name": "jaymoskingdoms:monster_gear/legendary_weapons",
-          "expand": true
+          "expand": true,
+          "items": "#jaymoskingdoms:monster_gear/legendary_weapons"
         }
       ]
     }
