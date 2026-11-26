@@ -169,6 +169,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		WoolClothes.register();
 		// qiviut, the muskox's underwool, and the clothes knitted from it
 		QiviutClothes.register();
+		// clothes for the sun, the ranger's leaf cloak, and the herbalist's belt charms
+		LeafCloak.register();
+		ClimateWear.register();
+		HerbalistWares.register();
 		Buildings.register();
 		Construction.register();
 		// 0.7.202: the world weathers (moss, cracks, mud, leaf litter, tufts); a settlement's builders keep up its upkeep

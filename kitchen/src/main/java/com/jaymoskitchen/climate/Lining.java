@@ -27,11 +27,18 @@ public enum Lining {
 	/** Furs are heavier than wool and warmer. A loom can't take a pelt: only a tailor sews one ({@link Tailoring}). */
 	WOLF_FUR("wolf_fur", 1.5F, 0.0F, true),
 	WILD_FUR("wild_fur", 1.25F, 0.0F, true),
-	BEAR_FUR("bear_fur", 2.0F, 0.0F, true);
+	BEAR_FUR("bear_fur", 2.0F, 0.0F, true),
+	/**
+	 * A dragon's hide, sewn only by a master tailor ({@link Tailoring}): it counts as a full warm and a full cool piece, and
+	 * whoever wears a piece lined with it can't go past chilly in the cold or warm in the heat ({@link BodyHeat#tempered}).
+	 */
+	TEMPERED("tempered", 1.0F, 1.0F, true, true);
 
 	public static final Codec<Lining> CODEC = Codec.STRING.xmap(Lining::byId, lining -> lining.id);
 	/** Qiviut, whichever mod's it is (Kingdoms lists its own; the tag is empty without it). */
 	public static final TagKey<Item> QIVIUT_CLOTH = TagKey.create(Registries.ITEM, JaymosKitchen.id("qiviut"));
+	/** A dragon's hide, whichever mod's it is (Jaymo's Powers' {@code dragon_hide}; the tag is empty without it). */
+	public static final TagKey<Item> DRAGON_HIDE = TagKey.create(Registries.ITEM, JaymosKitchen.id("dragon_hide"));
 	/** Any hide or pelt (c:hides). */
 	public static final TagKey<Item> HIDES = TagKey.create(Registries.ITEM, net.minecraft.resources.Identifier.fromNamespaceAndPath("c", "hides"));
 	public static final StreamCodec<ByteBuf, Lining> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(Lining::byId, lining -> lining.id);
@@ -41,12 +48,19 @@ public enum Lining {
 	public final float warm, cool;
 	/** Sewn only by a tailor villager, for a fee. */
 	public final boolean tailored;
+	/** Sewn only by a master tailor (a shepherd at the top level of the trade). */
+	public final boolean master;
 
 	Lining(String id, float warm, float cool, boolean tailored) {
+		this(id, warm, cool, tailored, false);
+	}
+
+	Lining(String id, float warm, float cool, boolean tailored, boolean master) {
 		this.id = id;
 		this.warm = warm;
 		this.cool = cool;
 		this.tailored = tailored;
+		this.master = master;
 	}
 
 	/** Flame pips the tooltip shows: half a warm piece each. */
@@ -90,6 +104,9 @@ public enum Lining {
 		}
 		if (stack.is(Furs.WILD_FUR)) {
 			return WILD_FUR;
+		}
+		if (stack.is(DRAGON_HIDE)) {
+			return TEMPERED;
 		}
 		// any other hide or pelt lines as rabbit hide does (Andy: "everything that requires rabbit pelts should also take hides")
 		if (stack.is(HIDES)) {

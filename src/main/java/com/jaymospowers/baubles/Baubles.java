@@ -163,6 +163,9 @@ public final class Baubles {
 		com.jaymospowers.baubles.artifacts.ArtifactBaubles.init();
 		// the ticking charm: clicks faster the nearer the blight
 		TickingCharm.init();
+		// belt charms against the heat and the cold, counted in Kitchen's body heat when it is loaded
+		ClimateCharms.init();
+		com.jaymospowers.compat.KitchenBodyHeat.init();
 		// what the thing under the wreck leaves: a charm that saves its wearer from the water once, and a tooth
 		ClingingCoil.init();
 		// the boots of long strides and the cloak of the depths

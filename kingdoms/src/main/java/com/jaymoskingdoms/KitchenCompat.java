@@ -306,6 +306,8 @@ public final class KitchenCompat {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Butcher's Hand (needs clean kills and skinning pulls): {}", e.toString());
 		}
 		HunterBow.kitchenHooks();
+		// a desert robe and headscarf together keep the sun off like shade
+		ClimateWear.kitchenHooks();
 		// a butcher's work on the town's carcasses (on the meat hook) goes into their town's stores
 		try {
 			Class.forName("com.jaymoskitchen.corpse.Butchers").getMethod("setStock", java.util.function.BiFunction.class)
