@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:32). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,7 +14,6 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for ☀️ Apollo · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for ☀️ Apollo · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
-- [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for 🪶 Quill · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for ☀️ Apollo · open
 
 
@@ -22,6 +21,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 🪶 Quill · claimed
 
 
 ## In review
