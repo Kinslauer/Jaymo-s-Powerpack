@@ -1,5 +1,5 @@
 ---
-status: open
+status: blocked
 for: hermes-modeller
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
