@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: open
 for: gemini
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
-claimed_by: gemini
-pr: 2251
+claimed_by: 
+pr: 
 ---
 
 # Blood Awakening: build Andy's per-blood upgrades
