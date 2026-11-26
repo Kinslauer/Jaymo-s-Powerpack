@@ -9,6 +9,9 @@ pr:
 suggested_owns: []
 ---
 
+## Closed (YOUTH, 2026-11-26)
+Andy's answer: it was the spider watcher's hut with the web roof, and its generation stopped in PR #2108 (Silk Deeps removed). Nothing left to tune or spawn-rate - closing rather than leaving it blocked.
+
 # Structure spawn rate — wooden hut too common, needs to be rarer than mushroom islands
 
 Andy wants a structure (small wooden hut topped with white flowers, seen in a cave-biome-adjacent area) to be significantly rarer — rarer than mushroom islands.

@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Hollow captains fix: captain keeps his WALKING place when due back; tuning numbers as static finals; 12 Hollow slots per player on their own ladders
 branch: claude/hollow-captains-fix
 with: Hephaestus (hermes-fixer)
@@ -34,3 +34,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-26 01:25 No sign of work for 30 min: marked stalled (whoever ran it stopped).
