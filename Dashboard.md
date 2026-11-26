@@ -6,6 +6,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Questions for you:**
+- [[Inbox/hunters-road-10|hunters-road-10]] · see the note
 - [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-26 19:58 ON HOLD until wave 1 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
 - [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-26 19:59 ON HOLD until wave 2 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
 - [[Inbox/hunters-road-5|hunters-road-5]] · 2026-11-26 20:00 ON HOLD until wave 3 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
@@ -28,7 +29,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-9 waiting for a bot, 5 being built, 8 in review: see [[Kanban]].
+8 waiting for a bot, 5 being built, 8 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
