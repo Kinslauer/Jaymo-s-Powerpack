@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 03:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 03:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,12 +19,12 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · 🍇 Bacchus · claimed
-- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · 🪶 Quill · #2216 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
+- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
