@@ -1,0 +1,15 @@
+{
+  "faction_allegiance.jaymoskingdoms.human": "Human",
+  "faction_allegiance.jaymoskingdoms.nonhuman": "Nonhuman",
+  "faction_allegiance.jaymoskingdoms.bandit": "Bandit",
+  "faction_allegiance.jaymoskingdoms.pirate": "Pirate",
+  "faction_allegiance.jaymoskingdoms.greenskin": "Greenskin",
+  "faction_allegiance.jaymoskingdoms.pillager": "Pillager",
+  "faction_allegiance.jaymoskingdoms.demon": "Demon",
+  "faction_allegiance.jaymoskingdoms.avatar": "Avatar",
+  "faction_allegiance.jaymoskingdoms.pallid": "Pallid",
+  "relation.jaymoskingdoms.allied": "Allied",
+  "relation.jaymoskingdoms.neutral": "Neutral",
+  "relation.jaymoskingdoms.rival": "Rival",
+  "relation.jaymoskingdoms.war": "At War"
+}
