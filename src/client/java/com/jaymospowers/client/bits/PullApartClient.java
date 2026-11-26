@@ -68,7 +68,7 @@ public final class PullApartClient {
 				Screens.getWidgets(screen).add(pick);
 				// the recipe book moves the inventory about: follow it every frame
 				ScreenEvents.beforeExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> pick.place());
-				ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> drawMode(container, pick, graphics, mouseX, mouseY));
+				ScreenEvents.afterExtract(screen).register((s, graphics, mouseX, mouseY, delta) -> drawMode(container, graphics));
 			}
 			ScreenEvents.remove(screen).register(s -> {
 				if (s == modeScreen) {
@@ -101,8 +101,8 @@ public final class PullApartClient {
 		return slot != null && PullApart.of(slot.getItem()) != null && slot.mayPlace(slot.getItem());
 	}
 
-	/** While the mode is on: gold outlines on what comes apart, and the explanation beside the pick for a while. */
-	private static void drawMode(AbstractContainerScreen<?> screen, Pick pick, GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+	/** While the mode is on: gold outlines on what comes apart (the explanation is the pick's own, {@link Pick#extractContents}). */
+	private static void drawMode(AbstractContainerScreen<?> screen, GuiGraphicsExtractor graphics) {
 		if (!on || screen != modeScreen) {
 			return;
 		}
@@ -111,11 +111,6 @@ public final class PullApartClient {
 			if (slot.isActive() && pullable(slot)) {
 				graphics.outline(at.jaymospowers$leftPos() + slot.x - 1, at.jaymospowers$topPos() + slot.y - 1, 18, 18, UiStyle.GOLD);
 			}
-		}
-		if (Util.getMillis() - turnedOn < EXPLAIN_MS && !pick.isHovered()) {
-			// Andy: "use this shorter descp", the hover text
-			UiStyle.tip(graphics, Minecraft.getInstance().font, Component.translatable("button.jaymospowers.pull_apart.hover"),
-				pick.getX() + Pick.SIZE, pick.getY() + Pick.SIZE + 4);
 		}
 	}
 
@@ -184,6 +179,12 @@ public final class PullApartClient {
 			graphics.pose().scale(0.5F, 0.5F);
 			graphics.item(ICON, 0, 0);
 			graphics.pose().popMatrix();
+			// for a while after it's turned on, the explanation beside it (Andy: "use this shorter descp", the hover text).
+			// Set here, as the widget draws, so it goes out with the screen's tooltips (set after the screen, it was lost)
+			if (on && Util.getMillis() - turnedOn < EXPLAIN_MS && !isHovered()) {
+				UiStyle.tip(graphics, Minecraft.getInstance().font, Component.translatable("button.jaymospowers.pull_apart.hover"),
+					x + SIZE, y + SIZE + 4);
+			}
 		}
 
 		@Override
