@@ -1167,3 +1167,4 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26 (Andy, CC0 picks thread): picked 39 CC0/MIT rows (all but Ghillie Suit, Blink Eye, ActionHunger, Working Graves), "do it here, one PR". Torches burn 40 min; lamps up to 3 days on whale oil; coyote time is a skill-tree perk; lasso stays tied, drops when swapped off, off hand leads captives.
 - 2026-11-26 (Andy, CC0 picks thread): Cutout Leaves on by default (Fast preset and low-end mode keep it).
 - 2026-11-26 (Andy, CC0 picks thread, card): lanterns capped at 3 days too (whale oil 3, ambergris 2, coal 1, tallow 0.5), replacing the 2026-11-12 long lanterns.
+- 2026-11-26 (Andy, CC0 picks thread): "merge approve" -> the 16 CC0-pick lore paragraphs approved; merge #2212.
