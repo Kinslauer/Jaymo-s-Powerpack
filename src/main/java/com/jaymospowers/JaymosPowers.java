@@ -110,6 +110,7 @@ public class JaymosPowers implements ModInitializer {
 		// (0.20.68) armour wears fast, absorbs more, breaks without vanishing
 		com.jaymospowers.core.ArmourWear.init();
 		com.jaymospowers.core.Dismember.init();
+		com.jaymospowers.core.UndeadLeaps.init();
 		com.jaymospowers.core.wounds.Wounds.init();
 		// fighting and running in armour wear the feathers down; run dry and the next blow knocks the weapon away
 		// (after the wounds: the blow that starts adrenaline finds the hand already closed)
