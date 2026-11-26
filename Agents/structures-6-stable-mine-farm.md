@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: in-review
 task: structures-6-stable-mine-farm
 branch: claude/structures-6-stable-mine-farm
 with: 
-pr: 
+pr: 2217
 mods: kingdoms
 versions: 
 started: 2026-11-26
@@ -30,5 +30,8 @@ owns:
 - Patch 6 precedent (PR #2110): data-only, no Java changes.
 
 ## Done
-(none yet)
+- Built the three original structures (stable, mine, farm) as NBT templates via tools/small_designs/stable_mine_farm.py + tools/small_structures.py, with worldgen/structure, template_pool, structure_set and biome tag files under smalls/, and extended the stables_by_towns / mines_by_buyers / farms_by_homes placement tags so PlacementReasons (track 2, merged as #2085) places them. Added changes/kingdoms/structures-6-stable-mine-farm.md.
+- kingdoms/src/main/java/com/jaymoskingdoms builds: sh ./gradlew build passes (BUILD SUCCESSFUL); tools/pr_checks.py passes (20 changed files against origin/master).
+- PR #2217 opened from claude/structures-6-stable-mine-farm -> master and handed in (vault status in-review, pr=2217). CI 'Build Powers' flapped red on Modrinth HTTP 429 rate limiting (shared-advancements/betterping/item-highlighter downloads) — unrelated to this data-only Kingdoms change; Build Kingdoms + Build Kitchen + change-note checks are green.
+- Not tested in game: placement was not playtested.
 - 2026-11-26 04:04 No sign of work for 30 min: marked stalled (whoever ran it stopped).
