@@ -5,7 +5,7 @@ mechanics" from Legends: Superheroes Unlimited, Chrono "running so fast it takes
 applicable fx and animations" from Legends Anime, Power Rangers, Revenant's Miscellaneous and Legends Core, and (project
 chat) "web users should get access to the uptilt attack as they get increased agility, their mid air uptilts should involve
 using the webs to swing them up or pendulum kick the enemy higher, like the insomniac games". Pick list (all 61 rows
-picked): https://claude.ai/artifact/EHLGagLabgCmMYK9NuHAjV (db `picks/andy`). Andy's one row note: suit-up pose, "rig too"; then "the rig should have a few different suit ups" (several Rig suit-ups, picked at random or by situation: standing, running, falling/flying in).
+picked): https://claude.ai/artifact/EHLGagLabgCmMYK9NuHAjV (db `picks/andy`). Andy's one row note: suit-up pose, "rig too"; then "the rig should have a few different suit ups" (several Rig suit-ups, picked by situation: plates slamming on piece by piece while standing, a step-in where the suit folds shut around you, a flight-in that locks on midair, and, Andy: "one where it assembles on you while falling from a great height, then thrusters kick in to stop the momentum").
 
 ## Licences
 
