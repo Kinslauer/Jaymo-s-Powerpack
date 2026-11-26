@@ -23,6 +23,7 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
+- [ ] [[Inbox/nycto-7|nycto-7]] · for any · open
 
 
 ## Being built
