@@ -477,12 +477,15 @@ public final class Camps {
 			// Adjust Y to find a valid floor
 			boolean illager = IllagerCamps.KIND.equals(kind), goblin = GoblinVillages.KIND.equals(kind), orc = OrcCamps.KIND.equals(kind);
 			boolean pirate = PirateCoves.KIND.equals(kind), sky = SkyPirates.KIND.equals(kind);
+			// SkyPirates need peaks - skip in group spawning (they spawn individually via SkyPirates.trySite)
+			if (sky) {
+				continue;
+			}
 			int floor = pirate ? IllagerBuildings.floor(level, at, PirateCoves.MAX_SPREAD, PirateCoves.RADIUS)
 				: orc ? IllagerBuildings.floor(level, at, OrcCamps.MAX_SPREAD, OrcBuildings.CLEAR_RADIUS)
 				: goblin ? (SwampGoblins.swamp(level, at) ? SwampGoblins.floor(level, at)
 					: IllagerBuildings.floor(level, at, GoblinVillages.MAX_SPREAD, GoblinBuildings.CLEAR_RADIUS))
 				: illager ? IllagerBuildings.floor(level, at, IllagerCamps.MAX_SPREAD)
-				: sky ? SkyPirates.floor(level, at)
 				: CampBuildings.floor(level, at, MAX_SPREAD);
 			if (floor == Integer.MIN_VALUE) {
 				continue;
@@ -504,9 +507,6 @@ public final class Camps {
 			if (pirate && !PirateCoves.land(level, at)) {
 				continue;
 			}
-			if (sky && !SkyPirates.land(level, at)) {
-				continue;
-			}
 			Direction gate = Direction.getApproximateNearest(realm.seat().getX() - at.getX(), 0, realm.seat().getZ() - at.getZ());
 			Faction camp = null;
 			if (pirate) {
@@ -517,8 +517,6 @@ public final class Camps {
 				camp = GoblinVillages.found(level, at, floor, gate);
 			} else if (illager) {
 				camp = IllagerCamps.found(level, at, floor, gate);
-			} else if (sky) {
-				camp = SkyPirates.found(level, at, floor);
 			} else {
 				camp = found(level, at, floor, gate);
 			}
