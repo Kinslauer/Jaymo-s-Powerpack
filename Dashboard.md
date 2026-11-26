@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:16). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:26). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -33,6 +33,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2207 The salmon run: salmon swim upriver in autumn, spawn in the headwaters and die there (Powers, Kingdoms, 2026-11-26)
 - [ ] #2206 Giant mushrooms repainted in the pack's vanilla style (Kingdoms, 2026-11-26)
 - [ ] #2205 anacondas lie on the ground, live in the jungle and hunt from trees and water (Kingdoms, 2026-11-26)
 - [ ] #2204 story scenes and the Warlock's midnight bargain, spoken spells (Kingdoms, 2026-11-26)
@@ -92,8 +93,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2141 fallen trees are solid (Kingdoms, 2026-11-25)
 - [ ] #2140 Squashed bugs and spiders burst in their own blood (Powers, Kingdoms, 2026-11-25)
 - [ ] #2139 refusal hints - a turned-down talk option says why (Kingdoms, 2026-11-25)
-- [ ] #2138 Tectonic leaves the pack (Powers, Kingdoms, 2026-11-25)
-- …and 585 older ones.
+- …and 586 older ones.
 
 ## Health
 
