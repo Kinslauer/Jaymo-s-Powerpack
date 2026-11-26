@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/torn_surcoat",
+    "layer1": "jaymoskingdoms:item/torn_surcoat_trim"
+  }
+}

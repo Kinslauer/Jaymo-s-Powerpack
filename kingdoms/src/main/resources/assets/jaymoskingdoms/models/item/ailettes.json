@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/ailettes",
+    "layer1": "jaymoskingdoms:item/ailettes_trim"
+  }
+}

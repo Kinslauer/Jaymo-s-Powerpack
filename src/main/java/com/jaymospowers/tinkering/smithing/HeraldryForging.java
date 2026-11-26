@@ -2,7 +2,9 @@ package com.jaymospowers.tinkering.smithing;
 
 import com.jaymospowers.tinkering.smeltery.Molten;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -11,11 +13,14 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DyedItemColor;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -62,6 +67,45 @@ public final class HeraldryForging {
 	/** The pieces also offered painted (the barbute's painted finish, Mordhau harness 1): paint needs no gold or rank. */
 	private static final java.util.Set<String> PAINTABLE = java.util.Set.of("barbute", "visored_barbute");
 	private static final String PAINTED = "painted";
+	/**
+	 * (Kingdoms' Mordhau harness 3) More plate from steel, each with the ingots it takes (kept apart from the arrays above so their
+	 * counts stay in step): the cuirasses that only knights wore, the new cuirasses, the large pauldrons and the mitten gauntlets.
+	 */
+	private static final Map<String, Integer> MORE_PLATE = new LinkedHashMap<>();
+	/** More mail from iron: the long hauberk, mail with plates, the scale shirt. */
+	private static final Map<String, Integer> MORE_MAIL = new LinkedHashMap<>();
+	/** The finishes some pieces come in besides bright, blackened and gilded: the Italian's paint, the fluted cuirass's etching, the hussar's brass, the muscle cuirass's bronze, leather lamellar, browned munition plate. */
+	private static final Map<String, List<String>> EXTRA_FINISHES = new LinkedHashMap<>();
+	/** The plate that can be covered in cloth (the cuirasses, the sallets and the flat-topped helm), and the wool it takes (its colour is the wool's). */
+	private static final java.util.Set<String> COVERABLE = java.util.Set.of("plate_cuirass", "rounded_breastplate", "fluted_cuirass", "gothic_cuirass",
+		"kastenbrust", "peascod_cuirass", "sallet", "kettle_sallet", "archers_sallet", "flat_top_helm");
+	static final int COVER_WOOL = 2;
+	private static final String COVERED = "covered";
+	static {
+		MORE_PLATE.put("rounded_breastplate", 8);
+		MORE_PLATE.put("fluted_cuirass", 8);
+		MORE_PLATE.put("laced_lamellar", 7);
+		MORE_PLATE.put("gothic_cuirass", 8);
+		MORE_PLATE.put("kastenbrust", 8);
+		MORE_PLATE.put("peascod_cuirass", 8);
+		MORE_PLATE.put("hussar_cuirass", 8);
+		MORE_PLATE.put("muscle_cuirass", 7);
+		MORE_PLATE.put("embossed_cuirass", 8);
+		MORE_PLATE.put("pauldrons", 5);
+		MORE_PLATE.put("mitten_gauntlets", 3);
+		MORE_MAIL.put("mail_hauberk", 8);
+		MORE_MAIL.put("plated_mail", 8);
+		MORE_MAIL.put("scale_shirt", 6);
+		EXTRA_FINISHES.put("rounded_breastplate", List.of(PAINTED));
+		EXTRA_FINISHES.put("fluted_cuirass", List.of(PAINTED, "etched"));
+		EXTRA_FINISHES.put("plate_cuirass", List.of("russeted"));
+		EXTRA_FINISHES.put("laced_lamellar", List.of("hide"));
+		EXTRA_FINISHES.put("gothic_cuirass", List.of("etched"));
+		EXTRA_FINISHES.put("peascod_cuirass", List.of(PAINTED));
+		EXTRA_FINISHES.put("hussar_cuirass", List.of("gilt_banded", PAINTED));
+		EXTRA_FINISHES.put("muscle_cuirass", List.of("bronze"));
+		EXTRA_FINISHES.put("embossed_cuirass", List.of(PAINTED, "etched"));
+	}
 	private static final String PREFIX = "heraldry/";
 	private static final String GILDED = "gilded";
 
@@ -81,24 +125,62 @@ public final class HeraldryForging {
 			}
 		});
 		Forging.CHECKS.add((smith, anvil, option) -> {
-			if (!gilded(option)) {
+			if (!goldFinish(option)) {
 				return null;
 			}
-			if (!noble.test(smith)) {
+			// (the etched and gilt-banded finishes are gold finishes too: they take the gold, but are not a noble's alone)
+			if (gilded(option) && !noble.test(smith)) {
 				return Component.translatable("message.jaymospowers.smithing.gilding_noble");
 			}
 			return count(smith.getInventory(), s -> s.is(Items.GOLD_INGOT)) < GILD_GOLD
 				? Component.translatable("message.jaymospowers.smithing.gilding_gold", GILD_GOLD) : null;
 		});
 		Forging.FINISHES.add((smith, anvil, option, result) -> {
-			if (gilded(option) && !smith.getAbilities().instabuild) {
+			if (goldFinish(option) && !smith.getAbilities().instabuild) {
 				take(smith.getInventory(), s -> s.is(Items.GOLD_INGOT), GILD_GOLD);
+			}
+		});
+		// (Mordhau harness 3) plate covered in cloth: the wool the smith carries covers it, and its colour is the piece's
+		Forging.CHECKS.add((smith, anvil, option) -> covered(option) && count(smith.getInventory(), s -> s.is(ItemTags.WOOL)) < COVER_WOOL
+			? Component.translatable("message.jaymospowers.smithing.covering", COVER_WOOL) : null);
+		Forging.FINISHES.add((smith, anvil, option, result) -> {
+			if (covered(option)) {
+				for (int i = 0; i < smith.getInventory().getContainerSize(); i++) {
+					ItemStack stack = smith.getInventory().getItem(i);
+					if (stack.is(ItemTags.WOOL)) {
+						result.set(DataComponents.DYED_COLOR, new DyedItemColor(woolColour(stack)));
+						break;
+					}
+				}
+				if (!smith.getAbilities().instabuild) {
+					take(smith.getInventory(), s -> s.is(ItemTags.WOOL), COVER_WOOL);
+				}
 			}
 		});
 	}
 
+	private static boolean covered(Forging.Option option) {
+		return option.id().startsWith(PREFIX) && option.id().endsWith("/" + COVERED);
+	}
+
+	/** The colour of a block of wool (white for any that is not one of the sixteen). */
+	private static int woolColour(ItemStack wool) {
+		String name = BuiltInRegistries.ITEM.getKey(wool.getItem()).getPath();
+		for (DyeColor dye : DyeColor.values()) {
+			if (name.equals(dye.getName() + "_wool")) {
+				return dye.getTextureDiffuseColor() & 0xFFFFFF;
+			}
+		}
+		return 0xFFFFFF;
+	}
+
 	private static boolean gilded(Forging.Option option) {
 		return option.id().startsWith(PREFIX) && option.id().endsWith("/" + GILDED);
+	}
+
+	/** Whether {@code option} is in a gold finish (gilded, gilt-banded or etched and gilt: Kingdoms' GOLD_FINISHES), which takes the gold. */
+	private static boolean goldFinish(Forging.Option option) {
+		return option.id().startsWith(PREFIX) && (option.id().endsWith("/" + GILDED) || option.id().endsWith("/gilt_banded") || option.id().endsWith("/etched"));
 	}
 
 	/** What else {@code option} takes from the smith when it is done, each the choices for it: hides for a fur lining, gold for gilding (for JEI). */
@@ -109,8 +191,13 @@ public final class HeraldryForging {
 			BuiltInRegistries.ITEM.getTagOrEmpty(HIDES).forEach(item -> hides.add(new ItemStack(item, FUR_HIDES)));
 			out.add(hides.isEmpty() ? List.of(new ItemStack(Items.RABBIT_HIDE, FUR_HIDES)) : hides);
 		}
-		if (gilded(option)) {
+		if (goldFinish(option)) {
 			out.add(List.of(new ItemStack(Items.GOLD_INGOT, GILD_GOLD)));
+		}
+		if (covered(option)) {
+			List<ItemStack> wool = new ArrayList<>();
+			BuiltInRegistries.ITEM.getTagOrEmpty(ItemTags.WOOL).forEach(item -> wool.add(new ItemStack(item, COVER_WOOL)));
+			out.add(wool);
 		}
 		return out;
 	}
@@ -154,31 +241,46 @@ public final class HeraldryForging {
 		List<Forging.Option> out = new ArrayList<>();
 		DataComponentType<String> finish = finishComponent();
 		for (int i = 0; i < PLATE.length; i++) {
-			Item item = item(PLATE[i]);
-			if (item == null) {
-				continue;
-			}
-			List<String> finishes = new ArrayList<>(List.of(FINISHES));
-			if (PAINTABLE.contains(PLATE[i])) {
-				finishes.add(PAINTED);
-			}
-			for (String f : finishes) {
-				ItemStack result = new ItemStack(item);
-				if (!f.equals("bright") && finish != null) {
-					result.set(finish, f);
-					result.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymoskingdoms.finish." + f, Component.translatable(item.getDescriptionId())));
-				}
-				// (the finish is the id's last part, so all three share the piece's blueprint: Blueprints.shape)
-				out.add(new Forging.Option(PREFIX + PLATE[i] + "/" + f, result, Molten.STEEL, PLATE_INGOTS[i], Forging.hitsFor(PLATE_INGOTS[i])));
-			}
+			plate(out, finish, PLATE[i], PLATE_INGOTS[i]);
 		}
+		MORE_PLATE.forEach((name, ingots) -> plate(out, finish, name, ingots));
 		for (int i = 0; i < MAIL.length; i++) {
-			Item item = item(MAIL[i]);
-			if (item != null) {
-				out.add(new Forging.Option(PREFIX + MAIL[i] + "/iron", new ItemStack(item), Molten.IRON, MAIL_INGOTS[i], Forging.hitsFor(MAIL_INGOTS[i])));
-			}
+			mail(out, MAIL[i], MAIL_INGOTS[i]);
 		}
+		MORE_MAIL.forEach((name, ingots) -> mail(out, name, ingots));
 		return out;
+	}
+
+	/** One plate piece in each finish it comes in ({@code ingots} of steel each). */
+	private static void plate(List<Forging.Option> out, @Nullable DataComponentType<String> finish, String name, int ingots) {
+		Item item = item(name);
+		if (item == null) {
+			return;
+		}
+		List<String> finishes = new ArrayList<>(List.of(FINISHES));
+		if (PAINTABLE.contains(name)) {
+			finishes.add(PAINTED);
+		}
+		finishes.addAll(EXTRA_FINISHES.getOrDefault(name, List.of()));
+		if (COVERABLE.contains(name)) {
+			finishes.add(COVERED);
+		}
+		for (String f : finishes) {
+			ItemStack result = new ItemStack(item);
+			if (!f.equals("bright") && finish != null) {
+				result.set(finish, f);
+				result.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymoskingdoms.finish." + f, Component.translatable(item.getDescriptionId())));
+			}
+			// (the finish is the id's last part, so all of them share the piece's blueprint: Blueprints.shape)
+			out.add(new Forging.Option(PREFIX + name + "/" + f, result, Molten.STEEL, ingots, Forging.hitsFor(ingots)));
+		}
+	}
+
+	private static void mail(List<Forging.Option> out, String name, int ingots) {
+		Item item = item(name);
+		if (item != null) {
+			out.add(new Forging.Option(PREFIX + name + "/iron", new ItemStack(item), Molten.IRON, ingots, Forging.hitsFor(ingots)));
+		}
 	}
 
 	private static @Nullable Item item(String name) {
