@@ -1,4 +1,9 @@
 {
+	"beaver_ambient": {
+		"sounds": [
+			"jaymoskingdoms:entity/beaver_ambient"
+		]
+	},
 	"voice.narrator.born.title": {
 		"sounds": [
 			{

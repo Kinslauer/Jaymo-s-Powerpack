@@ -1,0 +1,41 @@
+{
+ "values": [
+  "jaymoskingdoms:moose",
+  {
+   "id": "naturalist:deer",
+   "required": false
+  },
+  {
+   "id": "naturalist:bison",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:reddeer",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:roedeer",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:reindeer",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:moose",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:bison",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:bison",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:moose",
+   "required": false
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "values": [
+  {
+   "id": "cubeanimals:mouse",
+   "required": false
+  },
+  {
+   "id": "jaymoskitchen:rat",
+   "required": false
+  }
+ ]
+}

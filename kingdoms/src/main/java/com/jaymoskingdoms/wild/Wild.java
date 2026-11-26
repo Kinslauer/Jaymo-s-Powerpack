@@ -71,6 +71,8 @@ public final class Wild {
 		MooseHerds.register();
 		FedPredators.register();
 		Crocodiles.register();
+		// (the wild's ways with each other, the year and the land: Andy's nature picks)
+		Nature.register();
 		Anacondas.register();
 	}
 
