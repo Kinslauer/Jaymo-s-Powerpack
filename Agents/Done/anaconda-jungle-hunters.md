@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Fix the anaconda model and make anacondas jungle ambush hunters
 branch: claude/project-thread-k10pz4
 with: Claude (Reason Art project thread)
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 Compile-checked only, not played.
+- 2026-11-26 04:45 PR #2205 is merged into master; moved to Agents/Done.

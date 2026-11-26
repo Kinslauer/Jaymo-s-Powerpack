@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Kanban cleanup approved by Andy
 branch: none (vault cleanup; code gets separate branches)
 pr:
@@ -21,3 +21,6 @@ owns:
 ---
 # Approved Kanban cleanup
 Andy approved the evidence-backed cleanup plan and asked for questions as they arise. No PC builds. Never edit HollowCaptains.java, Captains.java, Rivals.java or Ladders.java; another PR owns them. Hollow captains review is finished and no longer blocks this work.
+
+## Notes
+- 2026-11-26 04:45 No sign of work for 30 min: marked stalled (whoever ran it stopped).
