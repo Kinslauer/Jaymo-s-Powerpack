@@ -21,6 +21,8 @@
     "SpringFeatureMixin",
     "StructureManagerAccessor",
     "StructureMixin",
+    "StructureWatchMixin",
+    "FeatureWatchMixin",
     "SurfaceSystemAccessor",
     "TreeFeatureMixin",
     "WorldCarverMixin"

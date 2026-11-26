@@ -568,8 +568,7 @@ public class NoiseChunkGeneratorMixin {
             final int wx = startX + (i & 15), wz = startZ + (i >> 4);
             if (!com.AdamNew.dynamicwaters.ColumnWatch.on(wx, wz)) continue;
             final int y = chunk.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, i & 15, i >> 4);
-            com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "surface rules done: top y=" + y + " "
-                    + com.AdamNew.dynamicwaters.ColumnWatch.block(chunk.getBlockState(new BlockPos(wx, y, wz))));
+            com.AdamNew.dynamicwaters.ColumnWatch.surfaceDone(wx, wz, y, chunk.getBlockState(new BlockPos(wx, y, wz)));
         }
     }
 

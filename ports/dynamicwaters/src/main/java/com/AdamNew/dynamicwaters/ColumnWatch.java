@@ -41,6 +41,57 @@ public final class ColumnWatch {
         NOTES.computeIfAbsent(BlockPos.asLong(x, 0, z), k -> Collections.synchronizedList(new ArrayList<>())).add(step);
     }
 
+    /** Grass or dirt tops the surface rules left in watched columns, so the feature step can see who replaces them. */
+    private static final Map<Long, Integer> SOIL_TOP = new ConcurrentHashMap<>();
+
+    public static void surfaceDone(int x, int z, int y, BlockState top) {
+        if (!on(x, z)) return;
+        note(x, z, "surface rules done: top y=" + y + " " + block(top));
+        if (top.is(BlockTags.DIRT) || top.is(Blocks.SAND) || top.is(Blocks.GRAVEL)) SOIL_TOP.put(BlockPos.asLong(x, 0, z), y);
+    }
+
+    public static boolean near(int chunkX, int chunkZ) {
+        final int[] b = box;
+        if (b == null) return false;
+        final int x0 = (chunkX - 1) << 4, z0 = (chunkZ - 1) << 4, x1 = ((chunkX + 2) << 4) - 1, z1 = ((chunkZ + 2) << 4) - 1;
+        return x1 >= b[0] && x0 <= b[2] && z1 >= b[1] && z0 <= b[3];
+    }
+
+    /** Before a feature or structure runs: the soil tops it could reach (its chunk and the ring around it). */
+    public static Object[] before(net.minecraft.world.level.WorldGenLevel level, int chunkX, int chunkZ) {
+        if (!near(chunkX, chunkZ) || SOIL_TOP.isEmpty()) return null;
+        final List<long[]> where = new ArrayList<>();
+        final List<BlockState> was = new ArrayList<>();
+        for (int cx = chunkX - 1; cx <= chunkX + 1; cx++) {
+            for (int cz = chunkZ - 1; cz <= chunkZ + 1; cz++) {
+                if (!level.hasChunk(cx, cz)) continue;
+                for (int i = 0; i < 256; i++) {
+                    final int x = (cx << 4) + (i & 15), z = (cz << 4) + (i >> 4);
+                    final Integer y = SOIL_TOP.get(BlockPos.asLong(x, 0, z));
+                    if (y == null) continue;
+                    where.add(new long[] {x, y, z});
+                    was.add(level.getBlockState(new BlockPos(x, y, z)));
+                }
+            }
+        }
+        return where.isEmpty() ? null : new Object[] {where, was};
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void after(net.minecraft.world.level.WorldGenLevel level, Object[] snapshot, String what) {
+        if (snapshot == null) return;
+        final List<long[]> where = (List<long[]>) snapshot[0];
+        final List<BlockState> was = (List<BlockState>) snapshot[1];
+        for (int k = 0; k < where.size(); k++) {
+            final long[] w = where.get(k);
+            final BlockPos pos = new BlockPos((int) w[0], (int) w[1], (int) w[2]);
+            final BlockState now = level.getBlockState(pos);
+            if (now != was.get(k)) {
+                note(pos.getX(), pos.getZ(), "placed by " + what + ": y=" + pos.getY() + " " + block(was.get(k)) + " -> " + block(now));
+            }
+        }
+    }
+
     public static String carving(HydrologyManager.RiverCarving c) {
         if (c == null) return "none";
         final StringBuilder sb = new StringBuilder();
@@ -74,6 +125,7 @@ public final class ColumnWatch {
 
     static String watch(int x, int z, int radius) {
         NOTES.clear();
+        SOIL_TOP.clear();
         box = new int[] {x - radius, z - radius, x + radius, z + radius};
         return String.format("Watching columns %d,%d to %d,%d. Only chunks generated from now on are noted; "
                 + "go there, then /dynamicwaters watch report.", x - radius, z - radius, x + radius, z + radius);
@@ -82,6 +134,7 @@ public final class ColumnWatch {
     static String stop() {
         box = null;
         NOTES.clear();
+        SOIL_TOP.clear();
         return "Column watch off.";
     }
 
@@ -125,7 +178,8 @@ public final class ColumnWatch {
                             if (n.startsWith("placed ") || n.startsWith("cut ") || n.startsWith("dress ")
                                     || n.startsWith("skin ") || n.startsWith("boulder ") || n.startsWith("seal ")
                                     || n.startsWith("repair ") || n.startsWith("refill ") || n.startsWith("pool ")) {
-                                last = n.split(" ", 3)[0] + " " + n.split(" ", 3)[1];
+                                last = n.startsWith("placed by ") ? n.substring(0, n.indexOf(':'))
+                                        : n.split(" ", 3)[0] + " " + n.split(" ", 3)[1];
                             }
                         }
                     }
