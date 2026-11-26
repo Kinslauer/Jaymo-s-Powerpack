@@ -46,13 +46,15 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Sieges {
 	/** Waves before the sack, at a seat and at a homestead; how long each lasts and the lull after it (ticks). */
-	static final int WAVES = 5, HOME_WAVES = 1;
-	static final long WAVE_TICKS = 20 * 75, LULL_TICKS = 20 * 40;
-	/** The attackers' camp in a lull: this far back from their banner, and they keep within this of it (blocks). */
-	static final double CAMP_BACK = 26.0;
-	static final int CAMP_RADIUS = 6;
-	/** Fresh soldiers the attackers bring up for each wave after the first. */
-	static final int REINFORCE = 2;
+		static final int WAVES = 5, HOME_WAVES = 1;
+		static final long WAVE_TICKS = 20 * 75, LULL_TICKS = 20 * 40;
+		/** Muster period before the first wave (ticks): attackers draw supplies from nearby camps. */
+		static final long MUSTER_TICKS = 20 * 60;
+		/** The attackers' camp in a lull: this far back from their banner, and they keep within this of it (blocks). */
+		static final double CAMP_BACK = 26.0;
+		static final int CAMP_RADIUS = 6;
+		/** Fresh soldiers the attackers bring up for each wave after the first. */
+		static final int REINFORCE = 2;
 	/** Players this near the seat are asked; the one who asks is found this near them, comes this close, and gives up after this long (ticks). */
 	static final double ASK_RANGE = 64.0, ASKER_RANGE = 48.0, ASK_REACH = 5.0;
 	static final long ASK_WALK_TICKS = 20 * 25;
@@ -98,66 +100,83 @@ public final class Sieges {
 	// ---- the waves ---------------------------------------------------------------------------------------------------
 
 	/**
-	 * One step of {@code party}'s siege of {@code goal} ({@code target}'s seat, or a homestead with no target): its waves
-	 * and lulls. True once the last wave is over (the sack follows).
-	 */
-	static boolean drive(ServerLevel level, WarParties.Party party, List<PathfinderMob> soldiers, Faction from, @Nullable Faction target, BlockPos goal,
-		long now) {
-		if (party.siegeOver) {
-			return false;
-		}
-		if (party.wave == 0) {
-			begin(level, party, from, target, goal, now);
-		}
-		asks(level, party, target);
-		if (!party.lull) {
-			Sappers.drive(level, party, from, goal, now);
-			if (now - party.waveAt < WAVE_TICKS) {
+		 * One step of {@code party}'s siege of {@code goal} ({@code target}'s seat, or a homestead with no target): its waves
+		 * and lulls. True once the last wave is over (the sack follows).
+		 */
+		static boolean drive(ServerLevel level, WarParties.Party party, List<PathfinderMob> soldiers, Faction from, @Nullable Faction target, BlockPos goal,
+			long now) {
+			if (party.siegeOver) {
 				return false;
 			}
-			if (party.wave >= waves(party)) {
-				party.siegeOver = true;
-				return true;
+			if (party.wave == 0) {
+				begin(level, party, from, target, goal, now);
+				party.muster = true;
+				party.waveAt = now;
 			}
-			// the wave spent: back to the camp, and the besieged see to their walls
-			party.lull = true;
-			party.waveAt = now;
-			for (PathfinderMob s : soldiers) {
-				Comrades.stand(s);
-				s.setHomeTo(party.camp != null ? party.camp : goal, CAMP_RADIUS);
+			if (party.muster) {
+				// Muster period: draw supplies from nearby camps
+				if (now - party.waveAt < MUSTER_TICKS) {
+					if (target != null && (now - party.waveAt) % (MUSTER_TICKS / 4) == 0) {
+						drawFromCamps(level, party, from, target, goal);
+					}
+					return false;
+				}
+				// Muster complete, start first wave
+				party.muster = false;
+				party.lull = false;
+				party.wave = 1;
+				party.waveAt = now;
+				horn(level, goal, 1.0F);
 			}
-			horn(level, goal, 0.7F);
-			if (target != null) {
-				WarChest.resupply(level, party, target);
-				for (ServerPlayer p : Raids.players(level, goal, ASK_RANGE)) {
-					if (side(party, p) == DEFEND) {
-						Reputation.change(p, target, HELD_REP);
+			asks(level, party, target);
+			if (!party.lull) {
+				Sappers.drive(level, party, from, goal, now);
+				if (now - party.waveAt < WAVE_TICKS) {
+					return false;
+				}
+				if (party.wave >= waves(party)) {
+					party.siegeOver = true;
+					return true;
+				}
+				// the wave spent: back to the camp, and the besieged see to their walls
+				party.lull = true;
+				party.waveAt = now;
+				for (PathfinderMob s : soldiers) {
+					Comrades.stand(s);
+					s.setHomeTo(party.camp != null ? party.camp : goal, CAMP_RADIUS);
+				}
+				horn(level, goal, 0.7F);
+				if (target != null) {
+					WarChest.resupply(level, party, target);
+					for (ServerPlayer p : Raids.players(level, goal, ASK_RANGE)) {
+						if (side(party, p) == DEFEND) {
+							Reputation.change(p, target, HELD_REP);
+						}
 					}
 				}
+				return false;
+			}
+			BlockPos camp = party.camp != null ? party.camp : goal;
+			for (PathfinderMob s : soldiers) {
+				if (Rulers.target(s) == null && !SiegeTrain.pushing(level, party, s) && s.distanceToSqr(Vec3.atBottomCenterOf(camp)) > (CAMP_RADIUS + 2) * (CAMP_RADIUS + 2)
+					&& s.getNavigation().isDone()) {
+					s.getNavigation().moveTo(camp.getX() + 0.5, camp.getY(), camp.getZ() + 0.5, WarParties.MARCH_SPEED);
+				}
+			}
+			if (now - party.waveAt >= LULL_TICKS) {
+				party.lull = false;
+				party.wave++;
+				party.waveAt = now;
+				reinforce(level, party, from, camp, goal);
+				for (UUID id : party.soldiers) {
+					if (level.getEntity(id) instanceof PathfinderMob s && !party.holders.contains(id)) {
+						s.setHomeTo(party.rally != null ? party.rally : goal, WarParties.SIEGE_RADIUS);
+					}
+				}
+				horn(level, goal, 1.1F);
 			}
 			return false;
 		}
-		BlockPos camp = party.camp != null ? party.camp : goal;
-		for (PathfinderMob s : soldiers) {
-			if (Rulers.target(s) == null && !SiegeTrain.pushing(level, party, s) && s.distanceToSqr(Vec3.atBottomCenterOf(camp)) > (CAMP_RADIUS + 2) * (CAMP_RADIUS + 2)
-				&& s.getNavigation().isDone()) {
-				s.getNavigation().moveTo(camp.getX() + 0.5, camp.getY(), camp.getZ() + 0.5, WarParties.MARCH_SPEED);
-			}
-		}
-		if (now - party.waveAt >= LULL_TICKS) {
-			party.lull = false;
-			party.wave++;
-			party.waveAt = now;
-			reinforce(level, party, from, camp, goal);
-			for (UUID id : party.soldiers) {
-				if (level.getEntity(id) instanceof PathfinderMob s && !party.holders.contains(id)) {
-					s.setHomeTo(party.rally != null ? party.rally : goal, WarParties.SIEGE_RADIUS);
-				}
-			}
-			horn(level, goal, 1.1F);
-		}
-		return false;
-	}
 
 	/** The first wave: the camp marked, the gate shut, and the players about asked which side they're on. */
 	private static void begin(ServerLevel level, WarParties.Party party, Faction from, @Nullable Faction target, BlockPos goal, long now) {
@@ -199,9 +218,50 @@ public final class Sieges {
 				}
 			}
 		}
-	}
+			}
 
-	/** The besieged's ruler, if they're near {@code p}; else the nearest of its guards who can see them. */
+			/**
+			 * During the muster period, the siege draws supplies from nearby camps of the attacking faction.
+			 * Each camp contributes some of its storage to the siege effort. If a camp is cleared during the siege,
+			 * the siege is weakened (fewer reinforcements, less supply).
+			 */
+			private static void drawFromCamps(ServerLevel level, WarParties.Party party, Faction from, Faction target, BlockPos goal) {
+				MinecraftServer server = level.getServer();
+				// Find camps of the attacking faction near the siege
+				for (Faction camp : Factions.all(server, FactionType.BARBARIAN)) {
+					if (camp.fallen() || camp.id() == from.id()) {
+						continue;
+					}
+					// Check if this camp is allied with the attacking faction (same war side)
+					if (Wars.onSide(server, camp.id(), Wars.sideOf(server, from))) {
+						double dist = Raids.horizontal(camp.seat(), goal);
+						if (dist <= 40000.0) { // within 200 blocks
+							// Draw supplies from this camp
+							Camps.CampData data = Camps.data(server, camp.id());
+							if (data != null && data.clearedAt() < 0 && Storage.loaded(level, camp)) {
+								// Take some food, logs, and other supplies
+								int taken = 0;
+								taken += Storage.take(level, camp, Items.COOKED_MUTTON, 8);
+								taken += Storage.take(level, camp, Items.COOKED_BEEF, 8);
+								taken += Storage.take(level, camp, Items.COOKED_PORKCHOP, 8);
+								taken += Storage.take(level, camp, Items.COOKED_CHICKEN, 8);
+								taken += Storage.take(level, camp, Items.LOG, 16);
+								taken += Storage.take(level, camp, Items.OAK_LOG, 16);
+								taken += Storage.take(level, camp, Items.SPRUCE_LOG, 16);
+								taken += Storage.take(level, camp, Items.IRON_INGOT, 4);
+								taken += Storage.take(level, camp, Items.ARROW, 16);
+								if (taken > 0) {
+									// Add to the siege's supply (the war chest or the party's spoils)
+									party.spoilsSilver += taken / 4; // convert to silver value
+									JaymosKingdoms.LOGGER.debug("Siege of {} drew {} supplies from camp {}", target.name(), taken, camp.name());
+								}
+							}
+						}
+					}
+				}
+			}
+
+			/** The besieged's ruler, if they're near {@code p}; else the nearest of its guards who can see them. */
 	private static @Nullable Mob asker(ServerLevel level, Faction target, ServerPlayer p) {
 		PathfinderMob ruler = Rulers.of(level, target);
 		if (ruler != null && ruler.distanceTo(p) <= ASKER_RANGE && !Downed.isDowned(ruler)) {
@@ -484,10 +544,37 @@ public final class Sieges {
 	}
 
 	/** The fighters of {@code party}'s besieged realm near {@code goal}: its guards and archers, and the levies. */
-	static List<Mob> defenders(ServerLevel level, WarParties.Party party, Faction target, BlockPos goal) {
-		MinecraftServer server = level.getServer();
-		return level.getEntitiesOfClass(Mob.class, new AABB(goal).inflate(ASK_RANGE), m -> m.isAlive() && m instanceof Worker w
-			&& (w.role() == Folk.GUARD || w.role() == Folk.ARCHER) && w.factionId() >= 0 && !party.soldiers.contains(m.getUUID())
-			&& besieged(server, party, w.factionId()));
+		static List<Mob> defenders(ServerLevel level, WarParties.Party party, Faction target, BlockPos goal) {
+			MinecraftServer server = level.getServer();
+			return level.getEntitiesOfClass(Mob.class, new AABB(goal).inflate(ASK_RANGE), m -> m.isAlive() && m instanceof Worker w
+				&& (w.role() == Folk.GUARD || w.role() == Folk.ARCHER) && w.factionId() >= 0 && !party.soldiers.contains(m.getUUID())
+				&& besieged(server, party, w.factionId()));
+		}
+
+		/**
+		 * The defender has lost the siege: its faction falls, its people scatter, and its land is already being transferred
+		 * to the victor ({@link KingdomEvents#transferLand}). This method scatters the defender's folk and clears its roster.
+		 */
+		static void routDefender(ServerLevel level, Faction defender, Faction victor) {
+			MinecraftServer server = level.getServer();
+			// Scatter all of the defender's folk near its seat
+			for (Folk folk : level.getEntitiesOfClass(Folk.class, new AABB(defender.seat()).inflate(160.0),
+				f -> f.factionId() == defender.id() && f.isAlive())) {
+				if (folk.isCarrying()) {
+					folk.spawnAtLocation(level, folk.takeCarried());
+				}
+				level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
+				folk.discard();
+			}
+			McaCompat.scatterRaiders(level, defender.id(), new AABB(defender.seat()).inflate(160.0));
+			// Clear the defender's roster and storage (already handled by Factions.update with fallen)
+			Factions.update(server, defender.id(), f -> f.withHoldings(f.holdings().withRoster(Map.of()).withVacancies(Map.of()).withStorage(List.of(), Optional.empty())));
+			// Relations reset
+			for (Faction other : Factions.all(server)) {
+				if (other.id() != defender.id()) {
+					Relations.set(server, defender.id(), other.id(), Relation.NEUTRAL);
+				}
+			}
+			JaymosKingdoms.LOGGER.info("The realm of {} is routed by {}", defender.name(), victor.name());
+		}
 	}
-}

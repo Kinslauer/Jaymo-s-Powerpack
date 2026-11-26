@@ -1,0 +1,16 @@
+{
+  "message.jaymoskingdoms.camp.group_formed": "A ring of %s camps has formed around %s, preparing to siege!",
+  "message.jaymoskingdoms.camp.muster_begin": "The camps around %s sound their horns: the muster for siege begins!",
+  "message.jaymoskingdoms.camp.muster_end": "The muster is complete. The siege of %s begins!",
+  "message.jaymoskingdoms.camp.supplies_drawn": "The siege of %s draws supplies from nearby camps.",
+  "message.jaymoskingdoms.camp.cleared_weakens": "The camp %s has fallen! The siege of %s is weakened.",
+  "message.jaymoskingdoms.siege.victory": "The siege of %s is won by %s! The defenders are routed, and their land and stores pass to the victor.",
+  "message.jaymoskingdoms.siege.defeat": "The siege of %s is broken! The attackers withdraw.",
+  "message.jaymoskingdoms.land.transferred": "The land of %s passes to %s by right of conquest.",
+  "speech.jaymoskingdoms.siege.muster.0": "Brothers! The muster sounds. We march on %s at dawn!",
+  "speech.jaymoskingdoms.siege.muster.1": "Sharpen your blades. The siege of %s begins now!",
+  "speech.jaymoskingdoms.siege.victory.0": "The walls are breached! %s falls to %s!",
+  "speech.jaymoskingdoms.siege.victory.1": "Victory! The seat of %s is ours. Their land, their stores, their people - all ours.",
+  "speech.jaymoskingdoms.siege.defeat.0": "Fall back! The siege of %s is broken.",
+  "speech.jaymoskingdoms.siege.defeat.1": "We cannot take %s. Sound the retreat."
+}

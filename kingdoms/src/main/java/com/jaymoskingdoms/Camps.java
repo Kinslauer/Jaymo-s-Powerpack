@@ -65,10 +65,12 @@ public final class Camps {
 	/** A camp rises this far from a kingdom (or fiefdom), and at least {@code MIN_DISTANCE} from any settlement. */
 	static final double MIN_DISTANCE = 150.0, MAX_DISTANCE = 300.0;
 	/** At most this many standing camps within {@code CAMP_AREA} of a kingdom; camps keep {@code CAMP_SPACING} apart. */
-	static final int CAMPS_PER_KINGDOM = 2;
-	static final double CAMP_AREA = 360.0, CAMP_SPACING = 160.0;
+	static final int CAMPS_PER_KINGDOM = 4;
+	static final double CAMP_AREA = 360.0, CAMP_SPACING = 120.0;
 	/** The chance a kingdom with room for a camp gets one, each spawn check. */
-	static final float CAMP_CHANCE = 0.2F;
+	static final float CAMP_CHANCE = 0.15F;
+	/** When placing a group of camps around a kingdom, how many to place at once. */
+	static final int GROUP_SIZE_MIN = 3, GROUP_SIZE_MAX = 4;
 	/** Sites are tried round players near the kingdom, out of their sight: this far from any player, up to this much farther. */
 	static final int HIDE_RANGE = 56, SITE_SPREAD = 72, SITE_TRIES = 10;
 	/** No village bell this near a site (it would be taken for part of the village). */
@@ -362,8 +364,9 @@ public final class Camps {
 	}
 
 	/**
-	 * Every so often a kingdom with room for a camp may get one, out in the wild near a player passing through: a
-	 * barbarian camp anywhere, an illager camp in pillager country ({@link IllagerCamps#land}).
+	 * Every so often a kingdom with room for a camp group may get one: a ring of 3-4 camps around its seat,
+	 * like a quickly thrown-up raid shelter preparing to siege. Barbarian camps anywhere, illager camps in
+	 * pillager country, etc.
 	 */
 	private static void spawnCamps(MinecraftServer server, ServerLevel level) {
 		RandomSource random = level.getRandom();
@@ -376,32 +379,30 @@ public final class Camps {
 				continue;
 			}
 			// (with Grim Kingdoms, a barbarian camp waits for a Grim ruin in reach rather than pitching tents in the wild)
-			if (campsNear(server, realm, BARBARIAN) < CAMPS_PER_KINGDOM && random.nextFloat() < CAMP_CHANCE && !GrimSites.prefersGrim(server, realm)
-				&& trySite(server, level, realm, players, BARBARIAN)) {
-				return;
+			if (campsNear(server, realm, BARBARIAN) + GROUP_SIZE_MAX <= CAMPS_PER_KINGDOM && random.nextFloat() < CAMP_CHANCE && !GrimSites.prefersGrim(server, realm)) {
+				trySiteGroup(server, level, realm, players, BARBARIAN, GROUP_SIZE_MIN, GROUP_SIZE_MAX);
 			}
-			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, IllagerCamps.KIND) < IllagerCamps.CAMPS_PER_KINGDOM
-				&& random.nextFloat() < IllagerCamps.CAMP_CHANCE && trySite(server, level, realm, players, IllagerCamps.KIND)) {
-				return;
+			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, IllagerCamps.KIND) + GROUP_SIZE_MAX <= IllagerCamps.CAMPS_PER_KINGDOM
+				&& random.nextFloat() < IllagerCamps.CAMP_CHANCE) {
+				trySiteGroup(server, level, realm, players, IllagerCamps.KIND, GROUP_SIZE_MIN, GROUP_SIZE_MAX);
 			}
-			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, GoblinVillages.KIND) < GoblinVillages.VILLAGES_PER_KINGDOM
-				&& random.nextFloat() < GoblinVillages.VILLAGE_CHANCE && trySite(server, level, realm, players, GoblinVillages.KIND)) {
-				return;
+			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, GoblinVillages.KIND) + GROUP_SIZE_MAX <= GoblinVillages.VILLAGES_PER_KINGDOM
+				&& random.nextFloat() < GoblinVillages.VILLAGE_CHANCE) {
+				trySiteGroup(server, level, realm, players, GoblinVillages.KIND, GROUP_SIZE_MIN, GROUP_SIZE_MAX);
 			}
-			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, OrcCamps.KIND) < OrcCamps.CAMPS_PER_KINGDOM
-				&& random.nextFloat() < OrcCamps.CAMP_CHANCE && trySite(server, level, realm, players, OrcCamps.KIND)) {
-				return;
+			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, OrcCamps.KIND) + GROUP_SIZE_MAX <= OrcCamps.CAMPS_PER_KINGDOM
+				&& random.nextFloat() < OrcCamps.CAMP_CHANCE) {
+				trySiteGroup(server, level, realm, players, OrcCamps.KIND, GROUP_SIZE_MIN, GROUP_SIZE_MAX);
 			}
 			// (0.7.42) a pirate cove, on the coast near a coastal kingdom
-			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, PirateCoves.KIND) < PirateCoves.COVES_PER_KINGDOM
-				&& random.nextFloat() < PirateCoves.COVE_CHANCE && PirateCoves.coastal(level, realm)
-				&& trySite(server, level, realm, players, PirateCoves.KIND)) {
-				return;
+			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, PirateCoves.KIND) + GROUP_SIZE_MAX <= PirateCoves.COVES_PER_KINGDOM
+				&& random.nextFloat() < PirateCoves.COVE_CHANCE && PirateCoves.coastal(level, realm)) {
+				trySiteGroup(server, level, realm, players, PirateCoves.KIND, GROUP_SIZE_MIN, GROUP_SIZE_MAX);
 			}
 			// (medieval picks) a sky cove, on a high peak, once the steam towns have put airships up
-			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, SkyPirates.KIND) < SkyPirates.COVES_PER_KINGDOM
-				&& random.nextFloat() < SkyPirates.COVE_CHANCE && SkyPirates.trySite(server, level, realm, players)) {
-				return;
+			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, SkyPirates.KIND) + GROUP_SIZE_MAX <= SkyPirates.COVES_PER_KINGDOM
+				&& random.nextFloat() < SkyPirates.COVE_CHANCE) {
+				trySiteGroup(server, level, realm, players, SkyPirates.KIND, GROUP_SIZE_MIN, GROUP_SIZE_MAX);
 			}
 		}
 		// (structure plan, track 2) a bandit camp beside a trade road, near someone travelling it
@@ -454,6 +455,77 @@ public final class Camps {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Tries to place a group of {@code count} camps of {@code kind} around {@code realm}'s seat, in a rough ring.
+	 * Each camp is placed at a random angle and distance from the seat, avoiding other camps and settlements.
+	 */
+	private static void trySiteGroup(MinecraftServer server, ServerLevel level, Faction realm, List<ServerPlayer> players, String kind,
+		int minCount, int maxCount) {
+		RandomSource random = level.getRandom();
+		int count = minCount + random.nextInt(maxCount - minCount + 1);
+		// Base angle for the ring, so camps are spread around the seat
+		double baseAngle = random.nextDouble() * Math.PI * 2.0;
+		double angleStep = Math.PI * 2.0 / count;
+		int placed = 0;
+		for (int i = 0; i < count && placed < count; i++) {
+			double angle = baseAngle + i * angleStep + (random.nextDouble() - 0.5) * angleStep * 0.5;
+			// Distance from seat: between MIN_DISTANCE and MAX_DISTANCE, with some variance
+			double d = MIN_DISTANCE + random.nextDouble() * (MAX_DISTANCE - MIN_DISTANCE);
+			BlockPos at = realm.seat().offset((int)Math.round(Math.cos(angle) * d), 0, (int)Math.round(Math.sin(angle) * d));
+			// Adjust Y to find a valid floor
+			boolean illager = IllagerCamps.KIND.equals(kind), goblin = GoblinVillages.KIND.equals(kind), orc = OrcCamps.KIND.equals(kind);
+			boolean pirate = PirateCoves.KIND.equals(kind), sky = SkyPirates.KIND.equals(kind);
+			int floor = pirate ? IllagerBuildings.floor(level, at, PirateCoves.MAX_SPREAD, PirateCoves.RADIUS)
+				: orc ? IllagerBuildings.floor(level, at, OrcCamps.MAX_SPREAD, OrcBuildings.CLEAR_RADIUS)
+				: goblin ? (SwampGoblins.swamp(level, at) ? SwampGoblins.floor(level, at)
+					: IllagerBuildings.floor(level, at, GoblinVillages.MAX_SPREAD, GoblinBuildings.CLEAR_RADIUS))
+				: illager ? IllagerBuildings.floor(level, at, IllagerCamps.MAX_SPREAD)
+				: sky ? SkyPirates.floor(level, at)
+				: CampBuildings.floor(level, at, MAX_SPREAD);
+			if (floor == Integer.MIN_VALUE) {
+				continue;
+			}
+			// Check if the site is valid (loaded, not owned, far from players, no bell)
+			if (!open(server, level, at)) {
+				continue;
+			}
+			// Check kind-specific land requirements
+			if (illager && !IllagerCamps.land(level, at)) {
+				continue;
+			}
+			if (goblin && !GoblinVillages.land(level, at)) {
+				continue;
+			}
+			if (orc && !OrcCamps.land(level, at)) {
+				continue;
+			}
+			if (pirate && !PirateCoves.land(level, at)) {
+				continue;
+			}
+			if (sky && !SkyPirates.land(level, at)) {
+				continue;
+			}
+			Direction gate = Direction.getApproximateNearest(realm.seat().getX() - at.getX(), 0, realm.seat().getZ() - at.getZ());
+			Faction camp = null;
+			if (pirate) {
+				camp = PirateCoves.found(level, at, floor);
+			} else if (orc) {
+				camp = OrcCamps.found(level, at, floor, gate);
+			} else if (goblin) {
+				camp = GoblinVillages.found(level, at, floor, gate);
+			} else if (illager) {
+				camp = IllagerCamps.found(level, at, floor, gate);
+			} else if (sky) {
+				camp = SkyPirates.found(level, at, floor);
+			} else {
+				camp = found(level, at, floor, gate);
+			}
+			if (camp != null) {
+				placed++;
+			}
+		}
 	}
 
 	/** {@code at} is free for a camp: loaded, nobody's land, far from every settlement and camp, out of every player's sight, no bell near. */
