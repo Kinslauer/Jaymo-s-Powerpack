@@ -32,3 +32,6 @@ Rules:
 - Build: compileClientJava. Run tools/pr_checks.py.
 
 PR body: each row, what you built, classes, keys, every deviation from the plan, what you couldn't check.
+
+## Notes
+- 2026-11-26 23:01 Held until legends-p3-big-symbiote is merged into claude/project-thread-aaw9tm; the Claude thread sets for=hermes then.
