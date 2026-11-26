@@ -192,6 +192,12 @@ public final class FrontierWear {
 		if (order != null) {
 			return order;
 		}
+		// MCA dresses anyone in danger through this same routine (a farmer panicking at a monster, with nothing to put on):
+		// only a guard, an archer or a gunner gets the settlement's issue, or a scared villager came out in Templar plate
+		// and never took it off again (keeps)
+		if (!onDuty(villager)) {
+			return stack;
+		}
 		Faction f = villager instanceof Worker w && w.factionId() >= 0 ? Factions.get(server, w.factionId())
 			: Factions.at(server, villager.level(), villager.blockPosition());
 		String look = lookOf(villager, f);
@@ -207,6 +213,19 @@ public final class FrontierWear {
 		return stack;
 	}
 
+	/** {@code mob} is a guard, an archer or a gunner: one whose settlement issues it a look ({@link #lookOf}). */
+	static boolean onDuty(LivingEntity mob) {
+		if (mob instanceof Worker w && (w.role() == Folk.GUARD || w.role() == Folk.ARCHER)) {
+			return true;
+		}
+		return mob instanceof net.minecraft.world.entity.PathfinderMob p && McaCompat.isGuard(p) || Musketoon.holds(mob) || EarlyGuns.gunner(mob);
+	}
+
+	/** A guard's look only, never anyone else's work clothes: the Templar plate and its blackened steel. */
+	static boolean guardsOnly(@Nullable String look) {
+		return "templar".equals(look) || "templar_steel".equals(look);
+	}
+
 	/**
 	 * From {@code McaEquipmentMixin}: MCA is about to change what {@code villager} has in {@code slot} (putting a sword
 	 * in a guard's hand, taking the armour off someone off duty). True if what's there stays: a {@link Musketoon} or a
@@ -220,7 +239,15 @@ public final class FrontierWear {
 		}
 		ItemStack worn = villager.getItemBySlot(slot);
 		boolean straw = slot == EquipmentSlot.HEAD && worn.is(com.jaymoskingdoms.blossomland.BlossomDress.STRAW_HAT);
-		return !guard && (FrontierArmour.setOf(worn) != null || straw) || FantasyArmorCompat.keeps(villager, slot);
+		// (a guard's Templar plate on someone who isn't one comes off, unless it's their own, from their pack)
+		String set = FrontierArmour.setOf(worn);
+		boolean ours = set != null && !(guardsOnly(set) && !onDuty(villager) && !packed(villager, worn));
+		return !guard && (ours || straw) || FantasyArmorCompat.keeps(villager, slot);
+	}
+
+	/** {@code villager} carries {@code worn}'s like in its own inventory (it was given it, or picked it up): it's theirs to wear. */
+	private static boolean packed(LivingEntity villager, ItemStack worn) {
+		return villager instanceof Villager v && v.getInventory().hasAnyMatching(s -> s.is(worn.getItem()));
 	}
 
 	/** The villagers round each player: those whose trade has a look of ours put it on. */
@@ -238,14 +265,22 @@ public final class FrontierWear {
 		for (Villager v : seen) {
 			Worker w = (Object) v instanceof Worker worker ? worker : null;
 			int role = w == null ? -1 : w.role();
+			if (role == Folk.GUARD || role == Folk.ARCHER || onDuty(v)) {
+				continue;
+			}
+			// a guard's plate on someone who isn't one (put on them while they were scared) comes off, unless it's their own
+			for (ArmorType type : TYPES) {
+				ItemStack worn = v.getItemBySlot(type.getSlot());
+				if (guardsOnly(FrontierArmour.setOf(worn)) && !packed(v, worn)) {
+					v.setItemSlot(type.getSlot(), ItemStack.EMPTY);
+				}
+			}
 			if (v.entityTags().contains(Underworld.FENCE_TAG) || Smuggling.runOf(server, v) != null) {
 				wearAll(v, "scoundrel");
 			} else if (role == Sorcery.WIZARD) {
 				wearAll(v, "hedge_elite");
 			} else if (role == Folk.CARTER) {
 				hatAndCoat(v, false);
-			} else if (role == Folk.GUARD || role == Folk.ARCHER) {
-				continue;
 			} else if (Crooks.isCrook(v)) {
 				// a pickpocket's hood is up after dark, and down again by day
 				ItemStack head = v.getItemBySlot(EquipmentSlot.HEAD);
