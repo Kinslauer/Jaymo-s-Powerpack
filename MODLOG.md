@@ -8475,3 +8475,21 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - **Rusty armour protects less** (`ArmourDeflect`): the rust a wet piece of armour has built up now takes up to a quarter off how much it turns blows. Cleaning it off restores it.
 - Built with Gradle; not played.
 - Built (all three mods build); not played. Mixins checked against the 26.3 sources only.
+
+## 0.27.81 (2026-11-26): Medieval resource packs under the Reason look (#2210)
+
+- **Pixel Perfection Fidelity** (SourAlien, after XSSheep; CC BY) is the new base: a cozy medieval 16x look for the whole game, under the Reason look.
+- **Medieval Items!** (CC BY) redraws about 760 vanilla items in a medieval style; the game's own axes stay.
+- **Framed Glass Panes** and **Red Bricks** (MIT): leaded window frames and redder bricks.
+- **Medieval Tactical Shield** (MIT): a bigger shield through Entity Model Features.
+- Each is downloaded from Modrinth on first launch and switched on once; turn any of them off in the resource pack screen. Not tested in game.
+
+## 0.27.82 (2026-11-26): Reason look: Powers art and other mods' textures in one hand (#2210)
+
+- **Fish**: every one of the 32 fish, shellfish and jellyfish icons has its own silhouette (carp, pike, perch, swordfish, catshark, crab, lobster, jellyfish and so on) with flat bands of back, flank and belly and clean pattern shapes. Cooked fish are the same shape in the colours of vanilla's cooked cod, cooked salmon or a boiled shell. Fish skins lost their per-pixel noise.
+- **Spawn eggs**: the 35 fish and sea-creature eggs are vanilla's egg shape with the creature's two colours.
+- **Dusts**: copper, gold, iron, tin, bronze, clay, flint, glass, sawdust, cane chad, ash, nitre earth, saltpetre and sulphur are one pile shape, like vanilla's redstone and gunpowder, each in its own colour.
+- **Relics, wish orbs, band plans, rig limbs, scrap, wreck core, platings, meteoric iron, sabers** and a handful of blocks: jitter removed and folded into a few clear shades; half-transparent pixels are solid.
+- **Future-world, dinosaur, rogue fighter, Unseeing, symbiote and Xenoform skins, guns, backpack, hoverboard, space pod**: the jitter is smoothed out and each sheet is folded to about 56 colours.
+- **Reason look pack, other mods**: Cube Animals skins and items, Vanilla Constructs diamond tools and buckets and Eternal Nether withered blocks are cleaned (their licences allow it); Shippy Ships sail icons, Cooking for Blockheads oven fronts, some Stellarity icons and the Knight Armor icons are fresh paintings. Credits and licence basis are in `docs/Vanilla-Style.md`.
+- Art only; checked with `tools/art_audit.py`, not played.

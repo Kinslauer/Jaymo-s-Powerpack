@@ -17823,3 +17823,11 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Monster gear grades are data** (`MonsterGear`): the armour, weapons and shields of each grade of tiered monster gear (worn, common, fine, rare, legendary) now come from loot tables (`jaymoskingdoms:monster_gear/<grade>_armor`, `_weapon`, `_shield`), so a datapack can change them. What monsters wear is the same as before.
 - Built with Gradle; not played.
 - Built (all three mods build); not played. Mixins checked against the 26.3 sources only.
+
+## 0.13.34 (2026-11-26): Reason look: Kingdoms gear, crests, spawn eggs and mob skins (#2210)
+
+- **Icons**: Reverent, Heavenly, Kintsugi, Primal and the Frontier sets (Templar, Hedge, Primalist, Ranger, Settler, Juggernaut, Scoundrel, Sanguine, Despot, Foxshade) are drawn from their models in a few clear shades with an outline in each piece's own darkest shade, not blended. The old-age relics, the Sky Shards and most scrolls lose their speckle; sixteen of the nineteen crests are redrawn the same way.
+- **Heraldry armour**: all 72 pieces in their 15 finishes are painted without the per-pixel jitter, and their icons are picked texel by texel from the model in at most 14 colours with a dark outline, so the icons read like vanilla's armour icons instead of shrunk renders. The worn sheets are clean too.
+- **Spawn eggs and dragon eggs**: about 100 eggs are vanilla's spotted egg in each mob's two colours, lit from the top-left.
+- **Mob skins**: the old dead (risen, husks, mutants), horse coats, lords, builders, chiefs, barbarians, camp shamans, dragon hides, legends, champions, creatures and the rest lose their per-pixel jitter and are painted in a few tones; stains, holes, marks and stripes stay.
+- Art only; checked with the art check, not played.
