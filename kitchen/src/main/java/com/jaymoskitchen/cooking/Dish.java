@@ -380,7 +380,11 @@ public enum Dish {
 	SEARED_FUGU(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(FUGU, SOYBEANS, FLIP, FLIP), 8, 0.8F, false,
 		List.of(new Buff(MobEffects.WATER_BREATHING, 90 * 20, 0))),
 	FUGU_RICE_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, FUGU, RICE, CARROT), 11, 0.9F, true,
-		List.of(new Buff(MobEffects.WATER_BREATHING, 60 * 20, 0), new Buff(MobEffects.REGENERATION, 10 * 20, 0)));
+		List.of(new Buff(MobEffects.WATER_BREATHING, 60 * 20, 0), new Buff(MobEffects.REGENERATION, 10 * 20, 0))),
+	// the climate patch's ice cream: crushed ice (or snow) beaten into sweet milk on a board; eating it cools you for a few
+	// minutes in the heat (climate/Warmth#consumed, the item tag jaymoskitchen:cool_foods)
+	ICE_CREAM(Method.CHOP, EnumSet.of(Station.BOARD), List.of(MILK_BOTTLE, SUGAR, ICE, ICE), 5, 0.5F, false,
+		List.of());
 
 	/** Which minigame cooks the dish. */
 	public enum Method {

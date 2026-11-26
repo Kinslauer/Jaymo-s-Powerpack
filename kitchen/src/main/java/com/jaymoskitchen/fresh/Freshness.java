@@ -254,7 +254,7 @@ public final class Freshness {
 		for (BlockPos p : BlockPos.betweenClosed(pos.offset(-ICE_REACH, -1, -ICE_REACH), pos.offset(ICE_REACH, 1, ICE_REACH))) {
 			BlockState state = level.getBlockState(p);
 			if (state.is(Blocks.PACKED_ICE) || state.is(Blocks.BLUE_ICE) || state.is(Blocks.ICE)
-				|| state.getBlock() instanceof com.jaymoskitchen.climate.HearthBlock hearth && hearth.cold) {
+				|| com.jaymoskitchen.climate.HearthBlock.cooling(state)) {
 				return true;
 			}
 		}

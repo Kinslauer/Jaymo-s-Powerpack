@@ -15,6 +15,9 @@
 		"jaymospowers:wind_bladder",
 		"jaymospowers:ender_pouch",
 		"jaymospowers:jesters_cushion",
+		"jaymospowers:hot_stone_pouch",
+		"jaymospowers:cold_clay_flask",
+		"jaymospowers:equinox_charm",
 		{
 			"id": "travelertoolbelt:belt",
 			"required": false

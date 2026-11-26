@@ -387,7 +387,9 @@ public final class GuardKit {
 		given[MAINHAND] = m.getMainHandItem().copy();
 		given[OFFHAND] = m.getOffhandItem().copy();
 		for (Harness.Slot slot : Harness.Slot.values()) {
-			given[HARNESS + slot.ordinal()] = Harness.get(m, slot).copy();
+			ItemStack worn = Harness.get(m, slot);
+			// (what the cold put on them, HearthFolk, isn't issued kit)
+			given[HARNESS + slot.ordinal()] = HearthFolk.marked(worn) ? ItemStack.EMPTY : worn.copy();
 		}
 		return given;
 	}

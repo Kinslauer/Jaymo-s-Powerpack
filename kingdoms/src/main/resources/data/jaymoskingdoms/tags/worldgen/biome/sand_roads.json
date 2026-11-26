@@ -5,6 +5,8 @@
       "id": "minecraft:desert",
       "required": false
     },
-    "#minecraft:is_badlands"
+    "#minecraft:is_badlands",
+    "jaymoskingdoms:salt_desert",
+    "jaymoskingdoms:ashlands"
   ]
 }

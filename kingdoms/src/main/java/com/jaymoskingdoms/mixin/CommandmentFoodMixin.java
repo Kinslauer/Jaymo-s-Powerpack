@@ -19,6 +19,7 @@ abstract class CommandmentFoodMixin {
 		if (!level.isClientSide()) {
 			Commandments.ate(eater, stack);
 			com.jaymoskingdoms.hunger.HungerCurse.ateStart(eater, stack);
+			com.jaymoskingdoms.lands.SaltyFood.ate(eater, stack);
 		}
 	}
 

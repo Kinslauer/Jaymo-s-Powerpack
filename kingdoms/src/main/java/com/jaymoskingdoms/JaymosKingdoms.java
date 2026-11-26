@@ -169,6 +169,14 @@ public final class JaymosKingdoms implements ModInitializer {
 		WoolClothes.register();
 		// qiviut, the muskox's underwool, and the clothes knitted from it
 		QiviutClothes.register();
+		// clothes for the sun, the ranger's leaf cloak, and the herbalist's belt charms
+		LeafCloak.register();
+		ClimateWear.register();
+		ClimateVisits.register();
+		WeatherWise.register();
+		Notices.register();
+		HearthFolk.register();
+		HerbalistWares.register();
 		Buildings.register();
 		Construction.register();
 		// 0.7.202: the world weathers (moss, cracks, mud, leaf litter, tufts); a settlement's builders keep up its upkeep
@@ -637,6 +645,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		AtiCompounds.register();
 		// underground rivers' lanterns, jungle pillar crowns, volcanic islands and lit lava tunnels
 		TerrainFeatures.register();
+		// (climate track E) the steam valley, ashlands, salt pans and steppe: their blocks, features and the cold steppe night
+		com.jaymoskingdoms.lands.Lands.register();
 		// kingdoms' seats the world generates whole: a castle with its square, garden, barracks and homes round it
 		SeatCompounds.register();
 		// village mods 6, small structures: the tree sites (the hollow oak's hermit, the lookout's bandits, the hanging

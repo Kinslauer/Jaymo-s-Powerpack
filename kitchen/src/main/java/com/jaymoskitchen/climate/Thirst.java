@@ -96,6 +96,8 @@ public final class Thirst {
 	static final int DIRTY_BOTTLE = 5, CLEAN_BOTTLE = 7, POTION = 3, MILK = 6, HONEY = 1, BREW = 4, SPIRITS = -2, LEMONADE = 6;
 	/** Water from a bucket of cactus water ({@link Climate#CACTUS_WATER}), bitter or boiled. */
 	static final int CACTUS_BUCKET = 8;
+	/** Water from a bowl of water, murky or boiled (a bowl holds less than a bottle). */
+	static final int DIRTY_BOWL = 3, CLEAN_BOWL = 4;
 	/** Water from food: a stew or soup, a melon slice, a berry or apple. */
 	static final int STEW = 3, MELON = 2, FRUIT = 1;
 	/** Clean water and a fresh sip cool you this much (body heat points). */
@@ -157,6 +159,11 @@ public final class Thirst {
 		return player.getAttachedOrElse(WATER, MAX);
 	}
 
+	/** For other mods (by reflection): a salty bite's thirst (Kingdoms' salted food): {@code by} off the water, with no drink told of. */
+	public static void parch(ServerPlayer player, int by) {
+		set(player, water(player) - by);
+	}
+
 	static void set(ServerPlayer player, int water) {
 		water = Mth.clamp(water, 0, MAX);
 		if (water == MAX) {
@@ -214,7 +221,8 @@ public final class Thirst {
 			// (0.5.48) the core soaks it up
 			set(player, water(player) + 1);
 		}
-		float drained = DRAINED.getOrDefault(id, 0.0F) + (DRAIN * rate + exerted / EXHAUSTION_POINT) * BodyHeat.thirstFactor(player);
+		float drained = DRAINED.getOrDefault(id, 0.0F) + (DRAIN * rate + exerted / EXHAUSTION_POINT) * BodyHeat.thirstFactor(player)
+			* com.jaymoskitchen.season.Tropics.thirstFactor(player);
 		if (drained >= 1.0F) {
 			set(player, water(player) - 1);
 			drained -= 1.0F;
@@ -278,6 +286,19 @@ public final class Thirst {
 		if (stack.is(Climate.CLEAN_WATER)) {
 			drink(player, CLEAN_BOTTLE, true, 0.0F);
 			BodyHeat.cool(player, CLEAN_COOL);
+			return;
+		}
+		if (stack.is(WaterBowls.WATER_BOWL) || stack.is(WaterBowls.CLEAN_WATER_BOWL)) {
+			// scooped from a pond: unpurified like a pond bottle, until it's been boiled
+			boolean boiled = stack.is(WaterBowls.CLEAN_WATER_BOWL);
+			if (fireDrinker(player)) {
+				hiss(player);
+				return;
+			}
+			drink(player, boiled ? CLEAN_BOWL : DIRTY_BOWL, boiled, SICK_CHANCE);
+			if (boiled) {
+				BodyHeat.cool(player, CLEAN_COOL / 2.0F);
+			}
 			return;
 		}
 		if (stack.is(Climate.CACTUS_WATER)) {

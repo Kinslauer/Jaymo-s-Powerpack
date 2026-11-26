@@ -82,6 +82,11 @@ public final class Seasons {
 		return Math.floorMod(Math.floorDiv(level.getOverworldClockTime(), DAY_TICKS) + shift, YEAR);
 	}
 
+	/** The day of the season, from 0 on its first day to {@link #DAYS_PER_SEASON} - 1 on its last. */
+	public static int dayInSeason(Level level) {
+		return dayOfYear(level) % DAYS_PER_SEASON;
+	}
+
 	public static Season of(Level level) {
 		return season(dayOfYear(level));
 	}
@@ -130,6 +135,7 @@ public final class Seasons {
 	}
 
 	public static void register() {
+		SeasonDial.register();
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 			shift = server.overworld().getAttachedOrElse(SHIFT, 0);
 			look(server.overworld());

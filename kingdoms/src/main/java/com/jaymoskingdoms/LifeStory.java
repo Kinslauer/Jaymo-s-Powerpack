@@ -3606,6 +3606,8 @@ public final class LifeStory {
 		// our own villagers and folk forget them too: whatever they remembered, suspected or swore against the old life
 		Recollections.bornAnew(player);
 		McaCompat.newDestiny(player);
+		// a brand-new character: Kitchen's first-wake grace from the cold and heat is theirs again
+		KitchenCompat.newCharacter(player);
 		return reincarnate(player);
 	}
 
