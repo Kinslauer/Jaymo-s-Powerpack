@@ -60,6 +60,7 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-2|nycto-2]] · for any · blocked
 - [ ] [[Inbox/nycto-3|nycto-3]] · for any · blocked
 - [ ] [[Inbox/nycto-4|nycto-4]] · for any · blocked
+- [ ] [[Inbox/nycto-5|nycto-5]] · for any · blocked
 
 
 ## Done
