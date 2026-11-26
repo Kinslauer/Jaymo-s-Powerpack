@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:59). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 20:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,7 +16,6 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · for any · open
-- [ ] [[Inbox/hunters-road-5|hunters-road-5]] · for any · open
 
 
 ## Being built
@@ -48,6 +47,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for any · blocked
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · for any · blocked
+- [ ] [[Inbox/hunters-road-5|hunters-road-5]] · for any · blocked
 
 
 ## Done
