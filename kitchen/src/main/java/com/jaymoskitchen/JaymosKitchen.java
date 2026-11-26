@@ -122,6 +122,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.farm.DryFields.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
+		com.jaymoskitchen.stomach.Bites.register();
 		// (GT New Horizons picks) a heart for a varied diet, its food journal (its attachment is class-loaded here), the lunch box
 		com.jaymoskitchen.stomach.Variety.register();
 		com.jaymoskitchen.stomach.LunchBox.register();
