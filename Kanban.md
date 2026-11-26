@@ -10,7 +10,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · open
-- [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for ☀️ Apollo · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for ☀️ Apollo · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for ☀️ Apollo · open
@@ -21,6 +20,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · claimed
 
 
 ## In review
