@@ -63,6 +63,12 @@ public final class Scavengers {
 	private static final int BITE_EVERY = 14, BITES = 5, BITES_PER_WIDTH = 3;
 	/** Ticks to eat a part torn off, there by the body; and to eat one it was driven off with, wherever it went. */
 	private static final int CHEW_TICKS = 100, CARRY_TICKS = 300;
+	/**
+	 * Andy (2026-11-25): "it should take longer for them to finish eating across the board, even longer for passive
+	 * scavengers, and the hostile ones are faster. make it about double". How many times over the bites and chewing above
+	 * a monster takes ({@link #pace}), and any other scavenger (a wolf, a vulture, a deer).
+	 */
+	private static final float HOSTILE_PACE = 1.6F, WILD_PACE = 2.4F;
 	/** Scavengers tearing at one body at once; the others wait their turn. */
 	private static final int MAX_EATERS = 2;
 	/** How fast a flier at the body comes down onto the ground beside it (blocks a tick). */
@@ -331,6 +337,11 @@ public final class Scavengers {
 			other -> other.isAlive() && HUNGERS.containsKey(other)).size() >= HORDE;
 	}
 
+	/** How much longer than {@link #BITES} and {@link #CHEW_TICKS} {@code mob} takes over a body ({@link #HOSTILE_PACE}, {@link #WILD_PACE}). */
+	private static float pace(Mob mob) {
+		return mob instanceof net.minecraft.world.entity.monster.Enemy ? HOSTILE_PACE : WILD_PACE;
+	}
+
 	/** Scavengers about a body that make a horde, and how near it they must be (blocks). */
 	private static final int HORDE = 4;
 	private static final double HORDE_REACH = 8.0;
@@ -494,7 +505,7 @@ public final class Scavengers {
 		}
 
 		private int needed() {
-			return BITES + Mth.floor(body.getBbWidth() * BITES_PER_WIDTH);
+			return Math.round((BITES + Mth.floor(body.getBbWidth() * BITES_PER_WIDTH)) * pace(mob));
 		}
 
 		@Override
@@ -607,7 +618,7 @@ public final class Scavengers {
 				body = null;
 			} else if (torn > 0) {
 				// the part's off: it eats it there
-				hunger.take(mob, CHEW_TICKS);
+				hunger.take(mob, Math.round(CHEW_TICKS * pace(mob)));
 			}
 		}
 
