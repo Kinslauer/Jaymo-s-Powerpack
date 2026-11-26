@@ -565,7 +565,7 @@ public final class HollowCaptains {
 			if (!live() || level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
 				return;
 			}
-			ServerPlayer near = level.getNearestPlayer(members.getFirst().getX(), members.getFirst().getY(), members.getFirst().getZ(), ROAM_FAR, false);
+			ServerPlayer near = (ServerPlayer) level.getNearestPlayer(members.getFirst().getX(), members.getFirst().getY(), members.getFirst().getZ(), ROAM_FAR, false);
 			if (near == null || !fair(near) || playerRoom(near) <= 0 || level.getRandom().nextFloat() >= HORDE_CHANCE) {
 				return;
 			}
