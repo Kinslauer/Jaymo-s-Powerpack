@@ -1,11 +1,15 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.jspecify.annotations.Nullable;
 
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -26,6 +30,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -39,6 +44,13 @@ import net.minecraft.world.phys.Vec3;
  * near enough that sees it (or near enough to hear it, out of sight): someone dying, going down, or a blow landing on
  * the downed. They run from the killer, or from the body if nothing killed it. Only a ridden or tamed animal keeps its
  * head; a leashed one strains at the rope.
+ * <p>
+ * Known hunters (after Scarify, CC0: mobs fear players as sheep fear wolves; Andy: "Prey could learn to run from a known
+ * hunter YES"). A herd animal that sees (or hears, close by) one of its own kind killed by a player or a person
+ * ({@link #hunter}) remembers who did it ({@link #KNOWN_HUNTERS}, kept on the animal) and from then on runs from them on
+ * sight ({@link #HUNTER_SIGHT}, half as far while they sneak), and its kin run with it. Each killing it sees makes the
+ * memory last longer ({@link #MEMORY_TICKS}, at most {@link #MEMORY_MOST}); left alone, it fades. A player who never
+ * hunts them is never feared, and a ridden, tamed or leashed animal keeps its head.
  */
 public final class Herds {
 	/** The herd animals. */
@@ -52,6 +64,18 @@ public final class Herds {
 	static final double FLEE_SPEED = 1.8;
 	/** How far a killing scares herd animals that see it; how close they hear it out of sight (blocks). */
 	static final double KILL_SEEN = 16.0, KILL_HEARD = 6.0;
+
+	/** How far a herd animal sees a hunter it knows (blocks; half that while they sneak). */
+	static final double HUNTER_SIGHT = 20.0;
+	/** How much longer each killing it sees makes its memory of the killer (ticks: three days), and the longest it lasts (ticks: ten days). */
+	static final long MEMORY_TICKS = 72000L, MEMORY_MOST = 240000L;
+
+	/** Hunter (UUID) → game time the animal remembers them until. Saved on the animal. */
+	static final AttachmentType<Map<String, Long>> KNOWN_HUNTERS = AttachmentRegistry.create(JaymosKingdoms.id("known_hunters"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
+
+	/** People (not players) some animal fears, until when: looked about for as players are. */
+	private static final Map<LivingEntity, Long> PEOPLE_HUNTERS = new WeakHashMap<>();
 
 	/** What it runs from: a creature, or (no creature) a place, where a disaster is coming (Signs). */
 	private record Flight(@Nullable Entity from, Vec3 at, long until) {
@@ -67,7 +91,10 @@ public final class Herds {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Herds::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> FLIGHTS.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			FLIGHTS.clear();
+			PEOPLE_HUNTERS.clear();
+		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (taken > 0.0F && entity instanceof PathfinderMob hurt && skittish(hurt) && source.getEntity() instanceof LivingEntity attacker
 				&& attacker != hurt && hurt.level() instanceof ServerLevel level) {
@@ -83,6 +110,9 @@ public final class Herds {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (!skittish(entity) && entity.level() instanceof ServerLevel level) {
 				killing(level, entity, source.getEntity());
+			}
+			if (skittish(entity) && source.getEntity() instanceof LivingEntity killer && hunter(killer) && entity.level() instanceof ServerLevel level) {
+				hunted(level, entity, killer);
 			}
 		});
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, be) -> {
@@ -121,6 +151,56 @@ public final class Herds {
 			double d = m.distanceToSqr(body);
 			if (d <= KILL_HEARD * KILL_HEARD || d <= KILL_SEEN * KILL_SEEN && m.hasLineOfSight(body)) {
 				flee(level, m, from);
+			}
+		}
+	}
+
+	/** Who a herd learns to fear: a player, or a person (a villager, our folk, an illager). */
+	static boolean hunter(Entity e) {
+		return e instanceof Player p && !p.isCreative() && !p.isSpectator() || Temperaments.humanoid(e);
+	}
+
+	/** {@code body}, a herd animal, was killed by {@code killer}: its kind near enough remember them, and run. */
+	private static void hunted(ServerLevel level, LivingEntity body, LivingEntity killer) {
+		long now = level.getGameTime();
+		String who = killer.getUUID().toString();
+		boolean any = false;
+		for (PathfinderMob m : level.getEntitiesOfClass(PathfinderMob.class, body.getBoundingBox().inflate(KILL_SEEN),
+			m -> m != body && m.isAlive() && m.getType() == body.getType() && !owned(m))) {
+			double d = m.distanceToSqr(body);
+			if (d <= KILL_HEARD * KILL_HEARD || d <= KILL_SEEN * KILL_SEEN && m.hasLineOfSight(body)) {
+				Map<String, Long> known = new HashMap<>(m.getAttachedOrElse(KNOWN_HUNTERS, Map.of()));
+				known.values().removeIf(until -> until <= now);
+				known.merge(who, now + MEMORY_TICKS, (was, fresh) -> Math.min(now + MEMORY_MOST, was + MEMORY_TICKS));
+				m.setAttached(KNOWN_HUNTERS, known);
+				any = true;
+				if (!FLIGHTS.containsKey(m) && !m.isVehicle()) {
+					flee(level, m, killer);
+				}
+			}
+		}
+		if (any && !(killer instanceof Player)) {
+			PEOPLE_HUNTERS.merge(killer, now + MEMORY_MOST, Math::max);
+		}
+	}
+
+	/** Whether {@code m} remembers {@code hunter} as one who kills its kind. */
+	static boolean knows(PathfinderMob m, Entity hunter) {
+		Map<String, Long> known = m.getAttached(KNOWN_HUNTERS);
+		if (known == null) {
+			return false;
+		}
+		Long until = known.get(hunter.getUUID().toString());
+		return until != null && until > m.level().getGameTime();
+	}
+
+	/** Herd animals that know {@code hunter} and see it run from it, and their kin with them. */
+	private static void watchFor(ServerLevel level, LivingEntity hunter) {
+		double r = hunter.isShiftKeyDown() ? HUNTER_SIGHT / 2.0 : HUNTER_SIGHT;
+		for (PathfinderMob m : level.getEntitiesOfClass(PathfinderMob.class, hunter.getBoundingBox().inflate(r),
+			m -> m.isAlive() && skittish(m) && m.hasAttached(KNOWN_HUNTERS) && !FLIGHTS.containsKey(m) && !m.isVehicle() && !m.isLeashed() && !owned(m))) {
+			if (m.distanceToSqr(hunter) <= r * r && knows(m, hunter) && m.hasLineOfSight(hunter)) {
+				panic(level, m, hunter);
 			}
 		}
 	}
@@ -173,7 +253,16 @@ public final class Herds {
 				if (p.isSprinting()) {
 					spook(p);
 				}
+				if (!p.isSpectator() && !p.isCreative() && p.level() instanceof ServerLevel level) {
+					watchFor(level, p);
+				}
 			}
+			PEOPLE_HUNTERS.entrySet().removeIf(e -> !e.getKey().isAlive() || e.getValue() <= e.getKey().level().getGameTime());
+			PEOPLE_HUNTERS.keySet().forEach(h -> {
+				if (h.level() instanceof ServerLevel level) {
+					watchFor(level, h);
+				}
+			});
 		}
 		Iterator<Map.Entry<PathfinderMob, Flight>> it = FLIGHTS.entrySet().iterator();
 		while (it.hasNext()) {
