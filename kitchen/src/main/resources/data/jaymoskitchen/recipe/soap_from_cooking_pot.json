@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:cooking_pot",
+    "jaymoskitchen:tallow",
+    "jaymoskitchen:lye"
+  ],
+  "result": {
+    "id": "jaymoskitchen:soap",
+    "count": 2
+  }
+}

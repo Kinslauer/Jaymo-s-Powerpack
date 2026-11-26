@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": "jaymoskitchen:milk_bottle",
+  "result": {
+    "id": "jaymoskitchen:milk_bottle",
+    "components": {
+      "!jaymoskitchen:raw_milk": {}
+    }
+  }
+}

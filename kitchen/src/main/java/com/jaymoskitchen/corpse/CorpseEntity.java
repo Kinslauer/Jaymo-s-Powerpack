@@ -1278,6 +1278,9 @@ public class CorpseEntity extends Entity {
 		}
 		if (!gutted) {
 			spawnAtLocation(level, new ItemStack(com.jaymoskitchen.butchery.Butchery.OFFAL, oneHanded() ? 1 : 2), 0.3F);
+			for (net.minecraft.world.item.Item organ : Gutting.organs(this)) {
+				spawnAtLocation(level, new ItemStack(organ), 0.3F);
+			}
 		}
 		butcherStage = Hanging.SKINNED;
 		addDressed(DRESSED_SKINNED);
@@ -2393,7 +2396,9 @@ public class CorpseEntity extends Entity {
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			default -> {
-				return search(level, player);
+				// (Chest Cavity's organ sets) a blade held on a spider, a creeper or a ghast guts it, a stroke at a time
+				InteractionResult gutting = Gutting.use(this, level, player, held);
+				return gutting != null ? gutting : search(level, player);
 			}
 		}
 	}
