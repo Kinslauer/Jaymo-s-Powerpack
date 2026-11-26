@@ -5,6 +5,8 @@ import com.jaymospowers.aether.AetherBlocks;
 import com.jaymospowers.aether.AetherFlora;
 import com.jaymospowers.aether.AetherItems;
 import com.jaymospowers.aether.monster.AetherMonsters;
+import com.jaymospowers.compat.Stacked;
+import com.jaymospowers.power.wind.aether.WindAether;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -243,6 +245,10 @@ public final class AetherAnimals {
 		int variant = SkyrootLizard.variantOfLeaves(state.getBlock());
 		ServerLevel level = context.getLevel();
 		if (variant < 0 || level.getRandom().nextInt(LIZARD_ODDS) != 0) {
+			return;
+		}
+		// only in the Aether (its band of a stacked world, or its own dimension): Aether leaves carried elsewhere grow none
+		if (!Stacked.realm(level, origin.y).equals(WindAether.AETHER)) {
 			return;
 		}
 		SkyrootLizard lizard = SKYROOT_LIZARD.create(level, EntitySpawnReason.TRIGGERED);

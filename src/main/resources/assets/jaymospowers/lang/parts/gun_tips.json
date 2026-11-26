@@ -1,0 +1,6 @@
+{
+	"gun_tip.jaymospowers.ship_cannon.title": "Loading a cannon",
+	"gun_tip.jaymospowers.ship_cannon": "Press %1$s on the gun three times: with gunpowder in hand, then with shot (Round, Heavy, Chain, Grape, Stone, Fire, or an Explosive Shell), then with flint and steel or a fire charge to fire. Look up or down to lay the barrel. At a ship's helm, %2$s fires every loaded gun on the side you look to. Ashore, set a chest, barrel or hopper of powder and shot behind its breech and a redstone pulse loads and fires it.",
+	"gun_tip.jaymospowers.field_mortar.title": "The field mortar",
+	"gun_tip.jaymospowers.field_mortar": "Set it on the ground and press %1$s on it with a Mortar Shell in hand to load it, then press %1$s again to fire it the way you face. Look up to drop the shell nearer. A mortar with its own crew is theirs to work."
+}

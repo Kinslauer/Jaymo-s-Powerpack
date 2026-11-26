@@ -302,7 +302,11 @@ message.jaymospowers.zfighter_starving
 message.jaymospowers.zfighter_teleport_nobody
 ship.jaymoskingdoms.anchor_to_use
 ship.jaymoskingdoms.built
+ship.jaymoskingdoms.cannon.loaded
 ship.jaymoskingdoms.cannon.melded
+ship.jaymoskingdoms.cannon.not_loaded
+ship.jaymoskingdoms.cannon.powder_first
+ship.jaymoskingdoms.cannon.wants_shot
 ship.jaymoskingdoms.crew.helm_held
 ship.jaymoskingdoms.finish_frame
 ship.jaymoskingdoms.frame_wants

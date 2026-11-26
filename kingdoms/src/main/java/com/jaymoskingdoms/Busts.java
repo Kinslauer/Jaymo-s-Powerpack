@@ -314,10 +314,8 @@ public final class Busts {
 		if (taken > 0) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bust.confiscated", taken).withStyle(ChatFormatting.GRAY));
 		}
-		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, player.getBoundingBox().inflate(Arrests.ANNOUNCE_RANGE), p -> p != player)) {
-			p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bust.seen", name, f.name(),
-				Component.translatable("bust.jaymoskingdoms.sentence." + s.key())).withStyle(ChatFormatting.GOLD));
-		}
+		// others aren't told in chat (Andy, 2026-11-26): the realm's crier cries it by the seat (TownCrier)
+		TownCrier.verdict(level, f, player, Component.translatable("bust.jaymoskingdoms.crime." + crime), s.key());
 		long now = level.getGameTime();
 		switch (s) {
 			case FLOG -> FLOGGINGS.put(player.getUUID(), new Flogging(player.getUUID(), guard, now + FLOG_GAP * 2L));

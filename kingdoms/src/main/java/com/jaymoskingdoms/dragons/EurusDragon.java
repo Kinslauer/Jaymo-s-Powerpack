@@ -83,7 +83,7 @@ public class EurusDragon extends WindDragon {
 	@Override
 	protected void breathe(ServerLevel level, Vec3 mouth, Vec3 aim, boolean griefing) {
 		// (the bolt never burns blocks; griefing only lets a real bolt fall in a thunderstorm)
-		DragonStorm.breathe(level, this, mouth, aim, this.tickCount, griefing);
+		DragonStorm.breathe(level, this, mouth, aim, this.tickCount, griefing, griefing);
 	}
 
 	@Override

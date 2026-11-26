@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.dragons;
 
+import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Stacked;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -40,6 +43,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.MoverType;
@@ -56,6 +61,7 @@ import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -197,9 +203,146 @@ public abstract class WindDragon extends AbstractHorse {
 	/** (0.7.522) The move the model is playing ({@link #action}) and how many ticks it has been playing it. */
 	public int actionSeen, actionAge;
 
+	/** The breaths, after Dragonforge's elements (RochStudio): what a dive slam does and which roar goes with it ({@link #element}). */
+	public enum Element { FIRE, FROST, STORM, ACID, EARTH }
+
+	/** The rider's bite (G) and dive slam: how often (ticks), how far it must have dived (blocks) and how fast it must be falling. */
+	static final int RIDER_BITE_EVERY = 24, SLAM_EVERY = 100;
+	static final double SLAM_DROP = 6.0, SLAM_FALL = 0.6;
+	/** Sprint flight: stamina a second while its rider holds sprint aloft, and how long one sprint packet lasts (ticks). */
+	static final float SPRINT_FLY_DRAIN = 5.0F;
+	static final int SPRINT_HOLD = 6;
+	/** A tamed grown dragon's extra health, a share of its base. */
+	static final double TAMED_HEALTH = 0.25;
+	static final Identifier TAMED_HEALTH_ID = JaymosKingdoms.id("tamed_dragon_health");
+	/** Synced flag: told to keep about {@link #tameHome} (sneak-use cycles follow, sit, wander). */
+	public static final int WANDERING = 16;
+	/** Keeping home: ticks between sky patrols, how long one lasts, and how far from home it looks for monsters. */
+	static final int PATROL_GAP_MIN = 2400, PATROL_GAP_MAX = 6000, PATROL_MIN = 600, PATROL_MAX = 1200;
+	static final double PATROL_RANGE = 32.0;
+	/** The horn's call: how long it keeps coming (ticks) and how near it stops. */
+	static final int CALL_TICKS = 600;
+	static final double CALL_STOP = 6.0;
+	/** The rider's bite and dive slam cooldowns, for the HUD's ready marks (bite << 8 | slam). */
+	private static final EntityDataAccessor<Integer> DATA_COOLDOWNS = SynchedEntityData.defineId(WindDragon.class, EntityDataSerializers.INT);
+
+	/** Its head, neck, tail and wings, to be aimed at ({@link DragonPart}). */
+	private final DragonPart[] parts;
+	private int biteCool, slamCool, sprintUntil = -1;
+	/** Where a ridden dive began (NaN when it isn't diving), and whether it was in the air last tick. */
+	private double diveTop = Double.NaN;
+	private boolean wasAirborne;
+	/** Where a wandering one keeps (and a realm's wyvern guards); patrol timing; whether it flies home now. */
+	private @Nullable Vec3 tameHome;
+	private int patrolIn = PATROL_GAP_MIN, patrolLeft;
+	private boolean landingHome;
+	/** Set by its own flying while tamed and unridden, so the tamed tick doesn't drop it out of the air. */
+	private boolean freeFlight;
+	/** Who blew the horn for it, and how long it keeps coming. */
+	private @Nullable UUID calledBy;
+	private int callLeft;
+	/** The kingdom (faction id) whose seat it guards, or -1 ({@code RealmDragons}). */
+	int realm = -1;
+	/** A realm dragon's tamer (a villager, {@code RealmDragons}), whose foes it takes on. */
+	@Nullable UUID keeper;
+	/** Whether it has laid its nest ({@link DragonNests}): a wild one lays one, once. */
+	boolean nested;
+
 	protected WindDragon(EntityType<? extends WindDragon> type, Level level) {
 		super(type, level);
 		this.xpReward = 60;
+		DragonPart.Kind[] kinds = DragonPart.Kind.values();
+		this.parts = new DragonPart[kinds.length];
+		for (int i = 0; i < kinds.length; i++) {
+			this.parts[i] = new DragonPart(this, kinds[i]);
+		}
+	}
+
+	public DragonPart[] parts() {
+		return this.parts;
+	}
+
+	/** Its parts take the ids just after its own, as the ender dragon's do, so the client and the server name the same one. */
+	@Override
+	public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+		super.recreateFromPacket(packet);
+		for (int i = 0; i < this.parts.length; i++) {
+			this.parts[i].setId(packet.getId() + 1 + i);
+		}
+	}
+
+	/** Puts its parts round it: the head at its mouth, the neck before it, the tail behind, the wings out only in flight. */
+	private void placeParts() {
+		boolean out = this.isAlive() && !this.isBaby();
+		float w = this.getBbWidth(), h = this.getBbHeight();
+		float yaw = this.yBodyRot * Mth.DEG_TO_RAD;
+		Vec3 ahead = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
+		Vec3 side = new Vec3(Mth.cos(yaw), 0.0, Mth.sin(yaw));
+		Vec3 base = this.position();
+		Vec3 mouth = mouth();
+		float head = Math.max(1.0F, w * 0.4F), neck = Math.max(0.8F, w * 0.3F);
+		place(DragonPart.Kind.HEAD, out, mouth, head, head);
+		Vec3 chest = base.add(ahead.scale(w * 0.5)).add(0.0, h * 0.7, 0.0);
+		place(DragonPart.Kind.NECK, out, chest.add(mouth).scale(0.5), neck, neck);
+		place(DragonPart.Kind.TAIL_BASE, out, base.add(ahead.scale(-w * 0.9)).add(0.0, h * 0.45, 0.0), w * 0.5F, Math.max(0.6F, h * 0.35F));
+		place(DragonPart.Kind.TAIL_TIP, out, base.add(ahead.scale(-w * 1.5)).add(0.0, h * 0.35, 0.0), w * 0.35F, Math.max(0.5F, h * 0.25F));
+		boolean wings = out && flies() && airborne();
+		Vec3 wingY = base.add(0.0, h * 0.7, 0.0);
+		place(DragonPart.Kind.LEFT_WING, wings, wingY.add(side.scale(w * 1.1)), w * 0.8F, 0.6F);
+		place(DragonPart.Kind.RIGHT_WING, wings, wingY.add(side.scale(-w * 1.1)), w * 0.8F, 0.6F);
+	}
+
+	private void place(DragonPart.Kind kind, boolean out, Vec3 at, float width, float height) {
+		DragonPart part = this.parts[kind.ordinal()];
+		part.out = out;
+		if (out) {
+			part.place(at, width, height);
+		}
+	}
+
+	/** A blow on one of its parts: it counts for that part's share, and a blow to the head rings. */
+	boolean hurtFromPart(DragonPart part, ServerLevel level, DamageSource source, float damage) {
+		boolean hit = this.hurtServer(level, source, damage * part.kind.damage);
+		if (hit && part.kind == DragonPart.Kind.HEAD) {
+			level.playSound(null, part.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT, this.getSoundSource(), 1.2F, 0.8F);
+		}
+		return hit;
+	}
+
+	/** Its breath's element: what its dive slam does and which roar it gives. */
+	public Element element() {
+		return switch (species()) {
+			case "notus", "ignivorus" -> Element.FIRE;
+			case "boreas", "atroxiia" -> Element.FROST;
+			case "zephyrus", "varasuchus", "wyvern" -> Element.ACID;
+			case "stegonaut" -> Element.EARTH;
+			default -> Element.STORM;
+		};
+	}
+
+	/** Ticks until its rider can bite again (synced). */
+	public int biteCooldown() {
+		return this.entityData.get(DATA_COOLDOWNS) >> 8 & 255;
+	}
+
+	/** Ticks until its rider can dive-slam again (synced). */
+	public int slamCooldown() {
+		return this.entityData.get(DATA_COOLDOWNS) & 255;
+	}
+
+	/** Told to keep about its home. */
+	public boolean wandering() {
+		return flag(WANDERING);
+	}
+
+	/** Whether it can fly (for the rider's HUD: {@link #flies} is the species' hook). */
+	public boolean winged() {
+		return flies();
+	}
+
+	/** A realm's wyvern, guarding its kingdom's seat. */
+	public boolean realmGuard() {
+		return this.realm >= 0;
 	}
 
 	/** A species' attributes: its health, hide (armour, toughness), pace on the ground and bite. */
@@ -225,6 +368,7 @@ public abstract class WindDragon extends AbstractHorse {
 		builder.define(DATA_TRUST, 0.0F);
 		builder.define(DATA_TAMER, -1);
 		builder.define(DATA_LOOK, 0);
+		builder.define(DATA_COOLDOWNS, 0);
 	}
 
 	@Override
@@ -592,6 +736,7 @@ public abstract class WindDragon extends AbstractHorse {
 	@Override
 	public void tick() {
 		super.tick();
+		placeParts();
 		if (this.level().isClientSide()) {
 			animate();
 			return;
@@ -606,11 +751,19 @@ public abstract class WindDragon extends AbstractHorse {
 		if (this.isTamed()) {
 			tamedTick(level, moved);
 		}
+		if (this.biteCool > 0) {
+			this.biteCool--;
+		}
+		if (this.slamCool > 0) {
+			this.slamCool--;
+		}
+		this.entityData.set(DATA_COOLDOWNS, Math.min(this.biteCool, 255) << 8 | Math.min(this.slamCool, 255));
 		// breath, the wild one's and the rider's
 		boolean riderBreath = this.isTamed() && this.riderBreathUntil >= this.tickCount && !exhausted();
 		if (this.breathTicks > 0 || riderBreath) {
 			Vec3 aim = riderBreath ? this.riderAim : this.breathAim();
-			boolean griefing = riderBreath || level.getGameRules().get(GameRules.MOB_GRIEFING);
+			// (a realm's dragon never sets its own seat alight)
+			boolean griefing = riderBreath || !realmGuard() && level.getGameRules().get(GameRules.MOB_GRIEFING);
 			breathe(level, mouth(), aim, griefing);
 			if (this.breathTicks > 0) {
 				this.breathTicks--;
@@ -626,9 +779,21 @@ public abstract class WindDragon extends AbstractHorse {
 	private void tamedTick(ServerLevel level, Vec3 moved) {
 		LivingEntity rider = this.getControllingPassenger();
 		boolean ridden = rider instanceof Player;
-		this.flying = false;
-		// (0.7.522) a swimmer ridden in the water is steered as in the air (it doesn't sink)
-		this.setNoGravity(ridden && saddled() && (!grounded() && flies() || swims() && this.isInWater()));
+		if (!ridden && this.freeFlight) {
+			// flying on its own (a patrol, the horn's call): its AI keeps it up, a tick at a time
+			this.freeFlight = false;
+		} else {
+			this.flying = false;
+			// (0.7.522) a swimmer ridden in the water is steered as in the air (it doesn't sink)
+			this.setNoGravity(ridden && saddled() && (!grounded() && flies() || swims() && this.isInWater()));
+		}
+		if (ridden && this.sprintUntil >= this.tickCount && !this.onGround() && !this.isInWater()) {
+			spend(SPRINT_FLY_DRAIN / 20.0F);
+		}
+		diveSlam(level, rider, ridden, moved);
+		if (this.tickCount % 40 == 0) {
+			tougher();
+		}
 		for (Entity passenger : this.getPassengers()) {
 			passenger.resetFallDistance();
 			if (swims() && passenger instanceof LivingEntity l && l.isEyeInFluid(FluidTags.WATER)) {
@@ -648,6 +813,109 @@ public abstract class WindDragon extends AbstractHorse {
 			this.bar.removeAllPlayers();
 			this.bar = null;
 		}
+	}
+
+	/** A ridden flier that dived hard and hit the ground slams it ({@link DragonSlam}). */
+	private void diveSlam(ServerLevel level, @Nullable LivingEntity rider, boolean ridden, Vec3 moved) {
+		boolean air = !this.onGround() && !this.isInWater();
+		if (ridden && flies() && this.wasAirborne && this.onGround() && !Double.isNaN(this.diveTop) && this.diveTop - this.getY() >= SLAM_DROP
+			&& this.slamCool <= 0 && !this.isBaby()) {
+			this.slamCool = SLAM_EVERY;
+			DragonSlam.slam(level, this, rider);
+		}
+		if (!ridden || !air) {
+			this.diveTop = Double.NaN;
+		} else if (moved.y < -SLAM_FALL) {
+			if (Double.isNaN(this.diveTop)) {
+				this.diveTop = this.getY() - moved.y;
+			}
+		} else if (moved.y > -SLAM_FALL * 0.5) {
+			this.diveTop = Double.NaN;
+		}
+		this.wasAirborne = air;
+	}
+
+	/** A tamed grown one is a quarter tougher than a wild one. */
+	private void tougher() {
+		AttributeInstance health = this.getAttribute(Attributes.MAX_HEALTH);
+		if (health == null) {
+			return;
+		}
+		boolean want = this.isTamed() && !this.isBaby();
+		if (want != health.hasModifier(TAMED_HEALTH_ID)) {
+			if (want) {
+				health.addPermanentModifier(new AttributeModifier(TAMED_HEALTH_ID, TAMED_HEALTH, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+			} else {
+				health.removeModifier(TAMED_HEALTH_ID);
+			}
+			if (this.getHealth() > this.getMaxHealth()) {
+				this.setHealth(this.getMaxHealth());
+			}
+		}
+	}
+
+	/** (From the RiderMove packet) its rider bites (G): whatever living thing is nearest its jaws. */
+	public void riderBite() {
+		if (this.biteCool > 0 || exhausted() || this.isBaby() || !(this.level() instanceof ServerLevel level)) {
+			return;
+		}
+		this.biteCool = RIDER_BITE_EVERY;
+		Vec3 jaws = mouth();
+		double reach = 1.5 + this.getBbWidth() * 0.3;
+		LivingEntity best = null;
+		double bestDistance = reach * reach;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(jaws, jaws).inflate(reach), this::spareable)) {
+			double d = e.getBoundingBox().distanceToSqr(jaws);
+			if (d < bestDistance) {
+				bestDistance = d;
+				best = e;
+			}
+		}
+		level.playSound(null, BlockPos.containing(jaws), DragonSounds.BITE.value(), SoundSource.NEUTRAL, 1.5F, 0.9F + this.random.nextFloat() * 0.2F);
+		if (best != null) {
+			best.hurtServer(level, this.damageSources().mobAttack(this), (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE) * 1.25F);
+			bitten(best);
+		}
+	}
+
+	/** (From the RiderMove packet) its rider holds sprint aloft: it beats harder and tires faster ({@code DragonsClient} speeds it). */
+	public void riderSprint() {
+		if (!exhausted()) {
+			this.sprintUntil = this.tickCount + SPRINT_HOLD;
+		}
+	}
+
+	/** {@code player} blew a horn for it: it stops what it was told and comes, by air if it can. */
+	public void hornCall(Player player) {
+		this.calledBy = player.getUUID();
+		this.callLeft = CALL_TICKS;
+		setDragonFlag(SITTING, false);
+		setDragonFlag(WANDERING, false);
+		this.patrolLeft = 0;
+		this.landingHome = false;
+		this.level().playSound(null, this.blockPosition(), DragonSounds.roar(element()).value(), SoundSource.NEUTRAL, 3.0F, 1.0F);
+	}
+
+	/** Sneak-use with empty hands: follow, then sit, then wander about here, then follow again. */
+	void nextOrder(Player player) {
+		String key;
+		if (sitting()) {
+			setDragonFlag(SITTING, false);
+			setDragonFlag(WANDERING, true);
+			this.tameHome = this.position();
+			key = "wanders";
+		} else if (wandering()) {
+			setDragonFlag(WANDERING, false);
+			key = "follows";
+		} else {
+			setDragonFlag(SITTING, true);
+			key = "sits";
+		}
+		this.patrolLeft = 0;
+		this.landingHome = false;
+		this.callLeft = 0;
+		this.patrolIn = Mth.nextInt(this.random, PATROL_GAP_MIN, PATROL_GAP_MAX);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.dragon." + key, this.getDisplayName()));
 	}
 
 	private void spend(float amount) {
@@ -690,6 +958,9 @@ public abstract class WindDragon extends AbstractHorse {
 		if (grounded()) {
 			groundedAi(level);
 			return;
+		}
+		if (!this.nested && this.tickCount % 40 == 0) {
+			nestHere(level);
 		}
 		// (bolting, it flies off whoever's about)
 		LivingEntity target = this.wild == Wild.FLEE ? null : wildFoe(level);
@@ -1353,6 +1624,7 @@ public abstract class WindDragon extends AbstractHorse {
 		}
 		level.sendParticles(ParticleTypes.HEART, this.getX(), this.getY() + 2.5, this.getZ(), 10, 1.0, 0.5, 1.0, 0.0);
 		level.playSound(null, this.blockPosition(), SoundEvents.ENDER_DRAGON_AMBIENT, SoundSource.NEUTRAL, 1.5F, 1.2F);
+		level.playSound(null, this.blockPosition(), DragonSounds.TAME.value(), SoundSource.NEUTRAL, 1.5F, 1.0F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.dragon.tamed", this.getDisplayName()).withStyle(ChatFormatting.GOLD));
 	}
 
@@ -1375,6 +1647,13 @@ public abstract class WindDragon extends AbstractHorse {
 	// ---- tamed ----------------------------------------------------------------------------------------------------------
 
 	private void tamedAi(ServerLevel level) {
+		if (this.callLeft > 0 && answerCall(level)) {
+			return;
+		}
+		if (wandering() || realmGuard()) {
+			keepHome(level);
+			return;
+		}
 		this.setNoGravity(false);
 		if (sitting()) {
 			this.getNavigation().stop();
@@ -1403,6 +1682,143 @@ public abstract class WindDragon extends AbstractHorse {
 		} else if (distance < FOLLOW_STOP) {
 			this.getNavigation().stop();
 		}
+	}
+
+	/** Coming to whoever blew the horn: false once it's there or they're gone. */
+	private boolean answerCall(ServerLevel level) {
+		this.callLeft--;
+		Player caller = this.calledBy == null ? null : level.getPlayerByUUID(this.calledBy);
+		if (caller == null || !caller.isAlive() || caller.level() != this.level()) {
+			this.callLeft = 0;
+			return false;
+		}
+		double flat = caller.position().subtract(this.position()).horizontalDistance();
+		if (flat < CALL_STOP || this.callLeft <= 0) {
+			this.callLeft = 0;
+			if (this.flying) {
+				land();
+			}
+			return false;
+		}
+		if (flies() && (flat > 24.0 || this.flying)) {
+			if (!this.flying) {
+				takeOff();
+			}
+			setFlying(true);
+			this.freeFlight = true;
+			flyToward(level, new Vec3(caller.getX(), caller.getY() + (flat > 12.0 ? 8.0 : 1.0), caller.getZ()), cruiseSpeed() * 1.2, flat < 12.0);
+		} else {
+			this.getNavigation().moveTo(caller, 1.4);
+		}
+		return true;
+	}
+
+	/**
+	 * A wild grown one settled (a flier perched, a walker on its feet at home, with no nest of its kind near) lays its nest
+	 * ({@link DragonNests}). Wyverns keep their own nests on the crags ({@code Wyverns}).
+	 */
+	private void nestHere(ServerLevel level) {
+		if (this.isBaby() || fighting() || this.wild == Wild.FLEE || "wyvern".equals(species())
+			|| (flies() ? this.wild != Wild.PERCHED : !this.onGround() || this.isInWater())) {
+			return;
+		}
+		this.nested = true;
+		if (!flies() && !level.getEntitiesOfClass(WindDragon.class, this.getBoundingBox().inflate(48.0),
+			d -> d != this && d.nested && d.getType() == this.getType()).isEmpty()) {
+			// a herd lays one nest between them
+			return;
+		}
+		DragonNests.lay(level, this);
+	}
+
+	/**
+	 * Keeping its home (told to wander, or a realm's wyvern over its kingdom's seat): it strolls about it, now and then
+	 * flies a patrol round it, takes on monsters that come near (and whoever hurts its owner) and comes back down home.
+	 */
+	private void keepHome(ServerLevel level) {
+		if (this.tameHome == null) {
+			this.tameHome = this.position();
+		}
+		this.home = this.tameHome;
+		LivingEntity owner = this.getOwner();
+		LivingEntity threat = owner != null && owner.level() == this.level() ? owner.getLastHurtByMob() : null;
+		if (threat == null && this.keeper != null && level.getEntity(this.keeper) instanceof LivingEntity tamer) {
+			threat = tamer.getLastHurtByMob();
+		}
+		if (!valid(threat) || threat == this || DragonBreath.spared(this, threat) || threat.distanceToSqr(this.tameHome) > PATROL_RANGE * PATROL_RANGE) {
+			threat = this.tickCount % 10 == 0 ? monsterNearHome(level) : this.foe;
+		}
+		if (threat != null && valid(threat)) {
+			this.foe = threat;
+			if (flies()) {
+				fight(level, threat);
+				this.freeFlight = this.flying;
+			} else {
+				groundFight(level, threat, true);
+			}
+			this.home = this.tameHome;
+			this.landingHome = this.flying && this.patrolLeft <= 0;
+			return;
+		}
+		this.foe = null;
+		if (this.patrolLeft > 0) {
+			this.patrolLeft--;
+			if (this.wild != Wild.CIRCLE) {
+				circle();
+			}
+			this.wildFor = Integer.MAX_VALUE;
+			roam(level);
+			this.freeFlight = true;
+			if (this.patrolLeft == 0) {
+				this.landingHome = true;
+				this.wildTicks = 0;
+			}
+			return;
+		}
+		if (this.landingHome || this.flying) {
+			if (!this.landingHome) {
+				this.landingHome = true;
+				this.wildTicks = 0;
+			}
+			double floor = floorBelow(level, BlockPos.containing(this.tameHome.x, Math.max(this.getY(), this.tameHome.y), this.tameHome.z));
+			Vec3 spot = new Vec3(this.tameHome.x, floor, this.tameHome.z);
+			double flat = spot.subtract(this.position()).horizontalDistance();
+			setFlying(true);
+			this.freeFlight = true;
+			flyToward(level, spot.add(0.0, flat > 6.0 ? 3.0 : 0.0, 0.0), flat > 6.0 ? cruiseSpeed() : 0.25, flat < 6.0);
+			if (flat < 1.5 && this.getY() - floor < 1.5 || this.onGround() && flat < 4.0 || ++this.wildTicks > 600) {
+				land();
+				this.freeFlight = false;
+				this.landingHome = false;
+				this.patrolIn = Mth.nextInt(this.random, PATROL_GAP_MIN, PATROL_GAP_MAX);
+			}
+			return;
+		}
+		this.setNoGravity(false);
+		if (flies() && !this.isBaby() && --this.patrolIn <= 0) {
+			this.patrolLeft = Mth.nextInt(this.random, PATROL_MIN, PATROL_MAX);
+			circle();
+			takeOff();
+			this.freeFlight = true;
+			return;
+		}
+		walk(level);
+	}
+
+	/** The nearest monster it can see within {@link #PATROL_RANGE} of its home. */
+	private @Nullable LivingEntity monsterNearHome(ServerLevel level) {
+		Vec3 at = this.tameHome == null ? this.position() : this.tameHome;
+		LivingEntity best = null;
+		double bestDistance = PATROL_RANGE * PATROL_RANGE;
+		for (Mob m : level.getEntitiesOfClass(Mob.class, new AABB(at, at).inflate(PATROL_RANGE),
+			m -> m instanceof Enemy && !(m instanceof WindDragon) && m.isAlive() && this.hasLineOfSight(m))) {
+			double d = m.distanceToSqr(at);
+			if (d < bestDistance) {
+				bestDistance = d;
+				best = m;
+			}
+		}
+		return best;
 	}
 
 	@Override
@@ -1454,9 +1870,7 @@ public abstract class WindDragon extends AbstractHorse {
 		if (player.isSecondaryUseActive()) {
 			if (stack.isEmpty()) {
 				if (server && owner(player)) {
-					setDragonFlag(SITTING, !sitting());
-					player.sendOverlayMessage(Component.translatable(sitting() ? "message.jaymoskingdoms.dragon.sits" : "message.jaymoskingdoms.dragon.follows",
-						this.getDisplayName()));
+					nextOrder(player);
 				}
 			} else {
 				this.openCustomInventoryScreen(player);
@@ -1475,6 +1889,10 @@ public abstract class WindDragon extends AbstractHorse {
 				return InteractionResult.SUCCESS;
 			}
 			setDragonFlag(SITTING, false);
+			setDragonFlag(WANDERING, false);
+			this.callLeft = 0;
+			this.patrolLeft = 0;
+			this.landingHome = false;
 			player.setYRot(this.getYRot());
 			player.setXRot(this.getXRot());
 			if (!com.jaymoskingdoms.PowersCompat.climbOn(player, this)) {
@@ -1539,6 +1957,15 @@ public abstract class WindDragon extends AbstractHorse {
 		this.pitchAnim += (pitch - this.pitchAnim) * 0.2F;
 		this.swimAnim = Mth.approach(this.swimAnim, this.isInWater() && !air ? 1.0F : 0.0F, 0.1F);
 		this.standAnim = Mth.approach(this.standAnim, standing() ? 1.0F : 0.0F, 0.05F);
+		// fast on its wings: a thin trail off each wing tip
+		if (air && flies() && v.horizontalDistance() > 0.75 && this.tickCount % 2 == 0) {
+			float yaw = this.yBodyRot * Mth.DEG_TO_RAD;
+			double reach = this.getBbWidth() * 1.6, up = this.getBbHeight() * 0.7;
+			for (int s = -1; s <= 1; s += 2) {
+				this.level().addParticle(ParticleTypes.WHITE_SMOKE, this.getX() + Mth.cos(yaw) * reach * s, this.getY() + up,
+					this.getZ() + Mth.sin(yaw) * reach * s, 0.0, 0.0, 0.0);
+			}
+		}
 		int action = action();
 		if (action != this.actionSeen) {
 			this.actionSeen = action;
@@ -1667,7 +2094,17 @@ public abstract class WindDragon extends AbstractHorse {
 		super.addAdditionalSaveData(output);
 		output.putInt("dragon_look", this.entityData.get(DATA_LOOK));
 		output.putFloat("dragon_stamina", stamina());
-		output.putInt("dragon_flags", this.entityData.get(DATA_FLAGS) & (GROUNDED | SITTING));
+		output.putInt("dragon_flags", this.entityData.get(DATA_FLAGS) & (GROUNDED | SITTING | WANDERING));
+		if (this.tameHome != null) {
+			output.putDouble("dragon_home_x", this.tameHome.x);
+			output.putDouble("dragon_home_y", this.tameHome.y);
+			output.putDouble("dragon_home_z", this.tameHome.z);
+		}
+		output.putInt("dragon_realm", this.realm);
+		if (this.keeper != null) {
+			output.putString("dragon_keeper", this.keeper.toString());
+		}
+		output.putBoolean("dragon_nested", this.nested);
 		output.putInt("dragon_grounded", this.groundedLeft);
 		output.putLong("dragon_calm_until", this.calmUntil);
 		output.putString("dragon_hunters", String.join(",", this.hunters.stream().map(UUID::toString).toList()));
@@ -1681,6 +2118,17 @@ public abstract class WindDragon extends AbstractHorse {
 		setStamina(input.getFloatOr("dragon_stamina", STAMINA));
 		this.entityData.set(DATA_FLAGS, (byte)input.getIntOr("dragon_flags", 0));
 		this.groundedLeft = input.getIntOr("dragon_grounded", 0);
+		double homeY = input.getDoubleOr("dragon_home_y", Double.NaN);
+		this.tameHome = Double.isNaN(homeY) ? null
+			: new Vec3(input.getDoubleOr("dragon_home_x", 0.0), homeY, input.getDoubleOr("dragon_home_z", 0.0));
+		this.realm = input.getIntOr("dragon_realm", -1);
+		try {
+			String keeper = input.getStringOr("dragon_keeper", "");
+			this.keeper = keeper.isEmpty() ? null : UUID.fromString(keeper);
+		} catch (IllegalArgumentException e) {
+			this.keeper = null;
+		}
+		this.nested = input.getBooleanOr("dragon_nested", false);
 		this.calmUntil = input.getLongOr("dragon_calm_until", 0L);
 		this.hunters.clear();
 		for (String id : input.getStringOr("dragon_hunters", "").split(",")) {

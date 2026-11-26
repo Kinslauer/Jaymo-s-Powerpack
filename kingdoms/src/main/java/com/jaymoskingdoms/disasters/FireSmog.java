@@ -26,7 +26,7 @@ import net.minecraft.world.level.Level;
  * couple of seconds each player is sent the cells round them that hold a large flame (a burning house, a burning tree, a
  * forest), out to {@link #SEND_RANGE} blocks, and the client hangs dark smog over each ({@code FireSmoke}). A fire in a
  * loaded chunk too far off to tick still burns, so its cell is kept as it was until the chunk ticks or unloads.
- * Not in the Nether.
+ * Not in the Nether. Anyone who breathes the smoke a long while turns sick ({@link SmokeSickness}).
  */
 public final class FireSmog {
 	/** Cells are 2^CELL blocks across. */
@@ -89,6 +89,7 @@ public final class FireSmog {
 
 	static void clear() {
 		LEVELS.clear();
+		SmokeSickness.clear();
 	}
 
 	/** (FireBlockSmogMixin) A fire block at {@code pos} ticked. */
@@ -115,11 +116,14 @@ public final class FireSmog {
 					cells = null;
 				}
 			}
+			List<Source> big = cells == null ? List.of() : big(cells);
 			// (an empty list too, so a player's client lets go of fires that are out, or in another world)
 			for (ServerPlayer player : level.players()) {
-				ServerPlayNetworking.send(player, new Sync(cells == null ? List.of() : near(cells, player)));
+				ServerPlayNetworking.send(player, new Sync(big.isEmpty() ? List.of() : near(big, player)));
 			}
+			SmokeSickness.breathe(level, big);
 		}
+		SmokeSickness.settle();
 	}
 
 	/** Each cell takes this round's count; the cold ones are forgotten, the frozen ones kept. */
@@ -147,19 +151,25 @@ public final class FireSmog {
 		}
 	}
 
-	/** The big cells within SEND_RANGE of the player, nearest first, at most MAX_SENT. */
-	private static List<Source> near(Long2ObjectOpenHashMap<Cell> cells, ServerPlayer player) {
+	/** The cells holding a large flame. */
+	private static List<Source> big(Long2ObjectOpenHashMap<Cell> cells) {
 		List<Source> out = new ArrayList<>();
-		double range2 = (double)SEND_RANGE * SEND_RANGE;
 		for (Long2ObjectMap.Entry<Cell> e : cells.long2ObjectEntrySet()) {
 			Cell cell = e.getValue();
-			if (cell.fires < FROM) {
-				continue;
+			if (cell.fires >= FROM) {
+				out.add(new Source((BlockPos.getX(e.getLongKey()) << CELL) + 8, (BlockPos.getZ(e.getLongKey()) << CELL) + 8, cell.top, cell.fires));
 			}
-			int x = (BlockPos.getX(e.getLongKey()) << CELL) + 8, z = (BlockPos.getZ(e.getLongKey()) << CELL) + 8;
-			double dx = x - player.getX(), dz = z - player.getZ();
-			if (dx * dx + dz * dz <= range2) {
-				out.add(new Source(x, z, cell.top, cell.fires));
+		}
+		return out;
+	}
+
+	/** The large flames within SEND_RANGE of the player, nearest first, at most MAX_SENT. */
+	private static List<Source> near(List<Source> big, ServerPlayer player) {
+		List<Source> out = new ArrayList<>();
+		double range2 = (double)SEND_RANGE * SEND_RANGE;
+		for (Source s : big) {
+			if (dist2(s, player) <= range2) {
+				out.add(s);
 			}
 		}
 		if (out.size() > MAX_SENT) {
