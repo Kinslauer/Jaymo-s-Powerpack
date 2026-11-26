@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Story cutscenes and mission flow like Endless Lantern Corps; spoken Warlock spells
 branch: claude/project-thread-fqmg1o
 with: Claude (cloud thread "Build story cutscenes like Endless Lantern Corps")
@@ -28,3 +28,4 @@ owns:
 
 ## Done
 Built and compile-checked; not played.
+- 2026-11-26 04:44 PR #2204 is merged into master; moved to Agents/Done.
