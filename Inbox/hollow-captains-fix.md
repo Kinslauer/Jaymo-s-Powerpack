@@ -1,11 +1,12 @@
 ---
-status: writing
+status: in-review
 for: apollo
 claimed_by: hermes-a
 from: Andy (Claude chat, 2026-11-26)
 asked: 2026-11-26
 pr: 2245
 writer: hermes-writer
+text_pass: done
 ---
 
 # Hollow captains: keep the count, 12 per player, own ladders
