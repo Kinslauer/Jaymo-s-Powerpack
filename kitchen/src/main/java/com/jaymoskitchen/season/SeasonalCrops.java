@@ -8,6 +8,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CocoaBlock;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.PitcherCropBlock;
+import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -15,6 +18,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * (0.5.6) Crops by season. A crop in one or more of the block tags {@code jaymoskitchen:seasons/<season>} grows only in
  * those seasons; any other crop (other mods' too) grows in all but winter. Out of season it waits, and in winter the
  * frost kills it ({@link #waits}).
+ * In jungles and savannas the crops of the block tag {@code jaymoskitchen:seasons/tropical} grow in the wet season and wait
+ * in the dry ({@link Tropics}); the other crops there grow as they always did.
  * Sheltered crops grow all year: under glass ({@code jaymoskitchen:greenhouse_roof}) or any solid roof. Only temperate
  * lands have seasons, so crops in a desert or the snowy north grow as they always did.
  * <p>
@@ -48,6 +53,10 @@ public final class SeasonalCrops {
 	 * cocoa lose what was on them.
 	 */
 	public static boolean waits(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		if (Tropics.at(level, pos)) {
+			// the hot lands keep a wet and a dry season, not four: no frost, but tropical crops wait out the dry
+			return Tropics.waits(state, level, pos);
+		}
 		if (!Seasons.temperate(level.getBiome(pos).value().getBaseTemperature())) {
 			return false;
 		}
@@ -87,6 +96,21 @@ public final class SeasonalCrops {
 			return season != Season.WINTER;
 		}
 		return state.is(IN_SEASON[season.ordinal()]);
+	}
+
+	/** Whether the season gate ({@link #waits}) governs this plant at all: the crops the mixin watches, and anything in a season tag. */
+	public static boolean seasonal(BlockState state) {
+		Block block = state.getBlock();
+		if (block instanceof CropBlock || block instanceof StemBlock || block instanceof SweetBerryBushBlock || block instanceof CocoaBlock
+			|| block instanceof PitcherCropBlock) {
+			return true;
+		}
+		for (TagKey<Block> tag : IN_SEASON) {
+			if (state.is(tag)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Under glass or a solid roof: the first thing above that isn't air or the plant itself. */
