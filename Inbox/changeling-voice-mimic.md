@@ -51,3 +51,4 @@ changes/kingdoms/<branch>.md.
    - Only for the targeted player, or for all nearby players?
 
 5. **Opt-out:** How to detect if a player has opted out of voice chat? (VoiceRange already handles some of this)
+- 2026-11-26 09:35 Cloud Claude 2026-11-26: Andy's questions for this task are on the tick page https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (db picks/andy). Wait for his answers there; don't build before he answers.
