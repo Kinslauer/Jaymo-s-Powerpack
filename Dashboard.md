@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:51). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:56). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -87,34 +87,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2172 The game starts again (the symbiote HUD crashed it on launch) (Powers, 2026-11-25)
 - [ ] #2171 Waking villages into kingdoms no longer freezes the server (Kingdoms, 2026-11-25)
 - [ ] #2170 Rig leg kick: taekwondo side kick and combo roundhouse (Powers, 2026-11-25)
-- [ ] #2169 The symbiote saves you (Powers, Kingdoms, 2026-11-25)
-- [ ] #2167 space pod: sit in the cockpit under a glass canopy, new icon and flight picture (Powers, 2026-11-25)
-- [ ] #2166 the Verdant World is land again; pod landings and pads keep off the sea, and no second pod (Powers, 2026-11-25)
-- [ ] #2165 tree debris only when a player brought the tree down (Kingdoms, 2026-11-25)
-- [ ] #2164 red symbiote - hunts first, trust unlocks orders, takes over in its big body, fights you for the small suit (Powers, Kingdoms, 2026-11-25)
-- [ ] #2163 severed limbs lie where they are and look like the body they came off (Powers, Kitchen, 2026-11-25)
-- [ ] #2162 symbiote, ape and mob-host takeovers fight with their whole kit (Powers, Kingdoms, 2026-11-25)
-- [ ] #2161 Penguins no longer flood the server log with NaN rotation errors (Powers, 2026-11-25)
-- [ ] #2160 Smithing anvil: the new harness helms, the barbute and spangenhelm, painted barbutes (Powers, Kingdoms, 2026-11-25)
-- [ ] #2159 fighting AI - weapon sense, breaking off to mend, shields, NPC eyes, danger sense, getting there, band styles (Kingdoms, 2026-11-25)
-- [ ] #2158 symbiote in hosts without the Web - every ability, a fight for the suit, a duel with the slinger (Powers, 2026-11-25)
-- [ ] #2157 Hearth's hit cap no longer softens the blow that downs you (Kingdoms, 2026-11-25)
-- [ ] #2156 NaN rotation diagnostic (Powers, 2026-11-25)
-- [ ] #2155 Toughness: Grit and gear let you take more hits (Kingdoms, 2026-11-25)
-- [ ] #2154 silver blades sear monsters, and the twin harness on the back (Powers, 2026-11-25)
-- [ ] #2153 Written starts: hand-built starts like an adventure map, and the Hearthkeeper's way-hut (Kingdoms, 2026-11-25)
-- [ ] #2152 The symbiote's meeting film no longer disconnects the client (Powers, 2026-11-25)
-- [ ] #2151 Bounty boards against a wall; plains towns always have a working windmill, a butcher and an infirmary (Kingdoms, 2026-11-25)
-- [ ] #2150 faints can be mashed out of (Powers, Kingdoms, 2026-11-25)
-- [ ] #2149 maggots for the hook: taken alive, best river bait, crawl off when dropped (Powers, Kingdoms, 2026-11-25)
-- [ ] #2148 explorer maps never make chunks on the server thread (Kingdoms, 2026-11-25)
-- [ ] #2147 The Nightmare haunts from the dark instead of acting as an enderman (Kingdoms, 2026-11-25)
-- [ ] #2146 Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (Powers, Kingdoms, 2026-11-25)
-- …and 535 older ones.
+- …and 616 older ones.
 
 ## Health
 
-19 problems in the notes: [[Health]].
+20 problems in the notes: [[Health]].
 
 ## Last week
 
