@@ -40,6 +40,8 @@ final class StormParticle extends SingleQuadParticle {
 	/** Smoke: how fast it starts rising, the wind it leans into aloft, how much it swells, and its grey at the top. */
 	private float rise, swell, greyTop, baseSize, greyFoot;
 	private double windX, windZ;
+	/** Smoke: how fast it spreads out sideways by the end of its life, settling (blocks a tick, each way). */
+	private double outX, outZ;
 
 	StormParticle(ClientLevel level, double x, double y, double z, TextureAtlasSprite sprite, int kind, int owner, float size, int life,
 		float r, float g, float b, float alpha) {
@@ -74,6 +76,13 @@ final class StormParticle extends SingleQuadParticle {
 		this.greyTop = greyTop;
 		this.baseSize = this.quadSize;
 		this.greyFoot = greyFoot;
+		return this;
+	}
+
+	/** Smoke spreads out sideways as it settles, up to (outX, outZ) a tick by the end of its life. */
+	StormParticle spread(double outX, double outZ) {
+		this.outX = outX;
+		this.outZ = outZ;
 		return this;
 	}
 
@@ -126,8 +135,9 @@ final class StormParticle extends SingleQuadParticle {
 		} else if (this.kind == SMOKE) {
 			float t = this.age / (float)this.lifetime;
 			// rising fast off the flames and slowing as it cools; the wind takes it more the higher it gets
-			this.xd = Mth.lerp(Math.min(1.0F, t * 2.5F), 0.0, this.windX);
-			this.zd = Mth.lerp(Math.min(1.0F, t * 2.5F), 0.0, this.windZ);
+			// (and, settling, it spreads out sideways)
+			this.xd = Mth.lerp(Math.min(1.0F, t * 2.5F), 0.0, this.windX) + this.outX * t;
+			this.zd = Mth.lerp(Math.min(1.0F, t * 2.5F), 0.0, this.windZ) + this.outZ * t;
 			this.x += this.xd;
 			this.y += this.rise * (1.0F - 0.6F * t);
 			this.z += this.zd;

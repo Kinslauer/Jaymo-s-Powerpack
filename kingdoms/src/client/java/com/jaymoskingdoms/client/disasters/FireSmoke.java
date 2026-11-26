@@ -26,13 +26,16 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>Each tick a few columns round the camera are looked at (the top of each, where a burning canopy's fire sits).
  * What burns is tallied in 8x8 cells, which cool off on their own, so each cell knows about how many fires it holds.</li>
- * <li>A cell with enough fire puffs big dark plumes ({@link StormParticle#SMOKE}) that rise, swell, pale and lean
- * downwind as they climb; the bigger the blaze round it, the bigger the puffs and the more of them. All the plumes
+ * <li>A cell with enough fire puffs big dark plumes ({@link StormParticle#SMOKE}) that rise a little, swell, pale, lean
+ * downwind and spread out sideways as they settle (Andy, 2026-11-26: "the smoke should settle closer to the ground, and
+ * plume out to the maximum of where it is now"); the bigger the blaze round it, the bigger the puffs and the more of them. All the plumes
  * together share one budget a tick (a third of it in low-end mode, {@code /lowend}), so a whole forest burning costs
  * no more than a few hundred puffs.</li>
- * <li>Over any large flame (a burning house, a burning tree, a forest), a dark bank of smog gathers high up where the
- * plumes end ({@link StormParticle#PALL}): big, slow, dark grey puffs that hang there, drift downwind and linger a minute
- * or two after the fire is out (Andy, 2026-11-20). The server says where the large flames are, out to 512 blocks
+ * <li>Over any large flame (a burning house, a burning tree, a forest), a dark bank of smog gathers low, a little over
+ * the flames where the plumes end ({@link StormParticle#PALL}): big, slow, dark grey puffs that hang there, drift
+ * downwind and linger a minute or two after the fire is out (Andy, 2026-11-20). Since 2026-11-26 it hangs low instead of
+ * high up, and every large flame's bank spreads as wide as only the biggest blaze's did; breathing it a long while makes
+ * you sick ({@code SmokeSickness}). The server says where the large flames are, out to 512 blocks
  * ({@link FireSmog}), so a pall, and a plume under it, can be seen from afar. The smog shares a budget of its own.</li>
  * <li>Right over the flames, on the ground under the trees as well as in a burning canopy, thick black smoke banks up
  * ({@link #smother}): it hardly rises and drifts with the wind, so a big blaze is hidden even seen from outside it.</li>
@@ -56,7 +59,10 @@ public final class FireSmoke {
 	static final float SIZE_SMALL = 5.0F, SIZE_BIG = 13.0F, BIG = 120.0F;
 	/** How long a puff lasts (ticks), how fast it starts rising (blocks a tick), and how much it swells by the end (times). */
 	static final int LIFE_MIN = 300, LIFE_MAX = 460;
-	static final float RISE_MIN = 0.1F, RISE_MAX = 0.16F, SWELL = 1.6F;
+	static final float RISE_MIN = 0.045F, RISE_MAX = 0.07F, SWELL = 1.6F;
+	/** How fast a plume puff spreads out sideways by the end of its life (blocks a tick; least, most); it covers about
+	 * half that times its life. */
+	static final float SPREAD_MIN = 0.04F, SPREAD_MAX = 0.09F;
 	/** Its grey (by day) at the foot and the top, and how thick it is at the foot. */
 	static final float GREY_FOOT = 0.22F, GREY_TOP = 0.46F, ALPHA = 0.55F;
 	/** How fast it leans with the wind once aloft, as a share of the wind's own drift. */
@@ -66,8 +72,8 @@ public final class FireSmoke {
 	static final float PALL_PER_FIRE = 0.003F, PALL_BUDGET = 0.15F, PALL_LOW_BUDGET = 0.05F, PALL_BIG = 120.0F;
 	/** How high over the highest flame it hangs (blocks; a small fire's, a big one's, and how much either way), how far it
 	 * spreads from the fire each way and how far downwind (small, big). */
-	static final float PALL_HEIGHT = 30.0F, PALL_HEIGHT_BIG = 48.0F, PALL_HEIGHT_SPREAD = 6.0F;
-	static final float PALL_SPREAD = 8.0F, PALL_SPREAD_BIG = 18.0F, PALL_DOWNWIND = 8.0F, PALL_DOWNWIND_BIG = 24.0F;
+	static final float PALL_HEIGHT = 7.0F, PALL_HEIGHT_BIG = 11.0F, PALL_HEIGHT_SPREAD = 3.0F;
+	static final float PALL_SPREAD = 18.0F, PALL_SPREAD_BIG = 18.0F, PALL_DOWNWIND = 24.0F, PALL_DOWNWIND_BIG = 24.0F;
 	/** A smog puff's size (blocks) over a small and over a big fire; how much it swells. */
 	static final float PALL_SIZE_SMALL = 12.0F, PALL_SIZE_BIG = 28.0F, PALL_SWELL = 0.5F;
 	/** How long a smog puff lasts (ticks; over a big fire, and a small one's share of that), how fast it drifts as a share of
@@ -273,8 +279,10 @@ public final class FireSmoke {
 		float size = Mth.lerp(blaze, SIZE_SMALL, SIZE_BIG) * (0.8F + random.nextFloat() * 0.4F);
 		int life = Mth.nextInt(random, LIFE_MIN, LIFE_MAX);
 		float rise = Mth.lerp(random.nextFloat(), RISE_MIN, RISE_MAX) * (0.85F + 0.3F * blaze);
+		float way = random.nextFloat() * Mth.TWO_PI, out = Mth.lerp(random.nextFloat(), SPREAD_MIN, SPREAD_MAX);
 		minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.SMOKE, 0, size, life,
-			GREY_FOOT, GREY_FOOT * 0.95F, GREY_FOOT * 0.92F, ALPHA).smoke(rise, wx, wz, SWELL, GREY_FOOT, GREY_TOP));
+			GREY_FOOT, GREY_FOOT * 0.95F, GREY_FOOT * 0.92F, ALPHA).smoke(rise, wx, wz, SWELL, GREY_FOOT, GREY_TOP)
+			.spread(Mth.cos(way) * out, Mth.sin(way) * out));
 	}
 
 	/** Each large flame the server told of gathers its share of this tick's smog high above it; one further off than the
