@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:charcoal"
+  ],
+  "result": {
+    "id": "jaymoskitchen:wood_ash",
+    "count": 2
+  }
+}
