@@ -16,6 +16,7 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · for any · open
+- [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · open
 
 
 ## Being built
