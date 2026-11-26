@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: structures-6-stable-mine-farm
 branch: claude/structures-6-stable-mine-farm
 with: 
@@ -31,3 +31,4 @@ owns:
 
 ## Done
 (none yet)
+- 2026-11-26 04:04 No sign of work for 30 min: marked stalled (whoever ran it stopped).
