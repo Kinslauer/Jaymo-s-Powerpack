@@ -8544,3 +8544,8 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - Stays on either way: our mods' own art for their new items, blocks and mobs, the 3D guns, Klei_Wright's tundra art, the fixes packs, music, the medieval MCA villagers, Tissou's future zombies, Tiered Shields' textures and the Fresh Animations packs (motion, not textures).
 - Classes: TextureLook (new), PackResourcePacks (skips those packs while the vanilla look is picked), JaymosPowersClient.
 - Built; not played.
+
+## 0.27.90 (2026-11-26): Dyed and grey sheep no longer sprout stray boxes (#2231)
+
+- **Sheep undercoat** (`SheepUndercoatMixin`): the game draws a dyed sheep's undercoat (the coat in its wool colour that shows once it's sheared) under the wool as well. Fresh Animations reshapes the sheep and its wool but has no undercoat model, so the undercoat stayed vanilla's shape in vanilla's place and poked out of grey, black and dyed sheep as flat boxes; Pixel Perfection Fidelity's solid undercoat made them plain to see. It's no longer drawn under wool (it's never seen there), and on a sheared sheep only when the undercoat's shape matches the sheep's. With Fresh Animations on, a sheared dyed sheep shows its bare skin, as sheared sheep did before the undercoat came in.
+- White sheep were never affected. Built; not played.
