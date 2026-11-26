@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 02:30). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 02:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -35,6 +35,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2213 Maw ruins from Pomkot's World (Powers, 2026-11-26)
 - [ ] #2212 CC0 picks: pack weight, death toll, weapon wheel, coyote time, better chainmail, axe throw, rust, falling snow, snores, clumsy undead, soap scrub, leaves on Fast, eight new pack mods (Powers, Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2211 fire engulfs faster, burns longer, buildings crumble (Kingdoms, 2026-11-26)
 - [ ] #2210 Medieval resource packs under the Reason look (Powers, Kingdoms, 2026-11-26)
@@ -94,8 +95,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2146 Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (Powers, Kingdoms, 2026-11-25)
 - [ ] #2145 Dodge key: tap to dodge, hold to roll, hold longer to go prone (Powers, 2026-11-25)
 - [ ] #2144 hollow among the dead - the Hollow walk with the hordes, and a kill makes a captain (Kingdoms, 2026-11-25)
-- [ ] #2143 Life story: no more stuck on "On to your looks" (Kingdoms, 2026-11-25)
-- …and 590 older ones.
+- …and 591 older ones.
 
 ## Health
 
