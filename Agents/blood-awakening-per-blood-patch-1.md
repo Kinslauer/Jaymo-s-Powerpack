@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: blood-awakening-per-blood-build
 branch: t3/blood-awakening-per-blood-patch-1
 with:
@@ -37,3 +37,4 @@ owns:
 
 ## Done
 In progress.
+- 2026-11-26 15:34 No sign of work for 30 min: marked stalled (whoever ran it stopped).
