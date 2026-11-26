@@ -95,7 +95,9 @@ public final class DeathRoll {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (taken > 0.0F && source.getEntity() instanceof Mob croc && source.getDirectEntity() == croc && jaws(croc)
 				&& !croc.isBaby() && !GRIPS.containsKey(croc) && entity.isAlive() && !held(entity) && !jaws(entity)
-				&& !entity.isPassenger() && bulk(entity) <= bulk(croc) * jawsOf(croc).mostPrey()) {
+				&& !entity.isPassenger() && bulk(entity) <= bulk(croc) * jawsOf(croc).mostPrey()
+				// (a fish is snapped up and swallowed, not rolled)
+				&& !(entity instanceof net.minecraft.world.entity.animal.fish.AbstractFish)) {
 				GRIPS.put(croc, new Grip(entity, croc.getHealth()));
 			}
 		});
