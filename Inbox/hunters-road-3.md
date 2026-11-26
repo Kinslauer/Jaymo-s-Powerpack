@@ -18,3 +18,4 @@ pr:
 **Order:** tracks two at a time: 1+2, then 3+6, then 4+7, then 5+8, then 9+10 (this is wave 2). Needs patch(es) hunters-road-2 merged first. Its models come first from hermes-modeller (task hunters-road-3-models).
 
 ## Notes
+- 2026-11-26 19:58 ON HOLD until wave 1 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coordinator opens it when its turn comes.

@@ -16,6 +16,9 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · for any · open
+- [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for 🔥 Prometheus · open
 
 
 ## Being built
@@ -46,6 +49,13 @@ kanban-plugin: board
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for any · blocked
+- [ ] [[Inbox/hunters-road-4|hunters-road-4]] · for any · blocked
+- [ ] [[Inbox/hunters-road-5|hunters-road-5]] · for any · blocked
+- [ ] [[Inbox/hunters-road-6|hunters-road-6]] · for any · blocked
+- [ ] [[Inbox/hunters-road-7|hunters-road-7]] · for any · blocked
+- [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
+- [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
+- [ ] [[Inbox/hunters-road-10|hunters-road-10]] · for any · blocked
 
 
 ## Done
