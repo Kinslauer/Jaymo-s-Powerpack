@@ -25,7 +25,8 @@ import org.jspecify.annotations.Nullable;
  * Andy (2026-11-25): "crocodiles should be among the first, they should deathroll with a mob in its jaws, dealing damage
  * every violent turn, then drag it's prey into the water to feed. like it's natural behavior". A crocodile or an
  * alligator ({@link #JAWS}) that bites something no bigger than {@link #MOST_PREY} times itself keeps it in its jaws: it
- * rolls, a violent turn every {@link #ROLL_EVERY} ticks, each one hurting the prey ({@link #ROLL_DAMAGE}), splashing in
+ * thrashes side to side ({@link #turn}: the other mods' crocodiles can't be drawn rolling over), a violent turn every
+ * {@link #ROLL_EVERY} ticks, each one hurting the prey ({@link #ROLL_DAMAGE}), splashing in
  * water. After {@link #ROLLS} turns it drags the prey to the nearest water ({@link #WATER_SEARCH}), and there it holds it
  * under and rolls on. If the prey dies in its jaws, it drags the body into the water instead and lets it go there, to
  * eat it (Jaymo's Kitchen's scavengers: crocodiles and alligators are in its {@code scavengers} tag). Hurting it hard
@@ -37,13 +38,15 @@ public final class DeathRoll {
 		Identifier.fromNamespaceAndPath("naturalist", "alligator"));
 	/** Jaymo's Kitchen's body. */
 	static final Identifier CORPSE = Identifier.fromNamespaceAndPath("jaymoskitchen", "corpse");
-	/** The biggest prey it takes in its jaws, as a share of its own bulk (width x width x height). */
-	static final double MOST_PREY = 1.5;
+	/** The biggest prey it takes in its jaws, as a share of its own bulk (width x width x height): a horse, an ox (Andy: "go after bigger prey"). */
+	static final double MOST_PREY = 4.0;
 	/** Ticks between violent turns, turns on land before it drags, harm of each turn. */
 	static final int ROLL_EVERY = 12, ROLLS = 4;
 	static final float ROLL_DAMAGE = 3.0F;
 	/** In the water it turns this much slower (it holds the prey under between). */
 	static final int WATER_ROLL_EVERY = 24;
+	/** How far each thrash wrenches its head and body to one side of where it faced at the bite (degrees, both ways). */
+	static final float THRASH = 55.0F, THRASH_JITTER = 20.0F;
 	/** Harm taken since the bite that makes it let go. */
 	static final float BREAK_FREE = 6.0F;
 	/** How far it looks for water to drag to (blocks), and how long it drags before it gives up (ticks). */
@@ -61,6 +64,9 @@ public final class DeathRoll {
 		Phase phase = Phase.ROLL;
 		int turns, ticks, dragged;
 		final float healthAtBite;
+		/** Which way it faced at the bite, and the side it thrashes to next (1 or -1). */
+		float facing;
+		int side = 1;
 		/** The prey died: waiting for its body (game time it died), or the body is held. */
 		long diedAt = -1;
 		boolean body;
@@ -82,7 +88,9 @@ public final class DeathRoll {
 			if (taken > 0.0F && source.getEntity() instanceof Mob croc && source.getDirectEntity() == croc && jaws(croc)
 				&& !croc.isBaby() && !GRIPS.containsKey(croc) && entity.isAlive() && !held(entity) && !jaws(entity)
 				&& !entity.isPassenger() && bulk(entity) <= bulk(croc) * MOST_PREY) {
-				GRIPS.put(croc, new Grip(entity, croc.getHealth()));
+				Grip grip = new Grip(entity, croc.getHealth());
+				grip.facing = croc.getYRot();
+				GRIPS.put(croc, grip);
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -112,7 +120,7 @@ public final class DeathRoll {
 		return false;
 	}
 
-	private static double bulk(Entity e) {
+	static double bulk(Entity e) {
 		return e.getBbWidth() * e.getBbWidth() * e.getBbHeight();
 	}
 
@@ -154,7 +162,7 @@ public final class DeathRoll {
 			case ROLL -> {
 				croc.getNavigation().stop();
 				if (grip.ticks % ROLL_EVERY == 0) {
-					turn(level, croc, prey);
+					turn(level, croc, prey, grip);
 					if (++grip.turns >= ROLLS) {
 						grip.phase = wet ? Phase.HOLD : Phase.DRAG;
 					}
@@ -180,7 +188,7 @@ public final class DeathRoll {
 			case HOLD -> {
 				croc.getNavigation().stop();
 				if (grip.ticks % WATER_ROLL_EVERY == 0) {
-					turn(level, croc, prey);
+					turn(level, croc, prey, grip);
 				}
 			}
 		}
@@ -188,9 +196,14 @@ public final class DeathRoll {
 		return true;
 	}
 
-	/** A violent turn: the crocodile spins over, wrenching what it holds, which is hurt by it. */
-	private static void turn(ServerLevel level, Mob croc, Entity prey) {
-		float yaw = croc.getYRot() + 150.0F + croc.getRandom().nextFloat() * 60.0F;
+	/**
+	 * A violent turn. Andy (2026-11-25): "for the ones we cant roll, they should thrash side to side" (the other mods'
+	 * crocodiles can't be drawn turning over): it wrenches its head and body hard to one side of where it faced at the bite,
+	 * then to the other, and what it holds is hurt by each.
+	 */
+	private static void turn(ServerLevel level, Mob croc, Entity prey, Grip grip) {
+		grip.side = -grip.side;
+		float yaw = grip.facing + grip.side * (THRASH + croc.getRandom().nextFloat() * THRASH_JITTER);
 		croc.setYRot(yaw);
 		croc.setYBodyRot(yaw);
 		croc.setYHeadRot(yaw);
