@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:43). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:47). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -28,6 +28,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
 - [ ] #2236 Town crier: verdicts are cried by the seat, not sent to chat (Kingdoms, 2026-11-26)
+- [ ] #2235 fire smoke settles low too, and makes you sick (Kingdoms, 2026-11-26)
 - [ ] #2234 Maggots come as a writhing heap that splats underfoot (Kingdoms, 2026-11-26)
 - [ ] #2233 Reincarnate link on the character page (Powers, Kingdoms, 2026-11-26)
 - [ ] #2232 Dragon keys no longer stop the game starting (Kingdoms, 2026-11-26)
@@ -86,8 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2162 symbiote, ape and mob-host takeovers fight with their whole kit (Powers, Kingdoms, 2026-11-25)
 - [ ] #2161 Penguins no longer flood the server log with NaN rotation errors (Powers, 2026-11-25)
 - [ ] #2160 Smithing anvil: the new harness helms, the barbute and spangenhelm, painted barbutes (Powers, Kingdoms, 2026-11-25)
-- [ ] #2159 fighting AI - weapon sense, breaking off to mend, shields, NPC eyes, danger sense, getting there, band styles (Kingdoms, 2026-11-25)
-- …and 606 older ones.
+- …and 607 older ones.
 
 ## Health
 
