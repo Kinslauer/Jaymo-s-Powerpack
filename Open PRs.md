@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 16:29
+updated: 2026-11-26 16:30
 ---
 # Open PRs
 
-11 open, as of 2026-11-26 16:29. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+11 open, as of 2026-11-26 16:30. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
