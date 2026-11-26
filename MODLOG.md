@@ -8413,3 +8413,8 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - **Alt zooms on its own while your line is out**, with no dash, roll, dive or flip, so the cast can't be dropped by a dodge. Shift + Alt still zooms, and Alt still dodges when no line is out. `SneakZoom.lineOut`, `DodgeClient`.
 - A one-time tip card the first time your line is out says this (Alt to look closer, reel and ease off, turn the rod against a run, Sneak then Use to let go). `BodyTips`.
 - Built; not played.
+
+## 0.27.75 (2026-11-26): Ki Cell has its icon and name (#2196)
+
+- The Tinkerer's **Ki Cell** showed the purple and black missing texture and its raw name: it had no item definition (`items/ki_cell.json`), no icon and no name under its real id. It now has all three: a brass-capped glass cell with ki glowing inside, in the ki-drink cyan (painted by `tools/ki_cell_icon.py`).
+- Built; not played.
