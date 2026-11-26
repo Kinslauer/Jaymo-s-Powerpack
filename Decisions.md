@@ -1168,3 +1168,4 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26 (Andy, CC0 picks thread): Cutout Leaves on by default (Fast preset and low-end mode keep it).
 - 2026-11-26 (Andy, CC0 picks thread, card): lanterns capped at 3 days too (whale oil 3, ambergris 2, coal 1, tallow 0.5), replacing the 2026-11-12 long lanterns.
 - 2026-11-26 (Andy, CC0 picks thread): "merge approve" -> the 16 CC0-pick lore paragraphs approved; merge #2212.
+- 2026-11-26: Andy: Pomkot's World (grc-mcs, Lost Cities add-on; listings say ARR, GitHub repo says MIT) is ported into the Maw under the repo's MIT licence, leaving out Pine-san's aircraft and warship (decision card "Port now under the repo's MIT"). Port and offshore districts are left out too, since the Maw is dry.
