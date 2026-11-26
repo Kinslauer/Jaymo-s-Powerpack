@@ -1159,3 +1159,4 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26: Andy merged PR #2204 (story scenes, midnight bargain, spoken Warlock spells).
 - 2026-11-26: Andy approved the Lore.md paragraph "The midnight bargain".
 - 2026-11-26 (Reason Art, pack art scan): the pack's own resource pack (Reason look) aims for **clean vanilla-plus** (vanilla-style rules, crisp outlines), replacing the Excalibur option; no muted variant. Pick list: https://claude.ai/artifact/FuL1HrVjz295anaVrYdcNV
+- 2026-11-26 (Andy, Nature picks thread): "merge then finish the rest in one pr" -> #2200 merged; nature patches 1-7 (salmon run through beavers) go out as one PR, #2207.
