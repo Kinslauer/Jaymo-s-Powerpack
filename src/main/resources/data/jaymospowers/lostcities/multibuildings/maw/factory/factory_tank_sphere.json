@@ -1,0 +1,14 @@
+{
+  "dimx": 2,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/factory/factory_tank_sphere00",
+      "jaymospowers:maw/factory/factory_tank_sphere01"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_tank_sphere10",
+      "jaymospowers:maw/factory/factory_tank_sphere11"
+    ]
+  ]
+}

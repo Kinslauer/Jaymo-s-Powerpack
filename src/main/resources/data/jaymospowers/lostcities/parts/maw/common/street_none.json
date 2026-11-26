@@ -1,0 +1,25 @@
+{
+  "xsize": 16,
+  "zsize": 16,
+  "refpalette": "jaymospowers:maw/default",
+  "slices": [
+    [
+      "bbbbbbbbbbbbbbbb",
+      "bbbbbbbbbbbbbbbb",
+      "bbbbbbbbbbbbbbbb",
+      "bbbbbbbbbbbbbbbb",
+      "bbbbSSSSSSSSbbbb",
+      "bbbbSSSSSSSSbbbb",
+      "bbbbSSSSSSSSbbbb",
+      "bbbbSSSSSSSSbbbb",
+      "bbbbSSSSSSSSbbbb",
+      "bbbbSSSSSSSSbbbb",
+      "bbbbSSSSSSSSbbbb",
+      "bbbbSSSSSSSSbbbb",
+      "bbbbbbbbbbbbbbbb",
+      "bbbbbbbbbbbbbbbb",
+      "bbbbbbbbbbbbbbbb",
+      "bbbbbbbbbbbbbbbb"
+    ]
+  ]
+}

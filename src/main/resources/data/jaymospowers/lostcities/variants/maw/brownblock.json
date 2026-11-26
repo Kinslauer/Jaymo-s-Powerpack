@@ -1,0 +1,24 @@
+{
+  "blocks": [
+    {
+      "random": 48,
+      "block": "minecraft:brown_terracotta"
+    },
+    {
+      "random": 48,
+      "block": "minecraft:spruce_wood"
+    },
+    {
+      "random": 48,
+      "block": "minecraft:dark_oak_wood"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:iron_bars"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:air"
+    }
+  ]
+}

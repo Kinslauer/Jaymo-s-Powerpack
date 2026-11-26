@@ -1,0 +1,14 @@
+{
+  "dimx": 2,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_radiotower00",
+      "jaymospowers:maw/scattered/scattered_radiotower01"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_radiotower10",
+      "jaymospowers:maw/scattered/scattered_radiotower11"
+    ]
+  ]
+}

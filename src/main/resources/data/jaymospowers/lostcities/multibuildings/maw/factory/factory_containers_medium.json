@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/factory/factory_containers_medium00",
+      "jaymospowers:maw/factory/factory_containers_medium01",
+      "jaymospowers:maw/factory/factory_containers_medium02"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_containers_medium10",
+      "jaymospowers:maw/factory/factory_containers_medium11",
+      "jaymospowers:maw/factory/factory_containers_medium12"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_containers_medium20",
+      "jaymospowers:maw/factory/factory_containers_medium21",
+      "jaymospowers:maw/factory/factory_containers_medium22"
+    ]
+  ]
+}

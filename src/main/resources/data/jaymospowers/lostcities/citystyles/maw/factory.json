@@ -1,0 +1,181 @@
+{
+  "inherit": "citystyle_config",
+  "style": "jaymospowers:maw/weathered",
+  "explosionchance": 0,
+  "streetblocks": {
+    "border": "y",
+    "wall": "w",
+    "street": "S",
+    "streetbase": "b",
+    "streetvariant": "B",
+    "width": 16,
+    "parts": {
+      "full": "jaymospowers:maw/common/street_full",
+      "straight": "jaymospowers:maw/common/street_straight",
+      "end": "jaymospowers:maw/common/street_end",
+      "bend": "jaymospowers:maw/common/street_bend",
+      "t": "jaymospowers:maw/common/street_t",
+      "none": "jaymospowers:maw/common/street_none",
+      "all": "jaymospowers:maw/common/street_all"
+    }
+  },
+  "parkblocks": {
+    "elevation": "x"
+  },
+  "corridorblocks": {
+    "roof": "x",
+    "glass": "+"
+  },
+  "railblocks": {
+    "railmain": "~"
+  },
+  "sphereblocks": {
+    "glass": "Z",
+    "border": "9",
+    "inner": "b"
+  },
+  "selectors": {
+    "buildings": [
+      {
+        "factor": 0.2,
+        "value": "jaymospowers:maw/factory/factory_tower_thin"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/black_building"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/factory/factory_tank_long"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/factory/factory_chimney"
+      }
+    ],
+    "multibuildings": [
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_containers_medium"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_crane"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_garage"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/factory/factory_reactor"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_tank_medium"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_rack"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_black_building"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_building_main_large"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_building_main_huge"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_building_sub"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_furnace"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_process_plant"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_tank_sphere"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/factory/factory_tank_water"
+      }
+    ],
+    "bridges": [
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/common/bridge_open"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/common/bridge_covered"
+      }
+    ],
+    "fronts": [],
+    "stairs": [
+      {
+        "factor": 1.0,
+        "value": "stairs1"
+      },
+      {
+        "factor": 1.0,
+        "value": "stairs2"
+      },
+      {
+        "factor": 1.0,
+        "value": "stairsnormal"
+      },
+      {
+        "factor": 1.0,
+        "value": "stairsbig"
+      }
+    ],
+    "fountains": [],
+    "parks": [
+      {
+        "factor": 1.0,
+        "value": "park_pool"
+      },
+      {
+        "factor": 1.0,
+        "value": "park_plants"
+      },
+      {
+        "factor": 1.0,
+        "value": "park_trees"
+      },
+      {
+        "factor": 1.0,
+        "value": "park_plants_pillars"
+      },
+      {
+        "factor": 0.3,
+        "value": "park_building"
+      },
+      {
+        "factor": 0.3,
+        "value": "park_building2"
+      }
+    ],
+    "raildungeons": [
+      {
+        "factor": 1.0,
+        "value": "rail_dungeon1"
+      },
+      {
+        "factor": 1.0,
+        "value": "rail_dungeon2"
+      }
+    ]
+  }
+}

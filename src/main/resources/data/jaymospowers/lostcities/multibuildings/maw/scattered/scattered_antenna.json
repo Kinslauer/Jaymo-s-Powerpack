@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_antenna00",
+      "jaymospowers:maw/scattered/scattered_antenna01",
+      "jaymospowers:maw/scattered/scattered_antenna02"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_antenna10",
+      "jaymospowers:maw/scattered/scattered_antenna11",
+      "jaymospowers:maw/scattered/scattered_antenna12"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_antenna20",
+      "jaymospowers:maw/scattered/scattered_antenna21",
+      "jaymospowers:maw/scattered/scattered_antenna22"
+    ]
+  ]
+}

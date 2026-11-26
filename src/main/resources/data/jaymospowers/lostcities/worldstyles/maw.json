@@ -1,0 +1,307 @@
+{
+  "outsidestyle": "outside",
+  "settings": {
+    "railwayavoidance": "ignore",
+    "railpartheight6": 2
+  },
+  "multisettings": {
+    "areasize": 20,
+    "minimum": 5,
+    "maximum": 20,
+    "correctstylefactor": 1,
+    "attempts": 50
+  },
+  "scattered": {
+    "areasize": 15,
+    "chance": 1,
+    "weightnone": 30,
+    "list": [
+      {
+        "name": "jaymospowers:maw/scattered_antenna",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_container",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_farmland",
+        "weight": 8,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_garage",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_gasstand",
+        "weight": 8,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_hanger",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_lighthouse",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_minifactory",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_radiotower",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_scaffold",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_telescope",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/scattered_watertank",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "jaymospowers:maw/wind_mill",
+        "weight": 5,
+        "maxheightdiff": 100,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_deep_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "radiotower",
+        "weight": 1,
+        "maxheightdiff": 3,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      },
+      {
+        "name": "cabin",
+        "weight": 10,
+        "maxheightdiff": 2,
+        "biomes": {
+          "excluding": [
+            "#minecraft:is_ocean",
+            "#minecraft:is_river",
+            "#minecraft:is_beach"
+          ]
+        }
+      }
+    ]
+  },
+  "citystyles": [
+    {
+      "citystyle": "jaymospowers:maw/factory",
+      "factor": 9
+    },
+    {
+      "citystyle": "jaymospowers:maw/base",
+      "factor": 9
+    },
+    {
+      "citystyle": "jaymospowers:maw/quarry",
+      "factor": 9
+    },
+    {
+      "citystyle": "jaymospowers:maw/megasolar",
+      "factor": 9
+    },
+    {
+      "citystyle": "jaymospowers:maw/standard",
+      "factor": 9
+    },
+    {
+      "citystyle": "jaymospowers:maw/standard2",
+      "factor": 1
+    },
+    {
+      "citystyle": "jaymospowers:maw/weatheredcity",
+      "factor": 1
+    },
+    {
+      "citystyle": "citystyle_standard",
+      "factor": 9
+    }
+  ],
+  "parts": {
+    "highways": {
+      "bridge": [
+        "jaymospowers:maw/common/highway_bridge"
+      ],
+      "bridge_bi": [
+        "jaymospowers:maw/common/highway_bridge_bi"
+      ],
+      "tunnel": [
+        "jaymospowers:maw/common/highway_tunnel"
+      ],
+      "tunnel_bi": [
+        "jaymospowers:maw/common/highway_tunnel_bi"
+      ],
+      "open": [
+        "jaymospowers:maw/common/highway_open"
+      ],
+      "open_bi": [
+        "jaymospowers:maw/common/highway_open_bi"
+      ]
+    },
+    "railways": {
+      "stationunderground": [
+        "jaymospowers:maw/common/station_underground"
+      ],
+      "stationundergroundstairs": [
+        "jaymospowers:maw/common/station_underground_stairs"
+      ],
+      "railshorizontal": [
+        "jaymospowers:maw/common/rails_horizontal"
+      ],
+      "railshorizontalend": [
+        "jaymospowers:maw/common/rails_horizontal_end"
+      ],
+      "railshorizontalwater": [
+        "jaymospowers:maw/common/rails_horizontal_water"
+      ],
+      "railsvertical": [
+        "jaymospowers:maw/common/rails_vertical"
+      ],
+      "railsverticalwater": [
+        "jaymospowers:maw/common/rails_vertical_water"
+      ],
+      "rails3split": [
+        "jaymospowers:maw/common/rails_3split"
+      ],
+      "railsbend": [
+        "jaymospowers:maw/common/rails_bend"
+      ],
+      "railsflat": [
+        "jaymospowers:maw/common/rails_flat"
+      ],
+      "railsdown1": [
+        "jaymospowers:maw/common/rails_down1"
+      ],
+      "railsdown2": [
+        "jaymospowers:maw/common/rails_down2"
+      ]
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "dimx": 5,
+  "dimz": 5,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_minifactory00",
+      "jaymospowers:maw/scattered/scattered_minifactory01",
+      "jaymospowers:maw/scattered/scattered_minifactory02",
+      "jaymospowers:maw/scattered/scattered_minifactory03",
+      "jaymospowers:maw/scattered/scattered_minifactory04"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_minifactory10",
+      "jaymospowers:maw/scattered/scattered_minifactory11",
+      "jaymospowers:maw/scattered/scattered_minifactory12",
+      "jaymospowers:maw/scattered/scattered_minifactory13",
+      "jaymospowers:maw/scattered/scattered_minifactory14"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_minifactory20",
+      "jaymospowers:maw/scattered/scattered_minifactory21",
+      "jaymospowers:maw/scattered/scattered_minifactory22",
+      "jaymospowers:maw/scattered/scattered_minifactory23",
+      "jaymospowers:maw/scattered/scattered_minifactory24"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_minifactory30",
+      "jaymospowers:maw/scattered/scattered_minifactory31",
+      "jaymospowers:maw/scattered/scattered_minifactory32",
+      "jaymospowers:maw/scattered/scattered_minifactory33",
+      "jaymospowers:maw/scattered/scattered_minifactory34"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_minifactory40",
+      "jaymospowers:maw/scattered/scattered_minifactory41",
+      "jaymospowers:maw/scattered/scattered_minifactory42",
+      "jaymospowers:maw/scattered/scattered_minifactory43",
+      "jaymospowers:maw/scattered/scattered_minifactory44"
+    ]
+  ]
+}

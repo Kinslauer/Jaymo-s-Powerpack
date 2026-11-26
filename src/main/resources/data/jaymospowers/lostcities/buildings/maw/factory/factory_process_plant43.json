@@ -1,0 +1,51 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "allowFillers": false,
+  "minfloors": 7,
+  "maxfloors": 7,
+  "maxcellars": 0,
+  "parts": [
+    {
+      "floor": 0,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_process_plant43_0"
+    },
+    {
+      "floor": 1,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_process_plant43_1"
+    },
+    {
+      "floor": 2,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_process_plant43_2"
+    },
+    {
+      "floor": 3,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_process_plant43_3"
+    },
+    {
+      "floor": 4,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_process_plant43_4"
+    },
+    {
+      "floor": 5,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_process_plant43_5"
+    },
+    {
+      "floor": 6,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_process_plant43_6"
+    },
+    {
+      "floor": 7,
+      "top": true,
+      "part": "jaymospowers:maw/factory/factory_process_plant43_7"
+    }
+  ]
+}

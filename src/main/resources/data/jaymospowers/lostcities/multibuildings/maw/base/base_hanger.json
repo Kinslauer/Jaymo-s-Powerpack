@@ -1,0 +1,56 @@
+{
+  "dimx": 5,
+  "dimz": 8,
+  "buildings": [
+    [
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty"
+    ],
+    [
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger00",
+      "jaymospowers:maw/base/base_building_hanger01",
+      "jaymospowers:maw/base/base_building_hanger01",
+      "jaymospowers:maw/base/base_building_hanger01",
+      "jaymospowers:maw/base/base_building_hanger01",
+      "jaymospowers:maw/base/base_building_hanger02",
+      "jaymospowers:maw/base/base_building_hanger_empty"
+    ],
+    [
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger10",
+      "jaymospowers:maw/base/base_building_hanger11",
+      "jaymospowers:maw/base/base_building_hanger11",
+      "jaymospowers:maw/base/base_building_hanger11",
+      "jaymospowers:maw/base/base_building_hanger11",
+      "jaymospowers:maw/base/base_building_hanger12",
+      "jaymospowers:maw/base/base_building_hanger_empty"
+    ],
+    [
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger20",
+      "jaymospowers:maw/base/base_building_hanger21",
+      "jaymospowers:maw/base/base_building_hanger21",
+      "jaymospowers:maw/base/base_building_hanger21",
+      "jaymospowers:maw/base/base_building_hanger21",
+      "jaymospowers:maw/base/base_building_hanger22",
+      "jaymospowers:maw/base/base_building_hanger_empty"
+    ],
+    [
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty",
+      "jaymospowers:maw/base/base_building_hanger_empty"
+    ]
+  ]
+}
