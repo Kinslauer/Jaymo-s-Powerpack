@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 18:07). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 18:27). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,8 +21,8 @@ kanban-plugin: board
 - [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · for codex · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · open
-- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
+- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for ☀️ Apollo · open
 
 
 ## Being built
