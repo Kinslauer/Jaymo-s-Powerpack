@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:57). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**18 problems.**
+**16 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -31,8 +31,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 ## Questions waiting on Andy
 
 - [[Agents/wither-model|wither-model]]: blocked since 2026-11-19.
-- [[Inbox/narrator-missing-lines|narrator-missing-lines]]: blocked since 2026-11-19: 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]]: blocked since 2026-11-19: 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 
 ## Tasks for nobody
 

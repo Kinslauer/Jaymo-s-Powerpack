@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: done
 for: coordinator
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-22)
 asked: 2026-11-22

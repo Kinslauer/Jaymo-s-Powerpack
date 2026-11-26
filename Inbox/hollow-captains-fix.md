@@ -1,9 +1,9 @@
 ---
-status: claimed
-for: hephaestus
+status: open
+for: apollo
+claimed_by: 
 from: Andy (Claude chat, 2026-11-26)
 asked: 2026-11-26
-claimed_by: hermes-fixer
 pr: 
 ---
 
@@ -41,3 +41,6 @@ they should all have their own ladders, and the captains can intersect." One PR 
 - Build on CI or the Deck. Turn on Auto-fix, or watch CI yourself.
 - Ask Andy if "intersect" turns out to mean something that changes the design.
 - When it's done: what a player will see, what wasn't tested, and the PR link.
+
+## Delegation note (YOUTH, 2026-11-26)
+Delegated to Apollo (Andy: hand both jobs to the Hermes bots now). It was briefly claimed by hermes-fixer/Hephaestus, but Hephaestus is on the stop list since Nov 21 and this is not narrow-bug-only work (adds 12 captains per player, own ladders, intersecting captains), so it goes to Apollo.
