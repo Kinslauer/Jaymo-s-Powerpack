@@ -61,7 +61,7 @@ RUBRIC = """# Powerpack task rubric (starter)
 4. `python3 tools/pr_checks.py` passes on the final commit.
 5. There is a change note `changes/<powers|kingdoms|kitchen>/<branch-name>.md` for each mod changed, and no change to
    a `version=` line, a MODLOG or `docs/codemap/`.
-6. Anything ported from another mod or artist has its licence checked and its credit added, as `CLAUDE.md` says.
+6. Anything ported from another mod or artist has its licence checked and its credit added, as the `new-gameplay` skill (`.agents/skills/new-gameplay/SKILL.md`) says.
 7. The PR description says what a player will see, what changed, how it was checked, and that it wasn't played.
 If the agent stopped because a decision is Andy's to make, criterion 1 is met instead by a last line
 `BLOCKED: <a specific question>`, and the rest are judged on the work done so far.

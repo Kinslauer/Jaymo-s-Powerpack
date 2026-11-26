@@ -15,8 +15,8 @@ Skills, agents and workflows are not copied here; they stay in `.claude/` so the
 
 ## Using it with another assistant
 
-- Codex and most agent tools read `AGENTS.md`; Gemini CLI reads `GEMINI.md`. Both files at the repo root point to
-  `CLAUDE.md` and the handbook.
-- Cursor: add a rule in `.cursor/rules/` that says "Follow CLAUDE.md and docs/AI-HANDBOOK.md", or paste them in.
-- A chat-only model: paste `CLAUDE.md`, `docs/AI-HANDBOOK.md` and the memory files for the topic at hand.
+- Codex and most agent tools read `AGENTS.md`; Gemini CLI reads `GEMINI.md`. `GEMINI.md` and `CLAUDE.md` just import
+  `AGENTS.md`; task-specific rules are skills in `.agents/skills/`.
+- Cursor: add a rule in `.cursor/rules/` that says "Follow AGENTS.md and docs/AI-HANDBOOK.md", or paste them in.
+- A chat-only model: paste `AGENTS.md`, the skills in `.agents/skills/`, `docs/AI-HANDBOOK.md` and the memory files for the topic at hand.
 - Skills are just markdown instructions: paste a skill's text into the other tool's rules or prompt when you want it.
