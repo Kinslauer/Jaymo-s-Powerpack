@@ -7,5 +7,7 @@
 	"jaymospowers.context.drag": "drag",
 	"jaymospowers.context.pick_up": "pick up",
 	"jaymospowers.context.lift": "lift into your arms",
-	"jaymospowers.context.pat_out": "pat out the flames"
+	"jaymospowers.context.pat_out": "pat out the flames",
+	"jaymospowers.context.revive": "revive",
+	"jaymospowers.context.body_menu": "more options"
 }

@@ -2,6 +2,9 @@ package com.jaymospowers.client.hud;
 
 import com.jaymoskitchen.corpse.CorpseEntity;
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.BodyMenu;
+import com.jaymospowers.core.Carry;
+import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.core.finisher.Finishers;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +38,11 @@ import net.minecraft.world.phys.EntityHitResult;
  * Keys are the player's own bindings. It settles for {@link #SETTLE_TICKS} before showing and fades out when the
  * crosshair leaves, so a glance past someone shows nothing.
  * <p>
- * Powers' own lines: the stealth kill (sneaking, behind one {@link Finishers#stealthKillable} who isn't after you) and a
- * body lying loose (Jaymo's Kitchen's {@link CorpseEntity}, an empty hand): loot it with a tap, drag or pick it up with a
- * hold, lift it into your arms with sneak and a hold, or pat out its flames. Jaymo's Kingdoms adds its own (greeting a
- * villager, picking a pocket) through {@link #SHARE} in Fabric Loader's object share, as it does for the body menu: an
+ * Powers' own lines: someone downed, tied or out cold (revive, drag, the body menu: {@link #body}), the stealth kill
+ * (sneaking, behind one {@link Finishers#stealthKillable} who isn't after you) and a body lying loose (Jaymo's
+ * Kitchen's {@link CorpseEntity}, an empty hand): loot it with a tap, drag or pick it up with a hold, lift it into your
+ * arms with sneak and a hold, or pat out its flames. Jaymo's Kingdoms adds its own (talking, trading, busy, picking a
+ * pocket) through {@link #SHARE} in Fabric Loader's object share, as it does for the body menu: an
  * {@code Object[]} of {id, {@code BiFunction<Player, Entity, List<String[]>>}}, each line a {@link #line} array.
  */
 public final class ContextHints {
@@ -48,7 +52,7 @@ public final class ContextHints {
 	/** Ticks the same lines must hold before showing, and ticks to fade in or out. */
 	static final int SETTLE_TICKS = 4, FADE_TICKS = 6;
 	/** The most lines at once. */
-	static final int MAX_LINES = 4;
+	static final int MAX_LINES = 5;
 	/** Line height and padding (gui pixels), and the opacity of the whole list (0-1). */
 	static final int LINE = 10, PAD = 3;
 	static final float OPACITY = 0.8F;
@@ -119,6 +123,10 @@ public final class ContextHints {
 		}
 		if (target instanceof CorpseEntity corpse) {
 			corpse(player, corpse, list);
+		} else if (BodyMenu.body(target)) {
+			// someone downed, tied up or out cold: what's done to them is a body's, so the other mods' lines (talk, trade) are left out
+			body(player, (LivingEntity) target, list);
+			return list.size() > MAX_LINES ? list.subList(0, MAX_LINES) : list;
 		} else if (player.isShiftKeyDown() && target instanceof LivingEntity body && Finishers.stealthKillable(player, body)
 			&& !(body instanceof Mob mob && mob.isAggressive())) {
 			// (the server also asks that they never saw you; a mob that's after you shows it, the rest it keeps to itself)
@@ -166,6 +174,23 @@ public final class ContextHints {
 		if (!corpse.tooBigToLift()) {
 			list.add(line(HOLD, "jaymospowers.context.lift", "key.sneak", "key.use"));
 		}
+	}
+
+	/**
+	 * Andy (2026-11-26): "a similar box should appear when interacting with npcs, like corpses, that tells you all the
+	 * controls, such as ... revive". Someone alive and down, tied up or out cold, as {@code Downed}'s and {@link BodyMenu}'s
+	 * clicks answer: a tap opens the body menu (revive, untie, pockets, weapons...), and, downed, a hold drags them and sneak
+	 * and a hold brings them round.
+	 */
+	private static void body(LocalPlayer player, LivingEntity body, List<String[]> list) {
+		if (Downed.isDowned(player) || Carry.isCarried(player) || Carry.isCarried(body)) {
+			return;
+		}
+		if (Downed.isDowned(body)) {
+			list.add(line(HOLD, "jaymospowers.context.revive", "key.sneak", "key.use"));
+			list.add(line(HOLD, "jaymospowers.context.drag", "key.use"));
+		}
+		list.add(line(TAP, "jaymospowers.context.body_menu", "key.use"));
 	}
 
 	/** Kitchen's {@code CorpseEntity.TAP_LOOT} and {@code TAP_BONE}. */

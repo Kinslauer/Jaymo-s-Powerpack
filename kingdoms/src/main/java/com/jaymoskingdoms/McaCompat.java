@@ -169,6 +169,12 @@ public final class McaCompat {
 		return LOADED ? McaBridge.spawnZombie(level, at) : null;
 	}
 
+	/** An MCA villager whose job trades (not a guard's, an outlaw's, a worker's, a nitwit's or no job), so sneak + right click trades. */
+	static boolean trades(net.minecraft.world.entity.Entity entity) {
+		return isMca(entity) && entity instanceof Villager v && !v.getVillagerData().profession().is(net.minecraft.world.entity.npc.villager.VillagerProfession.NITWIT)
+			&& !v.getVillagerData().profession().is(net.minecraft.world.entity.npc.villager.VillagerProfession.NONE) && !McaBridge.cannotTrade(v);
+	}
+
 	/** (0.5.29) An MCA villager (their own menu has the Quests button). */
 	static boolean isMca(net.minecraft.world.entity.Entity entity) {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
