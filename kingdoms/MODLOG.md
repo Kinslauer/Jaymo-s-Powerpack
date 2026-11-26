@@ -17900,3 +17900,10 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - An arrest is cried once its sentence is carried out (not before the axe falls). A player bust is cried as it's sentenced. A ranger's poacher: the ranger now says aloud where they're taking them (or that there's no court near), and the court's crier cries the fine or the taking.
 - The caught player still gets their own sentence in chat, as before; only what was told to bystanders moved.
 - Built; not played.
+
+## 0.13.45 (2026-11-26): fire smoke settles low too, and makes you sick (#2235)
+
+- **A low bank under the tall smoke**: the tall plume and the high smog over a big fire stay as they were, so a fire still shows from far away. Under them a low layer now settles as well: extra plume puffs that rise only about a third as high and spread out sideways as they settle, and a bank of smog 7 to 11 blocks over the flames that spreads as wide as the biggest blaze's high smog (18 blocks each way, 24 downwind), round every large flame. Each has its own particle budget (smaller in low-end mode).
+- **Smoke sickness** (`SmokeSickness`): anyone breathing that smoke (players, and villagers and other humanoids near a player) builds it up, faster nearer the middle and over a bigger blaze. After about 2.5 minutes of thick smoke the screen starts to swim (nausea, topped up while you stay in it). Out of the smoke your chest clears a little faster than it filled. Indoors the smoke is thinner (0.6x). Staying low helps indoors and out: crouched you breathe 0.75x, crawling, prone or lying 0.45x. It slows the sickness rather than stopping it (prone outdoors about 5.5 minutes, prone indoors about 9). No smoke under water; creative and spectator are left alone. No chat text.
+- `FireSmog` builds its list of large flames once a round and shares it with the sickness check; `FireSmoke` adds `settle` and the low bank, `StormParticle` gets `spread`.
+- Built; not played.
