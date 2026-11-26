@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 08:28). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 08:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -28,6 +28,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
 - [ ] #2221 wide flat plains and bigger biomes (open country) (Kingdoms, 2026-11-26)
+- [ ] #2219 world gen no longer freezes on Enderscape's "not in a structure" check (Powers, 2026-11-26)
 - [ ] #2214 Open art sets, batch 1: machines and far-world rock (Powers, Kingdoms, 2026-11-26)
 - [ ] #2213 Maw ruins from Pomkot's World (Powers, 2026-11-26)
 - [ ] #2212 CC0 picks: pack weight, death toll, weapon wheel, coyote time, better chainmail, axe throw, rust, falling snow, snores, clumsy undead, soap scrub, leaves on Fast, eight new pack mods (Powers, Kingdoms, Kitchen, 2026-11-26)
@@ -86,8 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2150 faints can be mashed out of (Powers, Kingdoms, 2026-11-25)
 - [ ] #2149 maggots for the hook: taken alive, best river bait, crawl off when dropped (Powers, Kingdoms, 2026-11-25)
 - [ ] #2148 explorer maps never make chunks on the server thread (Kingdoms, 2026-11-25)
-- [ ] #2147 The Nightmare haunts from the dark instead of acting as an enderman (Kingdoms, 2026-11-25)
-- …and 594 older ones.
+- …and 595 older ones.
 
 ## Health
 
