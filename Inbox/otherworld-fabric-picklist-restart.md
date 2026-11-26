@@ -1,10 +1,11 @@
 ---
-status: in-review
+status: writing
 for: apollo
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
 claimed_by: hermes-a
 pr: 
+writer: hermes-writer
 ---
 
 # Restart: Otherworld DnD on Fabric, the pick list of differences
