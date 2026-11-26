@@ -857,6 +857,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Callouts.register();
 		FieldMedics.register();
 		BandLeaders.register();
+		// no knots of fighters: a fight among people takes turns, the rest hold off on a ring
+		Turns.register();
 		BreakOff.register();
 		DangerSense.register();
 		Passages.register();
@@ -945,6 +947,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rites.register();
 		Sermons.register();
 		RealmFaiths.register();
+		RealmGifts.register();
+		Names.register();
 		// (0.7.518) patron gods, part (c): the champions and their temples
 		PatronChampions.register();
 		Temples.register();

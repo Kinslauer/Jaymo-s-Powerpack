@@ -140,7 +140,8 @@ public final class Frights {
 
 	/** {@code m} is one of {@code v}'s own faction's people (a camp's raiders don't frighten its crew). */
 	private static boolean sameSide(Villager v, LivingEntity m) {
-		return v instanceof Worker a && m instanceof Worker b && a.factionId() >= 0 && a.factionId() == b.factionId();
+		// (and a sellsword or creature its camp keeps: CampBeasts)
+		return v instanceof Worker a && m instanceof Worker b && a.factionId() >= 0 && a.factionId() == b.factionId() || CampBeasts.spares(v, m);
 	}
 
 	private static boolean frightful(Mob m) {

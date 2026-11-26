@@ -67,7 +67,7 @@ public final class FishingReal {
     /** Base ticks a hooked fish must wait before it can be caught (gives the player time to react). */
     private static final int MIN_FIGHT_TICKS = 60;
     /** Progress a fresh fight starts with, so the fish cannot get away on the first tick. */
-    private static final float START_PROGRESS = 0.3F;
+    static final float START_PROGRESS = 0.3F;
     /** Max fight duration before the line breaks from exhaustion (ticks). Shorter for a shark. */
     private static final int MAX_FIGHT_TICKS = 1800;
     private static final int MAX_FIGHT_TICKS_SHARK = 900;
@@ -102,12 +102,6 @@ public final class FishingReal {
     /** How hard a hooked shark and a hooked tuna pull the player toward them while they reel (blocks per tick). */
     public static final double PULL_PLAYER = 0.04;
     public static final double PULL_PLAYER_TUNA = 0.02;
-    /** Keep the fish within this many blocks of the hook, tugging it back on the line. */
-    private static final double KEEP_NEAR_DIST = 3.0;
-    /** How hard the line pulls the fish back toward the hook. */
-    private static final double KEEP_NEAR_PULL = 0.12;
-    /** How much the line lifts the fish up toward the surface. */
-    private static final double KEEP_NEAR_LIFT = 0.05;
     // ---- (Andy, 2026-11-23, a fishing gif: "thats what i want our fishing to be like") moods, energy and line ----
     /** The first ticks of a fight the fish is still taking the lure, and the share of the line in at which it's landing. */
     static final int TAKING_TICKS = 25;
@@ -331,8 +325,8 @@ public final class FishingReal {
             return;
         }
 
-        // keep the fish near the hook/water, tugging against the line, so it is not dragged onto land
-        keepNear(player, fish, hook);
+        // (Andy, 2026-11-26) the fish fights where you can see it, at the end of the line, coming in as the line does
+        FishOnLine.tick(player, fish, state, progress, run, thrash, now);
         player.setAttached(FIGHTING, state.with(tension, progress, run, breakLimit, mood(state, now, run, thrash, progress, player), energy));
     }
 
@@ -366,13 +360,13 @@ public final class FishingReal {
         return Math.max(1, stars);
     }
 
-    /** (2026-11-23) What the fish is doing, for the readout: taking the lure, calm, running, leaping, thrashing, being landed. */
+    /** (2026-11-23) What the fish is doing, for the readout: taking the lure, calm, running, leaping, thrashing, diving, being landed. */
     private static int mood(FishFight state, long now, int run, boolean thrash, float progress, ServerPlayer player) {
         if (thrash) {
             return FishFight.THRASHING;
         }
         if (run != 0) {
-            return FishRun.jumping(player, now) ? FishFight.JUMPING : FishFight.RUNNING;
+            return FishRun.jumping(player, now) ? FishFight.JUMPING : FishRun.diving(player) ? FishFight.DIVING : FishFight.RUNNING;
         }
         if (now - state.startTime() < TAKING_TICKS) {
             return FishFight.TAKING;
@@ -473,6 +467,7 @@ public final class FishingReal {
         player.setAttached(FIGHTING, new FishFight(fishKind, strength, START_PROGRESS, player.level().getGameTime(), lineMetres(player), kg));
         HOOKED.put(player.getUUID(), fish);
         HOOKS.put(player.getUUID(), hook);
+        FishOnLine.start(player, fish, hook);
         WEIGHTS.put(player.getUUID(), kg);
         // (0.21.61, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime")
         com.jaymospowers.compat.KingdomsCompat.fished(player, hook.blockPosition());
@@ -498,6 +493,7 @@ public final class FishingReal {
         FishingHook hook = HOOKS.remove(player.getUUID());
         Item bait = BAIT_USED.remove(player.getUUID());
         Feel feel = FEEL.remove(player.getUUID());
+        FishOnLine.end(player);
         if (fish != null) {
             if (caught) {
                 // (0.21.62) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
@@ -581,24 +577,6 @@ public final class FishingReal {
         }
         if (!legend.isEmpty()) {
             FishLegends.landed(level, (WildFish) fish, player);
-        }
-    }
-
-    /** Keep the hooked fish near the hook/water, tugging against the line, so it is not dragged onto land. */
-    private static void keepNear(ServerPlayer player, LivingEntity fish, FishingHook hook) {
-        double dx = hook.getX() - fish.getX();
-        double dz = hook.getZ() - fish.getZ();
-        double dist = Math.sqrt(dx * dx + dz * dz);
-        if (fish instanceof net.minecraft.world.entity.Mob mob && mob.isNoAi()) {
-            // a shark held without its AI is drawn back by hand
-            if (dist > KEEP_NEAR_DIST) {
-                fish.setPos(fish.getX() + dx / dist * KEEP_NEAR_PULL, fish.getY(), fish.getZ() + dz / dist * KEEP_NEAR_PULL);
-            }
-            return;
-        }
-        if (dist > KEEP_NEAR_DIST) {
-            double pull = KEEP_NEAR_PULL;
-            fish.setDeltaMovement(fish.getDeltaMovement().add(dx / dist * pull, KEEP_NEAR_LIFT, dz / dist * pull));
         }
     }
 

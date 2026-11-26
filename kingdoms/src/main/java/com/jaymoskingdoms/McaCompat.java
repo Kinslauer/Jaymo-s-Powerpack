@@ -220,6 +220,16 @@ public final class McaCompat {
 		return LOADED && McaBridge.panicking(villager);
 	}
 
+	/** {@link NpcTasks}: the MCA chore {@code villager} is set to ("harvest", "chop", "hunt", "fish", "prospect"); null without MCA. */
+	static @Nullable String chore(Villager villager) {
+		return LOADED ? McaBridge.chore(villager) : null;
+	}
+
+	/** {@link NpcTasks}: an MCA villager a player told to stay put; false without MCA. */
+	static boolean staying(Villager villager) {
+		return LOADED && McaBridge.staying(villager);
+	}
+
 	/** {@link FarmFamily}: an MCA villager someone set to one of MCA's chores; false without MCA. */
 	static boolean choring(Villager villager) {
 		return LOADED && McaBridge.choring(villager);

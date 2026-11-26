@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Blows;
 import com.jaymoskingdoms.MobCombat;
 import com.jaymoskingdoms.MobShields;
 import com.jaymoskingdoms.NpcDodge;
+import com.jaymoskingdoms.Turns;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -39,6 +40,14 @@ abstract class MeleeAttackGoalMixin {
 
 	@Shadow
 	protected abstract void resetAttackCooldown();
+
+	/** A fighter waiting its turn in a fight among people ({@link Turns}) neither closes in nor strikes: Turns walks it round the ring. */
+	@Inject(method = "tick", at = @At("HEAD"), cancellable = true)
+	private void jaymoskingdoms$waitTurn(CallbackInfo ci) {
+		if (Turns.waiting(this.mob)) {
+			ci.cancel();
+		}
+	}
 
 	@Inject(method = "checkAndPerformAttack", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$weaponMoves(LivingEntity target, CallbackInfo ci) {

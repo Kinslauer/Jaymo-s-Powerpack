@@ -170,7 +170,9 @@ public final class DodgeClient {
 		}
 		// one press, one move: the key going down (or a tap quicker than a tick), never its repeats while held;
 		// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
-		boolean wanted = (down || clicked) && !keyWasDown && !minecraft.options.keyShift.isDown();
+		// (Andy, 2026-11-26) with a fishing line out, Alt is the zoom alone (SneakZoom): no dash, roll or dive to drop the cast
+		boolean wanted = (down || clicked) && !keyWasDown && !minecraft.options.keyShift.isDown()
+			&& !com.jaymospowers.client.SneakZoom.lineOut(player);
 		keyWasDown = down;
 		if (wanted && com.jaymospowers.client.CrawlTaps.rollUp(player)) {
 			// (Andy) felled by a leg blow: the roll gets you back on your feet

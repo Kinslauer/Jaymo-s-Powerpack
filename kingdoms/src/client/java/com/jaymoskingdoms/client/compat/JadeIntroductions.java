@@ -1,7 +1,10 @@
 package com.jaymoskingdoms.client.compat;
 
 import com.jaymoskingdoms.Introductions;
+import com.jaymoskingdoms.JadeNpcTask;
+import net.minecraft.world.entity.npc.villager.Villager;
 import snownee.jade.api.IWailaClientRegistration;
+import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
 import snownee.jade.api.WailaPlugin;
 
@@ -10,10 +13,16 @@ import snownee.jade.api.WailaPlugin;
  * what you can see: what they are ("Stranger", "Villager"), never their name or trade, and their health only once
  * you've struck them. Done once the panel is gathered, so it holds whatever each player's Jade settings say. Only
  * loaded by Jade (the {@code jade} entrypoint). (0.7.474) A goblin or an orc is named as one ("Orc", not MCA's "Male
- * Villager") and shown as ours, not Minecraft Comes Alive's.
+ * Villager") and shown as ours, not Minecraft Comes Alive's. Also the line under a person's name saying what they're
+ * doing ({@link JadeNpcTask}).
  */
 @WailaPlugin
 public final class JadeIntroductions implements IWailaPlugin {
+	@Override
+	public void register(IWailaCommonRegistration registration) {
+		registration.registerEntityDataProvider(JadeNpcTask.INSTANCE, Villager.class);
+	}
+
 	@Override
 	public void registerClient(IWailaClientRegistration registration) {
 		// the callback lives in its own class: Jade loads this one on the server too (see JadeIntroductionsClient)

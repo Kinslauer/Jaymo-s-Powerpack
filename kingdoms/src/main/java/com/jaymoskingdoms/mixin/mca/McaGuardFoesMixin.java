@@ -27,7 +27,9 @@ abstract class McaGuardFoesMixin {
 			|| com.jaymoskingdoms.OgreHolds.spares(guard, entity) || com.jaymoskingdoms.Downed.holdsFire(guard, entity)
 			// (am-sieges, am-whiteflag, am-colours) nor one a siege spares, one under a white flag, one passing in its colours
 			|| com.jaymoskingdoms.Sieges.spares(guard, entity) || com.jaymoskingdoms.WhiteFlags.spares(guard, entity)
-			|| com.jaymoskingdoms.Colours.spares(guard, entity))) {
+			|| com.jaymoskingdoms.Colours.spares(guard, entity)
+			// (Andy, 2026-11-26) nor a sellsword or creature its camp has hired (CampBeasts#spares): MCA's guards go for any monster
+			|| com.jaymoskingdoms.CampBeasts.spares(guard, entity))) {
 			// (0.7.433) a sworn captain never goes for his lord; (0.7.474) a goblin or an orc never for an ogre; and a guard
 			// never for a downed player (Downed#holdsFire)
 			cir.setReturnValue(-1);

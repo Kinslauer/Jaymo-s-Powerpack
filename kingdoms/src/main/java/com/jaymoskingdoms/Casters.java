@@ -284,7 +284,8 @@ public final class Casters {
 			// risen as itself for a player (the Reaper's): its old side is nothing to it now, only its master's fight
 			return e != mob && e.isAlive() && !Thralls.refuses(mob, e);
 		}
-		if (e == mob || !e.isAlive() || Captives.bound(e) || e instanceof Player p && (p.isCreative() || p.isSpectator()) || ally(w, e) || Thralls.refuses(mob, e)) {
+		if (e == mob || !e.isAlive() || Captives.bound(e) || e instanceof Player p && (p.isCreative() || p.isSpectator()) || ally(w, e) || Thralls.refuses(mob, e)
+			|| CampBeasts.spares(mob, e)) {
 			return false;
 		}
 		if (realm(w)) {

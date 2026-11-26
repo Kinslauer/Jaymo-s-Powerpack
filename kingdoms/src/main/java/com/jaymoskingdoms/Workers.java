@@ -116,6 +116,10 @@ public final class Workers {
 			// captains', caravans' and crews' own steps, so they break off too (rulers and the like BreakOff leaves out itself)
 			return true;
 		}
+		if (Turns.brainStep(mob)) {
+			// waiting its turn in a fight, on the ring round it (Turns walks it there): its brain waits
+			return true;
+		}
 		if (BandStyles.brainStep(mob)) {
 			// (fighting AI patch 7) its band's style in a fight; rolling out of a blow (a bandit, an assassin), its brain waits
 			return true;
