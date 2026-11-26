@@ -172,6 +172,10 @@ final class SeaSites {
 		BlockPos helm = sails(path) ? helm(level, box) : null;
 		List<Long> guns = path.equals(LONG_SHIP) ? guns(level, box) : List.of();
 		Rig rig = new Rig(Optional.ofNullable(helm), guns);
+		if (helm != null) {
+			// (Moog's boats are solid below their decks: cast off, she keeps the lines she lies on, Ship#LINES)
+			com.jaymoskingdoms.sailing.Ship.laidOn(level, helm, com.jaymoskingdoms.sailing.Ship.AS_SHE_LIES);
+		}
 		Map<String, Rig> next = new HashMap<>(all);
 		next.put(Long.toString(ref), rig);
 		Factions.level(level.getServer()).setAttached(RIGGED, Map.copyOf(next));
@@ -186,7 +190,11 @@ final class SeaSites {
 		if (at != null && level.getBlockState(at).is(com.jaymoskingdoms.sailing.Sailing.HELM)) {
 			return at;
 		}
-		return helm(level, box);
+		BlockPos helm = helm(level, box);
+		if (helm != null) {
+			com.jaymoskingdoms.sailing.Ship.laidOn(level, helm, com.jaymoskingdoms.sailing.Ship.AS_SHE_LIES);
+		}
+		return helm;
 	}
 
 	/**

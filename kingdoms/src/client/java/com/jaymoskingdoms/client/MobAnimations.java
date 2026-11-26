@@ -22,7 +22,8 @@ import net.minecraft.world.entity.monster.illager.AbstractIllager;
  * (the {@code ModelFeatureRenderer} and {@code LivingEntityRenderer} mixins), so armour and held items follow the swing.
  * <p>
  * Between swings, a mob holding a two-handed weapon holds it in both hands in the weapon's Better Combat pose
- * ({@link MobCombat#holdPose}, {@link PalMobAnimator#hold}), as a player does.
+ * ({@link MobCombat#holdPose}, {@link PalMobAnimator#hold}), as a player does; and someone fishing plays the angler's poses
+ * ({@code com.jaymoskingdoms.Anglers#pose}: our own animations in {@code assets/jaymoskingdoms/player_animations}).
  * <p>
  * This class never touches the library's classes; without it (or without Better Combat), mobs swing their arm as
  * vanilla does.
@@ -60,6 +61,11 @@ public final class MobAnimations {
 			return;
 		}
 		Object animation = PalMobAnimator.extract(entity, partialTicks);
+		String angling = animation == null ? com.jaymoskingdoms.Anglers.pose(entity) : null;
+		if (angling != null) {
+			// fishing: casting, waiting on a bite, fighting a fish, swinging it in (Anglers)
+			animation = PalMobAnimator.hold(entity, angling, partialTicks);
+		}
 		if (animation == null && entity instanceof net.minecraft.world.entity.Mob mob) {
 			// between swings: a two-handed weapon held in both hands (MobCombat.holdPose)
 			String pose = MobCombat.holdPose(mob);

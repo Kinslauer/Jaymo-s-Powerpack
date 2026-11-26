@@ -1168,6 +1168,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Corsairs.register();
 		Navies.register();
 		Fishers.register();
+		Anglers.register();
+		PillagerShips.register();
 		SeaPassers.register();
 		SeaTrade.register();
 		Whalers.register();

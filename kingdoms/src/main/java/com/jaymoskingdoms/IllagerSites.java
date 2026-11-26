@@ -617,6 +617,13 @@ final class IllagerSites {
 		List<Long> packed = posts.stream().map(BlockPos::asLong).toList();
 		put(server, ref, new Site(path, seat, box, dweller, faction, realm == null ? -1 : realm.id(), crew, packed, kinds.toString(), now, Production.day(server)));
 		JaymosKingdoms.LOGGER.info("{} moved into the {} at {} ({} of them)", dweller, path, center, crew);
+		if (path.equals(SeaSites.LONG_SHIP) && dweller.equals("illagers") && faction >= 0) {
+			// her pillagers aboard, she puts to sea (PillagerShips)
+			Faction camp = Factions.get(server, faction);
+			if (camp != null) {
+				PillagerShips.putToSea(level, camp, ref, box);
+			}
+		}
 	}
 
 	/** A small ship made a realm's smack ({@link SeaSites#smack}) and her site put down as done, unless nothing came of it yet. */
@@ -1076,7 +1083,8 @@ final class IllagerSites {
 	static void campTick(ServerLevel level, Faction camp, Camps.CampData data) {
 		MinecraftServer server = level.getServer();
 		Site s = site(server, camp.id());
-		if (s == null) {
+		if (s == null || PillagerShips.atSea(server, camp.id())) {
+			// (a long ship's camp gone to sea in her: its warlord is aboard, not where she lay)
 			return;
 		}
 		boolean present = camp.leader().isPresent() && level.getEntity(camp.leader().get()) != null;
@@ -1094,7 +1102,8 @@ final class IllagerSites {
 		MinecraftServer server = level.getServer();
 		Site s = site(server, camp.id());
 		Camps.updateData(server, camp.id(), d -> d.withGrown(d.grown() + days));
-		if (s == null) {
+		if (s == null || PillagerShips.atSea(server, camp.id())) {
+			// (a long ship at sea makes up no hands where she lay)
 			return;
 		}
 		if (Storage.loaded(level, camp)) {
