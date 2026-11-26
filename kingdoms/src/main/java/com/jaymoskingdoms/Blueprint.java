@@ -54,7 +54,7 @@ public record Blueprint(String id, int width, int depth, int height, List<Placem
 	/** Adds a building to a faction type's growth order (in the order they're registered). */
 	public static void register(FactionType type, Entry entry) {
 		// (a pattern book may stand in for it: {@link Library})
-		CATALOGUE.computeIfAbsent(type, t -> new ArrayList<>()).add(RainBarrels.beside(type, TradeSigns.hung(type, Library.wrap(entry))));
+		CATALOGUE.computeIfAbsent(type, t -> new ArrayList<>()).add(TradeSigns.hung(type, Library.wrap(entry)));
 	}
 
 	/** A faction type's growth order. */

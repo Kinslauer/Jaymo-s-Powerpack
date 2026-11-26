@@ -68,6 +68,8 @@ public final class Warmth {
 	static final int HOT_FOOD_TICKS = BodyHeat.HOT_MEAL_TICKS;
 	/** How long a piece torn off the spit stays hot enough to warm you, in ticks. */
 	public static final int FRESH_TICKS = 3 * 60 * 20;
+	/** The stamp is rounded to this many ticks (a minute), so pieces torn off one roast stack. */
+	static final long FRESH_BUCKET = 60L * 20L;
 	/** How long water stays hot off the fire, or cold out of the snow, in the waterskin. */
 	static final int SKIN_KEEPS = 5 * 60 * 20;
 	/** The land's cold per thousand blocks north of the world's spawn (warmth to the south), and its most. */
@@ -374,7 +376,8 @@ public final class Warmth {
 	/** Stamps {@code stack} as hot off the spit until {@link #FRESH_TICKS} from {@code now}; only food takes the mark. Returns the stack. */
 	public static ItemStack stampFresh(ItemStack stack, long now) {
 		if (stack.has(DataComponents.FOOD)) {
-			stack.set(FRESH, now + FRESH_TICKS);
+			// to the minute, so pieces from one roast stack
+			stack.set(FRESH, (now + FRESH_TICKS) / FRESH_BUCKET * FRESH_BUCKET);
 		}
 		return stack;
 	}

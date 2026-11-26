@@ -28,7 +28,7 @@ final class AirGauge {
 		return Mth.clamp(Math.round((air - COLDEST) / (HOTTEST - COLDEST) * 15.0F), 0, 15);
 	}
 
-	/** The air at {@code at}, in body heat: negative is cold, positive hot. */
+	/** The air at {@code at}, in body heat: negative is cold, positive hot. Mirrors the world terms of {@link BodyHeat#ambient} (kept apart: that one is a person's, with wet, clothes and meals). */
 	static float air(ServerLevel level, BlockPos at) {
 		boolean sky = level.canSeeSky(at);
 		Biome.Precipitation falling = level.precipitationAt(at);

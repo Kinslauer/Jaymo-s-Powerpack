@@ -21,7 +21,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * Loaded with fuel (coal, charcoal, logs, planks, sticks) it burns and warms the closed room round it as a hearth does;
  * loaded with ice (ice, packed ice, blue ice, a snow block) it cools the room as an icebox does ({@link Warmth#room}, the
  * hearth's own room fill, {@link HearthEntity}). It does one thing at a time: {@link #COLD} says which, and the last thing
- * loaded decides, swapping whatever was in it for the new load. Use it with fuel or ice in hand to load it, or with an
+ * loaded decides, once it has run empty: while the other kind still burns, loading is refused. Use it with fuel or ice in hand to load it, or with an
  * empty hand to open the hearth's screen, which shows it as a hearth or an icebox by its present job.
  */
 public class RegulatorBlock extends HearthBlock {
@@ -48,7 +48,7 @@ public class RegulatorBlock extends HearthBlock {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		if (level.getBlockEntity(pos) instanceof HearthEntity entity && !level.isClientSide()) {
-			if (!entity.load(fuel, ice > 0)) {
+			if (!entity.load(fuel, ice > 0, player instanceof net.minecraft.server.level.ServerPlayer sp ? sp : null)) {
 				return InteractionResult.PASS;
 			}
 			if (!player.getAbilities().instabuild) {

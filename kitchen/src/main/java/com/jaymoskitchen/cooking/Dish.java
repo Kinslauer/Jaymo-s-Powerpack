@@ -384,7 +384,7 @@ public enum Dish {
 	// the climate patch's ice cream: crushed ice (or snow) beaten into sweet milk on a board; eating it cools you for a few
 	// minutes in the heat (climate/Warmth#consumed, the item tag jaymoskitchen:cool_foods)
 	ICE_CREAM(Method.CHOP, EnumSet.of(Station.BOARD), List.of(MILK_BOTTLE, SUGAR, ICE, ICE), 5, 0.5F, false,
-		List.of(new Buff(MobEffects.SPEED, 60 * 20, 0)));
+		List.of());
 
 	/** Which minigame cooks the dish. */
 	public enum Method {
