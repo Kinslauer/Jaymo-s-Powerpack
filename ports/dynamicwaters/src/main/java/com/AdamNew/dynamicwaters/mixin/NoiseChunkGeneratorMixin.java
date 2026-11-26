@@ -196,16 +196,6 @@ public class NoiseChunkGeneratorMixin {
                 if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + x, startZ + z, "ground y=" + originalY + " "
                         + com.AdamNew.dynamicwaters.ColumnWatch.block(chunk.getBlockState(new BlockPos(startX + x, originalY, startZ + z))));
 
-                final int mouthGround = HydrologyManager.caveMouthGround(startX + x, startZ + z, originalY,
-                        (net.minecraft.world.level.chunk.ChunkGenerator) (Object) this, chunk, random);
-                if (mouthGround != Integer.MIN_VALUE) {
-                    final int before = originalY;
-                    originalY = HydrologyManager.fillHollow(chunk, startX + x, startZ + z, originalY, mouthGround, poolGround,
-                            protectedBlocksMap[x + z * 16], minH);
-                    if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + x, startZ + z, "refill cave mouth "
-                            + before + "->" + originalY + " (cave-free ground " + mouthGround + ")");
-                }
-
                 net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biomeHolder = chunk.getNoiseBiome(x >> 2, originalY >> 2, z >> 2);
 
                 if (originalY < seaLevel - 1 && HydrologyManager.poolFilled(startX + x, startZ + z, originalY, seaLevel,
