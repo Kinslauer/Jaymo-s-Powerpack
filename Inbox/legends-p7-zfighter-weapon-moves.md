@@ -25,4 +25,4 @@ Power: Z Fighter, weapons.
 - **Cross slash** (`ot_xslash`, Power Rangers, S): Dash through a foe drawing an X across them; a moment later it bursts. Our side: A Weapon Forms move for swords.
 
 ## Notes
-- 2026-11-26 16:10 gemini's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 21:36 gemini's claim had no sign of work for 30 min: handed back as open.
