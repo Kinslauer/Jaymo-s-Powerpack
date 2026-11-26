@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: apollo
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-22)
 asked: 2026-11-22
 thread: 1574743704214831215
 claimed_by: hermes-a
-pr: 0
+pr: 2220
 suggested_owns: []
 ---
 

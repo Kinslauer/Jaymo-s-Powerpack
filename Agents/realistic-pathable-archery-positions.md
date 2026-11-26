@@ -1,14 +1,17 @@
 ---
-status: stalled
+status: in-review
 task: realistic-pathable-archery-positions
 branch: claude/realistic-pathable-archery
 with: apollo
-pr:
+pr: 2220
 mods: kingdoms
 versions:
 started: 2026-11-26
 owns:
-  - kingdoms archer AI/pathfinding files (to be determined)
+  - kingdoms/src/main/java/com/jaymoskingdoms/Castle.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/Citadel.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/Seats.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/WallArchers.java
 ---
 
 # Realistic and pathable archery positions
@@ -28,4 +31,8 @@ owns:
 - 2026-11-26 02:10 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 
 ## Done
-- 2026-11-26 06:52 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- Moved archer posts from battlements/parapets to accessible wall walks and roof floors in Castle (keep, castle, tower, watchtower) and Citadel structures
+- Added ladder/trapdoor access validation so archers can path to their posts
+- Filtered village seat rooftop posts to only those accessible from the building interior or with climbable blocks nearby
+- Validated posts have standing clearance (2 air blocks, solid floor) before placing archers
+- PR #2220 opened for review, compiles and passes PR checks
