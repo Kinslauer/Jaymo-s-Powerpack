@@ -148,13 +148,13 @@ licence; `python3 tools/open_art/apply.py` copies them onto our textures and mus
 
 | Texture | From | Author | Licence |
 |---|---|---|---|
-| Kingdoms silver sword, hidden blade, engineer's hammer | 16x16 Weapon RPG Icons, steel sheet | Shade (OpenGameArt) | CC0 |
+| Kingdoms engineer's hammer | 16x16 Weapon RPG Icons, steel sheet | Shade (OpenGameArt) | CC0 |
 | Powers far-world moon, Glacia and Verdant rock | 16x16 Block Texture Set (stone_generic, ice_glacier, serpentine) | aroachifoundonmypillow (OpenGameArt) | CC0 |
 | Powers Space Pod icon; the flight screen's raider pod and derelict pod (`textures/gui/pod_raider.png`, `pod_wreck.png`) | 16x16 Ship Collection (yellow row 9, red row 1, yellow row 9; black ground made clear) | Master484 (OpenGameArt) | CC0 |
 | Powers Gravity Machine (all faces, on and off), Fuel Works sides and top, Landing Beacon base | Militech (Oritech retexture) | LutherDev (Modrinth) | MIT, notice in `sources/militech/LICENSE.txt` |
 
-Tried and dropped: the block set's slate tiles and bricks on the mason table (they lose the table's plan and tools) and
-Militech's steel block on the landing beacon (soft diagonal gradient). The weapon icons keep Shade's black outline,
+Tried and dropped: Shade's sword and dagger on the silver sword and hidden blade (Andy, 2026-11-26), the block set's slate tiles and bricks on the mason table (they lose the table's plan and tools) and
+Militech's steel block on the landing beacon (soft diagonal gradient). The hammer keeps Shade's black outline,
 which the style rules above otherwise avoid. 16x16 RPG Items (DB32) is not used yet. Pods go by who flies them (Andy, 2026-11-26): yours, a raider's, a
 derelict's; the Galactic Patrol's never shows on the flight screen, so it has no ship yet. Later each pod type also gets
 a matching pod model (an art agent's job).

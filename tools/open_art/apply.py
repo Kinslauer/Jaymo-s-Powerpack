@@ -17,8 +17,6 @@ KD = "kingdoms/src/main/resources/assets/jaymoskingdoms/textures"
 
 # Shade's steel sheet: (row, column) of a 16 px cell.
 WEAPONS = {
-	f"{KD}/item/silver_sword.png": (0, 3),
-	f"{KD}/item/hidden_blade.png": (10, 6),
 	f"{KD}/item/engineers_hammer.png": (10, 21),
 }
 # Whole 16 px files: target -> source.
