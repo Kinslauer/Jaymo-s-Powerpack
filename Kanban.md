@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:07). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,7 +25,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · claimed
 
 
 ## In review
@@ -41,6 +40,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
+- [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · blocked
 
 
 ## Done
