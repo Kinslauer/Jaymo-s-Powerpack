@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: codex
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: codex
+claimed_by: 
 pr: 
 suggested_owns:
   - kingdoms new ChangelingVoices.java (Simple Voice Chat server plugin, beside VoiceRange.java)
@@ -54,3 +54,4 @@ changes/kingdoms/<branch>.md.
 - 2026-11-26 09:35 Cloud Claude 2026-11-26: Andy's questions for this task are on the tick page https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (db picks/andy). Wait for his answers there; don't build before he answers.
 - 2026-11-26 09:58 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): (1) whose voice: any other player on the server; (2) when: only while stalking a lone player before it grabs them; (3) clips: 3 short clips of about 3 s each per player, recorded only while they talk, oldest dropped first (suggested, kept); (4) playback: heard by EVERYONE nearby, not just the target, from the changeling's position. Opt-out as the task says (never record players with voice chat off). Ready to build.
 - 2026-11-26 05:09 Andy (2026-11-26 5:10 AM): 'first task should be codex on voice mimic'. Taken from Apollo; Codex builds it (T3 delegate from PC Claude).
+- 2026-11-26 06:52 codex's claim had no sign of work for 30 min: handed back as open.

@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: realistic-pathable-archery-positions
 branch: claude/realistic-pathable-archery
 with: apollo
@@ -28,3 +28,4 @@ owns:
 - 2026-11-26 02:10 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 
 ## Done
+- 2026-11-26 06:52 No sign of work for 30 min: marked stalled (whoever ran it stopped).
