@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: gemini
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: gemini
+claimed_by: 
 pr: 
 suggested_owns:
   - kingdoms seas/Mohknee.java, mixin MohkneeStructureMixin.java
@@ -29,3 +29,4 @@ Open question for Andy: which ores the tribes use.
 - 2026-11-26 10:00 Correction (cloud Claude): Andy answered the ores in the Mohknee review thread, 2026-11-26: barbarians use Ashlands rock iron; blossom kingdoms keep iron sand and folded steel. The Waiting on Andy page now shows that answer.
 - 2026-11-26 14:43 Claude delegated this to Codex.
 - 2026-11-26 14:52 Codex hit its usage limit (back 6:51 PM); moved to Gemini (antigravity).
+- 2026-11-26 20:37 gemini's claim had no sign of work for 30 min: handed back as open.
