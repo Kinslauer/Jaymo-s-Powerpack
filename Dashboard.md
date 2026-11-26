@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 10:00). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:51). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -6,31 +6,50 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Questions for you:**
-- [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 2026-11-26 09:35 Cloud Claude 2026-11-26: Andy's questions for this task are on the tick page https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (db picks/andy)…
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
+- [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · 2026-11-26 07:21 Design draft complete: Overworld aqueduct structure, SettlementCurse system, 4 board quests (Stem the Flow, Clear the Pillars, Purify the Ston…
 
 ## Stuck
 
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hollow-captains-fix|hollow-captains-fix]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/symbiote-113-picks|symbiote-113-picks]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
-- [[Agents/youth-delegates-ready|youth-delegates-ready]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/structures-6-stable-mine-farm|structures-6-stable-mine-farm]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-9 waiting for a bot, 3 being built, 2 in review: see [[Kanban]].
+6 waiting for a bot, 5 being built, 8 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2247 Alex's Mobs: old spawn files mended, blobfish deeper (Powers, Kingdoms, 2026-11-26)
+- [ ] #2246 Bands sleep until you approach (Powers, 2026-11-26)
+- [ ] #2244 executions finish, and finishing blows don't gib (Powers, 2026-11-26)
+- [ ] #2243 Youth's ears unpack the voice model on the server (Kingdoms, 2026-11-26)
+- [ ] #2242 Realm dragons and their dragon tamers (Kingdoms, 2026-11-26)
+- [ ] #2241 Dragon nests and dragon domains (Dragonforge picks, part 2) (Kingdoms, 2026-11-26)
+- [ ] #2240 Allays and the Sylvan: freeing caged allays, haven allays, a Sylvan's fall caught (Kingdoms, 2026-11-26)
+- [ ] #2239 fire alarm runs through town, everyone fights fires, twisters send people running, no stray Templar plate (Kingdoms, 2026-11-26)
+- [ ] #2238 Town crier: listeners who don't like the news shout, fight him or hire a blade (Kingdoms, 2026-11-26)
+- [ ] #2236 Town crier: verdicts are cried by the seat, not sent to chat (Kingdoms, 2026-11-26)
+- [ ] #2235 fire smoke settles low too, and makes you sick (Kingdoms, 2026-11-26)
+- [ ] #2234 Maggots come as a writhing heap that splats underfoot (Kingdoms, 2026-11-26)
+- [ ] #2233 Reincarnate link on the character page (Powers, Kingdoms, 2026-11-26)
+- [ ] #2232 Dragon keys no longer stop the game starting (Kingdoms, 2026-11-26)
+- [ ] #2231 Dyed and grey sheep no longer sprout stray boxes (Powers, 2026-11-26)
+- [ ] #2230 /texturelook vanilla|reason - switch the pack's retexture packs off and back on (Powers, 2026-11-26)
+- [ ] #2229 cannon loading tip cards (Powers, 2026-11-26)
+- [ ] #2228 face parts - snouts, beaks, fangs and horns on the painted faces (Kingdoms, 2026-11-26)
+- [ ] #2227 Dragonforge mechanics for our dragons (parts, bite, dive slam, sprint flight, tremor, horn, home patrols, realm wyverns) (Kingdoms, 2026-11-26)
+- [ ] #2226 lance couching from the saddle (Powers, Kingdoms, 2026-11-26)
+- [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
+- [ ] #2221 wide flat plains and bigger biomes (open country) (Kingdoms, 2026-11-26)
+- [ ] #2219 world gen no longer freezes on Enderscape's "not in a structure" check (Powers, 2026-11-26)
 - [ ] #2214 Open art sets, batch 1: machines and far-world rock (Powers, Kingdoms, 2026-11-26)
 - [ ] #2213 Maw ruins from Pomkot's World (Powers, 2026-11-26)
 - [ ] #2212 CC0 picks: pack weight, death toll, weapon wheel, coyote time, better chainmail, axe throw, rust, falling snow, snores, clumsy undead, soap scrub, leaves on Fast, eight new pack mods (Powers, Kingdoms, Kitchen, 2026-11-26)
@@ -95,7 +114,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-18 problems in the notes: [[Health]].
+19 problems in the notes: [[Health]].
 
 ## Last week
 

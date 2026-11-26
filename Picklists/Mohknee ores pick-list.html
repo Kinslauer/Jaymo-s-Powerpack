@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mohknee ores and tribal gear</title>
+<style>
+:root{--bg:#f3f5f4;--panel:#fff;--fg:#1b2422;--muted:#5d6b67;--line:#d9e0dd;--accent:#1f6f5c;--accent-soft:#e1efea;
+--on-accent:#fff;--font:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#121816;--panel:#1a2220;--fg:#e4ebe8;--muted:#97a6a1;--line:#2d3936;
+--accent:#5cc3a6;--accent-soft:#1f3630;--on-accent:#0d1f1a;color-scheme:dark}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--font)}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0 10px}
+h1{font-size:1.35rem;margin:0}.sub{color:var(--muted);font-size:.85rem;margin:2px 0 0}
+.count{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:10px}
+.search{flex:1 1 200px;min-width:0;font:inherit;font-size:.9rem;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.btn{font:inherit;font-size:.88rem;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+main{padding:18px 0 60px;display:flex;flex-direction:column;gap:14px}
+.intro{color:var(--muted);margin:0;max-width:68ch}
+h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:12px 0 0}
+.text{color:var(--muted);font-size:.9rem;margin:0;max-width:68ch}
+.group{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ghead{padding:12px 16px;border-bottom:1px solid var(--line)}.ghead b{font-size:1rem}
+.ghead p{margin:4px 0 0;color:var(--muted);font-size:.85rem}
+.row{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:12px 16px;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}.row.on{background:var(--accent-soft)}
+.row input[type=checkbox]{width:18px;height:18px;margin-top:3px;accent-color:var(--accent)}
+.rb{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rt{font-weight:600}.size{font-size:.7rem;font-weight:600;border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--muted);margin-left:6px}
+.rd{margin:0;font-size:.9rem}.rf{margin:0;font-size:.82rem;color:var(--muted)}
+.linkbtn{font:inherit;font-size:.8rem;background:none;border:0;color:var(--accent);cursor:pointer;padding:2px 0;align-self:flex-start}
+textarea{width:100%;font:inherit;font-size:.9rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:2.6em;resize:vertical}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.card h3{margin:0;font-size:1.05rem}
+.opt{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt input{margin-top:4px;accent-color:var(--accent)}.opt .oc{grid-column:2;color:var(--muted);font-size:.85rem}
+.rec{font-size:.7rem;font-weight:700;color:var(--accent);margin-left:6px}
+a{color:var(--accent)}code{font-size:.85em}
+#out{display:none;min-height:10em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style></head><body>
+<header><div class="wrap">
+ <div class="top"><div><h1 id="title"></h1><p class="sub" id="sub"></p></div><span class="count" id="count"></span></div>
+ <div class="bar">
+  <input class="search" id="q" type="search" placeholder="Find a row" aria-label="Find a row">
+  <button class="btn ghost" id="only" type="button" aria-pressed="false">Show ticked only</button>
+  <button class="btn" id="copy" type="button">Copy picks</button>
+  <button class="btn ghost" id="save" type="button">Save picks</button>
+ </div>
+</div></header>
+<main class="wrap" id="main"></main>
+<div class="wrap"><p class="intro" id="msg">Your ticks stay in this browser. When you're done, press <b>Copy picks</b> and paste it to the assistant, or <b>Save picks</b> and tell it the file is in Downloads.</p>
+<textarea id="out" readonly aria-label="Your picks as text"></textarea></div>
+<script type="application/json" id="data">{"meta": {"type": "picklist", "source": "Mohknee structures track 4 and Andy's request for an ore proposal", "status": "waiting-for-picks", "created": "2026-11-26", "tags": "[inbox, picklist, mohknee]"}, "title": "Mohknee ores and tribal gear", "intro": ["Blossom smiths already make folded steel from river black sand. My pick keeps that tradition and gives the foothill tribes a scarce red ironstone of their own. Both produce gear in the existing progression. Tick the parts you want built."], "blocks": [{"kind": "info", "head": "Questions", "level": 2, "part": "Questions", "text": [], "rows": [], "opts": []}, {"kind": "question", "head": "Which source should supply tribal smiths?", "level": 3, "part": "Questions", "text": ["The lore says Mohknee has little ore and describes iron washed from its rivers."], "rows": [], "opts": [{"id": "mk-red", "t": "Scarce red ironstone in dry foothills", "suggested": true, "chosen": false, "d": ["Approve a small local exception. The tribes smelt it for ordinary iron and use the red ochre to mark their gear."]}, {"id": "mk-sand", "t": "River black sand for both peoples", "suggested": false, "chosen": false, "d": ["Keep the current lore as written. The tribes work the same raw iron into thick fittings while blossom smiths fold theirs for blades and lamellar."]}], "id": "mk-source"}, {"kind": "question", "head": "How should players find the tribal material?", "level": 3, "part": "Questions", "text": ["This decides whether the source adds a gathering opportunity."], "rows": [], "opts": [{"id": "mk-gather", "t": "Gather it and encounter it in tribal gear", "suggested": true, "chosen": false, "d": ["Under red ironstone, add a few exposed cuts near suitable camps with ordinary iron output. Under black sand, use the existing gathering route."]}, {"id": "mk-trade", "t": "Encounter it through tribal gear and trade", "suggested": false, "chosen": false, "d": ["Leave the land generation and gathering routes as they are."]}], "id": "mk-access"}, {"kind": "rows", "head": "Tribal equipment", "level": 2, "part": "Tribal equipment", "text": [], "rows": [{"id": "mk-axes", "t": "Broad tribal axes", "s": "S", "on": false, "d": ["Use the chosen source for broad axe heads with ordinary iron performance."], "f": "", "note": ""}, {"id": "mk-shields", "t": "Iron-rimmed tribal shields", "s": "S", "on": false, "d": ["Give the tribes a shield with a recognizable iron rim."], "f": "", "note": ""}, {"id": "mk-hide", "t": "Riveted hide armor", "s": "M", "on": false, "d": ["Put iron rivets on tribal hide armor. Each tribe keeps its markings, using ochre if you pick red ironstone."], "f": "", "note": ""}], "opts": []}, {"kind": "rows", "head": "Rare pillager allies", "level": 2, "part": "Rare pillager allies", "text": [], "rows": [{"id": "mk-mixed", "t": "Mixed bands share tribal gear", "s": "M", "on": false, "d": ["A rare pillager band can appear alongside an allied tribe and wear some of its equipment."], "f": "", "note": ""}, {"id": "mk-tactics", "t": "Allied bands fight together", "s": "M", "on": false, "d": ["Give them a persistent alliance and check that they support one another in a fight."], "f": "", "note": ""}, {"id": "mk-speech", "t": "Allies learn each other's speech", "s": "M", "on": false, "d": ["Show the local words learned through the alliance using the existing language system where supported."], "f": "", "note": ""}], "opts": []}], "file": "Mohknee ores pick-list.md", "key": "pick-page:Mohknee ores pick-list:2026-11-26"}</script>
+<script>
+(function(){
+const P=JSON.parse(document.getElementById('data').textContent);
+const $=id=>document.getElementById(id);
+let S={rows:{},answers:{},note:''};
+try{const v=JSON.parse(localStorage.getItem(P.key)||'null');if(v)S=Object.assign(S,v);}catch(e){}
+P.blocks.forEach(b=>b.rows.forEach(r=>{if(r.on&&!(r.id in S.rows))S.rows[r.id]={on:true,note:r.note||''};else if(r.note&&!(r.id in S.rows))S.rows[r.id]={on:false,note:r.note};}));
+function keep(){try{localStorage.setItem(P.key,JSON.stringify(S));}catch(e){}count();}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function md(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>')
+  .replace(/\[([^\]]+)\]\((https:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+  .replace(/(^|\s)(https:\/\/[^\s<]+)/g,'$1<a href="$2" target="_blank" rel="noopener">$2</a>')
+  .replace(/\[\[([^\]|]+\|)?([^\]]+)\]\]/g,'$2');}
+function el(t,cls,h){const e=document.createElement(t);if(cls)e.className=cls;if(h!=null)e.innerHTML=h;return e;}
+$('title').textContent=P.title||P.file;document.title=P.title||P.file;
+$('sub').textContent=[P.meta.source,P.meta.licence].filter(Boolean).join(' · ');
+function count(){let n=0,t=0;P.blocks.forEach(b=>b.rows.forEach(r=>{n++;if(S.rows[r.id]&&S.rows[r.id].on)t++;}));
+  const q=P.blocks.filter(b=>b.kind==='question').length;$('count').textContent=t+' of '+n+' ticked'+(q?' · '+q+' question'+(q>1?'s':''):'');}
+function row(r){const st=S.rows[r.id]||{};const d=el('div','row'+(st.on?' on':''));
+  const cb=el('input');cb.type='checkbox';cb.id='cb-'+r.id;cb.checked=!!st.on;
+  const b=el('div','rb');b.appendChild(el('label','rt',md(r.t)+(r.s?'<span class="size" title="Size of the job">'+esc(r.s)+'</span>':''))).htmlFor=cb.id;
+  r.d.forEach(x=>b.appendChild(el('p','rd',md(x))));if(r.f)b.appendChild(el('p','rf','For us: '+md(r.f)));
+  const nb=el('button','linkbtn',st.note?'Edit note':'Add note');nb.type='button';b.appendChild(nb);
+  const ta=el('textarea');ta.placeholder='Your note on this row';ta.value=st.note||'';ta.hidden=!st.note;b.appendChild(ta);
+  nb.onclick=()=>{ta.hidden=false;ta.focus();};
+  ta.oninput=()=>{S.rows[r.id]=Object.assign({},S.rows[r.id],{note:ta.value});keep();};
+  cb.onchange=()=>{S.rows[r.id]=Object.assign({},S.rows[r.id],{on:cb.checked});d.classList.toggle('on',cb.checked);keep();};
+  d.appendChild(cb);d.appendChild(b);return d;}
+function question(b){const c=el('div','card');c.appendChild(el('h3',null,md(b.head)));
+  b.text.forEach(x=>c.appendChild(el('p','text',md(x))));
+  const cur=(S.answers[b.id]||{}).opt||((b.opts.find(o=>o.chosen)||b.opts.find(o=>o.suggested)||{}).id);
+  b.opts.forEach(o=>{const l=el('label','opt');const i=el('input');i.type='radio';i.name='q-'+b.id;i.checked=cur===o.id;
+    i.onchange=()=>{S.answers[b.id]=Object.assign({},S.answers[b.id],{opt:o.id});keep();};
+    l.appendChild(i);l.appendChild(el('span',null,md(o.t)+(o.suggested?'<span class="rec">SUGGESTED</span>':'')));
+    if(o.d.length)l.appendChild(el('span','oc',md(o.d.join(' '))));c.appendChild(l);});
+  const ta=el('textarea');ta.placeholder='Anything else, or your own answer';ta.value=(S.answers[b.id]||{}).note||'';
+  ta.oninput=()=>{S.answers[b.id]=Object.assign({opt:cur},S.answers[b.id],{note:ta.value});keep();};c.appendChild(ta);return c;}
+function render(){const m=$('main');m.textContent='';const term=$('q').value.toLowerCase();const only=$('only').getAttribute('aria-pressed')==='true';
+  if(!term&&!only)P.intro.forEach(x=>m.appendChild(el('p','intro',md(x))));
+  P.blocks.forEach(b=>{
+    if(b.kind==='question'){if(!only&&(!term||b.head.toLowerCase().includes(term)))m.appendChild(question(b));return;}
+    if(!b.rows.length){if(term||only)return;m.appendChild(el(b.level===2?'h2':'div',b.level===2?null:'text',b.level===2?esc(b.head):'<b>'+md(b.head)+'</b>'));
+      b.text.forEach(x=>m.appendChild(el('p','text',md(x))));return;}
+    const rows=b.rows.filter(r=>(!only||(S.rows[r.id]||{}).on)&&(!term||(b.head+' '+r.t+' '+r.d.join(' ')).toLowerCase().includes(term)));
+    if(!rows.length)return;const g=el('div','group');const h=el('div','ghead','<b>'+md(b.head)+'</b>');
+    b.text.forEach(x=>h.appendChild(el('p',null,md(x))));g.appendChild(h);rows.forEach(r=>g.appendChild(row(r)));m.appendChild(g);});
+  const c=el('div','card');c.appendChild(el('h3',null,'Anything else?'));const ta=el('textarea');ta.placeholder='A note on the whole list';ta.value=S.note||'';
+  ta.oninput=()=>{S.note=ta.value;keep();};c.appendChild(ta);if(!term&&!only)m.appendChild(c);count();}
+function text(){const L=['PICKS v1 · '+P.file,''];
+  P.blocks.forEach(b=>{b.rows.forEach(r=>{const s=S.rows[r.id];if(s&&(s.on||s.note)){L.push('['+(s.on?'x':' ')+'] '+r.id+' · '+r.t);if(s.note)L.push('    note: '+s.note.replace(/\s+/g,' '));}});
+    if(b.kind==='question'){const a=S.answers[b.id]||{};const opt=a.opt||((b.opts.find(o=>o.chosen)||b.opts.find(o=>o.suggested)||{}).id);
+      if(opt){const o=b.opts.find(x=>x.id===opt);L.push('Q '+b.id+' = '+opt+' · '+(o?o.t:''));if(a.note)L.push('    note: '+a.note.replace(/\s+/g,' '));}}});
+  if(S.note)L.push('NOTE: '+S.note.replace(/\s+/g,' '));return L.join('\n')+'\n';}
+$('copy').onclick=()=>{const t=text();const o=$('out');o.value=t;const fb=()=>{o.style.display='block';o.focus();o.select();$('msg').textContent='Copy the text below (Ctrl+C) and paste it to the assistant.';};
+  try{navigator.clipboard.writeText(t).then(()=>{$('msg').textContent='Copied. Paste it to the assistant.';},fb);}catch(e){fb();}};
+$('save').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text()],{type:'text/plain'}));
+  a.download=P.file.replace(/\.md$/,'')+'.picks.txt';document.body.appendChild(a);a.click();a.remove();
+  $('msg').textContent='Saved as '+a.download+' in your Downloads. Tell the assistant it is there.';};
+$('q').oninput=render;
+$('only').onclick=e=>{const b=e.currentTarget;b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true'));b.textContent=b.getAttribute('aria-pressed')==='true'?'Show all':'Show ticked only';render();};
+render();
+})();
+</script></body></html>

@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Reference mod compatibility assessment
 branch:
 pr:
@@ -18,3 +18,4 @@ Andy confirmed ownership. Two isolated Claude Sonnet implementation tracks start
 
 ## Notes
 - 2026-11-24 13:21 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-26 Andy (Waiting on Andy page): restart it: picked up again as Inbox task codex-reference-dinos-venom-restart.

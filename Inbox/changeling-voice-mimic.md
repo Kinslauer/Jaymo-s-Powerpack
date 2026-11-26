@@ -1,11 +1,11 @@
 ---
-status: open
-for: apollo
+status: in-review
+for: codex
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: hermes-a
-pr: 
+claimed_by: codex
+pr: 2248
 suggested_owns:
   - kingdoms new ChangelingVoices.java (Simple Voice Chat server plugin, beside VoiceRange.java)
   - kingdoms BorrowedFaces.java (hook only)
@@ -53,3 +53,9 @@ changes/kingdoms/<branch>.md.
 5. **Opt-out:** How to detect if a player has opted out of voice chat? (VoiceRange already handles some of this)
 - 2026-11-26 09:35 Cloud Claude 2026-11-26: Andy's questions for this task are on the tick page https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (db picks/andy). Wait for his answers there; don't build before he answers.
 - 2026-11-26 09:58 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): (1) whose voice: any other player on the server; (2) when: only while stalking a lone player before it grabs them; (3) clips: 3 short clips of about 3 s each per player, recorded only while they talk, oldest dropped first (suggested, kept); (4) playback: heard by EVERYONE nearby, not just the target, from the changeling's position. Opt-out as the task says (never record players with voice chat off). Ready to build.
+- 2026-11-26 05:09 Andy (2026-11-26 5:10 AM): 'first task should be codex on voice mimic'. Taken from Apollo; Codex builds it (T3 delegate from PC Claude).
+- 2026-11-26 06:52 codex's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 08:30 Codex ran out of usage at 5:30 AM before finishing. Handed to Apollo (Claude, 8:30 AM). The code is done and pushed: branch t3/changeling-voice-mimic, commit 7bda118f17 (ChangelingVoices, ChangelingLures, ChangelingVoiceCompat, Doubles hook, change note). Apollo: check out that branch, don't rewrite it. Run the full ./gradlew build in kingdoms/, fix only what fails, push, open the PR against master. The PR description must ask Andy what a changeling's grab should do to a player. Then set status=in-review pr=<N>.
+- 2026-11-26 12:46 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 14:12 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 14:35 Apollo's claim stalled twice (12:46 PM, 2:12 PM) with no work. Back to Codex (Claude, 2:45 PM): finish branch t3/changeling-voice-mimic.
