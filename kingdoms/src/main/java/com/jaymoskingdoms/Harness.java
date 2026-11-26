@@ -231,9 +231,9 @@ public final class Harness {
 	}
 
 	/**
-	 * {@code wearer} is deliberately issued equipment for a new part, once: a guard's first kit, his kit in a new settlement or at
-	 * a higher rank (bought from the stores and treasury, {@code GuardKit}), a recruit put into a realm's knights' harness
-	 * ({@code HeraldryWear#knight}), a ruler crowned or given a new title ({@code Rulers}). What was taken from them in their old
+	 * {@code wearer} is deliberately issued equipment for a new part, once: a guard's first kit, or his kit on being enlisted to
+	 * another settlement (bought from the stores and treasury, {@code GuardKit}), a new recruit put into a realm's knights' harness
+	 * once ({@code HeraldryWear#knight}), a ruler crowned or given a new title ({@code Rulers}). What was taken from them in their old
 	 * part no longer marks the places: the new part's pieces are paid or given for as a new issue, which the routine dressing
 	 * (putting the kit on again after duty, a restyle, the daily look-over) never is.
 	 */

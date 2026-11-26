@@ -456,10 +456,12 @@ public final class GuardKit {
 	private static Kit kit(Ctx c, Mob m, ItemStack[] given) {
 		Kit had = m.getAttached(KIT);
 		boolean keep = had != null && had.realm() == c.f().id() && had.who() == c.who();
-		// A new part is a new issue, paid for from the stores and treasury as ever: his first kit, a new settlement's, or a rank
-		// above his old one (a gunner who lost his gun, or a demotion, is not: nothing taken from him is made good that way).
-		// Else the places someone took a piece from stay bare, so the daily look-over never buys the same piece twice.
-		if (had == null || had.realm() != c.f().id() || c.who() > had.who()) {
+		// A new post is a new issue, paid for from the stores and treasury as ever: his first kit, or the kit of the settlement he
+		// is enlisted to now. A change of who he is in the same one (a gunner now or no longer, an archer) is not, as it can be
+		// brought about again and again (a musket taken, a musket given), so it never makes good what was taken from him. (A
+		// guard's rank is fixed by his own id here, and a recruit's kit is not his settlement's.) Else the places someone took a
+		// piece from stay bare, so the daily look-over never buys the same piece twice.
+		if (had == null || had.realm() != c.f().id()) {
 			Harness.issued(m);
 		}
 		if (had != null && !keep && had.realm() == c.f().id()) {
