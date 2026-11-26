@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:50). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,7 +14,6 @@ kanban-plugin: board
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · for any · open
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for any · open
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
-- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for any · open
 
 
 ## Being built
@@ -23,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · codex · claimed
 - [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · gemini · claimed
 - [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · codex · claimed
+- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · codex · claimed
 
 
 ## In review
