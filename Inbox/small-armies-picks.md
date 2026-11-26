@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: apollo
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
-claimed_by: hermes-a
+claimed_by: 
 pr: 
 ---
 
@@ -27,3 +27,4 @@ Not picked: clay soldiers, Clay Warfare colours/buffs/remote/book.
 - 2026-11-26 16:39 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-26 16:40 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-26 16:45 2026-11-26 16:45 apollo: worktree created at E:/wt/small-armies-picks-2 (branch claude/small-armies-picks-2). Ready to start coding: plan doc first, then the 4 picks (tentacles, host possession, divine powers, celestial control). Picking up next run.
+- 2026-11-26 17:18 hermes-a's claim had no sign of work for 30 min: handed back as open.
