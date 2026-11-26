@@ -1,0 +1,484 @@
+{
+  "variants": {
+    "facing=north,hot=false,power=0": {
+      "model": "jaymoskitchen:block/gauge_cold_15"
+    },
+    "facing=north,hot=false,power=1": {
+      "model": "jaymoskitchen:block/gauge_cold_14"
+    },
+    "facing=north,hot=false,power=2": {
+      "model": "jaymoskitchen:block/gauge_cold_13"
+    },
+    "facing=north,hot=false,power=3": {
+      "model": "jaymoskitchen:block/gauge_cold_12"
+    },
+    "facing=north,hot=false,power=4": {
+      "model": "jaymoskitchen:block/gauge_cold_11"
+    },
+    "facing=north,hot=false,power=5": {
+      "model": "jaymoskitchen:block/gauge_cold_10"
+    },
+    "facing=north,hot=false,power=6": {
+      "model": "jaymoskitchen:block/gauge_cold_9"
+    },
+    "facing=north,hot=false,power=7": {
+      "model": "jaymoskitchen:block/gauge_cold_8"
+    },
+    "facing=north,hot=false,power=8": {
+      "model": "jaymoskitchen:block/gauge_cold_7"
+    },
+    "facing=north,hot=false,power=9": {
+      "model": "jaymoskitchen:block/gauge_cold_6"
+    },
+    "facing=north,hot=false,power=10": {
+      "model": "jaymoskitchen:block/gauge_cold_5"
+    },
+    "facing=north,hot=false,power=11": {
+      "model": "jaymoskitchen:block/gauge_cold_4"
+    },
+    "facing=north,hot=false,power=12": {
+      "model": "jaymoskitchen:block/gauge_cold_3"
+    },
+    "facing=north,hot=false,power=13": {
+      "model": "jaymoskitchen:block/gauge_cold_2"
+    },
+    "facing=north,hot=false,power=14": {
+      "model": "jaymoskitchen:block/gauge_cold_1"
+    },
+    "facing=north,hot=false,power=15": {
+      "model": "jaymoskitchen:block/gauge_cold_0"
+    },
+    "facing=north,hot=true,power=0": {
+      "model": "jaymoskitchen:block/gauge_hot_0"
+    },
+    "facing=north,hot=true,power=1": {
+      "model": "jaymoskitchen:block/gauge_hot_1"
+    },
+    "facing=north,hot=true,power=2": {
+      "model": "jaymoskitchen:block/gauge_hot_2"
+    },
+    "facing=north,hot=true,power=3": {
+      "model": "jaymoskitchen:block/gauge_hot_3"
+    },
+    "facing=north,hot=true,power=4": {
+      "model": "jaymoskitchen:block/gauge_hot_4"
+    },
+    "facing=north,hot=true,power=5": {
+      "model": "jaymoskitchen:block/gauge_hot_5"
+    },
+    "facing=north,hot=true,power=6": {
+      "model": "jaymoskitchen:block/gauge_hot_6"
+    },
+    "facing=north,hot=true,power=7": {
+      "model": "jaymoskitchen:block/gauge_hot_7"
+    },
+    "facing=north,hot=true,power=8": {
+      "model": "jaymoskitchen:block/gauge_hot_8"
+    },
+    "facing=north,hot=true,power=9": {
+      "model": "jaymoskitchen:block/gauge_hot_9"
+    },
+    "facing=north,hot=true,power=10": {
+      "model": "jaymoskitchen:block/gauge_hot_10"
+    },
+    "facing=north,hot=true,power=11": {
+      "model": "jaymoskitchen:block/gauge_hot_11"
+    },
+    "facing=north,hot=true,power=12": {
+      "model": "jaymoskitchen:block/gauge_hot_12"
+    },
+    "facing=north,hot=true,power=13": {
+      "model": "jaymoskitchen:block/gauge_hot_13"
+    },
+    "facing=north,hot=true,power=14": {
+      "model": "jaymoskitchen:block/gauge_hot_14"
+    },
+    "facing=north,hot=true,power=15": {
+      "model": "jaymoskitchen:block/gauge_hot_15"
+    },
+    "facing=east,hot=false,power=0": {
+      "model": "jaymoskitchen:block/gauge_cold_15",
+      "y": 90
+    },
+    "facing=east,hot=false,power=1": {
+      "model": "jaymoskitchen:block/gauge_cold_14",
+      "y": 90
+    },
+    "facing=east,hot=false,power=2": {
+      "model": "jaymoskitchen:block/gauge_cold_13",
+      "y": 90
+    },
+    "facing=east,hot=false,power=3": {
+      "model": "jaymoskitchen:block/gauge_cold_12",
+      "y": 90
+    },
+    "facing=east,hot=false,power=4": {
+      "model": "jaymoskitchen:block/gauge_cold_11",
+      "y": 90
+    },
+    "facing=east,hot=false,power=5": {
+      "model": "jaymoskitchen:block/gauge_cold_10",
+      "y": 90
+    },
+    "facing=east,hot=false,power=6": {
+      "model": "jaymoskitchen:block/gauge_cold_9",
+      "y": 90
+    },
+    "facing=east,hot=false,power=7": {
+      "model": "jaymoskitchen:block/gauge_cold_8",
+      "y": 90
+    },
+    "facing=east,hot=false,power=8": {
+      "model": "jaymoskitchen:block/gauge_cold_7",
+      "y": 90
+    },
+    "facing=east,hot=false,power=9": {
+      "model": "jaymoskitchen:block/gauge_cold_6",
+      "y": 90
+    },
+    "facing=east,hot=false,power=10": {
+      "model": "jaymoskitchen:block/gauge_cold_5",
+      "y": 90
+    },
+    "facing=east,hot=false,power=11": {
+      "model": "jaymoskitchen:block/gauge_cold_4",
+      "y": 90
+    },
+    "facing=east,hot=false,power=12": {
+      "model": "jaymoskitchen:block/gauge_cold_3",
+      "y": 90
+    },
+    "facing=east,hot=false,power=13": {
+      "model": "jaymoskitchen:block/gauge_cold_2",
+      "y": 90
+    },
+    "facing=east,hot=false,power=14": {
+      "model": "jaymoskitchen:block/gauge_cold_1",
+      "y": 90
+    },
+    "facing=east,hot=false,power=15": {
+      "model": "jaymoskitchen:block/gauge_cold_0",
+      "y": 90
+    },
+    "facing=east,hot=true,power=0": {
+      "model": "jaymoskitchen:block/gauge_hot_0",
+      "y": 90
+    },
+    "facing=east,hot=true,power=1": {
+      "model": "jaymoskitchen:block/gauge_hot_1",
+      "y": 90
+    },
+    "facing=east,hot=true,power=2": {
+      "model": "jaymoskitchen:block/gauge_hot_2",
+      "y": 90
+    },
+    "facing=east,hot=true,power=3": {
+      "model": "jaymoskitchen:block/gauge_hot_3",
+      "y": 90
+    },
+    "facing=east,hot=true,power=4": {
+      "model": "jaymoskitchen:block/gauge_hot_4",
+      "y": 90
+    },
+    "facing=east,hot=true,power=5": {
+      "model": "jaymoskitchen:block/gauge_hot_5",
+      "y": 90
+    },
+    "facing=east,hot=true,power=6": {
+      "model": "jaymoskitchen:block/gauge_hot_6",
+      "y": 90
+    },
+    "facing=east,hot=true,power=7": {
+      "model": "jaymoskitchen:block/gauge_hot_7",
+      "y": 90
+    },
+    "facing=east,hot=true,power=8": {
+      "model": "jaymoskitchen:block/gauge_hot_8",
+      "y": 90
+    },
+    "facing=east,hot=true,power=9": {
+      "model": "jaymoskitchen:block/gauge_hot_9",
+      "y": 90
+    },
+    "facing=east,hot=true,power=10": {
+      "model": "jaymoskitchen:block/gauge_hot_10",
+      "y": 90
+    },
+    "facing=east,hot=true,power=11": {
+      "model": "jaymoskitchen:block/gauge_hot_11",
+      "y": 90
+    },
+    "facing=east,hot=true,power=12": {
+      "model": "jaymoskitchen:block/gauge_hot_12",
+      "y": 90
+    },
+    "facing=east,hot=true,power=13": {
+      "model": "jaymoskitchen:block/gauge_hot_13",
+      "y": 90
+    },
+    "facing=east,hot=true,power=14": {
+      "model": "jaymoskitchen:block/gauge_hot_14",
+      "y": 90
+    },
+    "facing=east,hot=true,power=15": {
+      "model": "jaymoskitchen:block/gauge_hot_15",
+      "y": 90
+    },
+    "facing=south,hot=false,power=0": {
+      "model": "jaymoskitchen:block/gauge_cold_15",
+      "y": 180
+    },
+    "facing=south,hot=false,power=1": {
+      "model": "jaymoskitchen:block/gauge_cold_14",
+      "y": 180
+    },
+    "facing=south,hot=false,power=2": {
+      "model": "jaymoskitchen:block/gauge_cold_13",
+      "y": 180
+    },
+    "facing=south,hot=false,power=3": {
+      "model": "jaymoskitchen:block/gauge_cold_12",
+      "y": 180
+    },
+    "facing=south,hot=false,power=4": {
+      "model": "jaymoskitchen:block/gauge_cold_11",
+      "y": 180
+    },
+    "facing=south,hot=false,power=5": {
+      "model": "jaymoskitchen:block/gauge_cold_10",
+      "y": 180
+    },
+    "facing=south,hot=false,power=6": {
+      "model": "jaymoskitchen:block/gauge_cold_9",
+      "y": 180
+    },
+    "facing=south,hot=false,power=7": {
+      "model": "jaymoskitchen:block/gauge_cold_8",
+      "y": 180
+    },
+    "facing=south,hot=false,power=8": {
+      "model": "jaymoskitchen:block/gauge_cold_7",
+      "y": 180
+    },
+    "facing=south,hot=false,power=9": {
+      "model": "jaymoskitchen:block/gauge_cold_6",
+      "y": 180
+    },
+    "facing=south,hot=false,power=10": {
+      "model": "jaymoskitchen:block/gauge_cold_5",
+      "y": 180
+    },
+    "facing=south,hot=false,power=11": {
+      "model": "jaymoskitchen:block/gauge_cold_4",
+      "y": 180
+    },
+    "facing=south,hot=false,power=12": {
+      "model": "jaymoskitchen:block/gauge_cold_3",
+      "y": 180
+    },
+    "facing=south,hot=false,power=13": {
+      "model": "jaymoskitchen:block/gauge_cold_2",
+      "y": 180
+    },
+    "facing=south,hot=false,power=14": {
+      "model": "jaymoskitchen:block/gauge_cold_1",
+      "y": 180
+    },
+    "facing=south,hot=false,power=15": {
+      "model": "jaymoskitchen:block/gauge_cold_0",
+      "y": 180
+    },
+    "facing=south,hot=true,power=0": {
+      "model": "jaymoskitchen:block/gauge_hot_0",
+      "y": 180
+    },
+    "facing=south,hot=true,power=1": {
+      "model": "jaymoskitchen:block/gauge_hot_1",
+      "y": 180
+    },
+    "facing=south,hot=true,power=2": {
+      "model": "jaymoskitchen:block/gauge_hot_2",
+      "y": 180
+    },
+    "facing=south,hot=true,power=3": {
+      "model": "jaymoskitchen:block/gauge_hot_3",
+      "y": 180
+    },
+    "facing=south,hot=true,power=4": {
+      "model": "jaymoskitchen:block/gauge_hot_4",
+      "y": 180
+    },
+    "facing=south,hot=true,power=5": {
+      "model": "jaymoskitchen:block/gauge_hot_5",
+      "y": 180
+    },
+    "facing=south,hot=true,power=6": {
+      "model": "jaymoskitchen:block/gauge_hot_6",
+      "y": 180
+    },
+    "facing=south,hot=true,power=7": {
+      "model": "jaymoskitchen:block/gauge_hot_7",
+      "y": 180
+    },
+    "facing=south,hot=true,power=8": {
+      "model": "jaymoskitchen:block/gauge_hot_8",
+      "y": 180
+    },
+    "facing=south,hot=true,power=9": {
+      "model": "jaymoskitchen:block/gauge_hot_9",
+      "y": 180
+    },
+    "facing=south,hot=true,power=10": {
+      "model": "jaymoskitchen:block/gauge_hot_10",
+      "y": 180
+    },
+    "facing=south,hot=true,power=11": {
+      "model": "jaymoskitchen:block/gauge_hot_11",
+      "y": 180
+    },
+    "facing=south,hot=true,power=12": {
+      "model": "jaymoskitchen:block/gauge_hot_12",
+      "y": 180
+    },
+    "facing=south,hot=true,power=13": {
+      "model": "jaymoskitchen:block/gauge_hot_13",
+      "y": 180
+    },
+    "facing=south,hot=true,power=14": {
+      "model": "jaymoskitchen:block/gauge_hot_14",
+      "y": 180
+    },
+    "facing=south,hot=true,power=15": {
+      "model": "jaymoskitchen:block/gauge_hot_15",
+      "y": 180
+    },
+    "facing=west,hot=false,power=0": {
+      "model": "jaymoskitchen:block/gauge_cold_15",
+      "y": 270
+    },
+    "facing=west,hot=false,power=1": {
+      "model": "jaymoskitchen:block/gauge_cold_14",
+      "y": 270
+    },
+    "facing=west,hot=false,power=2": {
+      "model": "jaymoskitchen:block/gauge_cold_13",
+      "y": 270
+    },
+    "facing=west,hot=false,power=3": {
+      "model": "jaymoskitchen:block/gauge_cold_12",
+      "y": 270
+    },
+    "facing=west,hot=false,power=4": {
+      "model": "jaymoskitchen:block/gauge_cold_11",
+      "y": 270
+    },
+    "facing=west,hot=false,power=5": {
+      "model": "jaymoskitchen:block/gauge_cold_10",
+      "y": 270
+    },
+    "facing=west,hot=false,power=6": {
+      "model": "jaymoskitchen:block/gauge_cold_9",
+      "y": 270
+    },
+    "facing=west,hot=false,power=7": {
+      "model": "jaymoskitchen:block/gauge_cold_8",
+      "y": 270
+    },
+    "facing=west,hot=false,power=8": {
+      "model": "jaymoskitchen:block/gauge_cold_7",
+      "y": 270
+    },
+    "facing=west,hot=false,power=9": {
+      "model": "jaymoskitchen:block/gauge_cold_6",
+      "y": 270
+    },
+    "facing=west,hot=false,power=10": {
+      "model": "jaymoskitchen:block/gauge_cold_5",
+      "y": 270
+    },
+    "facing=west,hot=false,power=11": {
+      "model": "jaymoskitchen:block/gauge_cold_4",
+      "y": 270
+    },
+    "facing=west,hot=false,power=12": {
+      "model": "jaymoskitchen:block/gauge_cold_3",
+      "y": 270
+    },
+    "facing=west,hot=false,power=13": {
+      "model": "jaymoskitchen:block/gauge_cold_2",
+      "y": 270
+    },
+    "facing=west,hot=false,power=14": {
+      "model": "jaymoskitchen:block/gauge_cold_1",
+      "y": 270
+    },
+    "facing=west,hot=false,power=15": {
+      "model": "jaymoskitchen:block/gauge_cold_0",
+      "y": 270
+    },
+    "facing=west,hot=true,power=0": {
+      "model": "jaymoskitchen:block/gauge_hot_0",
+      "y": 270
+    },
+    "facing=west,hot=true,power=1": {
+      "model": "jaymoskitchen:block/gauge_hot_1",
+      "y": 270
+    },
+    "facing=west,hot=true,power=2": {
+      "model": "jaymoskitchen:block/gauge_hot_2",
+      "y": 270
+    },
+    "facing=west,hot=true,power=3": {
+      "model": "jaymoskitchen:block/gauge_hot_3",
+      "y": 270
+    },
+    "facing=west,hot=true,power=4": {
+      "model": "jaymoskitchen:block/gauge_hot_4",
+      "y": 270
+    },
+    "facing=west,hot=true,power=5": {
+      "model": "jaymoskitchen:block/gauge_hot_5",
+      "y": 270
+    },
+    "facing=west,hot=true,power=6": {
+      "model": "jaymoskitchen:block/gauge_hot_6",
+      "y": 270
+    },
+    "facing=west,hot=true,power=7": {
+      "model": "jaymoskitchen:block/gauge_hot_7",
+      "y": 270
+    },
+    "facing=west,hot=true,power=8": {
+      "model": "jaymoskitchen:block/gauge_hot_8",
+      "y": 270
+    },
+    "facing=west,hot=true,power=9": {
+      "model": "jaymoskitchen:block/gauge_hot_9",
+      "y": 270
+    },
+    "facing=west,hot=true,power=10": {
+      "model": "jaymoskitchen:block/gauge_hot_10",
+      "y": 270
+    },
+    "facing=west,hot=true,power=11": {
+      "model": "jaymoskitchen:block/gauge_hot_11",
+      "y": 270
+    },
+    "facing=west,hot=true,power=12": {
+      "model": "jaymoskitchen:block/gauge_hot_12",
+      "y": 270
+    },
+    "facing=west,hot=true,power=13": {
+      "model": "jaymoskitchen:block/gauge_hot_13",
+      "y": 270
+    },
+    "facing=west,hot=true,power=14": {
+      "model": "jaymoskitchen:block/gauge_hot_14",
+      "y": 270
+    },
+    "facing=west,hot=true,power=15": {
+      "model": "jaymoskitchen:block/gauge_hot_15",
+      "y": 270
+    }
+  }
+}

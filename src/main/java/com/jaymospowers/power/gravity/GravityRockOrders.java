@@ -4,7 +4,6 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.combat.Guard;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Powers;
-import com.jaymospowers.ground.FirstTools;
 import com.jaymospowers.power.arsenal.ArsenalStorm;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
@@ -312,7 +311,7 @@ public final class GravityRockOrders {
 			return;
 		}
 		last.put(living.getId(), now);
-		GravityRocks.hit(player, level, living, damage, true);
+		GravityRocks.hit(player, level, living, damage * GravityMetal.heft(rocks.item()), true);
 		Vec3 at = living.getBoundingBox().getCenter();
 		grit(level, rocks, at, 4);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.STONE_HIT, SoundSource.PLAYERS, 0.8F, 0.9F + level.getRandom().nextFloat() * 0.3F);
@@ -382,7 +381,7 @@ public final class GravityRockOrders {
 			var inventory = player.getInventory();
 			for (int i = 0; i < inventory.getContainerSize(); i++) {
 				ItemStack stack = inventory.getItem(i);
-				if (FirstTools.rock(stack)) {
+				if (GravityRocks.stone(stack)) {
 					stack.shrink(1);
 					break;
 				}

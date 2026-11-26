@@ -168,6 +168,7 @@ public final class Directions {
 		}
 		RandomSource random = level.getRandom();
 		if (McaBridge.heartsOf(v, player) < REFUSE_HEARTS) {
+			RefusalHints.hint(player, v, RefusalHints.Cause.DISLIKE);
 			return Component.translatable(line("refuse", random));
 		}
 		if (LEADS.containsKey(v)) {

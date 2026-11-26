@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "key": {
+    "#": "jaymoskingdoms:glowcap_planks"
+  },
+  "result": {
+    "id": "jaymoskingdoms:glowcap_stairs",
+    "count": 4
+  },
+  "group": "wooden_stairs"
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jaymoskingdoms:block/stripped_glowcap_stem",
+    "side": "jaymoskingdoms:block/stripped_glowcap_stem"
+  }
+}

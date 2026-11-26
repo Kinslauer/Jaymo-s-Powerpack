@@ -15,7 +15,8 @@
               "type": "minecraft:copy_state",
               "block": "jaymospowers:pod_fin",
               "properties": [
-                "damaged"
+                "damaged",
+                "forged"
               ]
             }
           ]

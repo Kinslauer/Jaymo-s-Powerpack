@@ -33,6 +33,8 @@ import net.minecraft.world.phys.Vec3;
  * each swing of a weapon or fist at something ({@link #SWING_DRAIN}; a Better Combat swing counts when it starts, hit
  * or miss), and each blow taken from someone or something ({@link #HIT_DRAIN}; a blocked one costs what the guard
  * already charges).</li>
+ * <li><b>An overload</b> ({@link com.jaymospowers.core.PackWeight#over}): carrying past what the body bears freely adds to
+ * the load, so an overloaded pack tires the unarmoured too.</li>
  * <li><b>Run dry</b> ({@link Feathers#spent}: the row and its red strain both gone, by this or by spending) and the next
  * blow that lands knocks the weapon out of the hand ({@link DroppedArms#knock}): it lands on the ground a few blocks
  * off, whole, to be picked up again. Once each time they run dry.</li>
@@ -88,7 +90,7 @@ public final class Exertion {
 		if (player.isCreative() || player.isSpectator() || !player.isAlive() || Downed.isDowned(player)) {
 			return 0.0F;
 		}
-		return amount * ArmourKind.load(player) * (Adrenaline.active(player) ? ADRENALINE_EASE : 1.0F);
+		return amount * (ArmourKind.load(player) + com.jaymospowers.core.PackWeight.over(player)) * (Adrenaline.active(player) ? ADRENALINE_EASE : 1.0F);
 	}
 
 	private static long[] seen(ServerPlayer player) {

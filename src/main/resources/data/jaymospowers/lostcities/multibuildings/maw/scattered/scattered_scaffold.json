@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_scaffold00",
+      "jaymospowers:maw/scattered/scattered_scaffold01",
+      "jaymospowers:maw/scattered/scattered_scaffold02"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_scaffold10",
+      "jaymospowers:maw/scattered/scattered_scaffold11",
+      "jaymospowers:maw/scattered/scattered_scaffold12"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_scaffold20",
+      "jaymospowers:maw/scattered/scattered_scaffold21",
+      "jaymospowers:maw/scattered/scattered_scaffold22"
+    ]
+  ]
+}

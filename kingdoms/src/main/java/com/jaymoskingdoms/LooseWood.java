@@ -215,7 +215,10 @@ public final class LooseWood {
 		List<BlockPos> nests = FallingTree.hives(level, logs, null);
 		if (logs.size() <= LOOSE_LOGS && leaves.isEmpty() && nests.isEmpty()) {
 			for (BlockPos log : logs) {
-				FallingBlockEntity.fall(level, log, level.getBlockState(log)).setHurtsEntities(HURT_PER_BLOCK, HURT_MOST);
+				FallingBlockEntity loose = FallingBlockEntity.fall(level, log, level.getBlockState(log));
+				loose.setHurtsEntities(HURT_PER_BLOCK, HURT_MOST);
+				// (nobody felled it: if it can't land as a block it's gone, not left as a drop, FallingTree#byPlayer)
+				loose.dropItem = false;
 			}
 			return;
 		}

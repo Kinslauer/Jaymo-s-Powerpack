@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "waxed_corroded_iron_door",
+  "ingredients": [
+    "jaymospowers:corroded_iron_door",
+    "minecraft:honeycomb"
+  ],
+  "result": {
+    "id": "jaymospowers:waxed_corroded_iron_door",
+    "count": 1
+  }
+}

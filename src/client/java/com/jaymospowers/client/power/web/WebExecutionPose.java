@@ -267,6 +267,23 @@ public final class WebExecutionPose {
 			k(31, -0.08F, 22, 4, -0.8F, -0.3F, 0.2F, -0.8F, 0.3F, -0.2F, -1.6F, 0.1F, 0.6F).lunge(0.1F).tendril(0.3F),
 			k(35, 0.0F, 8, 0, -0.4F, -0.1F, 0.1F, -0.4F, 0.1F, -0.1F, -0.3F, 0.1F, 0.45F),
 			rest(40)});
+		// ---- the red one's pounce ---------------------------------------------------------------------------------------
+		// Rupture: a crouch and a leap, landing astride them with both hands pinning, two tendrils reared over the
+		// shoulders and driven down into the chest in turn, six times, the last held in and twisted
+		Key pinned = astride(0, 40, -0.8F, -0.3F, 0.1F, -0.8F, 0.3F, -0.1F, 0.7F);
+		KEYS.put(Move.RUPTURE_STAB, new Key[] {
+			rest(0),
+			k(5, 0.25F, 20, 0, -0.9F, 0.1F, 0.1F, -0.9F, -0.1F, -0.1F, -0.4F, 0.3F, 0.55F),
+			k(9, -0.55F, 10, 0, -2.4F, 0.1F, 0.3F, -2.4F, -0.1F, -0.3F, -1.3F, -1.3F, 0.5F).lunge(0.25F).tendril(0.3F),
+			pinned.at(13).tendril(0.6F), pinned.at(14).tendril(1.0F).turned(14, 6),
+			pinned.at(18).tendril(0.4F), pinned.at(20).tendril(1.0F).turned(20, -6),
+			pinned.at(24).tendril(0.4F), pinned.at(26).tendril(1.0F).turned(26, 6),
+			pinned.at(30).tendril(0.4F), pinned.at(32).tendril(1.0F).turned(32, -6),
+			pinned.at(36).tendril(0.4F), pinned.at(38).tendril(1.0F).turned(38, 6),
+			astride(44, 16, -2.3F, -0.2F, 0.3F, -2.3F, 0.2F, -0.3F, 0.5F).tendril(0.6F),
+			astride(52, 46, -1.2F, -0.25F, 0.05F, -1.2F, 0.25F, -0.05F, 0.75F).tendril(1.0F).turned(52, -10),
+			astride(57, 42, -1.0F, -0.25F, 0.05F, -1.0F, 0.25F, -0.05F, 0.7F).tendril(0.4F),
+			rest(62)});
 		// ---- the tendrils, over the armour ------------------------------------------------------------------------------
 		// Quartered: the arms spread as four tendrils take the limbs, hoist them, strain this way and that, and tear
 		KEYS.put(Move.QUARTER, new Key[] {
@@ -379,7 +396,7 @@ public final class WebExecutionPose {
 	/** The moves done kneeling at the head. */
 	private static boolean atHead(Move move) {
 		return switch (move) {
-			case KNEE_TWIST, HEEL_STOMP, CHOKE_OUT, PUMMEL, THROAT_PUNCH, SKULL_CRUSH -> true;
+			case KNEE_TWIST, HEEL_STOMP, CHOKE_OUT, PUMMEL, THROAT_PUNCH, SKULL_CRUSH, RUPTURE_STAB -> true;
 			default -> false;
 		};
 	}
@@ -487,7 +504,7 @@ public final class WebExecutionPose {
 	public static int[] tendrilRoots(Move move) {
 		return switch (move) {
 			case TENDRIL_SKEWER, IMPALE_SLAM -> new int[] {1};
-			case TENDRIL_SNAP -> new int[] {0, 1};
+			case TENDRIL_SNAP, RUPTURE_STAB -> new int[] {0, 1};
 			case DRAG_KNEE -> new int[] {2, 3};
 			case QUARTER -> new int[] {0, 1, 4, 5};
 			case WRAP_CRUSH -> new int[] {0, 1, 4, 5, 6, 7};
@@ -509,6 +526,7 @@ public final class WebExecutionPose {
 		return switch (run.move()) {
 			case TENDRIL_SKEWER, IMPALE_SLAM -> new Vec3[] {at.add(0.0, -h * 0.2, 0.0)};
 			case TENDRIL_SNAP -> new Vec3[] {at.add(-1.5, -h * 0.6, 0.0), at.add(1.5, -h * 0.6, 0.0)};
+			case RUPTURE_STAB -> new Vec3[] {at.add(-w * 0.3, h * 0.1, 0.0), at.add(w * 0.3, h * 0.1, 0.0)};
 			case DRAG_KNEE -> new Vec3[] {at.add(-w * 0.6, h * 0.2, 0.0), at.add(w * 0.6, h * 0.2, 0.0)};
 			case QUARTER -> new Vec3[] {at.add(-w * 0.9, -h * 0.5, 0.0), at.add(w * 0.9, -h * 0.5, 0.0), at.add(-w * 0.6, h * 0.7, 0.0),
 				at.add(w * 0.6, h * 0.7, 0.0)};
@@ -521,7 +539,7 @@ public final class WebExecutionPose {
 	/** What the move's tendrils end in: 0 a spear point, 1 a hooked blade, -1 a bare tip (the ones that wind round). */
 	public static int tendrilBlade(Move move) {
 		return switch (move) {
-			case TENDRIL_SKEWER, IMPALE_SLAM, QUARTER -> 0;
+			case TENDRIL_SKEWER, IMPALE_SLAM, QUARTER, RUPTURE_STAB -> 0;
 			case DRAG_KNEE -> 1;
 			default -> -1;
 		};

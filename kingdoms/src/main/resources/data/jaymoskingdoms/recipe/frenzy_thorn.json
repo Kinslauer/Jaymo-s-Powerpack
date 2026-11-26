@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:leech_kit_mix",
+  "ingredients": [
+    "jaymoskingdoms:quickening_thorn",
+    "jaymoskingdoms:restoring_thorn"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:frenzy_thorn"
+  }
+}

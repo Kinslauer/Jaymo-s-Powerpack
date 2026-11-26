@@ -369,12 +369,12 @@ public final class CampAlarm {
 		}
 	}
 
-	/** A foe on the camp's ground: whoever struck it, or a monster that isn't the camp's own or its captive. */
+	/** A foe on the camp's ground: whoever struck it, or a monster that isn't the camp's own (its folk, a sellsword or creature it keeps) or its captive. */
 	private static boolean foe(LivingEntity e, Alarm a, int camp) {
 		if (a.foes.contains(e.getUUID())) {
 			return true;
 		}
-		if (!(e instanceof Enemy) || e instanceof Worker w && w.factionId() == camp || Captives.bound(e)) {
+		if (!(e instanceof Enemy) || e instanceof Worker w && w.factionId() == camp || Captives.bound(e) || CampBeasts.hiredCamp(e) == camp) {
 			return false;
 		}
 		return !(e instanceof Folk folk && Barbarians.isBarbarian(folk));

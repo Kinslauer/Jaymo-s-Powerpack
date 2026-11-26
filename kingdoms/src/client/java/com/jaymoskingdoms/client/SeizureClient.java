@@ -182,9 +182,43 @@ public final class SeizureClient {
 		steer(player, prey, kind == Seizures.Kind.FERAL ? BEAST_SPEED : FEVER_SPEED);
 	}
 
+	/**
+	 * (Andy, 2026-11-25: takeovers get the new MCA fighting AI, "the most playerlike and aggressive".) At its prey it
+	 * never stands still: it circles at arm's length ({@code CIRCLE}, changing side every {@code CIRCLE_TICKS}), and the
+	 * beast and the blade hop into each blow every {@code CRIT_HOP_EVERY} ticks so it lands falling, a critical hit
+	 * (Seizures waits a moment for it); anything shot at it, it sidesteps (TakeoverDodge).
+	 */
+	static final double CLOSE = 2.2, CIRCLE = 0.16;
+	static final int CIRCLE_TICKS = 30, CRIT_HOP_EVERY = 12;
+
 	/** Straight at it if the way's open (or a step it can hop), else the nearest way round; up out of water. */
 	private static void steer(LocalPlayer player, Entity prey, double speed) {
-		steerAt(player, prey.getBoundingBox().getCenter(), speed);
+		if (TakeoverDodge.dodge(player)) {
+			return;
+		}
+		Vec3 center = prey.getBoundingBox().getCenter();
+		Vec3 flat = new Vec3(center.x - player.getX(), 0.0, center.z - player.getZ());
+		if (flat.lengthSqr() > CLOSE * CLOSE || player.isInWater()) {
+			steerAt(player, center, speed);
+			return;
+		}
+		// at it: eyes on it, circling, hopping into the blows
+		Vec3 to = center.subtract(player.getEyePosition());
+		float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
+		float pitch = (float)(-Mth.atan2(to.y, to.horizontalDistance()) * Mth.RAD_TO_DEG);
+		player.setYRot(player.getYRot() + Mth.wrapDegrees(yaw - player.getYRot()) * TURN);
+		player.setXRot(Mth.clamp(player.getXRot() + (pitch - player.getXRot()) * TURN, -90.0F, 90.0F));
+		Vec3 side = flat.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal() : flat.normalize();
+		side = new Vec3(-side.z, 0.0, side.x).scale((player.tickCount / CIRCLE_TICKS) % 2 == 0 ? 1.0 : -1.0);
+		if (!player.level().noCollision(player, player.getBoundingBox().move(side.scale(0.6)))) {
+			side = side.reverse();
+		}
+		Vec3 v = player.getDeltaMovement();
+		double up = v.y;
+		if (kind != Seizures.Kind.FEVER && player.onGround() && player.tickCount % CRIT_HOP_EVERY == 0) {
+			up = JUMP;
+		}
+		player.setDeltaMovement(side.x * CIRCLE, up, side.z * CIRCLE);
 	}
 
 	/** (0.7.465) {@link #steer} at a point rather than a being (the Grue walking its host's routine, a spirit pulling you out of flux). */

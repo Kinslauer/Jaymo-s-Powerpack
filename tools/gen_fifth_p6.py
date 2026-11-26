@@ -60,7 +60,7 @@ def scroll(name, seal, glyph):
         for x, c in enumerate(row):
             if c == "#":
                 mask.add((x, y))
-                shade = 232 - (x + y) % 4 * 4 - (6 if x - y < -3 else 0)
+                shade = 232 - (14 if x - y < -3 else 0)
                 im.putpixel((x, y), (shade, shade - 34, shade - 78, 255))
     # rolled ends
     for (x, y) in [(2, 10), (3, 11), (4, 12), (11, 1), (12, 2)]:

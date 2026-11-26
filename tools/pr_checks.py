@@ -14,8 +14,10 @@ Fails (exit 1) when:
      was the forward model);
   4. a changed item definition (items/*.json) uses exactly the same models as another item (PR #1096 pointed the
      gold, diamond and tempest daggers all at the base dagger's model).
+  5. an item or block texture the PR adds or changes looks script-made: per-pixel noise, soft gradients, far more
+     colours than vanilla uses, half-transparent pixels (tools/art_audit.py, the Reason look's art check).
 
-A deliberate exception for 3 or 4: add the file's repo path to tools/pr_checks_allow.txt with a short reason.
+A deliberate exception for 3, 4 or 5: add the file's repo path to tools/pr_checks_allow.txt with a short reason.
 """
 import json
 import re
@@ -112,6 +114,16 @@ def main():
     tales = subprocess.run([sys.executable, str(ROOT / "tools" / "tale_check.py")], capture_output=True, text=True)
     if tales.returncode:
         errors.append(tales.stdout.strip().replace("\n", " | "))
+
+    # 1d. the Reason look: textures a PR adds or changes must not look script-made (tools/art_audit.py)
+    pngs = sorted(p for p in changed if p.endswith(".png") and (ROOT / p).exists())
+    if pngs:
+        sys.path.insert(0, str(ROOT / "tools"))
+        import art_audit
+        fails, _ = art_audit.check(pngs, allow)
+        for f in fails:
+            errors.append(f"{f}. Paint it to the Reason look's rules (docs/Vanilla-Style.md), or add the path to "
+                          f"tools/pr_checks_allow.txt with a reason.")
 
     # 2. old jars in libs/
     jars = {}

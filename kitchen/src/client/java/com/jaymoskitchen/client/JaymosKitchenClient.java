@@ -44,6 +44,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.corpse.CorpseEntity.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		com.jaymoskitchen.client.hands.HandsClient.register();
 		com.jaymoskitchen.client.stomach.StomachHud.register();
+		com.jaymoskitchen.client.stomach.BitesHud.register();
 		// (0.5.25) thirst row, thermometer, heat edges, sips
 		com.jaymoskitchen.client.climate.ClimateHud.register();
 		// (Hardrock picks) a familiar farm animal shows its hearts
@@ -131,6 +132,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		});
 
 		com.jaymoskitchen.client.season.SeasonTints.register();
+		com.jaymoskitchen.client.season.SeasonTooltip.register();
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenButcher.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ButcherScreen(payload)));
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenKitchen.TYPE, (payload, ctx) -> {
 			Station station = Station.byIndex(payload.station());

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:crest",
+  "ingredients": [
+    "jaymoskingdoms:torse",
+    "#minecraft:wool",
+    "#minecraft:wool"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:crest_mantling"
+  }
+}

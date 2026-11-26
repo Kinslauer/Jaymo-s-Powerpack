@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskitchen:block/forage/frostcap"
+      },
+      {
+        "model": "jaymoskitchen:block/forage/frostcap",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/forage/frostcap",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/forage/frostcap",
+        "y": 270
+      }
+    ]
+  }
+}

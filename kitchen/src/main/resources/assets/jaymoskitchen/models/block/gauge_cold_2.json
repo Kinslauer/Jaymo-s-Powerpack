@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskitchen:block/gauge_base",
+  "textures": {
+    "face": "jaymoskitchen:block/gauge_cold_2"
+  }
+}

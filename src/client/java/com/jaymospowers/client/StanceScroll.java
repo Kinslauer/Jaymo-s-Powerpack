@@ -227,6 +227,9 @@ public final class StanceScroll {
 		} else if (held != null && held == Stance.PRONE) {
 			// got up the crawl's own way
 			held = null;
+		} else if (held != null && held != Stance.STAND && sitting()) {
+			// sat down from the knee (or a held sneak): the sit has you now, and Sneak is yours again (a press of it gets you up)
+			release(player);
 		} else if (held != null && held != Stance.STAND && !able(player)) {
 			// in water, mounted, flying, downed: the held stance drops
 			release(player);
@@ -269,6 +272,13 @@ public final class StanceScroll {
 		boolean still = dx * dx + dz * dz < com.jaymospowers.core.Kneel.STILL * com.jaymospowers.core.Kneel.STILL;
 		stillTicks = still ? stillTicks + 1 : 0;
 		knelt = stillTicks >= com.jaymospowers.core.Kneel.KNEEL_AFTER;
+	}
+
+	/** From {@code StanceInputMixin}: whether the local player sits (Sitting; not a held shadowbox), when the walking keys do nothing. */
+	public static boolean sitting() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		com.jaymospowers.core.Meditate.State state = player == null ? null : com.jaymospowers.core.Meditate.of(player);
+		return state != null && state.kind() == com.jaymospowers.core.Meditate.MEDITATING;
 	}
 
 	/** (0.18.80) From {@code StanceInputMixin}: on the knee in the low crouch, the walking keys do nothing. */

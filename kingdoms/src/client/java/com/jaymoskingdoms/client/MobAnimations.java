@@ -21,6 +21,10 @@ import net.minecraft.world.entity.monster.illager.AbstractIllager;
  * controller of our own per mob and lays its bones onto the mob's humanoid (or illager) model after vanilla posed it
  * (the {@code ModelFeatureRenderer} and {@code LivingEntityRenderer} mixins), so armour and held items follow the swing.
  * <p>
+ * Between swings, a mob holding a two-handed weapon holds it in both hands in the weapon's Better Combat pose
+ * ({@link MobCombat#holdPose}, {@link PalMobAnimator#hold}), as a player does; and someone fishing plays the angler's poses
+ * ({@code com.jaymoskingdoms.Anglers#pose}: our own animations in {@code assets/jaymoskingdoms/player_animations}).
+ * <p>
  * This class never touches the library's classes; without it (or without Better Combat), mobs swing their arm as
  * vanilla does.
  */
@@ -36,10 +40,16 @@ public final class MobAnimations {
 
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(MobCombat.MobSwing.TYPE, (payload, context) -> {
+			// (a dodger's roll is our own keyframes, with or without the library: NpcRollPose)
+			if (com.jaymoskingdoms.NpcDodge.ROLL_ANIMATION.equals(payload.animation())) {
+				NpcRollPose.start(context.client(), payload.entityId(), payload.length(), payload.mirror());
+				return;
+			}
 			if (PAL) {
-				PalMobAnimator.play(payload.entityId(), payload.animation(), payload.length());
+				PalMobAnimator.play(payload.entityId(), payload.animation(), payload.length(), payload.mirror());
 			}
 		});
+		NpcRollPose.register();
 		if (PAL) {
 			ClientTickEvents.END_CLIENT_TICK.register(client -> PalMobAnimator.tick(client.level));
 		}
@@ -50,7 +60,20 @@ public final class MobAnimations {
 		if (!PAL || entity instanceof Avatar) {
 			return;
 		}
-		state.setData(KEY, PalMobAnimator.extract(entity, partialTicks));
+		Object animation = PalMobAnimator.extract(entity, partialTicks);
+		String angling = animation == null ? com.jaymoskingdoms.Anglers.pose(entity) : null;
+		if (angling != null) {
+			// fishing: casting, waiting on a bite, fighting a fish, swinging it in (Anglers)
+			animation = PalMobAnimator.hold(entity, angling, partialTicks);
+		}
+		if (animation == null && entity instanceof net.minecraft.world.entity.Mob mob) {
+			// between swings: a two-handed weapon held in both hands (MobCombat.holdPose)
+			String pose = MobCombat.holdPose(mob);
+			if (pose != null) {
+				animation = PalMobAnimator.hold(entity, pose, partialTicks);
+			}
+		}
+		state.setData(KEY, animation);
 	}
 
 	/** Right after a model was posed for this state: lays the attack animation over it. */

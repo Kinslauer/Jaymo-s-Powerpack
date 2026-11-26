@@ -236,7 +236,11 @@ final class GreenMarket {
 			return;
 		}
 		long hoard = HordeEconomy.hoard(level.getServer(), camp.id());
-		for (Good g : goods(data.orc())) {
+		List<Good> wares = new ArrayList<>(goods(data.orc()));
+		if (!data.orc() && SwampGoblins.is(level, data.center())) {
+			wares.addAll(SwampGoblins.goods());
+		}
+		for (Good g : wares) {
 			int stock = Storage.count(level, camp, g.item());
 			int price = price(g, stock);
 			int spare = (stock - g.keep()) / g.lot();

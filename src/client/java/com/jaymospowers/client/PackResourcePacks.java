@@ -94,6 +94,8 @@ final class PackResourcePacks {
 		// Features, with coat variants. Version 4.3 for 1.21.11 (formats 22-94, older than 26.3's), fetched from Modrinth
 		// (project alMAK8J4). Horses, skeleton horses and zombie horses are Jaymo's Kingdoms' breed horses
 		// (BreedHorseRenderer), so only donkeys and mules take its look. Listed after Fresh Animations so it wins there.
+		// With Icy's Better Horses in the pack its breed horses swap in for every horse and draw themselves (GeckoLib), so this
+		// pack still only draws the donkeys and mules (and skeleton and zombie horses) that Icy's leaves vanilla.
 		new Pack("Better Horses", "jaymospowers-better-horses-v1", "Better Horses", "Better Horses v4.3 1.21.11.zip",
 			"https://cdn.modrinth.com/data/alMAK8J4/versions/EfH2muyG/Better%20Horses%20v4.3%201.21.11.zip",
 			"fea54f680dc959e122189b2005d11adebcd18b5b", true),
@@ -101,9 +103,12 @@ final class PackResourcePacks {
 		// never copied): over 1600 modern-dress zombie skins through Entity Texture Features. Andy (2026-11-15): "All can go
 		// into the future". Jaymo's Kingdoms keeps it on Chrono's future dead only (TissouPack): the present's dead wear our
 		// own skins, and the textures it repaints outright are read back from the game's own. Format 15 (1.20.1).
-		new Pack("Tissou's zombies", "jaymospowers-tissou-zombies-v1", "TZP_", "TZP_1.20.1_2.7.zip",
+		// Andy (2026-11-26): "zombie sounds seem to have swapped back to vanilla": its zombie groans are the pack's own
+		// zombie sounds, and like the medieval villagers pack it had dropped out of the selected packs while its once-only
+		// marker said it was done. Kept on now (config/jaymospowers-tissou-zombies-off keeps it off).
+		new Pack("Tissou's zombies", "jaymospowers-tissou-zombies", "TZP_", "TZP_1.20.1_2.7.zip",
 			"https://mediafilez.forgecdn.net/files/4750/306/TZP_1.20.1_2.7.zip",
-			"0f24fbc99e9a6f4d1b9ceb628f9389a901137ec1", true),
+			"0f24fbc99e9a6f4d1b9ceb628f9389a901137ec1", true, null, true),
 		// Sensible MC picks (Andy, 2026-11-16). Each fetched unchanged from Modrinth, never shipped, edited or copied.
 		// Fresh Animations' own add-ons (by FreshLX, under its terms): extra mob details and a new look for creepers,
 		// just above Fresh Animations. Details 2.4 (project lctgpCsu), Creepers 2.2 (project AhPf2E1u).
@@ -144,8 +149,41 @@ final class PackResourcePacks {
 		// MUSIC_TAG, its SHA-1 from the .sha1 file beside it (empty sha1 here); kept on, "jaymospowers-medieval-music-off"
 		// in config/ keeps it off. Sits at the bottom of the file packs, and our small warped forest pack just above it
 		// (MUSIC_GAPS, put in place when this one is switched on).
+		// Medieval and future packs, Andy's picks (2026-11-26, after the script-painted Reason art fell short): each fetched
+		// from Modrinth, never shipped in our jar. Credits and licences in docs/Vanilla-Style.md.
+		// "Pixel Perfection Fidelity" (by SourAlien, from XSSheep's Pixel Perfection; CC BY, its source CC BY-SA, so it's
+		// only ever fetched as it is): a cozy medieval 16x retexture of the whole game, R2.0 for 26.2-26.3 (project
+		// JTabr6nO). Andy: "this can be the reason base", so it sits at the bottom, under the Reason look.
+		new Pack("Pixel Perfection Fidelity", "jaymospowers-pixel-perfection-v1", "Pixel Perfection Fidelity",
+			"Pixel Perfection Fidelity vR2.0-88.97  26.2-26.3.zip",
+			"https://cdn.modrinth.com/data/JTabr6nO/versions/TFXxAeiO/Pixel%20Perfection%20Fidelity%20vR2.0-88.97%20%2026.2-26.3.zip",
+			"e45b72d6a45da3c997e95a1f47257603f932bb9e", true, BASE),
+		// "Medieval Items!" (by its Modrinth author, CC BY 4.0): medieval redraws of about 760 vanilla items, 1.2 (project
+		// L6chz93w), just above Pixel Perfection Fidelity so its items win. Andy: "dont change the axe", so its axes are
+		// taken out of the file once it's downloaded (STRIPPED) and the game's own axes show.
+		new Pack("Medieval Items", "jaymospowers-medieval-items-v1", "MedievalItems", "MedievalItems.zip",
+			"https://cdn.modrinth.com/data/L6chz93w/versions/myGf8ZHi/MedievalItems.zip",
+			"5c8227f530da2302dd662acc2c7677fd29c95f4b", true, "Pixel Perfection Fidelity"),
+		// "Framed Glass Panes" (by Kai1907, MIT): leaded frames on glass panes, V97 (project phbz5GXB).
+		new Pack("Framed Glass Panes", "jaymospowers-framed-glass-panes-v1", "Framed Glass Panes", "Framed Glass Panes V97 MC26.3.zip",
+			"https://cdn.modrinth.com/data/phbz5GXB/versions/EW9ZB3YA/Framed%20Glass%20Panes%20V97%20MC26.3.zip",
+			"652969338ba1b6990f1b829ea717a1fbcf41b1e9", true),
+		// "Red Bricks" (by Lobster Project, MIT): redder clay bricks, 1.0.5 (project D05iZg4c).
+		new Pack("Red Bricks", "jaymospowers-red-bricks-v1", "RedBricks", "RedBricks 26.2+.zip",
+			"https://cdn.modrinth.com/data/D05iZg4c/versions/Yallap1R/RedBricks%2026.2%2B.zip",
+			"0c94a4da2a83cfce7abdd283f51b478f941038a3", false),
+		// "Medieval Tactical Shield" (MIT): a bigger shield through Entity Model Features, 1.1 for 1.21.8 (project pwDKTTxF).
+		new Pack("Medieval Tactical Shield", "jaymospowers-tactical-shield-v1", "Medieval Tactical Shield", "Medieval Tactical Shield 1.1.zip",
+			"https://cdn.modrinth.com/data/pwDKTTxF/versions/c45rsgJs/Medieval%20Tactical%20Shield%201.1.zip",
+			"7ae438c32f8d74c2df3cf1898fcf9db5cc9a4b3b", true),
 		new Pack("Jaymo Medieval Music", PackResourcePacks.MUSIC_MARKER, "Jaymo Medieval Music", "Jaymo Medieval Music.zip", PackResourcePacks.MUSIC_URL,
 			"", false, BASE, true));
+
+	/**
+	 * Files taken out of a pack right after it's downloaded, by its file name prefix: what each entry's name ends with.
+	 * Only for packs whose licence allows changes (Medieval Items!, CC BY 4.0: Andy kept the game's own axes).
+	 */
+	private static final java.util.Map<String, String> STRIPPED = java.util.Map.of("MedievalItems", "_axe.png");
 
 	static final String MUSIC_MARKER = "jaymospowers-medieval-music";
 	/** The release the music zip is an asset of, and the asset names GitHub gives it (spaces become dots). */
@@ -160,28 +198,19 @@ final class PackResourcePacks {
 	 */
 	private static final List<String> RETIRED = List.of("Fluid & Foolish");
 
-	/** (0.19.72) Andy: Excalibur and its additions optional and off by default. Fetched, never switched on here. */
-	static final List<Pack> OPTIONAL = List.of(
-		// (0.19.65; optional and off by default since 0.19.72) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0:
-		// shipped unchanged, never edited or built on, with a link to its official page on the pack's page): the whole game redrawn in its darker, earthier medieval
-		// style. Version 26.3_01, fetched from Modrinth (project hJAzl1Bs). Downloaded into resourcepacks/ but never
-		// switched on by us: /excalibur on (ExcaliburLook) puts it at the bottom of the pack order, so Fresh Animations,
-		// its patch below, our 3D items and every other pack draw over it. Our own textures' graded copies are the
-		// built-in excalibur_style pack (tools/excalibur_style, docs/Excalibur-Style.md); none of its pixels are in them.
-		new Pack("Excalibur", "jaymospowers-excalibur-v1", "Excalibur", "Excalibur_V26.3_01.zip",
-			"https://cdn.modrinth.com/data/hJAzl1Bs/versions/lk2oxwrP/Excalibur_V26.3_01.zip",
-			"97348d602be6def05fdfa9eee339ac64be5badd6", false, BASE),
-		// (0.19.65) "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; all rights reserved, but its page lets
-		// modpacks include it unchanged, never reupload or alter it): Fresh Animations' mobs drawn in Excalibur's style.
-		// Version 1.10.5 Hotfix 1 for 26.3, fetched from Modrinth (project yiTthr0O). It's made against Fresh
-		// Animations 1.10.5 and we ship 1.11.1; the mobs it covers bring their own models, so they still match. It sits
-		// just above Fresh Animations, under Better Horses, so donkeys and mules keep Better Horses' look. Also only switched
-		// on by /excalibur on.
-		new Pack("Excalibur's Fresh Animations", "jaymospowers-excalibur-fa-v1", "EFA_", "EFA_1.10.5 Hotfix 1.zip",
-			"https://cdn.modrinth.com/data/yiTthr0O/versions/UmkPWet8/EFA_1.10.5%20Hotfix%201.zip",
-			"0380c78d4e0086b6cade7597a4b57f14d06616ec", false, "FreshAnimations"));
+	/**
+	 * Excalibur and its Fresh Animations patch, retired for the pack's own Reason look (Andy, 2026-11-26). /excalibur
+	 * used to switch them on; they're switched off once, by these file name prefixes, and the files left in
+	 * resourcepacks/ are the player's to keep or delete.
+	 */
+	private static final List<String> EXCALIBUR = List.of("Excalibur", "EFA_");
+	private static final String EXCALIBUR_OFF = "jaymospowers-excalibur-retired-v1";
 
 	private PackResourcePacks() {
+	}
+
+	static List<Pack> packs() {
+		return PACKS;
 	}
 
 	static void enableOnce(Minecraft minecraft) {
@@ -190,10 +219,33 @@ final class PackResourcePacks {
 			minecraft.options.save();
 			minecraft.reloadResourcePacks();
 		}
+		boolean vanillaLook = TextureLook.vanilla();
 		for (Pack pack : PACKS) {
-			enableOnce(minecraft, pack);
+			// a player who picked the vanilla look (/texturelook vanilla) gets none of the retexture packs
+			if (!(vanillaLook && TextureLook.isLookPack(pack.prefix()))) {
+				enableOnce(minecraft, pack);
+			}
 		}
-		ExcaliburLook.start(minecraft);
+		retireExcalibur(minecraft);
+	}
+
+	/** Once per install: takes Excalibur, its patch and our old excalibur_style pack out of the selected packs. */
+	private static void retireExcalibur(Minecraft minecraft) {
+		Path marker = FabricLoader.getInstance().getConfigDir().resolve(EXCALIBUR_OFF);
+		if (Files.exists(marker)) {
+			return;
+		}
+		if (minecraft.options.resourcePacks.removeIf(id -> id.endsWith("excalibur_style")
+			|| EXCALIBUR.stream().anyMatch(prefix -> id.startsWith("file/" + prefix)))) {
+			minecraft.options.loadSelectedResourcePacks(minecraft.getResourcePackRepository());
+			minecraft.options.save();
+			minecraft.reloadResourcePacks();
+		}
+		try {
+			Files.writeString(marker, "Jaymo's Powers switched the retired Excalibur look off once. The Reason look replaces it.\n");
+		} catch (IOException e) {
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
+		}
 	}
 
 	private static void enableOnce(Minecraft minecraft, Pack pack) {
@@ -312,6 +364,10 @@ final class PackResourcePacks {
 				Files.deleteIfExists(part);
 				return null;
 			}
+			String strip = STRIPPED.get(pack.prefix());
+			if (strip != null) {
+				strip(part, strip);
+			}
 			Files.move(part, target, StandardCopyOption.REPLACE_EXISTING);
 			com.jaymospowers.JaymosPowers.LOGGER.info("Downloaded {} ({}) into resourcepacks/", pack.file(), pack.what());
 			return pack.file();
@@ -323,6 +379,23 @@ final class PackResourcePacks {
 			}
 			return null;
 		}
+	}
+
+	/** Rewrites the zip {@code file} without the entries whose names end with {@code suffix}. */
+	private static void strip(Path file, String suffix) throws IOException {
+		Path out = file.resolveSibling(file.getFileName() + ".strip");
+		try (java.util.zip.ZipInputStream in = new java.util.zip.ZipInputStream(Files.newInputStream(file));
+				java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(Files.newOutputStream(out))) {
+			for (java.util.zip.ZipEntry entry; (entry = in.getNextEntry()) != null; ) {
+				if (entry.getName().endsWith(suffix)) {
+					continue;
+				}
+				zip.putNextEntry(new java.util.zip.ZipEntry(entry.getName()));
+				in.transferTo(zip);
+				zip.closeEntry();
+			}
+		}
+		Files.move(out, file, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	/** A pack with no fixed SHA-1 (a file of ours on a release) says its own, in the file beside it: the url plus ".sha1". */

@@ -436,7 +436,8 @@ public final class Dismember {
 				return false;
 			}
 			attacker = striker;
-			scale = scale(target, BLADE_CHANCE);
+			// a deeper blade (diamond, netherite, Sharpness) takes a limb off likelier, a shallow one (wood, stone) seldomer
+			scale = scale(target, BLADE_CHANCE) * com.jaymospowers.core.wounds.CutDepth.severScale(target.level(), striker.getMainHandItem());
 		}
 		// (0.18.87) Andy: rubber limbs come off easier (they grow back with a swallow, Kingdoms' RubberFolk)
 		if (target.entityTags().contains(RUBBER_TAG)) {
@@ -828,6 +829,18 @@ public final class Dismember {
 		return lethalSever(target, lethalPart(target, source, landed), source);
 	}
 
+	/**
+	 * Cuts that added up on one limb ({@code CutTotals}) tear {@code part} off, by the same rules as any severing: a body
+	 * that can lose parts, a player only while downed, never the head. True if it came off.
+	 */
+	public static boolean tearOff(LivingEntity target, int part, @Nullable LivingEntity by) {
+		if (part == HEAD || !canLoseParts(target) || (missing(target) & part) != 0
+			|| target instanceof Player p && (p.isCreative() || p.isSpectator() || !Downed.isDowned(p))) {
+			return false;
+		}
+		return sever(target, part, by);
+	}
+
 	/** Takes {@code part} off {@code target} (if it still has it), with everything that follows. True if it came off. */
 	public static boolean sever(LivingEntity target, int part, @Nullable LivingEntity by) {
 		return lose(target, part, by, false, null, false);
@@ -1172,6 +1185,9 @@ public final class Dismember {
 
 	/** (Andy: armour guards against severing) What's left of the chance to sever {@code part} after the armour over it: 1 bare. */
 	public static float armourGuard(LivingEntity target, int part) {
+		if (part == HEAD && ArmourFace.skipped(target)) {
+			return 1.0F;
+		}
 		return 1.0F - (float) Math.min(ARMOUR_GUARD_MAX, armourOn(target, part) * ARMOUR_GUARD);
 	}
 

@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#jaymoskingdoms:settlements",
+      "required": false
+    },
+    {
+      "id": "#jaymoskingdoms:farm_neighbours",
+      "required": false
+    },
+    {
+      "id": "#jaymoskingdoms:homesteads_by_towns",
+      "required": false
+    },
+    {
+      "id": "#jaymoskingdoms:farms_by_homes",
+      "required": false
+    },
+    {
+      "id": "#jaymoskingdoms:stables_by_towns",
+      "required": false
+    },
+    {
+      "id": "#jaymoskingdoms:mines_by_buyers",
+      "required": false
+    }
+  ]
+}

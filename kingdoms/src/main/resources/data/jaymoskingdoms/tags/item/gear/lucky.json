@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:rabbit_foot_charm",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:lucky_scarf",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:heartstone_amulet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:chorus_totem",
+      "required": false
+    },
+    {
+      "id": "friendsandfoes:totem_of_freezing",
+      "required": false
+    },
+    {
+      "id": "friendsandfoes:totem_of_illusion",
+      "required": false
+    }
+  ]
+}

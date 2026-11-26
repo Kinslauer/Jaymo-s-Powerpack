@@ -140,6 +140,9 @@ def main():
 	c = [(lo[k] + hi[k]) / 2 for k in range(3)]
 	ext = max(hi[k] - lo[k] for k in range(3)) or 1
 	size, yaws = 360, (30, 90, 150, 0, 210)
+	if os.environ.get("YAWS"):
+		# (e.g. YAWS=180,90,0: the front, the side and the back; the default's third view is the one icons are cut from)
+		yaws = tuple(int(v) for v in os.environ["YAWS"].split(","))
 	sheet = Image.new("RGB", (size * len(yaws), size), (150, 170, 190))
 	d = ImageDraw.Draw(sheet)
 	px = size * 0.78 / ext

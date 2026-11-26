@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/black_building",
+      "jaymospowers:maw/black_building",
+      "jaymospowers:maw/black_building"
+    ],
+    [
+      "jaymospowers:maw/black_building",
+      "jaymospowers:maw/black_building",
+      "jaymospowers:maw/black_building"
+    ],
+    [
+      "jaymospowers:maw/black_building",
+      "jaymospowers:maw/black_building",
+      "jaymospowers:maw/black_building"
+    ]
+  ]
+}

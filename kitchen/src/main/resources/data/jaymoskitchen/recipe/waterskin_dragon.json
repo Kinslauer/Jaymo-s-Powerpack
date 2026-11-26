@@ -7,7 +7,7 @@
     " d "
   ],
   "key": {
-    "s": "minecraft:string",
+    "s": "#c:strings",
     "d": "minecraft:dragon_breath"
   },
   "result": {

@@ -138,7 +138,7 @@ public final class Followers {
 			return false;
 		}
 		return McaBridge.involved(villager, player) || Loans.borrowedBy(villager, player) || RivalParties.hiredBy(villager, player)
-			|| player.getUUID().equals(McaCompat.following(villager)) || crewOf(villager, player);
+			|| player.getUUID().equals(McaCompat.following(villager)) || crewOf(villager, player) || Company.ownedBy(villager, player);
 	}
 
 	/** {@code v} is one of the hands of a ship {@code player} has the helm of (aboard her). */
@@ -167,7 +167,7 @@ public final class Followers {
 				asked.add(v);
 			}
 		} else {
-			asked.addAll(level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Presence.reach(player, ALL_RANGE)), v -> takesOrders(v, player)));
+			asked.addAll(level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Presence.reach(player, ALL_RANGE)), v -> takesOrders(v, player) && Company.heeds(v, player)));
 		}
 		int taken = 0;
 		for (Villager v : asked) {
@@ -176,7 +176,8 @@ public final class Followers {
 			}
 			// (Andy: "Follow and stay should only be there for mca you have a good bond with": an escort, a captive or
 			// a ship's hand takes the other orders, but only family, hired help or a friend follows you or stays put)
-			if ((kind == FOLLOW || kind == STAND) && !McaBridge.involved(v, player) && !Loans.borrowedBy(v, player) && !RivalParties.hiredBy(v, player)) {
+			if ((kind == FOLLOW || kind == STAND) && !McaBridge.involved(v, player) && !Loans.borrowedBy(v, player) && !RivalParties.hiredBy(v, player)
+				&& !Company.ownedBy(v, player)) {
 				if (target >= 0) {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.followers.no_bond", v.getDisplayName(),
 						Strangers.TRUSTED_HEARTS).withStyle(ChatFormatting.GRAY));
@@ -191,13 +192,18 @@ public final class Followers {
 			if (Possession.held(v) || Murmur.ignores(v, player)) {
 				continue;
 			}
-			if (v.getVehicle() instanceof Ship ship && Crewmen.tagged(v) && (kind == FOLLOW || kind == FIGHT || kind == PATROL || kind == CLEAR)) {
+			if (v.getVehicle() instanceof Ship ship && (Crewmen.tagged(v) || Company.soldier(v)) && (kind == FOLLOW || kind == FIGHT || kind == PATROL || kind == CLEAR)) {
 				// a hand leaves her only when she lies still (the others keep their stations and meet what comes aboard)
 				if (ship.getDeltaMovement().horizontalDistanceSqr() > STILL * STILL) {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.followers.underway", v.getDisplayName()).withStyle(ChatFormatting.GRAY));
 					continue;
 				}
 				v.stopRiding();
+			}
+			// (village mods rc2_ships) your soldiers told to Hold aboard your ship, with you, take stations on her
+			if (kind == HOLD && Company.station(v, player)) {
+				taken++;
+				continue;
 			}
 			take(v, player, kind);
 			taken++;
@@ -261,6 +267,17 @@ public final class Followers {
 					return;
 				}
 				progress[1] += EVERY;
+				// (village mods rc2_patrol) a soldier of a company whose group has a route walks it, point to point, round again
+				List<BlockPos> route = Company.route(v);
+				if (route != null) {
+					Vec3 point = Vec3.atBottomCenterOf(route.get(progress[0] % route.size()));
+					if (v.position().distanceToSqr(point) < 4.0 || progress[1] >= PATROL_EVERY * 3) {
+						progress[0] = (progress[0] + 1) % route.size();
+						progress[1] = 0;
+					}
+					walk(v, point);
+					return;
+				}
 				double angle = progress[0] * (Math.PI * 2.0 / PATROL_POINTS);
 				Vec3 point = spot.add(Math.cos(angle) * PATROL_RADIUS, 0.0, Math.sin(angle) * PATROL_RADIUS);
 				if (progress[1] >= PATROL_EVERY || v.position().distanceToSqr(point) < 9.0) {

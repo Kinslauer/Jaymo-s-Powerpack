@@ -1,0 +1,98 @@
+{
+  "title": "The Way-Hut",
+  "start": {
+    "by": "written"
+  },
+  "places": {
+    "table": {
+      "at": "written",
+      "mark": "table",
+      "name": "the keeper's board"
+    },
+    "cellar": {
+      "at": "written",
+      "mark": "cellar",
+      "name": "the store under the floor"
+    },
+    "hearth": {
+      "at": "written",
+      "mark": "hearth",
+      "name": "the way-hut's hearth"
+    },
+    "town": {
+      "at": "other_town",
+      "name": "the nearest town"
+    }
+  },
+  "first": "slate",
+  "steps": {
+    "slate": {
+      "do": "search",
+      "at": "table",
+      "goal": "Read what the keeper left on the board",
+      "clues": [
+        {
+          "name": "The Keeper's Slate",
+          "item": "minecraft:paper",
+          "lore": [
+            "Chalk on slate, in a big plain hand.",
+            "Take what you need. The store is under the boards, the bar is off.",
+            "Bar the door when it gets dark. Leave the hut as you found it."
+          ],
+          "journal": "Someone brought me in out of the night and left me on the cot of a Hearthkeeper's way-hut. The keeper's slate says the store is under the boards."
+        }
+      ],
+      "opens": ["cellar"],
+      "then": "store"
+    },
+    "store": {
+      "do": "go",
+      "to": "cellar",
+      "radius": 3,
+      "goal": "Go down to {place:cellar}",
+      "journal": "Under the boards: tools, torches, and food that keeps. The keeper lays it in for whoever comes.",
+      "then": "night"
+    },
+    "night": {
+      "do": "vigil",
+      "at": "hearth",
+      "radius": 12,
+      "when": "night",
+      "gap": 20,
+      "goal": "Keep the hut through the night",
+      "lines": [
+        {
+          "say": "The light goes off the window. Out past the trees something calls, and something else answers it.",
+          "sound": "minecraft:entity.wolf.howl"
+        },
+        {
+          "say": "Something comes up to the door, tries it once, and stands there breathing.",
+          "sound": "minecraft:entity.zombie.attack_wooden_door"
+        },
+        {
+          "say": "It goes off round the side of the hut. After a while there is nothing to hear but the roof ticking."
+        },
+        {
+          "say": "The window goes grey. It is nearly morning, and the hut held."
+        }
+      ],
+      "journal": "I kept the way-hut through my first night. Something tried the door and went away again.",
+      "left": "road",
+      "then": "road"
+    },
+    "road": {
+      "do": "go",
+      "to": "town",
+      "radius": 32,
+      "goal": "Find {place:town} ({way:town})",
+      "journal": "I found the road out of the wild and walked into {place:town}.",
+      "then": "end:arrived"
+    }
+  },
+  "endings": {
+    "arrived": {
+      "text": "I woke in a way-hut in the wild, kept it through a night, and walked out to the nearest town. Whoever brought me in out of the dark never said who they were.",
+      "marks": ["way_hut_kept"]
+    }
+  }
+}

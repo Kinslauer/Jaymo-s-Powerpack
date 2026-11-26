@@ -79,7 +79,12 @@ public final class DragonsClient {
 	static final float AETHERION_SHADOW = 2.8F, AETHERION_SCALE = 1.25F, AETHERION_REACH = 9.0F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
-	private static @Nullable KeyMapping breathKey;
+	private static @Nullable KeyMapping breathKey, biteKey;
+	/** Whether the bite key was down last tick (a bite is sent on the press). */
+	private static boolean biteWasDown;
+	/** Sprint flight (after Dragonforge): thrust and top speed while the rider holds sprint aloft. */
+	static final double SPRINT_THRUST = 1.6, SPRINT_TOP = 1.45;
+	static final int MARK_READY = 0xE0E0E0, MARK_COOLING = 0x606060;
 
 	private DragonsClient() {
 	}
@@ -106,8 +111,11 @@ public final class DragonsClient {
 		EntityRenderers.register(Dragons.IGNIVORUS_DRAGON, c -> new WindDragonRenderer<>(c, "ignivorus", new KintsugiDragonModel(true), IGNIVORUS_SHADOW,
 			IGNIVORUS_SCALE, KINTSUGI_REACH).ownDeath());
 		EntityRenderers.register(Dragons.AETHERION_DRAGON, c -> new AetherionDragonRenderer(c, AETHERION_SHADOW, AETHERION_SCALE, AETHERION_REACH));
-		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R,
-			KeyMapping.Category.register(JaymosKingdoms.id("dragons"))));
+		// one category for both keys: registering it twice stops the game starting
+		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("dragons"));
+		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R, category));
+		biteKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_bite", InputConstants.KEY_G, category));
+		RubbleParticle.register();
 		ClientTickEvents.END_CLIENT_TICK.register(DragonsClient::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("dragon"), DragonsClient::hud);
 	}
@@ -118,14 +126,18 @@ public final class DragonsClient {
 	}
 
 	private static boolean breathHeld(Minecraft minecraft) {
-		if (breathKey == null || minecraft.gui.screen() != null) {
+		return held(minecraft, breathKey);
+	}
+
+	private static boolean held(Minecraft minecraft, @Nullable KeyMapping mapping) {
+		if (mapping == null || minecraft.gui.screen() != null) {
 			return false;
 		}
-		if (breathKey.isDown()) {
+		if (mapping.isDown()) {
 			return true;
 		}
 		// (polled: the key may be shared with another mod's mapping, which then gets its presses)
-		InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(breathKey);
+		InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(mapping);
 		return key.getType() == InputConstants.Type.KEYBOARD && key.getValue() != InputConstants.UNKNOWN.getValue()
 			&& InputConstants.isKeyDown(key.getValue());
 	}
@@ -143,6 +155,14 @@ public final class DragonsClient {
 		float pitch = FreeReinClient.on() ? FreeReinClient.pitch() : player.getXRot();
 		if (dragon.isTamed() && breathHeld(minecraft) && player.tickCount % 2 == 0 && ClientPlayNetworking.canSend(Dragons.Breathe.TYPE)) {
 			ClientPlayNetworking.send(new Dragons.Breathe(yaw, pitch));
+		}
+		boolean bite = held(minecraft, biteKey);
+		if (dragon.isTamed() && bite && !biteWasDown && ClientPlayNetworking.canSend(Dragons.RiderMove.TYPE)) {
+			ClientPlayNetworking.send(new Dragons.RiderMove(Dragons.RiderMove.BITE));
+		}
+		biteWasDown = bite;
+		if (dragon.isTamed() && sprinting(minecraft, dragon) && player.tickCount % 2 == 0 && ClientPlayNetworking.canSend(Dragons.RiderMove.TYPE)) {
+			ClientPlayNetworking.send(new Dragons.RiderMove(Dragons.RiderMove.SPRINT));
 		}
 		if (dragon.swims() && dragon.isInWater() && dragon.isNoGravity()) {
 			swim(minecraft, dragon, yaw, pitch);
@@ -196,10 +216,17 @@ public final class DragonsClient {
 		dragon.setDeltaMovement(x, y, z);
 	}
 
+	/** Its rider holds sprint while it flies forward and isn't spent. */
+	private static boolean sprinting(Minecraft minecraft, WindDragon dragon) {
+		return minecraft.options.keySprint.isDown() && minecraft.options.keyUp.isDown() && dragon.isNoGravity() && !dragon.onGround()
+			&& !dragon.isInWater() && !dragon.exhausted();
+	}
+
 	private static void fly(Minecraft minecraft, WindDragon dragon, float yaw, float pitch) {
 		// (0.7.141) some fly faster for some riders (Eurus for a Wind user in a gale)
 		LocalPlayer rider = minecraft.player;
 		double boost = rider == null ? 1.0 : dragon.riderSpeedFactor(rider);
+		boolean sprint = sprinting(minecraft, dragon);
 		boolean tired = dragon.exhausted();
 		boolean up = minecraft.options.keyJump.isDown() && !tired;
 		boolean forward = minecraft.options.keyUp.isDown();
@@ -216,9 +243,10 @@ public final class DragonsClient {
 		double x = m.x / AIR_DRAG, y = m.y / AIR_DRAG_Y, z = m.z / AIR_DRAG;
 		if (forward && !tired) {
 			Vec3 look = DragonBreath.aim(yaw, pitch);
-			x += look.x * THRUST * boost;
-			y += look.y * THRUST * boost;
-			z += look.z * THRUST * boost;
+			double thrust = THRUST * boost * (sprint ? SPRINT_THRUST : 1.0);
+			x += look.x * thrust;
+			y += look.y * thrust;
+			z += look.z * thrust;
 		} else {
 			x *= GLIDE_DRAG;
 			z *= GLIDE_DRAG;
@@ -238,7 +266,7 @@ public final class DragonsClient {
 		if (tired) {
 			y = Math.min(y, -EXHAUSTED_SINK);
 		}
-		double speed = Math.sqrt(x * x + y * y + z * z), top = (dive ? MAX_DIVE_SPEED : CRUISE) * boost;
+		double speed = Math.sqrt(x * x + y * y + z * z), top = (dive ? MAX_DIVE_SPEED : CRUISE) * boost * (sprint ? SPRINT_TOP : 1.0);
 		if (speed > top) {
 			x *= top / speed;
 			y *= top / speed;
@@ -263,6 +291,14 @@ public final class DragonsClient {
 			MutableComponent label = riding.getDisplayName().copy().withColor(0xB0B0B0);
 			if (riding.exhausted()) {
 				label.append(Component.literal("  ")).append(Component.translatable("hud.jaymoskingdoms.dragon_exhausted").withColor(EXHAUSTED_COLOR));
+			} else if (riding.isTamed() && !riding.isBaby()) {
+				// the ready marks: lit when it can, dim while it's cooling down
+				label.append(Component.literal("  ")).append(mark(breathKey, "hud.jaymoskingdoms.dragon_breath", true));
+				label.append(Component.literal(" ")).append(mark(biteKey, "hud.jaymoskingdoms.dragon_bite", riding.biteCooldown() == 0));
+				if (riding.winged()) {
+					label.append(Component.literal(" ")).append(Component.translatable("hud.jaymoskingdoms.dragon_slam")
+						.withColor(riding.slamCooldown() == 0 ? MARK_READY : MARK_COOLING));
+				}
 			}
 			bar(graphics, minecraft.font, share, color, label, WindDragon.RECOVER / WindDragon.STAMINA);
 			return;
@@ -277,6 +313,12 @@ public final class DragonsClient {
 			Component label = Component.translatable("hud.jaymoskingdoms.dragon_trust", wooed.getDisplayName()).withColor(0xB0B0B0);
 			bar(graphics, minecraft.font, share, pulse(TRUST_COLOR, 0xFFFFFF, time * 0.15F), label, -1.0F);
 		}
+	}
+
+	/** "[key] what", lit when {@code ready}. */
+	private static Component mark(@Nullable KeyMapping key, String what, boolean ready) {
+		Component name = key == null ? Component.literal("?") : key.getTranslatedKeyMessage();
+		return Component.literal("[").append(name).append("] ").append(Component.translatable(what)).withColor(ready ? MARK_READY : MARK_COOLING);
 	}
 
 	/** A bar in Equestrian's place (right of the hotbar, over the powers' chips), with its label over it. */

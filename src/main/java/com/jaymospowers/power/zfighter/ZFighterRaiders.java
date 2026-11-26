@@ -100,6 +100,21 @@ public final class ZFighterRaiders {
 		});
 	}
 
+	/** (Patch 9) The odds a pod crossing between worlds is caught by a raider band, and how many pods a band is out there. */
+	static final float SPACE_CHANCE = 0.45F;
+	static final int SPACE_MIN = 2, SPACE_MAX = 3;
+
+	/**
+	 * (Patch 9, tr_raiders) How many raider pods catch {@code player}'s pod in the dark between worlds, 0 for none: the same
+	 * warrior-born that land by towns, only for a pilot in the world tier they raid, and by chance.
+	 */
+	public static int spaceBand(ServerPlayer player, RandomSource random) {
+		if (ZFighterKingdoms.present() && ZFighterKingdoms.worldTier(player) < MIN_TIER) {
+			return 0;
+		}
+		return random.nextFloat() < SPACE_CHANCE ? SPACE_MIN + random.nextInt(SPACE_MAX - SPACE_MIN + 1) : 0;
+	}
+
 	/** (0.19.1) The living raiders of band {@code id} (none once it is beaten or gone); a band still coming down counts as its pods. */
 	static List<LivingEntity> raiders(UUID id) {
 		List<LivingEntity> alive = new ArrayList<>();
@@ -198,6 +213,8 @@ public final class ZFighterRaiders {
 			boolean chief = i == 0;
 			ZFighterPatrol.Flier flier = ZFighterPatrol.land(level, ground, random.nextInt(NAMES), f -> stepOut(band, f, chief));
 			flier.pod.addTag(TAG);
+			// a raider's keel has the fewest sockets
+			flier.pod.setSockets(com.jaymospowers.power.zfighter.pod.PodModules.FEWEST_SOCKETS);
 			strip(flier.pod, random);
 			band.pods.add(flier.pod);
 		}

@@ -3,8 +3,9 @@
 The rules live in the repo; this note only points at them. Paths are from the repo root (agents open them directly;
 in Obsidian use the GitHub links, since Obsidian only opens files inside the vault).
 
-- **`CLAUDE.md`**: the short project rules every agent follows.
-  [GitHub](https://github.com/Kinslauer/Jaymo-s-Powerpack/blob/master/CLAUDE.md)
+- **`AGENTS.md`**: the short project rules every agent follows (`CLAUDE.md` and `GEMINI.md` just import it). Rules
+  that only matter for some tasks are skills in `.agents/skills/` and `.claude/skills/`.
+  [GitHub](https://github.com/Kinslauer/Jaymo-s-Powerpack/blob/master/AGENTS.md)
 - **`docs/AI-HANDBOOK.md`**: the long version. Worth knowing by section:
   - 4. Versions, branches, PRs, merging, and the **before-you-open-a-PR checklist** (also run
     `python3 tools/pr_checks.py`; the PR checks Action re-checks it).

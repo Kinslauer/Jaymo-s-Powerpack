@@ -58,6 +58,11 @@ public final class ClimateHud {
 	static final float TREND = 4.0F;
 	/** Overheating's red edges: bands and how deep each is. */
 	static final int BANDS = 10, BAND = 4;
+	/** Heat haze on the red edges: wave speed (radians a millisecond), how much of the strength it takes, lag between bands, sway (px). */
+	static final double HAZE_SPEED = 0.004;
+	static final float HAZE_DEPTH = 0.45F;
+	static final double HAZE_BAND_LAG = 0.6;
+	static final float HAZE_SWAY = 3.0F;
 	/** The burning thermometer's flames: how tall (px) at overheating and at the most, and how fast they flicker. */
 	static final float FLAME_LOW = 3.0F, FLAME_HIGH = 10.0F, FLICKER_SPEED = 0.012F;
 	/** The freezing thermometer's shake: ms between jolts at freezing and at the coldest; and its frost. */
@@ -287,16 +292,22 @@ public final class ClimateHud {
 		}
 	}
 
-	/** Red-orange edges creeping in as the heat climbs. */
+	/**
+	 * Red-orange edges creeping in as the heat climbs. They shimmer like heat haze: each band's strength rises and falls
+	 * on its own slow wave, and the bands wobble in and out a pixel or two, more so in heatstroke.
+	 */
 	private static void edges(GuiGraphicsExtractor graphics, float strength) {
 		int w = graphics.guiWidth(), h = graphics.guiHeight();
+		double now = Util.getMillis() * HAZE_SPEED;
 		for (int i = 0; i < BANDS; i++) {
-			int alpha = Math.round(strength * 70.0F * (BANDS - i) / BANDS);
+			float wave = 1.0F - HAZE_DEPTH * (0.5F + 0.5F * (float) Math.sin(now + i * HAZE_BAND_LAG));
+			int alpha = Math.round(strength * 70.0F * (BANDS - i) / BANDS * wave);
 			if (alpha <= 0) {
 				continue;
 			}
 			int colour = ARGB.color(alpha, 220, 70, 20);
-			int a = i * BAND, b = a + BAND;
+			int sway = Math.round((float) Math.sin(now * 0.7 + i * 1.3) * HAZE_SWAY * strength);
+			int a = i * BAND + Math.max(0, sway), b = a + BAND;
 			graphics.fill(a, a, w - a, b, colour);
 			graphics.fill(a, h - b, w - a, h - a, colour);
 			graphics.fill(a, b, b, h - b, colour);

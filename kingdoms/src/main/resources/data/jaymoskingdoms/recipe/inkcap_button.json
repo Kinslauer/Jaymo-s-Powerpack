@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "jaymoskingdoms:inkcap_planks"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:inkcap_button",
+    "count": 1
+  },
+  "group": "wooden_button"
+}

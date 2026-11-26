@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -64,7 +63,7 @@ final class Arrests {
 	static final double BLOW_REACH = 2.5;
 	/** At the audience: the guard speaks, then the ruler after this long, then the sentence is carried out after this (ticks). */
 	static final int VERDICT_TICKS = 20 * 4, CARRY_OUT_TICKS = 20 * 3;
-	/** How far words at an audience carry, and how far players are told the sentence in chat. */
+	/** How far words at an audience carry, and how near a player counts as having seen a sentence carried out. */
 	static final double AUDIENCE_SPEECH = 24.0, ANNOUNCE_RANGE = 48.0;
 	/** Sentencing: each notoriety counts this much, plus up to this at random; the ruler's lean by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, PURIST, none). */
 	static final int PER_NOTORIETY = 10, CHANCE_SPREAD = 30;
@@ -420,7 +419,7 @@ final class Arrests {
 		}
 	}
 
-	/** The ruler (or, with none about, the guard in his name) weighs it up and says the sentence aloud; nearby players are told. */
+	/** The ruler (or, with none about, the guard in his name) weighs it up and says the sentence aloud; the crier cries it once it's done ({@link #done}). */
 	private static void pronounce(ServerLevel level, Arrest a, Faction f) {
 		RandomSource random = level.getRandom();
 		Tempers.Temper temper = Tempers.of(f);
@@ -437,13 +436,6 @@ final class Arrests {
 		LivingEntity speaker = judge != null ? judge : a.guard;
 		Speech.say(level, speaker, Component.translatable("arrest.jaymoskingdoms.verdict." + a.sentence.key() + "." + random.nextInt(LINES)),
 			a.sentence == Sentence.PARDON ? Speech.GOLD : Speech.RED, AUDIENCE_SPEECH);
-		Component judgeName = judge != null ? judge.getDisplayName() : Component.literal(f.name());
-		Component told = Component.translatable("message.jaymoskingdoms.arrest.sentence", judgeName, a.crook.getDisplayName(),
-			Component.translatable("crime.jaymoskingdoms." + a.crime), Component.translatable("sentence.jaymoskingdoms." + a.sentence.key()))
-			.withStyle(ChatFormatting.GOLD);
-		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, a.crook.getBoundingBox().inflate(ANNOUNCE_RANGE))) {
-			p.sendSystemMessage(told);
-		}
 	}
 
 	/** The sentence is carried out; false when it's done (an exile goes on walking). */
@@ -547,6 +539,10 @@ final class Arrests {
 	private static void done(Arrest a) {
 		for (Sentenced s : SENTENCED) {
 			s.sentenced(a.crook, a.faction, a.sentence.key());
+		}
+		// not to chat (Andy, 2026-11-26): the realm's crier cries it by the seat to whoever's in earshot (TownCrier)
+		if (a.crook.level() instanceof ServerLevel level && Factions.get(level.getServer(), a.faction) instanceof Faction f) {
+			TownCrier.verdict(level, f, a.crook, Component.translatable("crime.jaymoskingdoms." + a.crime), a.sentence.key());
 		}
 		if (a.bringer != null && a.crook.level() instanceof ServerLevel level) {
 			Looters.judged(level, a.bringer, a.faction, a.crook, a.sentence.key());

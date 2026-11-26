@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jaymoskingdoms:item/surcoat",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": -13940082
+      }
+    ]
+  }
+}

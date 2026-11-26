@@ -108,12 +108,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
-		if ("root".equals(question) && (McaCompat.dealingOpening(villager, player) || McaCompat.storyOpening(villager, player)
+		if ("root".equals(question) && (McaCompat.keeperOpening(villager, player) || McaCompat.dealingOpening(villager, player) || McaCompat.storyOpening(villager, player)
 			|| McaCompat.outlawOpening(villager, player) || McaCompat.zfighterOpening(villager, player)
 			|| McaCompat.druidOpening(villager, player) || McaCompat.waryOpening(villager, player))) {
 			// (0.7.380) just after something passed between you: they open with that; (0.7.246) a shipmate, or one who knows
 			// how your story started: they open with that, and never as to a stranger; (0.7.397) an outlaw: a curt word;
-			// (0.7.405) a Z Fighter character: a line of their own; (0.7.597) one wary of you: the same cold word as for your name
+			// (0.7.405) a Z Fighter character: a line of their own; (0.7.597) one wary of you: the same cold word as for your name;
+			// a ruin keeper: the next tale of their city
 			ci.cancel();
 			return;
 		}
@@ -193,6 +194,8 @@ abstract class McaDialogueMixin {
 			// (0.7.109) they remember too much ill of you for that
 			villager.sendChatMessage(Component.translatable("recall.jaymoskingdoms.refuse." + villager.getRandom().nextInt(Recollections.REFUSALS),
 				Recollections.nameTo(player, villager)), player);
+			// (refusal hints) and the worst of it, or what they bear you
+			com.jaymoskingdoms.RefusalHints.hintStanding(player, villager);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
@@ -378,6 +381,20 @@ abstract class McaDialogueMixin {
 			// (Andy, 2026-11-12) a horse raised from its mane lock
 			villager.getInteractions().stopInteracting();
 			com.jaymoskingdoms.equestrian.HorseRevival.open(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.RubberNewborns.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-24) a newborn Rubber-folk's request: take it to a town, or point the way
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.RubberNewborns.open(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Banks.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-23) banking at the counter
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.Banks.open(player, villager);
 			ci.cancel();
 			return;
 		}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": "#jaymospowers:dark_hides",
+    "X": "minecraft:string"
+  },
+  "pattern": [
+    "XDX",
+    "D D"
+  ],
+  "result": {
+    "id": "jaymospowers:dark_trapper_helmet"
+  }
+}

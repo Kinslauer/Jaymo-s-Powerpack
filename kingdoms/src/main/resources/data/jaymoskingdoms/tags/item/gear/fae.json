@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:bottled_fairy",
+      "required": false
+    }
+  ]
+}

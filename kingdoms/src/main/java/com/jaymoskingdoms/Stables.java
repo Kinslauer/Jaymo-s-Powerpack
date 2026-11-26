@@ -288,7 +288,7 @@ public final class Stables {
 		AbstractHorse horse = job.horse == null ? null : level.getEntity(job.horse) instanceof AbstractHorse h && h.isAlive() ? h : null;
 		if (horse == null && now >= job.next) {
 			List<AbstractHorse> horses = level.getEntitiesOfClass(AbstractHorse.class, box(stable).inflate(4.0),
-				h -> h.isAlive() && Equestrian.covered(h) && !h.isVehicle());
+				h -> h.isAlive() && Equestrian.mount(h) && !h.isVehicle());
 			if (!horses.isEmpty()) {
 				horse = horses.get(level.getRandom().nextInt(horses.size()));
 				job.horse = horse.getUUID();
@@ -436,7 +436,7 @@ public final class Stables {
 	}
 
 	private static boolean mine(AbstractHorse horse, Player player) {
-		return Equestrian.covered(horse) && horse.isTamed() && Bonding.owner(horse, player);
+		return Equestrian.mount(horse) && horse.isTamed() && Bonding.owner(horse, player);
 	}
 
 	private static @Nullable AbstractHorse horseById(ServerPlayer player, int id) {
@@ -1212,6 +1212,16 @@ public final class Stables {
 		MinecraftServer server = level.getServer();
 		int lvl = f.type().isRealm() ? level(server, f) : 0;
 		if (lvl == 0 || horse instanceof WarElephant || rider.role() != Folk.GUARD && rider.role() != Folk.ARCHER) {
+			return;
+		}
+		if (Equestrian.ICY) {
+			// a horse of Icy's wears vanilla's saddle and armour (our war tack isn't drawn on it): a faster horse, plate or chain
+			// for a wealthy realm, no war training to give it
+			horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+			if (lvl >= 2) {
+				horse.setItemSlot(EquipmentSlot.BODY, new ItemStack(Wealth.of(server, f) == Wealth.Tier.WEALTHY ? Items.DIAMOND_HORSE_ARMOR : Items.IRON_HORSE_ARMOR));
+			}
+			horse.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(Cavalry.HORSE_SPEED + STABLE_SPEED * lvl);
 			return;
 		}
 		horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Tackroom.WAR_SADDLE));

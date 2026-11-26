@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskingdoms:block/inkcap"
+      },
+      {
+        "model": "jaymoskingdoms:block/inkcap",
+        "y": 90
+      },
+      {
+        "model": "jaymoskingdoms:block/inkcap",
+        "y": 180
+      },
+      {
+        "model": "jaymoskingdoms:block/inkcap",
+        "y": 270
+      }
+    ]
+  }
+}

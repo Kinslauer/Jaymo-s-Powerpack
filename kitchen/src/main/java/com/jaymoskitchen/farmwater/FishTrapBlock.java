@@ -1,6 +1,5 @@
 package com.jaymoskitchen.farmwater;
 
-import com.jaymoskitchen.butchery.Butchery;
 import com.jaymoskitchen.compat.TideCompat;
 import com.jaymoskitchen.fishing.Bait;
 import net.minecraft.core.BlockPos;
@@ -36,7 +35,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A wicker fish trap (Let's Do's idea, our own): set it in water, put a bait in (Fish Bait or offal) and it fills over a
+ * A wicker fish trap (Let's Do's idea, our own): set it in water, put a bait in (Fish Bait, offal, a lung or a liver) and it fills over a
  * day ({@link #FILL_TICKS}); empty it with an empty hand. What it holds comes from the stretch's stock
  * ({@link WaterStock}), so a trap in thin water, or in water already trapped out, comes up near empty. Fishing,
  * to the Tideborn ({@link TideCompat}).
@@ -94,7 +93,7 @@ public class FishTrapBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	@Override
 	protected InteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
-		boolean bait = held.is(Bait.FISH_BAIT) || held.is(Butchery.OFFAL);
+		boolean bait = held.is(Bait.FISH_BAIT) || held.is(com.jaymoskitchen.butchery.Organs.BAIT);
 		if (!bait || state.getValue(BAITED) || !state.getValue(WATERLOGGED)) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}

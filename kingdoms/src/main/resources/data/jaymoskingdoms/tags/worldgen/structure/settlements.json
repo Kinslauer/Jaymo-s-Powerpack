@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#minecraft:village",
+      "required": false
+    },
+    {
+      "id": "nova_structures:hamlet",
+      "required": false
+    }
+  ]
+}

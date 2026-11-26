@@ -20,11 +20,11 @@ import org.jspecify.annotations.Nullable;
 public final class DeadBodies {
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("jaymoskitchen");
 	private static final @Nullable Class<?> CORPSE, KEEPING, BURIAL, FRESHNESS;
-	private static final @Nullable Method IS_PLAYER, OWNER, KEPT, KEEP, LOWER, RAISE, TODAY, PRESERVE, HOTBAR;
+	private static final @Nullable Method IS_PLAYER, IS_VILLAGER, OWNER, KEPT, KEEP, LOWER, RAISE, TODAY, PRESERVE, HOTBAR;
 
 	static {
 		Class<?> corpse = null, keeping = null, burial = null, freshness = null;
-		Method isPlayer = null, owner = null, kept = null, keep = null, lower = null, raise = null, today = null, preserve = null, hotbar = null;
+		Method isPlayer = null, isVillager = null, owner = null, kept = null, keep = null, lower = null, raise = null, today = null, preserve = null, hotbar = null;
 		if (LOADED) {
 			try {
 				corpse = Class.forName("com.jaymoskitchen.corpse.CorpseEntity");
@@ -32,6 +32,7 @@ public final class DeadBodies {
 				burial = Class.forName("com.jaymoskitchen.corpse.Burial");
 				freshness = Class.forName("com.jaymoskitchen.fresh.Freshness");
 				isPlayer = corpse.getMethod("isPlayerCorpse");
+				isVillager = corpse.getMethod("isVillager");
 				owner = corpse.getMethod("owner");
 				hotbar = corpse.getMethod("takeHotbar");
 				kept = keeping.getMethod("kept", Entity.class, Level.class);
@@ -50,6 +51,7 @@ public final class DeadBodies {
 		BURIAL = burial;
 		FRESHNESS = freshness;
 		IS_PLAYER = isPlayer;
+		IS_VILLAGER = isVillager;
 		OWNER = owner;
 		KEPT = kept;
 		KEEP = keep;
@@ -76,6 +78,11 @@ public final class DeadBodies {
 	/** Whether {@code e} is a dead player's body. */
 	public static boolean isPlayerBody(Entity e) {
 		return isBody(e) && Boolean.TRUE.equals(call(IS_PLAYER, e));
+	}
+
+	/** Whether {@code e} is a villager's body (not a dead player's). */
+	public static boolean isVillagerBody(Entity e) {
+		return isBody(e) && Boolean.TRUE.equals(call(IS_VILLAGER, e)) && !isPlayerBody(e);
 	}
 
 	/** Whose body {@code e} is. */

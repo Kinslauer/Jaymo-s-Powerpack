@@ -124,6 +124,8 @@ public final class Butchery {
 			return rug;
 		});
 		Spoilage.register();
+		// the organs gutting takes out of a body (Chest Cavity's organ sets)
+		Organs.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(new ItemStack(MEAT_HOOK));
 			output.accept(new ItemStack(BLOOD_GRATE));

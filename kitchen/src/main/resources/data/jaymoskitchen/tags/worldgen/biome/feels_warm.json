@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:contaminated_jungle",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:pale_grove",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "enderscape"
+      ]
+    }
+  ],
+  "ambient_light": 0.25,
+  "attributes": {
+    "minecraft:audio/ambient_sounds": {
+      "additions": {
+        "sound": "enderscape:ambient.default_end.additions",
+        "tick_chance": 0.00075
+      },
+      "loop": "enderscape:ambient.default_end.loop",
+      "mood": {
+        "block_search_extent": 8,
+        "offset": 2.0,
+        "sound": "enderscape:ambient.default_end.mood",
+        "tick_delay": 6000
+      }
+    },
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "sound": "enderscape:music.enderscape.biome.default_end"
+      }
+    },
+    "minecraft:gameplay/bed_rule": {
+      "can_set_spawn": "never",
+      "can_sleep": "never",
+      "explodes": true
+    },
+    "minecraft:gameplay/respawn_anchor_works": false,
+    "minecraft:visual/ambient_light_color": "#1a1e1a",
+    "minecraft:visual/fog_color": "#110d18",
+    "minecraft:visual/sky_color": "#181321",
+    "minecraft:visual/sky_light_color": "#654b82",
+    "minecraft:visual/sky_light_factor": 0.0,
+    "enderscape:gameplay/enderscape/end_haven_core_works": true,
+    "enderscape:gameplay/enderscape/monster_spawn_cap": 200,
+    "enderscape:visual/enderscape/fog_end_density": {
+      "argument": 0.9,
+      "modifier": "multiply"
+    },
+    "minecraft:visual/ambient_particles": [
+      {
+        "particle": {
+          "type": "enderscape:void_stars"
+        },
+        "probability": 0.003
+      }
+    ],
+    "minecraft:visual/block_light_tint": "#ffa69e",
+    "minecraft:visual/cloud_color": "#00000000",
+    "minecraft:visual/fog_start_distance": -20.0,
+    "minecraft:visual/star_brightness": 0.12
+  },
+  "coordinate_scale": 1.0,
+  "default_clock": "minecraft:the_end",
+  "has_ceiling": false,
+  "has_ender_dragon_fight": false,
+  "has_fixed_time": true,
+  "has_skylight": true,
+  "height": 320,
+  "infiniburn": "#minecraft:infiniburn_end",
+  "logical_height": 320,
+  "min_y": -48,
+  "monster_spawn_block_light_limit": 0,
+  "monster_spawn_light_level": 15,
+  "skybox": "end",
+  "timelines": "#minecraft:in_end"
+}

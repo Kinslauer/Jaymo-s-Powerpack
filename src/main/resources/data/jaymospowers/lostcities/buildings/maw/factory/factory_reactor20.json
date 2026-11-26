@@ -1,0 +1,45 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "allowFillers": false,
+  "maxfloors": 20,
+  "minfloors": 15,
+  "maxcellars": 0,
+  "parts": [
+    {
+      "floor": 0,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_reactor20_0"
+    },
+    {
+      "floor": 1,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_reactor20_1"
+    },
+    {
+      "floor": 2,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_reactor20_2"
+    },
+    {
+      "range": "3,100",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_reactor20_3"
+    },
+    {
+      "range": "3,100",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_reactor20_4"
+    },
+    {
+      "range": "3,100",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_reactor20_5"
+    },
+    {
+      "top": true,
+      "part": "jaymospowers:maw/factory/factory_reactor20_6"
+    }
+  ]
+}

@@ -5,6 +5,7 @@
 	"mixins": [
 		"ArsenalEnderManMixin",
 		"ArsenalLivingEntityMixin",
+		"AxeThrowItemMixin",
 		"BundleContentsMixin",
 		"HopperBlockEntityMixin",
 		"ItemEntityMixin",

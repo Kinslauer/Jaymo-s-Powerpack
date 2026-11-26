@@ -36,6 +36,8 @@ public class SpiderLeg extends Entity {
 	static final double GRAVITY = 0.04, AIR_KEEP = 0.98, GROUND_KEEP = 0.6, BOUNCE = 0.3;
 	/** Client: tumbling in the air, this many degrees a tick (at most; each leg its own). */
 	static final float SPIN = 35.0F;
+	/** A fall faster than this (blocks a tick) is a landing ({@link #landed}). */
+	static final double LANDING = 0.12;
 
 	private static final EntityDataAccessor<String> LOOK = SynchedEntityData.defineId(SpiderLeg.class, EntityDataSerializers.STRING);
 	private static final EntityDataAccessor<Float> SIZE = SynchedEntityData.defineId(SpiderLeg.class, EntityDataSerializers.FLOAT);
@@ -117,8 +119,12 @@ public class SpiderLeg extends Entity {
 		Vec3 v = getDeltaMovement();
 		if (onGround()) {
 			// a hard landing bounces a little; then it slides to a stop
-			double up = before.y < -0.15 ? -before.y * BOUNCE : 0.0;
-			setDeltaMovement(v.x * GROUND_KEEP, up, v.z * GROUND_KEEP);
+			double up = before.y < -0.15 ? -before.y * bounce() : 0.0;
+			double keep = groundKeep();
+			setDeltaMovement(v.x * keep, up, v.z * keep);
+			if (before.y < -LANDING && !level().isClientSide()) {
+				landed(-before.y);
+			}
 		} else {
 			setDeltaMovement(v.scale(AIR_KEEP));
 		}
@@ -133,6 +139,19 @@ public class SpiderLeg extends Entity {
 				this.spin += (rest - this.spin) * 0.5F;
 			}
 		}
+	}
+
+	/** How much of a hard landing comes back as a bounce, and how much of its slide it keeps each tick on the ground. */
+	protected double bounce() {
+		return BOUNCE;
+	}
+
+	protected double groundKeep() {
+		return GROUND_KEEP;
+	}
+
+	/** Server: it has hit the ground this fast (blocks a tick, downward). */
+	protected void landed(double speed) {
 	}
 
 	@Override

@@ -2,7 +2,7 @@
 
 This file is for any AI coding assistant (Claude, Gemini, Codex, Cursor, a local model) that picks up this repository.
 It gathers the rules, habits and workflows that grew up over many Claude sessions, so another assistant can carry on
-without asking Andy everything again. Read it together with `CLAUDE.md` (the short rules) and `docs/HANDOFF.md`
+without asking Andy everything again. Read it together with `AGENTS.md` (the short rules; `CLAUDE.md` imports it) and `docs/HANDOFF.md`
 (what each folder is, how to build, hard-won 26.3 API facts).
 
 Written 2026-11-06, at Powers/pack 0.21.40, Kingdoms 0.7.642, Kitchen 0.5.84.
@@ -12,7 +12,8 @@ Written 2026-11-06, at Powers/pack 0.21.40, Kingdoms 0.7.642, Kitchen 0.5.84.
 0. `docs/vault/Home.md`: the project vault (Obsidian). Current versions, open PRs, the agent board (who owns which
    files) and Andy's decisions. How to use it: `docs/vault/How agents use this vault.md`. Its live
    folder syncs with the `vault-live` branch through `tools/vault_sync.py`; tasks from the coordinator land in `Inbox/`.
-1. `CLAUDE.md`: the short project rules. Everything in it applies to every assistant, not only Claude.
+1. `AGENTS.md`: the short project rules, for every assistant (`CLAUDE.md` and `GEMINI.md` import it). Rules for
+   particular tasks are skills in `.agents/skills/` (and Claude-only ones in `.claude/skills/`).
 2. `docs/HANDOFF.md`: folders, build, 26.3 API facts, Andy's preferences.
 3. This handbook: standing rulings and workflows.
 4. `docs/codemap/<powers|kingdoms|kitchen>.md`: one line per class (path, what it does, main methods). Grep it
@@ -294,7 +295,7 @@ These habits came from running many Claude agents at once; they work for any mul
 ## 10. What doesn't carry over from the Claude app
 
 The Claude setup used a project "coordinator" that started one thread per task, shared memory between threads, and
-merged on Andy's word. Another assistant won't have that. Run one task at a time: give it this handbook, `CLAUDE.md`
+merged on Andy's word. Another assistant won't have that. Run one task at a time: give it this handbook, `AGENTS.md`
 and the relevant memory file from `docs/ai-bundle/memory/`, and keep the same version and merge rules. When you learn
 a lasting fact (a ruling, a gotcha), add it to this handbook or the matching memory file so the next assistant has it.
 

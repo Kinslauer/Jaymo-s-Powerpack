@@ -94,6 +94,16 @@ public final class TownTroubles {
 	/** The last game day it rained (for drought). On the Overworld. */
 	static final AttachmentType<Long> DRY = AttachmentRegistry.create(JaymosKingdoms.id("town_dry"), builder -> builder.persistent(Codec.LONG));
 
+	/** Days since it last rained (0 while it rains), for the wild's water holes ({@code wild/HerdWays}). */
+	public static long dryDays(ServerLevel level) {
+		ServerLevel overworld = Factions.level(level.getServer());
+		if (overworld.isRaining()) {
+			return 0L;
+		}
+		long today = Quests.day(overworld);
+		return today - overworld.getAttachedOrElse(DRY, today);
+	}
+
 	/** Town id → {fires counted, window start (game time)}. Not saved: a restart forgets a half-counted fire. */
 	private static final Map<Integer, int[]> FIRES = new HashMap<>();
 	private static final Map<Integer, Long> FIRE_SINCE = new HashMap<>();

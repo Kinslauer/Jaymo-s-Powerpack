@@ -30,11 +30,16 @@ import org.jspecify.annotations.Nullable;
  * thing, however long it's held (the key's repeats don't count). A roll goes back only while locked on to a foe
  * ({@code LockOnClient}): otherwise the back of the movement keys is dropped, so Back with Left or Right rolls to that
  * side, nothing held rolls forward, and Back alone doesn't roll. Held into a ground roll, the roll goes long
- * ({@link Dodge#HOLD_TICKS}) and, still held as it ends, you go on down into prone ({@code CrawlTaps.goProne}).
+ * ({@link Dodge#ROLL_HOLD_TICKS}) and, still held as it ends, you go on down into prone ({@code CrawlTaps.goProne}).
  * <p>Andy (2026-11-23): "pressing the alt key and a direction should make you do a short dash, saving the hold for our
- * current combat roll". On the ground a tap is the upright dash ({@link Dodge#DASH_SPEED}); held {@link Dodge#HOLD_TICKS}
+ * current combat roll". On the ground a tap is the upright dash ({@link Dodge#DASH_SPEED}); held {@link Dodge#ROLL_HOLD_TICKS}
  * the dash goes on into the long roll; let go before the roll ends and you come up on your feet, still held as it ends
  * and you go prone. A landing roll is still a roll (held, it goes long as before).
+ * <p>Andy (2026-11-25): "extend the required hold time for alt to go prone ... more akin to arc raiders, where they tap
+ * for a dodge and hold for a roll". One press, three lengths ({@link Dodge#ROLL_HOLD_TICKS}, {@link Dodge#PRONE_HOLD_TICKS}):
+ * a tap is the dodge (the dash); held, the roll; held through the roll you come up into a crouch, kept while the key is
+ * ({@link #crouchHeld}), and only still held at {@link Dodge#PRONE_HOLD_TICKS} do you go on down into prone. Letting go at
+ * any point ends the hold there: a roll already under way finishes and you stand, a crouch stands up.
  */
 public final class DodgeClient {
 	private static @Nullable KeyMapping dodgeKey;
@@ -49,10 +54,21 @@ public final class DodgeClient {
 	static float rollX, rollZ;
 	/** Whether our own last roll was the flip in the air ({@link Dodge#canFlip}). */
 	static boolean rollFlip;
-	/** Whether our own last roll is the long one (the key held into it, {@link Dodge#HOLD_TICKS}). */
+	/** Whether our own last roll is the long one (the key held into it, {@link Dodge#ROLL_HOLD_TICKS}). */
 	static boolean rollLong;
-	/** Our own dash or landing roll may still be held on (not yet {@link Dodge#HOLD_TICKS} in); our long roll's end may still take us prone. */
+	/** Whether our own last roll is a long roll our held dash went on into (drawn out of the dash's stance, {@link DodgeRollPose}). */
+	static boolean rollFromDash;
+	/** Our own dash or landing roll may still be held on (not yet {@link Dodge#ROLL_HOLD_TICKS} in); our long roll's end may still take us on down. */
 	private static boolean holdPending, proneAtEnd;
+	/**
+	 * Client game time of the press our ground move is held from (the press in the air for a landing roll), or MIN_VALUE
+	 * when the key isn't being held on from one: letting go at any point ends it ({@link #tickHold}).
+	 */
+	private static long holdStart = Long.MIN_VALUE;
+	/** Up out of our held long roll into a crouch, kept while the key is held, till {@link Dodge#PRONE_HOLD_TICKS} takes us prone. */
+	private static boolean crouchHold;
+	/** Client game time a press in the air (to roll as we land) was made, for {@link #holdStart}. */
+	private static long airPress = Long.MIN_VALUE;
 	/** Client game time our own dash started (it may still go on into the roll), or MIN_VALUE when there's none. */
 	private static long dashStart = Long.MIN_VALUE;
 	/** Client game time our own last dash started, drawn at once ({@link DodgeRollPose}), the way {@link #rollX}, {@link #rollZ}. */
@@ -65,9 +81,20 @@ public final class DodgeClient {
 		dashStart = Long.MIN_VALUE;
 		dashDrawStart = Long.MIN_VALUE;
 		rollLong = false;
+		rollFromDash = false;
 		holdPending = false;
 		proneAtEnd = false;
+		holdStart = Long.MIN_VALUE;
+		crouchHold = false;
 		Dodge.localRollTicks = Dodge.ROLL_TICKS;
+	}
+
+	/**
+	 * From {@code StanceInputMixin}: up out of a held long roll with the key still down, we're kept crouched (the Sneak
+	 * bit sent for us), on the way to prone at {@link Dodge#PRONE_HOLD_TICKS}.
+	 */
+	public static boolean crouchHeld() {
+		return crouchHold;
 	}
 
 	/** Leaving the ground faster than this upward (blocks/tick) is a jump, not a step off an edge. */
@@ -119,6 +146,9 @@ public final class DodgeClient {
 		if (player == null || minecraft.gui.screen() != null) {
 			landingRoll = 0;
 			keyWasDown = down;
+			holdStart = Long.MIN_VALUE;
+			crouchHold = false;
+			proneAtEnd = false;
 			return;
 		}
 		boolean ground = player.onGround();
@@ -140,8 +170,15 @@ public final class DodgeClient {
 		}
 		// one press, one move: the key going down (or a tap quicker than a tick), never its repeats while held;
 		// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
-		boolean wanted = (down || clicked) && !keyWasDown && !minecraft.options.keyShift.isDown();
+		// (Andy, 2026-11-26) with a fishing line out, Alt is the zoom alone (SneakZoom): no dash, roll or dive to drop the cast
+		boolean wanted = (down || clicked) && !keyWasDown && !minecraft.options.keyShift.isDown()
+			&& !com.jaymospowers.client.SneakZoom.lineOut(player);
 		keyWasDown = down;
+		if (wanted && com.jaymospowers.client.CrawlTaps.rollUp(player)) {
+			// (Andy) felled by a leg blow: the roll gets you back on your feet
+			wanted = false;
+			landingRoll = 0;
+		}
 		if (wanted && dive(player)) {
 			// (Andy, 2026-11-22) at an edge over deep water, or falling over it: a dive, head first
 			wanted = false;
@@ -171,6 +208,7 @@ public final class DodgeClient {
 		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
 			// falling: held until you land
 			landingRoll = LandingRoll.EARLY_TICKS;
+			airPress = player.level().getGameTime();
 		} else if (wanted) {
 			tryDodge(player, false);
 		}
@@ -235,23 +273,34 @@ public final class DodgeClient {
 	}
 
 	/**
-	 * The key held {@link Dodge#HOLD_TICKS} into our own dash: it goes on into the long roll from here, the way the dash
-	 * went (the server's told, so everyone draws it). Held into a landing roll: it goes long. A long roll carries on along
-	 * the ground, slowing; still held as it ends, we go on down into prone, which {@code ProneTransition} draws as a
-	 * gradual crouch and lowering onto the hands. Let go before then and we come up on our feet.
+	 * The key held {@link Dodge#ROLL_HOLD_TICKS} into our own dash: it goes on into the long roll from here, the way the
+	 * dash went (the server's told, so everyone draws it). Held {@link Dodge#LANDING_HOLD_TICKS} into a landing roll: it
+	 * goes long. A long roll carries on along the ground, slowing; still held as it ends, we come up into a crouch and are
+	 * kept there while the key is held ({@link #crouchHeld}), and at {@link Dodge#PRONE_HOLD_TICKS} from the press we go on
+	 * down into prone, which {@code ProneTransition} draws from the crouch onto the hands. Let go at any point and the hold
+	 * ends there: before the roll, it was a tap (the dash); in the roll, it finishes and we stand; in the crouch, we stand.
 	 */
 	private static void tickHold(LocalPlayer player, boolean down) {
 		long now = player.level().getGameTime();
+		if (holdStart != Long.MIN_VALUE && !down) {
+			// let go: nothing more comes of this press (a roll under way finishes on its own and we stand)
+			holdStart = Long.MIN_VALUE;
+			holdPending = false;
+			dashStart = Long.MIN_VALUE;
+			proneAtEnd = false;
+			crouchHold = false;
+		}
 		if (holdPending) {
 			boolean dash = dashStart != Long.MIN_VALUE;
 			long held = now - (dash ? dashStart : rollStart);
-			if (held >= Dodge.HOLD_TICKS) {
+			if (held >= (dash ? Dodge.ROLL_HOLD_TICKS : Dodge.LANDING_HOLD_TICKS)) {
 				holdPending = false;
 				dashStart = Long.MIN_VALUE;
-				if (down && dash && player.onGround() && !player.isInWater()) {
+				if (dash && player.onGround() && !player.isInWater()) {
 					rollStart = now;
 					rollFlip = false;
 					rollLong = true;
+					rollFromDash = true;
 					proneAtEnd = true;
 					Dodge.localRollTicks = Dodge.LONG_ROLL_TICKS;
 					// the body is the low one for the roll (Dodge#rollingLow), at once
@@ -259,14 +308,20 @@ public final class DodgeClient {
 					Dodge.localRollStart = now;
 					cooldown = Math.max(cooldown, Dodge.LONG_ROLL_TICKS);
 					sendExtend();
-				} else if (down && !dash && rollStart != Long.MIN_VALUE && !rollFlip && held < Dodge.LONG_ROLL_TICKS) {
+				} else if (!dash && rollStart != Long.MIN_VALUE && !rollFlip && held < Dodge.LONG_ROLL_TICKS) {
 					rollLong = true;
 					proneAtEnd = true;
 					Dodge.localRollTicks = Dodge.LONG_ROLL_TICKS;
 					cooldown = Math.max(cooldown, (int)(Dodge.LONG_ROLL_TICKS - held));
 					sendExtend();
+				} else {
+					holdStart = Long.MIN_VALUE;
 				}
 			}
+		}
+		if (crouchHold) {
+			tickCrouchHold(player, now);
+			return;
 		}
 		if (rollStart == Long.MIN_VALUE || rollFlip || !rollLong) {
 			return;
@@ -274,8 +329,10 @@ public final class DodgeClient {
 		long elapsed = now - rollStart;
 		if (elapsed < Dodge.LONG_ROLL_TICKS) {
 			if (player.onGround() && !player.isInWater()) {
-				// carried on the way of the roll, easing off toward its end (never slowed below what the hop still gives)
-				float share = (elapsed - Dodge.HOLD_TICKS) / (float)(Dodge.LONG_ROLL_TICKS - Dodge.HOLD_TICKS);
+				// carried on the way of the roll, easing off toward its end (never slowed below what the hop still gives);
+				// a landing roll made long is carried from when it became long
+				int from = rollFromDash ? 0 : Dodge.LANDING_HOLD_TICKS;
+				float share = (elapsed - from) / (float)(Dodge.LONG_ROLL_TICKS - from);
 				double speed = Mth.lerp(Mth.clamp(share, 0.0F, 1.0F), Dodge.LONG_SPEED_START, Dodge.LONG_SPEED_END);
 				Vec3 motion = player.getDeltaMovement();
 				double along = motion.x * rollX + motion.z * rollZ;
@@ -285,9 +342,29 @@ public final class DodgeClient {
 			}
 		} else if (proneAtEnd) {
 			proneAtEnd = false;
-			if (down && player.onGround() && !com.jaymospowers.client.CrawlTaps.prone()) {
-				com.jaymospowers.client.CrawlTaps.goProne(player, false);
+			if (holdStart != Long.MIN_VALUE && player.onGround() && !com.jaymospowers.client.CrawlTaps.prone()) {
+				// still held as the roll ends: up into the crouch (or straight on down, if the press is already long enough)
+				crouchHold = true;
+				tickCrouchHold(player, now);
+			} else {
+				holdStart = Long.MIN_VALUE;
 			}
+		}
+	}
+
+	/** Crouched out of the held roll: on down into prone once the press is {@link Dodge#PRONE_HOLD_TICKS} long. */
+	private static void tickCrouchHold(LocalPlayer player, long now) {
+		if (!player.onGround() || player.isInWater() || player.isPassenger() || FreerunClient.active()
+			|| com.jaymospowers.client.CrawlTaps.prone() || !com.jaymospowers.core.Crawl.canCrawl(player)) {
+			// off the ground, swimming, mounted, climbing, or down already some other way: the hold is over
+			crouchHold = false;
+			holdStart = Long.MIN_VALUE;
+			return;
+		}
+		if (now - holdStart >= Dodge.PRONE_HOLD_TICKS) {
+			crouchHold = false;
+			holdStart = Long.MIN_VALUE;
+			com.jaymospowers.client.CrawlTaps.goProne(player, false);
 		}
 	}
 
@@ -353,9 +430,12 @@ public final class DodgeClient {
 		rollZ = (float)dir.z;
 		rollFlip = true;
 		rollLong = false;
+		rollFromDash = false;
 		holdPending = false;
 		dashStart = Long.MIN_VALUE;
 		proneAtEnd = false;
+		holdStart = Long.MIN_VALUE;
+		crouchHold = false;
 		if (ClientPlayNetworking.canSend(Dodge.Flip.TYPE)) {
 			ClientPlayNetworking.send(new Dodge.Flip((float)dir.x, (float)dir.z));
 		}
@@ -417,8 +497,12 @@ public final class DodgeClient {
 		rollZ = (float)dir.z;
 		rollFlip = false;
 		rollLong = false;
+		rollFromDash = false;
 		holdPending = true;
 		proneAtEnd = false;
+		crouchHold = false;
+		// held from the press: this one, or for a landing roll the press in the air (tickHold lets go of it if the key's up)
+		holdStart = landing && airPress != Long.MIN_VALUE && now - airPress <= LandingRoll.EARLY_TICKS ? airPress : now;
 		if (landing) {
 			// the landing roll stays a roll (it takes the fall)
 			player.setDeltaMovement(dir.x * Dodge.SPEED + motion.x * 0.2, Dodge.UP, dir.z * Dodge.SPEED + motion.z * 0.2);

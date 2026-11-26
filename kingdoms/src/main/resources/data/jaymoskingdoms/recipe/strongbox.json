@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "III",
+    "PLP",
+    "PPP"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "P": "#minecraft:planks",
+    "L": "jaymoskingdoms:lock"
+  },
+  "result": {
+    "id": "jaymoskingdoms:strongbox",
+    "count": 1
+  }
+}

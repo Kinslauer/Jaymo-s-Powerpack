@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:spider_eye",
+    "minecraft:rotten_flesh",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "id": "jaymospowers:narcotic",
+    "count": 2
+  }
+}

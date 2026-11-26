@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "minecraft:stone_bricks",
+    "minecraft:stone_button"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:loose_stone"
+  }
+}

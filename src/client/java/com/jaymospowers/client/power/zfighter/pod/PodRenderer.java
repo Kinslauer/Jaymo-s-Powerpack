@@ -1,9 +1,12 @@
 package com.jaymospowers.client.power.zfighter.pod;
 
+import com.jaymospowers.client.compat.PodSubmarine;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
+import com.jaymospowers.power.zfighter.pod.PodModules;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -26,8 +29,12 @@ import net.minecraft.world.phys.AABB;
 public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 	/** How far a damaged fin is bent (degrees). */
 	static final float BEND = 35.0F;
+	/** Alex's Caves is loaded, so the pod is drawn as his submarine (only then is PodSubmarine touched). */
+	static final boolean SUBMARINE = FabricLoader.getInstance().isModLoaded("alexscaves");
 	private static final String[] FINS = {"fin_l", "fin_r", "fin_b"};
 	private static final String[] PLATES = {"plate_f", "plate_r", "plate_b", "plate_l"};
+	/** Where a module sits (pixels, model space: x, up, z), by socket: the hull's four sides high up, then two corners. */
+	private static final float[][] SOCKETS = {{14, 22, 0}, {-14, 22, 0}, {0, 22, 14}, {0, 22, -14}, {13, 24, 13}, {-13, 24, -13}};
 	private static final String[] GASHES = {"gash_f", "gash_r", "gash_b", "gash_l"};
 
 	public static class State extends EntityRenderState {
@@ -36,6 +43,10 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		int damaged;
 		boolean finished;
 		int grade;
+		/** How far the canopy is tilted open (degrees). */
+		float open;
+		/** By socket: the module's part name, or null (the landing legs are the fins, so they are not drawn here). */
+		String[] modules = new String[0];
 	}
 
 	public PodRenderer(EntityRendererProvider.Context context) {
@@ -50,8 +61,8 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 
 	@Override
 	protected AABB getBoundingBoxForCulling(PodEntity entity, float partialTicks) {
-		// the fins reach past its box
-		return entity.getBoundingBox().inflate(0.6, 0.2, 0.6);
+		// the fins (and the submarine's thrusters, bow and motor) reach past its box
+		return entity.getBoundingBox().inflate(SUBMARINE ? 1.6 : 0.6, 0.2, SUBMARINE ? 1.6 : 0.6);
 	}
 
 	@Override
@@ -62,6 +73,12 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		state.damaged = entity.damagedMask();
 		state.finished = entity.finished();
 		state.grade = entity.grade();
+		state.modules = new String[Math.min(entity.sockets(), SOCKETS.length)];
+		for (int socket = 0; socket < state.modules.length; socket++) {
+			PodModules.Kind kind = entity.moduleAt(socket);
+			state.modules[socket] = kind == null || kind == PodModules.Kind.LEGS ? null : "mod_" + kind.key;
+		}
+		state.open = SUBMARINE ? entity.canopyOpen(partialTicks) * PodSubmarine.OPEN : 0.0F;
 	}
 
 	@Override
@@ -69,6 +86,14 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		poseStack.pushPose();
 		poseStack.rotateDegrees(Axis.YP, -state.yaw);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
+		if (SUBMARINE) {
+			// Alex's submarine, taken apart into the pod's pieces (PodSubmarine)
+			PodSubmarine.submit(collector, poseStack, state.lightCoords, state.filled, state.damaged, state.finished,
+				state.open);
+			poseStack.popPose();
+			super.submit(state, poseStack, collector, camera);
+			return;
+		}
 		RenderType solid = RenderTypes.entityCutout(PodModel.TEXTURE);
 		RenderType glass = RenderTypes.entityTranslucent(PodModel.TEXTURE);
 		if ((state.filled & PodPart.KEEL.bit(0)) != 0) {
@@ -111,6 +136,17 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		}
 		if ((state.filled & PodPart.CANOPY.bit(0)) != 0) {
 			draw(collector, poseStack, state, (state.damaged & PodPart.CANOPY.bit(0)) != 0 ? "canopy_low" : "canopy", glass);
+		}
+		if ((state.filled & PodPart.KEEL.bit(0)) != 0) {
+			for (int socket = 0; socket < state.modules.length; socket++) {
+				if (state.modules[socket] != null) {
+					float[] at = SOCKETS[socket];
+					poseStack.pushPose();
+					poseStack.translate(at[0] / 16.0F, -at[1] / 16.0F, at[2] / 16.0F);
+					draw(collector, poseStack, state, state.modules[socket], solid);
+					poseStack.popPose();
+				}
+			}
 		}
 		if ((state.filled & PodPart.MAST.bit(0)) != 0) {
 			draw(collector, poseStack, state, "mast", solid);

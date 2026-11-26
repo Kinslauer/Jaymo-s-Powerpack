@@ -10,7 +10,7 @@ export const meta = {
   ],
 }
 
-// Two rounds in a row with no progress ends a fix loop (CLAUDE.md).
+// Two rounds in a row with no progress ends a fix loop (the big-patch-tracks skill).
 const MAX_NO_PROGRESS = 2
 
 const FINDINGS = {

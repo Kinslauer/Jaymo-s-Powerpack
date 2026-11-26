@@ -33,10 +33,17 @@ import net.minecraft.world.level.levelgen.feature.Feature;
  * bats for them to eat ({@link SpiderNests}: what the nest catches feeds it, and a fed nest spreads). At its deepest a
  * brood queen sleeps on her egg ({@link NestStructures}); above, a watcher's hut keeps a map down.
  * <p>
+ * <p>
+ * Not generated any more ({@link #GENERATES}, Andy 2026-11-24: "remove these caves and their abandoned buildings"): the
+ * biome, its blocks, the brood queen and the two structures stay registered so worlds that already hold them still load,
+ * but no new chunk gets the biome, and the queen's chamber and the watcher's hut only ever generate over it.
+ * <p>
  * Lore: the silk deeps (Lore.md, Andy approved 2026-11-15).
  */
 public final class SilkDeeps {
 	// ---- tuning ----
+	/** Whether the silk deeps go into the Overworld's biome list at all (off: Andy removed them, 2026-11-24). */
+	static final boolean GENERATES = false;
 	/** Where the biome lies in the climate (each -1 to 1): temperate to warm (the ice caves have the cold), dry to fairly damp
 	 * (the lush caves have the wet), inland short of the far inland (the dripstone caves'), most erosions, any weirdness: about
 	 * as often met as the dripstone caves, in patches as the climate shifts. */
@@ -78,7 +85,7 @@ public final class SilkDeeps {
 
 	/** Wraps the Overworld biome list as it's built: the silk deeps go in beside the dripstone caves (the first cave biome). */
 	public static Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> placing(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> out) {
-		if (!placed) {
+		if (!placed || !GENERATES) {
 			return out;
 		}
 		return pair -> {

@@ -1,5 +1,19 @@
 {
   "values": [
-    "jaymospowers:arkenium_lantern"
+    "jaymospowers:arkenium_lantern",
+    "jaymospowers:spotted_lantern",
+    "jaymospowers:rusty_lantern",
+    "jaymospowers:corroded_lantern",
+    "jaymospowers:waxed_lantern",
+    "jaymospowers:waxed_spotted_lantern",
+    "jaymospowers:waxed_rusty_lantern",
+    "jaymospowers:waxed_corroded_lantern",
+    "jaymospowers:spotted_soul_lantern",
+    "jaymospowers:rusty_soul_lantern",
+    "jaymospowers:corroded_soul_lantern",
+    "jaymospowers:waxed_soul_lantern",
+    "jaymospowers:waxed_spotted_soul_lantern",
+    "jaymospowers:waxed_rusty_soul_lantern",
+    "jaymospowers:waxed_corroded_soul_lantern"
   ]
 }

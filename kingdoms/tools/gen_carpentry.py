@@ -154,7 +154,9 @@ def trim_recipes():
     for name, block, slab, texture, wood in MATERIALS:
         s, m, c = (NS + ":" + name + "_" + k for k in ("siding", "moulding", "corner"))
         group = lambda k: NS + ":" + k
-        shapeless(name + "_siding", ["minecraft:" + block], s, 2, group("siding"))
+        # one cobblestone alone in the grid is Powers' 4 stone rocks (Andy, 2026-11-24); its siding is cut in the stonecutter
+        if block != "cobblestone":
+            shapeless(name + "_siding", ["minecraft:" + block], s, 2, group("siding"))
         write(DATA + "recipe/" + name + "_siding_from_slabs.json", {
             "type": "minecraft:crafting_shaped", "category": "building", "group": group("siding"),
             "pattern": ["#", "#"], "key": {"#": "minecraft:" + slab}, "result": {"count": 2, "id": s}})

@@ -53,6 +53,13 @@ public final class Havens {
 	 */
 	static final float GREENSKIN_SHARE = 0.25F, ORC_KING_SHARE = 0.35F;
 	static final float GREENSKIN_BIRTHS = 0.25F, ORC_RULED_BIRTHS = 0.35F;
+	/**
+	 * (Andy, 2026-11-26: "the scalebound should spawn more ... within havens as villagers") This share of havens keep
+	 * Scalebound among them, the lizardfolk kin of the scalebane sellswords, who put the bow down and settled with the
+	 * others the towns had mocked; more of those by a swamp or a jungle, their own country. This share of those born there
+	 * are Scalebound ({@link HeritageVariants.Variant#SCALEBOUND}).
+	 */
+	static final float SCALEBOUND_SHARE = 0.25F, SCALEBOUND_WET_SHARE = 0.5F, SCALEBOUND_BIRTHS = 0.2F;
 
 	static final String MIXED = "mixed", NONE = "", MIGRATED = "_migrated";
 	/** Faction id → its haven ("" none, "mixed", or a heritage key), "|" the game time it was drawn. On the Overworld. */
@@ -208,6 +215,15 @@ public final class Havens {
 		JaymosKingdoms.LOGGER.info("{} stands in one of ChoiceTheorem's villages: a haven ({})", f.name(), haven.isEmpty() ? "none: purist" : haven);
 	}
 
+	/**
+	 * (Village mods patch 7, Andy's pick tt_tideborn) A raft town of Tidal Towns ({@link TidalTowns}) is the sea folk's:
+	 * always a Tideborn haven, whatever the share or its temper, its people standing and those born there Tideborn.
+	 */
+	static void tidal(ServerLevel level, Faction f) {
+		make(level, f, Heritage.Kind.TIDEBORN.key());
+		JaymosKingdoms.LOGGER.info("{} stands on a raft town out at sea: a Tideborn haven", f.name());
+	}
+
 	/** (0.7.521) The key prefix of a ChoiceTheorem village's haven in {@link #HAVENS}, and its structures' namespace. */
 	static final String CTOV = "ctov:";
 	/** (0.7.521) About one human in this many in a ChoiceTheorem village's haven stays there, for a reason. */
@@ -284,6 +300,10 @@ public final class Havens {
 			// (0.7.441) one of the goblins and orcs who live there
 			return orcRuled(server, f) || random.nextBoolean() ? Heritage.Kind.ORC : Heritage.Kind.GOBLIN;
 		}
+		if (scalebound(server, f) && random.nextFloat() < SCALEBOUND_BIRTHS) {
+			// one of the Scalebound who live there (a Beastfolk born here takes their look: HeritageVariants#roll)
+			return Heritage.Kind.BEASTFOLK;
+		}
 		if (Heritage.Kind.DIVINE.key().equals(haven)) {
 			// a sky village's people: Divine-born, a few of them halfway folk
 			return SkyFolk.born(random);
@@ -301,6 +321,27 @@ public final class Havens {
 		return is(server, f) && Math.floorMod(lot(f) >>> 11, 1000L) < (long)(GREENSKIN_SHARE * 1000);
 	}
 
+	/** Haven {@code f} keeps Scalebound among its people (drawn from who it is and where, so always the same). */
+	static boolean scalebound(MinecraftServer server, @Nullable Faction f) {
+		if (!is(server, f) || Heritage.Kind.DIVINE.key().equals(of(server, f))) {
+			return false;
+		}
+		ServerLevel level = Factions.level(server);
+		// (the land's own biome from the generator: no chunk is loaded for it)
+		BlockPos seat = f.seat();
+		Holder<Biome> biome = level.getChunkSource().getGenerator().getBiomeSource().createUncachedResolver(level.getChunkSource().randomState())
+			.getNoiseBiome(net.minecraft.core.QuartPos.fromBlock(seat.getX()), net.minecraft.core.QuartPos.fromBlock(seat.getY()),
+				net.minecraft.core.QuartPos.fromBlock(seat.getZ()));
+		boolean wet = biome.is(net.minecraft.world.level.biome.Biomes.SWAMP) || biome.is(net.minecraft.world.level.biome.Biomes.MANGROVE_SWAMP)
+			|| biome.is(BiomeTags.IS_JUNGLE);
+		return Math.floorMod(lot(f) >>> 23, 1000L) < (long)((wet ? SCALEBOUND_WET_SHARE : SCALEBOUND_SHARE) * 1000);
+	}
+
+	/** One of the Beastfolk born at {@code pos}, on the land of a haven that keeps Scalebound: one of them. */
+	static boolean scaleboundAt(ServerLevel level, BlockPos pos) {
+		return scalebound(level.getServer(), at(level, pos));
+	}
+
 	/** (0.7.441) Haven {@code f} sits under an orc king (one of those that live alongside the tribes). */
 	static boolean orcRuled(MinecraftServer server, @Nullable Faction f) {
 		return greenskin(server, f) && Math.floorMod(lot(f) >>> 37, 1000L) < (long)(ORC_KING_SHARE * 1000);
@@ -316,6 +357,10 @@ public final class Havens {
 		String haven = of(server, f);
 		if (kind != null && kind.brood && greenskin(server, f)) {
 			// (0.7.441) its goblins and orcs
+			return true;
+		}
+		if (kind == Heritage.Kind.BEASTFOLK && scalebound(server, f)) {
+			// its Scalebound
 			return true;
 		}
 		if (kind == Heritage.Kind.DAWNBORN && Heritage.Kind.DIVINE.key().equals(haven)) {

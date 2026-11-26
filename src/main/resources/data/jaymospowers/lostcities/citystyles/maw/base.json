@@ -1,0 +1,188 @@
+{
+  "inherit": "citystyle_config",
+  "style": "jaymospowers:maw/weathered",
+  "explosionchance": 0,
+  "buildingsettings": {
+    "maxfloors": 14
+  },
+  "streetblocks": {
+    "border": "y",
+    "wall": "w",
+    "street": "S",
+    "streetbase": "b",
+    "streetvariant": "B",
+    "width": 16,
+    "parts": {
+      "full": "jaymospowers:maw/common/street_full",
+      "straight": "jaymospowers:maw/common/street_straight",
+      "end": "jaymospowers:maw/common/street_end",
+      "bend": "jaymospowers:maw/common/street_bend",
+      "t": "jaymospowers:maw/common/street_t",
+      "none": "jaymospowers:maw/common/street_none",
+      "all": "jaymospowers:maw/common/street_all"
+    }
+  },
+  "parkblocks": {
+    "elevation": "x"
+  },
+  "corridorblocks": {
+    "roof": "x",
+    "glass": "+"
+  },
+  "railblocks": {
+    "railmain": "~"
+  },
+  "sphereblocks": {
+    "glass": "Z",
+    "border": "9",
+    "inner": "b"
+  },
+  "selectors": {
+    "buildings": [
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_cargo_a"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_cargo_b"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_tank_a"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_tank_b"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_storage_rack"
+      },
+      {
+        "factor": 0.05,
+        "value": "jaymospowers:maw/base/base_lookout_tower"
+      },
+      {
+        "factor": 0.03,
+        "value": "jaymospowers:maw/base/base_tarret"
+      },
+      {
+        "factor": 0.05,
+        "value": "jaymospowers:maw/base/base_control_tower"
+      },
+      {
+        "factor": 0.2,
+        "value": "jaymospowers:maw/base/base_ground_empty"
+      }
+    ],
+    "multibuildings": [
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_hanger"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_building_medium"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_missile_large_multi"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_missile_launcher_l"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_missile_launcher_m"
+      },
+      {
+        "factor": 0.05,
+        "value": "jaymospowers:maw/base/base_space_shuttle"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_container"
+      },
+      {
+        "factor": 0.1,
+        "value": "jaymospowers:maw/base/base_ground_airvent"
+      },
+      {
+        "factor": 0.3,
+        "value": "jaymospowers:maw/base/base_ground_ns"
+      },
+      {
+        "factor": 0.3,
+        "value": "jaymospowers:maw/base/base_ground_ew"
+      }
+    ],
+    "bridges": [
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/common/bridge_open"
+      },
+      {
+        "factor": 1.0,
+        "value": "jaymospowers:maw/common/bridge_covered"
+      }
+    ],
+    "fronts": [],
+    "stairs": [
+      {
+        "factor": 1.0,
+        "value": "stairs1"
+      },
+      {
+        "factor": 1.0,
+        "value": "stairs2"
+      },
+      {
+        "factor": 1.0,
+        "value": "stairsnormal"
+      },
+      {
+        "factor": 1.0,
+        "value": "stairsbig"
+      }
+    ],
+    "fountains": [],
+    "parks": [
+      {
+        "factor": 1.0,
+        "value": "park_pool"
+      },
+      {
+        "factor": 1.0,
+        "value": "park_plants"
+      },
+      {
+        "factor": 1.0,
+        "value": "park_trees"
+      },
+      {
+        "factor": 1.0,
+        "value": "park_plants_pillars"
+      },
+      {
+        "factor": 0.3,
+        "value": "park_building"
+      },
+      {
+        "factor": 0.3,
+        "value": "park_building2"
+      }
+    ],
+    "raildungeons": [
+      {
+        "factor": 1.0,
+        "value": "rail_dungeon1"
+      },
+      {
+        "factor": 1.0,
+        "value": "rail_dungeon2"
+      }
+    ]
+  }
+}

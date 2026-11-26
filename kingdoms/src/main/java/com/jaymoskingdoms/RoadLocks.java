@@ -63,7 +63,7 @@ public final class RoadLocks {
 	 * blood ({@link #DIVINE_DEED}).
 	 */
 	static final Set<Start> OPEN = Collections.unmodifiableSet(EnumSet.of(Start.VILLAGE, Start.ROCK_BOTTOM, Start.BANISHED, Start.SHIPWRECK,
-		Start.FATE, Start.VERDANT, Start.DEMON, Start.LAB));
+		Start.FATE, Start.VERDANT, Start.DEMON, Start.LAB, Start.WRITTEN));
 
 	/**
 	 * (0.7.501, Andy: "Biobuilt start and heritage should be locked ... only unlocked after meeting the tinkerer or becoming an
@@ -77,6 +77,9 @@ public final class RoadLocks {
 	 * Anyone who has that blood already counts ({@link #look}).
 	 */
 	static final String DIVINE_DEED = "afterlife.died";
+
+	/** The deed that opens the monster-born's road: a goblin or wolf named and made your follower ({@link NamedFollowers}). */
+	static final String NAMED_DEED = "monster.named";
 
 	/** (0.7.605) The capital's deed: a journeyman's rank in any trade. The wild's: a night out far from any settlement. Sworn's: a raider slain. */
 	static final String TRADE_DEED = "trade.ranked", WILD_DEED = "wild.night", RAIDER_DEED = "raider.slain";
@@ -164,6 +167,8 @@ public final class RoadLocks {
 		lock(Start.MAW, p -> is(p, Question.CHILDHOOD, "caves") && is(p, Question.TURN, "bite"), "world.maw");
 		// (0.7.606) the afterlife's road opens with the Divine-born blood; no secret past
 		lock(Start.AFTERLIFE, p -> false, DIVINE_DEED);
+		// the monster-born's road opens when you name a follower and it grows (NamedFollowers); no secret past
+		lock(Start.MONSTERBORN, p -> false, NAMED_DEED);
 	}
 
 	private RoadLocks() {

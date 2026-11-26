@@ -210,6 +210,13 @@ final class TreasureWrecks {
 		if (random.nextFloat() < 0.25F) {
 			loot.add(new ItemStack(Items.NAUTILUS_SHELL, 1 + random.nextInt(2)));
 		}
+		if (box instanceof BlockEntity be && be.getLevel() instanceof ServerLevel level) {
+			// (a sunken ship's treasure: collectors pay more for it, Provenance)
+			Provenance.Origin o = Provenance.at(level, be.getBlockPos(), Provenance.SHIPWRECK, "", null);
+			for (ItemStack stack : loot) {
+				Provenance.stamp(stack, o);
+			}
+		}
 		List<Integer> slots = new ArrayList<>();
 		for (int i = 0; i < box.getContainerSize(); i++) {
 			if (box.getItem(i).isEmpty()) {

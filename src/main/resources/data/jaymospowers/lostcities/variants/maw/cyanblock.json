@@ -1,0 +1,24 @@
+{
+  "blocks": [
+    {
+      "random": 48,
+      "block": "minecraft:cyan_terracotta"
+    },
+    {
+      "random": 48,
+      "block": "minecraft:tuff"
+    },
+    {
+      "random": 48,
+      "block": "minecraft:stone"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:iron_bars"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:air"
+    }
+  ]
+}

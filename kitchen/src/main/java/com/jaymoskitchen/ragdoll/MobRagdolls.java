@@ -12,6 +12,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalEntityTypeTags;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -97,7 +99,7 @@ public final class MobRagdolls {
 			if (!(entity instanceof Mob mob) || blocked || damageTaken <= 0.0F || !mob.isAlive()) {
 				return;
 			}
-			if (isLimp(mob) || !HeavyHits.heavy(mob, source, baseDamage, damageTaken) || !may(mob)) {
+			if (isLimp(mob) || !(HeavyHits.heavy(mob, source, baseDamage, damageTaken) || hardLanding(mob, source, damageTaken)) || !may(mob)) {
 				return;
 			}
 			knock(mob, source);
@@ -125,6 +127,15 @@ public final class MobRagdolls {
 				}
 			}
 		});
+	}
+
+	/** A fall that hurt this much (or took this share of its health) knocks a mob limp, as it does a player. */
+	private static final float HARD_LANDING = 6.0F, HARD_LANDING_SHARE = 0.3F;
+
+	/** Whether {@code source} is a high fall whose damage {@code taken} was hard enough to floor {@code mob}. */
+	private static boolean hardLanding(Mob mob, DamageSource source, float taken) {
+		return source.is(DamageTypeTags.IS_FALL) && !mob.hasEffect(MobEffects.SLOW_FALLING)
+			&& (taken >= HARD_LANDING || taken >= 3.0F && taken >= mob.getMaxHealth() * HARD_LANDING_SHARE);
 	}
 
 	/** True while {@code entity} is a mob lying limp (on either side). */
@@ -172,15 +183,30 @@ public final class MobRagdolls {
 		return ready == null || mob.level().getGameTime() >= ready;
 	}
 
-	/** Knocks {@code mob} limp: standing as it stood, toppled away from the blow, carried on by its knockback. */
+	/**
+	 * Floors {@code mob} from a grapple (Jaymo's Powers' takedown): limp as a blow would leave it, toppled away from
+	 * {@code from} (null: any way). False if it can't be knocked limp just now.
+	 */
+	public static boolean floor(Mob mob, @Nullable Vec3 from) {
+		if (!mob.isAlive() || isLimp(mob) || !may(mob)) {
+			return false;
+		}
+		knock(mob, from);
+		return true;
+	}
+
 	private static void knock(Mob mob, DamageSource source) {
+		knock(mob, source.getSourcePosition());
+	}
+
+	/** Knocks {@code mob} limp: standing as it stood, toppled away from {@code from}, carried on by its knockback. */
+	private static void knock(Mob mob, @Nullable Vec3 from) {
 		if (mob.isPassenger()) {
 			mob.stopRiding();
 		}
 		EntityDimensions size = mob.getDimensions(Pose.STANDING);
 		RagdollRig rig = RagdollShapes.rig(mob.getType(), size.width(), size.height());
 		RagdollBody body = RagdollBody.standing(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot);
-		Vec3 from = source.getSourcePosition();
 		double dx = from == null ? 0.0 : mob.getX() - from.x, dz = from == null ? 0.0 : mob.getZ() - from.z;
 		double flat = Math.hypot(dx, dz);
 		double fx = 0.0, fz = 0.0;

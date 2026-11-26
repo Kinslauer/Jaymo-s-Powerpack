@@ -167,6 +167,9 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 	/** Server: the horse it's hitched to, kept across saves and found again once it's loaded. */
 	private @Nullable UUID hitchUuid;
 	private int hitchSearch;
+	/** How it rolls on its pole (see CartPhysics), and the ground it covered last tick, read for the slope. */
+	private final CartPhysics physics = new CartPhysics();
+	private double lastRise, lastRan;
 	private int hits;
 	/** Server: the game time before which a wagon or coach takes in no more mobs (they were just let out). */
 	private long noLoadUntil;
@@ -327,6 +330,7 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 				till(level, puller);
 			}
 		} else {
+			physics.reset();
 			Vec3 motion = getDeltaMovement();
 			setDeltaMovement(motion.x * 0.5, onGround() ? 0.0 : motion.y - 0.08, motion.z * 0.5);
 			move(MoverType.SELF, getDeltaMovement());
@@ -614,7 +618,11 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		return true;
 	}
 
-	/** Trails behind its puller at the end of its pole, turning to face it (NiftyCarts' carts pitching toward it). */
+	/**
+	 * Trails behind its puller at the end of its pole (NiftyCarts' carts pitching toward it). The pole is a spring, not a
+	 * rigid bar: the cart has weight (CartPhysics, after the Cars mod), so it gathers speed slowly, turns at a limited
+	 * rate, slides on ice, slows up a slope, and drags back at a horse that pulls it.
+	 */
 	private void follow(LivingEntity puller) {
 		Vec3 hitch = puller.position();
 		double dx = hitch.x - getX();
@@ -627,20 +635,48 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 			distance = 1.0;
 		}
 		double nx = dx / distance, nz = dz / distance;
-		double targetX = hitch.x - nx * poleLength(puller);
-		double targetZ = hitch.z - nz * poleLength(puller);
+		double pole = poleLength(puller);
+		double grip = onGround()
+			? CartPhysics.grip(level().getBlockState(getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction()) : 1.0;
+		float heading = (float) physics.step(getYRot() * Mth.DEG_TO_RAD, new Vec3(dx, 0.0, dz), pole, grip, lastRise, lastRan);
+		Vec3 roll = physics.velocity;
+		if (distance < pole) {
+			// closer than the pole: nothing rolls on into its puller
+			double into = roll.x * nx + roll.z * nz;
+			if (into > 0.0) {
+				roll = new Vec3(roll.x - nx * into, 0.0, roll.z - nz * into);
+			}
+		}
+		if (physics.lastPull > 0.0 && !(puller instanceof Player)) {
+			double back = Math.min(physics.lastPull * CartPhysics.REACTION, CartPhysics.MAX_REACTION);
+			puller.addDeltaMovement(new Vec3(-nx * back, 0.0, -nz * back));
+		}
 		double fall = onGround() ? -0.08 : getDeltaMovement().y - 0.08;
-		move(MoverType.SELF, new Vec3(targetX - getX(), fall, targetZ - getZ()));
+		Vec3 before = position();
+		move(MoverType.SELF, new Vec3(roll.x, fall, roll.z));
+		double gapX = hitch.x - getX(), gapZ = hitch.z - getZ();
+		double reach = Math.sqrt(gapX * gapX + gapZ * gapZ);
+		double leash = pole + CartPhysics.MAX_STRETCH;
+		if (reach > leash) {
+			// at the end of its rope: the pole holds, and it's hauled in
+			double excess = (reach - leash) / reach;
+			move(MoverType.SELF, new Vec3(gapX * excess, 0.0, gapZ * excess));
+		}
 		if (horizontalCollision && hitch.y - getY() > HAUL_UP_RISE) {
 			// (0.5.62) stuck at the foot of a bank its puller went up: hauled up a block (if there's room), then on
 			AABB lifted = getBoundingBox().move(0.0, 1.0, 0.0);
 			if (level().noCollision(this, lifted)) {
 				setPos(getX(), getY() + 1.0, getZ());
-				move(MoverType.SELF, new Vec3(targetX - getX(), 0.0, targetZ - getZ()));
+				move(MoverType.SELF, new Vec3(hitch.x - nx * pole - getX(), 0.0, hitch.z - nz * pole - getZ()));
 			}
 		}
+		// what it really did (a wall or a bank stops it); the slope it climbed is read from that
+		double movedX = getX() - before.x, movedZ = getZ() - before.z;
+		lastRan = Math.sqrt(movedX * movedX + movedZ * movedZ);
+		lastRise = getY() - before.y;
+		physics.velocity = horizontalCollision ? new Vec3(movedX, 0.0, movedZ) : roll;
 		setDeltaMovement(0.0, onGround() ? 0.0 : Math.max(fall, -2.0), 0.0);
-		setYRot((float) (Mth.atan2(-nx, nz) * Mth.RAD_TO_DEG));
+		setYRot((float) (heading * Mth.RAD_TO_DEG));
 		if (kind().tilts) {
 			// (0.5.62) over the real gap to the puller (never less than the pole), and no steeper than MAX_PITCH
 			double gap = Math.max(poleLength(puller), Math.sqrt((hitch.x - getX()) * (hitch.x - getX())

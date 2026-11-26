@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "jaymoskingdoms:crest",
+  "pattern": [
+    "GEG",
+    "GGG"
+  ],
+  "key": {
+    "G": "minecraft:gold_ingot",
+    "E": "minecraft:emerald"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:crest_crown"
+  }
+}

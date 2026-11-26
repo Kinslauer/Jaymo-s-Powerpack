@@ -32,6 +32,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.monster.illager.Pillager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -42,8 +43,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.MoonPhase;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -69,6 +72,10 @@ import org.jspecify.annotations.Nullable;
  * from there) and a lit campfire (a torch lit at it). Home is the villagers' way, the stores a settlement's folk's, the
  * fire a camp's. Nothing within {@link #FETCH_RANGE}, or not got there within {@link #FETCH_TICKS}, and they go without
  * for a while ({@link #GIVE_UP}).</li>
+ * <li><b>Pillagers</b> (Andy, 2026-11-24: "pillagers should also use their lanterns at night, or break them in the world
+ * and take them with if they run out") carry a light in the dark too: one in their own inventory, else one from their
+ * camp's loot pile; out of those, they break the nearest lit lantern set in the world (their camp's fence posts, a
+ * village's, anyone's; not with mob griefing off) and take it with them, fuel and all.</li>
  * <li><b>The night watch</b> ({@link #onWatch}): a guard or archer awake at night and not off duty always carries a
  * light, lit or not where he stands: a lantern from the stores if there is one (on a pole one time in
  * {@link #WATCH_POLE}), else a torch from them, else a torch for nothing (the watch is never sent out blind).</li>
@@ -137,7 +144,7 @@ public final class NightLights {
 	public static final AttachmentType<ItemStack> KEPT = AttachmentRegistry.create(JaymosKingdoms.id("night_light_kept"),
 		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC));
 
-	private enum Source { HOME, STORES, FIRE }
+	private enum Source { HOME, STORES, FIRE, HUNG }
 
 	/** Someone on their way to a light: where, what kind of place, and until when. */
 	private record Fetch(BlockPos to, Source source, long until) {
@@ -269,9 +276,9 @@ public final class NightLights {
 
 	// ---- carrying ---------------------------------------------------------------------------------------------------------
 
-	/** Who carries a light: a grown villager or folk, alive, who doesn't see in the dark. */
+	/** Who carries a light: a grown villager, folk or pillager, alive, who doesn't see in the dark. */
 	private static boolean bearer(PathfinderMob mob) {
-		return (mob instanceof Villager || mob instanceof Folk) && mob.isAlive() && !mob.isBaby();
+		return (mob instanceof Villager || mob instanceof Folk || mob instanceof Pillager) && mob.isAlive() && !mob.isBaby();
 	}
 
 	/** A guard or archer keeping the night watch: awake and not off duty (a realm's MCA guards have their evenings). */
@@ -350,12 +357,12 @@ public final class NightLights {
 		fetch(level, mob, now);
 	}
 
-	/** A light {@code mob} has about them: one from a villager's own inventory (taken out of it), or empty. */
+	/** A light {@code mob} has about them: one from a villager's or pillager's own inventory (taken out of it), or empty. */
 	private static ItemStack fromPocket(PathfinderMob mob) {
-		if (!(mob instanceof Villager v)) {
+		Container inv = mob instanceof Villager v ? v.getInventory() : mob instanceof Pillager p ? p.getInventory() : null;
+		if (inv == null) {
 			return ItemStack.EMPTY;
 		}
-		var inv = v.getInventory();
 		for (int i = 0; i < inv.getContainerSize(); i++) {
 			if (isLight(inv.getItem(i))) {
 				return inv.removeItem(i, 1);
@@ -426,12 +433,14 @@ public final class NightLights {
 		return new ItemStack(Items.TORCH);
 	}
 
-	/** The settlement {@code mob} lives or serves in, if it stands. */
+	/** The settlement {@code mob} lives or serves in (an illager's camp), if it stands. */
 	private static @Nullable Faction faction(ServerLevel level, PathfinderMob mob) {
-		if (!(mob instanceof Worker w) || w.factionId() < 0) {
+		Illagers.Tag tag = Illagers.tag(mob);
+		int id = tag != null ? tag.camp() : mob instanceof Worker w ? w.factionId() : -1;
+		if (id < 0) {
 			return null;
 		}
-		Faction f = Factions.get(level.getServer(), w.factionId());
+		Faction f = Factions.get(level.getServer(), id);
 		return f == null || f.fallen() ? null : f;
 	}
 
@@ -479,6 +488,7 @@ public final class NightLights {
 			case HOME -> household(mob);
 			case STORES -> fromStores(level, mob);
 			case FIRE -> new ItemStack(Items.TORCH);
+			case HUNG -> unhang(level, mob, f.to());
 		};
 		if (light.isEmpty()) {
 			WITHOUT.put(id, now + GIVE_UP);
@@ -516,18 +526,42 @@ public final class NightLights {
 				}
 			}
 		}
-		for (BlockPos pos : best != null ? java.util.List.<BlockPos>of() : BlockPos.betweenClosed(at.offset(-FIRE_RANGE, -FIRE_RANGE_Y, -FIRE_RANGE), at.offset(FIRE_RANGE, FIRE_RANGE_Y, FIRE_RANGE))) {
+		// a pillager out of lanterns takes one down where it hangs (mob griefing allowing); anyone else lights a torch at a fire
+		boolean raider = mob instanceof Pillager;
+		boolean search = best == null && (!raider || level.getGameRules().get(GameRules.MOB_GRIEFING));
+		for (BlockPos pos : !search ? java.util.List.<BlockPos>of() : BlockPos.betweenClosed(at.offset(-FIRE_RANGE, -FIRE_RANGE_Y, -FIRE_RANGE), at.offset(FIRE_RANGE, FIRE_RANGE_Y, FIRE_RANGE))) {
 			double d = pos.distSqr(at);
 			if (d < bestSqr) {
 				BlockState state = level.getBlockState(pos);
-				if (state.getBlock() instanceof CampfireBlock && CampfireBlock.isLitCampfire(state)) {
+				if (raider ? hung(state) : state.getBlock() instanceof CampfireBlock && CampfireBlock.isLitCampfire(state)) {
 					best = pos.immutable();
-					kind = Source.FIRE;
+					kind = raider ? Source.HUNG : Source.FIRE;
 					bestSqr = d;
 				}
 			}
 		}
 		return best == null ? null : new Fetch(best, kind, now + FETCH_TICKS);
+	}
+
+	/** A lit lantern set in the world (a burnt-out one is another block). */
+	private static boolean hung(BlockState state) {
+		return state.is(Blocks.LANTERN) || state.is(Blocks.SOUL_LANTERN);
+	}
+
+	/** A pillager breaks the lantern at {@code pos} and takes it, with the fuel it had left (empty if it's gone). */
+	private static ItemStack unhang(ServerLevel level, PathfinderMob mob, BlockPos pos) {
+		BlockState state = level.getBlockState(pos);
+		if (!hung(state)) {
+			return ItemStack.EMPTY;
+		}
+		ItemStack light = ItemStack.EMPTY;
+		for (ItemStack drop : Block.getDrops(state, level, pos, null)) {
+			if (light.isEmpty() && isLight(drop)) {
+				light = drop.copyWithCount(1);
+			}
+		}
+		level.destroyBlock(pos, false, mob);
+		return light;
 	}
 
 	/** A light worth taking from the stores: a lantern or a torch. */

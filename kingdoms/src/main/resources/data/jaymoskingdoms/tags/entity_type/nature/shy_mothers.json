@@ -1,0 +1,28 @@
+{
+ "values": [
+  {
+   "id": "naturalist:deer",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:reddeer",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:roedeer",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:reindeer",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:antilope",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:gazelle",
+   "required": false
+  }
+ ]
+}

@@ -63,6 +63,7 @@ public final class TownLedger {
 		ServerLevel level = (ServerLevel)speaker.level();
 		if (Reputation.get(player, f.id()) <= Reputation.HOSTILE) {
 			Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.ledger.refused"), Speech.RED);
+			RefusalHints.hint(player, speaker, RefusalHints.Cause.REPUTE, Component.literal(f.name()));
 			return;
 		}
 		ItemStack book = book(level.getServer(), f, speaker.getName().getString());
@@ -120,7 +121,7 @@ public final class TownLedger {
 	 * Lays {@code lines} on fresh pages after {@code pages}, under a heading ({@code ledger.jaymoskingdoms.<heading>}, none
 	 * if null), as many to a page as fit; a heading with nothing under it says so.
 	 */
-	private static void pack(List<Component> pages, @Nullable String heading, List<Component> lines) {
+	static void pack(List<Component> pages, @Nullable String heading, List<Component> lines) {
 		MutableComponent page = Component.empty();
 		int used = 0;
 		if (heading != null) {

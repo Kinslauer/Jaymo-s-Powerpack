@@ -30,8 +30,10 @@ public final class LeafSpiders {
 	public static final int LURK_TICKS = 1200;
 	/** After it moves on, it won't hide again for this long. */
 	public static final int BORED_TICKS = 600;
-	/** A player (not in creative or spectator) this close to a hidden spider gets pounced on, day or night. */
+	/** A player (not in creative or spectator) this close to a hidden spider gets pounced on, in the dark. */
 	public static final double AMBUSH_RANGE = 5.0;
+	/** Below this light value it's dark enough to pounce (the game's own spider rule); in daylight spiders only fight back. */
+	public static final float DARK = 0.5F;
 	/** How fast it scurries up into the leaves from below (blocks a tick). */
 	public static final double SCURRY_SPEED = 0.2;
 
@@ -150,6 +152,10 @@ public final class LeafSpiders {
 
 		/** Someone walked into reach: it drops on them. */
 		private void ambush() {
+			// in daylight it keeps the game's spider temper and lets them pass
+			if (this.spider.getLightLevelDependentMagicValue() >= DARK) {
+				return;
+			}
 			Player prey = this.spider.level().getNearestPlayer(this.spider, AMBUSH_RANGE);
 			if (prey != null && !prey.isCreative() && !prey.isSpectator() && !prey.isInvisible() && this.spider.hasLineOfSight(prey)) {
 				this.spider.setTarget(prey);

@@ -352,7 +352,7 @@ public final class GrimSites {
 		}
 		RandomSource random = level.getRandom();
 		BlockPos seat = pick.seat().middle();
-		Faction fief = Faction.create(Factions.nextId(server), FactionType.FIEFDOM, Names.kingdom(random), kingdom.color(), seat,
+		Faction fief = Faction.create(Factions.nextId(server), FactionType.FIEFDOM, Names.kingdom(server, random), kingdom.color(), seat,
 			KingdomEvents.claim(server, seat, FIEF_CLAIM));
 		Factions.put(server, fief);
 		int id = fief.id();

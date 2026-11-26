@@ -76,6 +76,12 @@ public final class SkiesClient {
 	/** Fire: blocks looked at each tick, how far round the camera, and the odds a fire found licks up and throws a spark. */
 	static final int FIRE_SAMPLES = 48, FIRE_RANGE = 12;
 	static final float FIRE_LICK = 0.35F, FIRE_SPARK = 0.12F, CAMPFIRE_SPARK = 0.08F;
+	/** Embers: the odds a fire found throws one (a campfire's), its size (blocks), how long it lasts (ticks) and how fast it leaves the flames. */
+	static final float FIRE_EMBER = 0.22F, CAMPFIRE_EMBER = 0.1F, EMBER_SIZE = 0.035F, EMBER_RISE = 0.09F;
+	static final int EMBER_LIFE = 40, EMBER_LIFE_SPREAD = 50;
+	/** Smoke lit from below off a lone fire: the odds a fire found puffs one, its size, life, rise and how lit it starts. */
+	static final float FIRE_SMOKE = 0.1F, FIRE_SMOKE_SIZE = 0.9F, FIRE_SMOKE_RISE = 0.06F, FIRE_SMOKE_LIT = 0.85F;
+	static final int FIRE_SMOKE_LIFE = 70;
 
 	/** The Nether: ash specks a tick over the wastes and how far round the camera; lava looked at each tick and the odds it throws an ember. */
 	static final int ASH = 2, LAVA_SAMPLES = 32;
@@ -295,9 +301,19 @@ public final class SkiesClient {
 				if (random.nextFloat() < FIRE_SPARK) {
 					spark(level, at, random, 1.0);
 				}
-			} else if (state.is(BlockTags.CAMPFIRES) && state.hasProperty(CampfireBlock.LIT) && state.getValue(CampfireBlock.LIT)
-				&& random.nextFloat() < CAMPFIRE_SPARK) {
-				spark(level, at, random, 0.5);
+				if (random.nextFloat() < FIRE_EMBER) {
+					ember(level, at, random, 0.8);
+				}
+				if (random.nextFloat() < FIRE_SMOKE) {
+					litSmoke(level, at, random);
+				}
+			} else if (state.is(BlockTags.CAMPFIRES) && state.hasProperty(CampfireBlock.LIT) && state.getValue(CampfireBlock.LIT)) {
+				if (random.nextFloat() < CAMPFIRE_SPARK) {
+					spark(level, at, random, 0.5);
+				}
+				if (random.nextFloat() < CAMPFIRE_EMBER) {
+					ember(level, at, random, 0.5);
+				}
 			}
 		}
 	}
@@ -350,6 +366,30 @@ public final class SkiesClient {
 			minecraft.particleEngine.add(new GustParticle(level, px, y + 0.92, pz, 0.0, 0.0, 0.0, CalamitiesClient.sprites.get(random), GustParticle.SAND,
 				0.07F + random.nextFloat() * 0.07F, 28 + random.nextInt(24), 0.92F + tone, 0.95F + tone * 0.5F, 0.97F, 0.75F));
 		}
+	}
+
+	/** An ember off the fire at {@code at}, from {@code from} up its block: it climbs, drifts downwind, winks and cools out. */
+	private static void ember(ClientLevel level, BlockPos at, RandomSource random, double from) {
+		if (StormsClient.cloudSprites == null) {
+			return;
+		}
+		double wx = Math.cos(Storms.clientWindAngle) * Storms.clientWindSpeed, wz = Math.sin(Storms.clientWindAngle) * Storms.clientWindSpeed;
+		Minecraft.getInstance().particleEngine.add(new EmberParticle(level, at.getX() + 0.2 + random.nextDouble() * 0.6, at.getY() + from,
+			at.getZ() + 0.2 + random.nextDouble() * 0.6, (random.nextDouble() - 0.5) * 0.04, EMBER_RISE * (0.6 + random.nextDouble() * 0.8),
+			(random.nextDouble() - 0.5) * 0.04, StormsClient.cloudSprites.get(random), EMBER_SIZE * (0.7F + random.nextFloat() * 0.6F),
+			EMBER_LIFE + random.nextInt(EMBER_LIFE_SPREAD), wx, wz));
+	}
+
+	/** A small puff of smoke over a lone fire, lit warm from below by it, greying as it climbs ({@link StormParticle#lit}). */
+	private static void litSmoke(ClientLevel level, BlockPos at, RandomSource random) {
+		if (StormsClient.cloudSprites == null) {
+			return;
+		}
+		double wx = Math.cos(Storms.clientWindAngle) * Storms.clientWindSpeed, wz = Math.sin(Storms.clientWindAngle) * Storms.clientWindSpeed;
+		float size = FIRE_SMOKE_SIZE * (0.8F + random.nextFloat() * 0.4F);
+		Minecraft.getInstance().particleEngine.add(new StormParticle(level, at.getX() + 0.5, at.getY() + 0.9, at.getZ() + 0.5,
+			StormsClient.cloudSprites.get(random), StormParticle.SMOKE, 0, size, FIRE_SMOKE_LIFE + random.nextInt(40), 0.3F, 0.29F, 0.28F, 0.4F)
+			.smoke(FIRE_SMOKE_RISE, wx * 0.5, wz * 0.5, 1.4F, 0.3F, 0.5F).lit(FIRE_SMOKE_LIT));
 	}
 
 	private static void spark(ClientLevel level, BlockPos at, RandomSource random, double from) {

@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.zfighter.sky;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.zfighter.sky.Charts;
+import com.jaymospowers.power.zfighter.sky.PodScope;
 import com.jaymospowers.power.zfighter.sky.Sky;
 import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -31,14 +32,14 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class SkyPlanets {
 	// ---- tuning ----
-	/** Per world (by destination index): right ascension and declination (degrees), colour (rgb), and size (gui pixels). */
+	/** Per world (by destination index): right ascension and declination (degrees, {@link PodScope#RA_DEC}, the server looks there too), colour (rgb), and size (gui pixels). */
 	private static final float[][] SPOTS = {
-		{128.0F, 38.0F, 0xE6EBFF, 1.0F}, // the Pale Moon: a cold white
-		{205.0F, 24.0F, 0xFF7A4A, 1.0F}, // Rustfall: rust red
-		{245.0F, 46.0F, 0x9FE0FF, 1.0F}, // Glacia: ice blue
-		{170.0F, 14.0F, 0xFFB050, 1.0F}, // Cinder: ember orange
-		{190.0F, 62.0F, 0xB070FF, 0.8F}, // the Maw: a dim violet
-		{105.0F, 22.0F, 0x7FA8FF, 2.0F}, // the Verdant World: what shows from here is its blue giant, with the ring
+		{PodScope.RA_DEC[0][0], PodScope.RA_DEC[0][1], 0xE6EBFF, 1.0F}, // the Pale Moon: a cold white
+		{PodScope.RA_DEC[1][0], PodScope.RA_DEC[1][1], 0xFF7A4A, 1.0F}, // Rustfall: rust red
+		{PodScope.RA_DEC[2][0], PodScope.RA_DEC[2][1], 0x9FE0FF, 1.0F}, // Glacia: ice blue
+		{PodScope.RA_DEC[3][0], PodScope.RA_DEC[3][1], 0xFFB050, 1.0F}, // Cinder: ember orange
+		{PodScope.RA_DEC[4][0], PodScope.RA_DEC[4][1], 0xB070FF, 0.8F}, // the Maw: a dim violet
+		{PodScope.RA_DEC[5][0], PodScope.RA_DEC[5][1], 0x7FA8FF, 2.0F}, // the Verdant World: what shows from here is its blue giant, with the ring
 	};
 	/** The world whose light wears the giant's ring (the Verdant World), and the ring's colour (rgb). */
 	static final int RINGED = 5, RING_RGB = 0xD6E2EE;
@@ -63,6 +64,8 @@ public final class SkyPlanets {
 	}
 
 	public static void init() {
+		ClientPlayNetworking.registerGlobalReceiver(com.jaymospowers.power.zfighter.pod.PodLog.Show.TYPE,
+			(payload, ctx) -> ctx.client().gui.setScreen(new BookViewScreen(new BookViewScreen.BookAccess(payload.pages()))));
 		ClientPlayNetworking.registerGlobalReceiver(Sky.Page.TYPE,
 			(payload, ctx) -> ctx.client().gui.setScreen(new BookViewScreen(new BookViewScreen.BookAccess(List.of(Charts.page(payload.world()))))));
 		HudElementRegistry.attachElementBefore(VanillaHudElements.CROSSHAIR, JaymosPowers.id("sky_planets"), SkyPlanets::draw);
@@ -92,10 +95,7 @@ public final class SkyPlanets {
 
 	/** The direction to {@code world}'s light now: east is +x, the sun's path across the sky is the x-y plane. */
 	private static Vec3 direction(int world, double turn) {
-		double ra = Math.toRadians(SPOTS[world][0]), dec = Math.toRadians(SPOTS[world][1]);
-		double x0 = Math.cos(dec) * Math.sin(ra), y0 = Math.cos(dec) * Math.cos(ra), z0 = Math.sin(dec);
-		double c = Math.cos(turn), s = Math.sin(turn);
-		return new Vec3(x0 * c - y0 * s, x0 * s + y0 * c, z0);
+		return PodScope.direction(world, turn);
 	}
 
 	private static boolean active(Minecraft minecraft) {

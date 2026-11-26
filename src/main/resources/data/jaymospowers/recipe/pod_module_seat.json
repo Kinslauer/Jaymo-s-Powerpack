@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#minecraft:wooden_stairs",
+    "#minecraft:wool",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "jaymospowers:pod_module_seat",
+    "count": 1
+  }
+}

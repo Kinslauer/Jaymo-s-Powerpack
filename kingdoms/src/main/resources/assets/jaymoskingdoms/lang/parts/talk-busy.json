@@ -10,5 +10,17 @@
   "talk_busy.jaymoskingdoms.prisoner.0": "Stand aside, %s. I've someone in hand.",
   "talk_busy.jaymoskingdoms.prisoner.1": "Not now. This one's going nowhere.",
   "talk_busy.jaymoskingdoms.loot.0": "Not now, %s!",
-  "talk_busy.jaymoskingdoms.loot.1": "Busy. Go away."
+  "talk_busy.jaymoskingdoms.loot.1": "Busy. Go away.",
+  "talk_busy.jaymoskingdoms.snap.fight.0": "I'm fighting for my life here, %s, and you want a chat? Leave me be!",
+  "talk_busy.jaymoskingdoms.snap.fight.1": "Can't you see the blade in front of me? Stop pulling at me, %s!",
+  "talk_busy.jaymoskingdoms.snap.talk.0": "I'm ignoring you because I'm already talking to someone, %s. It's rude to keep cutting in.",
+  "talk_busy.jaymoskingdoms.snap.talk.1": "You heard me the first time, %s. Wait until we're done.",
+  "talk_busy.jaymoskingdoms.snap.tend.0": "Someone could die while you pester me, %s! Help or step back.",
+  "talk_busy.jaymoskingdoms.snap.tend.1": "I said they're hurt, %s. Every word to you is time they haven't got.",
+  "talk_busy.jaymoskingdoms.snap.dead.0": "I'm laying the dead to rest, %s. Have you no shame?",
+  "talk_busy.jaymoskingdoms.snap.dead.1": "This was someone's kin, %s. Pester me again and I'll remember it.",
+  "talk_busy.jaymoskingdoms.snap.prisoner.0": "If I turn to you, this one runs, %s. That's why I'm not answering.",
+  "talk_busy.jaymoskingdoms.snap.prisoner.1": "I've a prisoner in hand and you won't stop tugging at me, %s. Enough!",
+  "talk_busy.jaymoskingdoms.snap.loot.0": "There's coin on the ground and you're in my way, %s. Get lost!",
+  "talk_busy.jaymoskingdoms.snap.loot.1": "Ask me once more, %s, and you'll get nothing from me after."
 }

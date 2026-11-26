@@ -20,6 +20,7 @@ final class JadeIntroductionsClient {
 	}
 
 	static void register(IWailaClientRegistration registration) {
+		registration.registerEntityComponent(JadeNpcTaskClient.INSTANCE, net.minecraft.world.entity.npc.villager.Villager.class);
 		registration.addTooltipCollectedCallback((box, accessor) -> {
 			if (!(accessor instanceof EntityAccessor entityAccessor)) {
 				return;

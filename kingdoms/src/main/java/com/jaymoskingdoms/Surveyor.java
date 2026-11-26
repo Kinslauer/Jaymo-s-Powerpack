@@ -41,6 +41,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Quarry</b>: a pit for the miners to dig out, layer by layer ({@link Areas#quarry}).</li>
  * <li><b>Storage</b>: a chest or barrel added to (or taken out of) the settlement's storage, where builders fetch
  * materials and workers bring what they gather ({@link Areas#toggleStorage}).</li>
+ * <li><b>Patrol</b>: the points of your company's patrol route, for the group you've picked ({@link Company#mark}); use it at
+ * the sky to clear the route.</li>
+ * <li><b>Supply</b>: a chest or barrel your company eats and drinks from ({@link Company#toggleSupply}).</li>
  * </ul>
  * While you hold it, your corners are shown with sparks.
  */
@@ -49,7 +52,7 @@ public final class Surveyor {
 	static final int SHOW_TICKS = 20;
 
 	public enum Mode {
-		DESIGN, PLOT, FIELD, QUARRY, STORAGE;
+		DESIGN, PLOT, FIELD, QUARRY, STORAGE, PATROL, SUPPLY;
 
 		String key() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);
@@ -117,6 +120,8 @@ public final class Surveyor {
 					.withStyle(ChatFormatting.GOLD));
 				sp.sendSystemMessage(Component.translatable("surveyor.jaymoskingdoms." + next.key() + ".how").withStyle(ChatFormatting.GRAY));
 				level.playSound(null, player.blockPosition(), SoundEvents.WOOD_PLACE, SoundSource.PLAYERS, 0.4F, 1.8F);
+			} else if (mode(player) == Mode.PATROL) {
+				Company.clearRoute(sp);
 			} else {
 				SELECTIONS.remove(player.getUUID());
 				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.surveyor.cleared",
@@ -143,6 +148,13 @@ public final class Surveyor {
 		Mode mode = mode(player);
 		if (mode == Mode.STORAGE) {
 			return Areas.toggleStorage(player, pos);
+		}
+		// (village mods rc2_patrol, rc2_supply) your company's patrol route, point by point, and its stores
+		if (mode == Mode.PATROL) {
+			return Company.mark(player, pos);
+		}
+		if (mode == Mode.SUPPLY) {
+			return Company.toggleSupply(player, pos);
 		}
 		Selection sel = SELECTIONS.get(player.getUUID());
 		if (sel == null || sel.a() == null || sel.b() != null) {

@@ -1,0 +1,28 @@
+{
+ "values": [
+  "minecraft:wolf",
+  "jaymoskingdoms:feral_wolf",
+  "jaymoskingdoms:coyote",
+  "jaymoskingdoms:grizzly",
+  {
+   "id": "naturalist:coyote",
+   "required": false
+  },
+  {
+   "id": "naturalist:bear",
+   "required": false
+  },
+  {
+   "id": "bearminimum:brown_bear",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:lynx",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:grizzly_bear",
+   "required": false
+  }
+ ]
+}

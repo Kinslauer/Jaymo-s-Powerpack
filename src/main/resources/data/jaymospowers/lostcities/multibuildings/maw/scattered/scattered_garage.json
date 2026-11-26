@@ -1,0 +1,41 @@
+{
+  "dimx": 5,
+  "dimz": 5,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_garage00",
+      "jaymospowers:maw/scattered/scattered_garage01",
+      "jaymospowers:maw/scattered/scattered_garage02",
+      "jaymospowers:maw/scattered/scattered_garage03",
+      "jaymospowers:maw/scattered/scattered_garage04"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_garage10",
+      "jaymospowers:maw/scattered/scattered_garage11",
+      "jaymospowers:maw/scattered/scattered_garage12",
+      "jaymospowers:maw/scattered/scattered_garage13",
+      "jaymospowers:maw/scattered/scattered_garage14"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_garage20",
+      "jaymospowers:maw/scattered/scattered_garage21",
+      "jaymospowers:maw/scattered/scattered_garage22",
+      "jaymospowers:maw/scattered/scattered_garage23",
+      "jaymospowers:maw/scattered/scattered_garage24"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_garage30",
+      "jaymospowers:maw/scattered/scattered_garage31",
+      "jaymospowers:maw/scattered/scattered_garage32",
+      "jaymospowers:maw/scattered/scattered_garage33",
+      "jaymospowers:maw/scattered/scattered_garage34"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_garage40",
+      "jaymospowers:maw/scattered/scattered_garage41",
+      "jaymospowers:maw/scattered/scattered_garage42",
+      "jaymospowers:maw/scattered/scattered_garage43",
+      "jaymospowers:maw/scattered/scattered_garage44"
+    ]
+  ]
+}

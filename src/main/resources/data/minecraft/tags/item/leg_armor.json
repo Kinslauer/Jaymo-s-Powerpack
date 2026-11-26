@@ -1,6 +1,11 @@
 {
   "values": [
     "jaymospowers:caveman_leggings",
+    "jaymospowers:dark_caveman_leggings",
+    "jaymospowers:trapper_leggings",
+    "jaymospowers:dark_trapper_leggings",
+    "jaymospowers:barbarian_leggings",
+    "jaymospowers:dark_barbarian_leggings",
     "jaymospowers:beast_pelt_leggings",
     "jaymospowers:burrukai_plate_leggings",
     "jaymospowers:zanite_leggings",
@@ -8,6 +13,7 @@
     "jaymospowers:gravitite_leggings",
     "jaymospowers:neptune_leggings",
     "jaymospowers:mailed_chausses",
-    "jaymospowers:studded_leggings"
+    "jaymospowers:studded_leggings",
+    "jaymospowers:copper_chainmail_leggings"
   ]
 }

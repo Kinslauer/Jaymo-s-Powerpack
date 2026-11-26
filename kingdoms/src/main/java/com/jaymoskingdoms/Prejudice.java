@@ -67,6 +67,14 @@ public final class Prejudice {
 	 * actually all not human": the near-human looking ones a little, the ones with scales, void or sculk in them more.
 	 */
 	static final int EMBERBORN = 1, FROSTBORN = 1, RUBBERFOLK = 1, DIVINE = 1, ENDBORN = 2, DEEPBORN = 2, DRAGONBLOOD = 2;
+	/**
+	 * Andy (2026-11-25), of the crocodiles that take pets and anything else: "nearly everyone hates them. this raises
+	 * alot of suspicion/hatred around the lizard beastfolk". The lizard kin (the Serpen and the Scalebound, {@link #lizardKin})
+	 * are this much further from human than the other beastfolk, and even folk who mind no other blood, or aren't human
+	 * themselves, mind theirs at {@link #LIZARD_TOLERANT} of the full weight.
+	 */
+	static final int LIZARD_KIN = 2;
+	static final float LIZARD_TOLERANT = 0.5F;
 	/** (0.7.357) A human who minds no other blood still minds the Bio-built's this much (a share of the full degree). */
 	static final float BIO_TOLERANT = 0.5F;
 	/**
@@ -168,9 +176,18 @@ public final class Prejudice {
 	/** How far from human {@code e} is seen to be: a player's or villager's blood (a full mask hides a player's). */
 	static int degree(Entity e) {
 		if (e instanceof Player p) {
-			return Math.max(GreenskinLife.degree(p), masked(p) ? 0 : degree(Heritage.of(p)));
+			return Math.max(GreenskinLife.degree(p), masked(p) ? 0 : degree(Heritage.of(p)) + (lizardKin(p) ? LIZARD_KIN : 0));
 		}
-		return degree(VillagerHeritage.of(e));
+		return degree(VillagerHeritage.of(e)) + (lizardKin(e) ? LIZARD_KIN : 0);
+	}
+
+	/** Whether {@code e} is of the lizard kin (Serpen or Scalebound beastfolk), and shows it (a full mask hides a player's). */
+	static boolean lizardKin(Entity e) {
+		if (e instanceof Player p && masked(p)) {
+			return false;
+		}
+		HeritageVariants.Variant v = HeritageVariants.of(e);
+		return v == HeritageVariants.Variant.SERPEN || v == HeritageVariants.Variant.SCALEBOUND;
 	}
 
 	/**
@@ -202,7 +219,8 @@ public final class Prejudice {
 			// (no blood to mind, or their own)
 			return 0.0F;
 		}
-		int d = degree(theirs);
+		boolean lizard = lizardKin(whom);
+		int d = degree(theirs) + (lizard ? LIZARD_KIN : 0);
 		Faction f = faction(who);
 		boolean purist = Purists.is(f) && Purists.kin(f, who);
 		// ((0.7.221) less where the ruler has decreed tolerance: Reforms)
@@ -224,11 +242,12 @@ public final class Prejudice {
 			return edict * (purist ? m * PURIST_HARSH : tolerant(who) ? 0.0F : m);
 		}
 		if (degree(mine) > 0) {
-			// (not plainly human themselves: they know how it is)
-			return 0.0F;
+			// (not plainly human themselves: they know how it is; but the lizard kin, nearly everyone minds)
+			return lizard ? edict * d * LIZARD_TOLERANT : 0.0F;
 		}
-		// (a purist's own: always, and harder; (0.7.357) the tolerant still mind the Bio-built, if less)
-		return edict * (purist ? d * PURIST_HARSH : tolerant(who) ? (theirs == Heritage.Kind.BIOBUILT ? d * BIO_TOLERANT : 0.0F) : d);
+		// (a purist's own: always, and harder; (0.7.357) the tolerant still mind the Bio-built, if less, and the lizard kin)
+		return edict * (purist ? d * PURIST_HARSH : tolerant(who) ? (theirs == Heritage.Kind.BIOBUILT ? d * BIO_TOLERANT
+			: lizard ? d * LIZARD_TOLERANT : 0.0F) : d);
 	}
 
 	/** (0.7.490) The share of their distaste {@code who} keeps under their ruler's tolerance edicts (1: none decreed; {@link Reforms}). */

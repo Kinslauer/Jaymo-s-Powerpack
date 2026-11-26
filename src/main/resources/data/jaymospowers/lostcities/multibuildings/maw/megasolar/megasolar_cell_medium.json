@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell"
+    ],
+    [
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell"
+    ],
+    [
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell"
+    ]
+  ]
+}

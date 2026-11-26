@@ -574,7 +574,9 @@ def make_blocks():
                                     ramp("a8870f", "c29c16"), hx("fff6c0"))
     t["zanite_block"] = bordered("zanite_block", ramp("c9a2f8", "b88af0"), ramp("9a5fe0", "8c50d2", "a875ea", "7d44c4"),
                                  ramp("5b2f9a", "6a39ae"), hx("e0c8ff"))
-    t["cold_aercloud"] = cloud("cold_aercloud", ramp("ffffff", "eef3fa", "dde6f2"), [225, 205, 185])
+    # (Patch 9) see-through, so a pod's pilot sees the isles and the sky below through the cloud they climb through
+    t["cold_aercloud"] = cloud("cold_aercloud", ramp("ffffff", "eef3fa", "dde6f2"), [150, 130, 115])
+    t["cloudbank"] = cloud("cold_aercloud", ramp("ffffff", "eef3fa", "dde6f2"), [105, 90, 75])
     t["blue_aercloud"] = cloud("blue_aercloud", ramp("c6e4ff", "a8d3fb", "8dc2f2"), [225, 205, 185])
     t["golden_aercloud"] = cloud("golden_aercloud", ramp("fff3b8", "ffe58c", "f6d266"), [225, 205, 185])
     t["skyroot_log"] = bark("skyroot_log", GREY_GREEN_BARK)

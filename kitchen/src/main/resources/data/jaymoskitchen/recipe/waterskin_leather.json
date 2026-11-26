@@ -7,7 +7,7 @@
     " l "
   ],
   "key": {
-    "s": "minecraft:string",
+    "s": "#c:strings",
     "l": "minecraft:leather"
   },
   "result": {

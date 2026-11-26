@@ -170,6 +170,8 @@ public final class Captives {
 	}
 
 	static void register() {
+		// (what they're doing in their chains is drawn by everyone's client: the type is known before any is sent)
+		CaptiveIdle.init();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Villager v && v.hasAttached(CAPTIVE)) {
 				LOADED.add(v);
@@ -240,6 +242,11 @@ public final class Captives {
 
 	/** A villager taken from {@code home} (null: nowhere), put at {@code at} in chains. */
 	static @Nullable Villager take(ServerLevel level, BlockPos at, @Nullable Faction home) {
+		return take(level, at, home, true);
+	}
+
+	/** As above; {@code report} false: their town isn't told it's missing one (a taker's cellar keeps its own secret, {@link TakersCellar}). */
+	static @Nullable Villager take(ServerLevel level, BlockPos at, @Nullable Faction home, boolean report) {
 		Vec3 pos = Vec3.atBottomCenterOf(at);
 		Villager v = McaCompat.newVillager(level, pos);
 		if (v == null) {
@@ -253,7 +260,7 @@ public final class Captives {
 		v.setPersistenceRequired();
 		level.addFreshEntity(v);
 		LOADED.add(v);
-		if (home != null && !Havens.is(level.getServer(), home)) {
+		if (report && home != null && !Havens.is(level.getServer(), home)) {
 			// (0.7.530) the town they were taken from is missing one of its own
 			TownTroubles.missing(level, home, v, at);
 		}
@@ -285,6 +292,7 @@ public final class Captives {
 			v.setAttached(BOUND, true);
 		} else {
 			v.removeAttached(BOUND);
+			CaptiveIdle.clear(v);
 		}
 	}
 
@@ -554,6 +562,8 @@ public final class Captives {
 				Doubles.unsteal(level, v);
 			} else if (c.rescuer().isEmpty()) {
 				if (bound(v) && v.isNoAi()) {
+					Player near = level.getNearestPlayer(v, PLEAD_RANGE);
+					CaptiveIdle.step(level, v, near == null || near.isSpectator() ? null : near, now);
 					plead(level, v, now);
 				} else {
 					walkFree(v);

@@ -214,6 +214,8 @@ public final class Camps {
 			OgreGrowth.clear();
 			IllagerCamps.clear();
 			GoblinVillages.clear();
+			GoblinBands.clear();
+			SwampGoblins.clear();
 			OrcCamps.clear();
 			Orcs.clear();
 			PirateCoves.clear();
@@ -402,6 +404,8 @@ public final class Camps {
 				return;
 			}
 		}
+		// (structure plan, track 2) a bandit camp beside a trade road, near someone travelling it
+		BanditCamps.trySpawn(server, level);
 	}
 
 	/** Standing camps of {@code kind} within {@link #CAMP_AREA} of {@code realm}'s seat. */
@@ -422,11 +426,13 @@ public final class Camps {
 			BlockPos at = player.blockPosition().offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
 			double d = Math.sqrt(Raids.horizontal(at, realm.seat()));
 			if (d < MIN_DISTANCE || d > MAX_DISTANCE || !open(server, level, at) || (illager && !IllagerCamps.land(level, at))
-				|| (goblin && !GoblinVillages.land(level, at)) || (orc && !OrcCamps.land(level, at)) || (pirate && !PirateCoves.land(level, at))) {
+				|| (goblin && !GoblinVillages.land(level, at)) || (orc && !OrcCamps.land(level, at))
+				|| (orc && tries < SITE_TRIES / 2 && !OrcCamps.onBorder(level, at)) || (pirate && !PirateCoves.land(level, at))) {
 				continue;
 			}
 			int floor = pirate ? IllagerBuildings.floor(level, at, PirateCoves.MAX_SPREAD, PirateCoves.RADIUS) : orc ? IllagerBuildings.floor(level, at, OrcCamps.MAX_SPREAD, OrcBuildings.CLEAR_RADIUS)
-				: goblin ? IllagerBuildings.floor(level, at, GoblinVillages.MAX_SPREAD, GoblinBuildings.CLEAR_RADIUS)
+				: goblin ? (SwampGoblins.swamp(level, at) ? SwampGoblins.floor(level, at)
+					: IllagerBuildings.floor(level, at, GoblinVillages.MAX_SPREAD, GoblinBuildings.CLEAR_RADIUS))
 				: illager ? IllagerBuildings.floor(level, at, IllagerCamps.MAX_SPREAD) : CampBuildings.floor(level, at, MAX_SPREAD);
 			if (floor == Integer.MIN_VALUE) {
 				continue;
@@ -588,6 +594,10 @@ public final class Camps {
 		}
 		if (SkyPirates.KIND.equals(kind(server, camp.id()))) {
 			SkyPirates.grow(level, camp, days);
+			return;
+		}
+		if (BanditCamps.is(server, camp.id())) {
+			BanditCamps.grow(level, camp, days);
 			return;
 		}
 		Palette p = CampBuildings.palette(level, camp);

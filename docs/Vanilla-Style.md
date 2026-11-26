@@ -1,12 +1,16 @@
-# Vanilla style for every modded item
+# The Reason look: one art style for the whole pack
 
-> 2026-11-03: Excalibur's look is optional and off by default (`docs/Excalibur-Style.md`, `/excalibur on`). These
-> redraws are the default look; their graded copies are in the built-in `excalibur_style` pack.
+> 2026-11-26 (Andy): the pack's own resource pack, the **Reason look**, replaces the Excalibur option, aiming for
+> **clean vanilla-plus**. It is the built-in pack `src/main/resources/resourcepacks/vanilla_style` (the id stays, so
+> players' choice carries over; it shows as "Reason look"), on by default. Excalibur, its Fresh Animations patch and
+> the graded `excalibur_style` copies are gone; installs that had them on get them switched off once
+> (`PackResourcePacks.retireExcalibur`). The scan that found what still looks script-made, and Andy's picks of what to
+> repaint, are in the project's `art-overhaul/pack-art-scan/` folder and the Pack Art Scan pick list.
 
-Goal: every item in the pack looks like Mojang drew it. Delivered as the built-in resource pack
-`src/main/resources/resourcepacks/vanilla_style` (on by default; switch it off under Resource Packs to compare).
-Workflow adapted from the game-assets-enhancer skill (audit, style guide, one anchor, reuse over regenerate); its
-fal.ai image generation and parallax parts don't apply to 16px item icons, so the art is painted as pixel grids.
+Goal: everything in the pack looks like one hand drew it, in vanilla Minecraft's style. Our mods' own art is fixed at
+the source (each `tools/gen_*.py`); other mods' textures are replaced in this pack with our own paintings, so their jars
+never change. Workflow adapted from the game-assets-enhancer skill (audit, style guide, one anchor, reuse over
+regenerate); its fal.ai image generation and parallax parts don't apply to 16px art, so the art is painted as pixel grids.
 
 ## Style rules (what the audit measures)
 - **16x16**, one frame per icon. 32px icons come down to 16, except textures on models drawn at double size
@@ -21,6 +25,32 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
   `mushroom_stew`'s bowl, spears could point at vanilla's spears.
 - **5 to 18 colours per icon**, no half-transparent pixels, item fills about half the square, tools on the diagonal
   (handle bottom-left, head top-right).
+
+## Blocks, mobs and worn armour (2026-11-26)
+The item rules above, carried over to everything else.
+- **No per-pixel noise.** Never colour each pixel with a random jitter, a blur or a smooth gradient across a shape:
+  that is what makes art look script-made. Texture is placed by hand (or by a fixed pattern): vanilla stone is
+  clusters of 2 to 4 pixels in 4 or 5 shades, not speckle.
+- **Ramps, not ranges.** Each material gets one ramp of 4 to 7 shades (`tools/vanilla_style/vstyle.py`, `MAT`), and
+  every pixel is one of its steps. A block face stays under about 40 colours, a 64x64 mob sheet under about 60.
+- **Light from above.** On a mob, each part's top face is the light end of its ramp, the sides the middle, the
+  underside one or two steps darker. Faces read at a glance: eyes 1 or 2 pixels, a highlight only where vanilla has one.
+- **Patterns are shapes.** Stripes, spots, markings, trim and heraldry are clean blocks of colour with their own outline
+  shade, never noise or gradients.
+- **Variants are palette swaps.** A finish (blued, russeted, gilded), a dye colour or a coat is the same pixels in
+  another ramp, plus at most a small decal (rivets, gilt edge, etched lines). Dyed variants can be one greyscale base
+  tinted by the game, as vanilla leather is.
+- **Worn armour** starts from vanilla's equipment UVs and shading (`armour.py`); metals use their ramp's mid tone to
+  glint, as vanilla's diamond and gold do.
+- **Shapes before colour.** An icon has to say what it is by its outline: a helm, a cuirass and a greave must not be
+  the same box in three colours.
+- Glows, auras, beams, particles and screens are meant to look different and are not held to these rules.
+
+## The art check (`tools/art_audit.py`)
+`tools/pr_checks.py` runs it on every item and block texture a PR adds or changes, and fails the PR when one has far
+more colours than vanilla ever uses, soft gradients, or half-transparent pixels. Mob skins are only reported. Every
+redraw in this pack passes; the script-made textures it was measured on don't. `python3 tools/art_audit.py --all`
+counts what's left. A deliberate exception goes in `tools/pr_checks_allow.txt` with a reason.
 
 ## Audit (2026-10-16, `tools/vanilla_style/audit.py`)
 1,870 modded item textures measured against vanilla 26.3's 830 (5th-95th percentile of each measure).
@@ -51,19 +81,87 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
   Void Flintlock, Grand Shield and Void Crown are drawn fresh in their own palettes.
 - WeaponMod: iron katana (`paint_batch.py`).
 - **Jaymo's Powers armour (2026-11-11, Tiv's ask: "solid outlines, pixel based detail, clean images")**
-  (`armour.py`). Nine sets, item icons and worn layers (`entity/equipment/humanoid` and `humanoid_leggings`).
+  (`armour.py`). Eight sets, item icons and worn layers (`entity/equipment/humanoid` and `humanoid_leggings`).
   Metal sets (Zanite, Gravitite, Arkenium, Neptune, Burrukai plate, Bog iron) start from vanilla's iron armour,
-  hide and cloth sets (Beast pelt, Caveman, Ichorcloth) from vanilla's leather armour plus its overlay, repainted by
+  hide and cloth sets (Beast pelt, Ichorcloth) from vanilla's leather armour plus its overlay, repainted by
   brightness rank in the set's 7-step ramp. Worn layers use the ramp's mid tone to glint, as vanilla's diamond and
-  gold do. Trims: gold on Neptune, Burrukai and Ichorcloth, pale on Arkenium, fur on Beast pelt and Caveman.
-  Caveman keeps its own scraps cut (its old worn alpha is the mask) and its own icon shapes (Andy: "more like the
-  original rather than leather armor"), drawn as grids and shaded by `vstyle.parts`. Ichorcloth's hood/robe icons
+  gold do. Trims: gold on Neptune, Burrukai and Ichorcloth, pale on Arkenium, fur on Beast pelt.
+  The primitive hide sets (Caveman, Trapper's, Barbarian and a dark make of each, 2026-11-24; Andy picked all three
+  redrawn styles) are drawn in `hide_sets.py`, which `armour.py` calls: letter-grid icons shaded from the top-left, and
+  worn layers painted onto vanilla leather's UVs with its shading (Caveman keeps its old scraps cut,
+  `masks/caveman_*.png`). They are our own art, so the same images are the mod's base textures. The script asserts
+  the faults judges found in the drafts: outline shades on every silhouette pixel, nothing near the slot's grey on
+  it, no checker dither, bone, fur and sinew apart in value. Ichorcloth's hood/robe icons
   and Bog iron's icons were already in this style and stay. One-off gear with placeholder art is redrawn in the
   same script: Traceur Boots and Gloves, Training Weights (both), Weighted Gi, and the Sealed Helm's worn layer.
   Scouter, Rig, Air Skin and Void Crown were already clean and stay.
 
 Armour: `python -I tools/vanilla_style/armour.py <vanilla 26.3 assets/minecraft/textures folder>` (it needs the
-`item` and `entity/equipment` folders), then `python -I tools/excalibur_style/grade.py` for the graded copies.
+`item` and `entity/equipment` folders).
 
 Regenerate from the repository root with the vanilla 26.3 `textures/item` folder:
 `python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>`, `powers.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.
+
+## Powers art and other mods (2026-11-26, patches 6 and 7)
+Powers: `tools/gen_fishing_species.py` draws the 32 fish icons (`tools/vanilla_style/fish_icons.py`, one hand-drawn grid per
+species) and the 35 spawn eggs (`spawn_egg.py`, vanilla's egg). `tools/vanilla_style/powers_reason.py` runs after the old
+generators: the dust pile, and `reason_clean`'s smoother plus a fold into few shades for the parts, blocks and skins the
+art check reported (`entity/smoke/puff.png` is an effect and stays).
+Other mods: `python -I tools/vanilla_style/other_mods.py <extracted jars> <vanilla textures>` writes replacements into the pack.
+
+### Credits and licence basis
+| Mod | What the pack replaces | Basis |
+|---|---|---|
+| Cube Animals | 162 entity skins and 58 items, cleaned from its own pixels | CC0 |
+| Vanilla Constructs | 18 diamond buckets, tools and items, cleaned | MIT |
+| Eternal Nether | 8 withered blocks and the netherite bell, cleaned | MIT |
+| Shippy Ships | 19 sail pattern icons, fresh paintings (no pixel copied) | custom limited licence |
+| Cooking for Blockheads | 16 dye colours of oven front, plain and lit (32 blocks), fresh paintings | All Rights Reserved |
+| Stellarity | 7 icons (decayed clover, ender koi, three harvester swords, end city map, Deviant's Light disc), fresh paintings | own limited licence |
+| Knight Armor and Weapons | 4 armour icons: vanilla's iron armour in steel, visor, strap and cloth added | All Rights Reserved |
+
+Left alone on purpose: Simply Tents (every icon is a GeckoLib model sheet, a flat icon would not show), the knight
+weapons and blade/handle parts (custom 3D models or odd sizes), Stellarity's 32 px `_held` and 3D weapon textures (their
+models are drawn at double size), and Stellarity's animated prismatic pearl and punch arrow strips.
+
+### Packs under and beside the Reason look (2026-11-26)
+After the script-painted art fell short, Andy picked openly licensed packs instead (pick list
+https://claude.ai/artifact/DJgp8W4XAaLJPyuTMVxBED). The game fetches each one from Modrinth on first launch
+(`client/PackResourcePacks`); none is copied into our jars.
+
+| Pack | Author | Licence | Where it sits |
+|---|---|---|---|
+| Pixel Perfection Fidelity R2.0 | SourAlien, from XSSheep's Pixel Perfection | CC BY 4.0 (its source CC BY-SA 4.0) | the base, under the Reason look |
+| Medieval Items! 1.2 | its Modrinth author (project L6chz93w) | CC BY 4.0; changed: its axe textures are removed on download, at Andy's request | just above Pixel Perfection Fidelity |
+| Framed Glass Panes V97 | Kai1907 | MIT | on top |
+| Red Bricks 1.0.5 | Lobster Project | MIT | on top |
+| Medieval Tactical Shield 1.1 | its Modrinth author (project pwDKTTxF) | MIT | on top |
+
+**Back to vanilla** (Andy, 2026-11-26): `/texturelook vanilla` (client, `client/TextureLook`) switches off the Reason
+look, `held_3d`, `living_world` and every downloaded retexture or model pack (the five above plus Re-covered, Fancy
+Crops, 3D ladders and doors, Fabulous Fences, Armored Legacy, Canoe boats, Better Horses) and keeps them off across
+launches; `/texturelook reason` puts them back. A new retexture pack of vanilla or another mod goes into
+`TextureLook.FILE_PACKS` (or `BUILT_IN`) too. Our mods' own textures, the medieval MCA villagers, Tissou's zombies,
+KSPACK, music and Fresh Animations stay on.
+
+Don't copy pixels from Pixel Perfection Fidelity into our own textures: share-alike would then cover them. New art for our
+own items goes to an art agent, starting from the CC0 and MIT sources Andy picked (OpenGameArt weapon, RPG item, block
+and ship sets; Computercraft Greentech, CC Industrialized, Militech, Wares Recalibration, Vanilla Military, Starlight 16x).
+
+### Open art sets used as they are (2026-11-26, batch 1)
+Other artists' pixels, unchanged (no recolour, no redraw). `tools/open_art/sources/` keeps each source file with its
+licence; `python3 tools/open_art/apply.py` copies them onto our textures and must run after the old generators
+(`kingdoms/tools/gen_hidden_blade.py`, `gen_items.py`, `tools/vanilla_style/*.py`), which would draw these again.
+
+| Texture | From | Author | Licence |
+|---|---|---|---|
+| Kingdoms engineer's hammer | 16x16 Weapon RPG Icons, steel sheet | Shade (OpenGameArt) | CC0 |
+| Powers far-world moon, Glacia and Verdant rock | 16x16 Block Texture Set (stone_generic, ice_glacier, serpentine) | aroachifoundonmypillow (OpenGameArt) | CC0 |
+| Powers Space Pod icon; the flight screen's raider pod and derelict pod (`textures/gui/pod_raider.png`, `pod_wreck.png`) | 16x16 Ship Collection (yellow row 9, red row 1, yellow row 9; black ground made clear) | Master484 (OpenGameArt) | CC0 |
+| Powers Gravity Machine (all faces, on and off), Fuel Works sides and top, Landing Beacon base | Militech (Oritech retexture) | LutherDev (Modrinth) | MIT, notice in `sources/militech/LICENSE.txt` |
+
+Tried and dropped: Shade's sword and dagger on the silver sword and hidden blade (Andy, 2026-11-26), the block set's slate tiles and bricks on the mason table (they lose the table's plan and tools) and
+Militech's steel block on the landing beacon (soft diagonal gradient). The hammer keeps Shade's black outline,
+which the style rules above otherwise avoid. 16x16 RPG Items (DB32) is not used yet. Pods go by who flies them (Andy, 2026-11-26): yours, a raider's, a
+derelict's; the Galactic Patrol's never shows on the flight screen, so it has no ship yet. Later each pod type also gets
+a matching pod model (an art agent's job).

@@ -50,7 +50,7 @@ public final class TalkErrands {
 			&& (Crowns.rules(server, mine, player.getUUID()) || member != null && Rank.forStanding(member.standing()) == Rank.LORD);
 		boolean atWar = mine != null && Economy.atWar(server, mine);
 		boolean holding = !player.getMainHandItem().isEmpty();
-		List<Component> options = List.of(
+		List<Component> options = new ArrayList<>(List.of(
 			Component.translatable("talk.jaymoskingdoms.errands.festival"),
 			Component.translatable("talk.jaymoskingdoms.errands.war"),
 			Component.translatable("talk.jaymoskingdoms.errands.plot_mark"),
@@ -59,9 +59,18 @@ public final class TalkErrands {
 			Component.translatable("talk.jaymoskingdoms.errands.courier"),
 			Component.translatable("talk.jaymoskingdoms.errands.ledger"),
 			Component.translatable("talk.jaymoskingdoms.errands.ask_something"),
-			Component.translatable("talk.jaymoskingdoms.errands.hot"),
-			Component.translatable("talk.jaymoskingdoms.errands.leave"));
-		List<Boolean> enabled = List.of(lord, atWar, true, true, true, holding, TownLedger.keeps(speaker), AskTopics.canAsk(speaker), speaker instanceof Villager cook && HotRuns.cooks(cook), true);
+			Component.translatable("talk.jaymoskingdoms.errands.hot")));
+		List<Boolean> enabled = new ArrayList<>(List.of(lord, atWar, true, true, true, holding, TownLedger.keeps(speaker), AskTopics.canAsk(speaker), speaker instanceof Villager cook && HotRuns.cooks(cook)));
+		// (Village mods patch 5) what the town is doing (its page, as on the town board), and the house it offered you, if it did
+		options.add(Component.translatable("talk.jaymoskingdoms.errands.doings"));
+		enabled.add(true);
+		boolean gift = GiftHouses.offered(player, speaker);
+		if (gift) {
+			options.add(Component.translatable("talk.jaymoskingdoms.errands.gift_house"));
+			enabled.add(true);
+		}
+		options.add(Component.translatable("talk.jaymoskingdoms.errands.leave"));
+		enabled.add(true);
 		ZFighterFolk.ask(player, speaker, Component.translatable("talk.jaymoskingdoms.errands.ask"), options, enabled, pick -> {
 			switch (pick) {
 				case 0 -> run(player, "kingdom festival");
@@ -78,6 +87,12 @@ public final class TalkErrands {
 				case 8 -> {
 					if (speaker instanceof Villager cook) {
 						HotRuns.offer(player, cook);
+					}
+				}
+				case 9 -> TownDoings.show(player, speaker);
+				case 10 -> {
+					if (gift) {
+						GiftHouses.accept(player, speaker);
 					}
 				}
 				default -> {

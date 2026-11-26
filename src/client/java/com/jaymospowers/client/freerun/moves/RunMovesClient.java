@@ -300,7 +300,8 @@ public final class RunMovesClient {
 			if (charge == 0) {
 				peak = ChargeJump.peak(player, player.getRandom());
 			}
-			charge = Math.min(ChargeJump.FULL_TICKS, charge + 1);
+			// (past full it sinks back, ChargeJump#fill)
+			charge = Math.min(ChargeJump.FULL_TICKS + ChargeJump.OVERCHARGE_TICKS, charge + 1);
 			return;
 		}
 		if (charge == 0) {
@@ -327,7 +328,7 @@ public final class RunMovesClient {
 	}
 
 	private static float fill(int ticks) {
-		return Math.min(1.0F, ticks / (float)ChargeJump.FULL_TICKS);
+		return ChargeJump.fill(ticks);
 	}
 
 	private static boolean showing() {

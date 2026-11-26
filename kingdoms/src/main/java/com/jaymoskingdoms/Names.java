@@ -1,5 +1,10 @@
 package com.jaymoskingdoms;
 
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
 
 /** Kingdom names: an old-sounding first half and a second, like Ashmere or Valdhollow. */
@@ -14,6 +19,49 @@ final class Names {
 
 	static String kingdom(RandomSource random) {
 		return FIRST[random.nextInt(FIRST.length)] + SECOND[random.nextInt(SECOND.length)];
+	}
+
+	/** How many draws a name no other settlement has is looked for, before the realm's number is put on the last one. */
+	static final int UNIQUE_TRIES = 40;
+
+	/**
+	 * (Andy, 2026-11-26: the realm page showed two Wyrmarchs and two Ardengards) A kingdom name no other settlement in the
+	 * world has, risen or fallen.
+	 */
+	static String kingdom(MinecraftServer server, RandomSource random) {
+		String name = kingdom(random);
+		for (int tries = 1; tries < UNIQUE_TRIES && Factions.byName(server, name) != null; tries++) {
+			name = kingdom(random);
+		}
+		return Factions.byName(server, name) == null ? name : name + " " + Factions.nextId(server);
+	}
+
+	static void register() {
+		ServerLifecycleEvents.SERVER_STARTED.register(Names::renameTwins);
+	}
+
+	/**
+	 * Realms named before names were kept apart: the younger of two standing realms of one name is named again, once, so no
+	 * two realms on the realm page (or the map) share one.
+	 */
+	private static void renameTwins(MinecraftServer server) {
+		Set<String> seen = new HashSet<>();
+		java.util.List<Faction> realms = new java.util.ArrayList<>();
+		for (Faction f : Factions.all(server)) {
+			if (f.type().isRealm() && !f.fallen()) {
+				realms.add(f);
+			}
+		}
+		realms.sort(java.util.Comparator.comparingInt(Faction::id));
+		RandomSource random = RandomSource.create(server.overworld().getSeed());
+		for (Faction f : realms) {
+			if (!seen.add(f.name().toLowerCase(Locale.ROOT))) {
+				String name = kingdom(server, random);
+				seen.add(name.toLowerCase(Locale.ROOT));
+				JaymosKingdoms.LOGGER.info("Realm {} shared the name {} with an older realm; it is now {}", f.id(), f.name(), name);
+				Factions.update(server, f.id(), x -> x.withName(name));
+			}
+		}
 	}
 
 	/** Village names: a homelier second half, like Brinbrook or Ashley. */

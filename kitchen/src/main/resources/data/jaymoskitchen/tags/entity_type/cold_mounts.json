@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:skeleton_horse",
+    "minecraft:zombie_horse",
+    {
+      "id": "minecraft:camel_husk",
+      "required": false
+    }
+  ]
+}

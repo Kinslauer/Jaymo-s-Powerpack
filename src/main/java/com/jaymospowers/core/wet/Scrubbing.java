@@ -55,17 +55,21 @@ import org.jspecify.annotations.Nullable;
  * a wet sponge on its own ({@link #scrubStain}). Each scrub takes some of every stain under it off
  * ({@code BloodTrail.scrub}); blood that has dried takes twice the scrubbing, except with sand. Pouring water over it
  * washes it away too ({@code BloodTrail}).
+ * <p>
+ * Soap (Jaymo's Kitchen's: ash, lye and tallow boiled together, {@link #SOAPS}) is the best scrub of all, used the same way
+ * as the wisp: it takes off the most blood and grime at a time ({@link #SOAP_SCRUB}, {@link #STAIN_SOAP}), old dried
+ * blood as easily as fresh, and a soaped body comes out smelling of nothing at all. Rust still stays.
  */
 public final class Scrubbing {
 	// ---- tuning ----
 	/** What one scrub takes off: blood and grime with a wisp, and with sand. */
-	static final int WISP_SCRUB = 40, SAND_SCRUB = 50;
+	static final int WISP_SCRUB = 40, SAND_SCRUB = 50, SOAP_SCRUB = 90;
 	/** Scrubs in one wisp. */
 	static final int WISP_USES = 24;
 	/** A scrub at most every this many ticks. */
 	static final int COOLDOWN = 12;
 	/** Scrubbing a stain: how much of it one scrub takes off with a wisp, sand and a wet sponge; how far round the spot (blocks). */
-	static final float STAIN_WISP = 0.35F, STAIN_SAND = 0.5F, STAIN_SPONGE = 0.45F;
+	static final float STAIN_WISP = 0.35F, STAIN_SAND = 0.5F, STAIN_SPONGE = 0.45F, STAIN_SOAP = 0.8F;
 	static final double STAIN_REACH = 0.9;
 	/**
 	 * Sand or a sponge on a wall scrubs it only with a lasting stain this near (blocks): the splats and runs on walls are
@@ -90,6 +94,8 @@ public final class Scrubbing {
 	public static @Nullable SeenBlood seen;
 
 	public static Item STRAW_WISP;
+	/** Soap (Jaymo's Kitchen's), which scrubs best. */
+	public static final net.minecraft.tags.TagKey<Item> SOAPS = net.minecraft.tags.TagKey.create(Registries.ITEM, JaymosPowers.id("soaps"));
 	private static final Map<Player, Long> LAST = new WeakHashMap<>();
 
 	private Scrubbing() {
@@ -105,6 +111,10 @@ public final class Scrubbing {
 
 	private static boolean wisp(ItemStack stack) {
 		return STRAW_WISP != null && stack.is(STRAW_WISP);
+	}
+
+	private static boolean soap(ItemStack stack) {
+		return stack.is(SOAPS);
 	}
 
 	private static boolean sand(ItemStack stack) {
@@ -131,8 +141,8 @@ public final class Scrubbing {
 			return InteractionResult.PASS;
 		}
 		ItemStack tool = player.getMainHandItem();
-		boolean sand = sand(tool);
-		if (!sand && !wisp(tool) || cauldron == null && !player.isInWater()) {
+		boolean sand = sand(tool), soap = soap(tool);
+		if (!sand && !soap && !wisp(tool) || cauldron == null && !player.isInWater()) {
 			return InteractionResult.PASS;
 		}
 		ItemStack held = player.getOffhandItem();
@@ -147,7 +157,7 @@ public final class Scrubbing {
 		}
 		LAST.put(player, now);
 		if (level instanceof ServerLevel server) {
-			int scrub = sand ? SAND_SCRUB : WISP_SCRUB;
+			int scrub = soap ? SOAP_SCRUB : sand ? SAND_SCRUB : WISP_SCRUB;
 			if (!held.isEmpty()) {
 				scrubItem(held, scrub);
 			} else {
@@ -158,6 +168,10 @@ public final class Scrubbing {
 				}
 				if (Smell.stink(player) > 0.0F) {
 					Smell.scrub(player);
+					if (soap) {
+						// washed with soap: no smell left at all
+						Smell.set(player, 0.0F);
+					}
 				}
 			}
 			if (sand) {
@@ -171,10 +185,17 @@ public final class Scrubbing {
 			Vec3 at = !held.isEmpty() ? player.getEyePosition().add(player.getLookAngle().scale(0.5)).add(0.0, -0.5, 0.0)
 				: player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 			server.sendParticles(ParticleTypes.SPLASH, at.x, at.y, at.z, 12, 0.3, 0.3, 0.3, 0.1);
-			server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, sand ? Blocks.SAND.defaultBlockState() : Blocks.HAY_BLOCK.defaultBlockState()),
-				at.x, at.y, at.z, 6, 0.25, 0.25, 0.25, 0.05);
-			level.playSound(null, at.x, at.y, at.z, sand ? SoundEvents.SAND_HIT : SoundEvents.GRASS_HIT, SoundSource.PLAYERS, 0.7F,
-				0.9F + level.getRandom().nextFloat() * 0.2F);
+			if (soap) {
+				// a lather
+				server.sendParticles(ParticleTypes.BUBBLE_POP, at.x, at.y, at.z, 16, 0.3, 0.3, 0.3, 0.02);
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.PLAYERS, 0.7F,
+					0.9F + level.getRandom().nextFloat() * 0.2F);
+			} else {
+				server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, sand ? Blocks.SAND.defaultBlockState() : Blocks.HAY_BLOCK.defaultBlockState()),
+					at.x, at.y, at.z, 6, 0.25, 0.25, 0.25, 0.05);
+				level.playSound(null, at.x, at.y, at.z, sand ? SoundEvents.SAND_HIT : SoundEvents.GRASS_HIT, SoundSource.PLAYERS, 0.7F,
+					0.9F + level.getRandom().nextFloat() * 0.2F);
+			}
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.3F, 1.3F);
 		}
 		return InteractionResult.SUCCESS;
@@ -191,8 +212,8 @@ public final class Scrubbing {
 			return InteractionResult.PASS;
 		}
 		ItemStack tool = player.getMainHandItem();
-		boolean sand = sand(tool), sponge = tool.is(Items.WET_SPONGE);
-		if (!sand && !sponge && !wisp(tool)) {
+		boolean sand = sand(tool), sponge = tool.is(Items.WET_SPONGE), soap = soap(tool);
+		if (!sand && !sponge && !soap && !wisp(tool)) {
 			return InteractionResult.PASS;
 		}
 		ItemStack water = player.getOffhandItem();
@@ -204,7 +225,7 @@ public final class Scrubbing {
 		boolean wall = hit.getDirection().getAxis() != Direction.Axis.Y;
 		boolean blood;
 		if (!sand && !sponge) {
-			// a wisp is never placed, so the two sides may judge it differently
+			// a wisp (or soap) is never placed, so the two sides may judge it differently
 			blood = wall || (level instanceof ServerLevel server ? BloodTrail.stained(server, at, STAIN_REACH)
 				: seen != null && seen.near(level, at, STAIN_REACH));
 		} else {
@@ -227,7 +248,8 @@ public final class Scrubbing {
 			}
 			return InteractionResult.SUCCESS;
 		}
-		BloodTrail.scrub(server, at, STAIN_REACH, sand ? STAIN_SAND : sponge ? STAIN_SPONGE : STAIN_WISP, sand);
+		// (soap, like sand, takes dried blood as easily as fresh)
+		BloodTrail.scrub(server, at, STAIN_REACH, soap ? STAIN_SOAP : sand ? STAIN_SAND : sponge ? STAIN_SPONGE : STAIN_WISP, sand || soap);
 		if (sand) {
 			tool.consume(1, player);
 		} else if (!sponge) {
@@ -238,7 +260,9 @@ public final class Scrubbing {
 		}
 		Vec3 face = at.add(hit.getDirection().getStepX() * 0.05, hit.getDirection().getStepY() * 0.05, hit.getDirection().getStepZ() * 0.05);
 		server.sendParticles(ParticleTypes.SPLASH, face.x, face.y, face.z, 10, 0.25, 0.1, 0.25, 0.1);
-		if (!sponge) {
+		if (soap) {
+			server.sendParticles(ParticleTypes.BUBBLE_POP, face.x, face.y, face.z, 10, 0.25, 0.1, 0.25, 0.02);
+		} else if (!sponge) {
 			server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, sand ? Blocks.SAND.defaultBlockState() : Blocks.HAY_BLOCK.defaultBlockState()),
 				face.x, face.y, face.z, 5, 0.2, 0.1, 0.2, 0.05);
 		}

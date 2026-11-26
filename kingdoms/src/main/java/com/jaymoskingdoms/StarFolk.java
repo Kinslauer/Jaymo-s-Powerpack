@@ -75,7 +75,7 @@ public final class StarFolk {
 	private static final Map<UUID, Set<UUID>> SEEN = new HashMap<>();
 
 	private static boolean looked;
-	private static @Nullable MethodHandle unread, rank, sell, name, flights;
+	private static @Nullable MethodHandle unread, rank, sell, name, flights, hasStardust, hint;
 
 	private StarFolk() {
 	}
@@ -106,6 +106,14 @@ public final class StarFolk {
 					sell = lookup.findStatic(api, "sell", MethodType.methodType(boolean.class, ServerPlayer.class, int.class));
 					name = lookup.findStatic(api, "name", MethodType.methodType(Component.class, int.class));
 					flights = lookup.findStatic(api, "flights", MethodType.methodType(int.class, ServerPlayer.class));
+					try {
+						// (older Powers have no stardust: a stargazer then trades no hints)
+						hasStardust = lookup.findStatic(api, "hasStardust", MethodType.methodType(boolean.class, ServerPlayer.class));
+						hint = lookup.findStatic(api, "hint", MethodType.methodType(Component.class, ServerPlayer.class));
+					} catch (ReflectiveOperationException | LinkageError e) {
+						hasStardust = null;
+						hint = null;
+					}
 				} catch (ReflectiveOperationException | LinkageError e) {
 					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' star charts (older Powers?)", e);
 					unread = null;
@@ -122,6 +130,24 @@ public final class StarFolk {
 		} catch (Throwable e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't read the star charts of {}", player.getName().getString(), e);
 			return List.of();
+		}
+	}
+
+	/** Whether {@code player} has a pinch of stardust to trade for a hint of the sky. */
+	private static boolean hasStardust(ServerPlayer player) {
+		try {
+			return ready() && hasStardust != null && (boolean)hasStardust.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** One line of hint about the sky for a pinch of stardust, or null. */
+	private static @Nullable Component hint(ServerPlayer player) {
+		try {
+			return ready() && hint != null ? (Component)hint.invoke(player) : null;
+		} catch (Throwable e) {
+			return null;
 		}
 	}
 
@@ -198,7 +224,8 @@ public final class StarFolk {
 			tell(level, speaker, player);
 		}
 		Item dust = hermit ? dust() : Items.AIR;
-		if (worlds.isEmpty() && dust == Items.AIR) {
+		boolean hints = !hermit && hasStardust(player);
+		if (worlds.isEmpty() && dust == Items.AIR && !hints) {
 			ZFighterFolk.ask(player, speaker, Component.translatable("talk.jaymoskingdoms.stars.none"), List.of(Component.translatable("talk.jaymoskingdoms.stars.leave")),
 				List.of(true), pick -> {
 				});
@@ -218,9 +245,19 @@ public final class StarFolk {
 			options.add(Component.translatable("talk.jaymoskingdoms.stars.dust", DUST_COUNT, Money.text(player, Money.worth(DUST_PRICE))));
 			enabled.add(canPay(player, DUST_PRICE));
 		}
+		if (hints) {
+			options.add(Component.translatable("talk.jaymoskingdoms.stars.hint"));
+			enabled.add(true);
+		}
 		options.add(Component.translatable("talk.jaymoskingdoms.stars.leave"));
 		enabled.add(true);
 		ZFighterFolk.ask(player, speaker, words, options, enabled, pick -> {
+			if (hints && pick == worlds.size() + (sellsDust ? 1 : 0)) {
+				// a pinch of stardust for a line of the sky
+				Component line = hint(player);
+				Speech.tell(level, speaker, player, line == null ? Component.translatable("talk.jaymoskingdoms.stars.hint_none") : line, COLOR);
+				return;
+			}
 			if (sellsDust && pick == worlds.size()) {
 				// (0.7.498) the dust is handed over only once the coin is taken
 				if (!take(player, DUST_PRICE)) {

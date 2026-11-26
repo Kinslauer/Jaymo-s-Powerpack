@@ -45,7 +45,8 @@ import net.minecraft.world.level.gamerules.GameRules;
 /**
  * (0.17.184) Baubles (Andy: "need this", the CurseForge Baubles mod). Baubles itself is a 1.12 Forge mod and no
  * accessory-slot mod (Trinkets, Accessories, Curios) has a Fabric 26.3 build, so this is our own, laid out as Baubles
- * was: seven slots, an amulet, two rings, a belt, a head piece, a body piece and a charm, and a wrist (0.19.87) for bracelets.
+ * was: seven slots, an amulet, two rings, a belt, a head piece, a body piece and a charm, and a wrist (0.19.87) for bracelets;
+ * then the feet and a back slot for one weapon or tool.
  * <ul>
  * <li>The slots have their own screen, opened from a tab on the inventory's left edge (or the unbound Baubles key).</li>
  * <li>What fits each slot is an item tag ({@code jaymospowers:baubles/<slot>}), so any item can be made wearable by
@@ -61,7 +62,13 @@ public final class Baubles {
 		/** (0.19.87) Bracelets. Added last so saved lists of seven still load. */
 		WRIST("wrist"),
 		/** (Artifacts) Shoes, slippers and flippers. Added after the wrist so saved lists of eight still load. */
-		FEET("feet");
+		FEET("feet"),
+		/**
+		 * Andy (Vanilla+, Back Weapon Slot row): "make this the default". One weapon or tool carried on the back, drawn there
+		 * ({@code BodyWeapons}), swapped with the held item by a key ({@link BackSlot}). Added last so saved lists of nine
+		 * still load. Fits anything the body shows ({@code BodyWeapons.kind}) or tagged {@code jaymospowers:baubles/back}.
+		 */
+		BACK("back");
 
 		public final String id;
 		public final TagKey<Item> tag;
@@ -72,8 +79,8 @@ public final class Baubles {
 		}
 	}
 
-	/** Which kind each of the nine slots takes. */
-	public static final Kind[] SLOTS = {Kind.AMULET, Kind.RING, Kind.RING, Kind.BELT, Kind.HEAD, Kind.BODY, Kind.CHARM, Kind.WRIST, Kind.FEET};
+	/** Which kind each of the ten slots takes. */
+	public static final Kind[] SLOTS = {Kind.AMULET, Kind.RING, Kind.RING, Kind.BELT, Kind.HEAD, Kind.BODY, Kind.CHARM, Kind.WRIST, Kind.FEET, Kind.BACK};
 	public static final int SIZE = SLOTS.length;
 	/** How often (ticks) worn bonuses are checked again, besides whenever the slots change. */
 	static final int REFRESH_TICKS = 20;
@@ -106,6 +113,8 @@ public final class Baubles {
 	static final TagKey<Item> HIP_SHOWN = TagKey.create(Registries.ITEM, JaymosPowers.id("hip_shown"));
 	/** The belt and body slots, for {@link #SHOWN}. */
 	public static final int BELT_SLOT = 3;
+	/** The back slot (a weapon or tool carried on the back). */
+	public static final int BACK_SLOT = 9;
 	static final int BODY_SLOT = 5;
 
 	public static MenuType<BaublesMenu> MENU;
@@ -124,6 +133,8 @@ public final class Baubles {
 
 	public static void init() {
 		MENU = Registry.register(BuiltInRegistries.MENU, JaymosPowers.id("baubles"), new MenuType<>(BaublesMenu::new, FeatureFlags.VANILLA_SET));
+		PICTURES.put(Kind.BACK, net.minecraft.world.item.Items.IRON_SWORD);
+		BackSlot.init();
 		HEARTSTONE_AMULET = bauble("heartstone_amulet", Kind.AMULET, Rarity.UNCOMMON,
 			new BaubleItem.Bonus(Attributes.MAX_HEALTH, 4.0, AttributeModifier.Operation.ADD_VALUE));
 		SWIFTFOOT_RING = bauble("swiftfoot_ring", Kind.RING, Rarity.UNCOMMON,
@@ -144,12 +155,17 @@ public final class Baubles {
 		// (Motion patch 4) a lantern on a stick, worn on the back with the lantern hung out over the head
 		LANTERN_POLE = bauble("lantern_pole", Kind.BODY, Rarity.COMMON);
 		SKY_MASK = bauble("sky_mask", Kind.HEAD, Rarity.COMMON);
+		// (Village mods patch 5) the village trades' hats, ported from Villager Hats (MIT)
+		TradeHats.init();
 		// (0.20.12) the pink fairy, caught in a bottle
 		Fairies.init();
 		// (Artifacts) the Artifacts mod's 45 baubles, ported (MIT), and where they are found
 		com.jaymospowers.baubles.artifacts.ArtifactBaubles.init();
 		// the ticking charm: clicks faster the nearer the blight
 		TickingCharm.init();
+		// belt charms against the heat and the cold, counted in Kitchen's body heat when it is loaded
+		ClimateCharms.init();
+		com.jaymospowers.compat.KitchenBodyHeat.init();
 		// what the thing under the wreck leaves: a charm that saves its wearer from the water once, and a tooth
 		ClingingCoil.init();
 		// the boots of long strides and the cloak of the depths
@@ -217,7 +233,24 @@ public final class Baubles {
 
 	/** Whether {@code stack} may go in slot {@code slot}. */
 	public static boolean fits(int slot, ItemStack stack) {
+		if (slot == BACK_SLOT) {
+			return !stack.isEmpty() && (stack.is(Kind.BACK.tag) || com.jaymospowers.armory.BodyWeapons.carriedOnBody(stack));
+		}
 		return slot >= 0 && slot < SIZE && stack.is(SLOTS[slot].tag);
+	}
+
+	/**
+	 * Whether shift-click and sneak-use may put {@code stack} on in {@code slot}: every slot but the back, so a weapon or
+	 * tool still shift-clicks and uses as vanilla's (it goes on the back by the bauble screen or the swap key).
+	 */
+	static boolean quickFits(int slot, ItemStack stack) {
+		return slot != BACK_SLOT && fits(slot, stack);
+	}
+
+	/** What {@code player} carries on the back (empty if nothing); server, and the wearer's own client. */
+	public static ItemStack back(Player player) {
+		List<ItemStack> saved = player.getAttached(WORN);
+		return saved != null && BACK_SLOT < saved.size() ? saved.get(BACK_SLOT) : ItemStack.EMPTY;
 	}
 
 	/**
@@ -511,7 +544,7 @@ public final class Baubles {
 	static boolean equipFromHand(ServerPlayer player, ItemStack stack) {
 		List<ItemStack> worn = worn(player);
 		for (int i = 0; i < SIZE; i++) {
-			if (worn.get(i).isEmpty() && fits(i, stack)) {
+			if (worn.get(i).isEmpty() && quickFits(i, stack)) {
 				worn.set(i, stack.copyWithCount(1));
 				setWorn(player, worn);
 				stack.shrink(1);

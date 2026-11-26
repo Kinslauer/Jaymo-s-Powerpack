@@ -81,6 +81,15 @@ public final class RuinFolk {
 	static final AttachmentType<Map<String, Integer>> MAPS = AttachmentRegistry.create(JaymosKingdoms.id("ruin_maps"),
 		b -> b.persistent(Codec.unboundedMap(Codec.STRING, Codec.INT)));
 
+	/** Tales each keeper tells of their city (lang {@code dialogue.chat.jaymoskingdoms.keeper_tale.<people>.<n>}); their waiting and done lines. */
+	public static final int TALES = 6, WAITS = 3, DONES = 3;
+	/** On a descendant: how many of their tales each player has heard (by UUID). Saved. */
+	static final AttachmentType<Map<String, Integer>> TOLD = AttachmentRegistry.create(JaymosKingdoms.id("ruin_folk_told"),
+		b -> b.persistent(Codec.unboundedMap(Codec.STRING, Codec.INT)));
+	/** On a descendant: the players who have traded at their stall since their last tale (by UUID). Saved. */
+	static final AttachmentType<List<String>> OWED = AttachmentRegistry.create(JaymosKingdoms.id("ruin_folk_owed"),
+		b -> b.persistent(Codec.STRING.listOf()));
+
 	/** The nearest other city each city's map leads to (its start chunk → place). */
 	private static final Map<Long, BlockPos> MAPPED = new HashMap<>();
 
@@ -152,6 +161,43 @@ public final class RuinFolk {
 		}
 	}
 
+	/**
+	 * What {@code keeper} tells {@code player} as they open their talk (Lore: What the keepers tell): their city's story a
+	 * little at a time, never all at once. The first tale at once; each one after only once they've come back and traded
+	 * at the stall since the last; till then a word to come back, and when it's all told, that it is.
+	 */
+	public static Component tell(Villager keeper, ServerPlayer player) {
+		String who = player.getUUID().toString();
+		Map<String, Integer> told = new HashMap<>(keeper.getAttachedOrElse(TOLD, Map.of()));
+		List<String> owed = new ArrayList<>(keeper.getAttachedOrElse(OWED, List.of()));
+		int heard = told.getOrDefault(who, 0);
+		if (heard >= TALES) {
+			return Component.translatable("dialogue.chat.jaymoskingdoms.keeper_done." + keeper.getRandom().nextInt(DONES));
+		}
+		if (heard > 0 && !owed.contains(who)) {
+			return Component.translatable("dialogue.chat.jaymoskingdoms.keeper_wait." + keeper.getRandom().nextInt(WAITS));
+		}
+		told.put(who, heard + 1);
+		owed.remove(who);
+		keeper.setAttached(TOLD, told);
+		keeper.setAttached(OWED, owed);
+		return Component.translatable("dialogue.chat.jaymoskingdoms.keeper_tale." + people(keeper).id + "." + heard);
+	}
+
+	/** VillagerTradeMixin: {@code player} traded at {@code keeper}'s stall, so they've another tale coming. */
+	public static void traded(Villager keeper, ServerPlayer player) {
+		if (!is(keeper)) {
+			return;
+		}
+		List<String> owed = keeper.getAttachedOrElse(OWED, List.of());
+		String who = player.getUUID().toString();
+		if (!owed.contains(who)) {
+			List<String> next = new ArrayList<>(owed);
+			next.add(who);
+			keeper.setAttached(OWED, next);
+		}
+	}
+
 	static People people(Entity e) {
 		return People.byName(e.getAttachedOrElse(FOLK, People.SUNSTEP.id));
 	}
@@ -210,7 +256,7 @@ public final class RuinFolk {
 						.get(ResourceKey.create(Registries.STRUCTURE, JaymosKingdoms.id(o.id + "_ruins"))).ifPresent(others::add);
 				}
 			}
-			found = others.isEmpty() ? null : level.findNearestMapStructure(HolderSet.direct(others), v.blockPosition(), MAP_SEARCH, false);
+			found = others.isEmpty() ? null : com.jaymoskingdoms.Scout.nearest(level, HolderSet.direct(others), v.blockPosition(), MAP_SEARCH);
 			MAPPED.put(key, found);
 		}
 		if (found == null) {

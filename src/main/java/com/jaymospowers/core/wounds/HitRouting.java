@@ -1,5 +1,6 @@
 package com.jaymospowers.core.wounds;
 
+import com.jaymospowers.core.BlastGore;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.LimbBoxes;
 import com.jaymospowers.core.LockOnRegions;
@@ -66,7 +67,7 @@ final class HitRouting {
 		} else if (source.is(DamageTypeTags.IS_EXPLOSION) || source.is(DamageTypeTags.IS_DROWNING) || source.is(DamageTypes.IN_WALL)
 			|| source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)
 			|| source.is(DamageTypes.LIGHTNING_BOLT)) {
-			spread(victim, plan, points, max, loss);
+			spread(victim, plan, points, max, loss, source.is(DamageTypeTags.IS_EXPLOSION) ? BlastGore.exposure(victim, source) : -1);
 		} else if (source.getDirectEntity() != null || source.getEntity() != null) {
 			// a player locked onto it lands where the lock aims (LockOnRegions), else where the blow came
 			BodyPart aimed = LockOnRegions.aimedPart(victim, plan, source);
@@ -74,7 +75,7 @@ final class HitRouting {
 			damage(points, plan, landed, loss * guard(victim, source, landed) * (headshot(victim, source, landed) ? HEADSHOT : 1.0F));
 			return landed;
 		} else {
-			spread(victim, plan, points, max, loss);
+			spread(victim, plan, points, max, loss, -1);
 		}
 		return null;
 	}
@@ -84,10 +85,21 @@ final class HitRouting {
 	 * that the health loses of its most, never below {@link #SPREAD_FLOOR} of it (so fire or poison never blacks out or
 	 * breaks a part: the health runs out first).
 	 */
-	private static void spread(LivingEntity victim, BodyPlan plan, float[] points, float max, float loss) {
+	private static void spread(LivingEntity victim, BodyPlan plan, float[] points, float max, float loss, int exposed) {
 		float share = loss / Math.max(0.01F, victim.getMaxHealth());
+		if (exposed != -1) {
+			// (a blast with parts out of its sight: the exposed ones take the whole of it between them)
+			float reached = 0.0F;
+			for (int i = 0; i < points.length; i++) {
+				reached += (exposed >> plan.part(i).ordinal() & 1) != 0 ? plan.share(i, victim) : 0.0F;
+			}
+			share *= reached > 0.01F ? plan.total(victim) / reached : 1.0F;
+		}
 		for (int i = 0; i < points.length; i++) {
-			float cap = plan.share(i) * max;
+			if (exposed != -1 && (exposed >> plan.part(i).ordinal() & 1) == 0) {
+				continue;
+			}
+			float cap = plan.share(i, victim) * max;
 			float floor = Math.min(points[i], SPREAD_FLOOR * cap);
 			points[i] = Math.max(floor, points[i] - share * cap);
 		}

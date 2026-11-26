@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "jaymospowers:block/fuel_works"
+    },
+    "lit=true": {
+      "model": "jaymospowers:block/fuel_works_lit"
+    }
+  }
+}

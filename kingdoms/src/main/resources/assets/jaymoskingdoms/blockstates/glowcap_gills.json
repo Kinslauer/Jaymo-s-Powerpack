@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "bottom=false": {
+      "model": "jaymoskingdoms:block/glowcap_gills"
+    },
+    "bottom=true": {
+      "model": "jaymoskingdoms:block/glowcap_gills_tip"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": "#jaymospowers:dark_hides",
+    "X": "minecraft:string"
+  },
+  "pattern": [
+    "DXD",
+    "D D",
+    "D D"
+  ],
+  "result": {
+    "id": "jaymospowers:dark_trapper_leggings"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/chequered_gambeson",
+    "layer1": "jaymoskingdoms:item/chequered_gambeson_trim"
+  }
+}

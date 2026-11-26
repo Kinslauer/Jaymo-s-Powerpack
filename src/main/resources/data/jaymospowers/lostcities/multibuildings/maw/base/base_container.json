@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/base/base_container00",
+      "jaymospowers:maw/base/base_container01",
+      "jaymospowers:maw/base/base_container02"
+    ],
+    [
+      "jaymospowers:maw/base/base_container10",
+      "jaymospowers:maw/base/base_container11",
+      "jaymospowers:maw/base/base_container12"
+    ],
+    [
+      "jaymospowers:maw/base/base_container20",
+      "jaymospowers:maw/base/base_container21",
+      "jaymospowers:maw/base/base_container22"
+    ]
+  ]
+}

@@ -167,6 +167,7 @@ final class GravityWrath implements ElementalCorruption.Wrath {
 			// (the block it hit, and the loose blocks round it that lie open to the sky)
 			if (loose(state) && (pos.equals(at) || level.getBlockState(pos.above()).isAir())) {
 				level.levelEvent(2001, pos, Block.getId(state));
+				com.jaymospowers.core.TerrainReturn.record(level, pos);
 				level.removeBlock(pos, false);
 			}
 		}

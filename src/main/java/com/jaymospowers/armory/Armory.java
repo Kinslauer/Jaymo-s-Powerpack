@@ -59,7 +59,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>Daggers, hatchets, primitive spears, throwing sticks and the harpoon are held back and thrown like a trident
  * ({@link ThrowingWeaponItem}); kunai and throwing stars fly at a flick and stack. (0.18.64) Knives parry rather than
  * throw, and Balkon's knife and our dagger swap held damage ({@link KnifeGuard}).</li>
- * <li>The lance, couched on a moving mount, hits harder the faster you ride ({@link #LANCE_CHARGE}).</li>
+ * <li>The lance, from a mount it reaches down from (a horse, a pig, a goat, not a camel or dragon): right-click couches it
+ * like Kingdoms' Couched Lance ({@link LanceCouch}), and its swings hit harder the faster you ride ({@link #LANCE_CHARGE}).</li>
  * <li>The flanged mace and the war axe knock a raised shield aside, like an axe.</li>
  * <li>The machete cuts through leaves, vines and crops fast.</li>
  * <li>The round shield blocks like a shield and comes up a little quicker.</li>
@@ -140,6 +141,9 @@ public final class Armory {
 	static final Map<Tier, Item> LANCES = new EnumMap<>(Tier.class);
 	/** (Strains C) The bomb glider's item: placed like a boat, it's the {@link BombGlider}. */
 	public static Item BOMB_GLIDER;
+	/** The future's hoverboard (on the bomb glider's hull), and the bench it is built at. */
+	public static Item HOVERBOARD;
+	public static Block FUTURE_WORKBENCH;
 	/**
 	 * A weighted string net. Rogues &amp; Warriors' Throw Net spends one per cast (compat/SpellThrows); Andy: "make a net
 	 * item crafted from string".
@@ -149,7 +153,11 @@ public final class Armory {
 	public static Item FANG_GAUNTLETS;
 	/** (BWM port) The mining charge ({@link MiningChargeBlock}). */
 	public static Block MINING_CHARGE;
-	public static final ResourceKey<EquipmentAsset> CAVEMAN = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("caveman"));
+	/**
+	 * The primitive hide sets, each with its own look (Andy: "i want all 3, and they can have a darker variation made
+	 * from darker hides"): the cave band's Caveman, the Trapper's and the Barbarian's, and their dark makes.
+	 */
+	static final String[] HIDE_SETS = {"caveman", "dark_caveman", "trapper", "dark_trapper", "barbarian", "dark_barbarian"};
 
 	/** (0.10.13) A quarterstaff in a wind sorcerer's hand rides the gale (WindStaff). */
 	private static final ItemLore STAFF_LORE = new ItemLore(List.of(
@@ -188,10 +196,13 @@ public final class Armory {
 		Twinblade.schematic = item("twinblade_schematic", Item::new, p -> p.stacksTo(1).rarity(net.minecraft.world.item.Rarity.UNCOMMON)
 			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade_schematic.hint").withStyle(ChatFormatting.GRAY),
 				Component.translatable("item.jaymospowers.twinblade_schematic.old").withStyle(ChatFormatting.DARK_GRAY)))));
-		item("caveman_helmet", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.HELMET));
-		item("caveman_chestplate", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.CHESTPLATE));
-		item("caveman_leggings", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.LEGGINGS));
-		item("caveman_boots", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.BOOTS));
+		for (String set : HIDE_SETS) {
+			ArmorMaterial hide = hide(set);
+			item(set + "_helmet", Item::new, p -> p.humanoidArmor(hide, ArmorType.HELMET));
+			item(set + "_chestplate", Item::new, p -> p.humanoidArmor(hide, ArmorType.CHESTPLATE));
+			item(set + "_leggings", Item::new, p -> p.humanoidArmor(hide, ArmorType.LEGGINGS));
+			item(set + "_boots", Item::new, p -> p.humanoidArmor(hide, ArmorType.BOOTS));
+		}
 		// antiquity's bow, Japan's throwing irons, the whalers' harpoon
 		item("recurve_bow", RecurveBowItem::new, p -> p.durability(RecurveBowItem.DURABILITY).enchantable(1));
 		// (Smithing) its steel broadhead
@@ -240,6 +251,12 @@ public final class Armory {
 		// (Strains C) the bomb glider: a bat-winged board that drops dynamite
 		BOMB_GLIDER = item("bomb_glider", BombGliderItem::new, p -> p.stacksTo(1));
 		BombGliderNet.init();
+		// the future's hoverboard: never found, built at the Future Workbench
+		HOVERBOARD = item("hoverboard", HoverboardItem::new, p -> p.stacksTo(1));
+		ResourceKey<Block> benchKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("future_workbench"));
+		FUTURE_WORKBENCH = Registry.register(BuiltInRegistries.BLOCK, benchKey, new FutureWorkbenchBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.METAL).strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().setId(benchKey)));
+		item("future_workbench", p -> new BlockItem(FUTURE_WORKBENCH, p), p -> p.useBlockDescriptionPrefix());
 		// (BWM port) the mining charge: stuck to a block, it digs a 3x3x3 hole into it
 		ResourceKey<Block> chargeKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("mining_charge"));
 		MINING_CHARGE = Registry.register(BuiltInRegistries.BLOCK, chargeKey, new MiningChargeBlock(BlockBehaviour.Properties.of()
@@ -259,9 +276,11 @@ public final class Armory {
 		RapierItem.init();
 		PatronWeapons.init();
 		Lash.init();
+		LanceCouch.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker
-				&& entity.level() instanceof ServerLevel level && isLance(attacker.getMainHandItem())) {
+				&& entity.level() instanceof ServerLevel level && isLance(attacker.getMainHandItem()) && !LanceCouch.striking
+				&& LanceCouch.horseback(attacker)) {
 				charge(level, attacker, entity);
 			}
 		});
@@ -280,14 +299,14 @@ public final class Armory {
 		return LANCES.containsValue(stack.getItem());
 	}
 
-	/** A couched lance: the faster the mount, the harder it lands, and the further it throws the target back. */
+	/** A lance swung from the saddle: the faster the mount, the harder it lands, and the further it throws the target back. */
 	private static void charge(ServerLevel level, LivingEntity rider, LivingEntity target) {
 		Entity mount = rider.getVehicle();
 		if (mount == null || !target.isAlive()) {
 			return;
 		}
 		Vec3 move = mount.getKnownMovement();
-		double speed = Math.max(move.horizontalDistance(), mount.position().subtract(mount.xo, mount.yo, mount.zo).horizontalDistance());
+		double speed = LanceCouch.speed(mount);
 		if (speed < LANCE_MIN_SPEED) {
 			return;
 		}
@@ -387,19 +406,15 @@ public final class Armory {
 			Tool.Rule.overrideSpeed(blocks.getOrThrow(BlockTags.SWORD_EFFICIENT), MACHETE_CUT_SPEED)), 1.0F, 2, false);
 	}
 
-	private static ArmorMaterial caveman;
-
-	/** Hide and bone: leather's protection, a little tougher-wearing. */
-	private static ArmorMaterial cavemanHide() {
-		if (caveman == null) {
-			Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
-			defense.put(ArmorType.BOOTS, 1);
-			defense.put(ArmorType.LEGGINGS, 2);
-			defense.put(ArmorType.CHESTPLATE, 3);
-			defense.put(ArmorType.HELMET, 1);
-			defense.put(ArmorType.BODY, 3);
-			caveman = new ArmorMaterial(7, defense, 15, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.0F, ItemTags.REPAIRS_LEATHER_ARMOR, CAVEMAN);
-		}
-		return caveman;
+	/** Hide and bone: leather's protection, a little tougher-wearing. Every hide set wears the same; only the look differs. */
+	private static ArmorMaterial hide(String set) {
+		Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
+		defense.put(ArmorType.BOOTS, 1);
+		defense.put(ArmorType.LEGGINGS, 2);
+		defense.put(ArmorType.CHESTPLATE, 3);
+		defense.put(ArmorType.HELMET, 1);
+		defense.put(ArmorType.BODY, 3);
+		ResourceKey<EquipmentAsset> look = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id(set));
+		return new ArmorMaterial(7, defense, 15, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.0F, ItemTags.REPAIRS_LEATHER_ARMOR, look);
 	}
 }

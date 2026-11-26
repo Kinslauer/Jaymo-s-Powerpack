@@ -1,9 +1,9 @@
 package com.jaymoskingdoms;
 
+import java.util.List;
 import java.util.Optional;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
@@ -17,6 +17,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 /**
  * (0.7.105) Tiered monster gear, after Just-In COMBAT's (its idea only, our own code): the {@link WorldTiers} a monster
@@ -30,7 +32,10 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
  * <li>Rare: iron, a rapier or longsword when Jaymo's Powers is there</li>
  * <li>Legendary: steel plate and heavy iron blades, always enchanted (no diamond gear: Andy, 2026-11-15)</li>
  * </ol>
- * They drop it as vanilla's mobs do (now and then, worn). Gear a monster already had is kept.
+ * They drop it as vanilla's mobs do (now and then, worn). Gear a monster already had is kept. What each grade holds is
+ * data, not code (as MobGear's tables, {@link MobGearTables}): the loot tables {@code monster_gear/<grade>_armor} (a
+ * pool per piece), {@code _weapon} and {@code _shield}, Jaymo's Powers' blades and shields in item tags as optional
+ * entries, so a datapack can change any grade.
  * <p>
  * Deeper monsters, older gear: a zombie, skeleton or vindicator that spawns naturally below y 0 ({@link #armDeep}) is
  * dressed as if its world tier were higher by the band it spawned in, and the band is kept on it, so the world tier it
@@ -69,27 +74,11 @@ public final class MonsterGear {
 	/** (0.7.386) How often a star-touched mob that wears armour takes each empty slot's dyed piece. */
 	static final float STAR_PIECE_CHANCE = 0.75F;
 
-	/** Per grade: helmet, chestplate, leggings, boots. */
-	private static final Item[][] ARMOR = {
-		{Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS},
-		{Items.COPPER_HELMET, Items.COPPER_CHESTPLATE, Items.COPPER_LEGGINGS, Items.COPPER_BOOTS},
-		{Items.CHAINMAIL_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.CHAINMAIL_LEGGINGS, Items.CHAINMAIL_BOOTS},
-		{Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS}};
-	/** Legendary armour: the Armory's steel plate (iron if it's missing), helmet to boots. */
-	private static final String[] LEGENDARY_ARMOR = {"jaymoskingdoms:steel_plate_helmet", "jaymoskingdoms:steel_plate_chestplate",
-		"jaymoskingdoms:steel_plate_leggings", "jaymoskingdoms:steel_plate_boots"};
+	/** The grades' names, as their loot tables are named ({@code jaymoskingdoms:monster_gear/<grade>_armor}, {@code _weapon}, {@code _shield}). */
+	static final String[] GRADES = {"worn", "common", "fine", "rare", "legendary"};
 	private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-	/** Per grade, the weapons (Jaymo's Powers' ids are used when it's there, the vanilla one after each otherwise). */
-	private static final String[][] WEAPONS = {
-		{"minecraft:stone_sword", "minecraft:stone_axe", "jaymospowers:stone_rapier"},
-		{"minecraft:copper_sword", "minecraft:copper_axe", "jaymospowers:iron_dagger"},
-		{"minecraft:iron_sword", "jaymospowers:iron_saber", "jaymospowers:iron_rapier"},
-		{"jaymospowers:iron_rapier", "jaymospowers:iron_longsword", "minecraft:iron_axe"},
-		{"jaymospowers:iron_claymore", "jaymospowers:iron_broadsword", "jaymospowers:iron_war_axe"}};
+	/** Per grade, the weapon when its table gives none (Jaymo's Powers' blades missing). */
 	private static final Item[] FALLBACK = {Items.STONE_SWORD, Items.COPPER_SWORD, Items.IRON_SWORD, Items.IRON_AXE, Items.IRON_SWORD};
-	/** Per grade, the shield (a round shield from Jaymo's Powers above common). */
-	private static final String[] SHIELDS = {"minecraft:shield", "minecraft:shield", "jaymospowers:iron_round_shield",
-		"jaymospowers:iron_round_shield", "jaymospowers:iron_round_shield"};
 
 	private MonsterGear() {
 	}
@@ -144,7 +133,7 @@ public final class MonsterGear {
 			// an illager's model shows no armour: only the axe it carries is swapped for a better blade
 			if (mob.getRandom().nextFloat() < WEAPON_CHANCE[tier]) {
 				int grade = grade(mob.getRandom(), tier);
-				mob.setItemSlot(EquipmentSlot.MAINHAND, finish(level, mob.getRandom(), weapon(mob.getRandom(), grade), grade));
+				mob.setItemSlot(EquipmentSlot.MAINHAND, finish(level, mob.getRandom(), weapon(level, mob, grade), grade));
 			}
 			return;
 		}
@@ -160,26 +149,29 @@ public final class MonsterGear {
 				mob.setItemSlot(slot, finish(level, random, new ItemStack(dark.get()), 4));
 			} else if (mob.getItemBySlot(slot).isEmpty() && random.nextFloat() < ARMOR_CHANCE[tier]) {
 				int grade = grade(random, tier);
-				Item piece = grade < ARMOR.length ? ARMOR[grade][i] : item(LEGENDARY_ARMOR[i]).orElse(ARMOR[ARMOR.length - 1][i]);
-				mob.setItemSlot(slot, finish(level, random, new ItemStack(piece), grade));
+				ItemStack piece = armour(level, mob, grade, slot);
+				if (!piece.isEmpty()) {
+					mob.setItemSlot(slot, finish(level, random, piece, grade));
+				}
 			}
 		}
 		boolean zombie = mob instanceof Zombie;
 		if (zombie && mob.getMainHandItem().isEmpty() && random.nextFloat() < WEAPON_CHANCE[tier]
 			|| !zombie && random.nextFloat() < SKELETON_BLADE_CHANCE[tier]) {
 			int grade = grade(random, tier);
-			mob.setItemSlot(EquipmentSlot.MAINHAND, finish(level, random, weapon(random, grade), grade));
+			mob.setItemSlot(EquipmentSlot.MAINHAND, finish(level, random, weapon(level, mob, grade), grade));
 		}
 		if (ShieldBearers.canBear(mob) && random.nextFloat() < SHIELD_CHANCE[tier]) {
 			int grade = grade(random, tier);
-			mob.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(item(SHIELDS[grade]).orElse(Items.SHIELD)));
+			List<ItemStack> shield = table(level, mob, grade, "shield");
+			mob.setItemSlot(EquipmentSlot.OFFHAND, shield.isEmpty() ? new ItemStack(Items.SHIELD) : shield.get(0));
 		}
 	}
 
-	/** A weapon from world tier {@code tier}'s grades (a zombie horde's armed few, {@link ZombieHordes}). */
-	static ItemStack weaponFor(ServerLevel level, RandomSource random, int tier) {
+	/** A weapon for {@code mob} from world tier {@code tier}'s grades (a zombie horde's armed few, {@link ZombieHordes}). */
+	static ItemStack weaponFor(ServerLevel level, Mob mob, RandomSource random, int tier) {
 		int grade = grade(random, Mth.clamp(tier, 0, GRADE_WEIGHTS.length - 1));
-		return finish(level, random, weapon(random, grade), grade);
+		return finish(level, random, weapon(level, mob, grade), grade);
 	}
 
 	/** A grade, 0 (worn) to 4 (legendary), by the world tier's weights. */
@@ -199,9 +191,26 @@ public final class MonsterGear {
 		return 0;
 	}
 
-	private static ItemStack weapon(RandomSource random, int grade) {
-		String[] choices = WEAPONS[grade];
-		return new ItemStack(item(choices[random.nextInt(choices.length)]).orElse(FALLBACK[grade]));
+	/** What grade {@code grade}'s table {@code kind} (armor, weapon, shield) gives {@code mob}. */
+	private static List<ItemStack> table(ServerLevel level, Mob mob, int grade, String kind) {
+		LootTable table = level.getServer().reloadableRegistries().getLootTable(MobGearTables.key(JaymosKingdoms.id("monster_gear/" + GRADES[grade] + "_" + kind)));
+		return table == LootTable.EMPTY ? List.of() : MobGearTables.roll(level, mob, table, 0.0F);
+	}
+
+	/** Grade {@code grade}'s piece for {@code slot}: the one of its armour table's that is worn there. */
+	private static ItemStack armour(ServerLevel level, Mob mob, int grade, EquipmentSlot slot) {
+		for (ItemStack piece : table(level, mob, grade, "armor")) {
+			Equippable worn = piece.get(DataComponents.EQUIPPABLE);
+			if (worn != null && worn.slot() == slot) {
+				return piece;
+			}
+		}
+		return ItemStack.EMPTY;
+	}
+
+	private static ItemStack weapon(ServerLevel level, Mob mob, int grade) {
+		List<ItemStack> choices = table(level, mob, grade, "weapon");
+		return choices.isEmpty() ? new ItemStack(FALLBACK[grade]) : choices.get(0);
 	}
 
 	/** Rare pieces are now and then enchanted, legendary ones always (as a monster's spawn gear can be). */
@@ -234,7 +243,4 @@ public final class MonsterGear {
 		}
 	}
 
-	private static Optional<Item> item(String id) {
-		return BuiltInRegistries.ITEM.getOptional(Identifier.parse(id));
-	}
 }

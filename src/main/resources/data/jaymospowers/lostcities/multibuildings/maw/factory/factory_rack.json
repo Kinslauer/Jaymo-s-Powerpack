@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/factory/factory_rack",
+      "jaymospowers:maw/factory/factory_rack",
+      "jaymospowers:maw/factory/factory_rack"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_rack",
+      "jaymospowers:maw/factory/factory_rack",
+      "jaymospowers:maw/factory/factory_rack"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_rack",
+      "jaymospowers:maw/factory/factory_rack",
+      "jaymospowers:maw/factory/factory_rack"
+    ]
+  ]
+}

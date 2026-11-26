@@ -1,0 +1,31 @@
+{
+  "textures": {
+    "water": "jaymoskitchen:block/rain_barrel_water",
+    "particle": "jaymoskitchen:block/rain_barrel_water"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        11,
+        2
+      ],
+      "to": [
+        14,
+        11,
+        14
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ],
+          "texture": "#water"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "HBH",
+    "PPP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "H": "minecraft:honeycomb",
+    "B": "minecraft:barrel"
+  },
+  "result": {
+    "id": "jaymoskitchen:harvest_hive"
+  }
+}

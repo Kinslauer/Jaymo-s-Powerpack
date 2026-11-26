@@ -1,0 +1,10 @@
+{
+  "block.jaymoskitchen.season_dial": "Season Dial",
+  "message.jaymoskitchen.season_dial.count": "Season dial: counts the seasons (spring 1, summer 2, autumn 3, winter 4)",
+  "message.jaymoskitchen.season_dial.one": "Season dial: full signal in %s only",
+  "tooltip.jaymoskitchen.seasons": "Grows in: %s",
+  "tooltip.jaymoskitchen.seasons.all": "Grows in every season",
+  "tooltip.jaymoskitchen.seasons.sep": ", ",
+  "tooltip.jaymoskitchen.seasons.tropical": "In jungles and savannas: wet season only (summer, autumn)",
+  "tooltip.jaymoskitchen.seasons.roof": "Under a roof or glass, it grows all year"
+}

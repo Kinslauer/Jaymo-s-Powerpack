@@ -865,6 +865,7 @@ public final class Freerun {
 				refreshPerks(player);
 			}
 			balanceSlow(player);
+			com.jaymospowers.body.Wading.slow(player);
 			if (player.onGround() || player.isInWater() || player.onClimbable()) {
 				KICKED.remove(player.getUUID());
 				RAN.remove(player.getUUID());

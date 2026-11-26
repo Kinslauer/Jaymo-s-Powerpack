@@ -34,6 +34,12 @@ public final class ShieldBearers {
 		if (!canBear(mob) || mob.getRandom().nextFloat() >= chance) {
 			return false;
 		}
+		mob.setItemSlot(EquipmentSlot.OFFHAND, battered(mob, paint));
+		return true;
+	}
+
+	/** A plain wooden shield painted {@code paint} (null: bare planks), battered already ({@link #WORN_MIN} to {@link #WORN_MAX} used). */
+	static ItemStack battered(Mob mob, @Nullable DyeColor paint) {
 		ItemStack shield = new ItemStack(Items.SHIELD);
 		if (paint != null) {
 			shield.set(DataComponents.BASE_COLOR, paint);
@@ -41,8 +47,7 @@ public final class ShieldBearers {
 		// battered already: the wild's shields have seen fights, so one may break in this one
 		int max = shield.getMaxDamage();
 		shield.setDamageValue(Math.round(max * (WORN_MIN + mob.getRandom().nextFloat() * (WORN_MAX - WORN_MIN))));
-		mob.setItemSlot(EquipmentSlot.OFFHAND, shield);
-		return true;
+		return shield;
 	}
 
 	/** A melee weapon in the main hand (not a bow or the like) and nothing in the other. */

@@ -16,7 +16,7 @@
   "spell.jaymoskingdoms.form_spear_lunge.name": "Spear Lunge",
   "spell.jaymoskingdoms.form_spear_lunge.description": "Weapon Form (spear). A long lunge that runs the first foe through and goes on into a second behind it.",
   "spell.jaymoskingdoms.form_couched_lance.name": "Couched Lance",
-  "spell.jaymoskingdoms.form_couched_lance.description": "Weapon Form (spear, mounted). Couch the lance: the first foe it meets is hit harder the faster your mount goes, and unhorsed.",
+  "spell.jaymoskingdoms.form_couched_lance.description": "Weapon Form (spear, mounted, not on camels, elephants or dragons). Couch the lance: the first foe it meets is hit harder the faster your mount goes, and unhorsed.",
   "spell.jaymoskingdoms.form_pinning_throw.name": "Pinning Throw",
   "spell.jaymoskingdoms.form_pinning_throw.description": "Weapon Form (spear masterstroke). Throw the spear into a fallen foe and pin it where it lies. Tap the Combat Art key to tug it back.",
   "spell.jaymoskingdoms.form_ground_stomp.name": "Ground Stomp",

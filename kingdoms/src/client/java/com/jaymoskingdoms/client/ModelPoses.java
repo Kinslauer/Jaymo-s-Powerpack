@@ -16,6 +16,7 @@ public final class ModelPoses {
 		PullerPose.apply(model, state);
 		PickpocketPose.apply(model, state);
 		BioAbsorbPose.apply(model, state);
+		TreePushPose.apply(model, state);
 		BloodGrabPose.apply(model, state);
 		RubberEngulf.apply(model, state);
 		// (0.7.457) Andy: "still having a problem with the way the character is drawn on the start path screen". A Bio-built's
@@ -29,6 +30,7 @@ public final class ModelPoses {
 		HangPose.apply(model, state);
 		HordePoses.apply(model, state);
 		FiresidePose.apply(model, state);
+		CaptivePose.apply(model, state);
 		// Andy (2026-11-13): "the villager's costume was clipping outside its body". A villager's Better Combat swing is added
 		// to the bones it finds, and MCA's skin, clothes and hair bodies take the pose it captured with the swing already on:
 		// added again, those arms swung twice as far while the clothes' sleeves (synced before this) stayed with the real arm

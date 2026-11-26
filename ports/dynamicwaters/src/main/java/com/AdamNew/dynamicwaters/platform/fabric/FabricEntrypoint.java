@@ -99,6 +99,9 @@ public class FabricEntrypoint implements ModInitializer {
 			IceFloeSpawner.onLevelTick(level);
 		});
 		ServerChunkEvents.CHUNK_LOAD.register((level, chunk, generated) -> SpawningEvents.onChunkLoad(level, chunk));
+		ServerChunkEvents.CHUNK_LOAD.register((level, chunk, generated) -> {
+			if (generated) com.AdamNew.dynamicwaters.ColumnWatch.stage(chunk, "chunk loaded");
+		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, context, selection) -> DynamicWaters.onRegisterCommands(dispatcher));
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			DynamicWaters.ModEvents.onPlayerLogin(handler.player);

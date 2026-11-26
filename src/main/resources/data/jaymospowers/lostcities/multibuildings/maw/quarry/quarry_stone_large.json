@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/quarry/quarry_stone_large00",
+      "jaymospowers:maw/quarry/quarry_stone_large01",
+      "jaymospowers:maw/quarry/quarry_stone_large02"
+    ],
+    [
+      "jaymospowers:maw/quarry/quarry_stone_large10",
+      "jaymospowers:maw/quarry/quarry_stone_large11",
+      "jaymospowers:maw/quarry/quarry_stone_large12"
+    ],
+    [
+      "jaymospowers:maw/quarry/quarry_stone_large20",
+      "jaymospowers:maw/quarry/quarry_stone_large21",
+      "jaymospowers:maw/quarry/quarry_stone_large22"
+    ]
+  ]
+}

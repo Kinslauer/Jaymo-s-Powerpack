@@ -86,26 +86,43 @@ public class ScalebaneArcher extends Monster implements RangedAttackMob, Acting 
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true, (target, level) -> this.prey(level, target)));
 	}
 
-	/** What it shoots on sight: its paymasters' prey, or (rogue) any player. */
+	/** The camp (or goblin village) paying it; -1 for none. */
+	public int camp() {
+		return this.camp;
+	}
+
+	/**
+	 * What it shoots on sight: its paymasters' prey; or (unhired, Andy: "same team, but only when hired to the camp.
+	 * otherwise they are still hostile") any player, and the camps' people, barbarians and greenskins alike.
+	 */
 	private boolean prey(ServerLevel level, LivingEntity target) {
 		if (target instanceof ScalebaneArcher) {
 			return false;
 		}
 		if (this.camp < 0) {
-			return target instanceof Player player && !player.isCreative() && !player.isSpectator();
+			if (target instanceof Player player) {
+				return !player.isCreative() && !player.isSpectator();
+			}
+			return campsOwn(target) && !Captives.bound(target);
 		}
-		return GoblinVillages.is(level.getServer(), this.camp) ? Goblins.prey(this.camp, target) : Barbarians.prey(this.camp, target);
+		MinecraftServer server = level.getServer();
+		if (GoblinVillages.is(server, this.camp) || Camps.orc(server, this.camp)) {
+			return CampBeasts.prey(server, this.camp, target);
+		}
+		return Barbarians.prey(this.camp, target);
 	}
 
-	/** Whether {@code e} is on its side: its camp's folk or villagers, or another sellsword. */
+	/** One of a camp's own: its barbarian folk or MCA villagers, a goblin or an orc. */
+	private static boolean campsOwn(LivingEntity e) {
+		return e instanceof Folk folk && Barbarians.isBarbarian(folk) || Barbarians.isCampVillager(e) || Goblins.isGoblin(e) || Orcs.isOrc(e);
+	}
+
+	/** Whether {@code e} is on its side: its camp's folk or villagers (an allied camp's too), or another sellsword. */
 	private boolean ally(LivingEntity e) {
-		if (e instanceof ScalebaneArcher || this.camp < 0) {
-			return e instanceof ScalebaneArcher;
+		if (e instanceof ScalebaneArcher) {
+			return true;
 		}
-		if (e instanceof Folk folk) {
-			return folk.factionId() == this.camp;
-		}
-		return Barbarians.isCampVillager(e) || Goblins.isGoblin(e);
+		return this.camp >= 0 && CampBeasts.spares(this, e);
 	}
 
 	@Override
@@ -217,7 +234,7 @@ public class ScalebaneArcher extends Monster implements RangedAttackMob, Acting 
 			if (sword == null) {
 				return;
 			}
-			BlockPos at = GoblinVillages.spot(level, fire, random);
+			BlockPos at = CampBeasts.spot(level, camp, fire, random);
 			sword.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			sword.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
 			sword.camp = camp;

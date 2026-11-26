@@ -1,6 +1,62 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "jaymoskingdoms:item/town_notice"
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "plain_old",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/town_notice_plain_old"
+        }
+      },
+      {
+        "when": "sealed",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/town_notice_sealed"
+        }
+      },
+      {
+        "when": "sealed_old",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/town_notice_sealed_old"
+        }
+      },
+      {
+        "when": "vellum",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/town_notice_vellum"
+        }
+      },
+      {
+        "when": "vellum_old",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/town_notice_vellum_old"
+        }
+      },
+      {
+        "when": "gilt",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/town_notice_gilt"
+        }
+      },
+      {
+        "when": "gilt_old",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/town_notice_gilt_old"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymoskingdoms:item/town_notice"
+    }
   }
 }

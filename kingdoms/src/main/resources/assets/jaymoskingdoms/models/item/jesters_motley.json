@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/jesters_motley",
+    "layer1": "jaymoskingdoms:item/jesters_motley_trim"
+  }
+}

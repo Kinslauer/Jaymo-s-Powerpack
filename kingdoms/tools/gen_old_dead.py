@@ -37,6 +37,10 @@ from PIL import Image
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms", "textures", "entity", "old_dead")
 HUSKS = 16
+# The Reason look (docs/Vanilla-Style.md): with this set, every cloth, skin and bone is painted in its one shade; the
+# per-pixel shade jitter that made the skins look script-made is gone. The stains, holes, bone patches, dust and rents
+# are drawn as before.
+CLEAN = True
 
 # skin gone to parchment (a zombie's) or leather (a husk's), and what shows through it
 SKIN = [(132, 118, 100), (120, 108, 94), (142, 128, 108), (112, 100, 88), (126, 112, 92), (136, 124, 112)]
@@ -87,6 +91,13 @@ TRADES = {
 TRADE_ORDER = list(TRADES)
 
 
+def q(r):
+    """The shade jitter of one pixel: a roll in 0..1, or the middle one under CLEAN (the roll is still taken, so the rest
+    of each skin is drawn as before)."""
+    roll = r.random()
+    return 0.5 if CLEAN else roll
+
+
 def faces(u, v, w, h, d):
     """The six faces of a box at (u, v): name -> (x, y, width, height)."""
     return {"top": (u + d, v, w, d), "bottom": (u + d + w, v, w, d), "right": (u, v + d, d, h),
@@ -119,18 +130,18 @@ def make(index, husk):
              for _ in range(r.randint(1, 3))]
 
     def faded(c):
-        return mix(c, fade_to, FADE + r.random() * 0.12)
+        return mix(c, fade_to, FADE + q(r) * 0.12)
 
     def flesh():
         if r.random() < 0.03 * rot:
-            return shade(BONE, 0.85 + r.random() * 0.2)
-        return shade(skin, 0.82 + r.random() * 0.24)
+            return shade(BONE, 0.85 + q(r) * 0.2)
+        return shade(skin, 0.82 + q(r) * 0.24)
 
     def bared(face, x, y):
         return any(f == face and (x - cx) ** 2 + (y - cy) ** 2 <= rad * rad for f, cx, cy, rad in skull)
 
     def cloth(c, face):
-        k = 0.85 + r.random() * 0.2
+        k = 0.85 + q(r) * 0.2
         if face in ("left", "right"):
             k *= 0.9
         elif face == "back":
@@ -151,16 +162,16 @@ def make(index, husk):
 
     def head(face, x, y):
         if face != "front" and face != "bottom" and bared(face, x, max(y, 0)):
-            return shade(BONE, 0.8 + r.random() * 0.2)
+            return shade(BONE, 0.8 + q(r) * 0.2)
         if face == "top" or (face in ("back", "left", "right") and y <= 1):
             if r.random() < 0.12:
-                return shade(WISP, 0.8 + r.random() * 0.3)   # what's left of the hair
+                return shade(WISP, 0.8 + q(r) * 0.3)   # what's left of the hair
             return flesh()
         if face != "front":
             return flesh()
         # the face: a heavy brow, empty sockets, the long nose rotted to a hole, the teeth bare
         if y == 2 and 1 <= x <= 6:
-            return shade(BROW, 0.8 + r.random() * 0.3) if r.random() < 0.8 else flesh()
+            return shade(BROW, 0.8 + q(r) * 0.3) if r.random() < 0.8 else flesh()
         if y == 3 and x in (1, 2, 5, 6):
             if trade.get("eyepatch") and x in (5, 6):
                 return (26, 22, 20)
@@ -212,13 +223,13 @@ def make(index, husk):
             # finger bones
             if face == "bottom":
                 return shade(BONE, 0.8)
-            return shade(BONE, 0.85 + r.random() * 0.2) if (x + y) % 2 == 0 or r.random() < 0.3 else HOLE
+            return shade(BONE, 0.85 + q(r) * 0.2) if (x + y) % 2 == 0 or r.random() < 0.3 else HOLE
         if face == "top":
             return cloth(robe, face)
         if y == 9:
             return cloth(trim, face)                         # the cuff
         if husk and y >= 6 and r.random() < 0.6:
-            return shade(WRAP, 0.8 + r.random() * 0.25)      # grave-wraps
+            return shade(WRAP, 0.8 + q(r) * 0.25)      # grave-wraps
         return cloth(robe, face)
 
     def leg(face, x, y):
@@ -230,11 +241,11 @@ def make(index, husk):
         if y < hem[col % 16]:
             return cloth(robe if y < hem[col % 16] - 1 else dark, face)
         if y >= 10:
-            return shade(BONE, 0.8 + r.random() * 0.25) if r.random() < 0.7 else HOLE  # foot bones
+            return shade(BONE, 0.8 + q(r) * 0.25) if r.random() < 0.7 else HOLE  # foot bones
         if husk and r.random() < 0.5:
-            return shade(WRAP, 0.75 + r.random() * 0.25)
+            return shade(WRAP, 0.75 + q(r) * 0.25)
         # the shin down to bone, a strip of dry skin
-        return shade(BONE, 0.82 + r.random() * 0.2) if x in (1, 2) or r.random() < rot * 0.5 else flesh()
+        return shade(BONE, 0.82 + q(r) * 0.2) if x in (1, 2) or r.random() < rot * 0.5 else flesh()
 
     paint(0, 0, 8, 8, 8, head)
     paint(16, 16, 8, 12, 4, body)
@@ -354,21 +365,21 @@ def risen(place, land, stage, v):
     flesh_px = set()                                     # where skin shows (for what the place does to it after)
 
     def faded(c):
-        return mix(c, fade_to, fade + r.random() * 0.12)
+        return mix(c, fade_to, fade + q(r) * 0.12)
 
     def flesh():
         if r.random() < 0.03 * rot:
-            return shade(BONE, 0.85 + r.random() * 0.2)
-        return shade(skin, 0.82 + r.random() * 0.24)
+            return shade(BONE, 0.85 + q(r) * 0.2)
+        return shade(skin, 0.82 + q(r) * 0.24)
 
     def bone(k=0.82):
-        return shade(BONE, k + r.random() * 0.2)
+        return shade(BONE, k + q(r) * 0.2)
 
     def bared(face, x, y):
         return any(f == face and (x - cx) ** 2 + (y - cy) ** 2 <= rad * rad for f, cx, cy, rad in skull)
 
     def cloth(c, face):
-        k = 0.85 + r.random() * 0.2
+        k = 0.85 + q(r) * 0.2
         if face in ("left", "right"):
             k *= 0.9
         elif face == "back":
@@ -399,13 +410,13 @@ def risen(place, land, stage, v):
             return bone(0.8)
         if face == "top" or (face in ("back", "left", "right") and y <= 1):
             if r.random() < 0.12:
-                return shade(WISP, 0.8 + r.random() * 0.3)   # what's left of the hair
+                return shade(WISP, 0.8 + q(r) * 0.3)   # what's left of the hair
             return sk()
         if face != "front":
             return sk()
         # the face: a heavy brow, sockets where the eyes were (they glow in the dark: eyes.png), the long nose
         if y == 2 and 1 <= x <= 6:
-            return shade(BROW, 0.8 + r.random() * 0.3) if r.random() < 0.8 else sk()
+            return shade(BROW, 0.8 + q(r) * 0.3) if r.random() < 0.8 else sk()
         if y == 3 and x in (1, 2, 5, 6):
             return HOLE if x in (2, 5) or r.random() < 0.6 else shade(HOLE, 1.6)
         if y == 4 and x in (2, 5):
@@ -478,7 +489,7 @@ def risen(place, land, stage, v):
             return cloth(robe, face)
         if face == "bottom" or y >= 10:
             if place == "frostbitten" and stage < 2:
-                return shade(FROSTBITE, 0.8 + r.random() * 0.4)  # black fingers
+                return shade(FROSTBITE, 0.8 + q(r) * 0.4)  # black fingers
             if stage == 0 and face != "bottom" and y == 10:
                 return sk()                                  # the hand still skinned, the fingertips bare
             if face == "bottom":
@@ -636,7 +647,7 @@ def wear_bloated(img, r, flesh_px, put):
         y = v + d + r.randrange(h // 2)
         for k in range(r.randint(2, 5)):
             if y + k < v + d + h and img.getpixel((x, y + k))[3]:
-                put(x, y + k, shade(WEED, 0.8 + r.random() * 0.4))
+                put(x, y + k, shade(WEED, 0.8 + q(r) * 0.4))
 
 
 def wear_pale(img, r, flesh_px, put):
@@ -662,7 +673,7 @@ def wear_frostbitten(img, r, flesh_px, put):
     for (x, y), up in sorted(UPWARD.items()):
         c = img.getpixel((x, y))
         if c[3] and r.random() < 0.25 + 0.6 * up:
-            put(x, y, mix(c[:3], RIME, 0.55 + r.random() * 0.35))
+            put(x, y, mix(c[:3], RIME, 0.55 + q(r) * 0.35))
     for x in range(64):
         for y in range(0, 32):
             c = img.getpixel((x, y))

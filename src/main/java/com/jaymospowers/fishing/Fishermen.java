@@ -163,6 +163,10 @@ public final class Fishermen {
 		if (info != null && !info.legend().isEmpty()) {
 			f *= LEGEND_PRICE;
 		}
+		if (sp == Species.SALMON && SalmonRun.runRiver(level, player.blockPosition())) {
+			// (the run is in: salmon is everywhere this autumn)
+			f *= SalmonRun.RUN_PRICE;
+		}
 		Sold today = player.getAttachedOrElse(SOLD, new Sold(-1, 0.0F));
 		float sold = today.day() == today(level) ? today.kg() : 0.0F;
 		f /= 1.0F + sold / GLUT_KG;

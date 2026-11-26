@@ -211,7 +211,7 @@ def shard_icon(kind):
         half = (y - 2) // 2 if y < 8 else (13 - y) // 2 + 1
         for x in range(8 - half - 1, 8 + half + 1):
             shade = 1.15 if x < 8 else 0.8
-            px[x, y] = (min(255, int(r * shade)), min(255, int(g * shade)), min(255, int(b * shade)), 235)
+            px[x, y] = (min(255, int(r * shade)), min(255, int(g * shade)), min(255, int(b * shade)), 255)
     for y in range(2, 14):
         for x in range(16):
             if px[x, y][3] and (x == 0 or px[x - 1, y][3] == 0):

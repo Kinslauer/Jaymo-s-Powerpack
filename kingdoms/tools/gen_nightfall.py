@@ -7,6 +7,9 @@ it's after is All Rights Reserved: nothing of it is used):
 Run from kingdoms/: python3 tools/gen_nightfall.py"""
 import json, os, random
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 
 RES = 'src/main/resources/'
 ASSETS = RES + 'assets/jaymoskingdoms/'
@@ -254,16 +257,8 @@ def dried_meat():
 
 
 def egg(name, base, spots, seed):
-    p, rnd = {}, random.Random(seed)
-    for y in range(16):
-        for x in range(16):
-            dx, dy = (x - 7.5) / 5.0, (y - 8.5) / 6.5
-            if dx * dx + dy * dy * (1.0 + 0.25 * (8.5 - y) / 6.5) <= 1.0:
-                c = spots if rnd.random() < 0.18 else base
-                if x <= 5 and y <= 6:
-                    c = jitter(c, 30, rnd)
-                p[(x, y)] = jitter(c, 6, rnd)
-    icon(name, 16, p)
+    """The Reason look's spawn egg: vanilla's spotted egg in the mob's two colours (vanilla_egg.py)."""
+    vanilla_egg.save(ITEM + name + '.png', base[:3], spots[:3])
 
 
 def effects():

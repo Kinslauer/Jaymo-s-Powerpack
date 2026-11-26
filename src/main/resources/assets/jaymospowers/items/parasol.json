@@ -1,0 +1,122 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "0",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/umbrella/parasol_open_0",
+            "tints": [
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": -924452
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 1,
+                "default": -5227960
+              }
+            ]
+          }
+        },
+        {
+          "when": "1",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/umbrella/parasol_open_1",
+            "tints": [
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": -924452
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 1,
+                "default": -5227960
+              }
+            ]
+          }
+        },
+        {
+          "when": "2",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/umbrella/parasol_open_2",
+            "tints": [
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": -924452
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 1,
+                "default": -5227960
+              }
+            ]
+          }
+        },
+        {
+          "when": "3",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/umbrella/parasol_open_3",
+            "tints": [
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 0,
+                "default": -924452
+              },
+              {
+                "type": "minecraft:custom_model_data",
+                "index": 1,
+                "default": -5227960
+              }
+            ]
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/umbrella/parasol_open_0",
+        "tints": [
+          {
+            "type": "minecraft:custom_model_data",
+            "index": 0,
+            "default": -924452
+          },
+          {
+            "type": "minecraft:custom_model_data",
+            "index": 1,
+            "default": -5227960
+          }
+        ]
+      }
+    },
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/umbrella/parasol_closed",
+      "tints": [
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 0,
+          "default": -924452
+        },
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 1,
+          "default": -5227960
+        }
+      ]
+    }
+  }
+}

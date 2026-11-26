@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:iron_block",
+    "minecraft:copper_block",
+    "minecraft:raw_iron_block",
+    "minecraft:raw_copper_block",
+    "minecraft:cauldron",
+    "minecraft:lodestone",
+    "minecraft:heavy_core"
+  ]
+}

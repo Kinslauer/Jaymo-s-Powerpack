@@ -1,0 +1,21 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "allowFillers": false,
+  "minfloors": 1,
+  "maxfloors": 1,
+  "maxcellars": 0,
+  "parts": [
+    {
+      "floor": 0,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_garage01_0"
+    },
+    {
+      "floor": 1,
+      "top": true,
+      "part": "jaymospowers:maw/factory/factory_garage01_1"
+    }
+  ]
+}

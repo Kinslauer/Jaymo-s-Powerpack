@@ -145,6 +145,10 @@ abstract class LivingEntityMixin implements CorpseCapture {
 		if (self.deathTime != 0) {
 			return;
 		}
+		if (self instanceof net.minecraft.world.entity.monster.cubemob.AbstractCubeMob cube) {
+			// a slime bursts into goo as it dies (it splits as the game has it)
+			com.jaymoskitchen.corpse.Goo.burst(cube);
+		}
 		if (self.entityTags().contains(Corpses.NO_CORPSE_TAG) || Corpses.inNoCorpseZone(self)) {
 			// (marked by another mod: a body that leaves nothing behind, like a Darktide shade; (0.5.61) or dying where
 			// no body is left, the Other World)

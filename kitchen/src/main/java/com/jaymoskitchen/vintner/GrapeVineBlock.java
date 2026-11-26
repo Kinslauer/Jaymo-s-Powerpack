@@ -141,7 +141,7 @@ public class GrapeVineBlock extends VegetationBlock {
 			}
 			return InteractionResult.SUCCESS;
 		}
-		if (held.is(Items.STRING) && !state.getValue(NETTED) && !kind.nether()) {
+		if (held.is(com.jaymoskitchen.corpse.Sinew.STRINGS) && !state.getValue(NETTED) && !kind.nether()) {
 			level.setBlock(pos, state.setValue(NETTED, true), Block.UPDATE_CLIENTS);
 			level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8F, 1.2F);
 			if (!player.getAbilities().instabuild) {

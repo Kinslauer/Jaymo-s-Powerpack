@@ -1,6 +1,11 @@
 {
   "values": [
     "jaymospowers:caveman_boots",
+    "jaymospowers:dark_caveman_boots",
+    "jaymospowers:trapper_boots",
+    "jaymospowers:dark_trapper_boots",
+    "jaymospowers:barbarian_boots",
+    "jaymospowers:dark_barbarian_boots",
     "jaymospowers:beast_pelt_boots",
     "jaymospowers:burrukai_plate_boots",
     "jaymospowers:zanite_boots",
@@ -8,6 +13,7 @@
     "jaymospowers:gravitite_boots",
     "jaymospowers:neptune_boots",
     "jaymospowers:mailed_boots",
-    "jaymospowers:studded_boots"
+    "jaymospowers:studded_boots",
+    "jaymospowers:copper_chainmail_boots"
   ]
 }

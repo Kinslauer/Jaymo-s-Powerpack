@@ -26,6 +26,12 @@ abstract class VillagerTradeMixin {
 			if (v.getTradingPlayer() instanceof net.minecraft.server.level.ServerPlayer player) {
 				// (0.7.109) and they remember a customer
 				com.jaymoskingdoms.Recollections.trade(v, player);
+				// a ruin keeper has another tale of their city for one who comes back and trades
+				com.jaymoskingdoms.oldage.RuinFolk.traded(v, player);
+				// (Village mods patch 5) and the town's known goods come nearer
+				com.jaymoskingdoms.KnownGoods.traded(v, player);
+				// and what they've dealt in with them goes in the trader's ledger
+				com.jaymoskingdoms.Dealings.traded(v, player, offer);
 			}
 		}
 	}

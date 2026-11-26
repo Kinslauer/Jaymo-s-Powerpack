@@ -98,7 +98,8 @@ public final class HordePoses {
 
 	/** Render-state extraction: a horde zombie's reach and act for this frame. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		if (!(state instanceof ZombieRenderState) || !marching(entity)) {
+		// (down on its knees gnawing a body, Kitchen draws it: no reach or act over that)
+		if (!(state instanceof ZombieRenderState) || !marching(entity) || KitchenGnaw.posed(entity)) {
 			return;
 		}
 		float reach = Mth.clamp((state.walkAnimationSpeed - REACH_FROM) / (REACH_FULL - REACH_FROM), 0.0F, 1.0F);

@@ -151,6 +151,7 @@ public final class FreerunClient {
 		}
 		AirFlipClient.tick(minecraft, player);
 		Freerun.balanceSlow(player);
+		com.jaymospowers.body.Wading.slow(player);
 		Input input = player.input.keyPresses;
 		boolean jumpPressed = input.jump() && !jumpWasDown;
 		jumpWasDown = input.jump();

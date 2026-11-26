@@ -25,6 +25,12 @@ public final class Oddities {
 	public static final String METEOR = "meteor", STAR = "star";
 	/** A symbiote: a player in the black suit or the big body, or a mob it's poured itself into. */
 	public static final String SYMBIOTE = "symbiote";
+	/**
+	 * Held beside {@link #SYMBIOTE} on a player whose suit isn't the black one, so the world's people can tell them apart
+	 * (Andy, 2026-11-25: they couldn't tell the black from the red, and the white should put them in mind of the quiet
+	 * warrior of old).
+	 */
+	public static final String SYMBIOTE_RED = "symbiote_red", SYMBIOTE_WHITE = "symbiote_white";
 	/** A Darktide user walking as their shadow. */
 	public static final String SHADE = "shade";
 	/** (0.11.103) A villager raised by Darktide's Necromancy as itself, back at its life (saved: it stays marked). */

@@ -13,6 +13,9 @@ import os, random, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image, ImageDraw
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import reason_fold  # noqa: E402
 from gen_dragons import rgb, jitter, mix, shade, write, entry, egg, ASSETS, DATA, ITEM, SIZE
 from lesser_dragon_art import Plan, chain, noise_field, FACE_I
 
@@ -290,7 +293,7 @@ if __name__ == '__main__':
     hides = [hide_texture(i) for i in range(len(HIDES))]
     marks = [marks_texture(i) for i in range(len(MARKS))]
     for i, h in enumerate(hides):
-        h.save(folder + 'hide_%d.png' % i)
+        reason_fold.save(h, folder + 'hide_%d.png' % i)
     for i, m in enumerate(marks):
         m.save(folder + 'marks_%d.png' % i)
     egg('atroxiia_dragon_spawn_egg', rgb(0xB4C8D6), rgb(0x5AA8E0), 114)

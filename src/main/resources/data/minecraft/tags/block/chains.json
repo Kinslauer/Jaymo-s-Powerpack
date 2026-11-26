@@ -1,5 +1,12 @@
 {
   "values": [
-    "jaymospowers:arkenium_chain"
+    "jaymospowers:arkenium_chain",
+    "jaymospowers:spotted_iron_chain",
+    "jaymospowers:rusty_iron_chain",
+    "jaymospowers:corroded_iron_chain",
+    "jaymospowers:waxed_iron_chain",
+    "jaymospowers:waxed_spotted_iron_chain",
+    "jaymospowers:waxed_rusty_iron_chain",
+    "jaymospowers:waxed_corroded_iron_chain"
   ]
 }

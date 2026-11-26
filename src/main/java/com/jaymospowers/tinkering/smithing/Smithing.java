@@ -102,6 +102,7 @@ public final class Smithing {
 		RealmPatterns.register();
 		MailRings.register();
 		LightArmour.register();
+		CopperMail.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				HotMetal.tick(player);

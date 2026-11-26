@@ -153,6 +153,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 	WebSymbioteLife.@Nullable Remains remains;
 	@Nullable BlockPos rampageSite;
 	int feast;
+	/** The host whose sleep it's walking through (see {@link WebSymbioteSleep}); not saved, nor is it. */
+	java.util.@Nullable UUID sleepOwner;
 
 	/** With no host this long (ticks; 5 minutes) it gives up and settles where it is as goo, a block, still and waiting. */
 	static final int SETTLE_TICKS = 6000;
@@ -215,6 +217,25 @@ public class WebSymbioteBlob extends PathfinderMob {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_DEATH, SoundSource.HOSTILE, 1.4F, 0.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.HOSTILE, 1.0F, 0.5F);
 		return blob;
+	}
+
+	/**
+	 * (Andy, 2026-11-25) It binds to {@code target} at once, up a tendril and in (no roll to take them): a host's symbiote
+	 * that fought them and gave up its host for them ({@link WebSymbioteInfection}). False if it can't (they already have
+	 * one, or aren't near), and it makes for them as usual instead.
+	 */
+	boolean leapInto(ServerPlayer target) {
+		if (this.isRemoved() || !(this.level() instanceof ServerLevel level) || target.level() != level || !this.wants(target, target.position())) {
+			return false;
+		}
+		Vec3 from = this.position().add(0.0, 0.3, 0.0);
+		this.tendril(level, from, target.position().add(0.0, target.getBbHeight() * 0.6, 0.0));
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 0.8F, 1.6F);
+		Shakes.send(target, 8.0F, from);
+		this.bondWith(target, from);
+		level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 0.3, this.getZ(), 30, 0.3, 0.2, 0.3, 0.1);
+		this.discard();
+		return true;
 	}
 
 	/** (0.15.52) It makes for {@code target} (see {@link #pursuing}). */
@@ -374,6 +395,10 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
+		if (this.sleepOwner != null) {
+			WebSymbioteSleep.blobTick(this, level);
+			return;
+		}
 		// (0.17.150) feeding on what it killed; the things it keeps; rampaging round its crater
 		if (WebSymbioteLife.blobTick(this, level)) {
 			return;
@@ -458,6 +483,19 @@ public class WebSymbioteBlob extends PathfinderMob {
 		}
 	}
 
+	/** It's out of {@code host} while they sleep: it hunts for them (see {@link WebSymbioteSleep}) and nothing can hurt it. */
+	void sleepwalk(java.util.UUID host) {
+		this.sleepOwner = host;
+		this.setPermanentlyInvulnerable(true);
+		this.goalSelector.removeAllGoals(goal -> true);
+		this.goalSelector.addGoal(0, new FloatGoal(this));
+	}
+
+	@Override
+	public boolean shouldBeSaved() {
+		return this.sleepOwner == null && super.shouldBeSaved();
+	}
+
 	/** Its strain (black unless marked). */
 	WebSymbioteStrain strain() {
 		return WebSymbioteStrains.of(this);
@@ -533,8 +571,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 			}
 			this.bondWith(player, this.position());
 		} else if (host instanceof Mob mob && KitchenCompat.isZombiePlayer(mob)) {
-			WebBehemoth.possess(level, mob);
 			WebSymbioteStrains.mark(mob, this.strain());
+			WebBehemoth.possess(level, mob);
 		} else if (host instanceof Mob mob && this.rampageSite == null && WebInhabit.takeable(mob) && !this.spurned.contains(mob.getUUID())) {
 			WebInhabit.inhabit(level, mob, this.strain());
 		} else {
@@ -665,7 +703,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 	}
 
 	/** The lash itself: a tendril (in its strain's colour) snapping out from {@code from} to {@code to}. */
-	private void tendril(ServerLevel level, Vec3 from, Vec3 to) {
+	void tendril(ServerLevel level, Vec3 from, Vec3 to) {
 		Vec3 step = to.subtract(from);
 		int n = Math.max(2, (int)(step.length() / 0.25));
 		for (int i = 0; i <= n; i++) {

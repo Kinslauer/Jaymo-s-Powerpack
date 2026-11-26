@@ -133,7 +133,13 @@ public final class Bounties {
 	static final int EVERY = 100;
 	static final long BOARD_REBUILD = 24000L * 3;
 	/** Where a settlement's board goes: this far from its bell (blocks). */
-	static final int BOARD_NEAR = 3, BOARD_FAR = 8;
+	static final int BOARD_NEAR = 3, BOARD_FAR = 16;
+	/**
+	 * A board stands with its back to a wall (Andy: "it should be against a wall, with the notices facing out, its always in
+	 * the middle of a walkway"), and never where it would narrow a lane: at least this much open ground before it
+	 * ({@link #openness}, out of {@code (2 * BOARD_VIEW_SIDE + 1) * BOARD_VIEW}).
+	 */
+	static final int BOARD_OPEN_LEAST = 16;
 	/**
 	 * (0.7.197) How far ahead of a board, and how far to either side of its middle, the open ground in front of it is
 	 * counted (blocks); what facing the bell is worth in those blocks; and a board in town showing less open ground than
@@ -546,6 +552,10 @@ public final class Bounties {
 		if (here == null) {
 			here = Factions.near(server, pos, 96.0);
 		}
+		if (here == null) {
+			// a wayside inn's board, far from either town: the nearer end of its road
+			here = WaysideInns.owner(server, pos, 40.0);
+		}
 		return court(server, here);
 	}
 
@@ -745,7 +755,10 @@ public final class Bounties {
 		Map<String, String> map = new HashMap<>(pinned(level));
 		map.put(spot(pos), key);
 		level.setAttached(PINNED, Map.copyOf(map));
-		level.setBlock(pos, state.setValue(BountyBoard.NOTICE, TownNotices.is(key) || MerchantOrders.is(key) || TownProjects.is(key) ? BountyBoard.TOWN : BountyBoard.WANTED), Block.UPDATE_CLIENTS);
+		// (village mods 4: board work on its paper by its stars, a decree on its own)
+		int look = Decrees.is(key) ? BountyBoard.DECREE : TownNotices.is(key) ? BountyBoard.look(TownNotices.paper(key))
+			: MerchantOrders.is(key) || TownProjects.is(key) ? BountyBoard.TOWN : BountyBoard.WANTED;
+		level.setBlock(pos, state.setValue(BountyBoard.NOTICE, look), Block.UPDATE_CLIENTS);
 	}
 
 	/** Whatever notice is on the board block at {@code pos} comes off. */
@@ -790,6 +803,12 @@ public final class Bounties {
 			level.playSound(null, pos, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 1.0F);
 			return;
 		}
+		if (key != null && Decrees.is(key)) {
+			// (village mods 4) a decree stays up: it's read
+			Decrees.read(level, player, key);
+			level.playSound(null, pos, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 1.0F);
+			return;
+		}
 		if (key != null && TownNotices.is(key)) {
 			if (TownNotices.pull(level, player, key)) {
 				unpin(level, pos);
@@ -813,6 +832,16 @@ public final class Bounties {
 	/** (BountyBoard) {@code player} pins the notice {@code stack} on the bare board block at {@code pos}: they give its hunt up. */
 	static void pin(ServerLevel level, ServerPlayer player, BlockPos pos, ItemStack stack) {
 		MinecraftServer server = level.getServer();
+		if (stack.is(Decrees.ITEM)) {
+			// (village mods 4) a decree a player earned, pinned on any board for its time
+			String decree = Decrees.pin(level, player, BountyBoard.anchor(pos, level.getBlockState(pos)), stack);
+			if (decree != null) {
+				stack.shrink(1);
+				setNotice(level, pos, decree);
+				level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
+			}
+			return;
+		}
 		String key = noticeOf(stack);
 		if (key != null && TownNotices.is(key)) {
 			// (a town notice goes up again on any board, for whoever wants to read it)
@@ -1232,12 +1261,17 @@ public final class Bounties {
 					if (BountyBoard.isAnchor(there) && BountyBoard.complete(level, had, faces)) {
 						// (0.7.197) Andy: "the bounty board shouldn't be facing blocks so close like this when there is a wide
 						// open square in front of it." A board facing a wall is moved once to a spot that sees clearly more.
-						int seen = LOOKED_OVER.add(id) ? openness(level, had, faces) : BOARD_OPEN_ENOUGH;
-						if (seen >= BOARD_OPEN_ENOUGH) {
+						// A board standing free (out in a walkway) is moved once to a wall, its notices facing out.
+						if (!LOOKED_OVER.add(id)) {
+							continue;
+						}
+						int seen = openness(level, had, faces);
+						boolean backed = backed(level, had, faces);
+						if (backed && seen >= BOARD_OPEN_ENOUGH) {
 							continue;
 						}
 						best = boardSpot(level, f.seat());
-						if (best == null || openness(level, best.spot(), best.facing()) < seen + BOARD_TURN_GAIN) {
+						if (best == null || backed && openness(level, best.spot(), best.facing()) < seen + BOARD_TURN_GAIN) {
 							continue;
 						}
 						for (int c = 0; c < BountyBoard.WIDTH; c++) {
@@ -1306,6 +1340,20 @@ public final class Bounties {
 		return true;
 	}
 
+	/** Every block of the board has a wall right behind it, its face toward the board solid. */
+	private static boolean backed(ServerLevel level, BlockPos anchor, Direction facing) {
+		for (int c = 0; c < BountyBoard.WIDTH; c++) {
+			for (int r = 0; r < BountyBoard.HEIGHT; r++) {
+				BlockPos behind = BountyBoard.part(anchor, facing, c, r).relative(facing.getOpposite());
+				BlockState wall = level.getBlockState(behind);
+				if (wall.is(BOARD) || !wall.isFaceSturdy(level, behind, facing)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * (0.7.197) How much open ground lies before a board at {@code anchor} facing {@code facing}: lanes from
 	 * {@link #BOARD_VIEW_SIDE} left to right of its middle, each counted out to {@link #BOARD_VIEW} blocks until a block
@@ -1339,9 +1387,10 @@ public final class Bounties {
 	private static final Set<String> LOOKED_OVER = new HashSet<>();
 
 	/**
-	 * Open ground {@link #BOARD_NEAR}-{@link #BOARD_FAR} blocks from the bell where the whole board fits. (0.7.197) Of
-	 * those, the spot and facing with the most open ground before it ({@link #openness}), a little for facing the bell
-	 * and less the farther from it; it used to be the nearest spot, always facing the bell, even with a wall right ahead.
+	 * Open ground {@link #BOARD_NEAR}-{@link #BOARD_FAR} blocks from the bell where the whole board fits with its back to a
+	 * wall ({@link #backed}) and enough open ground before it ({@link #BOARD_OPEN_LEAST}). (0.7.197) Of those, the spot and
+	 * facing with the most open ground before it ({@link #openness}), a little for facing the bell and less the farther
+	 * from it; it used to be the nearest spot, always facing the bell, even with a wall right ahead.
 	 */
 	private static @Nullable Placing boardSpot(ServerLevel level, BlockPos bell) {
 		Placing best = null;
@@ -1358,10 +1407,14 @@ public final class Bounties {
 					}
 					Direction bellward = toward(bell, top);
 					for (Direction facing : Direction.Plane.HORIZONTAL) {
-						if (!fits(level, top, facing)) {
+						if (!fits(level, top, facing) || !backed(level, top, facing)) {
 							continue;
 						}
-						int score = openness(level, top, facing) + (facing == bellward ? BOARD_BELL_BONUS : 0) - r;
+						int open = openness(level, top, facing);
+						if (open < BOARD_OPEN_LEAST) {
+							continue;
+						}
+						int score = open + (facing == bellward ? BOARD_BELL_BONUS : 0) - r;
 						if (score > bestScore) {
 							bestScore = score;
 							best = new Placing(top, facing);
@@ -1392,6 +1445,7 @@ public final class Bounties {
 			BlockState state = level.getBlockState(pos);
 			boolean over = MerchantOrders.is(e.getValue()) ? state.is(BOARD) && !BountyBoard.anchor(pos, state).equals(MerchantOrders.boardOf(e.getValue()))
 				: TownProjects.is(e.getValue()) ? state.is(BOARD) && !BountyBoard.anchor(pos, state).equals(TownProjects.boardOf(e.getValue()))
+				: Decrees.is(e.getValue()) ? Decrees.expired(e.getValue(), now)
 				: TownNotices.is(e.getValue()) ? TownNotices.expired(e.getValue(), now) : b == null || b.dead() || b.takenByAnyone(now);
 			if (over || !state.is(BOARD) || !BountyBoard.pinned(state)) {
 				unpin(level, pos);
@@ -1429,7 +1483,7 @@ public final class Bounties {
 					BlockState s = level.getBlockState(p);
 					if (s.is(BOARD) && !BountyBoard.pinned(s)) {
 						bare.add(p);
-					} else if (s.is(BOARD) && s.getValue(BountyBoard.NOTICE) == BountyBoard.TOWN && !sheet.equals(pinned(level).get(spot(p))) && !works.equals(pinned(level).get(spot(p)))) {
+					} else if (s.is(BOARD) && BountyBoard.town(s) && !sheet.equals(pinned(level).get(spot(p))) && !works.equals(pinned(level).get(spot(p)))) {
 						town++;
 					}
 				}
@@ -1457,6 +1511,18 @@ public final class Bounties {
 					BlockPos slot = bare.get(random.nextInt(bare.size()));
 					ERRANDS.put(clerk.getUUID(), new Errand(clerk.getUUID(), anchor.immutable(), slot.immutable(), works, now + POST_TIMEOUT));
 					up.add(works);
+				}
+				continue;
+			}
+			// (village mods 4) a ruler's decree, if the town is short of something, carried up by a herald (a spot left for notices)
+			String decree = bare.size() > 1 ? Decrees.wanted(level, anchor, now, random) : null;
+			if (decree != null) {
+				Villager herald = poster(level, anchor);
+				if (herald != null) {
+					herald.setItemSlot(EquipmentSlot.MAINHAND, Decrees.item(Decrees.kind(decree)));
+					BlockPos slot = bare.get(random.nextInt(bare.size()));
+					ERRANDS.put(herald.getUUID(), new Errand(herald.getUUID(), anchor.immutable(), slot.immutable(), decree, now + POST_TIMEOUT));
+					up.add(decree);
 				}
 				continue;
 			}
@@ -1510,11 +1576,12 @@ public final class Bounties {
 			BlockState state = level.getBlockState(e.slot());
 			Bounty b = all.get(e.key());
 			boolean works = TownProjects.is(e.key()); // (0.7.530)
+			boolean decree = Decrees.is(e.key()); // (village mods 4)
 			boolean orders = MerchantOrders.is(e.key()) || works;
-			boolean town = TownNotices.is(e.key()) || orders;
-			boolean over = orders ? false : town ? TownNotices.expired(e.key(), now) : b == null || b.dead() || b.takenByAnyone(now);
+			boolean town = TownNotices.is(e.key()) || orders || decree;
+			boolean over = decree ? Decrees.expired(e.key(), now) : orders ? false : town ? TownNotices.expired(e.key(), now) : b == null || b.dead() || b.takenByAnyone(now);
 			if (v == null || !v.isAlive() || now > e.until() || v.isSleeping() || Downed.isDowned(v) || !state.is(BOARD)
-				|| BountyBoard.pinned(state) || over || !v.getMainHandItem().is(town ? TownNotices.ITEM : NOTICE_ITEM)) {
+				|| BountyBoard.pinned(state) || over || !v.getMainHandItem().is(decree ? Decrees.ITEM : town ? TownNotices.ITEM : NOTICE_ITEM)) {
 				if (v != null) {
 					emptyHand(v);
 				}
@@ -1532,7 +1599,8 @@ public final class Bounties {
 				level.playSound(null, e.slot(), SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
 				if (town) {
 					if (level.getRandom().nextFloat() < POST_SAY_CHANCE) {
-						Speech.say(level, v, works ? TownProjects.callOut(level.getRandom()) : orders ? MerchantOrders.callOut(level.getRandom()) : TownNotices.callOut(e.key(), level.getRandom()), Speech.WHITE, 12.0);
+						Speech.say(level, v, decree ? Decrees.callOut(e.key(), level.getRandom()) : works ? TownProjects.callOut(level.getRandom())
+							: orders ? MerchantOrders.callOut(level.getRandom()) : TownNotices.callOut(e.key(), level.getRandom()), Speech.WHITE, 12.0);
 					}
 				} else if (level.getRandom().nextFloat() < POST_SAY_CHANCE) {
 					Speech.say(level, v, Component.translatable("talk.jaymoskingdoms.bounty.posting." + level.getRandom().nextInt(3),
@@ -1548,7 +1616,7 @@ public final class Bounties {
 
 	/** The notice a villager was carrying is put away. */
 	private static void emptyHand(Villager v) {
-		if (v.getMainHandItem().is(NOTICE_ITEM) || v.getMainHandItem().is(TownNotices.ITEM)) {
+		if (v.getMainHandItem().is(NOTICE_ITEM) || v.getMainHandItem().is(TownNotices.ITEM) || v.getMainHandItem().is(Decrees.ITEM)) {
 			v.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		}
 	}

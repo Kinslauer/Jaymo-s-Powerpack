@@ -276,14 +276,14 @@ public final class WebTendrils {
 				return;
 			}
 			if (payload.entityId() == GRAB_BLOCK) {
-				if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator()) {
+				if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator() && WebStamina.pay(player, WebStamina.GRAB)) {
 					rip(player, hand);
 				}
 			} else if (payload.entityId() < 0) {
 				release(player, hand, true);
 			} else if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator()) {
 				Entity target = player.level().getEntity(payload.entityId());
-				if (target != null && target.distanceTo(player) <= GRAB_RANGE + 2.5) {
+				if (target != null && target.distanceTo(player) <= GRAB_RANGE + 2.5 && grabbable(player, target) && WebStamina.pay(player, WebStamina.GRAB)) {
 					grab(player, hand, target, -1L);
 				}
 			}

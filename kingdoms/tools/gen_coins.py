@@ -1,5 +1,5 @@
 """Draws the coin purse and the copper bit (0.7.498): original 16x16 vanilla-style art and the purse's JSON. Run from kingdoms/:
-python -I tools/gen_coins.py   (then, from the repo root, python -I tools/excalibur_style/grade.py)
+python -I tools/gen_coins.py
 
 Items: copper_coin (the copper bit: a stamped disc, lit from the top-left, a little mark pressed in), coin_purse_0..4 (a
 leather pouch tied with string that bulges as it fills; the item definition reads custom_model_data float 0 = fullness).

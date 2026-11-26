@@ -2,6 +2,10 @@
 	"values": [
 		"minecraft:fox",
 		{ "id": "naturalist:vulture", "required": false },
-		{ "id": "jaymoskingdoms:coyote", "required": false }
+		{ "id": "jaymoskingdoms:coyote", "required": false },
+		{ "id": "naturalist:deer", "required": false },
+		{ "id": "cubeanimals:reddeer", "required": false },
+		{ "id": "cubeanimals:roedeer", "required": false },
+		{ "id": "cubeanimals:reindeer", "required": false }
 	]
 }

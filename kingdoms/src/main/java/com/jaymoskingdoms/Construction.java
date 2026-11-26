@@ -796,6 +796,7 @@ public final class Construction {
 		JaymosKingdoms.LOGGER.info("{} finished its {} at {}", f.name(), p.entry(), p.origin());
 		Gatherers.built(level, f, p.entry(), l.min(), l.max());
 		Homes.built(level, f, p.entry(), l.min(), l.max());
+		RainBarrels.built(level, f, p.entry(), l.min(), l.max());
 		Displays.built(level, f, p.entry(), l.min(), l.max().above(Math.max(0, l.height() - 1)));
 	}
 

@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Test commands (gamemasters): {@code /powerdebug web symbiote bond|reject|feed}, {@code /powerdebug web symbiote dormant <ticks>}, {@code /powerdebug web symbiote level <0-100>} (the bond's strength), {@code /powerdebug web swung <blocks>}
+ * Test commands (gamemasters): {@code /powerdebug web symbiote bond|reject|feed}, {@code /powerdebug web symbiote dormant <ticks>}, {@code /powerdebug web symbiote level <0-100>} (the bond's strength), {@code /powerdebug web symbiote trust <0-100>} (its trust, WebSymbioteMind), {@code /powerdebug web swung <blocks>}
  * and {@code /powerdebug web crater} (a crater, goo and all, right where you stand).
  * Strains: {@code /powerdebug web symbiote strain <0-2>} (black, white, red), {@code /powerdebug web symbiote blob <0-2>}
  * (a roaming one of that strain at your feet) and {@code /powerdebug web crater red}.
@@ -33,6 +33,18 @@ final class WebDebugCommand {
 							.then(Commands.argument("bond", IntegerArgumentType.integer(0, WebSymbiote.BOND_MAX)).executes(c -> {
 								ServerPlayer player = c.getSource().getPlayerOrException();
 								WebSymbiote.addBond(player, IntegerArgumentType.getInteger(c, "bond") - WebSymbiote.state(player).bond());
+								c.getSource().sendSuccess(() -> Component.literal(WebSymbiote.describe(player)), false);
+								return 1;
+							})))
+						// its trust (WebSymbioteMind), apart from the bond
+						.then(Commands.literal("trust")
+							.then(Commands.argument("trust", IntegerArgumentType.integer(0, WebSymbioteMind.TRUST_MAX)).executes(c -> {
+								ServerPlayer player = c.getSource().getPlayerOrException();
+								if (!WebSymbiote.isBonded(player)) {
+									c.getSource().sendFailure(Component.literal("no symbiote to trust you: bond one first"));
+									return 0;
+								}
+								WebSymbioteMind.addTrust(player, IntegerArgumentType.getInteger(c, "trust") - WebSymbioteMind.mind(player).trust());
 								c.getSource().sendSuccess(() -> Component.literal(WebSymbiote.describe(player)), false);
 								return 1;
 							})))

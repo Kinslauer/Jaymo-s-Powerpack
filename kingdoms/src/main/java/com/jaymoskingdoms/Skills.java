@@ -444,7 +444,10 @@ public final class Skills {
 		// guard cheaper (Jaymo's Powers' Guard and PassiveBlocks ask Disciplines). Last, so no ordinal moves
 		KEEN_TIMING(Pillar.STRENGTH, 3, 1, 5, 1, 0),
 		SNATCH(Pillar.STRENGTH, 1, 1, 8, 2, 0),
-		IRON_GUARD(Pillar.STRENGTH, 1, 1, 10, 3, 0);
+		IRON_GUARD(Pillar.STRENGTH, 1, 1, 10, 3, 0),
+		// Coyote Time (Jaymo's Powers' CoyoteTime, the CC0 mod's idea): a Jump pressed just after running off an edge still
+		// jumps. On Freerunning's first ring, between Climber and Freerunner; last, so no ordinal moves
+		COYOTE_TIME(Pillar.STEALTH, 1, 1, 3, 4, 1);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

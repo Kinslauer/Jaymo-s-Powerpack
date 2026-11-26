@@ -15,15 +15,15 @@ import net.minecraft.util.Mth;
 public final class TellGlintParticle extends SingleQuadParticle {
 	/** Quad size for a glint of scale 1 (vanilla's quadSize is half the width, so about a block across). */
 	static final float SIZE = 0.5F;
-	/** Life in ticks (a little past the wind-up), the pop's length and how far past full it overshoots. */
-	static final int LIFE = AttackTells.WINDUP + 3, POP = 2;
+	/** Life in ticks past the wind-up, the pop's length and how far past full it overshoots. */
+	static final int LIFE_PAST = 3, POP = 2;
 	static final float OVERSHOOT = 1.25F;
 	/** Turn per tick (radians). */
 	static final float SPIN = 0.12F;
 
 	private final float fullSize;
 
-	private TellGlintParticle(ClientLevel level, double x, double y, double z, int color, float scale, SpriteSet sprites) {
+	private TellGlintParticle(ClientLevel level, double x, double y, double z, int color, float scale, int windup, SpriteSet sprites) {
 		super(level, x, y, z, sprites.get(level.getRandom()));
 		this.xd = 0.0;
 		this.yd = 0.0;
@@ -32,7 +32,7 @@ public final class TellGlintParticle extends SingleQuadParticle {
 		this.hasPhysics = false;
 		this.fullSize = SIZE * scale;
 		this.quadSize = this.fullSize;
-		this.lifetime = LIFE;
+		this.lifetime = (windup > 0 ? windup : AttackTells.WINDUP) + LIFE_PAST;
 		this.setColor((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F);
 		this.alpha = 1.0F;
 		this.roll = 0.0F; // the star and its heart turn together
@@ -41,9 +41,9 @@ public final class TellGlintParticle extends SingleQuadParticle {
 
 	public static void register() {
 		ParticleProviderRegistry.getInstance().register(AttackTells.GLINT,
-			sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new TellGlintParticle(level, x, y, z, options.color(), options.scale(), sprites));
+			sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new TellGlintParticle(level, x, y, z, options.color(), options.scale(), options.windup(), sprites));
 		ParticleProviderRegistry.getInstance().register(AttackTells.GLINT_CORE,
-			sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new TellGlintParticle(level, x, y, z, options.color(), options.scale(), sprites));
+			sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new TellGlintParticle(level, x, y, z, options.color(), options.scale(), options.windup(), sprites));
 	}
 
 	@Override

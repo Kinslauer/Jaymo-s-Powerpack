@@ -125,6 +125,8 @@ public final class Recollections {
 		SAW_DEATHLESS(0, 90, true, true, "You saw %1$s, one of the Pallid, lie dead and get up again where they fell (%3$s times that day).",
 			"%3$s saw %1$s, one of the Pallid, lie dead and get up again."),
 		/** {@link BlightSpread}: cured them of the Hollow's blight before it turned them. */
+		/** {@link Takers}: followed them through the night, and was seen. */
+		TAILED(-2, 30, true, false, "You followed %1$s through the night and %1$s saw you do it.", ""),
 		CURED_BLIGHT(6, 240, true, true, "%1$s cured you of the Hollow's blight when it would have made you one of the dead.",
 			"%1$s cured %3$s of the Hollow's blight before it turned them.");
 
@@ -592,6 +594,21 @@ public final class Recollections {
 		}
 		markTold(who, player, r);
 		return line(r, nameTo(player, who), random);
+	}
+
+	/**
+	 * (Refusal hints) The worst {@code who} holds against {@code player}, in the words they'd bring it up with: what they
+	 * say when that is why they won't ({@link RefusalHints}). Null if they hold nothing against them.
+	 */
+	static @Nullable Component worstLine(LivingEntity who, ServerPlayer player, RandomSource random) {
+		Recollection worst = null;
+		for (Recollection r : of(who, player)) {
+			Kind k = r.type();
+			if (k != null && k.remark && r.sway() < 0 && (worst == null || r.sway() < worst.sway())) {
+				worst = r;
+			}
+		}
+		return worst == null ? null : line(worst, nameTo(player, who), random);
 	}
 
 	private static Component line(Recollection r, Component name, RandomSource random) {

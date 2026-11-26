@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": "jaymospowers:dilophosaurus_skull",
+    "B": "jaymospowers:dino_bone"
+  },
+  "pattern": [
+    " S ",
+    "BBB",
+    "B B"
+  ],
+  "result": {
+    "id": "jaymospowers:dilophosaurus_skeleton"
+  }
+}

@@ -17,5 +17,6 @@ abstract class AbstractHorseRendererMixin {
 	private void jaymoskingdoms$looks(AbstractHorse horse, EquineRenderState state, float partialTicks, CallbackInfo ci) {
 		HorseLooks.extract(horse, state);
 		TackLayer.extract(horse, state, partialTicks);
+		com.jaymoskingdoms.client.equestrian.WonderLayer.extract(horse, state);
 	}
 }

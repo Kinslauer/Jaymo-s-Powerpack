@@ -107,6 +107,7 @@ public final class ClassTrees {
 		COLOURS.put(PlayerClass.RANGER, 0x3E8A5A);
 		COLOURS.put(PlayerClass.WARLOCK, 0x7A3AA0);
 		COLOURS.put(PlayerClass.TINKERER, 0xC08A3A);
+		COLOURS.put(PlayerClass.ARTIFICER, 0xA878E0);
 	}
 
 	/**

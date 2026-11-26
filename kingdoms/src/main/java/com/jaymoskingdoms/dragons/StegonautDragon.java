@@ -171,14 +171,15 @@ public class StegonautDragon extends WindDragon implements GeoEntity {
 		return Heritage.is(player, Heritage.Kind.STONEBORN) ? BOND_FACTOR : 1.0F;
 	}
 
-	/** It has no breath: its R is the ground slam ({@link #riderBreath}). */
+	/** Its breath is the stone tremor ({@link DragonTremor}); ridden, R stamps the ground slam first ({@link #riderBreath}). */
 	@Override
 	protected void breathe(ServerLevel level, Vec3 mouth, Vec3 aim, boolean griefing) {
+		DragonTremor.breathe(level, this, aim, this.tickCount, griefing);
 	}
 
 	@Override
 	protected double breathRange() {
-		return 0.0;
+		return DragonTremor.RANGE - 1.0;
 	}
 
 	@Override
@@ -277,7 +278,7 @@ public class StegonautDragon extends WindDragon implements GeoEntity {
 			lookAt(target);
 			return;
 		}
-		groundFight(level, target, false);
+		groundFight(level, target, true);
 		double distance = this.distanceTo(target);
 		double reach = 3.2 + this.getBbWidth() * 0.5 + target.getBbWidth() * 0.5;
 		this.chinIn--;
@@ -455,6 +456,11 @@ public class StegonautDragon extends WindDragon implements GeoEntity {
 	/** Ridden, R stamps a ground slam whose spikes run where the rider looks. */
 	@Override
 	public void riderBreath(float yaw, float pitch) {
+		if (this.riderSlamIn > 0 && this.riderSlamIn < RIDER_SLAM_EVERY - 20 && this.slamAt < 0) {
+			// R held on past the slam: the stone tremor
+			super.riderBreath(yaw, pitch);
+			return;
+		}
 		if (this.riderSlamIn > 0 || this.slamAt >= 0 || exhausted() || !this.onGround()) {
 			return;
 		}
