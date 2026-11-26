@@ -1,9 +1,9 @@
 ---
-status: open
-for: any
+status: claimed
+for: gemini
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: gemini
 pr: 
 ---
 
@@ -32,3 +32,5 @@ Reading of the notes: `ba-biobuilt-dmg` is replaced by Engulf turning into a gra
 
 ## Notes
 - 2026-11-26 13:22 Emberborn retry (Andy 2026-11-26 8:21 AM ET: 'Surprise me', so Claude picked; replaces the dropped rain row): (1) ba-emberborn-steam, Steam stride: while Forge Blessing is up, water boils off the Emberborn in steam and Heavy Water stops slowing them in water until the blessing ends; (2) ba-emberborn-edge, A forge-hot edge: the held weapon glows hot for the blessing and each hit sets the foe alight briefly, with sparks. Not picked: mending worn armour (clashes with Andy's no-mending-in-combat armour rule, #979) and blessing nearby allies.
+- 2026-11-26 14:47 Claude delegated this to Codex.
+- 2026-11-26 14:52 Codex hit its usage limit (back 6:51 PM); moved to Gemini (antigravity).

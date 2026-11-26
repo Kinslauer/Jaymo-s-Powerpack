@@ -1,10 +1,10 @@
 ---
 status: claimed
-for: codex
+for: gemini
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: codex
+claimed_by: gemini
 pr: 
 suggested_owns:
   - kingdoms seas/Mohknee.java, mixin MohkneeStructureMixin.java
@@ -28,3 +28,4 @@ Open question for Andy: which ores the tribes use.
 - 2026-11-26 09:59 Andy 2026-11-26 answered the open ores question: blossom kingdoms keep iron sand and folded steel as they are; barbarians get Ashlands rock iron, their own metal at iron's tier, used for their own gear. Exposed rock or quarries are fine (his old note was about obvious early-game surface ores, which the ore pebbles already handle). All questions answered: build to these plus the earlier ruling (diamond ore stays; distance is the only gate, make outsiders rare not blocked; travellers bring keepsakes back and tell gladly or keep it secret). Rewrite Codex's lore paragraph for the Ashlands first, before building anything.
 - 2026-11-26 10:00 Correction (cloud Claude): Andy answered the ores in the Mohknee review thread, 2026-11-26: barbarians use Ashlands rock iron; blossom kingdoms keep iron sand and folded steel. The Waiting on Andy page now shows that answer.
 - 2026-11-26 14:43 Claude delegated this to Codex.
+- 2026-11-26 14:52 Codex hit its usage limit (back 6:51 PM); moved to Gemini (antigravity).
