@@ -1182,3 +1182,4 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26 9:45 AM ET (Andy, T3 Code): Gemini subscription connected as the T3 "antigravity" harness. "keep claude as coordinator and reviewer, and all tasks should be run through the available harnesses, Codex then gemini then hermes". Gemini (antigravity) replaces the API-key omni-ai-mcp as the second opinion; omni-ai-mcp stays only as the no-T3 fallback.
 
 - 2026-11-26: Andy approved the town crier lore paragraph ("The town crier", Lore.md) and the crier replacing court verdict chat lines (PR #2236).
+- 2026-11-26 11:44 AM ET (Andy): approved the "Hard words for the crier" lore and merging PR #2238 (crier grudges: attacks and hits on the town crier).
