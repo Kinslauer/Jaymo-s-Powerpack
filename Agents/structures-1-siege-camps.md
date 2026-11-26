@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: structures-1-siege-camps
 branch: claude/structures-1-siege-camps
 with: apollo
@@ -32,3 +32,4 @@ owns:
 
 ## Done
 What a player will see: Groups of 3-4 camps now spawn in a ring around kingdom seats. When a war party arrives, a muster period begins where the siege draws supplies from nearby camps. If the siege is won, the defender faction is routed - its people scatter, its land transfers to the victor, and all its treasury/storage goes to the victor's spoils. Not tested in game.
+- 2026-11-26 02:26 No sign of work for 30 min: marked stalled (whoever ran it stopped).
