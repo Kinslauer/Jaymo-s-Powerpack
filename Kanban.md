@@ -12,16 +12,16 @@ kanban-plugin: board
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for any · open
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for ☀️ Apollo · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for ☀️ Apollo · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for ☀️ Apollo · open
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for ☀️ Apollo · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · open
+- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · codex-bleed-out-coma · claimed
 
 
 ## In review
