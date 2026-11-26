@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
 import org.lwjgl.system.MemoryStack;
 
 /**
- * Time skip on the runner's own side ({@link ChronoSkip}): the skip key (default {@code [}) asks for it; while it lasts the
+ * Time skip on the runner's own side ({@link ChronoSkip}): the skip key (default numpad {@code 0}) asks for it; while it lasts the
  * runner is pushed forward at speed for its first {@link #PUSH_TICKS} ticks (movement is the client's to decide, as the wall
  * run's is) and the screen warps: the {@code chrono_warp} post effect pulls the picture in toward the middle and streaks it
  * outward, rings running across it, easing in and out. Its strength and clock are written into the effect's settings block each
@@ -58,7 +58,7 @@ public final class ChronoSkipClient {
 	}
 
 	public static void init() {
-		skipKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.speed_skip", InputConstants.KEY_LBRACKET, JaymosPowersClient.CATEGORY));
+		skipKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.speed_skip", InputConstants.KEY_NUMPAD0, JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoSkipClient::tick);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			age = -1;

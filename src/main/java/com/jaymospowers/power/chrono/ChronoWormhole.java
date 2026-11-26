@@ -178,7 +178,8 @@ public final class ChronoWormhole {
 		long start, due;
 		@Nullable MarkAt mark;
 		@Nullable UUID foe;
-		boolean foeNoAi;
+		/** The bodies that went in, so someone who died and respawned meanwhile (a new body) is not carried. */
+		final Map<UUID, ServerPlayer> bodies = new HashMap<>();
 	}
 
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
@@ -215,6 +216,11 @@ public final class ChronoWormhole {
 			MEMBERS.clear();
 			DRAG_READY.clear();
 		});
+	}
+
+	/** Whether a drag's film is holding {@code entity} still (the mixin that stops a frozen creature asks, via {@code ChronoHooks}). */
+	static boolean held(Entity entity) {
+		return !HELD.isEmpty() && HELD.contains(entity.getUUID());
 	}
 
 	/** A runner leaves or loses the power: no hole, no mark, nothing waiting. */
@@ -387,6 +393,7 @@ public final class ChronoWormhole {
 				continue;
 			}
 			MEMBERS.put(id, trip.leader);
+			trip.bodies.put(id, p);
 			p.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, FILM_TICKS + FINISH_GRACE + 10, 4, false, false, false));
 			UltimateFilm.play(p, UltimateFilm.WORMHOLE, FILM_TICKS, ahead, null, 0.0);
 		}
@@ -414,12 +421,13 @@ public final class ChronoWormhole {
 		for (UUID id : trip.going) {
 			MEMBERS.remove(id);
 			ServerPlayer p = server.getPlayerList().getPlayer(id);
-			if (p != null && p.isAlive() && !p.isSpectator()) {
+			// the same living body that went in: not one who died and respawned (a new body) or logged out and in
+			if (p != null && p == trip.bodies.get(id) && p.isAlive() && !p.isSpectator()) {
 				going.add(p);
 			}
 		}
 		ServerPlayer leader = server.getPlayerList().getPlayer(trip.leader);
-		if (leader == null || !leader.isAlive()) {
+		if (leader == null || leader != trip.bodies.get(trip.leader) || !leader.isAlive()) {
 			release(server, trip);
 			return;
 		}
@@ -479,12 +487,11 @@ public final class ChronoWormhole {
 		trip.start = now;
 		trip.due = now + Math.round(DRAG_TICKS * DRAG_FINISH_AT);
 		trip.going.add(player.getUUID());
+		trip.bodies.put(player.getUUID(), player);
 		trip.foe = foe.getUUID();
+		// held in memory only (ChronoHooks.isFrozen, which ChronoLivingEntityMixin stops its AI and movement on): nothing is
+		// written to the creature, so a crash or an unloaded chunk can never leave it frozen
 		HELD.add(foe.getUUID());
-		if (foe instanceof Mob mob) {
-			trip.foeNoAi = mob.isNoAi();
-			mob.setNoAi(true);
-		}
 		MEMBERS.put(player.getUUID(), player.getUUID());
 		TRIPS.put(player.getUUID(), trip);
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, DRAG_TICKS + 40, 4, false, false, false));
@@ -526,9 +533,11 @@ public final class ChronoWormhole {
 		ServerLevel level = leader.level();
 		Vec3 look = Vec3.directionFromRotation(0.0F, leader.getYRot());
 		Vec3 at = leader.position().add(look.scale(1.5));
-		if (foe.level() == level) {
-			foe.teleportTo(level, at.x, at.y, at.z, Set.of(), foe.getYRot(), foe.getXRot(), false);
+		if (foe.level() != level) {
+			// it was taken to another dimension (or you were) while the film ran: nothing to uppercut
+			return;
 		}
+		foe.teleportTo(level, at.x, at.y, at.z, Set.of(), foe.getYRot(), foe.getXRot(), false);
 		leader.setAttached(ChronoFlow.MOVE, new ChronoFlow.Move(ChronoFlow.UPPERCUT, level.getGameTime(), foe.getId(), 1));
 		leader.swing(InteractionHand.MAIN_HAND, new SwingAnimation(SwingAnimationType.WHACK, 8), true);
 		foe.setInvulnerableTime(0);
@@ -579,14 +588,8 @@ public final class ChronoWormhole {
 
 	/** Gives a held foe back to the world as it was, and takes the members out of the film. */
 	private static void release(MinecraftServer server, Trip trip) {
-		LivingEntity foe = foeOf(server, trip);
 		if (trip.foe != null) {
 			HELD.remove(trip.foe);
-		}
-		if (foe != null) {
-			if (foe instanceof Mob mob) {
-				mob.setNoAi(trip.foeNoAi);
-			}
 		}
 		trip.foe = null;
 		for (UUID id : trip.going) {

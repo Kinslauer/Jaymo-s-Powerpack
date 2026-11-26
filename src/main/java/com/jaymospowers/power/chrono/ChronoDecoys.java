@@ -71,6 +71,9 @@ public final class ChronoDecoys {
 	/** The fighting copy: how far it looks for a foe, how close it strikes, how fast it runs (blocks a tick), how often it strikes and swaps (ticks), its blow (plus per ability mastered). */
 	static final double FIGHT_RANGE = 16.0, FIGHT_REACH = 2.0, FIGHT_SPEED = 0.45;
 	static final int FIGHT_EVERY = 8, FIGHT_SWAP_GAP = 20;
+	/** The fighter stays within this many blocks of you (it fades past this plus four), and two sneak presses this close (ticks) swap places. */
+	static final double FIGHT_LEASH = 16.0;
+	static final int FIGHT_DOUBLE_TAP = 8;
 	static final float FIGHT_DAMAGE = 2.0F, FIGHT_PER_LEVEL = 0.4F;
 
 	/** Server to clients: where {@code owner}'s copies stand (an empty list takes them away) and how long they last (ticks). */
@@ -116,8 +119,10 @@ public final class ChronoDecoys {
 		/** The copy that fights: where it stands (null if none), which way it faces, when it can strike and swap again, and whether you were sneaking last tick. */
 		Vec3 fighter;
 		float fighterYaw;
-		long nextHit, fighterSwapAt;
+		long nextHit, fighterSwapAt, lastSneak = -100;
 		boolean sneaked;
+		/** The dimension the copies stand in: they and the swap end if you leave it. */
+		net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim;
 
 		/** Every copy to draw: the standing ones, then the fighter. */
 		List<Vec3> allSpots() {
@@ -196,10 +201,16 @@ public final class ChronoDecoys {
 		if (set.spots.isEmpty()) {
 			return;
 		}
-		// one of them fights beside you (sneak swaps places with it)
-		int last = set.spots.size() - 1;
-		set.fighter = set.spots.remove(last);
-		set.fighterYaw = set.yaws.remove(last);
+		// and one more, beside you, that fights (sneak tapped twice swaps places with it)
+		for (int i = 0; i < 6 && set.fighter == null; i++) {
+			double angle = player.getRandom().nextDouble() * Mth.TWO_PI;
+			set.fighter = standAt(level, player, player.getX() + Math.cos(angle) * 2.0, player.getZ() + Math.sin(angle) * 2.0);
+		}
+		if (set.fighter != null) {
+			set.fighterYaw = player.getYRot();
+			MagicFx.burst(level, set.fighter.x, set.fighter.y + 1.0, set.fighter.z, COLOR, 0.6F, 5, 0.3, 0.6, 0.3);
+		}
+		set.dim = level.dimension();
 		set.until = now + LIFE;
 		set.swapReadyAt = now + SWAP_EVERY;
 		SETS.put(player.getUUID(), set);
@@ -243,7 +254,7 @@ public final class ChronoDecoys {
 			Copies set = entry.getValue();
 			ServerPlayer owner = server.getPlayerList().getPlayer(entry.getKey());
 			if (owner == null || !owner.isAlive() || !Powers.has(owner, ChronoPower.INSTANCE) || owner.level().getGameTime() >= set.until
-				|| set.spots.isEmpty() && set.fighter == null) {
+				|| !owner.level().dimension().equals(set.dim) || set.spots.isEmpty() && set.fighter == null) {
 				it.remove();
 				if (owner != null) {
 					send(owner, null);
@@ -317,7 +328,7 @@ public final class ChronoDecoys {
 
 	/**
 	 * The copy that fights (Andy's "vibrate and split off an afterimage that fights"): it runs at the nearest hostile creature
-	 * within {@link #FIGHT_RANGE} and, in reach, strikes it every {@link #FIGHT_EVERY} ticks. Sneak (a fresh press, with
+	 * within {@link #FIGHT_RANGE} and, in reach, strikes it every {@link #FIGHT_EVERY} ticks. Sneak tapped twice (with
 	 * {@link #FIGHT_SWAP_GAP} ticks between) swaps places with it. True when the clients should be sent the copies again.
 	 */
 	private static boolean fight(ServerLevel level, ServerPlayer owner, Copies set, long now) {
@@ -326,7 +337,21 @@ public final class ChronoDecoys {
 		}
 		boolean changed = false;
 		boolean sneak = owner.isShiftKeyDown();
-		if (sneak && !set.sneaked && now >= set.fighterSwapAt) {
+		if (owner.position().distanceTo(set.fighter) > FIGHT_LEASH + 4.0) {
+			// left behind: it fades
+			MagicFx.burst(level, set.fighter.x, set.fighter.y + 1.0, set.fighter.z, COLOR, 0.7F, 6, 0.3, 0.6, 0.3);
+			set.fighter = null;
+			return true;
+		}
+		// a deliberate trigger: sneak tapped twice (a single press is Sneak + B, Sneak + the mark key and the like)
+		boolean tap = sneak && !set.sneaked;
+		set.sneaked = sneak;
+		boolean swapNow = false;
+		if (tap) {
+			swapNow = now - set.lastSneak <= FIGHT_DOUBLE_TAP && now >= set.fighterSwapAt;
+			set.lastSneak = swapNow ? -100 : now;
+		}
+		if (swapNow) {
 			Vec3 there = set.fighter, here = owner.position();
 			set.fighter = here;
 			set.fighterYaw = owner.getYRot();
@@ -337,7 +362,6 @@ public final class ChronoDecoys {
 			level.playSound(null, there.x, there.y, there.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7F, 1.8F);
 			changed = true;
 		}
-		set.sneaked = sneak;
 		Mob foe = null;
 		double best = FIGHT_RANGE * FIGHT_RANGE;
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, new AABB(set.fighter, set.fighter).inflate(FIGHT_RANGE), m -> m instanceof Enemy && m.isAlive())) {
@@ -359,7 +383,7 @@ public final class ChronoDecoys {
 		if (gap > FIGHT_REACH) {
 			Vec3 step = flat.scale(Math.min(FIGHT_SPEED, gap - FIGHT_REACH * 0.7) / gap);
 			Vec3 on = settle(level, owner, set.fighter.x + step.x, set.fighter.y, set.fighter.z + step.z);
-			if (on != null) {
+			if (on != null && on.distanceTo(owner.position()) <= FIGHT_LEASH) {
 				set.fighter = on;
 				changed |= now % 2 == 0;
 			}

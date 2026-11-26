@@ -129,10 +129,14 @@ final class ChronoPunch {
 			target.setInvulnerableTime(0);
 			Vec3 before = target.getDeltaMovement();
 			if (!target.hurtServer(level, player.damageSources().playerAttack(player), damage)) {
+				// a blow held in slowed time (ChronoSlowTime) is still a strike
+				if (player.hasAttached(ChronoSlowTime.SLOWING)) {
+					ChronoBlitz.struck(player, target, true);
+				}
 				continue;
 			}
 			any = true;
-			ChronoBlitz.struck(player, target);
+			ChronoBlitz.struck(player, target, true);
 			if (last) {
 				Vec3 away = to.horizontal().lengthSqr() < 1.0E-4 ? look.horizontal() : to.horizontal().normalize();
 				target.setDeltaMovement(away.scale(FINISH_PUSH).add(0.0, 0.45, 0.0));

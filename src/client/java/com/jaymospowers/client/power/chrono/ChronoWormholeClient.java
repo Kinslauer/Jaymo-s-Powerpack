@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The wormhole on this side ({@link ChronoWormhole}): the holes the server has torn open near you, drawn by
- * {@link ChronoWormholeArt#drawHole} tearing open and closing; the catch key (default {@code ]}) that drags the foe ahead
+ * {@link ChronoWormholeArt#drawHole} tearing open and closing; the catch key (default numpad {@code 1}) that drags the foe ahead
  * when you run in top gear; and the mark, which the server needs to know about so a wormhole can put you there
  * ({@link #marked}, called by {@code ChronoSpeedKeys}).
  */
@@ -43,7 +43,7 @@ public final class ChronoWormholeClient {
 	}
 
 	public static void init() {
-		catchKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.speed_catch", InputConstants.KEY_RBRACKET, JaymosPowersClient.CATEGORY));
+		catchKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.speed_catch", InputConstants.KEY_NUMPAD1, JaymosPowersClient.CATEGORY));
 		ClientPlayNetworking.registerGlobalReceiver(ChronoWormhole.Open.TYPE, (payload, context) -> context.client().execute(() -> {
 			ClientLevel level = context.client().level;
 			if (level == null || payload.life() <= 0) {

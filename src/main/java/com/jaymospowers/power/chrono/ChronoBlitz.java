@@ -14,7 +14,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Blitz poses: when a Chrono's fists (Chrono Punch, the held flurry) land on a foe, the foe is knocked into one of
+ * Blitz poses, while time is slowed (Chrono Punch's stutter, or the slow-time key's crawl): when a Chrono's fists (Chrono Punch, the held flurry) land on a foe, the foe is knocked into one of
  * {@link ChronoFlow#STRIKE_POSES} different strike poses ({@code ChronoReelPose} draws them), and one foe in
  * {@link #DROP_ONE_IN} struck lets go of what it was holding. Every foe struck takes the next pose of a cycle that starts
  * at a random pose for each runner, so foes hit together never share a pose (up to six) and the same one never comes twice running.
@@ -27,21 +27,31 @@ final class ChronoBlitz {
 
 	/** The next pose to give, per runner. */
 	private static final Map<UUID, Integer> NEXT = new HashMap<>();
+	/** Foes whose one-in-five has been rolled (game time), forgotten after {@link #ROLL_MEMORY} ticks (weakly held, so a gone foe is let go). */
+	private static final Map<LivingEntity, Long> ROLLED = new java.util.WeakHashMap<>();
+	static final int ROLL_MEMORY = 400;
 
 	private ChronoBlitz() {
 	}
 
 	/** {@code target} has just been struck by {@code player}'s fists: it takes the next pose, and may drop what it holds. */
-	static void struck(ServerPlayer player, LivingEntity target) {
-		if (!target.isAlive()) {
+	static void struck(ServerPlayer player, LivingEntity target, boolean stutter) {
+		// only while time is slowed: Chrono Punch's stutter, or the slow-time key's crawl
+		if (!target.isAlive() || !stutter && !player.hasAttached(ChronoSlowTime.SLOWING)) {
 			return;
 		}
 		int n = NEXT.compute(player.getUUID(), (id, was) -> was == null ? player.getRandom().nextInt(ChronoFlow.STRIKE_POSES) : was + 1);
 		int pose = Math.floorMod(n, ChronoFlow.STRIKE_POSES);
 		int side = player.getRandom().nextBoolean() ? 1 : -1;
 		ChronoFlow.reel(target, ChronoFlow.STRIKE, side, pose);
-		if (player.getRandom().nextInt(DROP_ONE_IN) == 0) {
-			drop(player, target);
+		// the one-in-five is rolled once for each foe, however many blows it takes; players are never disarmed
+		long now = target.level().getGameTime();
+		Long rolled = ROLLED.get(target);
+		if (!(target instanceof net.minecraft.world.entity.player.Player) && (rolled == null || now - rolled > ROLL_MEMORY)) {
+			ROLLED.put(target, now);
+			if (player.getRandom().nextInt(DROP_ONE_IN) == 0) {
+				drop(player, target);
+			}
 		}
 	}
 

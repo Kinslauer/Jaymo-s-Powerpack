@@ -233,8 +233,9 @@ public final class ChronoFlurry {
 		target.setInvulnerableTime(0);
 		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.flurry", 1);
 		boolean hurt = target.hurtServer(player.level(), player.damageSources().playerAttack(player), damage);
-		if (hurt) {
-			ChronoBlitz.struck(player, target);
+		if (hurt || player.hasAttached(ChronoSlowTime.SLOWING)) {
+			// the flurry's own blows pose and disarm only while time is slowed (a blow held in it counts)
+			ChronoBlitz.struck(player, target, false);
 		}
 		return hurt;
 	}
