@@ -40,6 +40,7 @@ public final class Crocodiles {
 	}
 
 	public static void register() {
+		DeathRoll.register();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mob mob && CROCODILE.equals(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()))) {
 				CROCODILES.add(mob);
