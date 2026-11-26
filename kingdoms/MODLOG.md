@@ -17876,3 +17876,8 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - Players and villagers, in the character creator too; hidden under a helmet, hood, mask or costume, on the invisible and on a Bio-built form.
 - Not changed: looks that already had real parts (Stoneborn brow, Tideborn fins, the other sea looks, Verdant antennae, goblins and orcs, Divine halo, Bio-built forms) and the plain-faced bloods (Frostborn, Endborn, Deepborn, Emberborn, Rubber-folk, elves, Zombie, Wraith, Reaper).
 - Built (compileClientJava); not seen in game.
+
+## 0.13.41 (2026-11-26): Dragon keys no longer stop the game starting (#2232)
+
+- The game crashed on start ("Category 'jaymoskingdoms:dragons' is already registered"): the dragon breath and the new bite key each registered the Dragons key category. They now share one. `DragonsClient`.
+- Built by CI; not played.
