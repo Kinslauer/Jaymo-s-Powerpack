@@ -1,5 +1,5 @@
 ---
-status: open
+status: blocked
 for: any
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
