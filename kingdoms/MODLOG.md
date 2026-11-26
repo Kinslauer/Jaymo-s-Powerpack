@@ -17886,3 +17886,9 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 
 - Loading hint 110 now says you can choose to reincarnate yourself from the H menu's character page (Jaymo's Powers' new Reincarnate link).
 - Built; not played.
+
+## 0.13.43 (2026-11-26): Maggots come as a writhing heap that splats underfoot (#2234)
+
+- **Maggot heap**: a maggot at a body is now drawn as a heap of seven small maggots (`MaggotModel`), a couple lying over the others, each squirming on its own beat (heads lifting and swinging, tails flicking, bodies bunching and stretching, the heap slowly churning), instead of one big maggot. They crawl together when it moves. Its box is half a block across (was a quarter), so it's easier to tap for bait and to step on. A tap of use still takes the heap as one Maggots bait.
+- **Splat underfoot** (`wild/SpiderSquash`): a small bug (maggots, crickets, roaches, flies, snails and the rest of `squashable_bugs`) now splats when any part of a walker's foot comes down on it (`BUG_FOOT`), not only when the walker's middle passes over it. Monsters (zombies and the like) splat bugs underfoot too; spiders still spare their own. Spiders' squashing is unchanged.
+- Built; not played.
