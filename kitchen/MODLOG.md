@@ -2944,3 +2944,10 @@ The Dragon Waterskin survives fire and lava when dropped, as netherite does. An 
 - **What a finished body leaves** (`Gibs.eaten`, `Gibs.bonesLeft`): the ribcage, the spine, a skull (a person's body), 2-3 bone shards, 1-2 organs and two ropes of gut, 2-3 gut piles round it (intestines and offal in turn), the tatters of its clothes, and 3-5 bones as items (was a rib, a spine, a bone or two, one gut rope and one pile, and 1-2 bones). A bigger body leaves more, a smaller one fewer. Its gear and pockets drop as before; monsters that can pick up loot still take them up and wear armour that's better than theirs (Andy: "thats fine ... they should equip armor too").
 - **Fed monsters stop hunting** (`Scavengers.fedPace`): a monster that has swallowed a part lately or is full no longer takes up prey (full now counts too, not only the two minutes after a part), drops whoever it was after unless they hurt it in the last 10 seconds, and ambles at 70% of its speed. Hungry, it hunts as hard as ever. Wild scavengers only stop taking up prey, as before.
 - Built with Gradle; not played.
+
+## 0.7.2 (2026-11-26): Scavengers take longer over a body (#2200)
+
+- Andy (2026-11-25): "it should take longer for them to finish eating across the board, even longer for passive scavengers, and the hostile ones are faster. make it about double and modify from there."
+- **Slower meals** (`Scavengers.pace`, `HOSTILE_PACE`, `WILD_PACE`): a monster now takes 1.6 times the bites to tear a part off and 1.6 times as long to chew it (a man's limb about 15 seconds, was about 9); any other scavenger (wolves, bears, vultures, deer) 2.4 times (about 22 seconds a part).
+- **Crocodiles scavenge** (tag `scavengers`: Cube Animals' crocodile, alongside Naturalist's alligator): they eat the bodies they drag into the water (Jaymo's Kingdoms' death roll).
+- Built with Gradle; not played.
