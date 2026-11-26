@@ -30,3 +30,4 @@ shared rule for that blood or adds to it.
 
 ## Notes
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: #2117 implemented the shared rule, not this pick list. Prepare one or more selectable ideas for every move; no upgrades implemented before Andy selects them. Question sent: add to shared bonus, replace it, or decide per move.
+- 2026-11-26 00:28 YOUTH delegated this to Quill (Claude approved): tickable pick list of per-blood upgrades for Andy; whether a pick adds to or replaces the shared bonus is decided per move.
