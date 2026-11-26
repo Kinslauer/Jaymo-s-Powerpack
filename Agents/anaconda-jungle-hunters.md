@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Fix the anaconda model and make anacondas jungle ambush hunters
 branch: claude/project-thread-k10pz4
 with: Claude (Reason Art project thread)
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 Compile-checked only, not played.
+- 2026-11-26 00:07 No sign of work for 30 min: marked stalled (whoever ran it stopped).

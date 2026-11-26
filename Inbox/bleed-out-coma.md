@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: coordinator
 from: Andy (desktop session "Andy's three clips", 2026-11-23)
 asked: 2026-11-23
-claimed_by: codex-bleed-out-coma
+claimed_by: 
 pr:
 suggested_owns:
   - src/main/java/com/jaymospowers/core/wounds/ (a new class for the coma; small hooks in Downed, BleedOut)
@@ -48,3 +48,4 @@ Each part its own PR with a change note, Auto-fix on, CI green, not merged; what
 Lore check: none needed for part 1 (mechanics); part 2's lines fit the villagers' temperaments (`Temperaments`).
 
 ## Notes
+- 2026-11-26 00:07 codex-bleed-out-coma's claim had no sign of work for 30 min: handed back as open.
