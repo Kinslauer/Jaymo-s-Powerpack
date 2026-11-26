@@ -122,6 +122,7 @@
 		"LeavesStateMixin",
 		"LivingEntityVoiceAccessor",
 		"MobGoalsAccessor",
+		"WorldGenRegionStepAccessor",
 		"MobWeaponDropMixin",
 		"ServerGamePacketListenerImplMixin",
 		"SplashWaterDouseMixin",
