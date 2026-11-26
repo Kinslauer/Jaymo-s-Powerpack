@@ -17645,3 +17645,38 @@ The loot of the bloatshroom, mimicap, shambler and truffler and the bouncecap, g
 ## 0.13.13 (2026-11-26): Guards dress for their land (#2189)
 
 Guards' kit now leans by their realm's climate (Andy's ruling). In the warm lands (savanna, desert, badlands, jungle, swamp) the ranks wear mail and leather: the mail haubergeon for every rank, a leather jack beneath (the free floor in place of the quilted coat), leather cuisses, and plate only for veterans and leaders. In the north (taiga, snowy) they wear quilting and plate: soldiers get the quilted coat under iron plate, plate cuirass, gauntlets and greaves where the realm can pay. Each guard has a fixed chance to go against his land's lean: 15% in general, half of northern archers go in leather (no mail at all), and 35% of southern soldiers and knights (legionnaires) go in plate. Plains and cherry lands are unchanged. Everything is still paid for from the stores and treasury as before; tuning is in `GuardKit` (`WARM`, `AGAINST`, `NORTH_ARCHER`, `SOUTH_LEGION`).
+
+## 0.13.14 (2026-11-26): Shade under the canopy (#2190)
+
+Riding in a carriage, a rickshaw, a hired cab or a coach keeps the sun off you: with Jaymo's Kitchen the heat of the day doesn't reach the rider under the roof or hood. A wind dragon's rider gets no warmth from the beast's cold blood in winter, as they would on a horse. A final Reincarnate gives Kitchen's ten-minute first-wake grace from the cold and heat again, since the character is brand new.
+
+## 0.13.15 (2026-11-26): Rain barrels beside village houses (#2190)
+
+When Jaymo's Kitchen is installed, once a village's builders finish a house, they set one rain barrel on free solid ground against an outside wall (not on a path). It is a separate step after the house is up, so house plans are unchanged. It starts empty and fills in the rain. A house with no such spot goes without. Without Kitchen nothing changes.
+- Class: `RainBarrels`, hooked in `Blueprint#register` beside the trade signs.
+- Built; not played.
+
+## 0.13.16 (2026-11-26): Clothes and charms: desert garb, sun hats, leaf cloak, herbalist (#2190)
+
+- **Desert garb**: linen and rabbit-hide robes and headscarves (almost no armour; cool clothing). A robe and a headscarf worn together keep the sun off like shade. Tailors sell them in villages in desert, badlands and savanna land.
+- **Sun hats**: bamboo, reed and palm-leaf hats beside the straw hat, sold by farmers and tailors anywhere, and crafted (bamboo, sugar cane, jungle leaves). All cool clothing.
+- **Leaf cloak**: forest rangers sell it. Cool in the heat; mobs notice you from half as far with leaves against you and 70% as far elsewhere in a forest.
+- **Herbalist** (the monastery's): sells Powers' hot-stone pouch and cold-clay flask for silver. The rare equinox charm turns up now and then (12%) in the monastery's chests.
+- Classes: `ClimateWear`, `LeafCloak`, `HerbalistWares`. Built; not played.
+
+## 0.13.17 (2026-11-26): Four new lands: steam valley, ashlands, salt pans, steppe (#2190)
+
+- **Steam valley** (Mohknee): a rare cold-mountain valley, its slopes dotted with terraces of calcite holding hot pools. Each pool is water over a gravel floor over a magma block, so bathing in one really warms you (Kitchen's hot spring rule), and the valley's own temperature is held out of the seasons' reach, so it stays mild in winter. Some calcite on the rims steams. Snow monkeys live here.
+- **Ashlands** (Mohknee): black sand, basalt and blackstone, drifts of ash, lava vents ringed with smoldering basalt (hot underfoot like magma, smoking), and rich iron, gold, copper, redstone and diamond in the rock. Very hot (like a desert) and harsh land for foes: monsters there take the world tier plus two steps, whatever Mohknee's mild climate map says. Black sand dug there gives Mohknee's iron sand twice as often as a riverbed. No villages are founded in it.
+- **Salt pans** (home continent, in the desert belt): flat white crusts of **salt crust**; dig it (a shovel is quickest) for Kitchen's salt. Salt cures meat so it keeps (Kitchen's salting, as before). Eating salted food, and a few salty dishes, now leaves you thirsty (3 water points).
+- **Steppe** (home continent): dry cold grassland where plains meet the dry inland: grass patched with coarse dirt, mild days and bitter nights (the night under the open sky takes 20 more body heat than in other mild lands, as in a desert).
+- The lands are placed by our own hook in the Overworld's biome source (Fabric has no Overworld biome API in 26.3), only where the game already chose a matching host biome and a slow noise of ours is high: steam valley over cold mountain slopes and taiga on Mohknee, ashlands over most inland land of Mohknee, salt pans over flat desert, steppe over inland plains. Caves, seas, rivers, beaches and the climate map are untouched. Surface blocks come from a data rule (`worldgen/material_rule/lands_surface.json`, run by an edited `overworld` rule). New blocks: Steaming Calcite, Smoldering Basalt, Salt Crust.
+- Built; not played. The rarity of each land was worked out from the noise, not from a generated map.
+
+## 0.13.18 (2026-11-26): Villages and the weather (#2190)
+
+Cartographers know the weather. They sell Kitchen's thermometer and waterskins, the almanac and the land's climate clothes (a linen headscarf in a hot land, a wool cap in a cold one), and you can ask one about the weather on the talk wheel: they tell you which season is coming and how many days off it is. In a season's last days a cartographer who sees you walks over and tells you unasked. All in speech bubbles.
+
+Villagers notice when you suffer. One who sees you freezing comes over and offers a seat by their fire (they walk you to the nearest lit fire and wait when you fall behind) or, if kind-hearted, hands you a woollen shirt. A guard who sees you overheating in the noon sun of a hot land tells you to get out of it and walks you to shade. The cold-hearted never bother, others only now and then, nobody nags you more than once in a few minutes, and nobody stops what they are busy with.
+
+Settlement people live with the climate. On cold nights (cold lands, or winter in temperate ones) a few villagers and a third of the guards gather and sit round the village fire; at midday in hot lands some seek the shade of a roof or a tree; and in the cold they pull on a cloak and a hood (fur in cold lands) over their harness.

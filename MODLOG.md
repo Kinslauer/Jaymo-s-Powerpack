@@ -8400,3 +8400,7 @@ The symbiote does things in the world now, not only on your screen.
 
 - The anvil forges the waist, leg and foot pieces (from Jaymo's Kingdoms): the long tassets, the fluted cuisses, the schynbald and the scale sabatons from steel (each in bright, blackened and gilded); the scale skirt, the lamellar skirt, the brigandine cuisses, the mail chausses and the mail shoes from iron.
 - The new pieces are counted as cloth, mail or plate (the armour class tags).
+
+## 0.27.73 (2026-11-26): Belt charms: hot-stone pouch, cold-clay flask, equinox charm (#2190)
+
+Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone pouch warms, the cold-clay flask cools, and the rare equinox charm does both. No bonding needed. Without Kitchen they do nothing. Jaymo's Kingdoms' monastery herbalist sells the first two; the equinox charm is found in the monastery's chests.

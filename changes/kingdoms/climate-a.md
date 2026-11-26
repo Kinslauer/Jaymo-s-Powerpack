@@ -1,2 +1,0 @@
-# Shade under the canopy
-Riding in a carriage, a rickshaw, a hired cab or a coach keeps the sun off you: with Jaymo's Kitchen the heat of the day doesn't reach the rider under the roof or hood. A wind dragon's rider gets no warmth from the beast's cold blood in winter, as they would on a horse. A final Reincarnate gives Kitchen's ten-minute first-wake grace from the cold and heat again, since the character is brand new.
