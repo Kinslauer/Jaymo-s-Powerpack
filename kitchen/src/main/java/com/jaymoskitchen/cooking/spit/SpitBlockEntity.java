@@ -329,6 +329,9 @@ public class SpitBlockEntity extends BlockEntity {
 		if (any && (changed || ++be.cookTicks % 20 == 0)) {
 			be.markUpdated();
 		}
+		if (any && level instanceof ServerLevel server) {
+			com.jaymoskitchen.cooking.CookfireComfort.cooking(server, pos.below());
+		}
 	}
 
 	@Override
