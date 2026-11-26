@@ -395,7 +395,7 @@ public class NoiseChunkGeneratorMixin {
                         }
                     }
 
-                    if (originalY >= 90) {
+                    if (originalY >= HydrologyManager.aboveSea(90)) {
                         for (int y = seaLevel; y <= originalY; y++) {
                             if (y >= minH && protectedBlocks.get(y - minH)) continue;
                             BlockState currentState = chunk.getBlockState(new BlockPos(startX + x, y, startZ + z));

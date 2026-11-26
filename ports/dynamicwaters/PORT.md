@@ -116,6 +116,17 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   regions they look at (`getWatershedRegion`, on the worker thread that places the start; on the server thread it still
   only reads, as before). Built; not played.
 
+- **Gorges only in high ground, gentle banks in the lowlands**: Dynamic Waters set its lowland river heights as fixed
+  Ys for vanilla's sea at 63: a river cut a gorge (sheer stepped rock walls) where its ground stood over Y 76, kept
+  wide valley banks only under Y 80, sealed caves under ground over Y 90, and gave the river biome only under Y 80.
+  The pack's higher sea (`HighSea`, 8 blocks up, the land lifted as much) put Y 76 only 5 blocks over the water, so
+  nearly every lowland river through plains cut a ravine with a river at its foot (Andy's clip, 2026-11-26, "ravine
+  river hybrids"). Those heights now move with the world's sea (`HydrologyManager.aboveSea`): a gorge starts 13
+  blocks over the water as Dynamic Waters meant. And in open-gorge mode (the default) a lowland river's banks climb
+  at most one block for every two out from the water, out to the gorge's reach (`BANK_GENTLE_RUN`), so low ground
+  eases down to a river as a valley; the drainage routing's ground (`lowlandRouteGround`) takes the same slope.
+  Built; not played; new chunks only.
+
 - **Left clicks in the shore editors**: 26.3 numbers mouse buttons from 1 (`InputConstants.MOUSE_BUTTON_LEFT` is 1,
   right is 3), so the block picker, riverbank palette and water plant set screens, which waited for button 0, never
   took a left click. They compare with `InputConstants.MOUSE_BUTTON_LEFT` now. Built; not played.

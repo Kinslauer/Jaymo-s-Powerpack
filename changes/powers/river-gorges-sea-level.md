@@ -1,0 +1,5 @@
+# Rivers through low ground run in gentle valleys; gorges only in high ground
+- **Ravine-river hybrids gone from the lowlands** (Dynamic Waters port): its rivers cut a gorge (sheer stepped rock walls with the river at the foot) wherever the ground stood over Y 76, a height set for vanilla's sea at 63. Our higher sea and lifted land put that only 5 blocks over the water, so nearly every river through plains became a ravine. Its fixed heights (gorge start, wide valley banks, cave sealing, river biome) now follow the world's sea level, so a gorge starts 13 blocks over the water, in hills and high ground, as Dynamic Waters meant.
+- **Gentle banks**: a lowland river's banks climb at most one block for every two out from the water, so plains slope down to a river instead of breaking off in a cut. High ground still makes a real gorge.
+- `HydrologyManager` (`aboveSea`, `BANK_GENTLE_RUN`), `NoiseChunkGeneratorMixin`, `MultiNoiseBiomeSourceMixin`; listed in `ports/dynamicwaters/PORT.md`.
+- Built; not played. World gen: only new chunks change, so a fresh world is needed to see it.
