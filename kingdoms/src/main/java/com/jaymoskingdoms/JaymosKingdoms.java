@@ -224,6 +224,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// blasts that undercut a building bring down what's over the hole (chests ride down whole)
 		Collapse.register();
 		LooseWood.register();
+		// a wood's sticks, saplings and apples nobody threw go after a minute (a burning wood drops hundreds)
+		Windfall.register();
 		// 0.7.588: mob griefing always on (Andy)
 		PackRules.register();
 		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
