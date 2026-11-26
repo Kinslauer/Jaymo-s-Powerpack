@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 10:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 10:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,6 +19,7 @@ kanban-plugin: board
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for any · open
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for any · open
 - [ ] [[Inbox/codex-reference-dinos-venom-restart|codex-reference-dinos-venom-restart]] · for any · open
+- [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · for any · open
 
 
 ## Being built
