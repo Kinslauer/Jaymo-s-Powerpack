@@ -8442,3 +8442,11 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - **Fishers work the run** (lore "The run", for Andy to approve): by day in autumn a fisherman villager near you walks down to the run and takes a salmon now and then, but always leaves 2 of a school to go on to the beds. Salmon fetches half at a fisherman's on a run river while the run is in.
 - **Spring shallows** (`fishing/SpringShallows`): in spring the river and lake fish that bite better in spring than in winter come into water 2 blocks deep or less and splash there, and where 3 or more of a kind gather within 8 blocks a young one is born every 2 minutes (at most 12 of that kind within 32).
 - Built with Gradle; not played.
+
+## 0.27.79 (2026-11-26): Reason look pack replaces Excalibur; art check on PRs (#2208)
+
+- **Reason look**: the built-in pack that holds the redrawn art (the old "vanilla-style items" pack) is now the pack's own art style, "Reason look", on by default. Repaints of our mods' and other mods' script-made textures go into it, in clean vanilla-plus (Andy, 2026-11-26). Its id stays `vanilla_style`, so a player's choice carries over.
+- **Excalibur retired**: `/excalibur`, the Excalibur and Excalibur Fresh Animations downloads, and the graded `excalibur_style` pack (about 43 MB) are gone. Installs that had them on get them switched off once (`PackResourcePacks.retireExcalibur`); the zips stay in resourcepacks/ for the player to delete.
+- **Style guide**: docs/Vanilla-Style.md now covers blocks, mobs, worn armour and finish variants (no per-pixel noise, ramps, light from above, variants as palette swaps).
+- **Art check**: `tools/art_audit.py`, run by `tools/pr_checks.py`, fails a PR whose added or changed item or block textures look script-made (far more colours than vanilla, soft gradients, half-transparent pixels). Every Reason look redraw passes it.
+- Not played; built by CI only.
