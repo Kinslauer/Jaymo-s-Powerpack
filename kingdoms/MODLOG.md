@@ -17641,3 +17641,7 @@ The loot of the bloatshroom, mimicap, shambler and truffler and the bouncecap, g
 - Recipes for every cloth and leather piece; the new pieces count as cloth, mail or plate for Jaymo's Powers.
 - `Harness` (the place, its body parts, the under-layers), `HarnessMenu` (its slot), `HeraldryArmour` (registrations), `HeraldryLayer` and `UnderArmourLayer` (the hose layer).
 - Built and previewed off the game's files; not played, and the Java is compiled only by CI.
+
+## 0.13.13 (2026-11-26): Guards dress for their land (#2189)
+
+Guards' kit now leans by their realm's climate (Andy's ruling). In the warm lands (savanna, desert, badlands, jungle, swamp) the ranks wear mail and leather: the mail haubergeon for every rank, a leather jack beneath (the free floor in place of the quilted coat), leather cuisses, and plate only for veterans and leaders. In the north (taiga, snowy) they wear quilting and plate: soldiers get the quilted coat under iron plate, plate cuirass, gauntlets and greaves where the realm can pay. Each guard has a fixed chance to go against his land's lean: 15% in general, half of northern archers go in leather (no mail at all), and 35% of southern soldiers and knights (legionnaires) go in plate. Plains and cherry lands are unchanged. Everything is still paid for from the stores and treasury as before; tuning is in `GuardKit` (`WARM`, `AGAINST`, `NORTH_ARCHER`, `SOUTH_LEGION`).
