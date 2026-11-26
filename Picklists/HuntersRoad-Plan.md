@@ -165,3 +165,95 @@ github.com/AngelDGr/The-Conjunction-of-the-Spheres, branch 1.21.1-Multiloader, F
 Tracks two at a time: 1 with 2, then 3 with 6, then 4 with 7, then 5 with 8, then 9 with 10. Patch 3 needs 2 (tags,
 bestiary); 7 needs 6 (crucible recipes, toxicity); 9 needs 2 and 3. Models for patches 3, 4 and 5 go to
 hermes-modeller first so they're ready when the code lands.
+
+## Toxony additions (Andy's picks, 2026-11-26 21:05Z)
+
+Andy picked 29 of 31 rows on the Toxony page (https://claude.ai/artifact/TzinLRQPtkpKeDVBtok7kA, db `picks/andy`, source
+`/mnt/project-files/toxony/toxony-picks.html`). Not picked: B5 redstone mortar, E3 old silver ore.
+
+**Licence: ideas only.** Toxony (MrFrostyDev, github.com/MrFrostyDev/Toxony_Mod, NeoForge 1.21.1): metadata says LGPL-3.0,
+the repo LICENSE is the full GPL-3.0 text, and the README forbids reusing any images, textures, art or models. Copy no
+code, art, sound, journal text or invented name (Coldsnap, Whirlsnap, Witchfire, Eternal Plague...). Write each piece
+from the behaviour below (clean-room). Real plant names (nightshade, water hemlock, bloodroot) are fine.
+
+### Into patch 6 (the hunter's alchemy)
+- T-A1 tolerance: D1's load gets a second number, tolerance. Dosing yourself raises tolerance slowly; a poison weaker
+  than your tolerance no longer raises it. Past tolerance = real danger until a detox (golden apple, healing). Body
+  signs stay the only display without a gauge.
+- T-A3 a poison's lean: every poison ingredient leans heat, sea, decay, cold, forest or Nether (mapped onto our
+  essences). Learned by taking a lot of it, or by testing a reagent made from it (redstone mix, crucible, alembic) with
+  a needle on a strong creature brought near death; the Scrying Lens shows the lean only after that.
+- T-A4 the toxin gauge: a held brass instrument (or worn in the baubles charm slot) showing load, tolerance, next
+  threshold and your mutagens.
+- T-A5 new harms beside Poisons' four: toxin (big heart losses, can kill), acid (armour weaker for a while), flammable
+  (catch fire near flame), cripple (physical blows hurt more), hunt (marked: wolves and beast-mutated hit harder).
+- T-B4 the paste ladder in our own blocks: poison paste (Powers mortar), toxic paste (crucible, heat), pure toxin
+  (alembic), each a base for oils and brews.
+- T-D1 the hunter's flask: holds several doses of one potion, doubles its length (netherite: triples); pour in, topped
+  up by refill formula or D6's spirit, self-refills overnight with a Refill enchantment (behind knowledge level 3).
+- T-D2 copper lab furniture: vial rack, bell jar, copper scale, loose papers.
+- T-N1 sweat it out: a soak in a hot spring or sitting by a fire draws toxin out faster and lets a mutation fade sooner.
+
+### New patch 11: mutagens (after 6) row T-A2
+- Hold enough toxin long enough and you cross a threshold and mutate, three steps deep, in the direction of the leans
+  you've been taking: beast (speed burst on hits, +damage, faster and marking at night; meat feeds more), water (breath,
+  swim speed, regeneration in water, heavy knockback; fire hurts more), hollow (knockback resistance, less damage, slower
+  hunger, night sight, wall climb slower than the symbiote's; weak in sun), necrotic (raw meat heals, no hunger effect,
+  poison and wither immunity, poison your attacker, wither on hit, counted undead; weak in sun; "revive once" becomes a
+  longer black-screen wake-up, never a skip of our death rulings), infernal (less burn, set attackers alight, char wood
+  by hand, then fire and lava immunity and burning hits; weak in water and rain), spirit (less harm from phantoms and
+  vexes, half fall damage, a chance to slip a blow and go unseen, slow falling; magic hurts more; NO summoned homing
+  spirits: free projectiles, so its strike echoes a second time instead). Run out of toxin and you change back.
+- Lives on the Kingdoms body side (heritage and blood), not as a Power. Feeds H1 hunter's eyes and N3 feared and needed.
+
+### Into patch 7 (oils, bombs, herbs)
+- T-B1 poison garden: jungle mint, nightshade (dark forest), water hemlock (swamp), a blue frost flower (cold taiga),
+  bloodroot (crimson forest); seeds by breaking them down; they grow only on farmland poisoned with paste. Each with
+  essences, a lean and a Lore.md line.
+- T-B2 grafting: a known-lean ingredient on a known-lean poison crop grows a new strain (a moonlit hemlock, a sunspot,
+  a war-root, a winter mint, a whirl flower); grafting blind kills the crop.
+- T-B3 parts from poisoned beasts: a creature that dies poisoned, cut with a scalpel (a Kitchen butchery tool), gives a
+  venom fang (wolf), green spit (llama), a double poison sac (squid), brittle poison bones (bogged), a poison jelly
+  (slime). Same carve-not-loot rule as D3.
+- T-B6 poisoned sweets (Kitchen): a toxic cake you can set down or throw, milk, mint and dark chocolates, a gift box.
+- T-C1 effect oils from a placed pot block: poison, a slowing and weakening haze, a glowing mark, deadly toxin, a
+  blinding smoke, armour-eating acid, a purifying fire; a mending oil for tools; fire resistance and healing as splashes
+  for friends. Dip the blade in the pot or use from the off hand; the pot stays and refills. Same sheen and swing count
+  as D4's kind oils.
+- T-C2 acid: thrown on ore it dissolves the rock and leaves extra ore; the strong acid eats some blocks away.
+- T-C3 oil sash (about 16 throws) and bandolier (more), filled from a pot, thrown as bombs on D5's code. The endless
+  bandolier (patch 8 forge) costs toxin per throw.
+- T-C5 spilled oil: a slick on the ground that bursts into flame near fire, torches or lit campfires; works with the
+  Forest Fire port and the fire alarms.
+
+### Into patch 8 (gear)
+- T-C4 oiled bolts: dip bolts in a placed oil pot; works with E2's heavy crossbow bolts.
+- T-D3 the alchemical forge, through the Powers armory: a two-block bench whose plans are found in ruins (F1); fuses a
+  weapon with reagents into toxin-fed arms: a blade that grows keener on your load, a scalpel that injects, the endless
+  bandolier. They draw from T-A1's load.
+- T-E1 plague doctor's outfit (coat, hood, leggings, boots) of toxin-hardened leather: bad effects shorter per piece; a
+  netherite-grade set late. Matches our existing plague doctor's mask.
+- T-E2 silver steel: silver + steel alloy through Tinkers that upgrades armour, fishing rods and weapon parts, with
+  silver's bonus against F4's kinds.
+- T-E4 cyclebow: **Andy: "implement it if you can make a good looking fully animated model in blockbench."** A
+  one-handed crossbow that fires three bolts in the order loaded, and a cartridge that loads a set order at once.
+  Model first (hermes-modeller, Blockbench, fully animated: load, cycle, fire); build the item only if the model passes
+  review. If it doesn't, say so in the PR.
+- T-E5 twin flintlocks: a pistol in each hand, one fires while the other reloads, on our existing pistols.
+- T-E6 venom club (poisons on hit), bone saw (also a Kitchen butchery tool), flail with a heavy-impact enchantment,
+  through the Powers armory.
+
+### Into patch 9 (contracts and places)
+- T-F1 the expelled alchemist's house: our own scholar, thrown out of an academy, at a village's edge or in woods
+  outside an academy town (reason: he was cast out); holds his journal, a book that teaches the craft page by page.
+  Lore.md first.
+- T-F2 hunter's watchtowers on roads that pass monster ground (nests, troll holds, swamps); their hunters tell what a
+  monster fears (F3 bestiary).
+- T-F3 the old hunters' guild hall in bigger towns: posts N1 monster contracts, sells formulas and silver.
+- T-F4 silver mines, small and large, some abandoned, where silver ore runs in the mountains.
+- T-N2 changed hunters on the road: MCA travellers carrying patch 11's mutations, marked by them; some trade, teach a
+  formula or a lean, some can be hired, some have gone too far and are the contract.
+
+### Order, updated
+Waves: 1+2, then 3+6, then 4+7, then 5+8, then 9+10, then 11 (needs 6). Models for the cyclebow (T-E4), the forge and
+the new gear go to hermes-modeller before patch 8.

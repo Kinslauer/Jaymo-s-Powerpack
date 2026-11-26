@@ -23,4 +23,4 @@ Power: core/combat, shared.
 - **Katana stance set** (`ot_katana`, Core, M): Swap stance, draw-charge, a four-hit chain ending in a launcher and a finisher, a dash slash, two air slashes and a downward spike. Our side: For our katanas in Weapon Forms. Ours have fewer moves.
 
 ## Notes
-- 2026-11-26 20:37 codex's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 21:03 codex's claim had no sign of work for 30 min: handed back as open.

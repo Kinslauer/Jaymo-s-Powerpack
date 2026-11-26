@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 15:42). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:10). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -7,13 +7,14 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Questions for you:**
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-26 20:05 ON HOLD until wave 4 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-26 21:09 ON HOLD until hunters-road-6 merges (last wave). Not a question for Andy: the vault coordinator opens it.
 - [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-26 19:58 ON HOLD until wave 1 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
 - [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-26 19:59 ON HOLD until wave 2 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
 - [[Inbox/hunters-road-5|hunters-road-5]] · 2026-11-26 20:00 ON HOLD until wave 3 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
-- [[Inbox/hunters-road-6|hunters-road-6]] · 2026-11-26 20:01 ON HOLD until wave 1 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
-- [[Inbox/hunters-road-7|hunters-road-7]] · 2026-11-26 20:02 ON HOLD until wave 2 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
-- [[Inbox/hunters-road-8|hunters-road-8]] · 2026-11-26 20:03 ON HOLD until wave 3 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
-- [[Inbox/hunters-road-9|hunters-road-9]] · 2026-11-26 20:04 ON HOLD until wave 4 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/hunters-road-6|hunters-road-6]] · 2026-11-26 21:06 2026-11-26 21:06 Toxony picks folded in (Andy 29 of 30): also build the plan's 'Toxony additions' > 'Into patch 6' subsection, and keep its 'L…
+- [[Inbox/hunters-road-7|hunters-road-7]] · 2026-11-26 21:07 2026-11-26 21:06 Toxony picks folded in (Andy 29 of 30): also build the plan's 'Toxony additions' > 'Into patch 7' subsection, and keep its 'L…
+- [[Inbox/hunters-road-8|hunters-road-8]] · 2026-11-26 21:08 Its new gear models come first from hermes-modeller (task hunters-road-8-models); build the cyclebow only if its model passes review, else say…
+- [[Inbox/hunters-road-9|hunters-road-9]] · 2026-11-26 21:08 2026-11-26 21:06 Toxony picks folded in (Andy 29 of 30): also build the plan's 'Toxony additions' > 'Into patch 9' subsection, and keep its 'L…
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
 - [[Inbox/nycto-2|nycto-2]] · 2026-11-26 ON HOLD until the earlier waves merge (1, then 2+7, then 3+6, then 4+5). Not a question for Andy: the vault coordinator opens it when its turn comes.
@@ -40,7 +41,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-15 waiting for a bot, 2 being built, 8 in review: see [[Kanban]].
+15 waiting for a bot, 3 being built, 8 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -110,7 +111,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-23 problems in the notes: [[Health]].
+24 problems in the notes: [[Health]].
 
 ## Last week
 

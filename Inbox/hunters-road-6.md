@@ -19,3 +19,5 @@ pr:
 
 ## Notes
 - 2026-11-26 20:01 ON HOLD until wave 1 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
+- 2026-11-26 21:03 ON HOLD also for Toxony (2026-11-26): Andy linked Toxony; its picks fold into this patch. Don't open until the Hunter's Road thread sends the updated plan.
+- 2026-11-26 21:06 2026-11-26 21:06 Toxony picks folded in (Andy 29 of 30): also build the plan's 'Toxony additions' > 'Into patch 6' subsection, and keep its 'Licence: ideas only' rule (no Toxony code, art, sound, journal text or invented names). Toxony hold released: back to its normal wave.

@@ -19,3 +19,6 @@ pr:
 
 ## Notes
 - 2026-11-26 20:03 ON HOLD until wave 3 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
+- 2026-11-26 21:04 ON HOLD also for Toxony (2026-11-26): Andy linked Toxony; its picks fold into this patch. Don't open until the Hunter's Road thread sends the updated plan.
+- 2026-11-26 21:07 2026-11-26 21:06 Toxony picks folded in (Andy 29 of 30): also build the plan's 'Toxony additions' > 'Into patch 8' subsection, and keep its 'Licence: ideas only' rule (no Toxony code, art, sound, journal text or invented names). Toxony hold released: back to its normal wave.
+- 2026-11-26 21:08 Its new gear models come first from hermes-modeller (task hunters-road-8-models); build the cyclebow only if its model passes review, else say so in the PR.
