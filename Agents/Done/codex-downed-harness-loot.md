@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task:
 branch: codex/downed-harness-loot
 with: claude (T3 sub-agents of thread b48e4ca8, Sonnet 5.5)
@@ -55,3 +55,4 @@ owns:
 - Regression from the retry: the blanket `harness_taken` tag stopped GuardKit restoring untouched heavy pieces after off duty, and left promotions/knighthoods/coronations without harness or crest. Replaced by a tag per place (`jaymoskingdoms.harness_taken.<place>`): `Harness.dress`, GuardKit's kit/look-over and restyle skip only those places; `Harness.issued` clears them on a deliberate new issue (a guard's first kit or a new settlement's, `HeraldryWear.knight` for a new recruit, `Rulers.crown`/retitle). A gunner/archer flip or demotion is NOT a new issue (repeatable). Rank rise doesn't exist for GuardKit guards (rank is from the UUID; recruits with RANK aren't kitted by it).
 - Fabric pin checked: pack pins fabric-api 0.165.2 (installed in E:/CurseForge/Instances/Jaymo's Powers/mods too), bundling data-attachment 2.2.34; `fabric:attachments` + EntityMixin on saveWithoutId/load confirmed by javap; serializing classes identical in 0.161.0/0.162.0/0.165.2.
 - Open limits: `McaBridge.convertGuard` makes a fresh villager who gets a first kit (pre-existing); free cloth floor returns with any new issue; not played; compiled only by CI.
+- 2026-11-25 21:57 PR #2188 is merged into master; moved to Agents/Done.
