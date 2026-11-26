@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,6 +27,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2234 Maggots come as a writhing heap that splats underfoot (Kingdoms, 2026-11-26)
 - [ ] #2233 Reincarnate link on the character page (Powers, Kingdoms, 2026-11-26)
 - [ ] #2232 Dragon keys no longer stop the game starting (Kingdoms, 2026-11-26)
 - [ ] #2231 Dyed and grey sheep no longer sprout stray boxes (Powers, 2026-11-26)
@@ -86,8 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2159 fighting AI - weapon sense, breaking off to mend, shields, NPC eyes, danger sense, getting there, band styles (Kingdoms, 2026-11-25)
 - [ ] #2158 symbiote in hosts without the Web - every ability, a fight for the suit, a duel with the slinger (Powers, 2026-11-25)
 - [ ] #2157 Hearth's hit cap no longer softens the blow that downs you (Kingdoms, 2026-11-25)
-- [ ] #2156 NaN rotation diagnostic (Powers, 2026-11-25)
-- …and 545 older ones.
+- …and 546 older ones.
 
 ## Health
 
