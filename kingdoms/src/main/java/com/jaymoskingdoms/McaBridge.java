@@ -502,6 +502,19 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();
 	}
 
+	/** {@link NpcTasks}: the MCA chore {@code villager} is set to ("harvest", "chop", "hunt", "fish", "prospect"), or null. */
+	static @Nullable String chore(Villager villager) {
+		if (!(villager instanceof VillagerEntityMCA v) || v.getVillagerBrain().getCurrentJob() == net.conczin.mca.entity.ai.Chore.NONE) {
+			return null;
+		}
+		return v.getVillagerBrain().getCurrentJob().name().toLowerCase(java.util.Locale.ROOT);
+	}
+
+	/** {@link NpcTasks}: {@code villager} was told by a player to stay where they are. */
+	static boolean staying(Villager villager) {
+		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().getMoveState() == net.conczin.mca.entity.ai.MoveState.STAY;
+	}
+
 	/** {@link FarmFamily}: an MCA villager someone set to one of MCA's chores (harvest, chop, hunt, fish). */
 	static boolean choring(Villager villager) {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().getCurrentJob() != net.conczin.mca.entity.ai.Chore.NONE;
