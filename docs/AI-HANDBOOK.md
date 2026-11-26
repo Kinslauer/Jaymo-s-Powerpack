@@ -279,7 +279,10 @@ These habits came from running many Claude agents at once; they work for any mul
 - Every finding gets an independent verifier before it's reported. A fix loop stops after two rounds with no progress.
 - `.claude/workflows/audit-fix.js` is the template: audit batches of files, refute each finding, patch survivors in
   worktrees, verify each patch, then cross-check all diffs together.
-- Gemini second opinion: `.mcp.json` runs omni-ai-mcp 4.8.2 through `tools/gemini-mcp.sh`. It needs `GEMINI_API_KEY`
+- Who does the work: Claude coordinates and reviews; the work runs on Codex, then Gemini (the Antigravity harness in
+  T3 Code, on Andy's Gemini subscription) when Codex is out, then the Hermes bots (`CLAUDE.md`).
+- Gemini second opinion: the Antigravity harness (`.claude/skills/gemini-second-opinion`). Without T3, the fallback is
+  `.mcp.json`, which runs omni-ai-mcp 4.8.2 through `tools/gemini-mcp.sh`. It needs `GEMINI_API_KEY`
   as a plain environment variable (a proxy network secret breaks it because Gemini rejects the Bearer header). Only its
   text/code tools are used (`ask_gemini`, `gemini_code_review`, `gemini_challenge`, `gemini_analyze_codebase`); media,
   agent and OpenRouter tools are denied in `.claude/settings.json`. Treat its answers as advice to check against the
