@@ -18,4 +18,4 @@ Build 2 placement tracks at a time; tracks 1 and 2 first.
 
 **Andy's words:** "The second picture makes for another great stable. A good mine." Screenshots: a chimney house with a horse (stable) and a fenced open quarry (mine); the farm screenshot from the same day.
 
-Build the three structures (original builds, not copies) and place them by track 2's rules. Wait for track 2.
+Build the three structures (original builds, not copies) and place them by track 2's rules. Track 2 is merged as #2085; use PlacementReasons. The three requested original builds remain. Recover the reference pictures before finalizing their designs.

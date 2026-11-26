@@ -32,3 +32,4 @@ A kingdom's court wizard casts (and keeps up) a ward over the kingdom's plot. In
   in 26.3; check the sources) and restore them over a few seconds. Never restore into a block a player has since placed.
 - Effects through Kingdoms `Fx` (sigil/ring/wave), never recoloured redstone dust. Keep it cheap on the Deck server:
   creepers checked only near warded plots, not every creeper every tick.
+- 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: #1842 blast mending is not this complete ward. Before code, ask Andy to choose upkeep/break conditions and weakening/repulsion tuning; preserve prevention or safe rewind requirement.

@@ -1,5 +1,5 @@
 ---
-status: open
+status: blocked
 for: claude-cloud
 from: tiv (Discord, Hotspot / parthenon / Airstrip thread, 2026-11-23)
 asked: 2026-11-23
@@ -18,7 +18,7 @@ suggested_owns:
 
 **Rules:**
 - Copy `E:/Jaymo Vault Live/Lore.md` to a backup (e.g. `E:/Jaymo Vault Live/Lore-before-quill-rewrite.md`) first.
-- Rewrite `E:/Jaymo Vault Live/Lore.md` — clearer, better to read, in one voice, keep every fact, nothing dropped, nothing contradicts the current page.
+- Rewrite a separate draft, `E:/Jaymo Vault Live/Lore-rewritten.md` (inspect the existing draft before changing it) — clearer, better to read, in one voice, keep every fact, nothing dropped, nothing contradicts the current page.
 - Mark new additions so Andy can find them: start the paragraph with `(new)`.
 - This is a vault page, not code: no worktree, no branch, no build, no PR.
 - Set `status: blocked` and add a note under the task's Notes when the rewrite is done, waiting for Andy's review.
@@ -29,3 +29,5 @@ suggested_owns:
 - 2026-11-24 09:05 quill's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-24 17:59 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
 - 2026-11-24 15:01 claude-cloud's claim had no sign of work for 30 min: handed back as open.
+
+- 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish completeness or approval. Preserve canonical Lore.md.
