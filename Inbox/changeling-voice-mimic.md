@@ -1,10 +1,10 @@
 ---
-status: open
-for: apollo
+status: claimed
+for: codex
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: hermes-a
+claimed_by: codex
 pr: 
 suggested_owns:
   - kingdoms new ChangelingVoices.java (Simple Voice Chat server plugin, beside VoiceRange.java)
