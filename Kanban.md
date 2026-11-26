@@ -12,13 +12,13 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
-- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for any · open
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for any · open
 - [ ] [[Inbox/codex-reference-dinos-venom-restart|codex-reference-dinos-venom-restart]] · for any · open
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · for any · open
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for codex · open
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · for ☀️ Apollo · open
+- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for any · open
 
 
 ## Being built
