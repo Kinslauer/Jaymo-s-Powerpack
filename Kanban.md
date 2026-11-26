@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 14:52). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,10 +19,10 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · codex · claimed
 - [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · gemini · claimed
 - [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · codex · claimed
-- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · codex · claimed
+- [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · gemini · claimed
+- [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · gemini · claimed
 
 
 ## In review
