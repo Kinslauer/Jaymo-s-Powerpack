@@ -25,6 +25,7 @@
 		"FaintInputMixin",
 		"AutoWalkInputMixin",
 		"WetCoatTintMixin",
+		"SheepUndercoatMixin",
 		"TakeoverFacingMixin",
 		"TakeoverFacingHeadMixin",
 		"StillBodyHeadMixin",
