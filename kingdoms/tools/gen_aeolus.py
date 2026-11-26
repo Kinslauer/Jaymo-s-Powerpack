@@ -10,6 +10,9 @@ import os, random, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image
 import gen_dragons as g
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 from gen_dragons import rgb, jitter, mix, shade, write, entry, paint, ASSETS, DATA, ITEM
 
 # Every textured box of Aeolus' body plan: name -> (w, h, d), in the model's pixels (it is drawn 2.2x as big)
@@ -177,20 +180,8 @@ def marks_texture(pattern):
 
 
 def spawn_egg(name):
-    """A grey-white egg spotted in the four winds' colours."""
-    rnd = random.Random(88)
-    img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    px = img.load()
-    base = rgb(0xC4C6C4)
-    for y in range(16):
-        for x in range(16):
-            dx, dy = (x - 7.5) / 5.0, (y - 8.5) / 6.5
-            if dx * dx + dy * dy * (1.0 + 0.25 * (8.5 - y) / 6.5) <= 1.0:
-                c = WIND[(x // 3 + y // 3) % 4] if rnd.random() < 0.22 else base
-                if x <= 5 and y <= 6:
-                    c = jitter(c, 26, rnd)
-                px[x, y] = jitter(c, 6, rnd)
-    img.save(ITEM + name + '.png')
+    """A grey-white egg spotted in the four winds' colours: vanilla's spotted egg (vanilla_egg.py), grey with the orange wind."""
+    vanilla_egg.save(ITEM + name + '.png', rgb(0xC4C6C4)[:3], WIND[0][:3])
 
 
 def main():

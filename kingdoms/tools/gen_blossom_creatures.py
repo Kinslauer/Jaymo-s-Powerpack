@@ -15,6 +15,9 @@ import zlib
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
 import gen_creatures as gc  # noqa: E402
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 
 P, hexc, shade, jitter = gc.P, gc.hexc, gc.shade, gc.jitter
 ASSETS = os.path.join(gc.ROOT)
@@ -322,7 +325,7 @@ def main():
         gc.build(name, spec)
     lang = {}
     for name, (a, b) in EGGS.items():
-        gc.egg(name, a, b)
+        vanilla_egg.save(os.path.join(gc.ITEMS, name + "_spawn_egg.png"), gc.hexc(a), gc.hexc(b))
         with open(os.path.join(ASSETS, "items", name + "_spawn_egg.json"), "w") as f:
             json.dump({"model": {"type": "minecraft:model", "model": "jaymoskingdoms:item/" + name + "_spawn_egg"}}, f, indent=2)
         with open(os.path.join(ASSETS, "models", "item", name + "_spawn_egg.json"), "w") as f:

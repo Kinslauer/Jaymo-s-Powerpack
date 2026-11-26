@@ -7,6 +7,9 @@ Run from kingdoms/: python3 tools/gen_nether.py"""
 import json
 import math, os, random
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 
 RES = 'src/main/resources/'
 ASSETS = RES + 'assets/jaymoskingdoms/'
@@ -192,16 +195,8 @@ def icon(name, size, pixels, folder=ITEM):
 
 
 def egg(name, base, spots, seed):
-    p, rnd = {}, random.Random(seed)
-    for y in range(16):
-        for x in range(16):
-            dx, dy = (x - 7.5) / 5.0, (y - 8.5) / 6.5
-            if dx * dx + dy * dy * (1.0 + 0.25 * (8.5 - y) / 6.5) <= 1.0:
-                c = spots if rnd.random() < 0.18 else base
-                if x <= 5 and y <= 6:
-                    c = jitter(c, 30, rnd)
-                p[(x, y)] = jitter(c, 6, rnd)
-    icon(name, 16, p)
+    """The Reason look's spawn egg: vanilla's spotted egg in the mob's two colours (vanilla_egg.py)."""
+    vanilla_egg.save(ITEM + name + '.png', base[:3], spots[:3])
 
 
 EGGS = {'hornkin_spawn_egg': (0x7A3B2A, 0xF2C230), 'hornkin_hurler_spawn_egg': (0x5C2E25, 0xFF7A1A),
