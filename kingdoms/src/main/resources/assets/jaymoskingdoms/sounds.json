@@ -6020,5 +6020,53 @@
 				"volume": 0.8
 			}
 		]
+	},
+	"dragon.bite": {
+		"subtitle": "subtitles.jaymoskingdoms.dragon.bite",
+		"sounds": [
+			"jaymoskingdoms:dragon/bite"
+		]
+	},
+	"dragon.tame": {
+		"subtitle": "subtitles.jaymoskingdoms.dragon.tame",
+		"sounds": [
+			"jaymoskingdoms:dragon/tame"
+		]
+	},
+	"dragon.horn": {
+		"subtitle": "subtitles.jaymoskingdoms.dragon.horn",
+		"sounds": [
+			"jaymoskingdoms:dragon/horn"
+		]
+	},
+	"dragon.fire_roar": {
+		"subtitle": "subtitles.jaymoskingdoms.dragon.fire_roar",
+		"sounds": [
+			"jaymoskingdoms:dragon/fire_roar"
+		]
+	},
+	"dragon.ice_roar": {
+		"subtitle": "subtitles.jaymoskingdoms.dragon.ice_roar",
+		"sounds": [
+			"jaymoskingdoms:dragon/ice_roar"
+		]
+	},
+	"dragon.lightning_roar": {
+		"subtitle": "subtitles.jaymoskingdoms.dragon.lightning_roar",
+		"sounds": [
+			"jaymoskingdoms:dragon/lightning_roar"
+		]
+	},
+	"dragon.earth_roar": {
+		"subtitle": "subtitles.jaymoskingdoms.dragon.earth_roar",
+		"sounds": [
+			"jaymoskingdoms:dragon/earth_roar"
+		]
+	},
+	"dragon.earth_breath": {
+		"subtitle": "subtitles.jaymoskingdoms.dragon.earth_breath",
+		"sounds": [
+			"jaymoskingdoms:dragon/earth_breath"
+		]
 	}
 }

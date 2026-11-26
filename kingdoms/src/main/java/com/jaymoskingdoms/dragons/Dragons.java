@@ -138,7 +138,25 @@ public final class Dragons {
 		}
 	}
 
+	/** Client → server: the rider bites (G, {@link #BITE}) or holds sprint aloft ({@link #SPRINT}, every other tick while held). */
+	public record RiderMove(int move) implements CustomPacketPayload {
+		public static final int BITE = 0, SPRINT = 1;
+		public static final Type<RiderMove> TYPE = new Type<>(JaymosKingdoms.id("dragon_rider_move"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, RiderMove> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeByte(p.move),
+			buf -> new RiderMove(buf.readByte()));
+
+		@Override
+		public Type<RiderMove> type() {
+			return TYPE;
+		}
+	}
+
+	/** How far a goat horn's call carries to its blower's tamed dragons (blocks). */
+	static final double HORN_RANGE = 128.0;
+
 	public static void register() {
+		DragonSounds.register();
 		NOTUS_DRAGON = dragon("notus", NotusDragon::new, NOTUS_WIDTH, NOTUS_HEIGHT, true, NotusDragon.createAttributes());
 		BOREAS_DRAGON = dragon("boreas", BoreasDragon::new, BOREAS_WIDTH, BOREAS_HEIGHT, false, BoreasDragon.createAttributes());
 		ZEPHYRUS_DRAGON = dragon("zephyrus", ZephyrusDragon::new, ZEPHYRUS_WIDTH, ZEPHYRUS_HEIGHT, false, ZephyrusDragon.createAttributes());
@@ -198,6 +216,35 @@ public final class Dragons {
 				dragon.riderBreath(payload.yaw(), payload.pitch());
 			}
 		});
+		PayloadTypeRegistry.serverboundPlay().register(RiderMove.TYPE, RiderMove.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(RiderMove.TYPE, (payload, context) -> {
+			ServerPlayer player = context.player();
+			if (player.getVehicle() instanceof WindDragon dragon && dragon.isTamed() && dragon.getControllingPassenger() == player) {
+				if (payload.move() == RiderMove.BITE) {
+					dragon.riderBite();
+				} else if (payload.move() == RiderMove.SPRINT) {
+					dragon.riderSprint();
+				}
+			}
+		});
+		// (after Dragonforge's calling horn) a goat horn blown calls its blower's tamed dragons within reach to them
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((player, level, hand) -> {
+			ItemStack stack = player.getItemInHand(hand);
+			if (level instanceof ServerLevel server && stack.is(Items.GOAT_HORN) && !player.isSpectator() && !player.getCooldowns().isOnCooldown(stack)) {
+				java.util.List<WindDragon> mine = server.getEntitiesOfClass(WindDragon.class, player.getBoundingBox().inflate(HORN_RANGE),
+					d -> d.isTamed() && d.isAlive() && d.owner(player) && !d.hasPassenger(player));
+				for (WindDragon dragon : mine) {
+					dragon.hornCall(player);
+				}
+				if (!mine.isEmpty()) {
+					// (a plain horn blown with no dragon about says nothing)
+					server.playSound(null, player.blockPosition(), DragonSounds.HORN.value(), net.minecraft.sounds.SoundSource.PLAYERS, 2.0F, 1.0F);
+					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.dragon.horn_called", mine.size()));
+				}
+			}
+			return net.minecraft.world.InteractionResult.PASS;
+		});
+		RealmDragons.register();
 		ServerTickEvents.END_SERVER_TICK.register(Dragons::nether);
 		// testing (op): /kingdom dragon [notus|boreas|zephyrus|eurus|aeolus|stegonaut|varasuchus|ignivorus|aetherion] [tame]: a wild one (Notus unless named), or a
 		// tamed, saddled one, at your side
