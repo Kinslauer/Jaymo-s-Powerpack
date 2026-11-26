@@ -49,3 +49,4 @@ Delegated to Apollo (Andy: hand both jobs to the Hermes bots now). It was briefl
 ## Notes
 - 2026-11-26 06:07 hermes-a's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-26 11:51 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 14:12 Text pass: rewrote changes/kingdoms/hollow-captains-fix.md to be player-facing (per-player ladders of up to 12, kill-only promotion, intersecting ladders, captain-due-back keeps their ladder place, count bug fix; no code internals). The PR adds no lang, chat, screen or dialogue strings — HollowCaptains.java and Captains.java changes are code only (per-player attachments, named tuning constants). Kingdoms builds (sh ./gradlew build --no-daemon) and python tools/pr_checks.py pass; not play-tested.
