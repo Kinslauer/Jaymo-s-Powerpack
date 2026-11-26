@@ -123,6 +123,53 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 		return container.stillValid(player);
 	}
 
+	/** The parts a body can lose, in the order the screen lists them (button ids {@code CUT + i}). */
+	public static final int[] PARTS = {CorpseEntity.PART_HEAD, CorpseEntity.PART_RIGHT_ARM, CorpseEntity.PART_LEFT_ARM,
+		CorpseEntity.PART_RIGHT_LEG, CorpseEntity.PART_LEFT_LEG};
+	/** Button ids: cut off {@link #PARTS}{@code [id - CUT]}; cut off the part a gear slot's attached piece is on ({@code CUT_GEAR + slot}). */
+	public static final int CUT = 0, CUT_GEAR = 10;
+
+	/** Whether parts can be cut off this body here. */
+	public boolean canCutOff() {
+		return corpse != null && corpse.canCutOff();
+	}
+
+	/** What the gear in {@code slot} is attached to ({@link CorpseEntity#attachedParts}): -1 when it can be taken. */
+	public int attached(int slot) {
+		return corpse == null || slot < 0 || slot >= CorpseLoot.GEAR ? -1 : corpse.attachedParts(this.slots.get(slot).getItem());
+	}
+
+	/** The part cutting {@code slot}'s attached piece free takes off: the first of its parts still on, or 0. */
+	public int partFor(int slot) {
+		int on = attached(slot);
+		if (on <= 0 || corpse == null) {
+			return 0;
+		}
+		for (int part : PARTS) {
+			if ((on & part) != 0 && (corpse.missing() & part) == 0) {
+				return part;
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public boolean clickMenuButton(Player player, int id) {
+		if (!(container instanceof CorpseLoot loot) || !(player.level() instanceof net.minecraft.server.level.ServerLevel level)
+			|| !container.stillValid(player)) {
+			return false;
+		}
+		int part = id >= CUT && id < CUT + PARTS.length ? PARTS[id - CUT] : id >= CUT_GEAR && id < CUT_GEAR + CorpseLoot.GEAR ? partFor(id - CUT_GEAR) : 0;
+		if (part == 0 || !loot.corpse.cutOff(level, part, player)) {
+			return false;
+		}
+		// the part is in your hand now: the screen closes on it
+		if (player instanceof net.minecraft.server.level.ServerPlayer server) {
+			server.closeContainer();
+		}
+		return true;
+	}
+
 	@Override
 	public ItemStack quickMoveStack(Player player, int index) {
 		if (index >= CorpseLoot.SIZE) {
@@ -130,7 +177,7 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 			return ItemStack.EMPTY;
 		}
 		Slot slot = this.slots.get(index);
-		if (!slot.hasItem()) {
+		if (!slot.hasItem() || !slot.mayPickup(player)) {
 			return ItemStack.EMPTY;
 		}
 		ItemStack stack = slot.getItem();
@@ -168,6 +215,14 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 		@Override
 		public boolean mayPlace(ItemStack stack) {
 			return false;
+		}
+
+		@Override
+		public boolean mayPickup(Player player) {
+			// gear attached to the body comes off only with the part under it (cut off from the screen)
+			CorpseEntity body = container instanceof CorpseLoot loot ? loot.corpse
+				: player.containerMenu instanceof CorpseLootMenu menu ? menu.corpse : null;
+			return super.mayPickup(player) && (getContainerSlot() >= CorpseLoot.GEAR || body == null || body.attachedParts(getItem()) < 0);
 		}
 
 		@Override

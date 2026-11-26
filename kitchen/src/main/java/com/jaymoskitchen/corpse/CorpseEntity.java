@@ -2377,6 +2377,10 @@ public class CorpseEntity extends Entity {
 		// (0.5.42) a machine (a copper golem, a drone, an android) is looted where it lies and comes apart, like an iron
 		// golem: never pocketed, never treated as an animal's carcass
 		if (isMachine()) {
+			// (one wearing gear bolted on, an android in its Rig plate, opens the loot screen, to cut it off)
+			if (wearsAttached() && openLoot(level, player)) {
+				return InteractionResult.SUCCESS_SERVER;
+			}
 			return search(level, player);
 		}
 
@@ -2467,7 +2471,9 @@ public class CorpseEntity extends Entity {
 			return;
 		}
 		if (isMachine()) {
-			search(level, player);
+			if (!wearsAttached() || !openLoot(level, player)) {
+				search(level, player);
+			}
 			return;
 		}
 		switch (kind) {
@@ -4574,6 +4580,85 @@ public class CorpseEntity extends Entity {
 	 * is a loose bone and a zombie's a scrap of rotten flesh. Plain Java types, so it can be set by reflection from a mod
 	 * built against an older Kitchen.
 	 */
+	/**
+	 * Jaymo's Powers: gear that is part of the body it's on (a Rig bolted onto a trooper or an android), told by the kind of
+	 * creature and the piece: -1 when it isn't, 0 when it's on the torso (it never comes off), else the {@code PART_} bits it
+	 * comes off with (the first of them to go). Such gear can't be taken off a body: the part under it is cut off and the
+	 * piece falls with it ({@link #cutOff}). Plain Java types, so it can be set by reflection.
+	 */
+	private static java.util.function.@Nullable BiFunction<EntityType<?>, ItemStack, Integer> attachedGear;
+
+	public static void setAttachedGear(java.util.function.BiFunction<EntityType<?>, ItemStack, Integer> hook) {
+		attachedGear = hook;
+	}
+
+	/** What {@code stack}, worn by this body, is attached to (see {@link #setAttachedGear}): -1 when it can be taken off. */
+	public int attachedParts(ItemStack stack) {
+		java.util.function.BiFunction<EntityType<?>, ItemStack, Integer> hook = attachedGear;
+		EntityType<?> type = sourceType();
+		if (hook == null || stack.isEmpty() || type == null || isPlayerCorpse()) {
+			return -1;
+		}
+		try {
+			Integer parts = hook.apply(type, stack);
+			return parts == null ? -1 : parts;
+		} catch (RuntimeException | LinkageError e) {
+			return -1;
+		}
+	}
+
+	/** Whether anything it wears is attached to it (see {@link #setAttachedGear}). */
+	boolean wearsAttached() {
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return false;
+		}
+		for (int i = 0; i < 4; i++) {
+			if (attachedParts(gearIn(tag, GEAR[i])) >= 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** What's worn or held in {@code slot} of {@code tag} (its look), as it is (no wear put on). */
+	private ItemStack gearIn(CompoundTag tag, String slot) {
+		CompoundTag gear = tag.getCompoundOrEmpty("equipment");
+		if (!gear.contains(slot)) {
+			return ItemStack.EMPTY;
+		}
+		return ItemStack.CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), gear.get(slot)).result().orElse(ItemStack.EMPTY);
+	}
+
+	/**
+	 * Andy: "there should be a way to dismember them from the inventory screen so you can take the limb if it doesnt drop".
+	 * Whether a part can be cut off this body from its loot screen: a person's body (or one built like a person) lying
+	 * dead, not a player's.
+	 */
+	public boolean canCutOff() {
+		EntityType<?> type = sourceType();
+		return !isPlayerCorpse() && kind != CorpseKind.PLAYER && rig().shape == RagdollRig.Shape.HUMANOID
+			&& (comesApart() || type != null && type.builtInRegistryHolder().is(DISMEMBERABLE));
+	}
+
+	/**
+	 * From the loot screen: {@code part} is cut off the body and comes away in {@code player}'s hand (a severed part with
+	 * Jaymo's Powers), with whatever was worn on it, attached or not. False if it can't be.
+	 */
+	boolean cutOff(ServerLevel level, int part, Player player) {
+		if (!canCutOff() || Integer.bitCount(part) != 1 || (part & ALL_PARTS) == 0 || (missing() & part) != 0) {
+			return false;
+		}
+		shed(level, part, player, true);
+		jolt(true);
+		play(level, isMachine() ? SoundEvents.IRON_GOLEM_DAMAGE : SoundEvents.PLAYER_ATTACK_SWEEP, 0.9F);
+		if (looting != null) {
+			looting.reload();
+		}
+		syncTap();
+		return true;
+	}
+
 	private static java.util.function.@Nullable BiConsumer<Entity, Object[]> onPart;
 
 	public static void setOnPart(java.util.function.BiConsumer<Entity, Object[]> hook) {
@@ -4726,11 +4811,29 @@ public class CorpseEntity extends Entity {
 		if (tag == null) {
 			return;
 		}
+		// gear attached to the body (see setAttachedGear) comes away with the part it's on, and only that part
+		boolean[] attached = new boolean[4];
+		for (int i = 0; i < 4; i++) {
+			int on = attachedParts(gearIn(tag, GEAR[i]));
+			attached[i] = on >= 0;
+			if (on > 0 && (on & part) != 0) {
+				dropGear(level, tag, GEAR[i], at);
+				tag = parse(look());
+				if (tag == null) {
+					return;
+				}
+			}
+		}
 		if (part == PART_HEAD) {
-			dropGear(level, tag, "head", at);
+			if (!attached[0]) {
+				dropGear(level, tag, "head", at);
+			}
 		} else if (part == PART_RIGHT_LEG || part == PART_LEFT_LEG) {
-			dropGear(level, tag, "feet", at);
-			if ((missing() & (PART_RIGHT_LEG | PART_LEFT_LEG)) == (PART_RIGHT_LEG | PART_LEFT_LEG)) {
+			if (!attached[3]) {
+				dropGear(level, tag, "feet", at);
+				tag = parse(look());
+			}
+			if (tag != null && !attached[2] && (missing() & (PART_RIGHT_LEG | PART_LEFT_LEG)) == (PART_RIGHT_LEG | PART_LEFT_LEG)) {
 				dropGear(level, tag, "legs", at);
 			}
 		}

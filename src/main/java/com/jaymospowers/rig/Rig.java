@@ -306,6 +306,32 @@ public final class Rig {
 	}
 
 	/**
+	 * The Rig on the future's troopers and androids is bolted onto them (Andy: "they dont drop because they are attached
+	 * to the user. they must be ripped off like other limbs"): what part of the body a piece of it comes away with, as
+	 * Dismember's part bits (the Helm the head, the Arms either arm, the Thrusters either leg), 0 for the Core (on the
+	 * torso, it never comes off), -1 for anything else or anyone else's.
+	 */
+	public static int boltedOn(net.minecraft.world.entity.EntityType<?> type, ItemStack stack) {
+		if (type != com.jaymospowers.power.chrono.future.FutureMachines.TROOPER && type != com.jaymospowers.power.chrono.future.FutureMachines.ANDROID
+			|| HELM == null) {
+			return -1;
+		}
+		if (stack.is(HELM)) {
+			return com.jaymospowers.core.Dismember.HEAD;
+		}
+		if (stack.is(CORE)) {
+			return 0;
+		}
+		if (stack.is(ARMS)) {
+			return com.jaymospowers.core.Dismember.RIGHT_ARM | com.jaymospowers.core.Dismember.LEFT_ARM;
+		}
+		if (stack.is(THRUSTERS)) {
+			return com.jaymospowers.core.Dismember.RIGHT_LEG | com.jaymospowers.core.Dismember.LEFT_LEG;
+		}
+		return -1;
+	}
+
+	/**
 	 * Stamps a piece (or Rig limb) with its frame, and gives Hail and Tinker pieces their own armour layer so an armour
 	 * stand or a mob wearing one shows that suit (a player's worn suit is drawn from the frame itself).
 	 */

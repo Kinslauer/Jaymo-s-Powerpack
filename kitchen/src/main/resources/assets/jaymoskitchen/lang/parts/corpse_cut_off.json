@@ -1,0 +1,15 @@
+{
+	"screen.jaymoskitchen.corpse.cut.tip": "Cut a part off the body to take it",
+	"screen.jaymoskitchen.corpse.cut.head": "Head",
+	"screen.jaymoskitchen.corpse.cut.right_arm": "Right arm",
+	"screen.jaymoskitchen.corpse.cut.left_arm": "Left arm",
+	"screen.jaymoskitchen.corpse.cut.right_leg": "Right leg",
+	"screen.jaymoskitchen.corpse.cut.left_leg": "Left leg",
+	"screen.jaymoskitchen.corpse.cut.none": "Nothing left to cut",
+	"screen.jaymoskitchen.corpse.attached.head": "Bolted on: click to cut off the head with it",
+	"screen.jaymoskitchen.corpse.attached.right_arm": "Bolted on: click to cut off the right arm with it",
+	"screen.jaymoskitchen.corpse.attached.left_arm": "Bolted on: click to cut off the left arm with it",
+	"screen.jaymoskitchen.corpse.attached.right_leg": "Bolted on: click to cut off the right leg with it",
+	"screen.jaymoskitchen.corpse.attached.left_leg": "Bolted on: click to cut off the left leg with it",
+	"screen.jaymoskitchen.corpse.attached.torso": "Bolted to the torso"
+}
