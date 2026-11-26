@@ -1,10 +1,10 @@
 ---
-status: open
+status: blocked
 for: apollo
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: 
+claimed_by: hermes-a
 pr: 
 suggested_owns:
   - kingdoms new ChangelingVoices.java (Simple Voice Chat server plugin, beside VoiceRange.java)
@@ -26,3 +26,28 @@ changes/kingdoms/<branch>.md.
 - 2026-11-24 13:21 changeling-voice-mimic's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: stalled agent note has no PR. Inspect recoverable branch/work before restarting; no completion established. Keep microphone clips memory-only, session-only, and honour voice-chat opt-out.
 - 2026-11-25 23:26 YOUTH delegated this to apollo (Claude approved): SVC mic buffer plus changeling kidnappers; own remake, nothing copied from Gigarachne
+- 2026-11-26 02:18 Question: Before implementing changeling voice mimic, I need clarification:
+
+1. **Who counts as a "friend" whose voice a changeling can mimic?**
+   - MCA relationship (partner, kin, friend)?
+   - Party members (Parties mod)?
+   - Kingdom/faction members?
+   - Players who have spoken near each other recently?
+
+2. **When does a changeling (shapeshifter) play a mimic clip?**
+   - When hunting a lone player (shapeshifter's Mind.FIGHT/FLEE)?
+   - When guarding a vault (StolenCrowns vault keepers)?
+   - When near a player it's targeting?
+   - Randomly while roaming?
+
+3. **Voice clip buffering details:**
+   - How many clips per player? (e.g., 3-5 clips)
+   - How long is each clip? (e.g., 2-5 seconds of audio frames)
+   - How often to record? (continuous rolling buffer, or only when speaking?)
+
+4. **Playback behavior:**
+   - Play once when initiating hunt, or repeatedly?
+   - Locational from shapeshifter's position with SVC distance attenuation?
+   - Only for the targeted player, or for all nearby players?
+
+5. **Opt-out:** How to detect if a player has opted out of voice chat? (VoiceRange already handles some of this)
