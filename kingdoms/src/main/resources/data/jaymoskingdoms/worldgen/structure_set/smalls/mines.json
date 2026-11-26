@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "jaymoskingdoms:smalls/mine",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 38,
+    "separation": 16,
+    "salt": 9982213
+  }
+}

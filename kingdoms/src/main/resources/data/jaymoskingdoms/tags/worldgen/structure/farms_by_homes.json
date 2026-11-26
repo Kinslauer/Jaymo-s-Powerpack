@@ -6,6 +6,7 @@
     {"id": "mvs:haystack", "required": false},
     {"id": "mvs:windmill", "required": false},
     {"id": "mvs:barn", "required": false},
-    {"id": "mvs:horse_pen", "required": false}
+    {"id": "mvs:horse_pen", "required": false},
+    {"id": "jaymoskingdoms:smalls/farm", "required": false}
   ]
 }
