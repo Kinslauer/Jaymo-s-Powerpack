@@ -24,6 +24,9 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.item.Items;
+import net.minecraft.core.particles.ParticleTypes;
+import java.util.Optional;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -221,45 +224,51 @@ public final class Sieges {
 			}
 
 			/**
-			 * During the muster period, the siege draws supplies from nearby camps of the attacking faction.
-			 * Each camp contributes some of its storage to the siege effort. If a camp is cleared during the siege,
-			 * the siege is weakened (fewer reinforcements, less supply).
-			 */
-			private static void drawFromCamps(ServerLevel level, WarParties.Party party, Faction from, Faction target, BlockPos goal) {
-				MinecraftServer server = level.getServer();
-				// Find camps of the attacking faction near the siege
-				for (Faction camp : Factions.all(server, FactionType.BARBARIAN)) {
-					if (camp.fallen() || camp.id() == from.id()) {
-						continue;
-					}
-					// Check if this camp is allied with the attacking faction (same war side)
-					if (Wars.onSide(server, camp.id(), Wars.sideOf(server, from))) {
-						double dist = Raids.horizontal(camp.seat(), goal);
-						if (dist <= 40000.0) { // within 200 blocks
-							// Draw supplies from this camp
-							Camps.CampData data = Camps.data(server, camp.id());
-							if (data != null && data.clearedAt() < 0 && Storage.loaded(level, camp)) {
-								// Take some food, logs, and other supplies
-								int taken = 0;
-								taken += Storage.take(level, camp, Items.COOKED_MUTTON, 8);
-								taken += Storage.take(level, camp, Items.COOKED_BEEF, 8);
-								taken += Storage.take(level, camp, Items.COOKED_PORKCHOP, 8);
-								taken += Storage.take(level, camp, Items.COOKED_CHICKEN, 8);
-								taken += Storage.take(level, camp, Items.LOG, 16);
-								taken += Storage.take(level, camp, Items.OAK_LOG, 16);
-								taken += Storage.take(level, camp, Items.SPRUCE_LOG, 16);
-								taken += Storage.take(level, camp, Items.IRON_INGOT, 4);
-								taken += Storage.take(level, camp, Items.ARROW, 16);
-								if (taken > 0) {
-									// Add to the siege's supply (the war chest or the party's spoils)
-									party.spoilsSilver += taken / 4; // convert to silver value
-									JaymosKingdoms.LOGGER.debug("Siege of {} drew {} supplies from camp {}", target.name(), taken, camp.name());
+					 * During the muster period, the siege draws supplies from nearby camps of the attacking faction.
+					 * Each camp contributes some of its storage to the siege effort. If a camp is cleared during the siege,
+					 * the siege is weakened (fewer reinforcements, less supply).
+					 */
+					private static void drawFromCamps(ServerLevel level, WarParties.Party party, Faction from, Faction target, BlockPos goal) {
+						MinecraftServer server = level.getServer();
+						// Find the war between the attacker and the target
+						War war = Wars.between(server, from.id(), target.id());
+						if (war == null) {
+							return;
+						}
+						// Find camps of the attacking faction near the siege
+						for (Faction camp : Factions.all(server, FactionType.BARBARIAN)) {
+							if (camp.fallen() || camp.id() == from.id()) {
+								continue;
+							}
+							// Check if this camp is allied with the attacking faction (same war side)
+							War campWar = Wars.between(server, camp.id(), from.id());
+							if (campWar != null && campWar.id() == war.id() && Wars.onSide(server, camp.id(), Wars.sideOf(server, war, from.id()))) {
+								double dist = Raids.horizontal(camp.seat(), goal);
+								if (dist <= 40000.0) { // within 200 blocks
+									// Draw supplies from this camp
+									Camps.CampData data = Camps.data(server, camp.id());
+									if (data != null && data.clearedAt() < 0 && Storage.loaded(level, camp)) {
+										// Take some food, logs, and other supplies
+										int taken = 0;
+										taken += Storage.take(level, camp, Items.COOKED_MUTTON, 8);
+										taken += Storage.take(level, camp, Items.COOKED_BEEF, 8);
+										taken += Storage.take(level, camp, Items.COOKED_PORKCHOP, 8);
+										taken += Storage.take(level, camp, Items.COOKED_CHICKEN, 8);
+										taken += Storage.take(level, camp, Items.LOG, 16);
+										taken += Storage.take(level, camp, Items.OAK_LOG, 16);
+										taken += Storage.take(level, camp, Items.SPRUCE_LOG, 16);
+										taken += Storage.take(level, camp, Items.IRON_INGOT, 4);
+										taken += Storage.take(level, camp, Items.ARROW, 16);
+										if (taken > 0) {
+											// Add to the siege's supply (the war chest or the party's spoils)
+											party.spoilsSilver += taken / 4; // convert to silver value
+											JaymosKingdoms.LOGGER.debug("Siege of {} drew {} supplies from camp {}", target.name(), taken, camp.name());
+										}
+									}
 								}
 							}
 						}
 					}
-				}
-			}
 
 			/** The besieged's ruler, if they're near {@code p}; else the nearest of its guards who can see them. */
 	private static @Nullable Mob asker(ServerLevel level, Faction target, ServerPlayer p) {

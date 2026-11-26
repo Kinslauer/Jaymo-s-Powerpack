@@ -28,6 +28,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.monster.Enemy;
+import com.jaymoskingdoms.WarData.Banner;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.ChunkPos;
@@ -263,36 +264,37 @@ public final class KingdomEvents {
 	 */
 
 	/**
-	 * Transfers all land claims from {@code from} to {@code to}: the victor takes the defeated's land.
-	 */
-	static void transferLand(MinecraftServer server, Faction from, Faction to) {
-		List<Long> taken = new ArrayList<>(from.claims());
-		if (taken.isEmpty()) {
-			return;
-		}
-		// Remove claims from defeated faction
-		Factions.update(server, from.id(), f -> f.withClaims(List.of()));
-		// Add claims to victor
-		List<Long> victorClaims = new ArrayList<>(to.claims());
-		victorClaims.addAll(taken);
-		Factions.update(server, to.id(), f -> f.withClaims(victorClaims));
-		// Update banner ownership for transferred chunks (banners stay but their target realm changes)
-		for (Banner b : WarData.banners(server)) {
-			if (b.target() == from.id()) {
-				// This banner was in the defeated's land; it now belongs to the victor
-				WarData.putBanners(server, WarData.banners(server).stream()
-					.map(b2 -> b2.target() == from.id() ? new Banner(b2.pos(), b2.faction(), b2.war(), to.id(), b2.seat(), b2.planted(), b2.planter()) : b2)
-					.toList());
-				break; // only need to update once since we rebuild the list
+		 * Transfers all land claims from {@code from} to {@code to}: the victor takes the defeated's land.
+		 */
+		static void transferLand(MinecraftServer server, Faction from, Faction to) {
+			ServerLevel level = server.overworld();
+			List<Long> taken = new ArrayList<>(from.claims());
+			if (taken.isEmpty()) {
+				return;
 			}
+			// Remove claims from defeated faction
+			Factions.update(server, from.id(), f -> f.withClaims(List.of()));
+			// Add claims to victor
+			List<Long> victorClaims = new ArrayList<>(to.claims());
+			victorClaims.addAll(taken);
+			Factions.update(server, to.id(), f -> f.withClaims(victorClaims));
+			// Update banner ownership for transferred chunks (banners stay but their target realm changes)
+			for (Banner b : WarData.banners(server)) {
+				if (b.target() == from.id()) {
+					// This banner was in the defeated's land; it now belongs to the victor
+					WarData.putBanners(server, WarData.banners(server).stream()
+						.map(b2 -> b2.target() == from.id() ? new Banner(b2.pos(), b2.faction(), b2.war(), to.id(), b2.seat(), b2.planted(), b2.planter()) : b2)
+						.toList());
+					break; // only need to update once since we rebuild the list
+				}
+			}
+			// Announce the land transfer
+			for (ServerPlayer p : Raids.players(level, from.seat(), 256.0)) {
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.land.transferred", from.name(), to.name())
+					.withStyle(ChatFormatting.GOLD));
+			}
+			JaymosKingdoms.LOGGER.info("{}'s land transferred to {}", from.name(), to.name());
 		}
-		// Announce the land transfer
-		for (ServerPlayer p : Raids.players(server, from.seat(), 256.0)) {
-			p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.land.transferred", from.name(), to.name())
-				.withStyle(ChatFormatting.GOLD));
-		}
-		JaymosKingdoms.LOGGER.info("{}'s land transferred to {}", from.name(), to.name());
-	}
 
 	/**
 	 * A kingdom where no village stands: an Epic town is raised there for it ({@link EpicTowns}), and if none will do, the
