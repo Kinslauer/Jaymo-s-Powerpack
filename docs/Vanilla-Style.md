@@ -140,3 +140,19 @@ https://claude.ai/artifact/DJgp8W4XAaLJPyuTMVxBED). The game fetches each one fr
 Don't copy pixels from Pixel Perfection Fidelity into our own textures: share-alike would then cover them. New art for our
 own items goes to an art agent, starting from the CC0 and MIT sources Andy picked (OpenGameArt weapon, RPG item, block
 and ship sets; Computercraft Greentech, CC Industrialized, Militech, Wares Recalibration, Vanilla Military, Starlight 16x).
+
+### Open art sets used as they are (2026-11-26, batch 1)
+Other artists' pixels, unchanged (no recolour, no redraw). `tools/open_art/sources/` keeps each source file with its
+licence; `python3 tools/open_art/apply.py` copies them onto our textures and must run after the old generators
+(`kingdoms/tools/gen_hidden_blade.py`, `gen_items.py`, `tools/vanilla_style/*.py`), which would draw these again.
+
+| Texture | From | Author | Licence |
+|---|---|---|---|
+| Kingdoms silver sword, hidden blade, engineer's hammer | 16x16 Weapon RPG Icons, steel sheet | Shade (OpenGameArt) | CC0 |
+| Powers far-world moon, Glacia and Verdant rock | 16x16 Block Texture Set (stone_generic, ice_glacier, serpentine) | aroachifoundonmypillow (OpenGameArt) | CC0 |
+| Powers Gravity Machine (all faces, on and off), Fuel Works sides and top, Landing Beacon base | Militech (Oritech retexture) | LutherDev (Modrinth) | MIT, notice in `sources/militech/LICENSE.txt` |
+
+Tried and dropped: the block set's slate tiles and bricks on the mason table (they lose the table's plan and tools) and
+Militech's steel block on the landing beacon (soft diagonal gradient). The weapon icons keep Shade's black outline,
+which the style rules above otherwise avoid. 16x16 RPG Items (DB32) and the Ship Collection are not used yet: the ship
+icons wait on Andy's pick of what a pod type is; later each type also gets a matching pod model (an art agent's job).
