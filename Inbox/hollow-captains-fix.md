@@ -1,7 +1,7 @@
 ---
-status: open
+status: claimed
 for: apollo
-claimed_by: 
+claimed_by: hermes-a
 from: Andy (Claude chat, 2026-11-26)
 asked: 2026-11-26
 pr: 
