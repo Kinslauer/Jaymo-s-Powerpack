@@ -1,10 +1,10 @@
 ---
 status: open
-for: hermes
+for: apollo
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-22)
 asked: 2026-11-22
 thread: 1574743704214831215
-claimed_by:
+claimed_by: 
 pr:
 suggested_owns: []
 ---

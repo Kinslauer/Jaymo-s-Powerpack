@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: youth-delegates-ready
 branch: none (E:/hermes, outside git)
 with: Youth (T3 Code)
@@ -23,3 +23,4 @@ owns:
 
 ## Notes
 - See Decisions.md 2026-11-25 10:50 PM.
+- 2026-11-25 23:24 No sign of work for 30 min: marked stalled (whoever ran it stopped).
