@@ -79,8 +79,8 @@ def loot_tags(node, out=None):
 
 for ns, root in MODS.items():
 	for f in glob.glob(f'{root}/main/resources/data/**/*.json', recursive=True):
-		if '/tags/' in f or '/worldgen/' in f:
-			# (tags, and worldgen's pool and structure names, aren't item ids)
+		if '/tags/' in f or '/worldgen/' in f or '/lostcities/' in f:
+			# (tags, worldgen's pool and structure names, and Lost Cities' asset names aren't item ids)
 			continue
 		text = open(f, encoding='utf-8').read()
 		if any(f'/{sub}/' in f for sub in ('loot_table', 'predicate', 'item_modifier')):
