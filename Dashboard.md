@@ -16,6 +16,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/hollow-captains-fix|hollow-captains-fix]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -91,11 +92,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2148 explorer maps never make chunks on the server thread (Kingdoms, 2026-11-25)
 - [ ] #2147 The Nightmare haunts from the dark instead of acting as an enderman (Kingdoms, 2026-11-25)
 - [ ] #2146 Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (Powers, Kingdoms, 2026-11-25)
-- …and 535 older ones.
+- …and 593 older ones.
 
 ## Health
 
-17 problems in the notes: [[Health]].
+18 problems in the notes: [[Health]].
 
 ## Last week
 
