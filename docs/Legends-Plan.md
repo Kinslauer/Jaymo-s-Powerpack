@@ -125,7 +125,7 @@ Power: Z Fighter, weapons.
 ## Order
 
 Tracks run two at a time on separate files, then land on one branch (`claude/project-thread-aaw9tm`), one commit per
-patch, one PR: 1 + 5, then 2 + 7, then 3 + 6, then 4. Patches 1 to 4 all touch the web package, so each starts from the
+patch, one PR: 1 + 5, then 2, then 3, then 4. Andy: "have codex and gemini take a patch each then check it afterward": patch 6 goes to Codex (vault Inbox `legends-p6-core-animations`) and patch 7 to Gemini (`legends-p7-zfighter-weapon-moves`), each on its own PR, and this thread reviews both. Patches 1 to 4 all touch the web package, so each starts from the
 branch with the earlier web patch in it.
 
 ## Open questions
