@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: mordhau-3-body
 branch: claude/mordhau-3-body
 with: claude (T3 thread, Sonnet 5.5)
@@ -45,3 +45,4 @@ made the way the harness makes its pieces. Mordhau's meshes, textures and names 
 - 2026-11-25 4:59 PM Draft PR #2185 (waits on Andy's preview approval). 35 rows: 25 new pieces + covered finish + 10 have rows checked (3 made reachable at the anvil, coat of plates given a recipe). Change notes: changes/kingdoms and changes/powers claude-mordhau-3-body.md. Lore: 8 (new) paragraphs after 'The victor's wreath'. Not played; Java compiled only by CI.
 - 2026-11-25 5:40 PM The slashed doublet is puffed now (commit 2c11177dc9 on claude/mordhau-3-body, merged into claude/mordhau-4-legs as 5167428419): puffed sleeves slashed through, lined and gathered in the second colour, the left a size fuller, as the slashed hose's thigh puffs. Preview refreshed in Assets/mordhau-3-body/landsknecht_doublet.png. Not played; CI compiles.
 - 2026-11-25 5:40 PM Vault sync repaired: every push since 2026-11-24 12:43 PM had failed because a 290 MB `Assets/otherworld-fabric-picklist/Otherworld-v8 HF2.zip` was committed (GitHub refuses files over 100 MB), so each sync run only added commits (319 piled up). The 319 local commits were kept (backup branch `backup-before-zip-strip` in the live folder holds the originals) with the zip dropped from them, and pushed as a plain fast-forward (c2bc11ebf..b73d1c0aa, no force). The zip is still on disk, kept out of git by `.git/info/exclude`. Anything else over 100 MB put in the vault will stall the sync the same way.
+- 2026-11-26 00:33 PR #2185 is merged into master; moved to Agents/Done.

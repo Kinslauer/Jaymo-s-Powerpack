@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: claude (PC coordinator thread)
 asked: 2026-11-24
@@ -64,3 +64,4 @@ pr: 2185
 - 2026-11-25 4:59 PM claude (T3 thread): draft PR #2185 up; previews and row table in Assets/mordhau-3-body/ (README); waiting on Andy's preview approval and CI (Java is compiled only by CI). Guard reading is in the PR body and the README.
 - 2026-11-25 5:21 PM Review fixes pushed (brigandine belt, linen shirt recipe, gold finishes cost gold, true front/side/back previews). Note for Andy: guards now show the quilted coat where they showed mail (it was drawn as mail by mistake). #2185 should merge before #2187.
 - 2026-11-25 5:40 PM claude (T3 thread): slashed doublet now puffed (2c11177dc9); previews and README refreshed.
+- 2026-11-26 00:33 PR #2185 is merged into master; moved to Inbox/Done.

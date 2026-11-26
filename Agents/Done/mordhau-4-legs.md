@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: mordhau-4-legs
 branch: claude/mordhau-4-legs
 with: claude (T3 thread, Sonnet 5.5)
@@ -37,3 +37,4 @@ owns:
 - 2026-11-25 5:10 PM Draft PR #2186. 15 rows: 27 new pieces + the HOSE place (last Slot, hose layer in UnderArmourLayer, slot on the harness screen). Lore: 2 (new) paragraphs. Not played; Java compiled only by CI.
 - 2026-11-25 5:21 PM PR #2186 closed (no CI: not based on master); replaced by draft #2187 from the same branch to master, which also holds #2185's commits until that merges. Previews regenerated with a true front/side/back.
 - 2026-11-25 5:40 PM The body track's slashed doublet is puffed now (commit 2c11177dc9 on claude/mordhau-3-body, merged into claude/mordhau-4-legs as 5167428419): puffed sleeves slashed through, lined and gathered in the second colour, the left a size fuller, as the slashed hose's thigh puffs. Preview refreshed in Assets/mordhau-3-body/landsknecht_doublet.png. Not played; CI compiles.
+- 2026-11-26 00:33 PR #2187 is merged into master; moved to Agents/Done.

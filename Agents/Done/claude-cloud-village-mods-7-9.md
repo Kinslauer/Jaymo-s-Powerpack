@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: village-mods-7-ctov-tidal-towns, village-mods-8-swamp-goblins, village-mods-9-own-company
 branch: claude/project-thread-2p25nc
 with: 
@@ -29,3 +29,4 @@ owns:
 
 ## Done
 - 2026-11-25 16:35 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-26 00:33 PR #2183 is merged into master; moved to Agents/Done.
