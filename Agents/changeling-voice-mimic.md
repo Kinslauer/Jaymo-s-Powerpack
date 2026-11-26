@@ -1,7 +1,7 @@
 ---
-status: blocked
+status: running
 task: changeling-voice-mimic
-branch: claude/changeling-voice-mimic
+branch: t3/changeling-voice-mimic
 pr:
 mods: kingdoms
 started: 2026-11-26
@@ -33,3 +33,5 @@ Andy assigned this Inbox task to Apollo. Use Simple Voice Chat for short, in-mem
 
 ## Done
 What a player will see, and what wasn't tested.
+
+Codex took over from Apollo on Andy's instruction, November 26. Inspecting the missing player-stalking hook before implementation. Owns additionally ChangelingVoiceCompat.java and fabric.mod.json for optional SVC wiring.
