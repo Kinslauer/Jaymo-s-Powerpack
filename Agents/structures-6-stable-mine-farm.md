@@ -3,7 +3,7 @@ status: stalled
 task: structures-6-stable-mine-farm
 branch: claude/structures-6-stable-mine-farm
 with: 
-pr: 
+pr: 2217
 mods: kingdoms
 versions: 
 started: 2026-11-26

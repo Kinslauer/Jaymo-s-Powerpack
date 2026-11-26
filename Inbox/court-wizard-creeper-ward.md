@@ -1,10 +1,12 @@
 ---
-status: blocked
+status: in-review
 for: apollo
 from: Andy (Claude chat, 2026-11-23)
 asked: 2026-11-23
 claimed_by: hermes-a
-pr: 
+pr: 2222
+writer: hermes-writer
+text_pass: done
 ---
 
 # Court wizards ward their kingdom against creepers
@@ -35,3 +37,6 @@ A kingdom's court wizard casts (and keeps up) a ward over the kingdom's plot. In
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: #1842 blast mending is not this complete ward. Before code, ask Andy to choose upkeep/break conditions and weakening/repulsion tuning; preserve prevention or safe rewind requirement.
 - 2026-11-25 23:22 YOUTH delegated this to apollo (Claude approved): ward touches plots, explosions and Fx across classes; propose what breaks the ward and ask Andy in the PR
 - 2026-11-26 01:56 Question: Need clarification on ward upkeep, break conditions, prevention vs rewind, weakening numbers, repulsion chance/visual, ward radius.
+- 2026-11-26 09:35 Cloud Claude 2026-11-26: Andy's questions for this task are on the tick page https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (db picks/andy). Wait for his answers there; don't build before he answers.
+- 2026-11-26 09:58 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): upkeep: always on while the court wizard lives and is home, no cost (suggested, kept). Breaks: the wizard's death, absence from the plot, OR any siege. Stop vs undo: fizzle while the wizard is fresh, rewind any that go off; Andy's note: 'stronger wizards prevent more blasts, but they all rewind within the ward. players have to learn it too' (so prevention chance scales with wizard strength, every blast that gets through is rewound, and players can learn the ward spell). Weakened inside: 30% slower, blast half size (suggested, kept). Repelled at the edge: about half (Andy's earlier Kanban-cleanup answer, Decisions 2026-11-26; the page default was left untouched). Reach: the whole kingdom plot (suggested, kept). Ready to build.
+- 2026-11-26 10:27 Text pass: PR #2222 court-wizard-creeper-ward. Player-visible strings: changes/kingdoms/court-wizard-creeper-ward.md (ward behavior, plain and accurate); kingdoms lang parts form_skills.json, message.json, skill-perk.json (couched lance: dropped the not-on-camels-elephants-or-dragons mount restrictions now that dragons are removed); powers lang armory.json (lance charge tooltip shortened). New classes CreeperWard and CourtWizards add no player-facing strings. Validated JSON syntax of all four edited lang parts. No rewrites needed; no code changes.

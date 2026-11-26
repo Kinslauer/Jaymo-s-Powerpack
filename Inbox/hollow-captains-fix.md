@@ -1,10 +1,12 @@
 ---
-status: open
+status: in-review
 for: apollo
-claimed_by: 
+claimed_by: hermes-a
 from: Andy (Claude chat, 2026-11-26)
 asked: 2026-11-26
-pr: 
+pr: 2245
+writer: hermes-writer
+text_pass: done
 ---
 
 # Hollow captains: keep the count, 12 per player, own ladders
@@ -44,3 +46,8 @@ they should all have their own ladders, and the captains can intersect." One PR 
 
 ## Delegation note (YOUTH, 2026-11-26)
 Delegated to Apollo (Andy: hand both jobs to the Hermes bots now). It was briefly claimed by hermes-fixer/Hephaestus, but Hephaestus is on the stop list since Nov 21 and this is not narrow-bug-only work (adds 12 captains per player, own ladders, intersecting captains), so it goes to Apollo.
+
+## Notes
+- 2026-11-26 06:07 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 11:51 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 14:12 Text pass: rewrote changes/kingdoms/hollow-captains-fix.md to be player-facing (per-player ladders of up to 12, kill-only promotion, intersecting ladders, captain-due-back keeps their ladder place, count bug fix; no code internals). The PR adds no lang, chat, screen or dialogue strings — HollowCaptains.java and Captains.java changes are code only (per-player attachments, named tuning constants). Kingdoms builds (sh ./gradlew build --no-daemon) and python tools/pr_checks.py pass; not play-tested.

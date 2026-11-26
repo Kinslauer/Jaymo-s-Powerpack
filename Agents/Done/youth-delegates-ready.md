@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: youth-delegates-ready
 branch: none (E:/hermes, outside git)
 with: Youth (T3 Code)
@@ -30,3 +30,4 @@ Youth delegated 5 Ready jobs after Claude's yes (4 Apollo, 1 Bacchus) and posted
 structures-1-siege-camps. Held: aqueduct-curse (2 placement tracks at a time), mohknee and faction-table (Andy's
 questions), blood-awakening picks (Andy's list). Not tested: a full bot run on a delegated task. Each `assign` takes
 ~100 s (two vault syncs).
+- 2026-11-26 Andy (Waiting on Andy page): finished; note tidied away.

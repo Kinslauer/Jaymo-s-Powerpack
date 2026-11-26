@@ -1,13 +1,18 @@
 ---
-status: blocked
+status: stalled
 task: changeling-voice-mimic
-branch: claude/changeling-voice-mimic
+branch: t3/changeling-voice-mimic
 pr:
 mods: kingdoms
 started: 2026-11-26
 owns:
-  - kingdoms/src/main/java/com/jaymoskingdoms/ChangelingVoices.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/ChangelingLures.java
   - kingdoms/src/main/java/com/jaymoskingdoms/BorrowedFaces.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/ChangelingVoices.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/ChangelingVoiceCompat.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/Doubles.java
+  - kingdoms/src/main/resources/fabric.mod.json
+  - E:/Jaymo Vault Live/Lore.md
   - changes/kingdoms/changeling-voice-mimic.md
 ---
 # Changeling voice mimic
@@ -33,3 +38,6 @@ Andy assigned this Inbox task to Apollo. Use Simple Voice Chat for short, in-mem
 
 ## Done
 What a player will see, and what wasn't tested.
+
+Codex took over from Apollo on Andy's instruction, November 26. Inspecting the missing player-stalking hook before implementation. Owns additionally ChangelingVoiceCompat.java and fabric.mod.json for optional SVC wiring.
+- 2026-11-26 06:07 No sign of work for 30 min: marked stalled (whoever ran it stopped).

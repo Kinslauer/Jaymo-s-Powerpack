@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 08:09). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 13:39). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -6,35 +6,47 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Questions for you:**
-- [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 2026-11-26 00:46 Question for Andy: when a per-blood upgrade is ticked, does it add to the shared rule (halved waits + 1.5x duration) for that blood, or replac…
-- [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · 2026-11-26 02:18 Question: Before implementing changeling voice mimic, I need clarification:
-- [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · 2026-11-26 01:56 Question: Need clarification on ward upkeep, break conditions, prevention vs rewind, weakening numbers, repulsion chance/visual, ward radius.
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
-- [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/structures-4-mohknee|structures-4-mohknee]] · 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: ores for blossom kingdoms and barbarian tribes. Keep distinct from already merged continen…
-- [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
+- [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
+- [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · 2026-11-26 07:21 Design draft complete: Overworld aqueduct structure, SettlementCurse system, 4 board quests (Stem the Flow, Clear the Pillars, Purify the Ston…
 
 ## Stuck
 
+- [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hollow-captains-fix|hollow-captains-fix]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/symbiote-113-picks|symbiote-113-picks]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
-- [[Agents/youth-delegates-ready|youth-delegates-ready]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-5 waiting for a bot, 3 being built, 1 in review: see [[Kanban]].
+10 waiting for a bot, 2 being built, 5 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2243 Youth's ears unpack the voice model on the server (Kingdoms, 2026-11-26)
+- [ ] #2242 Realm dragons and their dragon tamers (Kingdoms, 2026-11-26)
+- [ ] #2241 Dragon nests and dragon domains (Dragonforge picks, part 2) (Kingdoms, 2026-11-26)
+- [ ] #2240 Allays and the Sylvan: freeing caged allays, haven allays, a Sylvan's fall caught (Kingdoms, 2026-11-26)
+- [ ] #2239 fire alarm runs through town, everyone fights fires, twisters send people running, no stray Templar plate (Kingdoms, 2026-11-26)
+- [ ] #2238 Town crier: listeners who don't like the news shout, fight him or hire a blade (Kingdoms, 2026-11-26)
+- [ ] #2236 Town crier: verdicts are cried by the seat, not sent to chat (Kingdoms, 2026-11-26)
+- [ ] #2235 fire smoke settles low too, and makes you sick (Kingdoms, 2026-11-26)
+- [ ] #2234 Maggots come as a writhing heap that splats underfoot (Kingdoms, 2026-11-26)
+- [ ] #2233 Reincarnate link on the character page (Powers, Kingdoms, 2026-11-26)
+- [ ] #2232 Dragon keys no longer stop the game starting (Kingdoms, 2026-11-26)
+- [ ] #2231 Dyed and grey sheep no longer sprout stray boxes (Powers, 2026-11-26)
+- [ ] #2230 /texturelook vanilla|reason - switch the pack's retexture packs off and back on (Powers, 2026-11-26)
+- [ ] #2229 cannon loading tip cards (Powers, 2026-11-26)
+- [ ] #2228 face parts - snouts, beaks, fangs and horns on the painted faces (Kingdoms, 2026-11-26)
+- [ ] #2227 Dragonforge mechanics for our dragons (parts, bite, dive slam, sprint flight, tremor, horn, home patrols, realm wyverns) (Kingdoms, 2026-11-26)
+- [ ] #2226 lance couching from the saddle (Powers, Kingdoms, 2026-11-26)
+- [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
+- [ ] #2221 wide flat plains and bigger biomes (open country) (Kingdoms, 2026-11-26)
+- [ ] #2219 world gen no longer freezes on Enderscape's "not in a structure" check (Powers, 2026-11-26)
 - [ ] #2214 Open art sets, batch 1: machines and far-world rock (Powers, Kingdoms, 2026-11-26)
 - [ ] #2213 Maw ruins from Pomkot's World (Powers, 2026-11-26)
 - [ ] #2212 CC0 picks: pack weight, death toll, weapon wheel, coyote time, better chainmail, axe throw, rust, falling snow, snores, clumsy undead, soap scrub, leaves on Fast, eight new pack mods (Powers, Kingdoms, Kitchen, 2026-11-26)
@@ -48,6 +60,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2201 ships rigged when they're made; pillager long ships sail; crews fish for their food; every NPC fights its fish in view (Kingdoms, 2026-11-26)
 - [ ] #2200 Crocodiles and alligators death roll their prey and drag it into the water (Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2199 Alone in the wild never leaves you on the sea (Kingdoms, 2026-11-26)
+- [ ] #2198 Rivers through low ground run in gentle valleys; gorges only in high ground (Powers, 2026-11-26)
 - [ ] #2197 Mobs slow down under heavy weapons; no blood on lost limbs; owls spare the downed (Powers, Kitchen, 2026-11-26)
 - [ ] #2196 Ki Cell has its icon and name (Powers, Kingdoms, 2026-11-26)
 - [ ] #2195 Camps stop crowding; scalebane sellswords live, side with the camp that hires them, and settle in havens as the Scalebound (Kingdoms, 2026-11-26)
@@ -74,32 +87,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2169 The symbiote saves you (Powers, Kingdoms, 2026-11-25)
 - [ ] #2167 space pod: sit in the cockpit under a glass canopy, new icon and flight picture (Powers, 2026-11-25)
 - [ ] #2166 the Verdant World is land again; pod landings and pads keep off the sea, and no second pod (Powers, 2026-11-25)
-- [ ] #2165 tree debris only when a player brought the tree down (Kingdoms, 2026-11-25)
-- [ ] #2164 red symbiote - hunts first, trust unlocks orders, takes over in its big body, fights you for the small suit (Powers, Kingdoms, 2026-11-25)
-- [ ] #2163 severed limbs lie where they are and look like the body they came off (Powers, Kitchen, 2026-11-25)
-- [ ] #2162 symbiote, ape and mob-host takeovers fight with their whole kit (Powers, Kingdoms, 2026-11-25)
-- [ ] #2161 Penguins no longer flood the server log with NaN rotation errors (Powers, 2026-11-25)
-- [ ] #2160 Smithing anvil: the new harness helms, the barbute and spangenhelm, painted barbutes (Powers, Kingdoms, 2026-11-25)
-- [ ] #2159 fighting AI - weapon sense, breaking off to mend, shields, NPC eyes, danger sense, getting there, band styles (Kingdoms, 2026-11-25)
-- [ ] #2158 symbiote in hosts without the Web - every ability, a fight for the suit, a duel with the slinger (Powers, 2026-11-25)
-- [ ] #2157 Hearth's hit cap no longer softens the blow that downs you (Kingdoms, 2026-11-25)
-- [ ] #2156 NaN rotation diagnostic (Powers, 2026-11-25)
-- [ ] #2155 Toughness: Grit and gear let you take more hits (Kingdoms, 2026-11-25)
-- [ ] #2154 silver blades sear monsters, and the twin harness on the back (Powers, 2026-11-25)
-- [ ] #2153 Written starts: hand-built starts like an adventure map, and the Hearthkeeper's way-hut (Kingdoms, 2026-11-25)
-- [ ] #2152 The symbiote's meeting film no longer disconnects the client (Powers, 2026-11-25)
-- [ ] #2151 Bounty boards against a wall; plains towns always have a working windmill, a butcher and an infirmary (Kingdoms, 2026-11-25)
-- [ ] #2150 faints can be mashed out of (Powers, Kingdoms, 2026-11-25)
-- [ ] #2149 maggots for the hook: taken alive, best river bait, crawl off when dropped (Powers, Kingdoms, 2026-11-25)
-- [ ] #2148 explorer maps never make chunks on the server thread (Kingdoms, 2026-11-25)
-- [ ] #2147 The Nightmare haunts from the dark instead of acting as an enderman (Kingdoms, 2026-11-25)
-- [ ] #2146 Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (Powers, Kingdoms, 2026-11-25)
-- [ ] #2145 Dodge key: tap to dodge, hold to roll, hold longer to go prone (Powers, 2026-11-25)
-- …and 592 older ones.
+- …and 613 older ones.
 
 ## Health
 
-21 problems in the notes: [[Health]].
+13 problems in the notes: [[Health]].
 
 ## Last week
 

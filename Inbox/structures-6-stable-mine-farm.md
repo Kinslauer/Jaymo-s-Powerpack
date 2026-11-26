@@ -1,14 +1,16 @@
 ---
-status: claimed
+status: in-review
 for: bacchus
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
 claimed_by: hermes-b
-pr: 
+pr: 2217
 suggested_owns:
   - kingdoms data/jaymoskingdoms/structure (new nbt), worldgen pools
   - kingdoms Stables.java, Mines.java hooks
+writer: hermes-writer
+text_pass: done
 ---
 # Structures 6: new stable, mine and farm structures
 
@@ -22,3 +24,9 @@ Build the three structures (original builds, not copies) and place them by track
 
 ## Notes
 - 2026-11-25 23:20 YOUTH delegated this to bacchus (Claude approved): self-contained worldgen structures; track 2 is done (PR #2085)
+- 2026-11-26 04:05 Blocked: PR #2217 CI 'Build Powers' check is red due to Modrinth HTTP 429 rate limiting while downloading dependencies (shared-advancements, betterping, item-highlighter) plus a pre-existing libs/jaymos-kitchen jar version warning. Unrelated to my data-only Kingdoms change (stable/mine/farm nbt + worldgen + PlacementReasons tag entries + change note). Local sh ./gradlew build passes and tools/pr_checks.py passes. PR is pushed claude/structures-6-stable-mine-farm -> master, ready to hand in once CI checks clear; will retry vault.py --set status=in-review pr=2217.
+- 2026-11-26 04:09 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-26 04:28 Text pass: rewrote changes/kingdoms/structures-6-stable-mine-farm.md — dropped internal rule names (PlacementReasons, stables_by_towns, mines_by_buyers, farms_by_homes); it now says three new small worldgen structures generate in the wild: a horse stable by towns, a fenced open quarry near buyers, farmland beside homes, each in the biomes it suits. Kept "Built; not played." No lang, dialogue or hint strings were touched by this PR. Kingdoms sh ./gradlew build passes; tools/pr_checks.py passes; commit a284501e44 pushed to PR branch claude/structures-6-stable-mine-farm (PR #2217).
+- 2026-11-26 04:43 Text pass: reviewed PR #2217 structures-6-stable-mine-farm. Player-visible strings: only the change note (changes/kingdoms/structures-6-stable-mine-farm.md) — already player-facing: three new small worldgen structures (stable by towns, fenced quarry by buyers, farmland beside homes), each in the biomes it suits, plus 'Built; not played.' per change-note house style. No lang parts, dialogue, hints, screens or chat lines were added; the worldgen json/nbt files and tools/small_designs/stable_mine_farm.py carry no player text. No rewrite needed.
+- 2026-11-26 05:15 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
+- 2026-11-26 06:11 Text pass: reviewed PR #2217 (claude/structures-6-stable-mine-farm). Player-visible text: only changes/kingdoms/structures-6-stable-mine-farm.md — matches house style (# title line, player-facing description of the stable/mine/farm structures, 'Built; not played.' closer, no version number), no rewrite needed. No lang parts, dialogue, hints, screens or chat lines were added; the worldgen JSONs, structure tags and NBTs carry no player-visible text (the stable, mine and farm designs use doors, lanterns, hay, cauldrons and fences only — no signs or books). No files were changed.
