@@ -4,6 +4,7 @@ import com.jaymoskitchen.HudBars;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.KitchenBlood;
 import com.jaymoskitchen.butchery.Butchery;
+import com.jaymoskitchen.butchery.Organs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -45,8 +46,13 @@ public final class Gutting {
 
 	/** Whether {@code corpse} can still be gutted: an animal's carcass that hasn't been cut up, lying where it is or hung. */
 	static boolean gutable(CorpseEntity corpse) {
-		return Hanging.hangable(corpse) && !corpse.gutted() && corpse.butcherStage() <= Hanging.SKINNED && corpse.carrier() == null
+		return (Hanging.hangable(corpse) || monster(corpse)) && !corpse.gutted() && corpse.butcherStage() <= Hanging.SKINNED && corpse.carrier() == null
 			&& corpse.dragger() == null;
+	}
+
+	/** A monster with insides worth taking ({@link Organs#gutsMonster}: a spider's silk, a creeper's powder), lying loose. */
+	static boolean monster(CorpseEntity corpse) {
+		return corpse.kind() == CorpseKind.OTHER && !corpse.isMachine() && Organs.gutsMonster(corpse.sourceType());
 	}
 
 	/** Insides to take out of it: a small body one piece, most two, a big carcass four. */
@@ -64,7 +70,9 @@ public final class Gutting {
 	 * isn't a blade for it or it can't be gutted, and the click is used as before.
 	 */
 	static @Nullable InteractionResult use(CorpseEntity corpse, ServerLevel level, Player player, ItemStack held) {
-		if (!held.is(BLADES) || held.is(Butchery.SKINNING_KNIVES) || !gutable(corpse) || player.isShiftKeyDown()) {
+		// (a knife guts a monster where it lies: it never goes on the hook, where a knife guts an animal)
+		boolean knife = held.is(Butchery.SKINNING_KNIVES);
+		if (!(held.is(BLADES) || knife) || knife && !monster(corpse) || !gutable(corpse) || player.isShiftKeyDown()) {
 			return null;
 		}
 		return work(corpse, level, player, held);
@@ -118,8 +126,17 @@ public final class Gutting {
 		}
 	}
 
-	/** Piece {@code n} of the insides, as a gut pile (offal, then intestines, turn about) beside the body. */
+	/**
+	 * Piece {@code n} of the insides, as a gut pile (offal, then intestines, turn about) beside the body, with its share of
+	 * the body's own organs ({@link Organs}) dropped by it. A monster's insides are only its organs.
+	 */
 	private static void layInsides(CorpseEntity corpse, ServerLevel level, int n) {
+		for (Item organ : Organs.piece(organs(corpse), n, pieces(corpse))) {
+			corpse.spawnAtLocation(level, new ItemStack(organ), 0.3F);
+		}
+		if (monster(corpse)) {
+			return;
+		}
 		double side = corpse.getBbWidth() * 0.5 + BESIDE;
 		double angle = corpse.getYRot() * Math.PI / 180.0 + Math.PI / 2.0 + (level.getRandom().nextDouble() - 0.5);
 		BlockPos spot = BlockPos.containing(corpse.getX() - Math.sin(angle) * side, corpse.getY() + 1.0, corpse.getZ() + Math.cos(angle) * side);
@@ -128,6 +145,11 @@ public final class Gutting {
 			// (nowhere to lay it: it falls as it is)
 			corpse.spawnAtLocation(level, new ItemStack(n % 2 == 0 ? Butchery.OFFAL : Butchery.INTESTINES), 0.3F);
 		}
+	}
+
+	/** The organs {@code corpse}'s kind of body holds. */
+	static java.util.List<Item> organs(CorpseEntity corpse) {
+		return Organs.of(corpse.sourceType(), corpse.oneHanded(), corpse.tooBigToLift());
 	}
 
 	/** The blade flicked clean: blood flies off it to the side, and the arm swings. */

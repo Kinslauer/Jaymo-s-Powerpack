@@ -488,6 +488,10 @@ public final class Hanging {
 	private static void gut(CorpseEntity corpse, ServerLevel level, @Nullable Player player, ItemStack tool, Consumer<ItemStack> drop) {
 		wear(tool, player);
 		drop.accept(new ItemStack(Butchery.OFFAL, corpse.oneHanded() ? OFFAL_SMALL : corpse.tooBigToLift() ? OFFAL_BIG : OFFAL));
+		// and the organs of its kind (Organs)
+		for (net.minecraft.world.item.Item organ : Gutting.organs(corpse)) {
+			drop.accept(new ItemStack(organ));
+		}
 		corpse.setGutted();
 		corpse.jolt(false);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.NEUTRAL, 0.8F, 0.7F);
