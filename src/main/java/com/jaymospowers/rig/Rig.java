@@ -64,6 +64,9 @@ public final class Rig {
 	static final float TOUGHNESS = 1.0F;
 
 	public static final ResourceKey<EquipmentAsset> ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("rig"));
+	/** The Hail and Tinker suits as armour layers (armour stands, troopers, androids): the white and gunmetal plate. */
+	public static final ResourceKey<EquipmentAsset> HAIL_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("rig_hail")),
+		TINKER_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("rig_tinker"));
 	/** Rig Salvage and Fallen Rig Scrap: what the Forge builds from, and repairs the pieces at an anvil. */
 	public static final TagKey<Item> SALVAGE_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("rig_salvage"));
 
@@ -300,6 +303,21 @@ public final class Rig {
 	public static ItemStack core(Player player) {
 		ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
 		return CORE != null && chest.is(CORE) ? chest : ItemStack.EMPTY;
+	}
+
+	/**
+	 * Stamps a piece (or Rig limb) with its frame, and gives Hail and Tinker pieces their own armour layer so an armour
+	 * stand or a mob wearing one shows that suit (a player's worn suit is drawn from the frame itself).
+	 */
+	public static void stamp(ItemStack stack, RigFrame frame) {
+		stack.set(FRAME, frame.id());
+		net.minecraft.world.item.equipment.Equippable worn = stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+		ResourceKey<EquipmentAsset> asset = frame == RigFrame.HAIL ? HAIL_ASSET : frame == RigFrame.TINKER ? TINKER_ASSET : ASSET;
+		if (worn != null && worn.assetId().isPresent() && !worn.assetId().get().equals(asset)) {
+			stack.set(net.minecraft.core.component.DataComponents.EQUIPPABLE, new net.minecraft.world.item.equipment.Equippable(worn.slot(),
+				worn.equipSound(), java.util.Optional.of(asset), worn.cameraOverlay(), worn.allowedEntities(), worn.dispensable(),
+				worn.swappable(), worn.damageOnHurt(), worn.equipOnInteract(), worn.canBeSheared(), worn.shearingSound()));
+		}
 	}
 
 	/** (0.11.87) A Core's Mind level (1..{@link #MAX_LEVEL}; 0 for an empty stack). */

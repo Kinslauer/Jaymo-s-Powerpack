@@ -1,5 +1,8 @@
 package com.jaymospowers.power.chrono.future;
 
+import com.jaymospowers.rig.Rig;
+import com.jaymospowers.rig.RigFrame;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -18,7 +21,9 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 
 /**
@@ -63,8 +68,22 @@ public class FutureAndroid extends Monster {
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, FutureTrooper.class, true));
 	}
 
-	/** Sent out by {@link FutureMachines}: most get a gun. */
+	/**
+	 * Sent out by {@link FutureMachines} (and set to guard the Dead Rigs): most get a gun, and every one wears the Mad
+	 * Tinkerer's gunmetal Rig plate (Andy: "the androids in the future and near the tinkerer use the gunmetal"), no helm
+	 * so the shell's face and eyes still show. The plate is looks only: it gives no armour and never drops.
+	 */
 	public void outfit(ServerLevel level) {
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			if (piece == Rig.Piece.HELM || piece.item() == null) {
+				continue;
+			}
+			ItemStack worn = new ItemStack(piece.item());
+			Rig.stamp(worn, RigFrame.TINKER);
+			worn.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+			setItemSlot(piece.slot, worn);
+			setDropChance(piece.slot, 0.0F);
+		}
 		if (getRandom().nextFloat() < ARMED) {
 			FutureGuns.arm(this, getRandom());
 		}

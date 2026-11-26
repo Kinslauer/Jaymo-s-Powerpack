@@ -1,4 +1,6 @@
 # Two new Rig suits: Hail and Tinker
 The Rig Forge has two more frames to pick: **Hail**, white plate with ice-cyan lights as the Frostborn build them, and **Tinker**, gunmetal with cyan, the Mad Tinkerer's copy. They're looks only and play like the standard frame. Their plates wear other artists' armour art (Power Armor: Renostalgized by Thepigcat76, and ItsSory's Netherite Armor pack, both MIT).
 - `RigFrame.HAIL`, `RigFrame.TINKER` (the standard frame's numbers), their suit textures and glow passes in `RigSuit`; `tools/open_art/rig_suits.py` lays the sources onto the plates `tools/gen_rig.py` defines.
-- Built; previewed in Blockbench, not played. The Forge hologram, item icons and armour-stand layer are unchanged.
+- Who wears which: Frostborn troopers in the future wear Hail (4 in 5; the rest the standard suit). The future's androids, the Dead Rig guards among them, wear Tinker plate on the chest, arms and legs (no helm, so their faces still show); on them it is looks only, no armour, never dropped. Rigs you build from salvage you find are still the standard frame unless you pick another at the Forge.
+- `Rig.stamp` sets the frame and, for Hail and Tinker, their own armour layer (`equipment/rig_hail`, `rig_tinker`, the source artists' layers unchanged), so armour stands and mobs show the right suit too.
+- Built; previewed in Blockbench, not played. The Forge hologram and item icons are unchanged.
