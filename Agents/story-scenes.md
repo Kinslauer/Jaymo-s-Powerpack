@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Story cutscenes and mission flow like Endless Lantern Corps; spoken Warlock spells
 branch: claude/project-thread-fqmg1o
 with: Claude (cloud thread "Build story cutscenes like Endless Lantern Corps")
@@ -27,4 +27,4 @@ owns:
 - Endless Lantern Corps: ChubOnYt, Forge 1.20.1, All Rights Reserved. Ideas only. Its flow: crashed ship structure, dying ring-bearer with reply dialogue in framed shots, items received, "Are you afraid?" question (say/type), oath spoken at the lantern (Windows speech, hold right-click fallback), willpower tree.
 
 ## Done
-Built and compile-checked; not played.
+Merged as PR #2204 (2026-11-26). Not played. Lore paragraph "The midnight bargain" awaits Andy.
