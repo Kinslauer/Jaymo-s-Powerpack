@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Climate picks (Tough As Nails / Serene Seasons / Biomes O' Plenty ideas)
 branch: claude/project-thread-mhtf6n
 with: cloud thread "temperature / damage system"
@@ -24,3 +24,4 @@ owns:
 - All sources ARR: ideas only.
 
 ## Done
+- 2026-11-26 01:31 No sign of work for 30 min: marked stalled (whoever ran it stopped).
