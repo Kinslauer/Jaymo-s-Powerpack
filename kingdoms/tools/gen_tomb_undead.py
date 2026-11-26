@@ -120,13 +120,19 @@ def shade(c, k):
 	return tuple(max(0, min(255, int(v * k))) for v in c)
 
 
+# The Reason look (docs/Vanilla-Style.md): a script that sets this paints each face in its light's one shade, without the
+# per-pixel jitter that made sheets look script-made. Patterns (mail, fur, grain, edges) stay.
+CLEAN = False
+
+
 def paint_face(img, box, mat, face, rng):
 	x0, y0, x1, y1 = box
 	base = PALETTE[mat]
 	light = {"up": 1.12, "down": 0.72, "north": 1.0, "south": 0.9, "east": 0.94, "west": 0.94}[face]
 	for y in range(y0, y1):
 		for x in range(x0, x1):
-			k = light * (0.9 + rng.random() * 0.18)
+			jitter = 0.9 + rng.random() * 0.18
+			k = light * (1.0 if CLEAN else jitter)
 			c = base
 			lx, ly = x - x0, y - y0
 			if mat == "mail" and (lx + ly) % 2 == 0:
