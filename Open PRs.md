@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 08:27
+updated: 2026-11-26 08:55
 ---
 # Open PRs
 
-7 open, as of 2026-11-26 08:27. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+6 open, as of 2026-11-26 08:55. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -25,11 +25,6 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/structures-6-stable-mine-farm` · **Updated:** 2026-11-26 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[structures-6-stable-mine-farm]]
-
-## [#2219](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2219) Stop new worlds freezing on "Saving world" (Lithostitched in_structure check)
-- **Branch:** `claude/project-thread-q7929k` · **Updated:** 2026-11-26 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
 
 ## [#2220](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2220) Realistic and pathable archery positions
 - **Branch:** `claude/realistic-pathable-archery` · **Updated:** 2026-11-26 (today)
