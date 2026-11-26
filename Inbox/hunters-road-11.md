@@ -14,3 +14,4 @@ pr:
 Lives on the Kingdoms body side (heritage and blood), not as a Power. Needs hunters-road-6 (toxicity) merged first. No summoned homing spirits (free projectiles); death rulings unchanged.
 
 ## Notes
+- 2026-11-26 21:09 ON HOLD until hunters-road-6 merges (last wave). Not a question for Andy: the vault coordinator opens it.
