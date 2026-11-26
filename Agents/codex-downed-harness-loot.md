@@ -3,16 +3,16 @@ status: stalled
 task:
 branch: codex/downed-harness-loot
 with: claude (T3 sub-agent of thread b48e4ca8, Sonnet 5.5)
-pr:
+pr: 2188
 mods: kitchen, kingdoms
 versions:
 started: 2026-11-25
 owns:
-  - kitchen/src/main/java/com/jaymoskitchen/corpse/CorpseEntity.java (additive: the harness read/write beside putGear, openLoot, hasGear)
-  - kitchen/src/main/java/com/jaymoskitchen/corpse/CorpseLoot.java, CorpseLootMenu.java (a mob body's harness section)
-  - kitchen/src/client/java/com/jaymoskitchen/client/corpse/CorpseLootScreen.java (the section drawn)
-  - kitchen lang for the section's title
-  - kingdoms/src/main/java/com/jaymoskingdoms/HeraldryWear.java, GuardKit.java, McaBridge.java (additive only: everyday harness for humanoid NPCs; these files are also in the in-review mordhau-3-body / mordhau-4-legs notes' owns lists)
+  - kitchen/src/main/java/com/jaymoskitchen/corpse/CorpseHarness.java (new), CorpseEntity.java (additive: the harness read/write beside putGear, openLoot, hasGear), CorpseLoot.java, CorpseLootMenu.java
+  - kitchen/src/client/java/com/jaymoskitchen/client/corpse/CorpseLootScreen.java, kitchen lang part corpse_harness.json
+  - kingdoms/src/main/java/com/jaymoskingdoms/Everyday.java (new), HeraldryWear.java (two additive call sites)
+  - kingdoms/src/main/java/com/jaymoskingdoms/DownedHarnessMenu.java (new), client/DownedHarnessScreen.java (new), Harness.java (menu type, taken tag, dress gate), Downed.java (the "harness" body-menu row), GuardKit.java (two skip lines), HeraldryWear.java (one gate), HeraldryClient.java (screen registration), lang parts body_menu.json + harness-downed.json
+  - E:/Jaymo Vault Live/Lore.md (one (new) paragraph: What ordinary people wear)
   - changes/kitchen/codex-downed-harness-loot.md, changes/kingdoms/codex-downed-harness-loot.md
 ---
 # Harness section on the loot screen of a fallen NPC, and harness as everyday dress
@@ -29,8 +29,7 @@ owns:
   ordinary clothing in the under-layer places (padding, hose, hood, cloak) by role and means, not plate for everyone, and never the player's gear.
 
 ## Plan
-- Base: draft #2187 (claude/mordhau-4-legs, which carries #2185). Neither is merged, so this PR stacks on them (the HOSE slot is the 13th place).
-  Retarget to master once they merge.
+- Base: master. #2185 and #2187 merged 2026-11-26 00:32-00:33 while this was being written; the branch was rebased onto master.
 - Kitchen reads the dead mob's harness out of its look (`jaymoskingdoms:harness`, found by name wherever Fabric nests the attachment) and
   edits the look in place, as `putGear` does for `equipment`. One source of truth: a rise as a zombie, a reload or a second viewer all see the same.
 
