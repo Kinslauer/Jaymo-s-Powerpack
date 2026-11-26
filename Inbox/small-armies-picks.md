@@ -26,3 +26,4 @@ Not picked: clay soldiers, Clay Warfare colours/buffs/remote/book.
 - 2026-11-26 15:47 YOUTH delegated this to apollo (Claude approved): build Andy's 4 picks from scratch; the sources are All Rights Reserved, so copy no code or art
 - 2026-11-26 16:39 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-26 16:40 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-26 16:45 2026-11-26 16:45 apollo: worktree created at E:/wt/small-armies-picks-2 (branch claude/small-armies-picks-2). Ready to start coding: plan doc first, then the 4 picks (tentacles, host possession, divine powers, celestial control). Picking up next run.
