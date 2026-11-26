@@ -17836,3 +17836,127 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 
 - The **Engineer's Hammer** icon is now Shade's CC0 16x16 steel hammer, used as it is (`tools/open_art/apply.py`, credits in `docs/Vanilla-Style.md`).
 - Built; not played.
+
+## 0.13.36 (2026-11-26): wide flat plains and bigger biomes (open country) (#2221)
+
+- **Open country** (Andy: "large flat plains, it would foster better roads and horse/carriage travel"): broad regions inland on the home continents, about two fifths of the land away from the coast, lie level: the erosion is held in the game's flat lowland band, the ground's squash factor is raised so its 3D noise no longer heaps it into knolls, and the land is a little drier, so grassland wins over woods. Rivers still cross it. The idea is Tectonic's (MIT, by Apollo: biome erosion pinned flat across whole regions, wider ridge noise); none of its code or files are used, and its caves, aquifers, continents and climate stay out, so caves and the heat map are as they were.
+- **Bigger biomes**: the ridge (weirdness) noise on the home continents is twice as wide, so biome variants (sunflower plains, flower forest, ice spikes ...) come in patches about 1.7x larger, and rivers are fewer and wider (the same share of the land). The local temperature and wetness variety is twice as wide too; the heat map's latitude bands are unchanged.
+- Mohknee and its sea are untouched (sampled heights and biomes identical), so Alex's Caves' placement under it is too.
+- Measured on a vanilla 26.3 server with the terrain data (seed 20261126, 12 km square round spawn, a sample every 48 blocks): flat land (2 blocks of rise or less over 16) 17% -> 41%, level land 44% -> 66%, biggest level stretches 0.2 -> 3.7 km2, biome patches 1307 -> 761. New chunks only. `tools/gen_continents.py` (OPEN_*, FLAT*, LOCAL_SCALE) and `tools/gen_mohknee.py` (RIDGE_SCALE). Not played in the full pack.
+
+## 0.13.37 (2026-11-26): Join hush - chat, toasts and advancements wait till you're in the world (#2224)
+
+- **No more pile of advancements before you spawn**: from the moment a player connects until they can see the world (their client has loaded in, and the story, MCA's creator, the start's loading screen and the short reveal after it are done), chat, system lines, advancement toasts and updates, and new-recipe toasts are held back. Once they're in, everything reaches them in the order it was sent. Action-bar lines sent meanwhile are dropped, since they'd be stale. The same hold applies whenever a story puts the loading screen back up later (a new life after Reincarnate, a far journey).
+- **"X has made the advancement" waits too**: an advancement earned while hidden is announced to everyone once the earner is in, not while they're still loading. If they leave before that, it's announced when they go.
+- Only those packets wait: the world, entities and the loading screen's own packets go through as before. Plain system lines are capped at 200 per hidden player (oldest dropped); signed chat and advancement updates are always kept.
+- `JoinHush` (gate: `StoryGround.unseen` plus vanilla's client-loaded flag at join), `JoinHushSendMixin` (ServerCommonPacketListenerImpl.send), `JoinHushAwardMixin` (PlayerAdvancements.award), `JoinHushBroadcastMixin` (PlayerList.broadcastSystemMessage).
+- Built; not played. Mixin targets checked with javap against the 26.3 jar.
+
+## 0.13.38 (2026-11-26): Couched Lance only where the lance reaches; Riders start with a spear (#2226)
+
+- The Couched Lance spear form now works only from a mount the lance reaches down from (horse, pig, goat, llama...), not anything over 2 blocks tall or a camel, elephant, mammoth, dragon or wyvern: the same rule as Powers' couched lance (`SpearForms.mounted`). Skill and perk text no longer say any mount.
+- The Rider class starts with an iron spear instead of an iron lance (`Classes`).
+- Built; not played.
+
+## 0.13.39 (2026-11-26): Dragonforge mechanics for our dragons (parts, bite, dive slam, sprint flight, tremor, horn, home patrols, realm wyverns) (#2227)
+
+- **Part hitboxes**: every grown dragon has a head, neck, two tail halves and (in flight) two wings you can aim at, past its body's box. The head takes 115% of a blow, neck 100%, wings 90%, tail 85% and 75%; a head hit rings. Riders and their arrows never hit their own dragon's parts (`DragonPart`, through the Nehemoth's part mixins).
+- **Fair blasts on huge mobs**: an explosion measures to the nearest edge of any mob 2+ blocks wide instead of its feet (`BigBlastMixin`).
+- **Breaths**: fire breath melts snow, powder snow and ice and lights unlit campfires; Eurus's and Aeolus's bolts fuse sand to glass where they strike; Stegonaut now breathes a stone tremor (`DragonTremor`): a 9-block cone along the ground that knocks back, weakens and (with griefing) shatters glass and leaves and cracks stone, cobble and dirt. Ridden, hold R past its slam to tremor.
+- **Riding**: G bites the nearest thing at its jaws (x1.25 bite damage, every 1.2 s); a ridden flier that dives 6+ blocks fast and hits the ground does a dive slam (`DragonSlam`) by its element (fire, frost, storm light, acid poison, stone toss), every 5 s; holding sprint while flying forward is 60% more thrust and 45% more top speed at 5 stamina a second. The HUD label shows [R] Breath, [G] Bite and Dive slam, dimmed while cooling. Wing tips leave a thin trail at speed.
+- **Tamed care**: sneak-use with empty hands now cycles follow, sit, wander here. A wandering dragon strolls about that spot, flies a patrol round it every 2-5 minutes, takes on monsters within 32 blocks and lands back home. Blowing a goat horn calls your tamed dragons within 128 blocks to you (flying if they can). Tamed grown dragons get +25% max health.
+- **Realm wyverns**: about one kingdom in six keeps a wyvern at its seat that belongs to the realm (tamed, no owner) and keeps it like a wandering tamed dragon; one slain is replaced after 3 days (`RealmDragons`).
+- Sounds (bite, bond, horn, four roars, tremor) and the rubble particle frames are Dragonforge's (RochStudio), used with Andy's permission (`licenses/dragonforge-NOTICE.txt`).
+- Compiled (main and client); not played.
+
+## 0.13.40 (2026-11-26): face parts - snouts, beaks, fangs and horns on the painted faces (#2228)
+
+- Andy: "some of the heritage looks have flat faces. nonhumans should get protruding features like biobuilts". The looks whose animal or monster faces were only painted on the skin now have real boxes on the head (client `FaceParts`, one table): muzzles and noses on the Beastfolk (first look), Canine, Feline and Kitsune; a beak on the Avian; fangs on the Arachnid; a snake snout with fangs on the Serpen; a lizard snout and brow on the Scalebound; swept-back horns on every Dragonblood (first look, Goldscale, Rimewyrm, Stormwyrm, Venomscale); a shark snout and toothed jaw on the Greyfin; a snout and toothed jaw on the Moray; lips on the Spinepuff; mandibles on the Shellclaw; a tube snout on the Weedfrond; a jaw on the Skeleton.
+- No new art: every box is cut from a texture the pack already ships (the looks' own parts sheets, the anglerfish jaw, and vanilla's chicken beak, spider, goat horn, dolphin and skeleton). `kingdoms/tools/face_parts_preview.py --check` proves every face lands on painted texels.
+- Players and villagers, in the character creator too; hidden under a helmet, hood, mask or costume, on the invisible and on a Bio-built form.
+- Not changed: looks that already had real parts (Stoneborn brow, Tideborn fins, the other sea looks, Verdant antennae, goblins and orcs, Divine halo, Bio-built forms) and the plain-faced bloods (Frostborn, Endborn, Deepborn, Emberborn, Rubber-folk, elves, Zombie, Wraith, Reaper).
+- Built (compileClientJava); not seen in game.
+
+## 0.13.41 (2026-11-26): Dragon keys no longer stop the game starting (#2232)
+
+- The game crashed on start ("Category 'jaymoskingdoms:dragons' is already registered"): the dragon breath and the new bite key each registered the Dragons key category. They now share one. `DragonsClient`.
+- Built by CI; not played.
+
+## 0.13.42 (2026-11-26): Reincarnate hint mentions the character page link (#2233)
+
+- Loading hint 110 now says you can choose to reincarnate yourself from the H menu's character page (Jaymo's Powers' new Reincarnate link).
+- Built; not played.
+
+## 0.13.43 (2026-11-26): Maggots come as a writhing heap that splats underfoot (#2234)
+
+- **Maggot heap**: a maggot at a body is now drawn as a heap of seven small maggots (`MaggotModel`), a couple lying over the others, each squirming on its own beat (heads lifting and swinging, tails flicking, bodies bunching and stretching, the heap slowly churning), instead of one big maggot. They crawl together when it moves. Its box is half a block across (was a quarter), so it's easier to tap for bait and to step on. A tap of use still takes the heap as one Maggots bait.
+- **Splat underfoot** (`wild/SpiderSquash`): a small bug (maggots, crickets, roaches, flies, snails and the rest of `squashable_bugs`) now splats when any part of a walker's foot comes down on it (`BUG_FOOT`), not only when the walker's middle passes over it. Monsters (zombies and the like) splat bugs underfoot too; spiders still spare their own. Spiders' squashing is unchanged.
+- Built; not played.
+
+## 0.13.44 (2026-11-26): Town crier: verdicts are cried by the seat, not sent to chat (#2236)
+
+- Andy: "messages like these shouldnt be displayed. maybe told by a crier in town near the jail." The court's verdicts no longer go to chat: "X sentences Y for theft: pardoned." (arrests), "X is caught by Y's guard and sentenced to Z." (a player bust, told to the others near), and the forest rangers' "brings X before Y for poaching" / "carries X off" / "cuts X loose" lines are gone.
+- **The town crier** (`TownCrier`): each realm's crier is its grown townsfolk nearest the seat (the cells are under it), never its ruler; they keep the post while they're about. Each verdict is queued for that realm's crier. While a player is within 20 blocks of them, they stop, ring a handbell, call "Hear ye!" in a gold speech bubble, then cry the news one piece at a time (who, for what, and the sentence). Nobody further away is told anything; news nobody comes by to hear is dropped after a day (at most 6 kept per realm). Names are as each listener knows them (someone they haven't been introduced to is "a villager", "an orc", "a goblin" or "a stranger"), and the crier speaks the realm's tongue like anyone else.
+- An arrest is cried once its sentence is carried out (not before the axe falls). A player bust is cried as it's sentenced. A ranger's poacher: the ranger now says aloud where they're taking them (or that there's no court near), and the court's crier cries the fine or the taking.
+- The caught player still gets their own sentence in chat, as before; only what was told to bystanders moved.
+- Built; not played.
+
+## 0.13.45 (2026-11-26): fire smoke settles low too, and makes you sick (#2235)
+
+- **A low bank under the tall smoke**: the tall plume and the high smog over a big fire stay as they were, so a fire still shows from far away. Under them a low layer now settles as well: extra plume puffs that rise only about a third as high and spread out sideways as they settle, and a bank of smog 7 to 11 blocks over the flames that spreads as wide as the biggest blaze's high smog (18 blocks each way, 24 downwind), round every large flame. Each has its own particle budget (smaller in low-end mode).
+- **Smoke sickness** (`SmokeSickness`): anyone breathing that smoke (players, and villagers and other humanoids near a player) builds it up, faster nearer the middle and over a bigger blaze. After about 2.5 minutes of thick smoke the screen starts to swim (nausea, topped up while you stay in it). Out of the smoke your chest clears a little faster than it filled. Indoors the smoke is thinner (0.6x). Staying low helps indoors and out: crouched you breathe 0.75x, crawling, prone or lying 0.45x. It slows the sickness rather than stopping it (prone outdoors about 5.5 minutes, prone indoors about 9). No smoke under water; creative and spectator are left alone. No chat text.
+- `FireSmog` builds its list of large flames once a round and shares it with the sickness check; `FireSmoke` adds `settle` and the low bank, `StormParticle` gets `spread`.
+- Built; not played.
+
+## 0.13.46 (2026-11-26): Town crier: listeners who don't like the news shout, fight him or hire a blade (#2238)
+
+- Andy: "npcs that dont like what they are saying may attack or hire a hit on them". After the town crier cries a verdict, one townsperson standing by may take it badly (`CrierGrudges`): kin of the one sentenced (MCA's family tree) at a flogging, the cells, exile, death or a ranger's taking (more likely the harder the sentence), or a crabby or grumpy one at a pardon ("Mercy, he calls it. Soft, I call it."). Guards, the ruler and the sentenced themselves never do.
+- They shout at the crier in a red bubble. About a third of angry kin (a tenth of the sour ones) then walk up and punch him for up to 20 seconds. At the first blow he shouts for the watch, and a guard comes to arrest the attacker for assault (`Arrests.arrest`, new crime "assault"). The attacker stops once a guard has them, once they're badly hurt, or once the crier is down.
+- Or a kinsman hires a blade (35% after an exile, a death or a ranger's taking, 10% otherwise): a contract on the crier (`Assassins.onCrier`, target `crier:<uuid>`, motive "kin", outside the 3-contract cap). Townsfolk whisper that someone's asking after him. A day or two later, with a player within 40 blocks, the assassin comes, stabs and poisons him and fights on. The crier cries out in a bubble (no chat). Cut the assassin down and he drops the sealed contract ("Signed with a family's mark") and his fee. If the crier dies, the next nearest townsperson takes the post.
+- Built; not played.
+
+## 0.13.47 (2026-11-26): Allays and the Sylvan: freeing caged allays, haven allays, a Sylvan's fall caught (#2240)
+
+- **Caged allays** (`Allays`): the allays caged in vanilla pillager outposts and woodland mansions (tagged when they load, if they're shut in), in illager camps' cages (`IllagerCamps`, now tagged) and the sites' boxes (`IllagerSites`). An allay is freed when its cage is opened so it can fly out (a flood fill of open cells round it, open doors and gates included); the nearest player within 16 blocks is its freer. Only an allay once seen shut in can be freed, so a cage that never held pays nothing.
+- **Freeing one**: +15 reputation with every Sylvan and mixed haven, and a Sylvan villager close by thanks you in a speech bubble. After 3 you're an allay-friend: Sylvan haven gates let you in (`HavenGates.admitted`). A Sylvan freer is liked at once, without handing it anything. One nobody has bonded within a minute flies off to the nearest Sylvan haven that isn't dark and lives there.
+- **Haven allays**: every Sylvan (and mixed) haven keeps 2 allays, plus one for each freed allay that flew to it, at most 6; they arrive while a player is within 72 blocks. They carry loose items lying in the haven (after a minute on the ground, never what a player dropped) to its storage, and at night hum round its giant glowcaps. While a haven keeps them its glow rots half as fast when it's left (`GlowWoodHavens.rot`); dark for half a season, they leave. Only a Sylvan or an allay-friend can bond with one (others get "The allay shies away from you").
+- **A Sylvan's allay** catches them: fall damage is halved while an allay that likes them is within 10 blocks.
+- Lore: "The caged singers" (approved by Andy 2026-11-26).
+- Built; not played.
+
+## 0.13.48 (2026-11-26): Dragon nests and dragon domains (Dragonforge picks, part 2) (#2241)
+
+- **Nests**: a wild grown dragon lays a nest once, where it first settles (a flier on its perch; a walker at home, one nest to a herd). The nest is a floor and broken rim in its breath's colours: fire is blackstone and basalt with a little magma, frost is packed ice and snow with some blue ice, storm is sand half fused to glass, and stone and acid get a moss-grown pit. The rim has bone blocks in it, and a chest of bones, hides and gold sits at the rim (`chests/dragon_nest`, never eggs). Nests need mobGriefing and are never laid within 24 blocks of a realm. Wyverns keep their own crag nests (`DragonNests`).
+- **Dragon domains** (`DragonDomains`): four rare landmarks built from vanilla blocks inside existing biomes:
+  - a burnt-out basalt cone with a lava crater and smoking vents in the badlands (Notus);
+  - a broken packed-ice keep with blue-ice towers on the frozen peaks (Boreas);
+  - a ring of shattered pillars with a lightning rod and glass-fused ground on the windswept hills (Eurus);
+  - mossy stone arches over jungles and plains (Stegonaut).
+- Once a dragon has fallen in the world, a domain's dragon comes to it when a player is within 96 blocks and keeps it as home. One slain is replaced after 5 days. Domains are saved on the Overworld as they generate.
+- Lore: "Dragon nests", "Dragon domains" and "Realm wyverns" are in Lore.md (Andy approved, 2026-11-26).
+- Compiled (main and client); not played; worldgen not seen in a world.
+
+## 0.13.49 (2026-11-26): fire alarm runs through town, everyone fights fires, twisters send people running, no stray Templar plate (#2239)
+
+- **Fire spotted and cried**: anyone in a settlement (villagers, MCA's too, our folk, a mine's diggers) who sees a watched fire within 32 blocks, or smells its smoke within 8 through any wall, cries "Fire!" ("Fire in the mine!" under stone). A sleeper who smells it wakes. (`FireAlarm`)
+- **The word is passed on**: everyone within 20 blocks of a cry hears it, wakes if asleep, and cries it on a moment later, so it runs house to house. The settlement's bell rings while it burns (sound only, so vanilla villagers don't hide) and everyone near the bell hears it. Golems come too.
+- **Everyone turns out**: all grown townsfolk with the word head for the fire from anywhere in town. Andy's old "only the brave and guards fight" is replaced: now everyone fights it except the timid and a few others, who take a child away when one is near. Children still run. Anyone running from a monster or a twister leaves the fire to the rest.
+- **Bucket lines**: with 4 or more at one fire and open water or a filled cauldron within 24 blocks, all but the front two stand in a line to the water. Each bucket goes hand to hand and the front one throws it on. The line calls out now and then. When the fire's out someone says so.
+- **Tornadoes**: townsfolk within 110/150 blocks now take real cover (home if it's not toward the funnel, else 30 blocks away) and stay there 30 s, even if they were already running from something else. Our own folk run too. Someone cries "Twister!" every few seconds. **Dust devils**, which frightened nobody before, now scatter anyone within 10 blocks.
+- **Templar plate on a civilian (bug)**: MCA dresses any villager who is panicking or fighting, and our hook gave every such villager in a Truth or Crowned Sun realm the guards' Templar plate, which then never came off. Now only guards, archers and gunners get the settlement's issue (`FrontierWear.issue`), and the sweep takes Templar off a non-guard unless they carry it in their own pack.
+- **Templar plate is for melee guards** (Andy): archers never get it (they stay in their mail and leather), gunners may wear only the Templar tassets and sabatons (never the surcoat, which is its cape, nor the great helm). `GuardKit` no longer offers Templar to archers and offers gunners the legs and boots; a kit made before this with a piece its wearer may not wear is made again; `FrontierWear.plateFit` takes such pieces off.
+- Classes: FireAlarm (new), Firefighting, Frights.takeCover, disasters/Tornadoes, FrontierWear, GuardKit, WarAlert.findBell; lang part fire-alarm.json.
+- Built; not played.
+
+## 0.13.50 (2026-11-26): Realm dragons and their dragon tamers (#2242)
+
+- A kingdom that keeps a dragon (about 1 in 6) now keeps one matched to the land under its seat: Notus in hot lands and badlands, Boreas in the cold, Zephyrus in swamps, Stegonaut in jungles, and a wyvern anywhere else. It is named "Dragon of <realm>". Andy: these are the one exception to dragons staying out of the Overworld until one has fallen.
+- Each realm dragon has a **Dragon Tamer**: an MCA villager with the new `dragon_tamer` job, posted within 24 blocks of the seat. If the tamer is lost while the dragon lives, a new one comes. The dragon takes on whoever hurts its tamer.
+- A realm dragon's breath never hurts villagers and never burns or breaks blocks unless someone is riding it.
+- Realm wyverns that already exist stay as they are and get a tamer.
+- Compiled (main and client); not played.
+
+## 0.13.51 (2026-11-26): Youth's ears unpack the voice model on the server (#2243)
+
+- **Youth's ears**: the speech model never unpacked on a server, so saying "youth" in voice chat never called the wisp. The log showed `bad zip entry vosk-model-small-en-us-0.15/am/`: the server's config folder is the relative path `./config`, and the zip-safety check compared each file's cleaned-up path against the temp folder's uncleaned one, so it refused the first entry. `YouthEars.unzip` now makes the temp folder's path absolute first.
+- Built; the path check was tested with the Deck's Java (jshell). Not played: hearing a voice call on the server still needs checking.

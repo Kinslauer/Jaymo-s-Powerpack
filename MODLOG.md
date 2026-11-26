@@ -8506,3 +8506,57 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - The **Gravity Machine** (every face, off and running), the **Fuel Works**' sides and top and the **Landing Beacon**'s base now use Militech's machine casings (LutherDev, MIT); the far worlds' **moon, Glacia and Verdant rock** use the CC0 16x16 Block Texture Set's stone, glacier ice and serpentine. Other artists' pixels as they are, no repaint (`tools/open_art/apply.py`, credits in `docs/Vanilla-Style.md`).
 - **Pods by who flies them** (Andy's pick): your **Space Pod**'s icon is now a ship from Master484's CC0 16x16 Ship Collection, and on the pod's flight screen a **raider's pod** is a red fighter and a **derelict** an old pod, each its own ship instead of the same tinted picture (`PodFlightScreen`). Galactic Patrol pods never show on the flight screen, so they have no ship yet; each pod type's matching model comes later.
 - Built; not played.
+
+## 0.27.85 (2026-11-26): Rivers through low ground run in gentle valleys; gorges only in high ground (#2198)
+
+- **Ravine-river hybrids gone from the lowlands** (Dynamic Waters port): its rivers cut a gorge (sheer stepped rock walls with the river at the foot) wherever the ground stood over Y 76, a height set for vanilla's sea at 63. Our higher sea and lifted land put that only 5 blocks over the water, so nearly every river through plains became a ravine. Its fixed heights (gorge start, wide valley banks, cave sealing, river biome) now follow the world's sea level, so a gorge starts 13 blocks over the water, in hills and high ground, as Dynamic Waters meant.
+- **Gentle banks**: a lowland river's banks climb at most one block for every two out from the water, so plains slope down to a river instead of breaking off in a cut. Mountain streams crossing low ground get the same gentle banks. High ground still makes a real gorge.
+- **Streams no longer fall into caves**: Dynamic Waters plans its mountain streams from the ground's height, and over a cave entrance it read the cave's floor (a meadow at Y 77 read as Y 20-40). Streams were routed into those holes and cut down to them as sheer stone slots with dripstone and lava at the bottom. Its ground reading now ignores caves.
+- **No more bare stone rims round streams and pools**: William Wyther's Overhauled Overworld's stony cliffs feature (`wythers:stony_cliffs`) turned the grass of every steep slope to bare stone, and the few blocks a river or pool bank stands over its water read to it as a cliff. Banks within 5 blocks of river or lake water and no more than 8 over it now keep their grass; real gorges, mountain cliffs and sea coasts keep their stone (`BankGuard`).
+- **River test command** for operators: `/dynamicwaters watch <x> <z> <radius>` notes every carving step for the columns in that box as their chunks generate; `/dynamicwaters watch report` lists the bare-rock banks there and the step that made each, `/dynamicwaters column` shows the column you stand on, `/dynamicwaters watch off` stops it.
+- `HydrologyManager` (`aboveSea`, `BANK_GENTLE_RUN`), `NoiseChunkGeneratorMixin`, `MultiNoiseBiomeSourceMixin`, `WiredRouter.withoutCaves`; listed in `ports/dynamicwaters/PORT.md`.
+- Built; not played. World gen: only new chunks change, so a fresh world is needed to see it.
+
+## 0.27.86 (2026-11-26): world gen no longer freezes on Enderscape's "not in a structure" check (#2219)
+
+- **New worlds froze on "Saving world" / before spawn** (Deck, twice in 25 minutes): Lithostitched's `lithostitched:in_structure` check, which Enderscape's End features use so they don't grow inside an End city (void lakes, celestial chanterelles, magnia arches and towers, mirestone pillars, veiled trees), asked the live world for nearby chunks from inside world gen. When every C2ME worker was waiting on such a chunk, and the server thread was waiting on the workers, nothing moved again. One Dimension runs those features in every stacked chunk with the Beneath under it, so it hit while the first chunks were made; the End and the server could freeze the same way.
+- During world gen the check now reads only the chunks the generator already holds (the chunk being decorated, the ring around it, and the structure starts eight chunks out), which never waits. Same answer for every structure that starts that close, so End cities still keep Enderscape's features out; it also counts every nearby chunk's structures, where Lithostitched's kept only the last one's. Outside world gen Lithostitched works as before. Enderscape's End content is unchanged. `InStructureRegionMixin`, `WorldGenRegionStepAccessor`.
+- Tested on a cloud copy of the Deck server (same mods, One Dimension with the Beneath, C2ME 3 workers, seed 12345): without this, forcing three far-off 16x16-chunk areas froze it (all three workers stuck in the check, the server stopped answering); with it, the same world loaded five such areas and kept answering. One run each, since the freeze is down to timing. Not played in single player.
+
+## 0.27.87 (2026-11-26): lance couching from the saddle (#2226)
+
+- **Couch the lance**: right-click with an Armory lance while riding and it is couched for 1.5 s, like Kingdoms' Couched Lance form (no form needed). The first foe it meets is hit for your attack x0.6 up to x4 by the mount's speed, thrown back, and knocked out of its saddle (it and anyone riding it get Slowness). 3 s wait between couches; a hit wears the lance 1.
+- **Only where the lance reaches**: horses, donkeys, mules, pigs, goats, llamas and the like. Not from anything taller than 2 blocks (camels, moas) or any camel, elephant, mammoth, dragon or wyvern; a rider up there is told the lance can't reach. The lance's faster-you-ride swing bonus follows the same rule, and doesn't stack onto a couched blow.
+- On foot, right-click still raises the guard; mounted, it couches instead.
+- New `armory/LanceCouch` (`horseback`, `MAX_MOUNT_HEIGHT`); `Armory.charge` checks it. No couch pose: the rider's arm isn't redrawn.
+- Built; not played.
+
+## 0.27.88 (2026-11-26): cannon loading tip cards (#2229)
+
+- Andy: "how do you load a cannon? there should be a popup with a tutorial". New `client.hud.GunTips`: the first time the crosshair finds a Ship's Cannon (block) or a Field Mortar (entity), or one is in your main hand, a tip card in the top right says how to load and fire it. Ship's Cannon: use with gunpowder, then shot (any of the seven kinds), then flint and steel or a fire charge; look up or down to lay it; attack at the helm fires a broadside; a chest, barrel or hopper behind the breech plus a redstone pulse loads and fires it. Field Mortar: use with a Mortar Shell, then use again to fire. Once per player each (`gun_tip.<uuid>.<part>` in the client config), waits for any card already up, off with /tips off. Text in `lang/parts/gun_tips.json`.
+- The Ship's Cannon's wrong-order lines (gunpowder first, now shot, loaded, not loaded) are now in `hint_keys.txt`, so they show as tip cards instead of over the hotbar.
+- Built; not played.
+
+## 0.27.89 (2026-11-26): /texturelook vanilla|reason - switch the pack's retexture packs off and back on (#2230)
+
+- **`/texturelook vanilla`** (client command): switches off every resource pack the pack uses to change how vanilla and other mods look: the Reason look, 3D items and mushrooms, bushy leaves and grass edges, and the downloaded Pixel Perfection Fidelity, Medieval Items, Framed Glass Panes, Red Bricks, Medieval Tactical Shield, Re-covered books, Fancy Crops, 3D ladders and doors, Fabulous Fences, Armored Legacy, Canoe boats and Better Horses. The choice is kept (config/jaymospowers-vanilla-look), so launches and updates don't switch them back on or download them.
+- **`/texturelook reason`** switches them all back on in their usual pack order (Pixel Perfection Fidelity at the bottom, Medieval Items just above it), downloading any that are missing. `/texturelook` alone says which look you're on.
+- Stays on either way: our mods' own art for their new items, blocks and mobs, the 3D guns, Klei_Wright's tundra art, the fixes packs, music, the medieval MCA villagers, Tissou's future zombies, Tiered Shields' textures and the Fresh Animations packs (motion, not textures).
+- Classes: TextureLook (new), PackResourcePacks (skips those packs while the vanilla look is picked), JaymosPowersClient.
+- Built; not played.
+
+## 0.27.90 (2026-11-26): Dyed and grey sheep no longer sprout stray boxes (#2231)
+
+- **Sheep undercoat** (`SheepUndercoatMixin`): the game draws a dyed sheep's undercoat (the coat in its wool colour that shows once it's sheared) under the wool as well. Fresh Animations reshapes the sheep and its wool but has no undercoat model, so the undercoat stayed vanilla's shape in vanilla's place and poked out of grey, black and dyed sheep as flat boxes; Pixel Perfection Fidelity's solid undercoat made them plain to see. It's no longer drawn under wool (it's never seen there), and on a sheared sheep only when the undercoat's shape matches the sheep's. With Fresh Animations on, a sheared dyed sheep shows its bare skin, as sheared sheep did before the undercoat came in.
+- White sheep were never affected. Built; not played.
+
+## 0.27.91 (2026-11-26): Reincarnate link on the character page (#2233)
+
+- **Reincarnate by choice**: the H menu's character page has a Reincarnate link on its Record panel (with Jaymo's Kingdoms). It asks once more ("Reincarnate?", the yes button greyed for 2 s), then ends the character as a final death does: black at once, moved to the world's spawn, everything wiped (`Mortality.endLife`), and the life story told anew with MCA's creator first.
+- Hidden or refused ("You can't reincarnate right now.") while downed, carried, left for dead, in Limbo or the Other World, held for revival, just woken, or still making a character.
+- `Reincarnate` (payload `jaymospowers:reincarnate`, `Reincarnate.can`), `Mortality.chooseToEnd`, `ZFighterAfterlife.storyAhead`, client `ReincarnateLink`.
+- Built; not played.
+
+## 0.27.92 (2026-11-26): Friends' zip installs Fabric API 0.165.2 (#2237)
+
+- The friends' CurseForge zip still had CurseForge download Fabric API 0.164.0 after the pack moved to 0.165.2 for Psithurism, so a fresh import would not start ("Psithurism requires 0.165.0 or later of Fabric API", Jamuu, 2026-11-26). Its CurseForge file id now points at 0.165.2 (9417647).

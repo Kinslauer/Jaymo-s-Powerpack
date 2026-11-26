@@ -266,7 +266,8 @@ public final class YouthEars {
 
 	/** Unpacks the model zip into {@code into}, dropping the zip's own top folder. */
 	private static void unzip(Path zip, Path into) throws IOException {
-		Path tmp = into.resolveSibling("model.part");
+		// absolute, so it matches the normalized entry paths below (the server's config dir is "./config")
+		Path tmp = into.resolveSibling("model.part").toAbsolutePath().normalize();
 		if (Files.exists(tmp)) {
 			try (var walk = Files.walk(tmp)) {
 				walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> p.toFile().delete());

@@ -383,6 +383,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		FrostTechLayer.register();
 		// (0.7.486) the sea-blooded Tideborn's parts (players and villagers)
 		SeaParts.register();
+		// snouts, beaks, fangs and horns on the looks whose faces were only painted (players and villagers)
+		FaceParts.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		GreenskinLooks.register();
 		// (0.7.616, Rivals patch 1) the marks captains carry back

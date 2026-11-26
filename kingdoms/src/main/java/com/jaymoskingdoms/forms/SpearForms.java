@@ -21,6 +21,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -50,7 +51,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>Spear Lunge: a long lunge (longer than the rapier's) that runs the first foe in the way through, and goes on into a
  * second one behind it.
- * <li>Couched Lance: only while you control a mount (a horse, a Cavalry mount, a pig, a camel...). The lance is couched for
+ * <li>Couched Lance: only from a mount the lance reaches down from (a horse, a Cavalry mount, a pig, a goat, a llama; never
+ * a camel, an elephant or a dragon; the same rule as Powers' lance, {@code LanceCouch.horseback}). The lance is couched for
  * {@value #COUCH_TICKS} ticks; the first foe it meets is hit for damage that grows with how fast the mount is going, and a
  * foe in the saddle is knocked out of it. Riders hit harder ({@link #RIDER_BONUS}). Kingdoms' mounted guards that carry a spear
  * charge too ({@link #charge}, called from {@code Cavalry}).
@@ -196,9 +198,28 @@ public final class SpearForms {
 		}
 	}
 
-	/** Whether {@code player} controls a mount (the saddle of a horse, a Cavalry mount, a pig, a camel...): what Couched Lance needs. */
+	/** The tallest mount a lance still reaches down from (blocks; a horse is 1.6, a llama 1.87, a camel 2.375). */
+	static final float MAX_MOUNT_HEIGHT = 2.0F;
+	/** Mounts the lance never reaches down from whatever their size, by words in their entity ids. */
+	private static final String[] TOO_HIGH = {"camel", "elephant", "mammoth", "dragon", "wyvern"};
+
+	/**
+	 * Whether {@code player} sits up front on a mount the lance reaches down from (a horse, a Cavalry mount, a pig, a
+	 * goat, a llama...; not anything taller than {@link #MAX_MOUNT_HEIGHT}, a camel, an elephant or a dragon): what Couched
+	 * Lance needs. The same rule as Powers' lance ({@code LanceCouch.horseback}).
+	 */
 	static boolean mounted(ServerPlayer player) {
-		return player.getVehicle() instanceof LivingEntity mount && mount.getControllingPassenger() == player;
+		if (!(player.getVehicle() instanceof LivingEntity mount) || mount.getBbHeight() > MAX_MOUNT_HEIGHT
+			|| mount.getControllingPassenger() != player && mount.getFirstPassenger() != player) {
+			return false;
+		}
+		String id = BuiltInRegistries.ENTITY_TYPE.getKey(mount.getType()).getPath();
+		for (String word : TOO_HIGH) {
+			if (id.contains(word)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** Whether a Pinning Throw is holding a foe for {@code player} (their hand is empty of the spear until it is tugged back). */

@@ -137,6 +137,13 @@ https://claude.ai/artifact/DJgp8W4XAaLJPyuTMVxBED). The game fetches each one fr
 | Red Bricks 1.0.5 | Lobster Project | MIT | on top |
 | Medieval Tactical Shield 1.1 | its Modrinth author (project pwDKTTxF) | MIT | on top |
 
+**Back to vanilla** (Andy, 2026-11-26): `/texturelook vanilla` (client, `client/TextureLook`) switches off the Reason
+look, `held_3d`, `living_world` and every downloaded retexture or model pack (the five above plus Re-covered, Fancy
+Crops, 3D ladders and doors, Fabulous Fences, Armored Legacy, Canoe boats, Better Horses) and keeps them off across
+launches; `/texturelook reason` puts them back. A new retexture pack of vanilla or another mod goes into
+`TextureLook.FILE_PACKS` (or `BUILT_IN`) too. Our mods' own textures, the medieval MCA villagers, Tissou's zombies,
+KSPACK, music and Fresh Animations stay on.
+
 Don't copy pixels from Pixel Perfection Fidelity into our own textures: share-alike would then cover them. New art for our
 own items goes to an art agent, starting from the CC0 and MIT sources Andy picked (OpenGameArt weapon, RPG item, block
 and ship sets; Computercraft Greentech, CC Industrialized, Militech, Wares Recalibration, Vanilla Military, Starlight 16x).

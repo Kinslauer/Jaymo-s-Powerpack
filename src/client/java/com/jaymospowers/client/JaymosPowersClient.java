@@ -75,6 +75,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.bodymenu.BodyMenuClient.init();
 		// (Andy, 2026-11-20) first-time cards for the body menu, executions, the lasso, being downed and the wall sit
 		com.jaymospowers.client.hud.BodyTips.init();
+		// (Andy, 2026-11-26) first-time cards for loading the Ship's Cannon and the Field Mortar
+		com.jaymospowers.client.hud.GunTips.init();
 		// biome name, use bar, chat mentions and Shift+T item sharing (client/bits)
 		com.jaymospowers.client.bits.BiomeTitle.init();
 		com.jaymospowers.client.bits.UseBar.init();
@@ -189,6 +191,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(PackResourcePacks::enableOnce);
 		// (0.17.56) shaders off and Fast graphics on weak PCs, once per install; /lowend on|off
 		LowEndMode.init();
+		// /texturelook vanilla|reason: the pack's retexture packs off for vanilla's own look, or back on
+		TextureLook.init();
 		com.jaymospowers.client.packlook.DarkPanels.init();
 		// (0.15.124) Iris (with a shader pack on) first asks for the enchantment glint textures while a render pass is
 		// open, and loading them then crashes the game ("Close the existing render pass"). Load them up front instead.
@@ -307,6 +311,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.wounds.DownedHud.init();
 		com.jaymospowers.client.wounds.BlackoutHush.init();
 		com.jaymospowers.client.wounds.LimboHud.init();
+		com.jaymospowers.client.wounds.ReincarnateLink.init();
 		com.jaymospowers.client.wounds.RevivalClient.init();
 		com.jaymospowers.client.wounds.OutOfBodyClient.init();
 		com.jaymospowers.client.wounds.MedicineHud.init();

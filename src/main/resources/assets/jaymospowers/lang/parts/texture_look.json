@@ -1,0 +1,6 @@
+{
+	"message.jaymospowers.texture_look.vanilla": "Vanilla look: the pack's retexture packs are off. Our own items, blocks and mobs keep their art. /texturelook reason switches them back on.",
+	"message.jaymospowers.texture_look.reason": "Reason look: the pack's retexture packs are back on (any that are missing download in the background).",
+	"message.jaymospowers.texture_look.is_vanilla": "You're on the vanilla look. /texturelook reason for the pack's own look.",
+	"message.jaymospowers.texture_look.is_reason": "You're on the Reason look. /texturelook vanilla switches the pack's retexture packs off."
+}
