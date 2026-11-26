@@ -142,6 +142,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.oldage.OldAgeClient.register();
 		// (0.7.206) whaling: great whales, their carcasses, harpoons and their lines
 		com.jaymoskingdoms.client.whaling.GreatWhaleRenderer.register();
+		AnglerFloatRenderer.register();
 		MobAnimations.register();
 		PullerPose.register();
 		// 0.5.50: a pickpocket's arm in the pocket

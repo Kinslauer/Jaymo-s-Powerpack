@@ -236,6 +236,8 @@ final class Corsairs implements Ship.Captaincy {
 		if (now % 2 == 0) {
 			this.gunnery(level, ship, crew, foe, now);
 		}
+		// her stores: a day's food a day for each hand, hunger when it's gone (Provisions)
+		Provisions.tick(level, ship, crew, now);
 		this.deckwork(level, ship, crew, foe, now);
 		if (crew.side == Crew.Side.WHALER) {
 			Whalers.helm(level, ship, crew);
@@ -381,6 +383,14 @@ final class Corsairs implements Ship.Captaincy {
 			Ship admiral = Navies.admiral(level, crew.faction);
 			want = d < STATION_CLOSE && admiral != null ? admiral.getYRot() : Fleet.bearing(ship, station.x, station.z);
 			sail = d < STATION_CLOSE ? PATROL_SAIL * 0.8 : d < 40.0 ? PATROL_SAIL : CHASE_SAIL;
+		} else if (Provisions.heaveTo(ship, crew)) {
+			// her stores low (or a fish on a line over her side): she lies hove to while her hands fish (Provisions)
+			crew.mode = "fish";
+			crew.wantYaw = ship.getYRot();
+			crew.wantSail = 0.0;
+			crew.row = false;
+			crew.astern = false;
+			return;
 		} else {
 			crew.mode = "patrol";
 			double range = crew.side == Crew.Side.NAVY ? NAVY_PATROL : PATROL;
@@ -824,6 +834,10 @@ final class Corsairs implements Ship.Captaincy {
 		ServerPlayer boarder = boarder(level, ship, crew);
 		// (0.7.246) the downed aboard are got up: a hand runs to each
 		Crewmen.care(level, ship, crew, deck, aboard, foe != null);
+		if ((foe != null || boarder != null) && (now + ship.getId()) % 10 == 0) {
+			// a fight: lines in
+			Provisions.lines(ship);
+		}
 		RandomSource random = level.getRandom();
 		java.util.Set<UUID> here = new java.util.HashSet<>();
 		for (LivingEntity hand : aboard) {
@@ -882,6 +896,9 @@ final class Corsairs implements Ship.Captaincy {
 				if (hand instanceof net.minecraft.world.entity.Mob m && m.getTarget() == null) {
 					m.setTarget(boarder);
 				}
+			} else if (foe == null && boarder == null && !monkey && Provisions.fish(level, ship, crew, deck, hand, seat, walk, now)) {
+				// a hand fishing over her side for her stores (or going to her rail to)
+				continue;
 			} else {
 				// a hand: somewhere a few steps off that nobody else is standing at or making for
 				to = this.stroll(crew, deck, aboard, seat, random);

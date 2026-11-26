@@ -67,6 +67,8 @@ public final class Illagers {
 	static final double WARLORD_HEALTH = 200.0, WARLORD_DAMAGE = 6.0, WARLORD_ARMOR = 8.0, WARLORD_TOUGHNESS = 2.0, WARLORD_KNOCKBACK_RESIST = 0.6;
 	/** He keeps this near his seat (his boss bar's range is {@link BossBars#RANGE}). */
 	static final int WARLORD_HOME_RADIUS = 8;
+	/** How far an illager taken on by a camp ({@link #adopt}) keeps from where it was (a long ship's deck is small). */
+	static final int ADOPTED_HOME_RADIUS = 6;
 	/** His rally: at this share of his health, for this long (ticks); illagers this near him are called to his foe. */
 	static final float RALLY_AT = 0.4F;
 	static final int RALLY_TICKS = 20 * 60;
@@ -217,19 +219,56 @@ public final class Illagers {
 		return mob;
 	}
 
+	/**
+	 * An illager that belongs to no camp taken on by {@code camp} as one of its {@code role}s, keeping near {@code home}, as
+	 * though it had been {@link #spawn}ed there: a long ship's own crew, when the pillagers' camp moves in aboard her
+	 * ({@code IllagerSites}). A warlord gets the warlord's strength and title, but keeps his own gear (Moog's ship captain
+	 * his axe and his Jolly Roger); he's made the camp's leader by the caller.
+	 */
+	static void adopt(ServerLevel level, Faction camp, Mob mob, int role, BlockPos home) {
+		if (mob instanceof Raider raider) {
+			raider.setCanJoinRaid(false);
+			raider.setPatrolLeader(false);
+		}
+		mob.setPersistenceRequired();
+		mob.setCanPickUpLoot(false);
+		mob.setHomeTo(home, role == WARLORD ? WARLORD_HOME_RADIUS : ADOPTED_HOME_RADIUS);
+		mob.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(SIGHT + 4.0);
+		if (role == WARLORD) {
+			strengthen(mob);
+			mob.setCustomName(IllagerHolds.warlordTitle(camp, false));
+		}
+		mob.setAttached(TAG, new Tag(camp.id(), role, false, false));
+		LOADED.add(mob);
+		if (role != WARLORD) {
+			Factions.update(level.getServer(), camp.id(), f -> f.withHoldings(f.holdings().adjust(role, 1)));
+		}
+	}
+
+	/** The part an untagged illager plays in a camp, by what it is: a crossbowman, a caster, or an axeman. */
+	static int roleOf(Mob mob) {
+		return mob instanceof net.minecraft.world.entity.monster.illager.Pillager ? PILLAGER
+			: mob instanceof net.minecraft.world.entity.monster.illager.SpellcasterIllager ? EVOKER : VINDICATOR;
+	}
+
 	/** The warlord: a big vindicator with a diamond axe, the ominous banner on his head (it drops when he dies), a boss bar. */
 	private static void outfitWarlord(ServerLevel level, Mob mob, Faction camp) {
+		strengthen(mob);
+		mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
+		mob.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		mob.setItemSlot(EquipmentSlot.HEAD, Raid.getOminousBannerInstance(level.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
+		mob.setDropChance(EquipmentSlot.HEAD, LOAD_DROP);
+		mob.setCustomName(IllagerHolds.warlordTitle(camp, false));
+	}
+
+	/** A warlord's health, blows, armour and footing. */
+	private static void strengthen(Mob mob) {
 		mob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(WARLORD_HEALTH);
 		mob.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(WARLORD_DAMAGE);
 		mob.getAttribute(Attributes.ARMOR).setBaseValue(WARLORD_ARMOR);
 		mob.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(WARLORD_TOUGHNESS);
 		mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(WARLORD_KNOCKBACK_RESIST);
 		mob.setHealth(mob.getMaxHealth());
-		mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
-		mob.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
-		mob.setItemSlot(EquipmentSlot.HEAD, Raid.getOminousBannerInstance(level.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
-		mob.setDropChance(EquipmentSlot.HEAD, LOAD_DROP);
-		mob.setCustomName(IllagerHolds.warlordTitle(camp, false));
 	}
 
 	/** Seats a new warlord at {@code spot} and makes him the camp's leader. Returns the camp as stored. */

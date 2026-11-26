@@ -66,6 +66,11 @@ public final class Hull {
 	/** How deep it sits (blocks below the waterline, from its bottom), and whether it floats at all. */
 	public final float draft;
 	public final boolean floats;
+	/**
+	 * How much shallower she sits than her blocks alone would have her (0 for most): a boat the world made solid below her
+	 * deck, as Moog's are, keeps the lines she was laid on ({@link Ship#LINES}), as the hollow hull her blocks stand for would.
+	 */
+	private final float eased;
 	/** Its length at the waterline (blocks, along local z), its sails, and (0.7.18) its oars. */
 	public final int waterline, sails, oars;
 	/** Whether the cloth over her is balloon enough to carry her weight through the air. */
@@ -80,6 +85,11 @@ public final class Hull {
 	public final double radius;
 
 	Hull(List<Ship.Piece> pieces) {
+		this(pieces, Float.NaN);
+	}
+
+	/** Her blocks, sitting no deeper than {@code lines} (blocks from her bottom; NaN: as deep as her blocks have her). */
+	Hull(List<Ship.Piece> pieces, float lines) {
 		this.pieces = pieces;
 		this.index.defaultReturnValue(-1);
 		int n = pieces.size();
@@ -258,6 +268,12 @@ public final class Hull {
 			total += k;
 		}
 		this.floats = afloat && m <= total * MOST_LOAD;
+		float eased = 0.0F;
+		if (this.floats && !Float.isNaN(lines) && lines > 0.0F && lines < depth) {
+			eased = depth - lines;
+			depth = lines;
+		}
+		this.eased = eased;
 		this.draft = depth;
 		// its length where it meets the water
 		int line = Mth.clamp(Mth.floor(depth) + y0, y0, y1), zl = Integer.MAX_VALUE, zh = Integer.MIN_VALUE;
@@ -302,7 +318,7 @@ public final class Hull {
 			}
 			held += kept;
 		}
-		return !Float.isNaN(depth) && this.mass <= total * MOST_LOAD ? depth : Float.NaN;
+		return !Float.isNaN(depth) && this.mass <= total * MOST_LOAD ? Math.max(this.draft, depth - this.eased) : Float.NaN;
 	}
 
 	/**
