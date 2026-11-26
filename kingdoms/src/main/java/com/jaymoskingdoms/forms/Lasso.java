@@ -1101,7 +1101,7 @@ public final class Lasso {
 			if (lassoHand(holder) == null) {
 				// (swapped off it on the hotbar, or dropped it: the rope drops with it)
 				level.playSound(null, holder.getX(), holder.getY(), holder.getZ(), SoundEvents.LEAD_UNTIED, SoundSource.PLAYERS, 0.8F, 0.9F);
-				release(hold, Component.translatable("message.jaymoskingdoms.lasso.let_go", held.getDisplayName()));
+				release(hold, Component.translatable("message.jaymoskingdoms.lasso.dropped", held.getDisplayName()));
 				continue;
 			}
 			weigh(holder, hold.mode != Hold.TETHER);

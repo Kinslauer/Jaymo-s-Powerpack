@@ -41,6 +41,7 @@ message.jaymoskingdoms.hard.chains.no_pick
 message.jaymoskingdoms.hidden_blade.jams
 message.jaymoskingdoms.hunter.noquarry
 message.jaymoskingdoms.imbue.no_blade
+message.jaymoskingdoms.lasso.dropped
 message.jaymoskingdoms.lasso.roped
 message.jaymoskingdoms.lasso.you_hogtied
 message.jaymoskingdoms.loan.short
