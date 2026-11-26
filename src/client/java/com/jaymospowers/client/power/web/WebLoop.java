@@ -27,19 +27,31 @@ final class WebLoop {
 	static final double TAUT_MARGIN = 1.15;
 	/** The least speed (blocks/tick) a loop in progress ever has, and the most ticks one may take. */
 	static final double FLOOR = 0.35;
-	static final int MAX_TICKS = 140;
+	static final int MAX_TICKS = WebPose.LOOP_MAX_TICKS;
+	/** How much of a full circle round the anchor the loop covers (it starts below the anchor's level and ends below it). */
+	static final double ROUND_SHARE = 0.85;
 	/** The body counts as over the top once this far above the anchor (a share of the rope), and as down the far side this far below. */
 	static final double TOP_SHARE = 0.25, DOWN_SHARE = 0.1;
 	// ================================================================================================================
 
 	private boolean active, passedTop;
 	private int ticks;
+	/** Who plays the loop's pose, to end it with the loop. */
+	private @org.jspecify.annotations.Nullable WebTrickClient owner;
 
 	boolean active() {
 		return active;
 	}
 
 	void reset() {
+		if (active && owner != null) {
+			// the loop ended (came down the far side, was given up, or the rope went): so does its pose
+			LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+			if (player != null) {
+				owner.endLoop(player);
+			}
+		}
+		owner = null;
 		active = false;
 		passedTop = false;
 		ticks = 0;
@@ -76,8 +88,11 @@ final class WebLoop {
 				active = true;
 				passedTop = false;
 				ticks = 0;
-				tricks.sendMove(WebPose.LOOP_FLIP, player.getRandom().nextBoolean() ? 1 : -1);
-				tricks.busy(player, WebPose.ticks(WebPose.LOOP_FLIP));
+				// the pose lasts about as long as the trip round the anchor will (and is ended when the loop is)
+				int expected = (int)Math.max(WebPose.LOOP_MIN_TICKS, Math.min(MAX_TICKS, ROUND_SHARE * 2.0 * Math.PI * rope / Math.max(v.length(), FLOOR)));
+				owner = tricks;
+				tricks.sendMove(WebPose.LOOP_FLIP, expected);
+				tricks.busy(player, expected);
 				WebSwing.play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 0.8F);
 				WebSwing.play(player, SoundEvents.WIND_CHARGE_BURST.value(), 0.4F, 1.3F);
 			}

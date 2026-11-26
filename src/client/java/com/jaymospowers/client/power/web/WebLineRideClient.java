@@ -48,6 +48,8 @@ final class WebLineRideClient {
 	static final double FLING_MIN = 1.0, FLING_MAX = 3.0;
 	/** Jumping off: up, and along the line's way. */
 	static final double HOP_UP = 0.55, HOP_ALONG = 0.3;
+	/** The server's say-so should be here by then: asked again at the first, and let go of at the second (ticks into the ride). */
+	static final int RESEND_AT = 6, CONFIRM_BY = 14;
 	// ================================================================================================================
 
 	private WebBridges.@Nullable Span span;
@@ -102,9 +104,7 @@ final class WebLineRideClient {
 		boolean use = minecraft.options.keyUse.isDown() && minecraft.gui.screen() == null;
 		boolean usePressed = use && !useWas;
 		useWas = use;
-		boolean free = player.isAlive() && !player.isSpectator() && !player.isPassenger() && !player.getAbilities().flying && !player.isFallFlying()
-			&& !player.isInWater() && !player.isInLava() && !swing.attached() && swing.pull == null && swing.wingsTicks == 0
-			&& !WebSymbioteClient.driving() && !com.jaymospowers.power.web.WebPower.ragdolled(player);
+		boolean free = free(player, swing);
 		if (span == null) {
 			if (usePressed && input.shift() && free) {
 				start(player);
@@ -118,6 +118,15 @@ final class WebLineRideClient {
 			return;
 		}
 		ticks++;
+		// the server has to confirm the ride (the synced RIDE): ask once more, and if it still doesn't, don't float on without it
+		if (player.getAttached(WebLineRide.RIDE) == null) {
+			if (ticks == RESEND_AT) {
+				ClientPlayNetworking.send(new WebLineRide.Ride(mode, pointOnLine()));
+			} else if (ticks >= CONFIRM_BY) {
+				stop();
+				return;
+			}
+		}
 		boolean sneak = input.shift();
 		boolean sneakPressed = sneak && !sneakWas;
 		boolean sneakReleased = !sneak && sneakWas;
@@ -205,11 +214,37 @@ final class WebLineRideClient {
 		player.resetFallDistance();
 	}
 
+	private static boolean free(LocalPlayer player, WebSwing swing) {
+		return player.isAlive() && !player.isSpectator() && !player.isPassenger() && !player.getAbilities().flying && !player.isFallFlying()
+			&& !player.isInWater() && !player.isInLava() && !swing.attached() && swing.pull == null && swing.wingsTicks == 0
+			&& !WebSymbioteClient.driving() && !com.jaymospowers.power.web.WebPower.ragdolled(player);
+	}
+
+	/** Where on the line you are now (named to the server so it can check it). */
+	private Vec3 pointOnLine() {
+		double len = span.from().distanceTo(span.to());
+		return span.from().lerp(span.to(), len < 1.0E-6 ? 0.0 : Mth.clamp(t / len, 0.0, 1.0));
+	}
+
+	/**
+	 * The use press, before the held item gets it: Sneak and use on a line in reach starts the ride and the press is
+	 * taken (true); while riding, use is taken too, so the held item isn't used on the line.
+	 */
+	boolean takesUse(LocalPlayer player, WebSwing swing) {
+		if (span != null) {
+			return true;
+		}
+		if (player.input.keyPresses.shift() && free(player, swing)) {
+			return start(player);
+		}
+		return false;
+	}
+
 	/** The line aimed at (or the nearest to the crosshair, in reach), if any: you are on it now. */
-	private void start(LocalPlayer player) {
+	private boolean start(LocalPlayer player) {
 		List<WebBridges.Span> spans = player.level().getAttached(WebBridges.SPANS);
 		if (spans == null) {
-			return;
+			return false;
 		}
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
@@ -224,7 +259,7 @@ final class WebLineRideClient {
 			}
 		}
 		if (best == null) {
-			return;
+			return false;
 		}
 		span = best;
 		t = bestT;
@@ -239,15 +274,16 @@ final class WebLineRideClient {
 		ticks = 0;
 		leftWas = player.input.keyPresses.left();
 		rightWas = player.input.keyPresses.right();
-		ClientPlayNetworking.send(new WebLineRide.Ride(mode));
+		ClientPlayNetworking.send(new WebLineRide.Ride(mode, point));
 		WebSwing.play(player, SoundEvents.LEAD_TIED, 0.7F, 1.5F);
 		player.level().addParticle(ParticleTypes.ITEM_COBWEB, point.x, point.y, point.z, 0.0, 0.02, 0.0);
+		return true;
 	}
 
 	/** The line is let go of (fell off it, tapped Sneak, frayed away, or something else took you). */
 	private void stop() {
 		if (span != null && ClientPlayNetworking.canSend(WebLineRide.Ride.TYPE)) {
-			ClientPlayNetworking.send(new WebLineRide.Ride(0));
+			ClientPlayNetworking.send(new WebLineRide.Ride(0, Vec3.ZERO));
 		}
 		span = null;
 		mode = 0;
@@ -347,7 +383,9 @@ final class WebLineRideClient {
 		Vec3 other = cross.other.to().subtract(cross.other.from()).normalize();
 		span = cross.other;
 		t = cross.along;
-		facing = other.x * want.x + other.z * want.z >= 0.0 ? 1 : -1;
+		// the server is told which line now
+		ClientPlayNetworking.send(new WebLineRide.Ride(mode, cross.point));
+		facing =other.x * want.x + other.z * want.z >= 0.0 ? 1 : -1;
 		WebSwing.play(player, SoundEvents.LEAD_TIED, 0.5F, 1.8F);
 		player.level().addParticle(ParticleTypes.ITEM_COBWEB, cross.point.x, cross.point.y, cross.point.z, 0.0, 0.03, 0.0);
 	}

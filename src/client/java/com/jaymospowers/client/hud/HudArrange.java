@@ -110,7 +110,7 @@ public final class HudArrange extends Screen {
 		addRenderableWidget(FlatButton.builder(zipMarkerLabel(), b -> {
 			com.jaymospowers.client.power.web.WebZipMarker.setEnabled(!com.jaymospowers.client.power.web.WebZipMarker.enabled());
 			b.setMessage(zipMarkerLabel());
-		}).bounds(this.width / 2 - 68, by - 20, 136, 16).build());
+		}).bounds(this.width / 2 - 68, 6, 136, 16).build());
 	}
 
 	private static Component zipMarkerLabel() {

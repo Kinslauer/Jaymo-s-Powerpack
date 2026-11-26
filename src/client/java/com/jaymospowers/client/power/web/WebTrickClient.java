@@ -200,6 +200,12 @@ final class WebTrickClient {
 		busyUntil = Math.max(busyUntil, player.tickCount + ticks);
 	}
 
+	/** The loop is over: its pose is ended on the server, and tricks are free again. */
+	void endLoop(LocalPlayer player) {
+		busyUntil = Math.min(busyUntil, player.tickCount);
+		ClientPlayNetworking.send(new WebTricks.Trick(WebPose.LOOP_FLIP, 0));
+	}
+
 	/** The pose {@code kind} turning to {@code side}, asked for by a move of the swing's own (the loop, the barrel roll). */
 	void sendMove(int kind, int side) {
 		ClientPlayNetworking.send(new WebTricks.Trick(kind, side));

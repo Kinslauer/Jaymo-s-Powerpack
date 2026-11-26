@@ -251,6 +251,8 @@ public final class WebSwing {
 	private int stuckTicks;
 	/** Jump was down last tick of the zip (a press, not a held Jump from before it began, cuts it). */
 	private boolean pullJumpHeld;
+	/** A fresh Jump press came during the zip: it springs off the spot on arrival. */
+	private boolean springWanted;
 	private Vec3 lastPos = Vec3.ZERO;
 	/** Flips and twirls off the webs, on them, and on landing. */
 	private final WebTrickClient tricks = new WebTrickClient();
@@ -571,6 +573,7 @@ public final class WebSwing {
 		pullTicks = 0;
 		stuckTicks = 0;
 		pullJumpHeld = player.input.keyPresses.jump();
+		springWanted = false;
 		pullPeak = 0.0;
 		spring.reset();
 		lastPos = player.position();
@@ -1108,6 +1111,14 @@ public final class WebSwing {
 	private int bankedCharge;
 	private boolean chargeSent;
 
+	/**
+	 * The use press (see the mixin) on a webline with Sneak held starts a ride, and use is taken while riding: true when
+	 * the held item must not be used.
+	 */
+	public static boolean lineRideTakesUse(LocalPlayer player) {
+		return WebPowerClient.isActive(player) && WebPowerClient.INSTANCE.swing.lineRide.takesUse(player, WebPowerClient.INSTANCE.swing);
+	}
+
 	/** True while Jump is being held to charge a leap on the ground (the plain jump is held back; see the mixin). */
 	public static boolean holdingCharge(LocalPlayer player) {
 		// (not while a takeover has the legs: its steps are plain hops, its leaps its own)
@@ -1408,13 +1419,10 @@ public final class WebSwing {
 
 	private void tickPull(LocalPlayer player) {
 		WebNet.Pull pull = this.pull;
-		// Jump at any point cuts the line: you carry on with whatever speed the zip had given you
+		// a fresh Jump press mid-zip is the spring: the zip carries on to the spot and kicks off the moment it arrives
 		boolean jump = player.input.keyPresses.jump();
 		if (jump && !pullJumpHeld) {
-			this.pull = null;
-			ClientPlayNetworking.send(new WebNet.Swing(WebNet.MAIN, false, Vec3.ZERO));
-			play(player, SoundEvents.LEAD_BREAK, 0.6F, 1.6F);
-			return;
+			springWanted = true;
 		}
 		pullJumpHeld = jump;
 		pullTicks++;
@@ -1445,9 +1453,10 @@ public final class WebSwing {
 			return;
 		}
 		// (Jump held through the zip carries it all the way in, to spring off the spot: WebSpring)
-		if (flingOut || pull.entityId() < 0 && !pullLedge && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown() && !jump) {
-			// let go early: momentum carries on, with a kick up
+		if (flingOut || pull.entityId() < 0 && !pullLedge && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown() && !jump && !springWanted) {
+			// let go early: momentum carries on, with a kick up; a Jump press in the next few ticks still springs
 			this.pull = null;
+			spring.arrive(player, pull, pullPeak, false);
 			Vec3 v = player.getDeltaMovement();
 			player.setDeltaMovement(v.x, Math.max(v.y, 0.0) + ZIP_RELEASE_LIFT, v.z);
 			play(player, SoundEvents.SLIME_SQUISH_SMALL, 0.5F, 1.8F);
@@ -1463,7 +1472,7 @@ public final class WebSwing {
 	private void finishPull(LocalPlayer player, WebNet.Pull pull) {
 		this.pull = null;
 		// Jump held as it arrives kicks off the spot at once; a press in the next few ticks does too (WebSpring)
-		Vec3 sprung = spring.arrive(player, pull, pullPeak, player.input.keyPresses.jump());
+		Vec3 sprung = spring.arrive(player, pull, pullPeak, player.input.keyPresses.jump() || springWanted);
 		if (sprung != null) {
 			springOff(player, sprung);
 			return;

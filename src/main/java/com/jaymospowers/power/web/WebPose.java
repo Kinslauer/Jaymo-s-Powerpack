@@ -78,6 +78,8 @@ public record WebPose(int kind, long start, int side) {
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
 	public static final int RAGDOLL_TICKS = 40;
+	/** The loop over the anchor lasts as long as the loop does, between these (ticks). */
+	public static final int LOOP_MIN_TICKS = 20, LOOP_MAX_TICKS = 140;
 
 	public static final StreamCodec<ByteBuf, WebPose> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_INT, WebPose::kind,
@@ -103,7 +105,8 @@ public record WebPose(int kind, long start, int side) {
 			case SWAN_DIVE, TWIST_FLIP -> 18;
 			case PIKE_FLIP, SIDE_ROLL -> 14;
 			case HANDSPRING, DIVE_ROLL -> 16;
-			case LOOP_FLIP -> 40;
+			// (the loop says how long it will take, in the side; see WebTricks)
+			case LOOP_FLIP -> Math.max(LOOP_MIN_TICKS, Math.min(LOOP_MAX_TICKS, Math.abs(side)));
 			case DIVE_KICK -> 40;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
 			case SPIKES -> WebSymbiote.SPIKE_POSE_TICKS;

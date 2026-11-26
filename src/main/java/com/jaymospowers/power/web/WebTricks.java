@@ -49,6 +49,14 @@ public final class WebTricks {
 			return;
 		}
 		ServerLevel level = player.level();
+		if (trick.kind() == WebPose.LOOP_FLIP && trick.side() == 0) {
+			// the loop is over: its pose ends with it
+			WebPose loop = player.getAttached(WebPower.POSE);
+			if (loop != null && loop.kind() == WebPose.LOOP_FLIP) {
+				player.removeAttached(WebPower.POSE);
+			}
+			return;
+		}
 		com.jaymospowers.core.trials.PowerTrials.count(player, "web.trick", 1);
 		long now = level.getGameTime();
 		WebPose current = player.getAttached(WebPower.POSE);
@@ -60,8 +68,14 @@ public final class WebTricks {
 		}
 		// (a barrel roll that carries on is sent with a side of 2 or -2, so its pose doesn't ease in again)
 		int side = trick.side() < 0 ? -1 : 1;
-		WebPower.pose(player, trick.kind(), trick.kind() == WebPose.DIVE_ROLL && Math.abs(trick.side()) == 2 ? side * 2 : side);
-		WebStunts.trick(player, trick.kind());
+		// (a loop's side is how many ticks it will last)
+		int posed = trick.kind() == WebPose.DIVE_ROLL && Math.abs(trick.side()) == 2 ? side * 2
+			: trick.kind() == WebPose.LOOP_FLIP ? Math.max(WebPose.LOOP_MIN_TICKS, Math.min(WebPose.LOOP_MAX_TICKS, Math.abs(trick.side()))) : side;
+		WebPower.pose(player, trick.kind(), posed);
+		// a roll that carries on is the same roll, and is not paid again
+		if (!(trick.kind() == WebPose.DIVE_ROLL && Math.abs(trick.side()) == 2)) {
+			WebStunts.trick(player, trick.kind());
+		}
 		double x = player.getX(), y = player.getY(), z = player.getZ();
 		switch (trick.kind()) {
 			case WebPose.HERO_LAND -> {
