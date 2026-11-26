@@ -18,3 +18,4 @@ pr:
 **Order:** tracks two at a time: 1+2, then 3+6, then 4+7, then 5+8, then 9+10 (this is wave 3). Its models come first from hermes-modeller (task hunters-road-4-models).
 
 ## Notes
+- 2026-11-26 19:59 ON HOLD until wave 2 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coordinator opens it when its turn comes.
