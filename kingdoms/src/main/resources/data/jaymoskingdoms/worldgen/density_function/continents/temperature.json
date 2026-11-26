@@ -8,22 +8,60 @@
         "type": "minecraft:add",
         "left": {
           "type": "minecraft:mul",
-          "left": 0.8,
-          "right": {
-            "type": "minecraft:mul",
-            "left": "jaymoskingdoms:continents/latitude",
-            "right": {
-              "type": "minecraft:add",
-              "left": 1.0,
-              "right": {
-                "type": "minecraft:mul",
-                "left": 0.35,
-                "right": {
-                  "type": "minecraft:clamp",
-                  "input": "jaymoskingdoms:continents/shape",
-                  "min": 0.0,
-                  "max": 1.0
+          "left": {
+            "type": "minecraft:spline",
+            "spline": {
+              "coordinate": "jaymoskingdoms:continents/latitude",
+              "points": [
+                {
+                  "derivative": 0.0,
+                  "location": -1.0,
+                  "value": -0.8
+                },
+                {
+                  "derivative": 0.8,
+                  "location": 0.0,
+                  "value": 0.0
+                },
+                {
+                  "derivative": 1.24,
+                  "location": 0.25,
+                  "value": 0.2
+                },
+                {
+                  "derivative": 1.0213,
+                  "location": 0.5,
+                  "value": 0.62
+                },
+                {
+                  "derivative": -0.5263,
+                  "location": 0.72,
+                  "value": 0.68
+                },
+                {
+                  "derivative": -1.2143,
+                  "location": 0.88,
+                  "value": 0.42
+                },
+                {
+                  "derivative": 0.0,
+                  "location": 1.0,
+                  "value": 0.34
                 }
+              ]
+            }
+          },
+          "right": {
+            "type": "minecraft:add",
+            "left": 1.0,
+            "right": {
+              "type": "minecraft:mul",
+              "left": 0.35,
+              "right": {
+                "type": "minecraft:clamp",
+                "input": "jaymoskingdoms:continents/shape",
+                "min": 0.0,
+                "max": 1.0
               }
             }
           }

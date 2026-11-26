@@ -13,14 +13,10 @@ import org.spongepowered.asm.mixin.injection.At;
  * every mod's natural spawns in the monster category count against it) is cut to {@link #MONSTER_SHARE} of vanilla's 70.
  * The animals and the pack's own camps and raids are left as they are.
  *
- * <p>(0.7.644) Andy (2026-11-07): "still too many mobs spawning at once in the water". The water caps come down too: fish
- * and other water ambients to {@link #WATER_AMBIENT} (vanilla 20), squid, dolphins, sharks and the like to
- * {@link #WATER_CREATURE} (vanilla 5), cave water creatures to {@link #UNDERGROUND_WATER} (vanilla 5); and each spawn
- * brings at most {@link WaterClusterMixin#WATER_CLUSTER} of them at once.
- *
- * <p>Andy (2026-11-19), across an ocean: "only saw dolphins". Those caps now hold along coasts, rivers and lakes; open sea
- * chunks ({@link SeaLife#openSea}, asked through {@code SeaCapsMixin}) have {@link #OPEN_WATER_AMBIENT} and
- * {@link #OPEN_WATER_CREATURE} instead, so a voyage meets whales, sharks, dolphins and schools of fish.
+ * <p>The water caps are the game's along coasts, rivers and lakes (Andy 2026-11-26: the cut made for "still too many
+ * mobs spawning at once in the water" came out; that was one mob overspawning). Open sea chunks ({@link SeaLife#openSea},
+ * asked through {@code SeaCapsMixin}) have {@link #OPEN_WATER_AMBIENT} and {@link #OPEN_WATER_CREATURE}, so a voyage
+ * meets whales, sharks, dolphins and schools of fish. Cave water creatures stay at {@link #UNDERGROUND_WATER}.
  *
  * <p>Andy (2026-11-19): spawns follow the climate map. The monster cap above holds in the temperate lands; a chunk of the
  * harsh lands ({@link HarshLands}, asked through {@code HarshCapsMixin}) keeps {@link HarshLands#MONSTER_SHARE} of vanilla's
@@ -30,13 +26,9 @@ import org.spongepowered.asm.mixin.injection.At;
 abstract class MonsterCapMixin {
 	/** The share of vanilla's monster cap that's left. */
 	private static final float MONSTER_SHARE = 0.5F;
-	/**
-	 * The water caps. Andy (2026-11-22): "NOTHING that swims other than dolphins jellyfish and whales show up. the water
-	 * should be teeming with life, within optimization requirements": fish back up from 6 (Powers' cave pool fish and
-	 * fish in underground aquifers had been taking these places out of sight; they no longer do).
-	 */
-	private static final int WATER_AMBIENT = 10, WATER_CREATURE = 3, UNDERGROUND_WATER = 2;
-	/** The open sea's water caps (vanilla 20 and 5 everywhere): fish at vanilla's own. */
+	/** Cave water creatures' cap (vanilla 5). */
+	private static final int UNDERGROUND_WATER = 2;
+	/** The open sea's water caps (vanilla 20 and 5 everywhere else): fish at vanilla's own, more room for the big ones. */
 	private static final int OPEN_WATER_AMBIENT = 20, OPEN_WATER_CREATURE = 8;
 
 	@ModifyReturnValue(method = "getMaxInstancesPerChunk", at = @At("RETURN"))
@@ -48,10 +40,10 @@ abstract class MonsterCapMixin {
 			return Math.max(1, Math.round(cap * (steps > 0 ? HarshLands.MONSTER_SHARE[steps] : MONSTER_SHARE)));
 		}
 		if (self == MobCategory.WATER_AMBIENT) {
-			return SeaLife.askingOpen() ? OPEN_WATER_AMBIENT : Math.min(cap, WATER_AMBIENT);
+			return SeaLife.askingOpen() ? OPEN_WATER_AMBIENT : cap;
 		}
 		if (self == MobCategory.WATER_CREATURE) {
-			return SeaLife.askingOpen() ? OPEN_WATER_CREATURE : Math.min(cap, WATER_CREATURE);
+			return SeaLife.askingOpen() ? OPEN_WATER_CREATURE : cap;
 		}
 		if (self == MobCategory.UNDERGROUND_WATER_CREATURE) {
 			return Math.min(cap, UNDERGROUND_WATER);

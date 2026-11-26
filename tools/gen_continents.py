@@ -126,8 +126,12 @@ write('jaymoskingdoms/worldgen/density_function/continents/shape.json',
 # noise bend the bands, and the land's middle is harsher than its coasts (hotter in the south, colder in the north).
 # Wet coasts and dry interiors, a dry belt (deserts) on the equator's side of the temperate band, a wet equator
 # (jungle). Biomes follow these numbers, and the settlements, their buildings, dress, coin and blood follow the biomes.
+# The game makes jungle only where it's warm (temperature 0.2 to 0.55) and wet, and desert wherever it's hotter, so the
+# heat peaks in the dry belt and eases off to warm at the wet equator (Andy, 2026-11-26: a jungle equator; with the heat
+# rising all the way to the equator its rain fell on desert, and jungles, gorillas and the rest were all but missing).
 LATITUDE = 6000            # blocks from the origin to a pole (north) or to the equator (south); a whole band is twice this
-LATITUDE_HEAT = 0.8        # how hot the equator is and how cold a pole is (the game's temperature runs -1 to 1)
+# heat by latitude (-1 pole, 0 the origin's band, 1 equator): cold to the north, the dry belt hottest, a warm equator
+LATITUDE_HEAT = [(-1.0, -0.8), (0.0, 0.0), (0.25, 0.2), (0.5, 0.62), (0.72, 0.68), (0.88, 0.42), (1.0, 0.34)]
 INLAND_EXTREMES = 0.35     # how much harsher the heat or cold is deep inland (by continentalness 0 to 1)
 HEAT_WOBBLE = 0.5          # the large temperature noise (continent-sized) bending the bands
 HEAT_LOCAL = 0.15          # the game's own temperature noise, for local variety
@@ -164,7 +168,7 @@ latitude = {'type': 'minecraft:gradient', 'axis': 'z', 'tiling': 'mirrored_repea
             'to_coordinate': LATITUDE, 'from_value': -1.0, 'to_value': 1.0}
 write('jaymoskingdoms/worldgen/density_function/continents/latitude.json', {'type': 'minecraft:cache', 'input': latitude})
 LAT = 'jaymoskingdoms:continents/latitude'
-heat = mul(LATITUDE_HEAT, mul(LAT, add(1.0, mul(INLAND_EXTREMES, clamp(SHAPE, 0.0, 1.0)))))
+heat = mul(spline(LAT, LATITUDE_HEAT), add(1.0, mul(INLAND_EXTREMES, clamp(SHAPE, 0.0, 1.0))))
 heat = add(add(heat, mul(HEAT_WOBBLE, noise('minecraft:temperature_large', 0.25))), mul(HEAT_LOCAL, noise('minecraft:temperature', LOCAL_SCALE)))
 write('jaymoskingdoms/worldgen/density_function/continents/temperature.json', {'type': 'minecraft:cache', 'input': clamp(heat, -1.0, 1.0)})
 wet = add(spline(SHAPE, COAST_RAIN), spline(LAT, LATITUDE_RAIN))
