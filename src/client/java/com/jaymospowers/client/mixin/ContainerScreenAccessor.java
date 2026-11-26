@@ -4,7 +4,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-/** Where a container screen sits and how wide it is, to put the hide-armour buttons beside its armour slots and the deconstruct pick at its right edge. */
+/** Where a container screen sits, to put the hide-armour buttons beside its armour slots. */
 @Mixin(AbstractContainerScreen.class)
 public interface ContainerScreenAccessor {
 	@Accessor("leftPos")
@@ -12,7 +12,4 @@ public interface ContainerScreenAccessor {
 
 	@Accessor("topPos")
 	int jaymospowers$topPos();
-
-	@Accessor("imageWidth")
-	int jaymospowers$imageWidth();
 }

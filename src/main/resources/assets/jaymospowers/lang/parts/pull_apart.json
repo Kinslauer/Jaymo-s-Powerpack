@@ -1,6 +1,6 @@
 {
   "jei.jaymospowers.pull_apart": "Pull Apart",
-  "jei.jaymospowers.pull_apart.how": "Click the iron pick beside your inventory, then click it to pull one apart (Shift-click for the whole stack). Or Ctrl + right-click it.",
+  "jei.jaymospowers.pull_apart.how": "Click the small iron pick under the crafting grid in your inventory, then click it to pull one apart (Shift-click for the whole stack). Or Ctrl + right-click it.",
   "jei.jaymospowers.pull_apart.back": "The crafting grid puts the parts back together.",
   "button.jaymospowers.pull_apart": "Deconstruct",
   "button.jaymospowers.pull_apart.hover": "Deconstruct mode: click to pull things apart into their parts (wool into string, cobblestone into rocks...).",
