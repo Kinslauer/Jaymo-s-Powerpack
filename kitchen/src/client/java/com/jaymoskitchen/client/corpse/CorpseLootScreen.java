@@ -19,7 +19,8 @@ import org.joml.Vector3f;
  * A body's loot screen ({@link CorpseLootMenu}), in the Kitchen's panel like the lunch box's: its armour down the left,
  * the body itself in the well beside it, drawn as it lies (its own renderer: ragdoll, wounds, arrows, shut eyes) and seen
  * from above, turning a little with the mouse; its hands to the right of that, its pockets on the right, your inventory
- * below. What's taken comes off the body in the well too. A player's body has the wide screen ({@link CorpseLootMenu}).
+ * below. What's taken comes off the body in the well too. A player's body has the wide screen ({@link CorpseLootMenu}), and
+ * so does a mob's that wore harness: a block of it to the right of the pockets, titled.
  */
 public class CorpseLootScreen extends AbstractContainerScreen<CorpseLootMenu> {
 	private static final int WIDTH = 176, HEIGHT = 188;
@@ -30,10 +31,10 @@ public class CorpseLootScreen extends AbstractContainerScreen<CorpseLootMenu> {
 	private float xMouse;
 
 	public CorpseLootScreen(CorpseLootMenu menu, Inventory inventory, Component title) {
-		super(menu, inventory, title, CorpseLootMenu.isPlayer(menu.corpse) ? CorpseLootMenu.PLAYER_WIDTH : WIDTH, HEIGHT);
+		super(menu, inventory, title, menu.width(WIDTH), HEIGHT);
 		this.inventoryLabelY = CorpseLootMenu.INVENTORY_Y - 11;
-		if (CorpseLootMenu.isPlayer(menu.corpse)) {
-			this.inventoryLabelX = CorpseLootMenu.PLAYER_INVENTORY_X;
+		if (menu.inventoryX() != 8) {
+			this.inventoryLabelX = menu.inventoryX();
 		}
 	}
 
@@ -82,7 +83,14 @@ public class CorpseLootScreen extends AbstractContainerScreen<CorpseLootMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		KitchenUi.line(graphics, this.font, this.title, this.titleLabelX, this.titleLabelY, this.imageWidth - this.titleLabelX * 2, KitchenUi.ACCENT);
+		if (this.menu.harnessPlaces > 0) {
+			// (the name stops where the harness block starts)
+			KitchenUi.line(graphics, this.font, this.title, this.titleLabelX, this.titleLabelY, CorpseLootMenu.MOB_HARNESS_X - this.titleLabelX - 6, KitchenUi.ACCENT);
+			KitchenUi.line(graphics, this.font, Component.translatable("container.jaymoskitchen.corpse.harness"), CorpseLootMenu.MOB_HARNESS_X, this.titleLabelY,
+				CorpseLootMenu.MOB_HARNESS_COLUMNS * 18, KitchenUi.ACCENT);
+		} else {
+			KitchenUi.line(graphics, this.font, this.title, this.titleLabelX, this.titleLabelY, this.imageWidth - this.titleLabelX * 2, KitchenUi.ACCENT);
+		}
 		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, KitchenUi.DIM);
 	}
 }

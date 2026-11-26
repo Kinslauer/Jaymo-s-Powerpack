@@ -172,6 +172,13 @@ public final class Downed {
 				disarm(player, (Mob) entity);
 				return false;
 			});
+		// Andy (2026-11-25): "the downed loot screen should have a harness section". Their harness comes off on a screen of its
+		// own for someone still alive and down (DownedHarnessMenu); once they are dead it is on the body's loot screen (Kitchen's).
+		PowersCompat.bodyOption("harness", 65, (player, entity) -> entity instanceof Mob body && isDowned(body) && disarmable(body)
+			&& Harness.worn(body).stream().anyMatch(piece -> !piece.isEmpty()), (player, entity) -> {
+				DownedHarnessMenu.open(player, (Mob) entity);
+				return false;
+			});
 		ServerTickEvents.END_SERVER_TICK.register(Downed::tick);
 	}
 
