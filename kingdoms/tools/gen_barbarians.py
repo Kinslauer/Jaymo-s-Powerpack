@@ -31,6 +31,16 @@ DYES = {"white": (233, 236, 236), "orange": (240, 118, 19), "magenta": (189, 68,
         "brown": (114, 71, 40), "green": (84, 109, 27), "red": (161, 39, 34), "black": (30, 30, 34)}
 
 
+# The Reason look (docs/Vanilla-Style.md): with this set, a flat area is one shade and a fur or beard falls in three tones
+# (steps of 14), not a per-pixel jitter of a few dozen near twins; the roll is still taken, so the drawing is the same.
+CLEAN = True
+
+
+def jit(rnd, lo, hi, step=14):
+    n = rnd.randint(lo, hi)
+    return int(round(n / float(step))) * step if CLEAN else n
+
+
 def clamp(c):
     return tuple(max(0, min(255, v)) for v in c)
 
@@ -47,7 +57,7 @@ def paint(img, rect, base, spread, rnd):
     x0, y0, w, h = rect
     for y in range(y0, y0 + h):
         for x in range(x0, x0 + w):
-            px(img, x, y, shade(base, rnd.randint(-spread, spread)))
+            px(img, x, y, shade(base, jit(rnd, -spread, spread, 999)))
 
 
 def box(img, b, base, spread, rnd):
@@ -112,7 +122,7 @@ def fur_kilt(img, rnd, fur):
             rx, ry, rw, rh = leg[name]
             for x in range(rx, rx + rw):
                 for y in range(ry, ry + 3 + rnd.randint(0, 2)):
-                    px(img, x, y, shade(fur, rnd.randint(-20, 20)))
+                    px(img, x, y, shade(fur, jit(rnd, -20, 20)))
 
 
 def leg_wraps(img, rnd, hide, skin):
@@ -123,7 +133,7 @@ def leg_wraps(img, rnd, hide, skin):
             for y in range(ry + 5, ry + rh):
                 c = hide if y % 2 else shade(hide, -22)
                 for x in range(rx, rx + rw):
-                    px(img, x, y, shade(c, rnd.randint(-6, 6)))
+                    px(img, x, y, shade(c, jit(rnd, -6, 6)))
         paint(img, leg["bottom"], shade(hide, -35), 6, rnd)
 
 
@@ -138,7 +148,7 @@ def arms(img, rnd, skin, paint_colour, bands, ring=None):
                     px(img, x, ry + y, p)
             if ring:
                 for x in range(rx, rx + rw):
-                    px(img, x, ry + 3, shade(ring, rnd.randint(-15, 15)))
+                    px(img, x, ry + 3, shade(ring, jit(rnd, -15, 15)))
             # hide wrist wraps
             for x in range(rx, rx + rw):
                 px(img, x, ry + rh - 2, (120, 85, 55))
@@ -206,7 +216,7 @@ def chief(colour_name, colour):
         depth = 3 if name == "front" else 10 if name == "back" else 5
         for x in range(rx, rx + rw):
             for y in range(ry, ry + depth + (rnd.randint(0, 1) if name != "front" else 0)):
-                px(img, x, y, shade(bear, rnd.randint(-22, 22)))
+                px(img, x, y, shade(bear, jit(rnd, -22, 22)))
     paint(img, JACKET["top"], bear, 22, rnd)
     # the mantle's skull clasp at the throat, a belt of hide with a gold buckle
     px(img, fx + 3, fy + 2, (230, 222, 200))
