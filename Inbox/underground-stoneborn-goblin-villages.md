@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: open
 for: any
 from: pc-claude-server-thread
 asked: 2026-11-19
