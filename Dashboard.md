@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 09:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 09:35). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -47,6 +47,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2201 ships rigged when they're made; pillager long ships sail; crews fish for their food; every NPC fights its fish in view (Kingdoms, 2026-11-26)
 - [ ] #2200 Crocodiles and alligators death roll their prey and drag it into the water (Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2199 Alone in the wild never leaves you on the sea (Kingdoms, 2026-11-26)
+- [ ] #2198 Rivers through low ground run in gentle valleys; gorges only in high ground (Powers, 2026-11-26)
 - [ ] #2197 Mobs slow down under heavy weapons; no blood on lost limbs; owls spare the downed (Powers, Kitchen, 2026-11-26)
 - [ ] #2196 Ki Cell has its icon and name (Powers, Kingdoms, 2026-11-26)
 - [ ] #2195 Camps stop crowding; scalebane sellswords live, side with the camp that hires them, and settle in havens as the Scalebound (Kingdoms, 2026-11-26)
@@ -93,8 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2148 explorer maps never make chunks on the server thread (Kingdoms, 2026-11-25)
 - [ ] #2147 The Nightmare haunts from the dark instead of acting as an enderman (Kingdoms, 2026-11-25)
 - [ ] #2146 Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (Powers, Kingdoms, 2026-11-25)
-- [ ] #2145 Dodge key: tap to dodge, hold to roll, hold longer to go prone (Powers, 2026-11-25)
-- …and 592 older ones.
+- …and 593 older ones.
 
 ## Health
 
