@@ -1138,3 +1138,4 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 
 - 2026-11-26 Andy approved the lore paragraph "Warm mail, northern plate" (guard gear by climate, PR #2189).
 - 2026-11-26: Andy said "merge" on PR #2190 (all 40 climate picks); merged.
+- 2026-11-26 (Andy, realm page): "Realms should have their own random or reasoned specific benefits and patrons." Built reasoned: patron from creed + land (seeded per realm), gifts from land (stat), creed (stat, Crown goodwill or Coin account) and kindred favour.
