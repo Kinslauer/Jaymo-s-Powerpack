@@ -6,8 +6,13 @@ pr:
 mods: kingdoms
 started: 2026-11-26
 owns:
-  - kingdoms/src/main/java/com/jaymoskingdoms/ChangelingVoices.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/ChangelingLures.java
   - kingdoms/src/main/java/com/jaymoskingdoms/BorrowedFaces.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/ChangelingVoices.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/ChangelingVoiceCompat.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/Doubles.java
+  - kingdoms/src/main/resources/fabric.mod.json
+  - E:/Jaymo Vault Live/Lore.md
   - changes/kingdoms/changeling-voice-mimic.md
 ---
 # Changeling voice mimic
