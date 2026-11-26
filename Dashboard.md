@@ -50,7 +50,6 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2231 Dyed and grey sheep no longer sprout stray boxes (Powers, 2026-11-26)
 - [ ] #2230 /texturelook vanilla|reason - switch the pack's retexture packs off and back on (Powers, 2026-11-26)
 - [ ] #2229 cannon loading tip cards (Powers, 2026-11-26)
-- [ ] #2228 face parts - snouts, beaks, fangs and horns on the painted faces (Kingdoms, 2026-11-26)
 - [ ] #2227 Dragonforge mechanics for our dragons (parts, bite, dive slam, sprint flight, tremor, horn, home patrols, realm wyverns) (Kingdoms, 2026-11-26)
 - [ ] #2226 lance couching from the saddle (Powers, Kingdoms, 2026-11-26)
 - [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
@@ -93,7 +92,8 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2172 The game starts again (the symbiote HUD crashed it on launch) (Powers, 2026-11-25)
 - [ ] #2171 Waking villages into kingdoms no longer freezes the server (Kingdoms, 2026-11-25)
 - [ ] #2170 Rig leg kick: taekwondo side kick and combo roundhouse (Powers, 2026-11-25)
-- …and 616 older ones.
+- [ ] #2169 The symbiote saves you (Powers, Kingdoms, 2026-11-25)
+- …and 557 older ones.
 
 ## Health
 
