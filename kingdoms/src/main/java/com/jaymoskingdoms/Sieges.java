@@ -251,15 +251,22 @@ public final class Sieges {
 									if (data != null && data.clearedAt() < 0 && Storage.loaded(level, camp)) {
 										// Take some food, logs, and other supplies
 										int taken = 0;
-										taken += Storage.take(level, camp, Items.COOKED_MUTTON, 8);
-										taken += Storage.take(level, camp, Items.COOKED_BEEF, 8);
-										taken += Storage.take(level, camp, Items.COOKED_PORKCHOP, 8);
-										taken += Storage.take(level, camp, Items.COOKED_CHICKEN, 8);
-										taken += Storage.take(level, camp, Items.LOG, 16);
-										taken += Storage.take(level, camp, Items.OAK_LOG, 16);
-										taken += Storage.take(level, camp, Items.SPRUCE_LOG, 16);
-										taken += Storage.take(level, camp, Items.IRON_INGOT, 4);
-										taken += Storage.take(level, camp, Items.ARROW, 16);
+										ItemStack stack = Storage.take(level, camp, Items.COOKED_MUTTON, 8);
+										taken += stack.getCount();
+										stack = Storage.take(level, camp, Items.COOKED_BEEF, 8);
+										taken += stack.getCount();
+										stack = Storage.take(level, camp, Items.COOKED_PORKCHOP, 8);
+										taken += stack.getCount();
+										stack = Storage.take(level, camp, Items.COOKED_CHICKEN, 8);
+										taken += stack.getCount();
+										stack = Storage.take(level, camp, Items.OAK_LOG, 16);
+										taken += stack.getCount();
+										stack = Storage.take(level, camp, Items.SPRUCE_LOG, 16);
+										taken += stack.getCount();
+										stack = Storage.take(level, camp, Items.IRON_INGOT, 4);
+										taken += stack.getCount();
+										stack = Storage.take(level, camp, Items.ARROW, 16);
+										taken += stack.getCount();
 										if (taken > 0) {
 											// Add to the siege's supply (the war chest or the party's spoils)
 											party.spoilsSilver += taken / 4; // convert to silver value
