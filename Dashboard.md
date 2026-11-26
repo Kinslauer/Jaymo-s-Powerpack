@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 21:59). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 03:18). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -28,6 +28,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 - [ ] #2196 Ki Cell has its icon and name (Powers, Kingdoms, 2026-11-26)
 - [ ] #2195 Camps stop crowding; scalebane sellswords live, side with the camp that hires them, and settle in havens as the Scalebound (Kingdoms, 2026-11-26)
+- [ ] #2194 snails slide and squash into slime; missing textures (Kingdoms, 2026-11-26)
 - [ ] #2193 fish fight: the hooked fish fights in plain sight, a hand-made fight plaque, Alt zooms while fishing (Powers, 2026-11-26)
 - [ ] #2192 Realms keep their own patrons and gifts (Kingdoms, 2026-11-26)
 - [ ] #2190 Belt charms: hot-stone pouch, cold-clay flask, equinox charm (Powers, Kingdoms, Kitchen, 2026-11-26)
@@ -85,12 +86,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2133 Visceral gore: deeper wounds, hit reactions, armour holes, takedowns, gore reader (Powers, Kingdoms, Kitchen, 2026-11-25)
 - [ ] #2132 Villager screen opens into talk: everything is a spoke on the talk wheel, only Gift and Trade stay buttons (Kingdoms, 2026-11-25)
 - [ ] #2131 The Wither's own look, animations and voice (Kingdoms, 2026-11-25)
-- [ ] #2130 End plants no longer break End worldgen (Kitchen, 2026-11-25)
-- …and 577 older ones.
+- …and 578 older ones.
 
 ## Health
 
-14 problems in the notes: [[Health]].
+15 problems in the notes: [[Health]].
 
 ## Last week
 
