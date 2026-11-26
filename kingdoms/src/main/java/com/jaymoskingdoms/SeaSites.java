@@ -1,11 +1,23 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -13,7 +25,15 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -30,7 +50,10 @@ import org.jspecify.annotations.Nullable;
  * <li>the <b>wanderer raft</b>: one drifter, for hire like any other ({@link Drifters#adrift}), who never moves along.</li>
  * </ul>
  * Every boat with a crew (all but the raft) also gets a ship's helm ({@link #helm}), so whoever skippers her has a wheel
- * to steer by, and a player can take her, sail her, and draw plans of her.
+ * to steer by, and a player can take her, sail her, and draw plans of her. Andy (2026-11-26), spawned on a long ship that
+ * had none: "all ships should at this point". So she's rigged the moment the last of her chunks is made ({@link #rig}),
+ * not when her people move in: the helm, and on a long ship her guns in the rails ({@link #guns}), each with a barrel of
+ * powder and round shot behind its breech that her pillagers load it from ({@link DeckGuns}).
  */
 final class SeaSites {
 	static final String MOD = "mos", PREFIX = "mos/";
@@ -46,6 +69,27 @@ final class SeaSites {
 	static final int SPOTS = 10, APART = 2;
 	/** A helm goes within this share of her length from one end. */
 	static final float HELM_END = 0.3F;
+	/**
+	 * A long ship's guns: this many a side, at these shares of the stretch her rails run (the nearest place in them that
+	 * takes one, never nearer another than this), and the powder and round shot in the barrel behind each one's breech.
+	 */
+	static final int GUNS_A_SIDE = 3, GUN_GAP = 4, GUN_POWDER = 8, GUN_SHOT = 8;
+	static final float[] GUN_AT = {0.5F, 0.1F, 0.9F};
+
+	/** What one of Moog's boats was rigged with when she was made: her helm (none: no deck for one) and her guns (packed). */
+	record Rig(Optional<BlockPos> helm, List<Long> guns) {
+		static final Codec<Rig> CODEC = RecordCodecBuilder.create(i -> i.group(
+				BlockPos.CODEC.optionalFieldOf("helm").forGetter(Rig::helm),
+				Codec.LONG.listOf().optionalFieldOf("guns", List.of()).forGetter(Rig::guns))
+			.apply(i, Rig::new));
+	}
+
+	/** On the Overworld: every boat rigged so far (her start chunk, packed → what she got). Saved, so none is rigged twice. */
+	static final AttachmentType<Map<String, Rig>> RIGGED = AttachmentRegistry.create(JaymosKingdoms.id("sea_sites_rigged"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Rig.CODEC)));
+	/** Boats whose chunks were loaded this tick (start chunk, packed → structure), looked at at the tick's end. */
+	private static final Map<Long, Structure> TO_RIG = new HashMap<>();
+
 	/** What a hauling ship's skipper might deal in. */
 	private static final List<ResourceKey<VillagerProfession>> GOODS = List.of(VillagerProfession.FARMER, VillagerProfession.MASON,
 		VillagerProfession.SHEPHERD, VillagerProfession.LEATHERWORKER, VillagerProfession.TOOLSMITH, VillagerProfession.CARTOGRAPHER);
@@ -58,6 +102,231 @@ final class SeaSites {
 			Folk.defineRole(new Folk.Role(role, roleName(role), false, false, null, (folk, faction) -> {
 			}));
 		}
+		// a boat is rigged as soon as all of her is made: each of her chunks, as it loads, has her looked at
+		ServerChunkEvents.CHUNK_LOAD.register((level, chunk, generated) -> {
+			if (level != Factions.level(level.getServer())) {
+				return;
+			}
+			var registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+			for (Map.Entry<Structure, LongSet> e : chunk.getAllReferences().entrySet()) {
+				Identifier id = registry.getKey(e.getKey());
+				String path = id == null ? null : path(id);
+				if (path != null && rigged(path)) {
+					for (long ref : e.getValue()) {
+						TO_RIG.put(ref, e.getKey());
+					}
+				}
+			}
+		});
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (TO_RIG.isEmpty()) {
+				return;
+			}
+			ServerLevel level = Factions.level(server);
+			var registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+			Map<Long, Structure> due = Map.copyOf(TO_RIG);
+			TO_RIG.clear();
+			Map<String, Rig> done = rigs(server);
+			for (Map.Entry<Long, Structure> e : due.entrySet()) {
+				if (done.containsKey(Long.toString(e.getKey()))) {
+					continue;
+				}
+				net.minecraft.world.level.ChunkPos from = net.minecraft.world.level.ChunkPos.unpack(e.getKey());
+				ChunkAccess startChunk = level.getChunkSource().getChunkNow(from.x(), from.z());
+				StructureStart start = startChunk == null ? null : startChunk.getStartForStructure(e.getValue());
+				Identifier id = registry.getKey(e.getValue());
+				String path = id == null ? null : path(id);
+				if (start == null || !start.isValid() || path == null) {
+					continue;
+				}
+				BoundingBox box = start.getBoundingBox();
+				// (not yet all made: the last of her chunks to load looks again)
+				if (Loaded.made(level, box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
+					rig(level, e.getKey(), path, box);
+				}
+			}
+		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TO_RIG.clear());
+		DeckGuns.register();
+	}
+
+	/** Whether the boat at {@code path} is rigged when she's made: one a helm goes on ({@link #sails}). */
+	static boolean rigged(String path) {
+		return sails(path);
+	}
+
+	static Map<String, Rig> rigs(net.minecraft.server.MinecraftServer server) {
+		return Factions.level(server).getAttachedOrElse(RIGGED, Map.of());
+	}
+
+	/**
+	 * The boat at {@code path} in {@code box}, started in the chunk {@code ref}, rigged (once: what she got the first time
+	 * after that): her helm ({@link #helm}), and a long ship's guns ({@link #guns}).
+	 */
+	static Rig rig(ServerLevel level, long ref, String path, BoundingBox box) {
+		Map<String, Rig> all = rigs(level.getServer());
+		Rig had = all.get(Long.toString(ref));
+		if (had != null) {
+			return had;
+		}
+		BlockPos helm = sails(path) ? helm(level, box) : null;
+		List<Long> guns = path.equals(LONG_SHIP) ? guns(level, box) : List.of();
+		Rig rig = new Rig(Optional.ofNullable(helm), guns);
+		Map<String, Rig> next = new HashMap<>(all);
+		next.put(Long.toString(ref), rig);
+		Factions.level(level.getServer()).setAttached(RIGGED, Map.copyOf(next));
+		JaymosKingdoms.LOGGER.info("Rigged the {} at {}: helm {}, {} guns", path, box.getCenter().toShortString(),
+			helm == null ? "none" : helm.toShortString(), guns.size());
+		return rig;
+	}
+
+	/** Her helm as rigged, if it still stands there; else one set now ({@link #helm}), or null. */
+	static @Nullable BlockPos helmOf(ServerLevel level, long ref, String path, BoundingBox box) {
+		BlockPos at = rig(level, ref, path, box).helm().orElse(null);
+		if (at != null && level.getBlockState(at).is(com.jaymoskingdoms.sailing.Sailing.HELM)) {
+			return at;
+		}
+		return helm(level, box);
+	}
+
+	/**
+	 * A long ship's guns, in her rails. Her main deck is the floor most of her middle line stands at ({@link #floor});
+	 * every place along her where her rail meets that deck ({@link #railAt}) could take one, and {@link #GUNS_A_SIDE} a
+	 * side go in, spread along her waist (at {@link #GUN_AT} of the stretch her rails run, never nearer each other than
+	 * {@link #GUN_GAP}): a ship's cannon set in the rail, facing outboard over open water, and a barrel of
+	 * {@link #GUN_POWDER} powder and {@link #GUN_SHOT} round shot on the deck behind its breech, which is what she's loaded
+	 * from (real powder and shot: when it's spent, she's quiet, and whoever takes her has what's left). Where they went (packed).
+	 */
+	static List<Long> guns(ServerLevel level, BoundingBox box) {
+		boolean alongX = box.getXSpan() >= box.getZSpan();
+		int lo = alongX ? box.minX() : box.minZ(), hi = alongX ? box.maxX() : box.maxZ();
+		int mid = alongX ? (box.minZ() + box.maxZ()) / 2 : (box.minX() + box.maxX()) / 2;
+		int half = (alongX ? box.getZSpan() : box.getXSpan()) / 2;
+		int top = Math.min(box.maxY(), level.getSeaLevel() + 12);
+		// her main deck
+		Map<Integer, Integer> floors = new HashMap<>();
+		for (int along = lo; along <= hi; along++) {
+			for (int off = -1; off <= 1; off++) {
+				int f = floor(level, alongX ? new BlockPos(along, top, mid + off) : new BlockPos(mid + off, top, along), level.getSeaLevel());
+				if (f != Integer.MIN_VALUE) {
+					floors.merge(f, 1, Integer::sum);
+				}
+			}
+		}
+		int deck = floors.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(Integer.MIN_VALUE);
+		List<Long> out = new ArrayList<>();
+		if (deck == Integer.MIN_VALUE) {
+			return out;
+		}
+		for (int side : new int[] {1, -1}) {
+			Direction way = alongX ? (side > 0 ? Direction.SOUTH : Direction.NORTH) : (side > 0 ? Direction.EAST : Direction.WEST);
+			List<BlockPos[]> rails = new ArrayList<>();
+			for (int along = lo; along <= hi; along++) {
+				BlockPos[] r = railAt(level, alongX, along, mid, half, side, way, top, deck);
+				if (r != null) {
+					rails.add(r);
+				}
+			}
+			if (rails.isEmpty()) {
+				continue;
+			}
+			int first = coord(rails.get(0)[0], alongX), last = coord(rails.get(rails.size() - 1)[0], alongX);
+			List<BlockPos[]> picked = new ArrayList<>();
+			for (float share : GUN_AT) {
+				int want = first + Math.round((last - first) * share);
+				BlockPos[] best = null;
+				for (BlockPos[] r : rails) {
+					int at = coord(r[0], alongX);
+					boolean near = false;
+					for (BlockPos[] p : picked) {
+						near |= Math.abs(coord(p[0], alongX) - at) < GUN_GAP;
+					}
+					if (!near && (best == null || Math.abs(at - want) < Math.abs(coord(best[0], alongX) - want))) {
+						best = r;
+					}
+				}
+				if (best != null && picked.size() < GUNS_A_SIDE) {
+					picked.add(best);
+				}
+			}
+			for (BlockPos[] r : picked) {
+				level.setBlockAndUpdate(r[0], com.jaymoskingdoms.sailing.Sailing.CANNON.defaultBlockState()
+					.setValue(com.jaymoskingdoms.sailing.ShipCannonBlock.FACING, way));
+				level.setBlockAndUpdate(r[1], Blocks.BARREL.defaultBlockState());
+				if (level.getBlockEntity(r[1]) instanceof net.minecraft.world.level.block.entity.BarrelBlockEntity barrel) {
+					barrel.setItem(0, new ItemStack(Items.GUNPOWDER, GUN_POWDER));
+					barrel.setItem(1, new ItemStack(com.jaymoskingdoms.sailing.Sailing.ROUND_SHOT, GUN_SHOT));
+					barrel.setChanged();
+				}
+				out.add(r[0].asLong());
+			}
+		}
+		return out;
+	}
+
+	private static int coord(BlockPos at, boolean alongX) {
+		return alongX ? at.getX() : at.getZ();
+	}
+
+	/**
+	 * Her rail across her at {@code along}, on {@code side}: walking out from her middle line over her main deck (the
+	 * columns open from above down to a floor at {@code deck}), the first column that isn't. Its block at deck height must
+	 * be a rail a gun can take the place of (solid and waist high or more, not a chest, a gate, a door or a hatch), her
+	 * side under it, clear air beyond it; the deck just inboard of it takes the barrel. {gun, barrel}, or null.
+	 */
+	private static BlockPos @Nullable [] railAt(ServerLevel level, boolean alongX, int along, int mid, int half, int side, Direction out, int top,
+		int deck) {
+		BlockPos inboard = null;
+		for (int off = 0; off <= half + 1; off++) {
+			int across = mid + side * off;
+			BlockPos column = alongX ? new BlockPos(along, top, across) : new BlockPos(across, top, along);
+			int floor = floor(level, column, level.getSeaLevel());
+			if (inboard == null) {
+				if (floor == deck && off <= 3) {
+					inboard = column.atY(deck);
+				}
+				if (off >= 3 && inboard == null) {
+					return null;
+				}
+				continue;
+			}
+			if (floor == deck) {
+				inboard = column.atY(deck);
+				continue;
+			}
+			BlockPos rail = column.atY(deck);
+			BlockPos beyond = rail.relative(out);
+			BlockState there = level.getBlockState(rail);
+			net.minecraft.world.phys.shapes.VoxelShape shape = there.getCollisionShape(level, rail);
+			if (shape.isEmpty() || shape.max(Direction.Axis.Y) < 0.45 || there.canBeReplaced() || level.getBlockEntity(rail) instanceof RandomizableContainerBlockEntity
+				|| there.is(net.minecraft.tags.BlockTags.FENCE_GATES) || there.is(net.minecraft.tags.BlockTags.DOORS)
+				|| there.is(net.minecraft.tags.BlockTags.TRAPDOORS) || there.is(com.jaymoskingdoms.sailing.Sailing.HELM)
+				|| there.is(com.jaymoskingdoms.sailing.Sailing.CANNON)
+				|| level.getBlockState(rail.below()).getCollisionShape(level, rail.below()).isEmpty()
+				|| !clear(level, beyond) || !clear(level, beyond.above())) {
+				return null;
+			}
+			return new BlockPos[] {rail, inboard};
+		}
+		return null;
+	}
+
+	/**
+	 * The floor of the column {@code column} (its x and z; its y the top looked from): the height of the first place,
+	 * coming down through clear air, with something solid under it, dry, above the sea; MIN_VALUE if there's none.
+	 */
+	private static int floor(ServerLevel level, BlockPos column, int sea) {
+		for (int y = column.getY(); y > sea; y--) {
+			BlockPos at = column.atY(y);
+			if (!clear(level, at)) {
+				return Integer.MIN_VALUE;
+			}
+			BlockPos under = at.below();
+			if (!level.getBlockState(under).getCollisionShape(level, under).isEmpty()) {
+				return clear(level, at.above()) && level.getFluidState(under).isEmpty() ? y : Integer.MIN_VALUE;
+			}
+		}
+		return Integer.MIN_VALUE;
 	}
 
 	static String roleName(int role) {
@@ -183,7 +452,7 @@ final class SeaSites {
 	 * there for a player to try); null, nothing done, if no realm's harbour is in reach yet or she isn't where things
 	 * move (looked at again later).
 	 */
-	static @Nullable String smack(ServerLevel level, BoundingBox box) {
+	static @Nullable String smack(ServerLevel level, long ref, BoundingBox box) {
 		BlockPos center = box.getCenter();
 		if (!level.isPositionEntityTicking(center)) {
 			return null;
@@ -192,7 +461,7 @@ final class SeaSites {
 		if (realm == null) {
 			return null;
 		}
-		BlockPos helm = helm(level, box);
+		BlockPos helm = helmOf(level, ref, SMALL_SHIP, box);
 		return helm != null && Fishers.atSea(level, realm, helm, center) != null ? AWAY : MOORED;
 	}
 
