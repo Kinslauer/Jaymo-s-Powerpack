@@ -49,6 +49,10 @@ import org.jspecify.annotations.Nullable;
  * that can't land (onto a spike, out of the world) spills its things where it came down. Doors and beds break. A siege
  * camp's guns can bring a tower down this way, and what falls counts as breached for the realm's masons
  * ({@link Sieges#broken}).
+ * <p>
+ * Fire does it too (Andy, 2026-11-26, a clip of a burning house "literally crumbling"): each built block a fire burns
+ * away ({@link #burnt}, from {@code FireBlockBurnMixin}) is looked round the same way, and what it held up comes down
+ * still alight. Natural wood is left to {@link LooseWood}.
  */
 public final class Collapse {
 	/** How far round a blast (blocks, by its radius, plus this, at most this) and above and below it is looked at. */
@@ -67,6 +71,11 @@ public final class Collapse {
 	static final int HURT_MOST = 20;
 	/** The most blasts looked at a tick (the rest wait), and the most waiting (a chain of TNT past that isn't looked at). */
 	static final int CHECKS_PER_TICK = 4, WAITING_MOST = 24;
+	/** Burnt blocks wait in the same line, but never take more of it than this (blasts keep the rest). */
+	static final int FIRE_WAITING_MOST = 12;
+	/** How far round a burnt block is looked at (as a blast of this radius), and how long what falls burns (seconds). */
+	static final double FIRE_RADIUS = 1.0;
+	static final float FALLING_BURNS = 6.0F;
 	static final Identifier SUPPORT_BEAM = Identifier.fromNamespaceAndPath("jaymospowers", "support_beam");
 
 	private static final int AIR = 0, LAND = 1, BUILT = 2, BEAM = 3;
@@ -80,6 +89,8 @@ public final class Collapse {
 		final int sx, sy, sz;
 		/** What held before the blast. */
 		@Nullable BitSet before;
+		/** A fire's, not a blast's: what falls comes down burning. */
+		boolean fire;
 
 		Look(ServerLevel level, BlockPos min, int sx, int sy, int sz) {
 			this.level = level;
@@ -133,6 +144,31 @@ public final class Collapse {
 		Look look = new Look(level, min, 2 * reach + 1, top - min.getY() + 1, 2 * reach + 1);
 		look.before = held(look);
 		return look;
+	}
+
+	/**
+	 * Fire is about to burn away {@code state} at {@code pos}: what holds round it now, for {@link #after}. Null for
+	 * anything that isn't part of a building (the land, a living tree), or while many burnt blocks already wait.
+	 */
+	public static @Nullable Look burnt(ServerLevel level, BlockPos pos, BlockState state) {
+		if (fireWaiting() >= FIRE_WAITING_MOST || kind(level, pos, state) != BUILT) {
+			return null;
+		}
+		Look look = before(level, Vec3.atCenterOf(pos), FIRE_RADIUS);
+		if (look != null) {
+			look.fire = true;
+		}
+		return look;
+	}
+
+	private static int fireWaiting() {
+		int n = 0;
+		for (Look look : AFTER) {
+			if (look.fire) {
+				n++;
+			}
+		}
+		return n;
 	}
 
 	/** The blast {@code look} was taken for has broken its blocks: what lost its hold comes down (at the end of the tick). */
@@ -191,12 +227,15 @@ public final class Collapse {
 					if (kind != BUILT && kind != BEAM) {
 						continue;
 					}
-					drop(level, p.immutable(), state);
+					drop(level, p.immutable(), state, look.fire);
 					fell++;
 				}
 			}
 		}
-		if (fell > 0) {
+		if (fell > 0 && look.fire) {
+			Vec3 mid = Vec3.atCenterOf(look.min.offset(look.sx / 2, 0, look.sz / 2));
+			level.playSound(null, mid.x, mid.y + 2.0, mid.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 0.7F, 0.6F);
+		} else if (fell > 0) {
 			Vec3 mid = Vec3.atCenterOf(look.min.offset(look.sx / 2, 0, look.sz / 2));
 			level.playSound(null, mid.x, mid.y + 2.0, mid.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 0.8F, 0.5F);
 			level.playSound(null, mid.x, mid.y + 2.0, mid.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 1.0F, 0.5F);
@@ -204,7 +243,7 @@ public final class Collapse {
 	}
 
 	/** The block at {@code pos} comes down: as a falling block, a chest with what's in it; a door or bed just breaks. */
-	private static void drop(ServerLevel level, BlockPos pos, BlockState state) {
+	private static void drop(ServerLevel level, BlockPos pos, BlockState state, boolean burning) {
 		Sieges.broken(level, pos, state);
 		if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) || state.hasProperty(BlockStateProperties.BED_PART)) {
 			level.destroyBlock(pos, true);
@@ -234,6 +273,9 @@ public final class Collapse {
 		FallingBlockEntity falling = FallingBlockEntity.fall(level, pos, falls);
 		falling.setHurtsEntities(HURT, HURT_MOST);
 		falling.blockData = data;
+		if (burning) {
+			falling.igniteForSeconds(FALLING_BURNS);
+		}
 		if (!things.isEmpty()) {
 			CARRIED.add(new Carried(falling, level, things));
 		}
