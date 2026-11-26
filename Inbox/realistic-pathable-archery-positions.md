@@ -27,3 +27,4 @@ Gameplay/mechanics task. Likely touches archery AI, mob pathfinding, or player-a
 - 2026-11-25 23:25 YOUTH delegated this to apollo (Claude approved): archer pathing and elevated positions across AI systems
 - 2026-11-26 02:10 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-26 07:01 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-26 07:16 Text pass: PR #2220 added no player-visible strings (comments only). Added changes/kingdoms/realistic-pathable-archery.md (archers take reachable wall-walk and roof posts; posts need standing clearance; seats skip inaccessible roofs). Fixed the missing class brace in kingdoms/src/main/java/com/jaymoskingdoms/Seats.java and missing Direction/BlockTags imports in kingdoms/src/main/java/com/jaymoskingdoms/WallArchers.java so Kingdoms compiles. Kingdoms: build successful, pr_checks passed.
