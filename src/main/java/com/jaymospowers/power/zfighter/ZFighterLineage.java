@@ -253,6 +253,7 @@ public final class ZFighterLineage {
 		// (0.15.148) a Z Fighter's ape has a mind of its own: its rage, its fits, his primal
 		ApeRage.init();
 		ApeEarthwork.init();
+		ApeMoves.init();
 		// a Writ of Rebirth (Jaymo's Kingdoms), read while sneaking: the lineage is unmade and asked again
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
@@ -729,6 +730,7 @@ public final class ZFighterLineage {
 			com.jaymospowers.core.GiantTrample.tick(player, now);
 		}
 		ApeSmash.tick(player, now);
+		ApeMoves.tick(player, live, level, now);
 	}
 
 	/** One of the Great Ape's steps: the foot (left, then right) comes down like a stomp, shaking the ground and flinging what's near. */
@@ -856,6 +858,7 @@ public final class ZFighterLineage {
 			return;
 		}
 		player.removeAttached(ApeSmash.CHARGE);
+		ApeMoves.clear(player);
 		ApeGrab.end(player, live);
 		player.removeAttached(GREAT_APE);
 		ZFighterGoldenApe.ended(player);

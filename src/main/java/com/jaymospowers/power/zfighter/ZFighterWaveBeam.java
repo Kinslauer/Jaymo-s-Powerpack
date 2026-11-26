@@ -73,9 +73,32 @@ public final class ZFighterWaveBeam {
 	/** A beam stopped by a clash bursts with this share of its blast (the clash itself does the hurting). */
 	static final float CLASH_BURST = 0.6F;
 
+	// ---- staged beam firing (gather -> hold -> fire -> sustain -> end) ----
+	public static final int STAGE_NONE = 0;
+	public static final int STAGE_GATHER = 1;
+	public static final int STAGE_HOLD = 2;
+	public static final int STAGE_FIRE = 3;
+	public static final int STAGE_SUSTAIN = 4;
+	public static final int STAGE_END = 5;
+	/** Sustain: base hold ticks once the beam reaches its tip, max ticks while V is held, damage tick interval, extra ki per tick. */
+	static final int SUSTAIN_BASE_TICKS = 16;
+	static final int SUSTAIN_MAX_TICKS = 48;
+	static final int SUSTAIN_HIT_EVERY = 5;
+	static final float SUSTAIN_KI_PER_TICK = 0.35F;
+	static final float SUSTAIN_DAMAGE_FACTOR = 0.28F;
+	/** How smoothly a sustained beam tracks the player's look while held. */
+	static final double SUSTAIN_AIM_TURN = 0.14;
+	/** Cool-off stage after the beam finishes firing. */
+	static final int END_TICKS = 10;
+	/** Extra tolerance around the beam cylinder when highlighting targets in red. */
+	static final double TARGET_HIGHLIGHT_PAD = 0.35;
+
 	/** He's holding the firing pose, for everyone's client. Not saved. */
 	public static final AttachmentType<Boolean> FIRING = AttachmentRegistry.create(JaymosPowers.id("zfighter_wave_firing"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Current beam stage ({@link #STAGE_NONE}..{@link #STAGE_END}), for everyone's client. Not saved. */
+	public static final AttachmentType<Integer> STAGE = AttachmentRegistry.create(JaymosPowers.id("zfighter_beam_stage"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
 	/**
 	 * What a fired beam is: its reach and speed (blocks, blocks a tick), how thick, the hurt and push of what it reaches,
@@ -91,13 +114,18 @@ public final class ZFighterWaveBeam {
 		final ServerLevel level;
 		final UUID owner;
 		final int id;
-		final Vec3 start;
-		final Vec3 dir;
+		Vec3 start;
+		Vec3 dir;
 		final Spec spec;
 		final int maxAge;
 		final Set<Integer> struck = new HashSet<>();
 		double length;
 		int age;
+		int stage = STAGE_FIRE;
+		int sustainTicks;
+		int endTicks;
+		boolean holding;
+		boolean burstDone;
 
 		Wave(ServerLevel level, UUID owner, int id, Vec3 start, Vec3 dir, Spec spec) {
 			this.level = level;
@@ -106,7 +134,7 @@ public final class ZFighterWaveBeam {
 			this.start = start;
 			this.dir = dir;
 			this.spec = spec;
-			this.maxAge = (int)Math.ceil(spec.range() / spec.speed()) + BeamClash.MAX_TICKS + LIFE_SLACK;
+			this.maxAge = (int)Math.ceil(spec.range() / spec.speed()) + SUSTAIN_MAX_TICKS + END_TICKS + BeamClash.MAX_TICKS + LIFE_SLACK;
 		}
 
 		Vec3 head() {
@@ -162,6 +190,32 @@ public final class ZFighterWaveBeam {
 		return Boolean.TRUE.equals(player.getAttached(FIRING));
 	}
 
+	/** Current beam stage ({@link #STAGE_NONE}..{@link #STAGE_END}) on both sides. */
+	public static int stage(Player player) {
+		Integer s = player.getAttached(STAGE);
+		return s == null ? STAGE_NONE : s;
+	}
+
+	/** Sets the synced beam stage (only sends when it changes). */
+	static void setStage(ServerPlayer player, int stage) {
+		Integer now = player.getAttached(STAGE);
+		if (stage == STAGE_NONE) {
+			if (now != null) {
+				player.removeAttached(STAGE);
+			}
+		} else if (now == null || now != stage) {
+			player.setAttached(STAGE, stage);
+		}
+	}
+
+	/** V held while the beam is firing extends the sustain stage. */
+	static void holdInput(ServerPlayer player, boolean down) {
+		Wave wave = WAVES.get(player.getUUID());
+		if (wave != null) {
+			wave.holding = down;
+		}
+	}
+
 	/** A wave's strength in a clash from how full it was (his ki power is added live, {@link #strength(ServerPlayer)}). */
 	static float strength(float charge) {
 		return Mth.lerp(charge, CLASH_CHARGE_EMPTY, CLASH_CHARGE_FULL);
@@ -171,10 +225,14 @@ public final class ZFighterWaveBeam {
 	static void fire(ServerPlayer player, Vec3 start, Vec3 dir, Spec spec) {
 		Wave old = WAVES.remove(player.getUUID());
 		if (old != null) {
-			burst(player, old, old.head(), false);
+			if (!old.burstDone) {
+				detonate(player, old, old.head(), false);
+			}
+			sendTargets(player, new int[0]);
 		}
 		WAVES.put(player.getUUID(), new Wave(player.level(), player.getUUID(), player.getId(), start, dir.normalize(), spec));
 		player.setAttached(FIRING, true);
+		setStage(player, STAGE_FIRE);
 		ZFighterPower.refresh(player, ZFighterPower.live(player));
 	}
 
@@ -196,6 +254,7 @@ public final class ZFighterWaveBeam {
 	private static void stop(ServerPlayer player) {
 		Wave wave = WAVES.remove(player.getUUID());
 		if (wave != null) {
+			sendTargets(player, new int[0]);
 			burst(player, wave, wave.head(), true);
 		}
 	}
@@ -215,23 +274,31 @@ public final class ZFighterWaveBeam {
 				WAVES.remove(wave.owner);
 				send(wave, wave.head(), true);
 				if (player != null) {
+					sendTargets(player, new int[0]);
 					end(player);
 				}
 				continue;
 			}
 			if (!advance(player, wave)) {
 				WAVES.remove(wave.owner);
-				burst(player, wave, wave.head(), false);
+				if (!wave.burstDone) {
+					detonate(player, wave, wave.head(), false);
+				}
+				sendTargets(player, new int[0]);
+				end(player);
 			}
 		}
 	}
 
-	/** One tick of flight; false once it has stopped. */
+	/** One tick of the beam's stages (FIRE -> SUSTAIN -> END); false once END finishes. */
 	private static boolean advance(ServerPlayer player, Wave wave) {
 		ServerLevel level = wave.level;
 		Spec spec = wave.spec;
 		wave.age++;
-		boolean done = false;
+		if (wave.stage == STAGE_END) {
+			wave.endTicks++;
+			return wave.endTicks < END_TICKS;
+		}
 		if (BeamClash.isClashing(player)) {
 			// held at the knot, following it either way; the ki behind it burns
 			wave.length = Math.max(0.0, BeamClash.clamp(player, wave.start, wave.length + spec.speed()));
@@ -239,7 +306,18 @@ public final class ZFighterWaveBeam {
 			if (!spec.ape() && !player.isCreative() && !live.raging()) {
 				live.ki = Math.max(0.0F, live.ki - CLASH_KI_DRAIN);
 			}
-		} else {
+			Vec3 head = wave.head();
+			strike(player, wave, head);
+			sparks(wave, head);
+			sendTargets(player, collectTargets(player, wave, head));
+			if (wave.age % HUM_EVERY == 0) {
+				Soundscape.play(level, head, SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.4F).pitched(spec.pitch()), ZFighterKi.KI_SURGE);
+			}
+			send(wave, head, false);
+			return true;
+		}
+		if (wave.stage == STAGE_FIRE) {
+			boolean reached = false;
 			double next = Math.min(spec.range(), wave.length + spec.speed());
 			if (!spec.pierces()) {
 				Vec3 a = wave.head();
@@ -247,25 +325,115 @@ public final class ZFighterWaveBeam {
 				BlockHitResult hit = level.clip(new ClipContext(a, b, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 				if (hit.getType() != HitResult.Type.MISS) {
 					next = wave.start.distanceTo(hit.getLocation());
-					done = true;
+					reached = true;
 					com.jaymospowers.core.BeamScars.touch(player, hit, spec.radius());
 				}
 			}
 			wave.length = next;
 			// a wave skimming soft ground leaves a groove along its path
 			com.jaymospowers.core.BeamScars.under(player, wave.start.add(wave.dir.scale(next)), spec.radius());
-			done |= wave.length >= spec.range() - 1.0E-3 || wave.age >= wave.maxAge;
+			reached |= wave.length >= spec.range() - 1.0E-3 || wave.age >= wave.maxAge;
+			Vec3 head = wave.head();
+			strike(player, wave, head);
+			sparks(wave, head);
+			sendTargets(player, collectTargets(player, wave, head));
+			if (wave.age % HUM_EVERY == 0) {
+				Soundscape.play(level, head, SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.4F).pitched(spec.pitch()), ZFighterKi.KI_SURGE);
+			}
+			send(wave, head, false);
+			if (reached) {
+				wave.stage = STAGE_SUSTAIN;
+				setStage(player, STAGE_SUSTAIN);
+				MagicFx.ring(level, head, (float)Math.max(1.5, spec.radius() * 1.8), spec.color());
+			}
+			return true;
 		}
+		// STAGE_SUSTAIN: hold the beam on target, gently following aim, burning foes inside and outlining them red
+		wave.sustainTicks++;
+		wave.start = hands(player, wave);
+		Vec3 aim = player.getViewVector(1.0F);
+		wave.dir = wave.dir.lerp(aim, SUSTAIN_AIM_TURN).normalize();
+		double reach = spec.range();
+		if (!spec.pierces()) {
+			Vec3 endPos = wave.start.add(wave.dir.scale(reach));
+			BlockHitResult hit = level.clip(new ClipContext(wave.start, endPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+			if (hit.getType() != HitResult.Type.MISS) {
+				reach = wave.start.distanceTo(hit.getLocation());
+				if (wave.sustainTicks % 4 == 0) {
+					com.jaymospowers.core.BeamScars.touch(player, hit, spec.radius());
+				}
+			}
+		}
+		wave.length = reach;
 		Vec3 head = wave.head();
 		strike(player, wave, head);
+		if (wave.sustainTicks % SUSTAIN_HIT_EVERY == 0) {
+			sustainStrike(player, wave, head);
+		}
 		sparks(wave, head);
+		sendTargets(player, collectTargets(player, wave, head));
 		if (wave.age % HUM_EVERY == 0) {
-			Soundscape.play(level, head, SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.4F).pitched(spec.pitch()), ZFighterKi.KI_SURGE);
+			Soundscape.play(level, head, SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.5F).pitched(spec.pitch() * 1.05F), ZFighterKi.KI_SURGE);
 		}
-		if (!done) {
+		boolean keep = wave.sustainTicks < SUSTAIN_BASE_TICKS;
+		if (!keep && wave.holding && wave.sustainTicks < SUSTAIN_MAX_TICKS) {
+			ZFighterPower.Live live = ZFighterPower.live(player);
+			if (spec.ape() || player.isCreative() || live.raging() || live.ki >= SUSTAIN_KI_PER_TICK) {
+				if (!spec.ape() && !player.isCreative() && !live.raging()) {
+					live.ki = Math.max(0.0F, live.ki - SUSTAIN_KI_PER_TICK);
+				}
+				keep = true;
+			}
+		}
+		if (keep && wave.age < wave.maxAge) {
 			send(wave, head, false);
+			return true;
 		}
-		return !done;
+		// transition into STAGE_END: burst at tip, start client fade, clear red outlines, hold cool-off pose briefly
+		detonate(player, wave, head, false);
+		sendTargets(player, new int[0]);
+		wave.stage = STAGE_END;
+		wave.endTicks = 0;
+		setStage(player, STAGE_END);
+		return true;
+	}
+
+	/** Repeated damage pulses on foes caught inside a sustained beam. */
+	private static void sustainStrike(ServerPlayer player, Wave wave, Vec3 head) {
+		Spec spec = wave.spec;
+		ServerLevel level = wave.level;
+		DamageSource source = ZFighterKi.source(player);
+		float tickDamage = Math.max(1.0F, spec.damage() * SUSTAIN_DAMAGE_FACTOR);
+		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, new AABB(wave.start, head).inflate(spec.radius() + 1.0),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
+			if (ZFighterKi.distanceToSegment(target.getBoundingBox().getCenter(), wave.start, head) > spec.radius() + target.getBbWidth() * 0.5) {
+				continue;
+			}
+			target.setInvulnerableTime(0);
+			target.hurtServer(level, source, tickDamage);
+			ZFighterKi.push(target, wave.dir, spec.push() * 0.3, 0.08);
+		}
+	}
+
+	/** Entity ids of living targets currently inside the beam cylinder (sent to the firer to outline red). */
+	private static int[] collectTargets(ServerPlayer player, Wave wave, Vec3 head) {
+		Spec spec = wave.spec;
+		List<LivingEntity> inside = wave.level.getEntitiesOfClass(LivingEntity.class, new AABB(wave.start, head).inflate(spec.radius() + 1.5),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand)
+				&& ZFighterKi.distanceToSegment(e.getBoundingBox().getCenter(), wave.start, head)
+					<= spec.radius() + e.getBbWidth() * 0.5 + TARGET_HIGHLIGHT_PAD);
+		if (inside.isEmpty()) {
+			return new int[0];
+		}
+		int[] ids = new int[Math.min(inside.size(), 64)];
+		for (int i = 0; i < ids.length; i++) {
+			ids[i] = inside.get(i).getId();
+		}
+		return ids;
+	}
+
+	private static void sendTargets(ServerPlayer player, int[] ids) {
+		ServerPlayNetworking.send(player, new ZFighterNet.BeamTargets(ids));
 	}
 
 	/** Whatever the beam's body now reaches is hurt, pushed and chilled, once. */
@@ -322,6 +490,16 @@ public final class ZFighterWaveBeam {
 
 	/** Where the head stops, it bursts (the beam's own blast); a clash's end only shakes the ground with it. */
 	private static void burst(ServerPlayer player, Wave wave, Vec3 at, boolean byClash) {
+		detonate(player, wave, at, byClash);
+		end(player);
+	}
+
+	/** Fires the beam's tip blast/shatter and starts the client fade (once per wave). */
+	private static void detonate(ServerPlayer player, Wave wave, Vec3 at, boolean byClash) {
+		if (wave.burstDone) {
+			return;
+		}
+		wave.burstDone = true;
 		ServerLevel level = wave.level;
 		Spec spec = wave.spec;
 		send(wave, at, true);
@@ -335,7 +513,6 @@ public final class ZFighterWaveBeam {
 			level.playSound(null, at.x, at.y, at.z, spec.style() == ZFighterKi.NEEDLE ? SoundEvents.AMETHYST_BLOCK_BREAK : SoundEvents.BEACON_DEACTIVATE,
 				SoundSource.PLAYERS, 1.2F, spec.style() == ZFighterKi.NEEDLE ? 1.6F : 1.2F);
 		}
-		end(player);
 	}
 
 	/** Out of the pose, no longer slowed. */
@@ -344,6 +521,7 @@ public final class ZFighterWaveBeam {
 			return;
 		}
 		player.removeAttached(FIRING);
+		setStage(player, STAGE_NONE);
 		if (Powers.has(player, ZFighterPower.INSTANCE)) {
 			ZFighterPower.refresh(player, ZFighterPower.live(player));
 		}

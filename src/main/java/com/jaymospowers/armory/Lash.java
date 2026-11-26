@@ -115,6 +115,11 @@ public final class Lash {
 	 * into, and the short jab a tap throws.
 	 */
 	public static final byte WIND = 12, JAB = 13, SWING = 14;
+	/**
+	 * Chain axe chain-blade moves: yanking a hooked foe straight to you ({@link #PULL}), and a 360-degree spinning
+	 * cyclone of chained blades all around you ({@link #CYCLONE}).
+	 */
+	public static final byte PULL = 15, CYCLONE = 16;
 
 	// ---- the flail --------------------------------------------------------------------------------------------------
 	/**
@@ -279,6 +284,19 @@ public final class Lash {
 	static final float CHOP_SHARE = 1.0F;
 	static final double CHOP_HIT = 0.35;
 
+	// ---- chain blades: pull & cyclone (chain axe) -------------------------------------------------------------------
+	/** Pulling a hooked foe straight to you (Sneak+use while embedded, or Sneak+release throw). */
+	public static final int PULL_TICKS = 6;
+	static final double PULL_SPEED = 1.45, PULL_UP = 0.36, PULL_MAX = 2.4;
+	static final float PULL_SHARE = 0.35F;
+	static final int PULL_SLOW_TICKS = 30;
+	/** Spinning cyclone of chained blades all around you (Sneak+left-click with Chain Axe). */
+	public static final int CYCLONE_TICKS = 36, CYCLONE_HIT_EVERY = 6, CYCLONE_COOLDOWN = 80;
+	public static final double CYCLONE_RADIUS = 3.6, CYCLONE_SPIN = 0.85;
+	static final float CYCLONE_SHARE = 0.42F, CYCLONE_EXHAUSTION = 0.03F;
+	static final double CYCLONE_PULL = 0.25, CYCLONE_TANGENT = 0.48, CYCLONE_LIFT = 0.12;
+	static final int CYCLONE_COLOR = 0xE8EEF5;
+
 	// ---- the burning chain (a Smoke user's) -------------------------------------------------------------------------
 	/**
 	 * A Smoke user's flail or whip burns: whatever the head hits is set alight for this many seconds, and one it holds
@@ -400,6 +418,8 @@ public final class Lash {
 		boolean swipe;
 		/** The chain axe was ripped out of what it was buried in: a longer wait before it can be swung again. */
 		boolean ripped;
+		/** The chain axe finished a spinning cyclone: uses {@link #CYCLONE_COOLDOWN}. */
+		boolean cyclone;
 
 		Run(ServerPlayer player) {
 			this.player = player;
@@ -583,6 +603,11 @@ public final class Lash {
 				Vec3 arc = chopPoint(player, state, t, partialTick);
 				yield t < SWEEP_LEAD ? state.from().lerp(arc, smooth(t / SWEEP_LEAD)) : arc;
 			}
+			case CYCLONE -> cyclonePoint(player, t, partialTick, 0.0);
+			case PULL -> {
+				Entity target = player.level().getEntity(state.target());
+				yield target == null ? state.aim() : target.getPosition(partialTick).add(0.0, target.getBbHeight() * 0.55, 0.0);
+			}
 			case SNAG, HEAVE, YANK -> {
 				Entity target = player.level().getEntity(state.target());
 				yield target == null ? state.aim() : target.getPosition(partialTick).add(0.0, target.getBbHeight() * 0.55, 0.0);
@@ -667,6 +692,15 @@ public final class Lash {
 	static double chopAngle(State state, double t) {
 		double s = Mth.clamp(t / CHOP_TICKS, 0.0, 1.0);
 		return Mth.lerp(s * s, state.shape().z, CHOP_END);
+	}
+
+	/** One blade tip of the Chain Axe's spinning cyclone, offset by {@code phaseOffset} radians. */
+	public static Vec3 cyclonePoint(Player player, double t, float partialTick, double phaseOffset) {
+		double out = Mth.clamp(t / 4.0, 0.0, 1.0);
+		double r = Mth.lerp(out, 0.8, CYCLONE_RADIUS) * player.getScale();
+		double a = t * CYCLONE_SPIN + phaseOffset;
+		double y = player.getBbHeight() * 0.52 + 0.22 * Math.sin(t * 0.45 + phaseOffset);
+		return player.getPosition(partialTick).add(Math.cos(a) * r, y, Math.sin(a) * r);
 	}
 
 	/** (0.19.73) A swipe's plane: ahead along yaw and pitch (radians), and the way it travels (across and up as you see it). */
@@ -824,6 +858,8 @@ public final class Lash {
 			// the chop: the arm goes up with the head, then comes down with it
 			case HEW -> t < SWEEP_LEAD ? Mth.lerp((float)smooth(t / SWEEP_LEAD), REST_RAISE, OVERHEAD_RAISE)
 				: Mth.lerp((float)Mth.clamp((chopAngle(state, t) - state.shape().z) / (CHOP_END - state.shape().z), 0.0, 1.0), OVERHEAD_RAISE, DROP_RAISE);
+			case CYCLONE -> WHIRL_RAISE;
+			case PULL -> DROP_RAISE;
 			default -> Mth.lerp((float)smooth(Math.min(1.0, t / RETURN_TICKS)), DROP_RAISE, REST_RAISE);
 		};
 	}
@@ -1056,6 +1092,17 @@ public final class Lash {
 					back(player, state, now);
 				}
 			}
+			case CYCLONE -> {
+				cycloneStep(run, state, t);
+				if (t >= CYCLONE_TICKS && player.getAttached(STATE) != null && player.getAttached(STATE).phase() == CYCLONE) {
+					back(player, state, now);
+				}
+			}
+			case PULL -> {
+				if (t >= PULL_TICKS) {
+					back(player, state, now);
+				}
+			}
 			case YANK -> {
 				if (t >= YANK_TICKS) {
 					back(player, state, now);
@@ -1103,7 +1150,8 @@ public final class Lash {
 				Vec3 at = aim == null ? player.getEyePosition().add(player.getLookAngle().scale(com.jaymospowers.mortal.ChainAxeItem.CHAIN))
 					: aim instanceof EntityHitResult hit ? hit.getEntity().getBoundingBox().getCenter() : aim.getLocation();
 				double flight = Math.max(2.0, Math.ceil(head.distanceTo(at) / com.jaymospowers.mortal.ChainAxeItem.THROW_SPEED));
-				player.setAttached(STATE, state.to(THROW, now, aim instanceof EntityHitResult hit ? hit.getEntity().getId() : -1, head, at, new Vec3(flight, 0.0, 0.0)));
+				double hookPull = player.isShiftKeyDown() ? 1.0 : 0.0;
+				player.setAttached(STATE, state.to(THROW, now, aim instanceof EntityHitResult hit ? hit.getEntity().getId() : -1, head, at, new Vec3(flight, hookPull, 0.0)));
 				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
 				return;
 			}
@@ -1417,6 +1465,10 @@ public final class Lash {
 			target.setInvulnerableTime(0);
 			if (strike(player, target, flailDamage(player) * (SLAM_SHARE + SLAM_SPIN_BONUS * run.spin), false) && target.isAlive()
 				&& isChainAxe(player.getMainHandItem())) {
+				if (state.shape().y > 0.5) {
+					chainPull(run, state, target);
+					return;
+				}
 				player.getMainHandItem().set(com.jaymospowers.mortal.Mortal.BURIED_IN, target.getUUID());
 				player.setAttached(STATE, state.to(EMBED, now, target.getId(), at, at));
 				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 8, 0.2, 0.2, 0.2, 0.25);
@@ -1489,13 +1541,50 @@ public final class Lash {
 			return;
 		}
 		ServerLevel level = player.level();
-		if (level.getEntity(state.target()) instanceof LivingEntity target && target.isAlive()
-			&& target.distanceTo(player) > com.jaymospowers.mortal.ChainAxeItem.FREE_RANGE) {
-			rip(run, state, target);
-			return;
+		if (level.getEntity(state.target()) instanceof LivingEntity target && target.isAlive()) {
+			if (player.isShiftKeyDown()) {
+				chainPull(run, state, target);
+				return;
+			}
+			if (target.distanceTo(player) > com.jaymospowers.mortal.ChainAxeItem.FREE_RANGE) {
+				rip(run, state, target);
+				return;
+			}
 		}
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 0.8F, 1.2F);
 		back(player, state, level.getGameTime());
+	}
+
+	/** Yanks a hooked foe straight to the wielder on the chain and frees the embedded head. */
+	private static void chainPull(Run run, State state, LivingEntity target) {
+		ServerPlayer player = run.player;
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Vec3 at = target.getBoundingBox().getCenter();
+		if (state.phase() == EMBED) {
+			player.getMainHandItem().remove(com.jaymospowers.mortal.Mortal.BURIED_IN);
+			ripping = true;
+			try {
+				target.setInvulnerableTime(0);
+				target.hurtServer(level, level.damageSources().playerAttack(player), flailDamage(player) * PULL_SHARE);
+			} finally {
+				ripping = false;
+			}
+		}
+		Vec3 to = player.position().subtract(target.position());
+		double flatDist = Math.hypot(to.x, to.z);
+		if (flatDist > 0.4) {
+			double speed = Math.min(PULL_MAX, PULL_SPEED + flatDist * 0.12);
+			Vec3 vel = new Vec3(to.x / flatDist * speed, Math.max(PULL_UP, Math.min(0.65, to.y * 0.18 + PULL_UP)), to.z / flatDist * speed);
+			shove(target, vel.subtract(target.getDeltaMovement()));
+		}
+		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, PULL_SLOW_TICKS, 1), player);
+		player.setAttached(STATE, state.to(PULL, now, target.getId(), at, at));
+		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 8, 0.25, 0.25, 0.25, 0.2);
+		com.jaymospowers.core.fx.MagicFx.stroke(level, at, hand(player, 1.0F), 0.7F, CYCLONE_COLOR);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 1.1F, 1.2F);
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.9F, 1.1F);
+		Shakes.send(player, 0.35F, at);
 	}
 
 	/** The buried head is torn out of {@code target} by the chain: a second wound, and a longer wait for the axe. */
@@ -1545,7 +1634,8 @@ public final class Lash {
 		}
 		ItemStack held = player.getMainHandItem();
 		if (!run.swipe && (state.kind() == FLAIL ? isFlail(held) : isWhip(held))) {
-			player.getCooldowns().addCooldown(held, run.ripped ? com.jaymospowers.mortal.ChainAxeItem.RIP_WAIT : state.kind() == FLAIL ? FLAIL_COOLDOWN : WHIP_COOLDOWN);
+			int wait = run.cyclone ? CYCLONE_COOLDOWN : run.ripped ? com.jaymospowers.mortal.ChainAxeItem.RIP_WAIT : state.kind() == FLAIL ? FLAIL_COOLDOWN : WHIP_COOLDOWN;
+			player.getCooldowns().addCooldown(held, wait);
 		}
 	}
 
@@ -1571,7 +1661,11 @@ public final class Lash {
 		Aim press = press(player, kind);
 		Vec3 head = following ? head(player, was, now, 1.0F) : player.position().add(press.head());
 		if (isChainAxe(held)) {
-			hew(player, attacked, head);
+			if (player.isShiftKeyDown()) {
+				cyclone(player, head);
+			} else {
+				hew(player, attacked, head);
+			}
 			return;
 		}
 		Run run = new Run(player);
@@ -1805,6 +1899,72 @@ public final class Lash {
 			level.playSound(null, head.x, head.y, head.z, SoundEvents.AXE_STRIP, SoundSource.PLAYERS, 0.8F, 0.7F);
 			level.sendParticles(ParticleTypes.CRIT, head.x, head.y, head.z, 4, 0.1, 0.05, 0.1, 0.05);
 			back(player, state, now);
+		}
+	}
+
+	/** Sneak + charged left-click with the Chain Axe: launches a 360-degree spinning cyclone of chained blades around you. */
+	private static void cyclone(ServerPlayer player, Vec3 head) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Run run = new Run(player);
+		run.held = false;
+		run.swipe = false;
+		run.cyclone = true;
+		RUNS.put(player.getUUID(), run);
+		player.setAttached(STATE, new State(FLAIL, CYCLONE, now, -1, head, Vec3.ZERO, Vec3.ZERO));
+		player.getMainHandItem().hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+		com.jaymospowers.core.fx.MagicFx.ring(level, player.position().add(0.0, 0.25, 0.0), (float)CYCLONE_RADIUS, CYCLONE_COLOR);
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.0F, 1.3F);
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.1F, 0.75F);
+	}
+
+	/** One tick of the Chain Axe spinning cyclone: twin sweeping arcs slicing and swirling all nearby foes. */
+	private static void cycloneStep(Run run, State state, long t) {
+		ServerPlayer player = run.player;
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (!player.isCreative()) {
+			player.causeFoodExhaustion(CYCLONE_EXHAUSTION);
+		}
+		if (t >= 1) {
+			Vec3 a0 = cyclonePoint(player, t - 1, 1.0F, 0.0);
+			Vec3 a1 = cyclonePoint(player, t, 1.0F, 0.0);
+			Vec3 b0 = cyclonePoint(player, t - 1, 1.0F, Math.PI);
+			Vec3 b1 = cyclonePoint(player, t, 1.0F, Math.PI);
+			if (t % 2 == 0) {
+				com.jaymospowers.core.fx.MagicFx.stroke(level, a0, a1, 0.85F, CYCLONE_COLOR);
+				com.jaymospowers.core.fx.MagicFx.stroke(level, b0, b1, 0.85F, CYCLONE_COLOR);
+			}
+			if (t % 4 == 0) {
+				level.sendParticles(ParticleTypes.SWEEP_ATTACK, a1.x, a1.y, a1.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(ParticleTypes.SWEEP_ATTACK, b1.x, b1.y, b1.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.85F, 0.9F + 0.15F * (t % 8 == 0 ? 1.0F : 0.0F));
+				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.55F, 1.35F);
+			}
+		}
+		double radius = CYCLONE_RADIUS * player.getScale();
+		float damage = flailDamage(player) * CYCLONE_SHARE;
+		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius, 1.2, radius),
+			e -> struck(player, e))) {
+			Vec3 diff = other.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+			double dist = diff.length();
+			if (dist > radius + other.getBbWidth() * 0.5) {
+				continue;
+			}
+			Long last = run.glanced.get(other.getId());
+			if (last != null && now - last < CYCLONE_HIT_EVERY) {
+				continue;
+			}
+			run.glanced.put(other.getId(), now);
+			other.setInvulnerableTime(0);
+			if (strike(player, other, damage, guarding(other, player))) {
+				Vec3 out = dist < 1.0E-3 ? ahead(player) : diff.scale(1.0 / dist);
+				Vec3 tangent = new Vec3(-out.z, 0.0, out.x);
+				Vec3 push = tangent.scale(CYCLONE_TANGENT).subtract(out.scale(CYCLONE_PULL));
+				shove(other, new Vec3(push.x, CYCLONE_LIFT, push.z));
+				Vec3 mid = other.getBoundingBox().getCenter();
+				level.sendParticles(ParticleTypes.CRIT, mid.x, mid.y, mid.z, 4, 0.2, 0.2, 0.2, 0.15);
+			}
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.zfighter.mixin;
 
+import com.jaymospowers.client.power.zfighter.ZFighterBeams;
 import com.jaymospowers.client.power.zfighter.ZFighterKiSenseClient;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -16,7 +17,10 @@ abstract class ZFighterKiSenseOutlineMixin {
 		method = "extractRenderState(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/entity/state/EntityRenderState;F)V",
 		at = @At("TAIL"))
 	private void jaymospowers$kiSense(Entity entity, EntityRenderState state, float partialTicks, CallbackInfo ci) {
-		int color = ZFighterKiSenseClient.color(entity);
+		int color = ZFighterBeams.outlineColor(entity);
+		if (color == 0) {
+			color = ZFighterKiSenseClient.color(entity);
+		}
 		if (color == 0) {
 			color = com.jaymospowers.client.power.zfighter.ZFighterPartnerClient.color(entity);
 		}

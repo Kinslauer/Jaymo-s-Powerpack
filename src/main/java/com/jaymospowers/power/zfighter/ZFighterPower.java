@@ -439,6 +439,8 @@ public final class ZFighterPower implements Power {
 		ZFighterKi.init();
 		ZFighterWaveBeam.init();
 		ZFighterHands.init();
+		ZFighterInstantStep.init();
+		ZFighterOverburn.init();
 		ZFighterDisc.init();
 		ZFighterItems.init();
 		ZFighterSparring.init();
@@ -614,12 +616,16 @@ public final class ZFighterPower implements Power {
 			endFlight(player, live);
 		}
 		ZFighterCombo.stop(player);
+		ZFighterInstantStep.forget(player);
+		ZFighterOverburn.clear(player);
 		ZFighterLegendHeart.downed(player);
 	}
 
 	@Override
 	public void onLost(ServerPlayer player) {
 		ZFighterLegendHeart.forget(player);
+		ZFighterInstantStep.forget(player);
+		ZFighterOverburn.clear(player);
 		Live live = LIVE.remove(player.getUUID());
 		if (live != null && live.flying) {
 			live.flying = false;
@@ -645,6 +651,8 @@ public final class ZFighterPower implements Power {
 		remove(player, Attributes.SCALE, ZFighterFusion.SCALE_ID);
 		player.removeAttached(ZFighterGuard.GUARD);
 		player.removeAttached(ZFighterWaveBeam.FIRING);
+		player.removeAttached(ZFighterWaveBeam.STAGE);
+		player.removeAttached(ZFighterKiSense.LEARNED);
 		ZFighterCombo.drop(player);
 		player.removeAttached(ZFighterLineage.LINEAGE);
 		player.removeAttached(ZFighterLineage.TAIL_WRAPPED);
@@ -745,6 +753,11 @@ public final class ZFighterPower implements Power {
 
 		ZFighterKi.tickWave(player, live);
 		ZFighterKi.tickBarrage(player, live);
+		if (live.waveFrom < 0 && !ZFighterWaveBeam.out(player) && ZFighterWaveBeam.stage(player) != ZFighterWaveBeam.STAGE_NONE) {
+			ZFighterWaveBeam.setStage(player, ZFighterWaveBeam.STAGE_NONE);
+		}
+		ZFighterInstantStep.tick(player, live);
+		ZFighterOverburn.tick(player, live);
 		ZFighterHands.sync(player, live);
 		ZFighterTechniques.tickBarrier(player, live);
 		ZFighterTechniques.tickSpirit(player, live);
@@ -844,18 +857,36 @@ public final class ZFighterPower implements Power {
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		Live live = live(player);
 		if (key == PowerKey.ABILITY_3 && ZFighterWaveBeam.out(player)) {
-			// his beam is out: V only pushes it, if it has locked in a clash
+			// his beam is out: V extends sustain and pushes if it has locked in a clash
+			ZFighterWaveBeam.holdInput(player, down);
 			com.jaymospowers.core.BeamClash.input(player, down);
 			return;
 		}
-		if (ZFighterLineage.ape(player) && key != PowerKey.ABILITY_1) {
-			// the Great Ape has no techniques: only his fists, and the beam from his mouth on V
-			if (key == PowerKey.ABILITY_3 && down && ready(player, ZFighterState.WAVE) && ZFighterKi.apeBeam(player, live)) {
-				cooldown(player, ZFighterState.WAVE, ZFighterLineage.APE_BEAM_COOLDOWN);
-			}
-			// G: the earth-splitter, B: the ring-breaker (ApeEarthwork)
-			if (down && (key == PowerKey.ABILITY_2 || key == PowerKey.ABILITY_4)) {
-				ApeEarthwork.stomp(player, live, key == PowerKey.ABILITY_2);
+		if (ZFighterLineage.ape(player)) {
+			// Great Ape move set: R roar, V mouth beam, G earth-splitter / Sneak+G boulder throw, B ring-breaker / Sneak+B or airborne B leap smash
+			if (down) {
+				switch (key) {
+					case ABILITY_1 -> ApeMoves.roar(player, live);
+					case ABILITY_2 -> {
+						if (player.isShiftKeyDown()) {
+							ApeMoves.boulderThrow(player, live);
+						} else {
+							ApeEarthwork.stomp(player, live, true);
+						}
+					}
+					case ABILITY_3 -> {
+						if (ready(player, ZFighterState.WAVE) && ZFighterKi.apeBeam(player, live)) {
+							cooldown(player, ZFighterState.WAVE, ZFighterLineage.APE_BEAM_COOLDOWN);
+						}
+					}
+					case ABILITY_4 -> {
+						if (player.isShiftKeyDown() || !player.onGround()) {
+							ApeMoves.leapSmash(player, live);
+						} else {
+							ApeEarthwork.stomp(player, live, false);
+						}
+					}
+				}
 			}
 			sync(player, live, maxKi(player));
 			return;
@@ -929,6 +960,8 @@ public final class ZFighterPower implements Power {
 					if (ready(player, ZFighterState.STEP) && ZFighterLineage.heal(player, live)) {
 						cooldown(player, ZFighterState.STEP, ZFighterLineage.HEAL_COOLDOWN);
 					}
+				} else if (down && (ZFighterKiSense.isOn(player) || player.isShiftKeyDown()) && ZFighterInstantStep.tryStart(player, live)) {
+					// Instant Step: two fingers to the brow, blink ahead (or behind sighted foe when sneaking)
 				} else if (down && ready(player, ZFighterState.STEP) && ZFighterHooks.flashStepStamina(player) && ZFighterKi.step(player, live)) {
 					cooldown(player, ZFighterState.STEP, ZFighterKi.STEP_COOLDOWN);
 				}
@@ -1783,6 +1816,7 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.SCALE, ZFighterFusion.SCALE_ID, ZFighterFusion.scale(player), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		// (0.17.50) the golden ape, the legendary line's bulk, False Super's flicker
 		ZFighterForms.attributes(player, live);
+		ZFighterOverburn.attributes(player);
 	}
 
 	/** What his bare fists add to a punch: mastery, every foe that ever beat him, ascension and trained Strength. */
@@ -1839,6 +1873,8 @@ public final class ZFighterPower implements Power {
 	/** Forgets the live state (a death: the next life starts with no ki, on the ground, not Super). */
 	static void forget(ServerPlayer player) {
 		LIVE.remove(player.getUUID());
+		ZFighterInstantStep.forget(player);
+		ZFighterOverburn.clear(player);
 		ZFighterLegendHeart.forget(player);
 	}
 
@@ -1933,6 +1969,7 @@ public final class ZFighterPower implements Power {
 		float form = 1.0F + (FORM_KI[stat] - 1.0F) * (1.0F + MASTERY_POWER * ZFighterTraining.mastery(player, stat)) * ZFighterPotential.edge(player, live);
 		float trained = 1.0F + ZFighterTraining.KI_POWER_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.KI_POWER);
 		return ZFighterFusion.power(player, ((0.75F + 0.0625F * Mastery.unlocked(player)) * form + (Fate.isAscended(player) ? 0.1F : 0.0F)) * trained
-			* ZFighterCorruption.kiFactor(player, live) * ZFighterBranchForms.kiFactor(player, live)) * ZFighterRelease.factor(player);
+			* ZFighterCorruption.kiFactor(player, live) * ZFighterBranchForms.kiFactor(player, live) * ZFighterOverburn.kiFactor(player))
+			* ZFighterRelease.factor(player);
 	}
 }

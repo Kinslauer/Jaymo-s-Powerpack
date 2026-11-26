@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
  */
 public final class ZFighterFiringPose {
 	public static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_wave_firing");
+	public static final RenderStateDataKey<Integer> STAGE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_wave_stage");
 	/** Arms straight forward (x, following the look up and down), turned in (y) so the hands meet. */
 	static final float THRUST = -Mth.HALF_PI;
 	static final float AIM_SHARE = 0.9F;
@@ -33,7 +34,9 @@ public final class ZFighterFiringPose {
 	}
 
 	static void extract(Avatar entity, AvatarRenderState state) {
-		state.setData(KEY, entity instanceof Player player && ZFighterWaveBeam.out(player));
+		boolean out = entity instanceof Player player && ZFighterWaveBeam.out(player);
+		state.setData(KEY, out);
+		state.setData(STAGE, out ? ZFighterWaveBeam.stage((Player)entity) : ZFighterWaveBeam.STAGE_NONE);
 	}
 
 	static void applyModel(Model<?> model, Object state) {
@@ -41,7 +44,9 @@ public final class ZFighterFiringPose {
 			return;
 		}
 		boolean on = Boolean.TRUE.equals(avatar.getData(KEY)) && avatar.deathTime <= 0.0F;
-		PoseBlend.Track track = BLEND.track(avatar.id, on, 0.0F, SPEED);
+		Integer stageBox = avatar.getData(STAGE);
+		int stage = stageBox == null ? ZFighterWaveBeam.STAGE_NONE : stageBox;
+		PoseBlend.Track track = BLEND.track(avatar.id, on, 0.0F, stage == ZFighterWaveBeam.STAGE_END ? SPEED * 0.7F : SPEED);
 		if (track == null || avatar.deathTime > 0.0F) {
 			return;
 		}
@@ -52,15 +57,20 @@ public final class ZFighterFiringPose {
 		PoseBlend.Frame f = new PoseBlend.Frame(h);
 		float pitch = THRUST + Mth.clamp(avatar.xRot * Mth.DEG_TO_RAD, -1.2F, 1.2F) * AIM_SHARE;
 		float stance = 1.0F - Mth.clamp(avatar.walkAnimationSpeed / STANCE_WALK, 0.0F, 1.0F);
+		float lean = stage == ZFighterWaveBeam.STAGE_END ? LEAN * 0.45F : stage == ZFighterWaveBeam.STAGE_SUSTAIN ? LEAN * 1.15F : LEAN;
+		float drop = stage == ZFighterWaveBeam.STAGE_END ? DROP * 0.4F : stage == ZFighterWaveBeam.STAGE_SUSTAIN ? DROP * 1.15F : DROP;
+		float armPitch = stage == ZFighterWaveBeam.STAGE_END ? pitch + 0.32F : pitch;
+		float close = stage == ZFighterWaveBeam.STAGE_END ? CLOSE * 0.45F : CLOSE;
 		// the arms aim from the shoulders; the lean is taken back out of them so they stay on the beam
-		f.set(PoseBlend.RIGHT_ARM, pitch - LEAN, -CLOSE, 0.0F);
-		f.set(PoseBlend.LEFT_ARM, pitch - LEAN, CLOSE, 0.0F);
-		float shake = Mth.sin(avatar.ageInTicks * SHAKE_BEAT) * SHAKE;
+		f.set(PoseBlend.RIGHT_ARM, armPitch - lean, -close, 0.0F);
+		f.set(PoseBlend.LEFT_ARM, armPitch - lean, close, 0.0F);
+		float shakeScale = stage == ZFighterWaveBeam.STAGE_FIRE ? 1.4F : stage == ZFighterWaveBeam.STAGE_SUSTAIN ? 1.0F : 0.25F;
+		float shake = Mth.sin(avatar.ageInTicks * SHAKE_BEAT) * SHAKE * shakeScale;
 		f.shake(PoseBlend.RIGHT_ARM, shake);
 		f.shake(PoseBlend.LEFT_ARM, -shake * 0.8F);
-		f.set(PoseBlend.HIP_PITCH, LEAN);
-		f.set(PoseBlend.DROP, DROP * stance);
-		f.add(PoseBlend.HEAD, -LEAN);
+		f.set(PoseBlend.HIP_PITCH, lean);
+		f.set(PoseBlend.DROP, drop * stance);
+		f.add(PoseBlend.HEAD, -lean);
 		f.add(PoseBlend.RIGHT_LEG, STANCE * stance);
 		f.add(PoseBlend.RIGHT_LEG + 2, STANCE_SPREAD * stance);
 		f.add(PoseBlend.LEFT_LEG, -STANCE * stance);

@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.zfighter.ApeGrab;
+import com.jaymospowers.power.zfighter.ApeMoves;
 import com.jaymospowers.power.zfighter.ZFighterGoldenApe;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -48,6 +49,8 @@ public final class ZFighterApe {
 	public static final RenderStateDataKey<Float> STRIDE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_stride");
 	/** (0.17.68) How far into his grab he is (ticks, {@link ApeGrab#TOTAL} long), or null when he isn't grabbing. */
 	public static final RenderStateDataKey<Float> GRAB = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_grab");
+	/** Active Great Ape move ({@link ApeMoves}): {kind, elapsedTicks}, or null. */
+	public static final RenderStateDataKey<float[]> ACTION = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_action");
 	/** Whether the ape is hauling (sprinting): its long, heavy strides ({@link ZFighterApeHaul}). */
 	public static final RenderStateDataKey<Boolean> HAULING = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_hauling");
 	/**
@@ -78,6 +81,13 @@ public final class ZFighterApe {
 		state.setData(HAULING, entity.isSprinting() ? Boolean.TRUE : null);
 		float grab = ApeGrab.phase(entity, partialTicks);
 		state.setData(GRAB, grab >= 0.0F ? grab : null);
+		ApeMoves.Action action = entity.getAttached(ApeMoves.ACTION);
+		if (action != null && action.kind() != ApeMoves.NONE) {
+			float elapsed = Math.max(0.0F, (entity.level().getGameTime() - action.start()) + partialTicks);
+			state.setData(ACTION, new float[] {action.kind(), elapsed});
+		} else {
+			state.setData(ACTION, null);
+		}
 		state.setData(GOLDEN, ZFighterGoldenApe.golden((Player)entity) ? Boolean.TRUE : null);
 		state.setData(ApeSmashClient.POSE, ApeSmashClient.pose((Player)entity));
 		state.isInvisible = true;
@@ -270,6 +280,12 @@ public final class ZFighterApe {
 				this.grab(grab, time);
 				return;
 			}
+			// full Great Ape moves (swipes, roar, ground slam, leap smash, boulder throw)
+			float[] action = state.getData(ACTION);
+			if (action != null) {
+				this.action((int)action[0], action[1], time);
+				return;
+			}
 			// (0.16.6) his punch: the right fist drawn back as it charges, then thrown out and down
 			float[] smash = state.getData(ApeSmashClient.POSE);
 			if (smash != null) {
@@ -334,6 +350,132 @@ public final class ZFighterApe {
 			this.head.xRot += head;
 			// the other arm braces out a little
 			this.leftArm.zRot -= Math.abs(lean) * 0.5F;
+		}
+
+		/** Poses for swipes, roar, ground slam, leap smash and boulder throw ({@link ApeMoves}). */
+		private void action(int kind, float t, float age) {
+			switch (kind) {
+				case ApeMoves.SWIPE_LEFT, ApeMoves.SWIPE_RIGHT -> {
+					boolean left = kind == ApeMoves.SWIPE_LEFT;
+					float p = Mth.clamp(t / ApeMoves.SWIPE_TICKS, 0.0F, 1.0F);
+					ModelPart active = left ? this.leftArm : this.rightArm;
+					ModelPart brace = left ? this.rightArm : this.leftArm;
+					float sign = left ? -1.0F : 1.0F;
+					float swing;
+					float weight;
+					if (p < 0.25F) {
+						float u = ease(p / 0.25F);
+						swing = -u;
+						weight = u;
+					} else if (p < 0.65F) {
+						float u = ease((p - 0.25F) / 0.4F);
+						swing = Mth.lerp(u, -1.0F, 1.0F);
+						weight = 1.0F;
+					} else {
+						float u = ease((p - 0.65F) / 0.35F);
+						swing = 1.0F - u;
+						weight = 1.0F - u;
+					}
+					active.xRot = Mth.lerp(weight, active.xRot, -1.25F - 0.25F * swing);
+					active.yRot = Mth.lerp(weight, active.yRot, -sign * (0.95F * swing));
+					active.zRot = Mth.lerp(weight, active.zRot, sign * (0.65F - 0.5F * swing));
+					brace.xRot = Mth.lerp(weight, brace.xRot, -0.35F);
+					brace.zRot += -sign * 0.45F * weight;
+					this.body.yRot = -sign * 0.48F * swing;
+					this.body.xRot += 0.16F * weight;
+				}
+				case ApeMoves.ROAR -> {
+					float p = Mth.clamp(t / ApeMoves.ROAR_TICKS, 0.0F, 1.0F);
+					float hold = p < 0.2F ? ease(p / 0.2F) : p < 0.78F ? 1.0F : 1.0F - ease((p - 0.78F) / 0.22F);
+					float shiver = hold * 0.06F * Mth.sin(age * 2.8F);
+					this.head.xRot = Mth.lerp(hold, this.head.xRot, -0.88F) + shiver;
+					this.body.xRot = Mth.lerp(hold, this.body.xRot, -0.36F);
+					this.rightArm.xRot = Mth.lerp(hold, this.rightArm.xRot, -0.65F) + shiver;
+					this.leftArm.xRot = Mth.lerp(hold, this.leftArm.xRot, -0.65F) - shiver;
+					this.rightArm.zRot = Mth.lerp(hold, this.rightArm.zRot, 1.15F);
+					this.leftArm.zRot = Mth.lerp(hold, this.leftArm.zRot, -1.15F);
+					this.rightArm.yRot = Mth.lerp(hold, this.rightArm.yRot, 0.35F);
+					this.leftArm.yRot = Mth.lerp(hold, this.leftArm.yRot, -0.35F);
+				}
+				case ApeMoves.GROUND_SLAM -> {
+					float p = Mth.clamp(t / ApeMoves.SLAM_TICKS, 0.0F, 1.0F);
+					float armX, lean, flare;
+					if (p < 0.3F) {
+						float u = ease(p / 0.3F);
+						armX = Mth.lerp(u, this.rightArm.xRot, -2.75F);
+						lean = -0.25F * u;
+						flare = 0.35F * u;
+					} else if (p < 0.55F) {
+						float u = (p - 0.3F) / 0.25F;
+						u *= u;
+						armX = Mth.lerp(u, -2.75F, -0.45F);
+						lean = Mth.lerp(u, -0.25F, 0.52F);
+						flare = Mth.lerp(u, 0.35F, 0.22F);
+					} else {
+						float u = ease((p - 0.55F) / 0.45F);
+						armX = Mth.lerp(u, -0.45F, this.rightArm.xRot);
+						lean = (1.0F - u) * 0.52F;
+						flare = (1.0F - u) * 0.22F;
+					}
+					this.rightArm.xRot = armX;
+					this.leftArm.xRot = armX;
+					this.rightArm.zRot += flare;
+					this.leftArm.zRot -= flare;
+					this.body.xRot += lean;
+					this.head.xRot += lean * 0.5F;
+				}
+				case ApeMoves.LEAP_AIR -> {
+					float u = ease(Math.min(1.0F, t / 6.0F));
+					this.rightArm.xRot = Mth.lerp(u, this.rightArm.xRot, -2.65F);
+					this.leftArm.xRot = Mth.lerp(u, this.leftArm.xRot, -2.65F);
+					this.rightArm.zRot = Mth.lerp(u, this.rightArm.zRot, 0.4F);
+					this.leftArm.zRot = Mth.lerp(u, this.leftArm.zRot, -0.4F);
+					this.body.xRot += 0.28F * u;
+					this.rightLeg.xRot = Mth.lerp(u, this.rightLeg.xRot, 0.55F);
+					this.leftLeg.xRot = Mth.lerp(u, this.leftLeg.xRot, 0.3F);
+				}
+				case ApeMoves.LEAP_LAND -> {
+					float p = Mth.clamp(t / ApeMoves.LEAP_LAND_TICKS, 0.0F, 1.0F);
+					float hold = p < 0.35F ? 1.0F : 1.0F - ease((p - 0.35F) / 0.65F);
+					this.rightArm.xRot = Mth.lerp(hold, this.rightArm.xRot, -0.55F);
+					this.leftArm.xRot = Mth.lerp(hold, this.leftArm.xRot, -0.55F);
+					this.rightArm.zRot = Mth.lerp(hold, this.rightArm.zRot, 0.45F);
+					this.leftArm.zRot = Mth.lerp(hold, this.leftArm.zRot, -0.45F);
+					this.body.xRot += 0.6F * hold;
+					this.head.xRot += 0.35F * hold;
+					this.rightLeg.xRot = Mth.lerp(hold, this.rightLeg.xRot, -0.35F);
+					this.leftLeg.xRot = Mth.lerp(hold, this.leftLeg.xRot, -0.35F);
+				}
+				case ApeMoves.BOULDER_THROW -> {
+					float lift = ApeMoves.BOULDER_LIFT_TICKS;
+					float armX, lean, inward;
+					if (t < lift) {
+						float u = ease(t / lift);
+						float shake = u > 0.5F ? 0.04F * Mth.sin(age * 2.2F) : 0.0F;
+						armX = Mth.lerp(u, -0.4F, -2.95F) + shake;
+						lean = Mth.lerp(u, 0.45F, -0.22F);
+						inward = 0.28F * u;
+					} else if (t < lift + 5.0F) {
+						float u = ease((t - lift) / 5.0F);
+						armX = Mth.lerp(u, -2.95F, -0.7F);
+						lean = Mth.lerp(u, -0.22F, 0.38F);
+						inward = Mth.lerp(u, 0.28F, 0.05F);
+					} else {
+						float u = ease(Math.min(1.0F, (t - lift - 5.0F) / Math.max(1.0F, ApeMoves.BOULDER_TICKS - lift - 5.0F)));
+						armX = Mth.lerp(u, -0.7F, this.rightArm.xRot);
+						lean = (1.0F - u) * 0.38F;
+						inward = (1.0F - u) * 0.05F;
+					}
+					this.rightArm.xRot = armX;
+					this.leftArm.xRot = armX;
+					this.rightArm.zRot = Mth.lerp(1.0F, this.rightArm.zRot, -inward);
+					this.leftArm.zRot = Mth.lerp(1.0F, this.leftArm.zRot, inward);
+					this.body.xRot += lean;
+					this.head.xRot += lean * 0.4F;
+				}
+				default -> {
+				}
+			}
 		}
 
 		private static float ease(float t) {

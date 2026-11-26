@@ -104,10 +104,14 @@ public final class ApeSmash {
 			return;
 		}
 		// (0.17.68) held long enough, the hand closes on whatever's in front of him instead ({@link ApeGrab})
-		if (now - start >= ApeGrab.HOLD_TO_GRAB && ApeGrab.begin(player, ZFighterPower.live(player), player.level(), null, now)) {
+		long held = now - start;
+		if (held >= ApeGrab.HOLD_TO_GRAB && ApeGrab.begin(player, ZFighterPower.live(player), player.level(), null, now)) {
 			return;
 		}
-		smash(player, Mth.clamp((now - start) / (float)FULL_TICKS, MIN_CHARGE, 1.0F));
+		if (held < ApeMoves.SWIPE_TAP_TICKS && ApeMoves.swipe(player, ZFighterPower.live(player))) {
+			return;
+		}
+		smash(player, Mth.clamp(held / (float)FULL_TICKS, MIN_CHARGE, 1.0F));
 	}
 
 	/** From the ape's tick: let go of a charge he can't keep; a growl when it's full. */
