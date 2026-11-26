@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,6 +30,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
+- [ ] [[Agents/ship-helms-pillager-crews|ship-helms-pillager-crews]] · 💻 Odysseus · #2201 · in-review
 
 
 ## Needs Andy
