@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 13:39). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:32). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -18,15 +18,19 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/hollow-captains-fix|hollow-captains-fix]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/structures-6-stable-mine-farm|structures-6-stable-mine-farm]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-10 waiting for a bot, 2 being built, 5 in review: see [[Kanban]].
+10 waiting for a bot, 1 being built, 6 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2247 Alex's Mobs: old spawn files mended, blobfish deeper (Powers, Kingdoms, 2026-11-26)
+- [ ] #2246 Bands sleep until you approach (Powers, 2026-11-26)
+- [ ] #2244 executions finish, and finishing blows don't gib (Powers, 2026-11-26)
 - [ ] #2243 Youth's ears unpack the voice model on the server (Kingdoms, 2026-11-26)
 - [ ] #2242 Realm dragons and their dragon tamers (Kingdoms, 2026-11-26)
 - [ ] #2241 Dragon nests and dragon domains (Dragonforge picks, part 2) (Kingdoms, 2026-11-26)
@@ -84,14 +88,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2172 The game starts again (the symbiote HUD crashed it on launch) (Powers, 2026-11-25)
 - [ ] #2171 Waking villages into kingdoms no longer freezes the server (Kingdoms, 2026-11-25)
 - [ ] #2170 Rig leg kick: taekwondo side kick and combo roundhouse (Powers, 2026-11-25)
-- [ ] #2169 The symbiote saves you (Powers, Kingdoms, 2026-11-25)
-- [ ] #2167 space pod: sit in the cockpit under a glass canopy, new icon and flight picture (Powers, 2026-11-25)
-- [ ] #2166 the Verdant World is land again; pod landings and pads keep off the sea, and no second pod (Powers, 2026-11-25)
-- …and 613 older ones.
+- …and 616 older ones.
 
 ## Health
 
-13 problems in the notes: [[Health]].
+16 problems in the notes: [[Health]].
 
 ## Last week
 
