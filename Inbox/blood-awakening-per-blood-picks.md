@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: quill
 from: Andy (decision card, 2026-11-24)
 asked: 2026-11-24
-claimed_by: 
+claimed_by: hermes-writer
 pr: 
 ---
 
