@@ -74,6 +74,23 @@ public record WebPose(int kind, long start, int side) {
 	 * {@link WebLineRide#RIDE} says so.
 	 */
 	public static final int LINE_HANG = 38;
+	/**
+	 * Web attacks (Legends patch 2, our own hand-made poses), all started by the server and none of them tricks, numbered past
+	 * the webline hang so nothing saved moves. {@link #ZIP_KICK}: flying feet first down a zip line at a webbed foe, the
+	 * kick landing on arrival ({@link WebZipStrike}). {@link #SWING_UP_KICK}, {@link #PENDULUM_KICK} and {@link #WEB_YANK_UP}:
+	 * the web air launchers ({@link WebUptilt}). {@link #DIVE_SLAM}: both lines in the ground, hauled down head first
+	 * ({@link WebDiveSlam}). {@link #PIN_THROW}: a foe yanked sideways onto a wall ({@link WebPin}). {@link #DROP_KICK}: the
+	 * flip into a drop kick ({@link WebRisingKick}). {@link #SHOCK_HOLD}: braced with both lines taut ({@link WebShock}).
+	 * {@link #WRECK_SWING}: whirling a ball of rubble on both lines ({@link WebWreck}). {@link #WEB_STORM}: arms spinning out a
+	 * dome of lines ({@link WebStorm}). {@link #FIST_JAB} to {@link #FIST_CRUSH}: the five webbed fist blows
+	 * ({@link WebFistCombo}). {@link #SENSE_TURN}: spinning round to answer an arrow ({@link WebZipStrike#answer}).
+	 * {@link #HUNT_DIVE}: one pass of the hunting dive ({@link WebHunt}). {@link #SURF}: standing on a launched foe's back
+	 * ({@link WebSurf}).
+	 */
+	public static final int ZIP_KICK = 39, SWING_UP_KICK = 40, PENDULUM_KICK = 41, WEB_YANK_UP = 42, DIVE_SLAM = 43, PIN_THROW = 44,
+		DROP_KICK = 45, SHOCK_HOLD = 46, WRECK_SWING = 47, WEB_STORM = 48, FIST_JAB = 49, FIST_KICK = 50, FIST_UPPER = 51, FIST_TWIST = 52,
+		FIST_CRUSH = 53, SENSE_TURN = 54, HUNT_DIVE = 55, SURF = 56;
+	public static final int FIRST_ATTACK = ZIP_KICK, LAST_ATTACK = SURF;
 
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
@@ -108,6 +125,17 @@ public record WebPose(int kind, long start, int side) {
 			// (the loop says how long it will take, in the side; see WebTricks)
 			case LOOP_FLIP -> Math.max(LOOP_MIN_TICKS, Math.min(LOOP_MAX_TICKS, Math.abs(side)));
 			case DIVE_KICK -> 40;
+			case ZIP_KICK, PENDULUM_KICK, SWING_UP_KICK -> 20;
+			case WEB_YANK_UP, SENSE_TURN -> 16;
+			case DIVE_SLAM -> 100;
+			case PIN_THROW -> 12;
+			case DROP_KICK -> 22;
+			case SHOCK_HOLD -> 44;
+			case WRECK_SWING -> 130;
+			case WEB_STORM -> 30;
+			case FIST_JAB, FIST_KICK, FIST_UPPER, FIST_TWIST, FIST_CRUSH -> 8;
+			case HUNT_DIVE -> 24;
+			case SURF -> 70;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
 			case SPIKES -> WebSymbiote.SPIKE_POSE_TICKS;
 			default -> DODGE_TICKS;

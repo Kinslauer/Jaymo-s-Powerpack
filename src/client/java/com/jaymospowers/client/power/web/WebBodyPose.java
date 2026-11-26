@@ -405,8 +405,7 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, -90.0F * fall);
 				poseStack.rotateDegrees(Axis.ZP, twitch);
 			}
-			default -> {
-			}
+			default -> WebAttackPoses.rotate(pose, poseStack, middle);
 		}
 	}
 
@@ -727,8 +726,7 @@ public final class WebBodyPose {
 				h.leftLeg.zRot = -0.3F;
 				h.head.xRot = 0.3F;
 			}
-			default -> {
-			}
+			default -> WebAttackPoses.applyModel(h, pose);
 		}
 	}
 

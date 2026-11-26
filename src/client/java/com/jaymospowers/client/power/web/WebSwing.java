@@ -509,6 +509,32 @@ public final class WebSwing {
 		return one.travel <= 0 && one.entityId >= 0 && com.jaymospowers.power.web.WebWhip.whippable(player, player.level().getEntity(one.entityId));
 	}
 
+	/**
+	 * Both webs on the same creature, close together: a punch there sends a shock down them
+	 * ({@link com.jaymospowers.power.web.WebWhip#SHOCK}).
+	 */
+	private boolean shockReady(LocalPlayer player) {
+		Strand a = strands[WebNet.MAIN], b = strands[WebNet.OFF];
+		if (!a.attached || !b.attached || a.travel > 0 || b.travel > 0 || a.entityId < 0 || a.entityId != b.entityId
+			|| a.anchor.distanceTo(b.anchor) > com.jaymospowers.power.web.WebWhip.NEAR) {
+			return false;
+		}
+		return player.level().getEntity(a.entityId) instanceof net.minecraft.world.entity.LivingEntity;
+	}
+
+	/**
+	 * Both webs stuck in the ground close together: a punch there gathers the loose debris into a wrecking ball
+	 * ({@link com.jaymospowers.power.web.WebWhip#BALL}), and letting go throws it.
+	 */
+	private boolean ballReady() {
+		Strand a = strands[WebNet.MAIN], b = strands[WebNet.OFF];
+		return a.attached && b.attached && a.travel <= 0 && b.travel <= 0 && a.entityId < 0 && b.entityId < 0
+			&& a.anchor.distanceTo(b.anchor) <= com.jaymospowers.power.web.WebWhip.NEAR;
+	}
+
+	/** Which whip mode the punch being held started (so letting go says the same). */
+	private int punchMode = com.jaymospowers.power.web.WebWhip.ONE_LINE;
+
 	/** Sneak and the attack key last tick, and whether each press went to the whip (so letting go tells the server). */
 	private boolean whipSneakWas, whipHeld, punchWas, punchHeld;
 
@@ -525,11 +551,23 @@ public final class WebSwing {
 		punchWas = punch;
 		if (punchHeld && !punch) {
 			punchHeld = false;
-			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(false, com.jaymospowers.power.web.WebWhip.ONE_LINE));
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(false, punchMode));
 		}
 		if (punched && oneLineReady(player)) {
 			punchHeld = true;
+			punchMode = com.jaymospowers.power.web.WebWhip.ONE_LINE;
 			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true, com.jaymospowers.power.web.WebWhip.ONE_LINE));
+			return true;
+		}
+		if (punched && shockReady(player)) {
+			// (a shock runs its own two seconds: nothing to let go of)
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true, com.jaymospowers.power.web.WebWhip.SHOCK));
+			return true;
+		}
+		if (punched && ballReady()) {
+			punchHeld = true;
+			punchMode = com.jaymospowers.power.web.WebWhip.BALL;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true, com.jaymospowers.power.web.WebWhip.BALL));
 			return true;
 		}
 		if (whipHeld && !sneak) {
