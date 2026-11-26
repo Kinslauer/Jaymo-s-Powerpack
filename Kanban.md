@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 06:20). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 06:52). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,12 +20,12 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · open
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · for ☀️ Apollo · open
+- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for codex · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · claimed
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #0 · claimed
 
 
