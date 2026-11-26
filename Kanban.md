@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:09). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,7 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · for ☀️ Apollo · open
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for ☀️ Apollo · open
-- [ ] [[Inbox/hunters-road-11|hunters-road-11]] · for any · open
 
 
 ## Being built
@@ -65,6 +64,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
+- [ ] [[Inbox/hunters-road-11|hunters-road-11]] · for any · blocked
 
 
 ## Done
