@@ -124,3 +124,21 @@ The fix loop stops after two rounds with no progress.
 ## Not checked
 
 No dev client runs (CLAUDE.md: build to check). Everything is built but not played until Andy tests the merge.
+
+## Done (2026-11-26)
+
+All 40 rows are built across six tracks. Each track got an independent verifier, and the verifiers' bugs were fixed.
+All three mods build together. Nothing has been played.
+
+Choices and rough edges worth a look in play:
+- **dm-clemency:** a character counts as brand-new on first join with under 5 minutes played. The final Reincarnate gives it again. Deaths don't renew it.
+- **dm-mount:** carriages, rickshaws, cabs and coaches give shade. Carts, handcarts and skiffs have no canopy.
+- **bop-tags:** set for lakeside_desert (hot), wind_valley (cool), contaminated_jungle (warm), demon_gloam (hot) and pale_grove (warm).
+- **Track E lands:** they sit on a fixed noise, so the layout is the same in every world. The steppe takes about half of the inland plains. Nobody has checked on a generated map whether Mohknee has enough cold slopes for steam valleys.
+- **ss-tropic:** the wet season is summer and autumn, and the dry season is winter and spring. Forest Fire's wildfires read the dry air too. Saplings aren't held to seasons, so their tooltip says "every season". The season dial counts the four seasons even in the tropics.
+- **cl-tempered:** it needs a level-5 tailor (a grown shepherd). It's unchecked whether MCA tailors level up.
+- **cl-charm:** the monastery herbalist sells the pouch and the flask through a "Belt Charms" spoke. The client can't tell who the herbalist is, so the spoke shows on every grown villager, and the others say they have nothing to sell. The Equinox Charm is a 12% find in monastery chests.
+- **fd-rain:** catalogue village houses get a barrel when they're finished. Blossom and steam-town houses, and houses built before this, don't.
+- **fd-hot:** the fresh-off-the-spit mark is rounded to the minute, so a roast's pieces stack.
+- **Iceboxes:** a lit icebox no longer boils water. It did before, which was a bug.
+- **vl-weather:** cartographers are the weather-wise. They sell a thermometer, waterskins, the almanac and clothes for their land, and they add an "Ask About the Weather" spoke.
