@@ -565,6 +565,10 @@ public final class MobExecutions {
 		if (e.move == Move.CHOP && Dismember.canLoseParts(victim)) {
 			Dismember.sever(victim, Dismember.HEAD, mob);
 		}
+		if (e.move == Move.CRUSH) {
+			// (a ravager or the warden brings its whole weight down: that death may burst them; no other execution does)
+			com.jaymospowers.core.BlastGore.crushes(victim);
+		}
 		Downed.execute(level, victim, mob);
 		if (e.move == Move.CRUSH) {
 			com.jaymospowers.core.Crushing.mark(victim);

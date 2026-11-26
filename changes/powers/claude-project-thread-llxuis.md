@@ -1,0 +1,4 @@
+# no gibs from finishing blows
+- **Bodies no longer burst when a small creature finishes them** (Andy: a villager killed by a digger burst into gibs). A downed body finished off, a head or body gone black, or a bleed-out is dealt as one endless blow credited to whoever felled them. BlastGore read that as a crushing blow (18+ damage within reach, no blade), so about one such death in three blew the body apart, whatever the killer was: a digger, a zombie, a bare-handed bandit, a club. BlastGore.crushing now skips these kills (Wounds and Bleeding damage, or any kill dealt as Float.MAX_VALUE). A real slam or heavy blow that leads to the death still bursts as before, since it is counted the tick it lands.
+- A ravager's or the warden's execution (MobExecutions CRUSH) still can burst a body, as often as before (BlastGore.crushes marks it).
+- Built; not played.
