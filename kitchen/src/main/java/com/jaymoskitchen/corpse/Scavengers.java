@@ -45,9 +45,9 @@ import org.jspecify.annotations.Nullable;
  * Andy (2026-11-23, a clip of vultures making off with his body while he watched from Limbo): "vultures should land and
  * pick at the body limb from limb, until disturbed by other mobs or players ... all scavengers and body eaters should go
  * limb at a time, giving players more time to recover their party members or revive a fallen MCA." So a body is eaten a
- * part at a time ({@link CorpseEntity#nextPart}): each arm and leg, then the belly (the guts), then the head, are torn off and eaten there beside
+ * part at a time ({@link CorpseEntity#nextPart}): a monster goes for the head (the brains) and then the belly (the guts), anything else for each arm and leg and then the belly, and these are torn off and eaten there beside
  * it ({@link #CHEW_TICKS}, the part in its mouth), and only then is the trunk torn open. A flier comes down onto the
- * ground to eat; a lone eater or two eat the limbs and the guts and move on, and only a horde or a blood moon goes on to the head
+ * ground to eat; a lone eater or two eat those and move on, and only a horde or a blood moon goes on to the rest
  * ({@link #finishes}); no more than {@link #MAX_EATERS} tear at one body at once, the rest wait their turn. A full scavenger
  * leaves what's left. Feeding, it notices less ({@link #FEEDING_SIGHT}, {@code ScavengerSightMixin}): the skittish ones
  * ({@link #SKITTISH}: vultures, foxes, coyotes) let a sneaking player come closer before they bolt, a moment after they
@@ -321,10 +321,10 @@ public final class Scavengers {
 	 * Andy (2026-11-25): "the only time someone should be completely devoured is during an encounter with a horde (as they
 	 * all will want a bite) and during blood moons", then "they should focus on the head and body, then move on. so the
 	 * hordes will be the ones to start the limbs and finish", and at last "mobs will moreso go for limbs and then body and
-	 * move, most leaving the head alone". Whether {@code eater} goes on eating a body that's
-	 * {@link CorpseEntity#pickedOver picked over} (limbs and guts gone), its head and then its trunk: when it's ravenous, or
-	 * when {@link #HORDE} scavengers or more are about the body (within {@link #HORDE_REACH}). Otherwise the body is left
-	 * lying with its head on and what it wore there.
+	 * move, most leaving the head alone" (of "deer and other scavengers"). Whether {@code eater} goes on eating a body
+	 * that's {@link CorpseEntity#pickedOver picked over} (a zombie has had the head and guts, anything else the limbs and
+	 * guts): when it's ravenous, or when {@link #HORDE} scavengers or more are about the body (within {@link #HORDE_REACH}).
+	 * Otherwise the rest is left lying, with what it wore.
 	 */
 	private static boolean finishes(ServerLevel level, Mob eater, CorpseEntity body) {
 		return ravenous(eater) || level.getEntitiesOfClass(Mob.class, body.getBoundingBox().inflate(HORDE_REACH),
@@ -444,7 +444,7 @@ public final class Scavengers {
 				return body != null;
 			}
 			List<CorpseEntity> bodies = mob.level().getEntitiesOfClass(CorpseEntity.class, mob.getBoundingBox().inflate(SMELL),
-				corpse -> corpse.isCarrionFor(mob) && (!corpse.pickedOver() || mob.level() instanceof ServerLevel at && finishes(at, mob, corpse)));
+				corpse -> corpse.isCarrionFor(mob) && (!corpse.pickedOver(mob) || mob.level() instanceof ServerLevel at && finishes(at, mob, corpse)));
 			body = null;
 			double best = Double.MAX_VALUE;
 			for (CorpseEntity corpse : bodies) {
@@ -597,8 +597,8 @@ public final class Scavengers {
 				// growling over it
 				mob.playAmbientSound();
 			}
-			if (body.pickedOver() && !finishes(level, mob, body)) {
-				// (the limbs and guts are gone: it leaves the rest lying, unless a horde is at it or the moon is red)
+			if (body.pickedOver(mob) && !finishes(level, mob, body)) {
+				// (it has had its share: it leaves the rest lying, unless a horde is at it or the moon is red)
 				body = null;
 				return;
 			}
@@ -627,8 +627,9 @@ public final class Scavengers {
 			double size = mob.getBbWidth() * mob.getBbWidth() * mob.getBbHeight();
 			for (Mob other : level.getEntitiesOfClass(Mob.class, mob.getBoundingBox().inflate(DISPLACE), other -> other != mob && other.isAlive()
 				&& other.getType() != mob.getType() && !(other instanceof TamableAnimal pet && pet.isTame()))) {
-				if (other instanceof net.minecraft.world.entity.monster.Enemy
-					|| other.is(SCAVENGERS) && other.getBbWidth() * other.getBbWidth() * other.getBbHeight() > size * BIGGER) {
+				// (a skittish one, a deer or a fox, drives nothing off, and gives way to any hunter that comes)
+				if (other instanceof net.minecraft.world.entity.monster.Enemy || other.is(SCAVENGERS) && !other.is(SKITTISH)
+					&& (mob.is(SKITTISH) || other.getBbWidth() * other.getBbWidth() * other.getBbHeight() > size * BIGGER)) {
 					return other;
 				}
 			}
@@ -685,7 +686,7 @@ public final class Scavengers {
 		 */
 		private void flee(ServerLevel level, net.minecraft.world.entity.Entity who) {
 			if (!hunger.chewing() && body.isCarrionFor(mob) && body.biteCount() * 2 >= needed()) {
-				int part = body.nextPart();
+				int part = body.nextPart(mob);
 				if (part != 0) {
 					body.eatPart(level, part);
 					com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.25, body.getZ(), 15, 0.2, 0.1, 0.2, 0.2);
@@ -756,16 +757,16 @@ public final class Scavengers {
 	 * flesh falls away in patches as the meal goes on ({@link CorpseEntity#eaten}).
 	 */
 	private static float eatenShare(CorpseEntity body, int bites, int needed) {
-		// (the belly torn open is a stage of its own, between the limbs and the head)
+		// (the belly torn open is a stage of its own)
 		int lost = Integer.bitCount(body.missing() & CorpseEntity.ALL_PARTS) + (body.gutted() ? 1 : 0);
-		int stages = lost > 0 || body.nextPart() != 0 ? Integer.bitCount(CorpseEntity.ALL_PARTS) + 2 : 1;
+		int stages = lost > 0 || body.nextPart(null) != 0 ? Integer.bitCount(CorpseEntity.ALL_PARTS) + 2 : 1;
 		return Math.min(0.99F, (lost + Math.min(1.0F, bites / (float) Math.max(1, needed))) / stages);
 	}
 
 	/**
 	 * One bite into {@code body} by {@code eater}, its jaws coming in along {@code in}: the body is dragged a little after
-	 * them and blood flies. Each {@code needed} bites tear off its next part ({@link CorpseEntity#nextPart}: the arms and
-	 * legs, the belly, then the head), and that's returned; with none left, the trunk is torn open: its meat spilled for the
+	 * them and blood flies. Each {@code needed} bites tear off its next part ({@link CorpseEntity#nextPart}: a monster
+	 * the head, the belly, then the limbs; anything else the limbs, the belly, then the head), and that's returned; with none left, the trunk is torn open: its meat spilled for the
 	 * scavengers, a villager's grave emptied, the body gone ({@link #GONE}). {@link #BITTEN} for a bite and no more.
 	 */
 	private static int tear(ServerLevel level, net.minecraft.world.entity.Entity eater, CorpseEntity body, Vec3 in, int needed) {
@@ -788,7 +789,7 @@ public final class Scavengers {
 		if (bites < needed) {
 			return BITTEN;
 		}
-		int part = body.nextPart();
+		int part = body.nextPart(eater);
 		if (part != 0) {
 			// the head, the guts or a limb comes away
 			body.eatPart(level, part);

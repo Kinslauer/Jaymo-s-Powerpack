@@ -3339,23 +3339,26 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * Andy (2026-11-23): "all scavengers and body eaters should go limb at a time, giving players more time to recover
-	 * their party members", and (2026-11-25) "mobs will moreso go for limbs and then body and move, most leaving the head
-	 * alone". The part a scavenger tears off next, as a {@code PART_} bit: an arm or a leg it still has (any), then the belly
-	 * ({@link #GUTS}, if it isn't gutted yet), then the head (only a horde or a blood moon gets that far:
-	 * {@link #pickedOver}); 0 once only the trunk is left, or for a body not built with limbs (a fish, a critter, a slime, a
-	 * snake), which is torn open whole.
+	 * their party members", and (2026-11-25) zombies "should also prioritize brains, then guts/entrails", they "focus on
+	 * the head and body, then move on", while deer and the other scavengers "will moreso go for limbs and then body and
+	 * move, most leaving the head alone". The part {@code eater} tears off next, as a {@code PART_} bit: for a monster
+	 * ({@link #brainsFirst}) the head, then the belly ({@link #GUTS}, if it isn't gutted yet), then the limbs; for anyone
+	 * else an arm or a leg (any), then the belly, then the head. Past the belly only a horde or a blood moon goes on
+	 * ({@link #pickedOver}). 0 once only the trunk is left, or for a body not built with limbs (a fish, a critter, a slime,
+	 * a snake), which is torn open whole.
 	 */
-	int nextPart() {
+	int nextPart(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity eater) {
 		RagdollRig.Shape shape = rig().shape;
 		if (isFish() || shape != RagdollRig.Shape.HUMANOID && shape != RagdollRig.Shape.QUADRUPED) {
 			return 0;
 		}
-		int left = LIMBS & ~missing();
+		int first = brainsFirst(eater) ? PART_HEAD : LIMBS, then = brainsFirst(eater) ? LIMBS : PART_HEAD;
+		int left = first & ~missing();
 		if (left == 0) {
 			if (!gutted) {
 				return GUTS;
 			}
-			left = PART_HEAD & ~missing();
+			left = then & ~missing();
 		}
 		if (left == 0) {
 			return 0;
@@ -3368,19 +3371,25 @@ public class CorpseEntity extends Entity {
 		return part;
 	}
 
+	/** Whether {@code eater} goes for the head first: a monster (a zombie, an ogre), after the brains. */
+	static boolean brainsFirst(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity eater) {
+		return eater instanceof net.minecraft.world.entity.monster.Enemy;
+	}
+
 	/**
 	 * {@code part} torn off and eaten by a scavenger (no severed part is left lying: it's in the eater's mouth): no longer
 	 * drawn on the body, an arm lets go of what it held, and the bites start over for the next part.
 	 */
 	/**
-	 * Picked over: a body built with limbs whose limbs and guts are eaten (Andy, 2026-11-25: "mobs will moreso go for limbs
-	 * and then body and move, most leaving the head alone"). Most eaters leave it there with its head on; only a horde or
-	 * a blood moon goes on to the head and the trunk ({@link Scavengers}).
+	 * Picked over, for {@code eater}: a body built with limbs whose first parts ({@link #nextPart}: the head for a monster,
+	 * the limbs for anyone else) and guts are eaten. Most eaters leave it there; only a horde or a blood moon goes on to
+	 * the rest and the trunk ({@link Scavengers}).
 	 */
-	boolean pickedOver() {
+	boolean pickedOver(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity eater) {
 		RagdollRig.Shape shape = rig().shape;
+		int first = brainsFirst(eater) ? PART_HEAD : LIMBS;
 		return !isFish() && (shape == RagdollRig.Shape.HUMANOID || shape == RagdollRig.Shape.QUADRUPED)
-			&& (missing() & LIMBS) == LIMBS && gutted;
+			&& (missing() & first) == first && gutted;
 	}
 
 	/** Bites taken toward the part being torn at now. */
