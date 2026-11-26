@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:48). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -6,6 +6,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Questions for you:**
+- [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 2026-11-26 00:46 Question for Andy: when a per-blood upgrade is ticked, does it add to the shared rule (halved waits + 1.5x duration) for that blood, or replac…
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: is this the spider watcher hut (white silk/web roof)? #1849 reduced that hut; #2108 stoppe…
@@ -26,7 +27,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-8 waiting for a bot, 4 being built, 0 in review: see [[Kanban]].
+8 waiting for a bot, 3 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
