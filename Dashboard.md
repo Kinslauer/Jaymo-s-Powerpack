@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 03:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:07). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -6,7 +6,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Questions for you:**
+- [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
+- [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: is this the spider watcher hut (white silk/web roof)? #1849 reduced that hut; #2108 stoppe…
+- [[Inbox/structures-4-mohknee|structures-4-mohknee]] · 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: ores for blossom kingdoms and barbarian tribes. Keep distinct from already merged continen…
+- [[Inbox/structures-5-faction-table|structures-5-faction-table]] · 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: barbarians separate, Humans, or per tribe? Account for later Pallids-as-faction ruling (De…
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 
 ## Stuck
@@ -20,7 +24,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-12 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
+9 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -90,7 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-16 problems in the notes: [[Health]].
+17 problems in the notes: [[Health]].
 
 ## Last week
 

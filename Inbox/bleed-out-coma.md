@@ -8,14 +8,12 @@ pr:
 suggested_owns:
   - src/main/java/com/jaymospowers/core/wounds/ (a new class for the coma; small hooks in Downed, BleedOut)
   - src/main/resources/assets/jaymospowers/lang/parts/wounds.json
-  - kingdoms/src/main/java/com/jaymoskingdoms/FaintWakers.java (part 2)
 ---
 
 # Bleeding out is a death; brought back from the brink, a coma until tended
 
-Two parts, best as two PRs (Powers, then Kingdoms). Comes after PR #2059 (finite blood: every stain a living body
-spills comes out of its own blood, `BleedOut#spill` / `BleedOut#dry`). Build on it if merged, or on its branch
-`finite-blood-hits`.
+Part 1 only; NPC item handoff is now [[bleed-out-npc-items]], its own Kingdoms PR. Comes after PR #2059 (finite blood: every stain a living body
+spills comes out of its own blood, `BleedOut#spill` / `BleedOut#dry`). Start from fresh origin/master; verify #2059 is merged before implementing.
 
 ## Andy's words (2026-11-23)
 On #2059's side effect (a badly cut fighter can run dry): "a player who bleeds out suffers a death, they can be
@@ -42,13 +40,8 @@ His answers to three questions:
 - Check: the bled-dry bed/fire rules in `DownedStruggle` (line ~299) and `Resting` (~161) already treat dry players;
   fold them into this rather than leaving two rules.
 
-## Part 2 (Kingdoms): NPCs hand you the item
-Andy: "MCA should give you the item instead of using it on you. for example if they say drink this water you're
-thirsty, if they give a canteen they'll ask for it back."
-- `FaintWakers` "tell and help" now adds the thirst/food straight to the player (`KitchenCompat.drink`, `eat`). Instead
-  the villager hands over the item with its line ("Drink this, you're parched"): clean water or food from what they carry.
-- A canteen/waterskin is lent: they ask for it back (a line a little later, or when you walk off). Bottles and food are kept.
-- The same goes for any other place a villager feeds or waters a player; grep before calling it done.
+## Related task
+NPC handoff requirements moved intact to [[bleed-out-npc-items]].
 
 ## Done means
 Each part its own PR with a change note, Auto-fix on, CI green, not merged; what wasn't played said plainly.

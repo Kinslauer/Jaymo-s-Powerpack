@@ -19,3 +19,6 @@ Build 2 placement tracks at a time; tracks 1 and 2 first.
 **Andy's words:** the village near the aqueduct dungeon "makes sense as an old feature of their civilization that was taken over by the skeletons/evil magic. there should be quests that come from that dynamic, tasking the player to clear it, and lift the curse from the village."
 
 First find which mod places the Overworld aqueduct (ours, Veradexian, is Aether only). Then: a village within 300 blocks of a taken ruin is cursed (signs per plan section 5), four quests from its board clear the ruin, and the lifted state changes the village.
+
+## Notes
+- 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: #2085 explicitly excludes the curse. Identify the Overworld aqueduct and recover full section 5/four quest specifications before implementation; do not invent the missing plan.

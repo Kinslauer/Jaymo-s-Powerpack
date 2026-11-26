@@ -1,5 +1,5 @@
 ---
-status: open
+status: blocked
 for: any
 from: coordinator
 asked: 2026-11-24
@@ -19,3 +19,6 @@ Build 2 placement tracks at a time; tracks 1 and 2 first.
 **Andy's words:** factions are Earthlings and Hearthlanders and the like (Humans), Nonhumans, Bandits, Pirates, Greenskins, Pillagers, Demons, Avatars. "the only sworn enemies are Greenskins/Pillagers, they will never get along."
 
 Build the table (plan section 2) so placement and sieges can read it. Greenskins vs Pillagers can never ally or make peace. Open question: are Barbarians a ninth faction?
+
+## Notes
+- 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: barbarians separate, Humans, or per tribe? Account for later Pallids-as-faction ruling (Decisions.md). FactionType currently describes settlement form; preserve its saved meaning rather than conflating it with peoples/allegiances.

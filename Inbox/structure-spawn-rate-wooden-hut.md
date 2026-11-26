@@ -1,5 +1,5 @@
 ---
-status: open
+status: blocked
 for: coordinator
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-22)
 asked: 2026-11-22
@@ -20,3 +20,4 @@ The structure spawns far too frequently — Andy saw 3 instances in a single pic
 ## Notes
 
 This is a world-gen / structure spawn rate tuning task. Determine which structure this is (small wooden hut with white flowers on top), where its spawn rate is configured (likely in worldgen/structure_set or a biome config), and reduce it to mushroom-island rarity levels or below. May touch Kingsom or Powers worldgen depending on which mod owns the structure.
+- 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: is this the spider watcher hut (white silk/web roof)? #1849 reduced that hut; #2108 stopped its generation with Silk Deeps. Identity unconfirmed; do not close yet.

@@ -19,3 +19,6 @@ Build 2 placement tracks at a time; tracks 1 and 2 first.
 **Andy's words:** camps "should come in groups, 3s and 4s and around a Kingdom or castle, this way it looks like a quickly thrown up raid shelter, to prepare to siege, and the siege should actually happen, supplied with the raiders stationed nearby, if they win they move in like now, and vice versa, the losers are routed or killed and their resources go to the victor."
 
 Build: place 3-4 camps around a kingdom or castle seat; a muster period; the siege runs, drawing supplies from the camps (a camp cleared mid-siege weakens it); winners take the site, losers routed or killed, their storage goes to the victor. Today a cleared camp's land and storage are wiped (Camps.java, chief kill) instead of going to the victor.
+
+## Notes
+- 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: retain grouped camps, supply-dependent sieges and victor resource transfer. Camps still clears storage on fall. #2195 fixes NPC crowding, not this task. Do not edit HollowCaptains.java, Captains.java, Rivals.java or Ladders.java while their separate PR owns them.

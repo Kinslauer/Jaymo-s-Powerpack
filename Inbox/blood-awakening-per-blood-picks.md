@@ -27,3 +27,6 @@ shared rule for that blood or adds to it.
 - Held moves: Powers `HeritageMoves` (Thunderclap, Sunflare), `EmberKindle`, `RaceMoves` (Stretch), `FrostBeam`; Kingdoms
   `FrostPrison`, `BioBuilt`, `RubberFolk`, `HeritageHold`.
 - The Verdant's push-button regrowth (`ZFighterLineage.regrowNow`) is already built; leave it unless Andy says otherwise.
+
+## Notes
+- 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: #2117 implemented the shared rule, not this pick list. Prepare one or more selectable ideas for every move; no upgrades implemented before Andy selects them. Question sent: add to shared bonus, replace it, or decide per move.

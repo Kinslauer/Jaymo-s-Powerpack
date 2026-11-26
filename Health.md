@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 03:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:07). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**16 problems.**
+**17 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -34,6 +34,7 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 ## Tasks for nobody
 
 - [[Inbox/bleed-out-coma|bleed-out-coma]]: `for: coordinator` matches no bot or agent, so no one will claim it.
+- [[Inbox/bleed-out-npc-items|bleed-out-npc-items]]: `for: coordinator` matches no bot or agent, so no one will claim it.
 - [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]]: `for: any (needs Andy's PC: the folder is local)` matches no bot or agent, so no one will claim it.
 - [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]]: `for: coordinator` matches no bot or agent, so no one will claim it.
 
