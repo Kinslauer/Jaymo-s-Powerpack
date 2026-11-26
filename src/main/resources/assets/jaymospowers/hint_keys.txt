@@ -19,6 +19,8 @@ message.jaymoskingdoms.cleric.symbol
 message.jaymoskingdoms.combat_art.none
 message.jaymoskingdoms.cordon.summons_blank
 message.jaymoskingdoms.daily.done
+message.jaymoskingdoms.dealings.kept
+message.jaymoskingdoms.dealings.usual
 message.jaymoskingdoms.dragon.exhausted
 message.jaymoskingdoms.dragon.not_yours
 message.jaymoskingdoms.druid.none

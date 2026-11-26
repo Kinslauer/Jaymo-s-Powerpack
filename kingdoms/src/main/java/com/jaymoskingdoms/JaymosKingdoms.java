@@ -313,6 +313,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Clearing.register();
 		Herds.register();
 		WeatherShelter.register();
+		LOGGER.debug("dealings attachment: {}", Dealings.DEALINGS);
 		Strays.register();
 		BloodChores.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground

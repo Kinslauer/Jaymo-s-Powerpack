@@ -30,6 +30,8 @@ abstract class VillagerTradeMixin {
 				com.jaymoskingdoms.oldage.RuinFolk.traded(v, player);
 				// (Village mods patch 5) and the town's known goods come nearer
 				com.jaymoskingdoms.KnownGoods.traded(v, player);
+				// and what they've dealt in with them goes in the trader's ledger
+				com.jaymoskingdoms.Dealings.traded(v, player, offer);
 			}
 		}
 	}
