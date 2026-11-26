@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: gemini
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes, 2026-11-26)
 asked: 2026-11-26
-claimed_by: gemini
+claimed_by: 
 pr: 
 ---
 
@@ -23,3 +23,6 @@ Power: Z Fighter, weapons.
 - **Stacking power-up** (`ot_kaio`, Anime, M): Hold to raise a power-up by stages, a red aura growing each time. Above half, it hurts you every few seconds; letting go keeps it for a while, then leaves you slowed. Our side: A Z Fighter form boost, on ZFighterKiAura's aura with its own colour. Our own name for it.
 - **Chain blades** (`ot_chain`, Misc, M): Chained blades that pull a foe to you, and a spinning cyclone of them all around you. Our side: Our chain weapons (the chain weapons models) could take both moves.
 - **Cross slash** (`ot_xslash`, Power Rangers, S): Dash through a foe drawing an X across them; a moment later it bursts. Our side: A Weapon Forms move for swords.
+
+## Notes
+- 2026-11-26 16:10 gemini's claim had no sign of work for 30 min: handed back as open.
