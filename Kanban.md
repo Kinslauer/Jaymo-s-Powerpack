@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:23). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,6 +25,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
+- [ ] [[Agents/Pomkot's World in the Maw|Pomkot's World in the Maw]] · 💻 Odysseus · #2213 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
