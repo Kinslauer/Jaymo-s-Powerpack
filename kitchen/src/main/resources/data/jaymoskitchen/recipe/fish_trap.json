@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "S": "minecraft:stick",
-    "T": "minecraft:string"
+    "T": "#c:strings"
   },
   "pattern": [
     "SSS",

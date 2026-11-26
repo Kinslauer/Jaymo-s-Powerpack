@@ -244,7 +244,8 @@ public class SpitBlockEntity extends BlockEntity {
 		}
 		markUpdated();
 		SpitBlock.ripSeen(level, worldPosition, by);
-		return chunk;
+		// hot off the spit: it warms whoever eats it soon (Warmth#consumed)
+		return com.jaymoskitchen.climate.Warmth.stampFresh(chunk, level.getGameTime());
 	}
 
 	/**
@@ -268,6 +269,9 @@ public class SpitBlockEntity extends BlockEntity {
 				out.addAll(SpitBlock.cookedProduct(stack, level));
 			}
 			clear(i);
+		}
+		for (ItemStack piece : out) {
+			com.jaymoskitchen.climate.Warmth.stampFresh(piece, level.getGameTime());
 		}
 		if (!out.isEmpty()) {
 			markUpdated();

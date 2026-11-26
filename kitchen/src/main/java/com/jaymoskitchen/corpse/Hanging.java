@@ -529,6 +529,11 @@ public final class Hanging {
 				// the fat cut away along the way (for tallow, and the tanner)
 				drop.accept(new ItemStack(com.jaymoskitchen.tanning.Tanning.ANIMAL_FAT, 1 + level.getRandom().nextInt(FAT_MORE + 1)));
 			}
+			// (a practised hand also pulls the sinew)
+			ItemStack sinew = Sinew.roll(corpse.sourceType(), level.getRandom());
+			if (!sinew.isEmpty()) {
+				drop.accept(sinew);
+			}
 			level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 20, 0.4, 0.3, 0.4, 0.2);
 			level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			tell(player, Component.translatable("message.jaymoskitchen.hook.done"));

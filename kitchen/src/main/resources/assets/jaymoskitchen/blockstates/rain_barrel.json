@@ -1,0 +1,41 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "jaymoskitchen:block/rain_barrel"
+      }
+    },
+    {
+      "when": {
+        "level": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/rain_barrel_water_1"
+      }
+    },
+    {
+      "when": {
+        "level": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/rain_barrel_water_2"
+      }
+    },
+    {
+      "when": {
+        "level": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/rain_barrel_water_3"
+      }
+    },
+    {
+      "when": {
+        "level": "4"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/rain_barrel_water_4"
+      }
+    }
+  ]
+}

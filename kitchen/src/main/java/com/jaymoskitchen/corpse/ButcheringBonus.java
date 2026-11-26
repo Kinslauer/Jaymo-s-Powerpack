@@ -74,6 +74,11 @@ final class ButcheringBonus {
 		if (fat != null && random.nextFloat() < fat.chance()) {
 			drops.add(new ItemStack(com.jaymoskitchen.tanning.Tanning.ANIMAL_FAT, 1 + random.nextInt(fat.max())));
 		}
+		ItemStack sinew = Sinew.roll(type, random);
+		if (!sinew.isEmpty()) {
+			// the tough cord from the legs and back, which works as string (Sinew)
+			drops.add(sinew);
+		}
 		return drops;
 	}
 }

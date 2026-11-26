@@ -60,6 +60,14 @@ public final class Warmth {
 	/** A warm or cold drink from a waterskin: how long it lasts and how hard it pushes. */
 	static final int DRINK_TICKS = 2 * 60 * 20;
 	static final float HOT_DRINK = 12.0F, COLD_DRINK = 12.0F;
+	/** A cup of the vintner's juice cools for a minute; ice cream cools harder for a few minutes. */
+	static final int JUICE_TICKS = 60 * 20, ICE_CREAM_TICKS = 4 * 60 * 20;
+	static final float ICE_CREAM_COOL = 16.0F;
+	/** Hot food (the item tag {@code jaymoskitchen:hot_foods}) and meat fresh off the spit warm like a hot meal ({@link BodyHeat#HOT_MEAL}). */
+	static final float HOT_FOOD = BodyHeat.HOT_MEAL;
+	static final int HOT_FOOD_TICKS = BodyHeat.HOT_MEAL_TICKS;
+	/** How long a piece torn off the spit stays hot enough to warm you, in ticks. */
+	public static final int FRESH_TICKS = 3 * 60 * 20;
 	/** How long water stays hot off the fire, or cold out of the snow, in the waterskin. */
 	static final int SKIN_KEEPS = 5 * 60 * 20;
 	/** The land's cold per thousand blocks north of the world's spawn (warmth to the south), and its most. */
@@ -80,6 +88,12 @@ public final class Warmth {
 	public static BlockEntityType<HearthEntity> HEARTH_ENTITY;
 	public static Item THERMOMETER;
 	public static DataComponentType<Lining> LINING;
+	/** On a piece of meat torn off the spit: the game time until which it is still hot ({@link #fresh}). */
+	public static DataComponentType<Long> FRESH;
+	public static HearthBlock REGULATOR_BLOCK;
+	/** Food that is hot to eat (pies, roasts, hot drinks) and food that is cold ({@link #consumed}). */
+	public static final net.minecraft.tags.TagKey<Item> HOT_FOODS = net.minecraft.tags.TagKey.create(Registries.ITEM, JaymosKitchen.id("hot_foods"));
+	public static final net.minecraft.tags.TagKey<Item> COOL_FOODS = net.minecraft.tags.TagKey.create(Registries.ITEM, JaymosKitchen.id("cool_foods"));
 
 	/** The rooms being warmed or cooled, by level, then by the hearth's position. */
 	private static final Map<ResourceKey<Level>, Map<Long, Room>> ROOMS = new HashMap<>();
@@ -104,13 +118,22 @@ public final class Warmth {
 			.mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava());
 		Item hearth = blockItem("hearth", HEARTH_BLOCK);
 		Item icebox = blockItem("icebox", ICEBOX_BLOCK);
+		// the climate stove: one block that does both jobs, one way at a time ({@link RegulatorBlock})
+		REGULATOR_BLOCK = block("regulator", p -> new RegulatorBlock(p), BlockBehaviour.Properties.of()
+			.mapColor(MapColor.METAL).strength(3.5F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.METAL)
+			.lightLevel(state -> state.getValue(HearthBlock.LIT) && !state.getValue(RegulatorBlock.COLD) ? 11 : 0));
+		Item regulator = blockItem("regulator", REGULATOR_BLOCK);
 		HEARTH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("hearth"),
-			new BlockEntityType<>(HearthEntity::new, Set.of(HEARTH_BLOCK, ICEBOX_BLOCK)));
+			new BlockEntityType<>(HearthEntity::new, Set.of(HEARTH_BLOCK, ICEBOX_BLOCK, REGULATOR_BLOCK)));
+		FRESH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKitchen.id("fresh"),
+			DataComponentType.<Long>builder().persistent(com.mojang.serialization.Codec.LONG)
+				.networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG).build());
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKitchen.id("thermometer"));
 		THERMOMETER = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().stacksTo(1).setId(key)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(hearth);
 			output.accept(icebox);
+			output.accept(regulator);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.accept(THERMOMETER));
 		// a world closed in single player mustn't leave its rooms or drinks behind for the next one opened
@@ -172,6 +195,11 @@ public final class Warmth {
 		return 0;
 	}
 
+	/** How long {@code stack} keeps a climate stove cooling: ice, packed ice, blue ice or a snow block (not a snowball); else 0. */
+	static int regulatorIce(ItemStack stack) {
+		return stack.is(Items.SNOWBALL) ? 0 : burnTicks(stack, true);
+	}
+
 	// ---- rooms ----
 
 	static void set(ServerLevel level, BlockPos hearth, boolean cold, LongOpenHashSet cells) {
@@ -208,6 +236,31 @@ public final class Warmth {
 		boolean warm = false, cool = false;
 		for (Room room : rooms.values()) {
 			if (room.cells.contains(feet) || room.cells.contains(head)) {
+				if (room.cold) {
+					cool = true;
+				} else {
+					warm = true;
+				}
+			}
+		}
+		if (warm && air < 0.0F) {
+			air = Math.min(0.0F, air + HEARTH);
+		}
+		if (cool && air > 0.0F) {
+			air = Math.max(0.0F, air - ICEBOX);
+		}
+		return air;
+	}
+
+	/** {@code air} (the push at a point, in body heat) as a warmed or cooled room that holds {@code pos} has it: what a gauge reads. */
+	static float roomAt(ServerLevel level, BlockPos pos, float air) {
+		Map<Long, Room> rooms = ROOMS.get(level.dimension());
+		if (rooms == null || rooms.isEmpty()) {
+			return air;
+		}
+		boolean warm = false, cool = false;
+		for (Room room : rooms.values()) {
+			if (room.cells.contains(pos.asLong())) {
 				if (room.cold) {
 					cool = true;
 				} else {
@@ -292,7 +345,44 @@ public final class Warmth {
 
 	/** A warm ({@code hot}) or cold drink, felt for {@link #DRINK_TICKS}. */
 	static void drink(ServerPlayer player, boolean hot) {
-		DRINKS.put(player.getUUID(), new long[] {hot ? 1 : -1, player.level().getGameTime() + DRINK_TICKS});
+		drink(player, hot, DRINK_TICKS, hot ? HOT_DRINK : COLD_DRINK);
+	}
+
+	/** A warm or cold bite or sip, felt for {@code ticks}, pushing the air {@code push} body heat the way it is warm or cold. */
+	static void drink(ServerPlayer player, boolean hot, int ticks, float push) {
+		DRINKS.put(player.getUUID(), new long[] {hot ? 1 : -1, player.level().getGameTime() + ticks, Math.round(push * 10.0F)});
+	}
+
+	/**
+	 * Something eaten or drunk (the stack still whole): a cup of the vintner's juice cools you for a minute, ice cream (the
+	 * item tag {@code jaymoskitchen:cool_foods}) for a few; a hot food (the tag {@code jaymoskitchen:hot_foods}: pies, roasts,
+	 * hot drinks) or a bite still {@link #fresh} off the spit warms you as a hot meal does.
+	 */
+	public static void consumed(ServerPlayer player, ItemStack stack) {
+		if (player.getAbilities().instabuild) {
+			return;
+		}
+		if (com.jaymoskitchen.vintner.Juice.ofBottle(stack) != null) {
+			drink(player, false, JUICE_TICKS, COLD_DRINK);
+		} else if (stack.is(COOL_FOODS)) {
+			drink(player, false, ICE_CREAM_TICKS, ICE_CREAM_COOL);
+		} else if (stack.is(HOT_FOODS) || fresh(stack, player.level().getGameTime())) {
+			drink(player, true, HOT_FOOD_TICKS, HOT_FOOD);
+		}
+	}
+
+	/** Stamps {@code stack} as hot off the spit until {@link #FRESH_TICKS} from {@code now}; only food takes the mark. Returns the stack. */
+	public static ItemStack stampFresh(ItemStack stack, long now) {
+		if (stack.has(DataComponents.FOOD)) {
+			stack.set(FRESH, now + FRESH_TICKS);
+		}
+		return stack;
+	}
+
+	/** Whether {@code stack} was torn off the spit and is still hot at game time {@code now}. */
+	static boolean fresh(ItemStack stack, long now) {
+		Long until = stack.get(FRESH);
+		return until != null && until >= now;
 	}
 
 	/** What a recent warm or cold drink adds to the air's push. */
@@ -305,7 +395,8 @@ public final class Warmth {
 			DRINKS.remove(player.getUUID());
 			return 0.0F;
 		}
-		return drink[0] > 0 ? HOT_DRINK : -COLD_DRINK;
+		float push = drink.length > 2 ? drink[2] / 10.0F : COLD_DRINK;
+		return drink[0] > 0 ? push : -push;
 	}
 
 	static void forget(UUID id) {

@@ -128,7 +128,8 @@ public enum Step {
 	BAKED_POTATO(() -> Items.BAKED_POTATO, null),
 	COOKED_BEEF(() -> Items.COOKED_BEEF, null, "cooked_red_meat"),
 	WHEAT(() -> Items.WHEAT, null),
-	ICE(() -> Items.ICE, null),
+	// (snow blocks and packed ice do as well as ice: jaymoskitchen:cooking/frozen)
+	ICE(() -> Items.ICE, null, "frozen"),
 	PASTA(() -> own("pasta"), null),
 	RICE_COOKED(() -> com.jaymoskitchen.ModItems.dish(Dish.COOKED_RICE), null),
 	CRUST(() -> com.jaymoskitchen.ModItems.dish(Dish.PIE_CRUST), null),
