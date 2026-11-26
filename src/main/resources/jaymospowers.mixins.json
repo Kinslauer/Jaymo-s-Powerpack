@@ -9,6 +9,8 @@
 		"SpawnCalmMixin",
 		"SnowFallMixin",
 		"SnowLandMixin",
+		"RustTickMixin",
+		"RustWeatherMixin",
 		"RetiredKnightTabIconMixin",
 		"OversizedDropMixin",
 		"LightArmourSlowMixin",

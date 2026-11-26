@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "waxed_iron_block",
+  "ingredients": [
+    "minecraft:iron_block",
+    "minecraft:honeycomb"
+  ],
+  "result": {
+    "id": "jaymospowers:waxed_iron_block",
+    "count": 1
+  }
+}

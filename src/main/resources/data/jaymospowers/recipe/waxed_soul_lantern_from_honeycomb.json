@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "waxed_soul_lantern",
+  "ingredients": [
+    "minecraft:soul_lantern",
+    "minecraft:honeycomb"
+  ],
+  "result": {
+    "id": "jaymospowers:waxed_soul_lantern",
+    "count": 1
+  }
+}
