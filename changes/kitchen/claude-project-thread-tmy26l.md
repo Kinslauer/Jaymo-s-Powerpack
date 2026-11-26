@@ -1,6 +1,7 @@
-# Cut parts off a body from its loot screen
-Andy: "there should be a way to dismember them from the inventory screen so you can take the limb if it doesnt drop". A person's body (or one built like a person) now has a cut-off button above its hands in the loot screen: pick the head, an arm or a leg and it comes off in your hand (a severed part with Jaymo's Powers), with whatever was worn on it.
-- Gear bolted onto a body (Jaymo's Powers says which: the Rig on the future's troopers and androids) can't be taken from its slot. Its slot is washed red, its tooltip says which part it comes off with, and a click on it cuts that part off. A piece bolted to the torso never comes off.
-- A machine's body wearing bolted gear (an android in its Rig plate) opens the loot screen too, so its plate can be cut off before it's searched.
-- `CorpseEntity#setAttachedGear` (a reflection hook, plain types), `attachedParts`, `canCutOff`, `cutOff`; parts lost any way drop their bolted gear with them. `CorpseLootMenu` buttons (`CUT`, `CUT_GEAR`), `CorpseLootScreen` button and part list, lang part `corpse_cut_off.json`.
-- Built; not played. Player bodies have no cut-off button.
+# Cut parts off a body with a blade or an axe
+Andy: "there should be a way to dismember them from the inventory screen so you can take the limb if it doesnt drop", then "it needs a blade, or an axe to butcher the same way we do animals, but only for gear not meat". A person's body (or one built like a person) can have its head, arms and legs cut off: hold use on it with a blade or an axe, and a bar fills the way a big carcass is cut up; the part comes off (a severed part with Jaymo's Powers) with whatever was worn on it. No meat comes of it.
+- The loot screen has a cut-off button above the hands: pick a part there, and the next cut takes it off. With nothing picked, a blade or axe held on the body cuts off a part with gear bolted to it, and otherwise does what it always did.
+- Gear bolted onto a body (Jaymo's Powers says which: the Rig on the future's troopers and androids) can't be taken from its slot. Its slot is washed red, its tooltip says which part it comes off with, and a click on it picks that part. A piece bolted to the torso never comes off.
+- A machine's body wearing bolted gear (an android in its Rig plate) opens the loot screen on a tap too, instead of coming apart when searched.
+- `CorpseEntity#setAttachedGear` (a reflection hook, plain types), `attachedParts`, `canCutOff`, `pickCut`, `cutApart`; parts lost any way drop their bolted gear with them. `CorpseLootMenu` buttons (`CUT`, `CUT_GEAR`), `CorpseLootScreen` button and part list, lang part `corpse_cut_off.json`.
+- Built; not played. Player bodies can't be cut apart this way.

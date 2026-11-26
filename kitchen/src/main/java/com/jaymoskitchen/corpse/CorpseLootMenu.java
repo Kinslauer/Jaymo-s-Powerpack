@@ -160,10 +160,10 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 			return false;
 		}
 		int part = id >= CUT && id < CUT + PARTS.length ? PARTS[id - CUT] : id >= CUT_GEAR && id < CUT_GEAR + CorpseLoot.GEAR ? partFor(id - CUT_GEAR) : 0;
-		if (part == 0 || !loot.corpse.cutOff(level, part, player)) {
+		if (part == 0 || !loot.corpse.pickCut(part, player)) {
 			return false;
 		}
-		// the part is in your hand now: the screen closes on it
+		// picked: the screen closes, and use held on the body with the blade cuts it off
 		if (player instanceof net.minecraft.server.level.ServerPlayer server) {
 			server.closeContainer();
 		}
