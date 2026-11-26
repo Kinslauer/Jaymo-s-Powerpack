@@ -17,6 +17,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · for any · open
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for 🔥 Prometheus · open
 
 
 ## Being built
