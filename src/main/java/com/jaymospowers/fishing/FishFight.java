@@ -11,7 +11,7 @@ import net.minecraft.network.codec.StreamCodec;
  * {@code run} is -1 while the fish runs to the player's left, 1 to the right, 0 while it holds (Track A).
  * <p>
  * (Andy, 2026-11-23, a fishing gif: "thats what i want our fishing to be like") The fish's {@code mood} tells you what to do
- * ({@link #TAKING}, {@link #CALM}: reel; {@link #RUNNING}, {@link #JUMPING}, {@link #THRASHING}: ease off; {@link #LANDING}),
+ * ({@link #TAKING}, {@link #CALM}: reel; {@link #RUNNING}, {@link #JUMPING}, {@link #THRASHING}, {@link #DIVING}: ease off; {@link #LANDING}),
  * its {@code energy} (1 fresh, falling as it fights) tires it, and the line out is in metres of the spool ({@link #lineOut},
  * {@code lineMax}): all of it run out, and the line parts. {@code kg} is its weight, for the readout.
  */
@@ -29,7 +29,7 @@ public record FishFight(
         float kg        // its weight
 ) {
     /** The fish's moods. */
-    public static final int TAKING = 0, CALM = 1, RUNNING = 2, JUMPING = 3, THRASHING = 4, LANDING = 5;
+    public static final int TAKING = 0, CALM = 1, RUNNING = 2, JUMPING = 3, THRASHING = 4, LANDING = 5, DIVING = 6;
 
     public static final FishFight NONE = new FishFight(-1, 0.0F, 0.0F, 0.0F, 0L, 0, 1.0F, TAKING, 1.0F, 1.0F, 0.0F);
 
@@ -81,7 +81,7 @@ public record FishFight(
 
     /** Whether the fish's mood asks you to ease off (it runs, jumps or thrashes). */
     public boolean easeOff() {
-        return mood == RUNNING || mood == JUMPING || mood == THRASHING;
+        return mood == RUNNING || mood == JUMPING || mood == THRASHING || mood == DIVING;
     }
 
     public FishFight with(float tension, float progress, int run, float breakAt, int mood, float energy) {

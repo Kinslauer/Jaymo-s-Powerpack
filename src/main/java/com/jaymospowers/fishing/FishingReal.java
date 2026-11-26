@@ -360,13 +360,13 @@ public final class FishingReal {
         return Math.max(1, stars);
     }
 
-    /** (2026-11-23) What the fish is doing, for the readout: taking the lure, calm, running, leaping, thrashing, being landed. */
+    /** (2026-11-23) What the fish is doing, for the readout: taking the lure, calm, running, leaping, thrashing, diving, being landed. */
     private static int mood(FishFight state, long now, int run, boolean thrash, float progress, ServerPlayer player) {
         if (thrash) {
             return FishFight.THRASHING;
         }
         if (run != 0) {
-            return FishRun.jumping(player, now) ? FishFight.JUMPING : FishFight.RUNNING;
+            return FishRun.jumping(player, now) ? FishFight.JUMPING : FishRun.diving(player) ? FishFight.DIVING : FishFight.RUNNING;
         }
         if (now - state.startTime() < TAKING_TICKS) {
             return FishFight.TAKING;

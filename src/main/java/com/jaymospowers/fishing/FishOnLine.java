@@ -25,7 +25,7 @@ import java.util.UUID;
  * the end of the line: the hook rides in its mouth ({@code FishingHookMixin}), so the line runs to the fish itself, not to
  * a float it has left behind. Its runs swing it out wide to the side and the line brings it back; it faces away from you
  * and pulls; as line comes in it comes in toward the bank, and a run takes it back out. Its runs leave a wake, its thrashes
- * splash. {@link FishingReal}'s fight tick calls {@link #tick} in place of the old "keep it within three blocks of the
+ * splash, and some runs are dives: it sounds for the bottom, bubbles rising, and the line brings it back up after. {@link FishingReal}'s fight tick calls {@link #tick} in place of the old "keep it within three blocks of the
  * float". Server side; the fish and the hook are real entities, so everyone sees it.
  */
 final class FishOnLine {
@@ -47,6 +47,13 @@ final class FishOnLine {
     static final double UNDER = 0.05D;
     /** How hard it's held at its depth (share of the gap a tick); weaker while it thrashes. */
     static final double HOLD_DEPTH = 0.25D, HOLD_DEPTH_THRASH = 0.08D;
+    /**
+     * (Andy, 2026-11-26: "the fish should still be able to dive deep while hooked") A diving fish heads for the bottom, as
+     * deep as this many blocks under the surface, at most this fast (blocks a tick); it swings out this share as wide as a
+     * run, and the line draws it back up after.
+     */
+    static final int DIVE_MOST = 12;
+    static final double DIVE_SPEED = 0.12D, DIVE_SWING = 0.4D;
     /** Ticks between wake and splash puffs. */
     static final int PUFF_EVERY = 2;
 
@@ -106,8 +113,9 @@ final class FishOnLine {
             }
         }
         // a run swings it out to the side, and the line draws it back between runs
-        line.swing = run != 0 ? Mth.clamp(line.swing + FishRun.RUN_SPEED * state.strength() * run * 2.0D, -SWING_MOST, SWING_MOST)
-                : line.swing * SWING_BACK;
+        boolean diving = run != 0 && FishRun.diving(player);
+        line.swing = run != 0 ? Mth.clamp(line.swing + FishRun.RUN_SPEED * state.strength() * run * 2.0D * (diving ? DIVE_SWING : 1.0D),
+                -SWING_MOST, SWING_MOST) : line.swing * SWING_BACK;
         double sideX = len > 1.0E-4D ? -oz / len : 0.0D, sideZ = len > 1.0E-4D ? ox / len : 0.0D;
         double tx = line.cx + sideX * line.swing, tz = line.cz + sideZ * line.swing;
         if (!fluidAt(level, tx, line.fluidY, tz, line.fluid)) {
@@ -118,6 +126,10 @@ final class FishOnLine {
         boolean leaping = FishRun.jumping(player, now) && !fish.isInLiquid();
         double surface = surface(level, fish, line);
         double ty = thrash ? surface - fish.getBbHeight() * 0.5D : surface - fish.getBbHeight() - UNDER;
+        if (diving) {
+            // sounding: down for the bottom, no faster than it swims
+            ty = Math.max(floor(level, fish, line), fish.getY() - DIVE_SPEED);
+        }
         boolean held = fish instanceof Mob mob && mob.isNoAi();
         if (held) {
             // a big shark held without its AI is moved by hand
@@ -164,6 +176,9 @@ final class FishOnLine {
         if (thrash) {
             send(level, lava ? ParticleTypes.LAVA : ParticleTypes.SPLASH, fish.getX(), y, fish.getZ(), 10, w + 0.2D, 0.1D, 0.2D);
             send(level, lava ? ParticleTypes.SMOKE : ParticleTypes.BUBBLE, fish.getX(), y - 0.2D, fish.getZ(), 4, w, 0.1D, 0.05D);
+        } else if (run != 0 && fish.getY() + fish.getBbHeight() < y - 1.0D) {
+            // deep on a dive: bubbles rising from it
+            send(level, lava ? ParticleTypes.SMOKE : ParticleTypes.BUBBLE_COLUMN_UP, fish.getX(), fish.getY() + fish.getBbHeight(), fish.getZ(), 2, w, 0.1D, 0.05D);
         } else if (run != 0) {
             send(level, lava ? ParticleTypes.SMOKE : ParticleTypes.FISHING, fish.getX(), y, fish.getZ(), 3, w, 0.0D, 0.02D);
             send(level, lava ? ParticleTypes.LAVA : ParticleTypes.SPLASH, fish.getX(), y, fish.getZ(), 2, w, 0.05D, 0.1D);
@@ -190,10 +205,22 @@ final class FishOnLine {
         return top.getY() + state.getHeight(level, top);
     }
 
-    /** The highest block of the same fluid straight up from {@code at} (at most a few blocks up). */
+    /** (2026-11-26) The lowest a diving fish goes: just over the bottom under it, at most {@link #DIVE_MOST} under the surface. */
+    private static double floor(ServerLevel level, LivingEntity fish, Line line) {
+        BlockPos at = BlockPos.containing(fish.getX(), Math.min(fish.getY(), line.fluidY), fish.getZ());
+        if (!level.getFluidState(at).is(line.fluid)) {
+            return fish.getY();
+        }
+        for (int i = 0; i < DIVE_MOST && level.getFluidState(at.below()).is(line.fluid) && line.fluidY - at.getY() < DIVE_MOST; i++) {
+            at = at.below();
+        }
+        return at.getY() + 0.1D;
+    }
+
+    /** The highest block of the same fluid straight up from {@code at} (as far up as a dive goes down, and a little more). */
     private static BlockPos top(net.minecraft.world.level.Level level, BlockPos at, TagKey<Fluid> fluid) {
         BlockPos top = at;
-        for (int i = 0; i < 8 && level.getFluidState(top.above()).is(fluid); i++) {
+        for (int i = 0; i < DIVE_MOST + 4 && level.getFluidState(top.above()).is(fluid); i++) {
             top = top.above();
         }
         return top;

@@ -87,6 +87,12 @@ public final class FishRun {
      */
     static final double AGAINST_DOT = -0.35;
     static final float ENERGY_AGAINST = 0.0018F;
+    /**
+     * (Andy, 2026-11-26: "the fish should still be able to dive deep while hooked") The chance a run that doesn't start with a
+     * leap is a dive instead, the fish sounding for the bottom ({@link FishOnLine} takes it down); a spent fish dives this much
+     * less often at no energy left.
+     */
+    static final float DIVE_CHANCE = 0.4F, DIVE_TIRED = 0.5F;
 
     private static final class Run {
         long fightStart;
@@ -96,6 +102,7 @@ public final class FishRun {
         long jumpUntil;
         long thrashUntil;
         boolean bigLeap;
+        boolean dive;
         double sideX, sideZ;
     }
 
@@ -148,12 +155,17 @@ public final class FishRun {
                 run.dir = random.nextBoolean() ? 1 : -1;
                 run.endsAt = now + Mth.nextInt(random, RUN_TICKS_LEAST, RUN_TICKS_MOST);
                 run.bigLeap = false;
+                run.dive = false;
                 if (!held && fish.isInWater() && random.nextFloat() < JUMP_CHANCE) {
                     run.bigLeap = leaper(state);
                     fish.setDeltaMovement(fish.getDeltaMovement().add(0.0D, run.bigLeap ? JUMP_UP_BIG : JUMP_UP, 0.0D));
                     player.level().playSound(null, fish.getX(), fish.getY(), fish.getZ(),
                             SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.NEUTRAL, 0.8F, 0.8F);
                     run.jumpUntil = now + JUMP_TICKS;
+                } else if (fish.isInWater() || held) {
+                    // (2026-11-26) or it sounds, down for the bottom
+                    float fresh = 1.0F - DIVE_TIRED * (1.0F - Mth.clamp(state.energy(), 0.0F, 1.0F));
+                    run.dive = random.nextFloat() < DIVE_CHANCE * fresh;
                 }
             }
         }
@@ -212,6 +224,12 @@ public final class FishRun {
         net.minecraft.world.phys.Vec3 look = player.getLookAngle();
         double len = Math.hypot(look.x, look.z);
         return len > 1.0E-4D && (look.x * run.sideX + look.z * run.sideZ) / len < AGAINST_DOT;
+    }
+
+    /** (2026-11-26) Whether {@code player}'s fish is diving deep on this run. */
+    static boolean diving(ServerPlayer player) {
+        Run run = RUNS.get(player.getUUID());
+        return run != null && run.dir != 0 && run.dive;
     }
 
     /** (2026-11-23) Whether {@code player}'s fish is in the first moments of a run that began with a leap. */
