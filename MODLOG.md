@@ -8581,3 +8581,13 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - `compat/AlexsMobsSpawnsPreset` (pre-launch, both sides) renames just those tags to the ones the new port's own files use, every start, before Alex's Mobs reads them. Fresh installs never had the bad files and are unchanged.
 - **Blobfish** spawn only below Alex's depth limit (25); with the land and sea 8 blocks higher than the game's, the deep sea floor sat above that almost everywhere. Once per install, while it's still 25, `amc.json`'s `blobfishSpawnHeight` goes to 33.
 - Built; not played. The Deck server's own `config/alexsmobs/` wasn't looked at; the fix runs there too.
+
+## 0.27.96 (2026-11-26): Two new Rig suits: Hail and Tinker (#2215)
+
+The Rig Forge has two more frames to pick: **Hail**, white plate with ice-cyan lights as the Frostborn build them, and **Tinker**, gunmetal with cyan, the Mad Tinkerer's copy. They're looks only and play like the standard frame. Their plates wear other artists' armour art (Power Armor: Renostalgized by Thepigcat76, and ItsSory's Netherite Armor pack, both MIT).
+- `RigFrame.HAIL`, `RigFrame.TINKER` (the standard frame's numbers), their suit textures and glow passes in `RigSuit`; `tools/open_art/rig_suits.py` lays the sources onto the plates `tools/gen_rig.py` defines.
+- Who wears which: Frostborn troopers in the future wear Hail (4 in 5; the rest the standard suit). The future's androids, the Dead Rig guards among them, wear Tinker plate on the chest, arms and legs (no helm, so their faces still show). It is real Rig armour bolted on: it never drops on death, only when the limb under it is ripped off. Androids can now lose limbs like other people (in sparks and torn metal, no blood); the Arms come away with the first arm, the Thrusters with a leg, and the Core stays on the torso.
+- Frostborn troopers can lose limbs now too, and their Rig is bolted on the same way: it never drops when they die. With Jaymo's Kitchen, a blade or an axe held on the body cuts a limb off (picked in its loot screen) to take it with its plate (`Rig.boltedOn`, told to Kitchen in `KitchenCompat`).
+- Any Rig wearer, players too: a Rig's Arms piece now comes off with a lost arm, not with the second leg as leggings do. Rigs you build from salvage you find are still the standard frame unless you pick another at the Forge.
+- `Rig.stamp` sets the frame and, for Hail and Tinker, their own armour layer (`equipment/rig_hail`, `rig_tinker`, the source artists' layers unchanged), so armour stands and mobs show the right suit too.
+- Built; previewed in Blockbench, not played. The Forge hologram and item icons are unchanged.
