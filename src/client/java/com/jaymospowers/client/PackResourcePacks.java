@@ -103,9 +103,12 @@ final class PackResourcePacks {
 		// never copied): over 1600 modern-dress zombie skins through Entity Texture Features. Andy (2026-11-15): "All can go
 		// into the future". Jaymo's Kingdoms keeps it on Chrono's future dead only (TissouPack): the present's dead wear our
 		// own skins, and the textures it repaints outright are read back from the game's own. Format 15 (1.20.1).
-		new Pack("Tissou's zombies", "jaymospowers-tissou-zombies-v1", "TZP_", "TZP_1.20.1_2.7.zip",
+		// Andy (2026-11-26): "zombie sounds seem to have swapped back to vanilla": its zombie groans are the pack's own
+		// zombie sounds, and like the medieval villagers pack it had dropped out of the selected packs while its once-only
+		// marker said it was done. Kept on now (config/jaymospowers-tissou-zombies-off keeps it off).
+		new Pack("Tissou's zombies", "jaymospowers-tissou-zombies", "TZP_", "TZP_1.20.1_2.7.zip",
 			"https://mediafilez.forgecdn.net/files/4750/306/TZP_1.20.1_2.7.zip",
-			"0f24fbc99e9a6f4d1b9ceb628f9389a901137ec1", true),
+			"0f24fbc99e9a6f4d1b9ceb628f9389a901137ec1", true, null, true),
 		// Sensible MC picks (Andy, 2026-11-16). Each fetched unchanged from Modrinth, never shipped, edited or copied.
 		// Fresh Animations' own add-ons (by FreshLX, under its terms): extra mob details and a new look for creepers,
 		// just above Fresh Animations. Details 2.4 (project lctgpCsu), Creepers 2.2 (project AhPf2E1u).
