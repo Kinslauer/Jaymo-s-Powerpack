@@ -231,6 +231,12 @@ final class Routines {
 			|| Directions.guiding(v));
 	}
 
+	/** {@link NpcTasks}: the routine {@code v} is about just now ({@link Kind#key}), or null. */
+	static @Nullable String doing(Villager v) {
+		Doing d = DOING.get(v.getUUID());
+		return d == null ? null : d.kind.key();
+	}
+
 	/** {@code v} takes up something fitting the hour. */
 	private static void start(ServerLevel level, Faction f, Landmarks marks, Villager v, List<Villager> folk, long t, long now) {
 		RandomSource random = level.getRandom();
