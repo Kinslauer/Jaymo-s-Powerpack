@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 16:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -41,12 +41,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-14 waiting for a bot, 1 being built, 9 in review: see [[Kanban]].
+13 waiting for a bot, 3 being built, 8 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2254 swamp fire lag - fallen trees drawn lighter, windfall goes in a minute (Kingdoms, 2026-11-26)
 - [ ] #2253 NPC controls by the crosshair - downed and tied-up bodies (Powers, Kingdoms, 2026-11-26)
 - [ ] #2247 Alex's Mobs: old spawn files mended, blobfish deeper (Powers, Kingdoms, 2026-11-26)
 - [ ] #2246 Bands sleep until you approach (Powers, 2026-11-26)
@@ -106,8 +107,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2175 Swinging while locked on no longer crashes the game (Powers, 2026-11-25)
 - [ ] #2174 class items show up in JEI under the class's name (Kingdoms, 2026-11-25)
 - [ ] #2173 No Subtle Effects error on a dedicated server's start (Powers, Kingdoms, 2026-11-25)
-- [ ] #2172 The game starts again (the symbiote HUD crashed it on launch) (Powers, 2026-11-25)
-- …and 618 older ones.
+- …and 619 older ones.
 
 ## Health
 
