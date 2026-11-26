@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:43). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 01:20). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,7 +25,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Agents/climate-picks|climate-picks]] · 💻 Odysseus · running
 
 
 ## In review
@@ -37,6 +36,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
+- [ ] [[Agents/climate-picks|climate-picks]] · 💻 Odysseus · stalled
+- [ ] [[Agents/codex-downed-harness-loot|codex-downed-harness-loot]] · 💻 Odysseus · #2188 · stalled
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 - [ ] [[Agents/symbiote-113-picks|symbiote-113-picks]] · 💻 Odysseus · stalled
@@ -46,14 +47,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/mordhau-4-legs|mordhau-4-legs]]
+- [x] [[Inbox/Done/mordhau-3-body|mordhau-3-body]]
 - [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
 - [x] [[Inbox/Done/village-mods-6-small-structures|village-mods-6-small-structures]]
 - [x] [[Inbox/Done/village-mods-5-town-life-hats|village-mods-5-town-life-hats]]
 - [x] [[Inbox/Done/village-mods-4-board-work|village-mods-4-board-work]]
 - [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
 - [x] [[Inbox/Done/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]]
-- [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
-- [x] [[Inbox/Done/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]]
 
 
 %% kanban:settings
