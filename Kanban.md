@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 23:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 23:10). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,10 +12,10 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for any · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for ☀️ Apollo · open
 
 
 ## Being built
