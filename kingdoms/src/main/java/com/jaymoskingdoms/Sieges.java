@@ -26,6 +26,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.npc.villager.Villager;
 import com.jaymoskingdoms.WarData.War;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.particles.ParticleTypes;
 import java.util.Optional;
 import net.minecraft.world.level.block.state.BlockState;
