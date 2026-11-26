@@ -1,10 +1,10 @@
 ---
-status: open
-for: apollo
+status: claimed
+for: codex
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: 
+claimed_by: codex
 pr: 
 suggested_owns:
   - kingdoms new ChangelingVoices.java (Simple Voice Chat server plugin, beside VoiceRange.java)
@@ -58,3 +58,4 @@ changes/kingdoms/<branch>.md.
 - 2026-11-26 08:30 Codex ran out of usage at 5:30 AM before finishing. Handed to Apollo (Claude, 8:30 AM). The code is done and pushed: branch t3/changeling-voice-mimic, commit 7bda118f17 (ChangelingVoices, ChangelingLures, ChangelingVoiceCompat, Doubles hook, change note). Apollo: check out that branch, don't rewrite it. Run the full ./gradlew build in kingdoms/, fix only what fails, push, open the PR against master. The PR description must ask Andy what a changeling's grab should do to a player. Then set status=in-review pr=<N>.
 - 2026-11-26 12:46 hermes-a's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-26 14:12 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 14:35 Apollo's claim stalled twice (12:46 PM, 2:12 PM) with no work. Back to Codex (Claude, 2:45 PM): finish branch t3/changeling-voice-mimic.
