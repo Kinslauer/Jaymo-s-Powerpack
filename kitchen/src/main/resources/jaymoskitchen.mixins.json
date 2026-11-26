@@ -54,6 +54,7 @@
 		"ServerLevelWeatherMixin",
 		"SignBlockEntityMixin",
 		"SlowGrowthMixin",
+		"ClimateGrowthMixin",
 		"RaidGardenGoalMixin",
 		"RangedAttackMobMixin",
 		"RopeFenceConnectionMixin",
