@@ -243,6 +243,8 @@ public abstract class WindDragon extends AbstractHorse {
 	private int callLeft;
 	/** The kingdom (faction id) whose seat it guards, or -1 ({@code RealmDragons}). */
 	int realm = -1;
+	/** Whether it has laid its nest ({@link DragonNests}): a wild one lays one, once. */
+	boolean nested;
 
 	protected WindDragon(EntityType<? extends WindDragon> type, Level level) {
 		super(type, level);
@@ -953,6 +955,9 @@ public abstract class WindDragon extends AbstractHorse {
 		if (grounded()) {
 			groundedAi(level);
 			return;
+		}
+		if (!this.nested && this.tickCount % 40 == 0) {
+			nestHere(level);
 		}
 		// (bolting, it flies off whoever's about)
 		LivingEntity target = this.wild == Wild.FLEE ? null : wildFoe(level);
@@ -1706,6 +1711,24 @@ public abstract class WindDragon extends AbstractHorse {
 	}
 
 	/**
+	 * A wild grown one settled (a flier perched, a walker on its feet at home, with no nest of its kind near) lays its nest
+	 * ({@link DragonNests}). Wyverns keep their own nests on the crags ({@code Wyverns}).
+	 */
+	private void nestHere(ServerLevel level) {
+		if (this.isBaby() || fighting() || this.wild == Wild.FLEE || "wyvern".equals(species())
+			|| (flies() ? this.wild != Wild.PERCHED : !this.onGround() || this.isInWater())) {
+			return;
+		}
+		this.nested = true;
+		if (!flies() && !level.getEntitiesOfClass(WindDragon.class, this.getBoundingBox().inflate(48.0),
+			d -> d != this && d.nested && d.getType() == this.getType()).isEmpty()) {
+			// a herd lays one nest between them
+			return;
+		}
+		DragonNests.lay(level, this);
+	}
+
+	/**
 	 * Keeping its home (told to wander, or a realm's wyvern over its kingdom's seat): it strolls about it, now and then
 	 * flies a patrol round it, takes on monsters that come near (and whoever hurts its owner) and comes back down home.
 	 */
@@ -2072,6 +2095,7 @@ public abstract class WindDragon extends AbstractHorse {
 			output.putDouble("dragon_home_z", this.tameHome.z);
 		}
 		output.putInt("dragon_realm", this.realm);
+		output.putBoolean("dragon_nested", this.nested);
 		output.putInt("dragon_grounded", this.groundedLeft);
 		output.putLong("dragon_calm_until", this.calmUntil);
 		output.putString("dragon_hunters", String.join(",", this.hunters.stream().map(UUID::toString).toList()));
@@ -2089,6 +2113,7 @@ public abstract class WindDragon extends AbstractHorse {
 		this.tameHome = Double.isNaN(homeY) ? null
 			: new Vec3(input.getDoubleOr("dragon_home_x", 0.0), homeY, input.getDoubleOr("dragon_home_z", 0.0));
 		this.realm = input.getIntOr("dragon_realm", -1);
+		this.nested = input.getBooleanOr("dragon_nested", false);
 		this.calmUntil = input.getLongOr("dragon_calm_until", 0L);
 		this.hunters.clear();
 		for (String id : input.getStringOr("dragon_hunters", "").split(",")) {
