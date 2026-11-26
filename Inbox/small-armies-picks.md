@@ -24,3 +24,4 @@ Not picked: clay soldiers, Clay Warfare colours/buffs/remote/book.
 
 ## Notes
 - 2026-11-26 15:47 YOUTH delegated this to apollo (Claude approved): build Andy's 4 picks from scratch; the sources are All Rights Reserved, so copy no code or art
+- 2026-11-26 16:39 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
