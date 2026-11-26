@@ -944,6 +944,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rites.register();
 		Sermons.register();
 		RealmFaiths.register();
+		RealmGifts.register();
+		Names.register();
 		// (0.7.518) patron gods, part (c): the champions and their temples
 		PatronChampions.register();
 		Temples.register();

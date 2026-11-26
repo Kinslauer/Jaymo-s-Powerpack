@@ -784,7 +784,11 @@ public final class LifeStory {
 	 * arms and its land's dress (head, chest, legs, feet, main hand, off hand), and the harness over it (its tabard, the
 	 * levy's cloth its livery gives, {@link Harness#worn}).
 	 */
-	public record Realm(int id, String name, int climate, int colour, List<ItemStack> dress, List<ItemStack> harness) {
+	public record Realm(int id, String name, int climate, int colour, List<ItemStack> dress, List<ItemStack> harness, String patron, String creed) {
+		/** (Andy, 2026-11-26) The same, with the realm's patron and creed as they stand now (RealmGifts): what the page says it gives. */
+		Realm keeping(String patron, String creed) {
+			return new Realm(this.id, this.name, this.climate, this.colour, this.dress, this.harness, patron, creed);
+		}
 	}
 
 	/** (gb-realmcards) A realm's person as last dressed, by the realm's look (id, name, colour, kind, overlord): dressed again only when that changes (it draws gear at random). */
@@ -825,7 +829,7 @@ public final class LifeStory {
 		} finally {
 			GuardKit.preview(false);
 		}
-		Realm r = new Realm(f.id(), f.name(), climate.ordinal(), colour, List.copyOf(dress), List.copyOf(harness));
+		Realm r = new Realm(f.id(), f.name(), climate.ordinal(), colour, List.copyOf(dress), List.copyOf(harness), "", "");
 		DRESSED.put(key, r);
 		return r;
 	}
@@ -852,6 +856,8 @@ public final class LifeStory {
 					buf.writeInt(r.colour);
 					ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, r.dress);
 					ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, r.harness);
+					buf.writeUtf(r.patron);
+					buf.writeUtf(r.creed);
 				}
 				buf.writeVarInt(p.mates.size());
 				for (Mate m : p.mates) {
@@ -873,7 +879,7 @@ public final class LifeStory {
 				List<Realm> realms = new ArrayList<>(n);
 				for (int i = 0; i < n; i++) {
 					realms.add(new Realm(buf.readVarInt(), buf.readUtf(), buf.readVarInt(), buf.readInt(), List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf)),
-						List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf))));
+						List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf)), buf.readUtf(), buf.readUtf()));
 				}
 				int m = buf.readVarInt();
 				List<Mate> mates = new ArrayList<>(m);
@@ -1139,6 +1145,8 @@ public final class LifeStory {
 				n++;
 			}
 		}
+		// (Andy, 2026-11-26) what the realm named gave: its land's and its creed's points (RealmGifts)
+		n += RealmGifts.points(player, stat);
 		// (0.7.349) years under Rustfall's weight
 		if (stat == RUSTFALL_STAT && startedAs(player, Start.RUSTFALL)) {
 			n++;
@@ -1233,7 +1241,8 @@ public final class LifeStory {
 		List<Realm> realms = new ArrayList<>();
 		for (Faction f : Factions.all(server)) {
 			if (f.type().isRealm() && !f.fallen()) {
-				realms.add(dressed(Factions.level(server), f));
+				Patron patron = RealmFaiths.patron(server, f);
+				realms.add(dressed(Factions.level(server), f).keeping(patron == null ? "" : patron.key, GreatWars.creed(server, f).key()));
 			}
 		}
 		ServerPlayNetworking.send(player, new Open(forced, List.copyOf(realms), untold(player) && McaCompat.destinyPending(player), mates(player),
@@ -1417,8 +1426,11 @@ public final class LifeStory {
 			}
 			PowersCompat.affinity(player, power);
 		}
+		// (Andy, 2026-11-26) the realm a noble family held its title in gives what it gives its own (RealmGifts)
+		RealmGifts.clear(player);
 		if (nobleRealm != null) {
 			atLeast(player, nobleRealm, NOBLE_REPUTATION);
+			RealmGifts.give(player, nobleRealm, false);
 		}
 
 		if (road == null) {
@@ -1900,6 +1912,7 @@ public final class LifeStory {
 					to = spot(level, mate, named.seat(), CITY_MIN, CITY_MAX, random, true);
 					if (to != null) {
 						atLeast(player, named, SWORN_REPUTATION);
+						RealmGifts.give(player, named, true);
 						if (Factions.of(server, player.getUUID()) == null) {
 							Factions.update(server, named.id(), f -> f.withMember(player.getUUID(), new Faction.Member(Rank.PEASANT.ordinal(), 0)));
 						}
