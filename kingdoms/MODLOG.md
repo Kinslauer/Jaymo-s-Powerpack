@@ -17615,3 +17615,29 @@ The loot of the bloatshroom, mimicap, shambler and truffler and the bouncecap, g
 - **Harness warmth** (`HarnessWarmth`, through Kitchen's `BodyHeat.addWorn`): fur hats, fur hoods and fur jerkins count as a warm piece each; fur-lined spaulders, cloaks, hoods, monk's cowls, aketons and arming doublets half a piece; torn cloaks and hoods and arming caps a quarter. Turbans and veiled turbans count as a cool piece, field hats half. Before, a fur hood on a northern guard or a turban in the desert did nothing for its wearer.
 - **Straw hats** (straw hat, basket hat, straw cape) are in Kitchen's `cool_clothing` tag, which was empty: they keep the sun off.
 - Built; not played.
+
+## 0.13.11 (2026-11-26): Mordhau harness 3: body (#2185)
+
+- Our own models of the historical pieces behind Andy's Mordhau picks (`kingdoms/tools/gen_heraldry_body.py`; nothing of Mordhau's is used), all worn in the harness:
+  - **Padding** (drawn as a sheet on the under-armour layer): the chequered gambeson (two colours in squares), the linen shirt, the wool tunic (with a short skirt), the cloth vest, the leather jack, and the slashed doublet (a second colour showing through its slits, with puffed sleeves slashed through and gathered in that colour, the left one fuller, as the slashed hose's thigh puffs are). The two-coloured ones take their second colour from the dye they are crafted with (`jaymoskingdoms:second_colour`).
+  - **Mail**: the long hauberk (full sleeves, a mail skirt to the knee), mail with plates, the scale shirt. The quilted coat, which had no model and was drawn as a mail haubergeon, now has its own quilted sheet and a long skirt (so the guards the guard kit gives it to, as the free mail layer, now show quilting and a knee skirt where they showed mail).
+  - **Cuirasses** (chest slot, plate in every finish): the Gothic, the kastenbrust, the peascod, the lamed hussar, the muscle cuirass and the embossed parade cuirass; and the brigandine coat (cloth over close-set rivets, dyed).
+  - **Covered plate**: a new finish made at the anvil, wool over the plate, its colour the wool's (2 wool). On the cuirasses, the sallets and the flat-topped helm (Andy's Covered flat top; the Royal flat top is that helm with the helm crown from the hoods PR).
+  - **Over-garments**: the long surcoat and its torn twin, the monk's habit, the kaftan, the jester's motley (two colours), the sash. Realms' shepherds sell the surcoat in the realm's colour.
+  - **Shoulders and hands**: the large pauldrons, the ailettes (they bear the realm's arms as the tabard does; realm armourers sell them), the mitten gauntlets.
+- **Every piece reachable**: the rounded breastplate, the fluted cuirass and the laced lamellar were worn only by knights and now are forged at the anvil; the coat of plates had no recipe and has one; plate cuirasses can also be had painted, etched, russeted, bronze or gilt-banded where the row asked for it.
+- **Guards** (Andy: "guards opt to remove their armor and stay within the harness gear, as it is too much to remove and store"): a guard or knight who puts his armour by now keeps the padding and mail under it on (`Harness.UNDER_LAYERS`) instead of losing the whole harness with it.
+- Recipes for every cloth and leather piece; the new pieces count as cloth, mail or plate for Jaymo's Powers.
+- `HeraldryArmour` (registrations), `HeraldryLayer` (covered tint, the body's colours, padding and mail skirts, the ailettes' arms), `UnderArmourLayer` (a sheet and a second-colour sheet for each padding and mail piece), `Harness.putByHeavy`, `HeraldryWear` (the off-duty sweep, shop offers).
+- Built and previewed off the game's files; not played, and the Java is compiled only by CI.
+
+## 0.13.12 (2026-11-26): Mordhau harness 4: waist, legs and feet, and a new hose place (#2187)
+
+- Our own models of the historical pieces behind Andy's Mordhau picks (`kingdoms/tools/gen_heraldry_legs.py`; nothing of Mordhau's is used), all worn in the harness:
+  - **A new place, HOSE** (on the end of the harness's places, so older saves and guards' kits read with it bare), drawn on the legs under everything and in its own slot on the harness screen: shorts, breeches, baggy breeches, linen hose, joined hose (a colour on each leg), riding hose, and the slashed and puffed Landsknecht hose. Dyed; the two-coloured ones take their second colour from the dye they are crafted with. Hose count as clothing for a guard off duty, who keeps them on with his padding and mail.
+  - **Waist**: the long tassets, the coat-of-plates skirt, the lamellar and leather lamellar skirts, the padded skirt, six cloth skirts (knee, short, long, the apron, the pleated base, the embroidered skirt), the scale skirt.
+  - **Thighs and shins**: the fluted cuisses, brigandine cuisses, leather cuisses, the mail chausses (thigh to toe, laced behind); the schynbald (a plate over the front of the shin only) and the leg wraps.
+  - **Feet**: the scale sabatons and the mail shoes.
+- Recipes for every cloth and leather piece; the new pieces count as cloth, mail or plate for Jaymo's Powers.
+- `Harness` (the place, its body parts, the under-layers), `HarnessMenu` (its slot), `HeraldryArmour` (registrations), `HeraldryLayer` and `UnderArmourLayer` (the hose layer).
+- Built and previewed off the game's files; not played, and the Java is compiled only by CI.

@@ -8389,3 +8389,14 @@ The symbiote does things in the world now, not only on your screen.
 ## 0.27.70 (2026-11-25): Ground that grows back drops nothing (#2180)
 
 - **Terrain return**: a block that Gravity moves, meteors or a big player blast break and that will grow back (`TerrainReturn.record`) now breaks without drops, so stone and dirt can't be farmed from a returning crater (Andy, 2026-11-25). Blocks that don't come back (ores, chests, anything with a block entity, or when the server switch is off) drop as before.
+
+## 0.27.71 (2026-11-26): Mordhau harness 3: more harness at the smith's anvil (#2185)
+
+- The anvil forges the rest of the body harness (from Jaymo's Kingdoms): the rounded breastplate, the fluted cuirass and the laced lamellar (which only knights wore), the Gothic, kastenbrust, peascod, hussar, muscle and embossed cuirasses, the large pauldrons and the mitten gauntlets from steel; the long hauberk, mail with plates and the scale shirt from iron.
+- New finishes at the anvil: painted (rounded breastplate, peascod, hussar, embossed, fluted), etched (fluted, Gothic, embossed), russeted (plate cuirass), hide (laced lamellar), bronze (muscle cuirass), gilt-banded (hussar; the etched and gilt-banded finishes are gold finishes and take 2 gold ingots like gilded does), and **covered**: cloth over the plate (cuirasses, sallets, the flat-topped helm), which takes 2 wool from the smith and is the wool's colour.
+- The new pieces are counted as cloth, mail or plate (the armour class tags).
+
+## 0.27.72 (2026-11-26): Mordhau harness 4: more harness at the smith's anvil (#2187)
+
+- The anvil forges the waist, leg and foot pieces (from Jaymo's Kingdoms): the long tassets, the fluted cuisses, the schynbald and the scale sabatons from steel (each in bright, blackened and gilded); the scale skirt, the lamellar skirt, the brigandine cuisses, the mail chausses and the mail shoes from iron.
+- The new pieces are counted as cloth, mail or plate (the armour class tags).
