@@ -71,6 +71,8 @@ public final class ChronoSpeedKeys {
 			if (player.isShiftKeyDown()) {
 				mark = player.blockPosition();
 				markLevel = level.dimension().identifier();
+				// the server keeps it too, for the wormhole to put you there
+				ChronoWormholeClient.marked(mark);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.speed_marked"));
 			} else if (ChronoMarkRun.running()) {
 				ChronoMarkRun.stop();

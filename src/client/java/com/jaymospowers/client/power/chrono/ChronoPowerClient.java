@@ -108,6 +108,9 @@ public final class ChronoPowerClient implements PowerClient {
 		ChronoCheatDeathClient.init();
 		ChronoStreak.init();
 		ChronoDecoyClient.init();
+		ChronoWormholeClient.init();
+		ChronoSkipClient.init();
+		ChronoFlickerClient.init();
 		MuzzleFlashParticle.register();
 		FutureDeadLooks.register();
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ChronoSpaceCue::render);
