@@ -18,6 +18,19 @@ Counts are textures that fail the art check (`tools/art_audit.py`) today.
 | 6 | p_fish, p_dusts, p_misc, p_mech, p_models | Powers: 23 fish and their cooked versions with their own shapes, dusts as one pile shape, relics/wish orbs/parts, future-world skins, gun/dino/other model skins | 46 + ~15 + ~30 + ~140 + ~45 |
 | 7 | t_cube, t_ships, t_vc, t_cfb, t_en, t_stell, t_big | Other mods, as replacements in the Reason look pack: Cube Animals (CC0, may build on its pixels), Shippy Ships sails, Vanilla Constructs buckets and tools (MIT), Cooking for Blockheads oven fronts, Eternal Nether withered blocks (MIT), Stellarity items, Simply Tents and Knight Armor icons at 16 px. ARR and limited licences get fresh paintings only | ~360 |
 
-Order: 2 first (the biggest and most seen), then 3, 6, 4, 5, 7. Each patch is its own PR and must pass the art check
-on every texture it writes. Patches 2 to 5 touch only Kingdoms generators, so two can run side by side only if they
-don't share a script.
+Patch 1 merged on its own (PR #2208). Andy asked for 2 to 7 as one PR (2026-11-26), and they ship together.
+
+## Where it stands after patches 2 to 7
+
+Fixed at the source (the generator is clean, so a rerun keeps the new look): heraldry armour, model-rendered gear icons
+(`gen_reverent.icon`), old dead, horses, folk, barbarians, sorcery, tomb undead and the kit users, dragon hides, every
+spawn egg with a generator, fish icons and fish skins.
+
+Cleaned once with `tools/vanilla_style/reason_clean.py` (a rerun of their old generator brings the noise back, so fix
+the generator first): most Kingdoms mob sheets (legends, creatures, champions, draugr, bb sheets, MoC, war elephants,
+Frontier sheets), about 45 Kingdoms icons with no generator, and the Powers relics, parts, future-world, dino and model
+skins (`tools/vanilla_style/powers_reason.py` runs after the old `gen_*` scripts).
+
+Still open: `bb/kintsugi.png` (too many colours to fold), the 8 translucent holy books, 8 noisy Kingdoms blocks
+(`noise_tile`), 29 Kitchen items, Simply Tents icons (special models), Knight Armor weapons and Stellarity's 32 px
+held textures.

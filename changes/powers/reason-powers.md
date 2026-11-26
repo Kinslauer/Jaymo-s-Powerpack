@@ -5,4 +5,4 @@
 - **Relics, wish orbs, band plans, rig limbs, scrap, wreck core, platings, meteoric iron, sabers** and a handful of blocks: jitter removed and folded into a few clear shades; half-transparent pixels are solid.
 - **Future-world, dinosaur, rogue fighter, Unseeing, symbiote and Xenoform skins, guns, backpack, hoverboard, space pod**: the jitter is smoothed out and each sheet is folded to about 56 colours.
 - **Reason look pack, other mods**: Cube Animals skins and items, Vanilla Constructs diamond tools and buckets and Eternal Nether withered blocks are cleaned (their licences allow it); Shippy Ships sail icons, Cooking for Blockheads oven fronts, some Stellarity icons and the Knight Armor icons are fresh paintings. Credits and licence basis are in `docs/Vanilla-Style.md`.
-- Built; not played. Art is checked with `tools/art_audit.py`.
+- Art only; checked with `tools/art_audit.py`, not played.
