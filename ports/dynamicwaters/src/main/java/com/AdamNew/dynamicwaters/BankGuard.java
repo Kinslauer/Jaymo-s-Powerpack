@@ -49,7 +49,8 @@ public final class BankGuard {
             final int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1;
             top[i] = y;
             if (level.getBlockState(pos.set(x, y, z)).getFluidState().isEmpty()) continue;
-            if (HydrologyManager.isOceanBiome(level.getBiome(pos))) continue;
+            // the chunk's own noise biome: the level's smoothed lookup reads neighbours the decoration region may not hold
+            if (HydrologyManager.isOceanBiome(level.getChunk(x >> 4, z >> 4).getNoiseBiome(x >> 2, y >> 2, z >> 2))) continue;
             water[i] = y;
         }
         final List<int[]> where = new ArrayList<>();
