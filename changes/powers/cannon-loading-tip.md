@@ -1,4 +1,0 @@
-# cannon loading tip cards
-- Andy: "how do you load a cannon? there should be a popup with a tutorial". New `client.hud.GunTips`: the first time the crosshair finds a Ship's Cannon (block) or a Field Mortar (entity), or one is in your main hand, a tip card in the top right says how to load and fire it. Ship's Cannon: use with gunpowder, then shot (any of the seven kinds), then flint and steel or a fire charge; look up or down to lay it; attack at the helm fires a broadside; a chest, barrel or hopper behind the breech plus a redstone pulse loads and fires it. Field Mortar: use with a Mortar Shell, then use again to fire. Once per player each (`gun_tip.<uuid>.<part>` in the client config), waits for any card already up, off with /tips off. Text in `lang/parts/gun_tips.json`.
-- The Ship's Cannon's wrong-order lines (gunpowder first, now shot, loaded, not loaded) are now in `hint_keys.txt`, so they show as tip cards instead of over the hotbar.
-- Built; not played.
