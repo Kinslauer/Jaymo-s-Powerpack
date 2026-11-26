@@ -577,6 +577,7 @@ public class NoiseChunkGeneratorMixin {
             net.minecraft.world.level.levelgen.NoiseChunk noiseChunk, RandomState randomState,
             net.minecraft.world.level.biome.BiomeManager biomeManager, WorldGenRegion carverRegion,
             net.minecraft.world.level.levelgen.material.rule.MaterialRule materialRule, CallbackInfo ci) {
+        com.AdamNew.dynamicwaters.ColumnWatch.stage(chunk, "carvers start");
         final Object[] terrain = DYNAMICWATERS$TERRAIN.get(chunk);
         final WorldGenRegion level = carverRegion != null ? carverRegion : terrain != null ? (WorldGenRegion) terrain[0] : null;
         if (level == null || level.getLevel().dimension() != net.minecraft.world.level.Level.OVERWORLD
@@ -835,5 +836,13 @@ public class NoiseChunkGeneratorMixin {
             com.AdamNew.dynamicwaters.shore.Boulders.place(chunk, skinCarvings, protectedBlocksMap2, minH, startX, startZ,
                     ((net.minecraft.world.level.chunk.ChunkGenerator)(Object)this).getBiomeSource(), randomState);
         }
+    }
+
+    @Inject(method = "generateCarvers", at = @At("RETURN"))
+    private void dynamicwaters$watchAfterCarvers(ChunkAccess chunk, net.minecraft.world.level.levelgen.blending.Blender blender,
+            net.minecraft.world.level.levelgen.NoiseChunk noiseChunk, RandomState randomState,
+            net.minecraft.world.level.biome.BiomeManager biomeManager, WorldGenRegion carverRegion,
+            net.minecraft.world.level.levelgen.material.rule.MaterialRule materialRule, CallbackInfo ci) {
+        com.AdamNew.dynamicwaters.ColumnWatch.stage(chunk, "carvers done");
     }
 }

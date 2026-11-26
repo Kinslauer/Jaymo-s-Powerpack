@@ -25,6 +25,7 @@ public class FeatureWatchMixin {
 
     @Inject(method = "applyBiomeDecoration", at = @At("HEAD"))
     private void dynamicwaters$watchStart(WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager, CallbackInfo ci) {
+        ColumnWatch.stage(chunk, "decoration start");
         DYNAMICWATERS$DECORATING.set(ColumnWatch.near(chunk.getPos().x(), chunk.getPos().z())
                 ? new Object[] {level, chunk.getPos().x(), chunk.getPos().z()} : null);
     }
@@ -32,6 +33,7 @@ public class FeatureWatchMixin {
     @Inject(method = "applyBiomeDecoration", at = @At("RETURN"))
     private void dynamicwaters$watchEnd(WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager, CallbackInfo ci) {
         DYNAMICWATERS$DECORATING.remove();
+        ColumnWatch.stage(chunk, "decoration end");
     }
 
     @WrapOperation(method = "applyBiomeDecoration", at = @At(value = "INVOKE",

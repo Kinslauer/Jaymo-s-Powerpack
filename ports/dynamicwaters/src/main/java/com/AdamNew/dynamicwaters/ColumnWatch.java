@@ -57,9 +57,26 @@ public final class ColumnWatch {
         return x1 >= b[0] && x0 <= b[2] && z1 >= b[1] && z0 <= b[3];
     }
 
+    private static final java.util.concurrent.atomic.AtomicLong CHECKS = new java.util.concurrent.atomic.AtomicLong();
+
+    /** Notes what each watched soil top in this chunk is at a generation stage, so the stage that changes it shows. */
+    public static void stage(net.minecraft.world.level.chunk.ChunkAccess chunk, String stage) {
+        final int cx = chunk.getPos().x(), cz = chunk.getPos().z();
+        if (box == null || SOIL_TOP.isEmpty()) return;
+        for (int i = 0; i < 256; i++) {
+            final int x = (cx << 4) + (i & 15), z = (cz << 4) + (i >> 4);
+            final Integer y = SOIL_TOP.get(BlockPos.asLong(x, 0, z));
+            if (y == null) continue;
+            final BlockPos pos = new BlockPos(x, y, z);
+            note(x, z, "at " + stage + ": y=" + y + " " + block(chunk.getBlockState(pos)) + ", above "
+                    + block(chunk.getBlockState(pos.above())) + ", below " + block(chunk.getBlockState(pos.below())));
+        }
+    }
+
     /** Before a feature or structure runs: the soil tops it could reach (its chunk and the ring around it). */
     public static Object[] before(net.minecraft.world.level.WorldGenLevel level, int chunkX, int chunkZ) {
         if (!near(chunkX, chunkZ) || SOIL_TOP.isEmpty()) return null;
+        CHECKS.incrementAndGet();
         final List<long[]> where = new ArrayList<>();
         final List<BlockState> was = new ArrayList<>();
         for (int cx = chunkX - 1; cx <= chunkX + 1; cx++) {
@@ -126,6 +143,7 @@ public final class ColumnWatch {
     static String watch(int x, int z, int radius) {
         NOTES.clear();
         SOIL_TOP.clear();
+        CHECKS.set(0);
         box = new int[] {x - radius, z - radius, x + radius, z + radius};
         return String.format("Watching columns %d,%d to %d,%d. Only chunks generated from now on are noted; "
                 + "go there, then /dynamicwaters watch report.", x - radius, z - radius, x + radius, z + radius);
@@ -196,7 +214,7 @@ public final class ColumnWatch {
         sb.append(bare).append(" bare-rock bank columns (top is stone, water within ").append(WATER_NEAR)
                 .append(" blocks, sea ").append(water).append(")");
         if (unnoted > 0) sb.append(", ").append(unnoted).append(" with no notes");
-        sb.append(". Last step that touched them:\n");
+        sb.append(". Feature/structure checks run: ").append(CHECKS.get()).append(". Last step that touched them:\n");
         lastSteps.forEach((k, v) -> sb.append("  ").append(v).append("x ").append(k).append('\n'));
         sb.append("First ").append(listed).append(" written to the log under [DW watch].");
         return sb.toString();
