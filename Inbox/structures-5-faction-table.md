@@ -1,14 +1,15 @@
 ---
-status: claimed
+status: writing
 for: apollo
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
 claimed_by: hermes-a
-pr: 
+pr: 2216
 suggested_owns:
   - kingdoms FactionType.java, Relation.java
   - kingdoms lang/parts/factions.json
+writer: hermes-writer
 ---
 # Structures 5: faction table and relations
 

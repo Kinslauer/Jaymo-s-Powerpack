@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: bacchus
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 suggested_owns:
   - kingdoms data/jaymoskingdoms/structure (new nbt), worldgen pools
