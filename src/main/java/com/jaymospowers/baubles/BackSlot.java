@@ -39,7 +39,7 @@ public final class BackSlot {
 		ServerPlayNetworking.registerGlobalReceiver(Swap.TYPE, (payload, context) -> swap(context.player()));
 	}
 
-	static void swap(ServerPlayer player) {
+	public static void swap(ServerPlayer player) {
 		if (player.isSpectator() || !player.isAlive()) {
 			return;
 		}

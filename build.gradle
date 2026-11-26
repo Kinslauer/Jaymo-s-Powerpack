@@ -785,6 +785,31 @@ def packModsNoCf = [
 	[dep: "maven.modrinth:vanilla-fireflies:f9FE4diA", cf: null],
 	// Vanilla Constructs (all rights reserved; shipped unchanged from Modrinth): 100+ small vanilla-style features.
 	[dep: "maven.modrinth:vanilla-constructs:il0WctcM", cf: null],
+	// (Andy's CC0 picks, 2026-11-26.) The mods below are CC0 (public domain): no credit owed, shipped unchanged.
+	// Vectorientation (CC0, Tectato): falling blocks turn to face where they fly, with squash and stretch by speed, so
+	// loose logs, sand and cave rubble tumble. Client-only. 1.1 for 26.3.
+	[dep: "maven.modrinth:vectorientation:RleTmgVs", cf: null],
+	// Quick Leaf Decay (CC0, wb1016): leaves cut off from their logs decay in seconds, checking diagonals too, so a felled
+	// tree (FallingTree, LooseWood) leaves no floating leaves behind. 1.0.0 for 26.3.
+	[dep: "maven.modrinth:quickleafdecay:NRd8xgUY", cf: null],
+	// Collapsing Caves (CC0 in its metadata; its author: "use it in modpacks, no credit needed"): cave-ins of varying size
+	// while mining, with a short warning first. 1.7 for 26.3.
+	[dep: "maven.modrinth:collapsing-caves:n2jAyNkE", cf: null],
+	// Dibs! (CC0, armaninyow): right-click an unemployed villager holding a workstation item, or any villager holding a
+	// bed, and that block is theirs for good; nobody else takes it. Its locate key (V, an ability key) is unbound
+	// (client/KeyConflicts). Needs YACL (packMods). 4.2.0 for 26.3.
+	[dep: "maven.modrinth:dibs:fnPV24fz", cf: null],
+	// Leashes (CC0, TreeOfSelf): 25-block leads strong enough to pull a mob in flight, and leads on villagers, fish, bats
+	// and the rest. Server-side. Works beside Stretchy Leash (both chain their changes onto the same leash checks).
+	// 1.4.0+26.3.
+	[dep: "maven.modrinth:leashes:juXFEalK", cf: null],
+	// Smooth Sail (CC0, armaninyow): boat steering ramps up over a second instead of snapping. Client-only. 2.2.0 for 26.3.
+	[dep: "maven.modrinth:smooth-sail:sY8WzbqM", cf: null],
+	// Ladder Sense (CC0, atperry7): climbing speed follows your gaze, faster looking up, a slide looking down. 1.3.0 for 26.3.
+	[dep: "maven.modrinth:ladder-sense:pILYuRKa", cf: null],
+	// Talek's Better Forest (its LICENSE file is CC0, its metadata says MIT; free either way, shipped unchanged with its
+	// own licence file inside): structure-built trees instead of vanilla's generated ones. New chunks only. 1.3.5 for 26.3.
+	[dep: "maven.modrinth:taleks-better-forest:UGEQIFPX", cf: null],
 ]
 // on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
 // the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).

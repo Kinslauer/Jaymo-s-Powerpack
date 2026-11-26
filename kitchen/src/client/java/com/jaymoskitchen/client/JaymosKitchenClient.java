@@ -44,6 +44,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.corpse.CorpseEntity.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		com.jaymoskitchen.client.hands.HandsClient.register();
 		com.jaymoskitchen.client.stomach.StomachHud.register();
+		com.jaymoskitchen.client.stomach.BitesHud.register();
 		// (0.5.25) thirst row, thermometer, heat edges, sips
 		com.jaymoskitchen.client.climate.ClimateHud.register();
 		// (Hardrock picks) a familiar farm animal shows its hearts

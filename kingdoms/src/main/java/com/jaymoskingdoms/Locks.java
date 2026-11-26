@@ -41,6 +41,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -63,6 +66,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.pathfinder.PathfindingContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -79,6 +84,11 @@ import org.jspecify.annotations.Nullable;
  * Powers change). Anyone else gets the Pin or Rotary game ({@link Lockpicking#pickLock}), and a pick seen in town is
  * burglary ({@link Theft}). Locked blocks are slow to break, and villagers, redstone, hoppers and copper golems can't
  * open or empty them (see {@code mixin/locks}). Townsfolk lock their own homes and shops at night ({@link NightLocks}).
+ *
+ * <p>After Lock Doors From Villagers (Samilton, CC0): a shut wooden door locked against a mob is an iron door to its path
+ * ({@link #pathType}), so villagers, MCA's people and our folk plan their way round it instead of walking up to it and
+ * standing there. Whoever may pass it ({@link #mayPass}: the realm's own folk and the villagers under its law for its
+ * night locks, which they carry the house keys to) still paths through. Zombies and raiders still come to batter it.
  */
 public final class Locks {
 	/** A forged lock's level (Lockpicking's 1-5: "fine"). */
@@ -427,6 +437,34 @@ public final class Locks {
 	public static boolean barred(Level level, BlockPos pos, @Nullable Entity who) {
 		Fitted f = entry(level, pos);
 		return f != null && f.locked() && !mayPass(who, f, level);
+	}
+
+	/**
+	 * From {@code WalkNodeEvaluator.getPathTypeOfMob} (after {@link Passages#type}): {@code mob}'s body at {@code x, y, z}
+	 * would go through a shut wooden door locked against it, so to its path that's an iron door.
+	 */
+	public static PathType pathType(PathfindingContext ctx, int x, int y, int z, @Nullable Mob mob, PathType was) {
+		if (was != PathType.WALKABLE_DOOR && was != PathType.DOOR_WOOD_CLOSED || mob == null || mob instanceof Zombie || mob instanceof Raider) {
+			return was;
+		}
+		Level level = mob.level();
+		if (level.isClientSide()) {
+			return was;
+		}
+		int wide = Math.max(1, Mth.ceil(mob.getBbWidth())), high = Math.max(1, Mth.ceil(mob.getBbHeight()));
+		for (int dx = 0; dx < wide; dx++) {
+			for (int dz = 0; dz < wide; dz++) {
+				for (int dy = 0; dy < high; dy++) {
+					BlockPos p = new BlockPos(x + dx, y + dy, z + dz);
+					BlockState s = ctx.getBlockState(p);
+					if (s.getBlock() instanceof DoorBlock door && door.type().canOpenByHand() && !door.isOpen(s) && level.isLoaded(p)
+						&& barred(level, p, mob)) {
+						return PathType.DOOR_IRON_CLOSED;
+					}
+				}
+			}
+		}
+		return was;
 	}
 
 	/** A locked lock on the shut block (redstone checks). */

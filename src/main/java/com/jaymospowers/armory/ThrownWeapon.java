@@ -79,8 +79,8 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	/** It tumbles end over end (until it lands). A sword always does (a hurled blade, {@code BladeThrow}). */
 	public boolean spins() {
 		ItemStack item = this.getItem();
-		return (item.getItem() instanceof ThrowingWeaponItem weapon ? weapon.spins() : Ranged.spins(item) || item.is(net.minecraft.tags.ItemTags.SWORDS))
-			&& !this.isInGround();
+		return (item.getItem() instanceof ThrowingWeaponItem weapon ? weapon.spins() : Ranged.spins(item) || item.is(net.minecraft.tags.ItemTags.SWORDS)
+			|| com.jaymospowers.power.arsenal.ArsenalAxeThrow.throwable(item)) && !this.isInGround();
 	}
 
 	/** This is a hurled blade ({@code BladeThrow}): it deals {@code damage}, and {@code comesBack} to its thrower's hand. */
@@ -122,6 +122,17 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 		return false;
 	}
 
+	/** A weapon pulled out of the Pocket Arsenal's rift goes back there when its time is up, thrown or not (true: it went). */
+	private boolean backToTheRift() {
+		if (this.tickCount % 20 != 0 || !com.jaymospowers.power.arsenal.Summoned.expired(this.getPickupItemStackOrigin(), this.level().getGameTime())) {
+			return false;
+		}
+		com.jaymospowers.power.arsenal.ArsenalRelics.reclaim(((ServerLevel)this.level()).getServer(), this.getPickupItemStackOrigin());
+		com.jaymospowers.power.arsenal.Summoned.dissolveEffects((ServerLevel)this.level(), this.position());
+		this.discard();
+		return true;
+	}
+
 	private boolean harpoon() {
 		return this.getItem().is(Armory.ITEMS.get("harpoon"));
 	}
@@ -130,6 +141,9 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	public void tick() {
 		if (this.inGroundTime > 4) {
 			this.dealtDamage = true;
+		}
+		if (!this.level().isClientSide() && this.backToTheRift()) {
+			return;
 		}
 		if (this.comesBack && !this.level().isClientSide() && this.flyHome()) {
 			return;

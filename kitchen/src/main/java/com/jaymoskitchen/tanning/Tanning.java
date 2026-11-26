@@ -105,6 +105,8 @@ public final class Tanning {
 		BARK = register("bark", new Item.Properties());
 		TANNED_LEATHER = register("tanned_leather", new Item.Properties());
 		LEATHER_STRAPS = register("leather_straps", new Item.Properties());
+		// soap: ash, lye and tallow boiled together (Soapistry's)
+		Soapmaking.register();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			for (Item item : List.of(ANIMAL_FAT, TALLOW, BARK, TANNED_LEATHER, LEATHER_STRAPS)) {

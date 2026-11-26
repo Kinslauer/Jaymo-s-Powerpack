@@ -288,7 +288,7 @@ public final class Climate {
 	private static final net.minecraft.resources.Identifier BONFIRE_EDGE = net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "bonfire_edge");
 
 	/** A water cauldron with heat under it (anything Kitchen's cookware cooks on). */
-	static boolean boiledCauldron(Level level, BlockPos pos) {
+	public static boolean boiledCauldron(Level level, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
 		return state.is(Blocks.WATER_CAULDRON) && CookwareBlock.hot(level.getBlockState(pos.below()));
 	}

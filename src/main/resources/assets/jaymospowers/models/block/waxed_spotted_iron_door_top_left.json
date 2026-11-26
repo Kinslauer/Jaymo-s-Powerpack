@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_left",
+  "textures": {
+    "bottom": "jaymospowers:block/waxed_spotted_iron_door_bottom",
+    "top": "jaymospowers:block/waxed_spotted_iron_door_top"
+  }
+}

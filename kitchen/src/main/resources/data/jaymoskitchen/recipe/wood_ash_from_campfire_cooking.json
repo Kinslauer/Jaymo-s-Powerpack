@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "misc",
+  "cookingtime": 300,
+  "experience": 0.1,
+  "ingredient": "#minecraft:leaves",
+  "result": {
+    "id": "jaymoskitchen:wood_ash"
+  }
+}

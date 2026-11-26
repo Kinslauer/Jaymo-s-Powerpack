@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_bars_post",
+  "textures": {
+    "bars": "jaymospowers:block/rusty_iron_bars",
+    "edge": "jaymospowers:block/rusty_iron_bars"
+  }
+}

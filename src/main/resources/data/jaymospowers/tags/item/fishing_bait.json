@@ -20,6 +20,18 @@
     "jaymospowers:trolling_squid",
     "jaymospowers:fishing_magnet",
     {
+      "id": "jaymoskitchen:offal",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:liver",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:lung",
+      "required": false
+    },
+    {
       "id": "jaymoskitchen:corn",
       "required": false
     },

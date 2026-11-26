@@ -35,6 +35,11 @@ public final class SlowFarms {
 		return !hurried && state.is(SLOW_GROWING) && random.nextFloat() >= GROWTH;
 	}
 
+	/** Whether a Time Bloom's own tick is running ({@link #hurry}). */
+	public static boolean hurried() {
+		return hurried;
+	}
+
 	/**
 	 * Jaymo's Powers' Time Bloom: runs {@code tick} (a random tick it gives a plant) without the farms' slowing. Plain
 	 * Java types, so it can be reached by reflection.

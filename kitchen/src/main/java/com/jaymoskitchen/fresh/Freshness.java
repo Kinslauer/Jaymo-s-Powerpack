@@ -47,7 +47,9 @@ import org.jspecify.annotations.Nullable;
  * {@link #days} are up it turns to rotten flesh (meat and fish) or Spoiled Food. It starts slow: raw meat keeps a week,
  * bread a season. Food that's {@link #PRESERVED} (salted, or smoked in the smoker's minigame) keeps {@link #PRESERVED_KEEPS}
  * times as long. Kept in a chest or barrel in a cold cellar (dark and under the sky, deep down, or beside ice or an
- * icebox) it ages at {@link #CELLAR_RATE} of the speed, counted when the container is opened ({@link #SEEN}).
+ * icebox) it ages at {@link #CELLAR_RATE} of the speed, counted when the container is opened ({@link #SEEN}). So does food
+ * in an ice chest, anywhere (Expired Food's cold items, MIT; the idea only, none of its code): a chest or barrel with a
+ * block of ice, packed ice, blue ice or snow ({@link #ICE_CHEST}) in among the food.
  */
 public final class Freshness {
 	/** Days each kind keeps (raw meat, raw fish, cooked meat or fish, fruit, vegetables, bread and baking, soup, anything else). */
@@ -57,6 +59,8 @@ public final class Freshness {
 	static final float CELLAR_RATE = 0.5F;
 	/** A cellar: block light under this, and either below this height or within {@link #ICE_REACH} of ice. */
 	static final int CELLAR_DARK = 8, CELLAR_DEEP = 40, ICE_REACH = 2;
+	/** Packed in a container with the food, these keep it as a cellar does. */
+	static final List<Item> ICE_CHEST = List.of(Items.ICE, Items.PACKED_ICE, Items.BLUE_ICE, Items.SNOW_BLOCK);
 	/** Food salted with one salt. */
 	static final int PER_SALT = 8;
 	/** How often players' pockets are checked (ticks). */
@@ -205,11 +209,11 @@ public final class Freshness {
 		}
 	}
 
-	/** A container opened: in a cold cellar, the days since it was last opened count at {@link #CELLAR_RATE}. */
+	/** A container opened: in a cold cellar or packed with ice, the days since it was last opened count at {@link #CELLAR_RATE}. */
 	static void opened(ServerLevel level, BlockPos pos, BlockEntity entity, Container container) {
 		long today = today(level);
 		Long seen = entity.getAttached(SEEN);
-		if (seen == null || seen > today || !cellar(level, pos)) {
+		if (seen == null || seen > today || !cellar(level, pos) && !iced(container)) {
 			entity.setAttached(SEEN, today);
 			return;
 		}
@@ -228,6 +232,17 @@ public final class Freshness {
 		}
 		entity.setAttached(SEEN, seen + Math.round(credit / (1.0F - CELLAR_RATE)));
 		container.setChanged();
+	}
+
+	/** Whether {@code container} has ice or snow packed in it ({@link #ICE_CHEST}). */
+	static boolean iced(Container container) {
+		for (int i = 0; i < container.getContainerSize(); i++) {
+			ItemStack stack = container.getItem(i);
+			if (!stack.isEmpty() && ICE_CHEST.contains(stack.getItem())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Other mods' cold places (by reflection, {@link #addCold}): Jaymo's Powers' gifted Cryo villagers keep their larders cold. */

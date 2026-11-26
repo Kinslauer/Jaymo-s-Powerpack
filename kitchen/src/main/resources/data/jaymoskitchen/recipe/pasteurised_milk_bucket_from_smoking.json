@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 100,
+  "experience": 0.1,
+  "ingredient": "minecraft:milk_bucket",
+  "result": {
+    "id": "minecraft:milk_bucket",
+    "components": {
+      "!jaymoskitchen:raw_milk": {}
+    }
+  }
+}

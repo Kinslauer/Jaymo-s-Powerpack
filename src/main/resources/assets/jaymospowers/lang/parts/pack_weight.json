@@ -1,0 +1,5 @@
+{
+	"tooltip.jaymospowers.pack_weight.one": "Weighs %s",
+	"tooltip.jaymospowers.pack_weight.all": "Weighs %s each, %s in all",
+	"screen.jaymospowers.pack_weight": "Carrying %s of %s"
+}

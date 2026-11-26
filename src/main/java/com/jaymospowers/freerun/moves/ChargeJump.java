@@ -18,7 +18,9 @@ import net.minecraft.world.entity.player.Player;
  * it shows, up to twice as high as a jump. Andy: "peak of the jump is orange. everyone can do it again, but the orange
  * stays consistent with the skill. randomized for everyone else." The bar's orange stretch is the full leap; let go
  * anywhere else and the leap tops out at {@link #MISS_SHARE} of it. With the Charge Jump perk the orange always sits at
- * {@link #PEAK_SKILLED}; without it, it lands somewhere new on every charge. Moving lets the charge go.
+ * {@link #PEAK_SKILLED}; without it, it lands somewhere new on every charge. Held on past full, the bar sinks back as a horse's
+ * does ({@link #OVERCHARGE_TICKS}, down to {@link #OVERCHARGE_FLOOR}: Player Charge Jump's overcharge, CC0), so holding on
+ * for ever is no sure leap. Moving lets the charge go.
  * A web slinger keeps Web's own charged leap ({@code WebSwing#tickChargeJump}) and never gets this one.
  * <p>The client jumps ({@code RunMovesClient}); here it pays: {@link #COST_MIN} feathers for a short wind-up, up to
  * {@link #COST_MAX} for a full one.
@@ -41,6 +43,9 @@ public final class ChargeJump {
 	public static final float PEAK_RANDOM_MIN = 0.3F, PEAK_RANDOM_MAX = 0.85F;
 	/** The most a leap let go outside the peak gets (share of the full leap's extra height); short of the peak it builds up to this. */
 	public static final float MISS_SHARE = 0.7F;
+	/** Held on past a full bar, it sinks back over this many ticks to this share of the bar, and stays there. */
+	public static final int OVERCHARGE_TICKS = 20;
+	public static final float OVERCHARGE_FLOOR = 0.45F;
 	// ================================================================================================================
 
 	private ChargeJump() {
@@ -59,6 +64,15 @@ public final class ChargeJump {
 	/** Where this charge's orange peak starts (share of the bar): the same spot every time with the perk, anywhere without. */
 	public static float peak(Player player, RandomSource random) {
 		return learned(player) ? PEAK_SKILLED : PEAK_RANDOM_MIN + random.nextFloat() * (PEAK_RANDOM_MAX - PEAK_RANDOM_MIN);
+	}
+
+	/** How far the bar shows filled after Jump has been held {@code ticks}: up to full, then sinking back past it. */
+	public static float fill(int ticks) {
+		if (ticks <= FULL_TICKS) {
+			return ticks / (float)FULL_TICKS;
+		}
+		float sunk = Math.min(1.0F, (ticks - FULL_TICKS) / (float)OVERCHARGE_TICKS);
+		return 1.0F - sunk * (1.0F - OVERCHARGE_FLOOR);
 	}
 
 	/** How much of the full leap a bar filled to {@code fill} gives, with the peak starting at {@code peak}. */

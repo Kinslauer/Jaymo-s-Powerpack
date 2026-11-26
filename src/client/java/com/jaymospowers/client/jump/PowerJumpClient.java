@@ -115,7 +115,8 @@ public final class PowerJumpClient {
 			return;
 		}
 		air++;
-		if (!pressed || spent || air < AIR_TICKS || busy(player) || ArtifactBaublesClient.cloudJump(player)) {
+		if (!pressed || spent || air < AIR_TICKS || busy(player) || ArtifactBaublesClient.cloudJump(player)
+			|| com.jaymospowers.client.freerun.moves.CoyoteTimeClient.justTook(player)) {
 			return;
 		}
 		byte kind = kind(player);
