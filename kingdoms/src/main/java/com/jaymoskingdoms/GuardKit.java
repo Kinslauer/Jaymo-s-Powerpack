@@ -328,7 +328,8 @@ public final class GuardKit {
 		if (f == null) {
 			return stack;
 		}
-		if (kit == null || kit.realm() != f.id()) {
+		// (a kit with Templar pieces its wearer may not wear, from before that plate was kept to melee guards, is made again)
+		if (kit == null || kit.realm() != f.id() || unfit(m, kit)) {
 			Ctx c = ctx(level, m, f);
 			if (c == null) {
 				return stack;
@@ -720,6 +721,16 @@ public final class GuardKit {
 		return stack;
 	}
 
+	/** {@code kit} holds a Templar piece {@code m} may not wear ({@link FrontierWear#plateFit}). */
+	private static boolean unfit(Mob m, Kit kit) {
+		for (int i = 0; i < TYPES.length && i < kit.pieces().size(); i++) {
+			if (FrontierWear.guardsOnly(FrontierArmour.setOf(kit.pieces().get(i))) && !FrontierWear.plateFit(m, TYPES[i].getSlot())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** {@code item}, or what's {@code given} if it's the same (so the trim and colour it was put on with stay). */
 	private static ItemStack plain(ItemStack given, Item item) {
 		return given.is(item) ? given.copy() : new ItemStack(item);
@@ -730,7 +741,15 @@ public final class GuardKit {
 		List<Option> out = new ArrayList<>();
 		ArmorType type = TYPES[i];
 		// whole sets: the Templars', the gunners' harness, the land's champions', the villages' settler gear
-		if (c.is(SOL | KN | VET | LEAD | ARCH) && c.templar()) {
+		// (Andy: "only melee guards should get this plate, its too heavy for gunners or archers")
+		if (c.is(SOL | KN | VET | LEAD) && c.templar()) {
+			if (c.grim()) {
+				add(out, FrontierArmour.stack("templar_steel", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i] + STEEL_EXTRA);
+			}
+			add(out, FrontierArmour.stack("templar", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i]);
+		}
+		// (a Templar realm's gunner may wear its tassets and sabatons, never its surcoat or great helm)
+		if (c.is(GUN) && c.templar() && i >= 2) {
 			if (c.grim()) {
 				add(out, FrontierArmour.stack("templar_steel", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i] + STEEL_EXTRA);
 			}
