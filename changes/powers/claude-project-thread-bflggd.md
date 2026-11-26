@@ -1,3 +1,0 @@
-# Tissou's zombie sounds stay on
-- **Zombie sounds back**: Tissou's Zombie Pack (its zombie, husk and zombie villager groans, and the future's zombie skins) had dropped out of the selected resource packs, so zombies sounded like the game's own again; it was only ever switched on once per install. It's now kept on like the medieval villagers pack: switched back on at any launch it's found off. A player who'd rather not have it creates `config/jaymospowers-tissou-zombies-off` (`PackResourcePacks`).
-- Not run in game: couldn't see Andy's options or log from here, so why it dropped out is a guess (the same thing happened to the medieval villagers pack on 2026-11-04).
