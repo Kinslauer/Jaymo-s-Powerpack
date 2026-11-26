@@ -436,6 +436,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		VigilanteTrials.register();
 		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
+		TownCrier.register();
 		// 0.7.211: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)
 		LOGGER.debug("underworld attachments: {} {} {} {} {}", Underworld.DENS, Underworld.FOUND, Busts.OFFENCES, Busts.CHARGES, Busts.JAILED);
 		Underworld.register();
