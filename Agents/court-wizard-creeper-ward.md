@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Court wizards ward their kingdom against creepers - prevent/rewind creeper explosions, weaken creepers inside, repel some at the edge
 branch: claude/court-wizard-creeper-ward
 with:
@@ -37,3 +37,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-26 08:26 No sign of work for 30 min: marked stalled (whoever ran it stopped).
