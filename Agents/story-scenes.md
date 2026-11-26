@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Story cutscenes and mission flow like Endless Lantern Corps; spoken Warlock spells
 branch: claude/project-thread-fqmg1o
 with: Claude (cloud thread "Build story cutscenes like Endless Lantern Corps")
-pr: 
+pr: 2204
 mods: kingdoms
 versions: 
 started: 2026-11-26
