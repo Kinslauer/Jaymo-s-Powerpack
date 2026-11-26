@@ -4,5 +4,6 @@
 - **Busy**: when they wouldn't stop to talk (TalkBusy: fighting, talking to someone else, tending someone, seeing to the dead, with a prisoner, looting), the talk line reads "busy (fighting)" and so on. The server tells each player who is busy within 8 blocks every half second, only when it changed (`ContextBusy`).
 - **Trade** only shows for jobs that trade (not guards, outlaws, workers, nitwits or the jobless: `McaCompat.trades`), and not when the sneak click would pick their pocket instead.
 - **Fainted** folk (Overcome) show Shift + right click: shake awake.
-- `ContextLines`, `ContextBusy`, `McaCompat`, `DialogueCue`, `JaymosKingdomsClient`.
+- **No talking while armed**: Andy: no "accidental talk activation while trying to fight". Right click on an MCA villager with a weapon in the main hand (a melee weapon as `Blows.weapon` counts, a bow or crossbow) no longer opens the talk menu; the weapon's own use goes ahead. Trade (sneak), pickpocket and the rest still work held (`McaTalkHoldMixin`, `TalkBusy.armed`).
+- `ContextLines`, `ContextBusy`, `McaCompat`, `DialogueCue`, `JaymosKingdomsClient`, `McaTalkHoldMixin`, `TalkBusy`.
 - Compile-checked; not played.

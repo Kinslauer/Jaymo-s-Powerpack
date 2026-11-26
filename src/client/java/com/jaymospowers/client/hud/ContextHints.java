@@ -123,7 +123,7 @@ public final class ContextHints {
 		}
 		if (target instanceof CorpseEntity corpse) {
 			corpse(player, corpse, list);
-		} else if (BodyMenu.body(target)) {
+		} else if (BodyMenu.body(target) && player.getMainHandItem().isEmpty()) {
 			// someone downed, tied up or out cold: what's done to them is a body's, so the other mods' lines (talk, trade) are left out
 			body(player, (LivingEntity) target, list);
 			return list.size() > MAX_LINES ? list.subList(0, MAX_LINES) : list;
@@ -131,6 +131,11 @@ public final class ContextHints {
 			&& !(body instanceof Mob mob && mob.isAggressive())) {
 			// (the server also asks that they never saw you; a mob that's after you shows it, the rest it keeps to itself)
 			list.add(line(HOLD, "jaymospowers.context.stealth_kill", "key.sneak", "key.attack"));
+		}
+		// Andy (2026-11-26): "make it all empty hand": with something in hand (a fight, most likely) the people lines stay
+		// away, though the clicks still work; only the stealth kill, which is the weapon's, shows then
+		if (!player.getMainHandItem().isEmpty()) {
+			return list;
 		}
 		for (BiFunction<Player, Entity, List<String[]>> source : SOURCES) {
 			try {
