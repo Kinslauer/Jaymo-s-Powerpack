@@ -25,9 +25,10 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Andy: "you should be able to right click the splatters to harvest the slime, then craft as intended." A snail or slug
  * stamped flat ({@link SpiderSquash}) leaves a splat of its slime on the ground (Jaymo's Powers' stain). Right-click that
- * splat with an empty hand (or one holding snail slime already) and you scrape it up: the splat is gone and its slime
- * goes into your pack, Kingdoms' snail slime (four make a slimeball). A splat lasts as long as its stain does; washed,
- * scrubbed or soaked away first, there's nothing left to take. Without Powers there's no splat to click, so the slime is
+ * splat with an empty hand (or one holding snail slime already) and you scrape some up into your pack, Kingdoms' snail
+ * slime (four make a slimeball). Andy: "or 5 harvests per stain": a splat gives {@link #HARVESTS} at most, and the last
+ * scrapes it off the ground. It lasts as long as its stain does; washed, scrubbed or soaked away first, there's nothing
+ * left to take. Without Powers there's no splat to click, so the slime is
  * simply left lying where the snail burst.
  */
 public final class SnailSlime {
@@ -39,12 +40,22 @@ public final class SnailSlime {
 	static final long LIFE = 12000L;
 	/** How far round a splat its stain is scraped up (blocks). */
 	static final double SCRAPE = 0.5;
+	/** How many snail slime one splat gives. */
+	static final int HARVESTS = 5;
 	// ================================================================================================================
 
 	private static final boolean POWERS = FabricLoader.getInstance().isModLoaded("jaymospowers");
 
-	/** One splat of snail slime: where it lies and until when. */
-	private record Splat(Vec3 at, long until) {
+	/** One splat of snail slime: where it lies, until when, and how many scrapes are left in it. */
+	private static final class Splat {
+		final Vec3 at;
+		final long until;
+		int left = HARVESTS;
+
+		Splat(Vec3 at, long until) {
+			this.at = at;
+			this.until = until;
+		}
 	}
 
 	/** The splats lying in each level. */
@@ -107,12 +118,16 @@ public final class SnailSlime {
 		if (best == null) {
 			return false;
 		}
-		splats.remove(best);
 		if (PowersCompat.bloodStains(level, best.at, SCRAPE, 1).isEmpty()) {
 			// washed or scrubbed away already
+			splats.remove(best);
 			return false;
 		}
-		PowersCompat.scrubStains(level, best.at, SCRAPE, 10.0F);
+		if (--best.left <= 0) {
+			// the last of it: the splat's scraped off the ground
+			splats.remove(best);
+			PowersCompat.scrubStains(level, best.at, SCRAPE, 10.0F);
+		}
 		player.getInventory().placeItemBackInInventory(new ItemStack(MocWild.SNAIL_SLIME), net.minecraft.util.Prediction.SERVER_ONLY);
 		level.playSound(null, best.at.x, best.at.y, best.at.z, SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.6F, 1.2F);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
