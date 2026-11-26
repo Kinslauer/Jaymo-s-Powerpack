@@ -127,6 +127,14 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   eases down to a river as a valley; the drainage routing's ground (`lowlandRouteGround`) takes the same slope.
   Built; not played; new chunks only.
 
+- **The river planner reads the ground, not the caves under it**: `CoarseHeightField` finds each column's ground by
+  walking down the router's final density to the first solid block. Near the surface the overworld's final density is
+  `min(sloped_cheese, 5 * caves/entrances)`, so over a cave entrance the walk fell through and read the cave's floor:
+  on Andy's seed a meadow at Y 77 read as Y 19-42, a mountain stream was routed into that "hollow" and cut down to it,
+  a sheer plain-stone slot with dripstone and a lava fall at the bottom (2026-11-26, the same "ravine river hybrids").
+  The walk now reads `WiredRouter.withoutCaves(finalDensity)`: every density function the router takes from a
+  `caves/` file stands in as solid rock. Built; not played; new chunks only.
+
 - **Left clicks in the shore editors**: 26.3 numbers mouse buttons from 1 (`InputConstants.MOUSE_BUTTON_LEFT` is 1,
   right is 3), so the block picker, riverbank palette and water plant set screens, which waited for button 0, never
   took a left click. They compare with `InputConstants.MOUSE_BUTTON_LEFT` now. Built; not played.
