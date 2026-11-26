@@ -288,6 +288,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		RaidBeasts.register();
 		WitchRaids.register();
 		GolemPathing.register();
+		VillagerFixes.register();
 		Visitors.register();
 		// 0.7.483: every settlement keeps a butcher and a healer
 		TownTrades.register();
