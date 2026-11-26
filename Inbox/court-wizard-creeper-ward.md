@@ -1,10 +1,11 @@
 ---
-status: in-review
+status: writing
 for: apollo
 from: Andy (Claude chat, 2026-11-23)
 asked: 2026-11-23
 claimed_by: hermes-a
 pr: 2222
+writer: hermes-writer
 ---
 
 # Court wizards ward their kingdom against creepers
