@@ -94,7 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-17 problems in the notes: [[Health]].
+16 problems in the notes: [[Health]].
 
 ## Last week
 
