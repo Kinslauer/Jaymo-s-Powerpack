@@ -8,6 +8,7 @@
 		"WebEntityRendererMixin",
 		"WebFirstPersonHandsMixin",
 		"WebJumpMixin",
+		"WebLineRideUseMixin",
 		"WebLivingEntityRendererMixin",
 		"WebModelFeatureRendererMixin",
 		"WebSprintMixin",
