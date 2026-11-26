@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 17:29
+updated: 2026-11-26 18:06
 ---
 # Open PRs
 
-11 open, as of 2026-11-26 17:29. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+10 open, as of 2026-11-26 18:06. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -53,10 +53,5 @@ Andy merges only on "merge", one at a time.
 
 ## [#2251](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2251) Blood Awakening per-blood upgrades, Patch 1 (Plain, Mountain & Elemental/Sky)
 - **Branch:** `t3/blood-awakening-per-blood-patch-1` · **Updated:** 2026-11-26 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2252](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2252) Pull wool, rocks, leather and more apart in the inventory
-- **Branch:** `claude/project-thread-sjbnh0` · **Updated:** 2026-11-26 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
