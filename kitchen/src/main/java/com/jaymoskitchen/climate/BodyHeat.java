@@ -39,8 +39,11 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -101,7 +104,17 @@ public final class BodyHeat {
 	static final float TIME_SWING = 2.0F * LSO_DEGREE;
 	/** Jaymo's Powers' Aether (its own dimension, or its band of a One Dimension world): no thin-air cold there. */
 	static final ResourceKey<Level> AETHER = ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath("jaymospowers", "aether"));
-	static final float RAIN = -15.0F, SNOW = -20.0F, POWDER_SNOW = -40.0F;
+	/**
+	 * Falling snow chills the air. Rain has no term of its own: it takes the sun away and soaks you ({@link Wetness}), and
+	 * counting it a third time made a summer shower as cold as snow.
+	 */
+	static final float SNOW = -20.0F, POWDER_SNOW = -40.0F;
+	/**
+	 * A hot spring (water over a magma block {@link #SPRING_DEPTH} or fewer blocks under your feet, as Jaymo's Powers
+	 * digs them): the water holds you at least this warm, and its wet doesn't chill you while you're in it.
+	 */
+	static final float HOT_SPRING = 20.0F;
+	static final int SPRING_DEPTH = 3;
 	/** Wet through ({@link Wetness}): 10 degrees colder, less as you dry; soaked on cold land, this many times that. */
 	static final float WET = -10.0F * LSO_DEGREE, COLD_SOAK = 1.5F;
 	/** Soaked clothes keep this share of their warmth; wool keeps all of it. */
@@ -173,6 +186,8 @@ public final class BodyHeat {
 	/** Other mods' weather on a player, in body heat (summed into {@link #ambient}); Kingdoms adds by reflection. */
 	public static final List<ToDoubleFunction<ServerPlayer>> WEATHER = new CopyOnWriteArrayList<>();
 	private static Predicate<Player> heatProof = player -> false;
+	/** Warm and cool pieces other mods dress players in outside the armour slots (Kingdoms' harness: fur hoods, turbans). */
+	private static final List<ToDoubleFunction<Player>> WARM_WORN = new CopyOnWriteArrayList<>(), COOL_WORN = new CopyOnWriteArrayList<>();
 	/** (0.5.60) Places other mods say the weather never reaches (Powers' Other World): body heat held neutral there. */
 	private static final List<Predicate<Player>> TEMPERATE = new CopyOnWriteArrayList<>();
 
@@ -211,6 +226,22 @@ public final class BodyHeat {
 	/** For other mods (by reflection): more weather on players, in body heat. */
 	public static void addWeather(ToDoubleFunction<ServerPlayer> weather) {
 		WEATHER.add(weather);
+	}
+
+	/**
+	 * For other mods (by reflection): how many warm pieces ({@code warm}) or cool pieces a player wears that the armour
+	 * slots don't show, counted like {@link WinterCold#WARM_CLOTHING} and {@link #COOL_CLOTHING} pieces.
+	 */
+	public static void addWorn(boolean warm, ToDoubleFunction<Player> pieces) {
+		(warm ? WARM_WORN : COOL_WORN).add(pieces);
+	}
+
+	private static float worn(List<ToDoubleFunction<Player>> sources, Player player) {
+		float n = 0.0F;
+		for (ToDoubleFunction<Player> source : sources) {
+			n += (float) source.applyAsDouble(player);
+		}
+		return n;
 	}
 
 	/**
@@ -389,6 +420,8 @@ public final class BodyHeat {
 		BlockPos at = player.blockPosition();
 		BlockPos head = BlockPos.containing(player.getEyePosition());
 		boolean sky = level.canSeeSky(head);
+		// rain or snow falling here, not just somewhere in the world (a desert under a clear sky keeps its sun)
+		Biome.Precipitation falling = level.precipitationAt(head);
 		float land;
 		float base = 0.8F;
 		// (0.5.59) by the realm at the player's height, so a One Dimension world's stacked Nether counts (Stacked)
@@ -409,7 +442,7 @@ public final class BodyHeat {
 			}
 			if (sky) {
 				if (level.isBrightOutside()) {
-					if (!level.isRaining()) {
+					if (falling == Biome.Precipitation.NONE) {
 						land += land >= 0.0F ? SUN : COLD_SUN;
 					}
 				} else {
@@ -431,28 +464,32 @@ public final class BodyHeat {
 			if (above > 0 && realm != AETHER) {
 				land -= above * HEIGHT_COLD;
 			}
-			if (realm == Level.OVERWORLD) {
-				// (Hardrock picks) colder the further north you travel, warmer to the south
+			if (realm == Level.OVERWORLD && !Warmth.CLIMATE_MAP) {
+				// (Hardrock picks) colder the further north you travel, warmer to the south; with Jaymo's Kingdoms its
+				// climate map already does this through the lands themselves, so it isn't counted twice
 				land += Warmth.north(level, player.getZ());
 			}
 		}
 		float air = land;
 		// (Hardrock picks) damp near the sea
 		if (realm == Level.OVERWORLD) {
-			air += Warmth.damp(level, at, sky, land);
+			air += Warmth.damp(level, at, sky, falling != Biome.Precipitation.NONE, land);
 		}
 
-		// wet
-		Biome.Precipitation falling = level.precipitationAt(head);
-		if (falling == Biome.Precipitation.RAIN) {
-			air += RAIN;
-		} else if (falling == Biome.Precipitation.SNOW) {
+		if (falling == Biome.Precipitation.SNOW) {
 			air += SNOW;
 		}
-		// the one wet term, in the water or out of it: the meter (Jaymo's Powers' Wet and Soaked feed it), worse soaked on cold land
-		air += WET * Wetness.share(player) * (Wetness.soaked(player) && land < 0.0F ? COLD_SOAK : 1.0F);
+		boolean spring = hotSpring(player);
+		if (!spring) {
+			// the one wet term, in the water or out of it: the meter (Jaymo's Powers' Wet and Soaked feed it), worse soaked on cold land
+			air += WET * Wetness.share(player) * (Wetness.soaked(player) && land < 0.0F ? COLD_SOAK : 1.0F);
+		}
 		if (player.isInPowderSnow) {
 			air += POWDER_SNOW;
+		}
+		if (spring) {
+			// the spring's water is warm, however cold the land round it
+			air = Math.max(air, HOT_SPRING);
 		}
 
 		// the Nether's open caverns count as out of doors: it's no building, and lava is everywhere
@@ -464,13 +501,14 @@ public final class BodyHeat {
 
 		// what you wear
 		float warm = warmPieces(player);
-		float cool = pieces(player, COOL_CLOTHING) + Warmth.lined(player, false) + com.jaymoskitchen.tanning.HideTraits.coolPieces(player);
+		float cool = pieces(player, COOL_CLOTHING) + Warmth.lined(player, false) + com.jaymoskitchen.tanning.HideTraits.coolPieces(player)
+			+ worn(COOL_WORN, player);
 		if (air < 0.0F) {
 			air = Math.min(0.0F, air + warm * WARM_PIECE);
 		} else {
 			air += warm * STUFFY_PIECE - cool * COOL_PIECE;
 			if (sky && level.isBrightOutside() && land > 0.0F) {
-				air += player.getArmorValue() * ARMOUR_IN_SUN;
+				air += metalArmour(player) * ARMOUR_IN_SUN;
 			}
 		}
 		if (hotMeal(player)) {
@@ -563,13 +601,48 @@ public final class BodyHeat {
 		return 0.0F;
 	}
 
+	/** In a hot spring: in water, with a magma block no more than {@link #SPRING_DEPTH} blocks under the feet. */
+	static boolean hotSpring(Player player) {
+		if (!player.isInWater()) {
+			return false;
+		}
+		BlockPos feet = player.blockPosition();
+		for (int i = 1; i <= SPRING_DEPTH; i++) {
+			if (player.level().getBlockState(feet.below(i)).is(Blocks.MAGMA_BLOCK)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The armour points worn that bake in the sun: all but what the warm and cool clothes give (leather, wool and robes
+	 * don't heat up like metal does; leather's stuffiness is counted already).
+	 */
+	static float metalArmour(Player player) {
+		float cloth = 0.0F;
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			ItemStack piece = player.getItemBySlot(slot);
+			if (piece.is(WinterCold.WARM_CLOTHING) || piece.is(COOL_CLOTHING)) {
+				float[] armour = {0.0F};
+				piece.forEachModifier(slot, (attribute, modifier) -> {
+					if (attribute.value() == Attributes.ARMOR.value() && modifier.operation() == AttributeModifier.Operation.ADD_VALUE) {
+						armour[0] += (float) modifier.amount();
+					}
+				});
+				cloth += armour[0];
+			}
+		}
+		return Math.max(0.0F, player.getArmorValue() - cloth);
+	}
+
 	/** Jaymo's Powers' studded leather (optional: an unknown tag matches nothing): all four pieces worn count as one warm piece. */
 	static final TagKey<Item> STUDDED = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("jaymospowers", "studded_armor"));
 
 	/** Warm clothes worn, warm linings sewn into what's worn ({@link Lining}), and llama leather (half a piece each). */
 	static float warmPieces(Player player) {
 		float warm = pieces(player, WinterCold.WARM_CLOTHING) + Warmth.lined(player, true) + com.jaymoskitchen.tanning.HideTraits.warmPieces(player)
-			+ (pieces(player, STUDDED) == 4 ? 1.0F : 0.0F);
+			+ (pieces(player, STUDDED) == 4 ? 1.0F : 0.0F) + worn(WARM_WORN, player);
 		if (Wetness.soaked(player)) {
 			// wet wool still keeps you warm; soaked leather, linings and the rest keep half
 			int wool = woolPieces(player);

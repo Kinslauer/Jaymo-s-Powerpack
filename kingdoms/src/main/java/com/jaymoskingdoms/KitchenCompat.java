@@ -354,6 +354,15 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for body heat (needs 0.5.25): {}", e.toString());
 		}
+		// furs, cloaks and hoods worn in the harness keep the cold off, turbans keep the sun off
+		try {
+			Class<?> bodyHeat = Class.forName("com.jaymoskitchen.climate.BodyHeat");
+			java.lang.reflect.Method addWorn = bodyHeat.getMethod("addWorn", boolean.class, java.util.function.ToDoubleFunction.class);
+			addWorn.invoke(null, true, (java.util.function.ToDoubleFunction<net.minecraft.world.entity.player.Player>) HarnessWarmth::warm);
+			addWorn.invoke(null, false, (java.util.function.ToDoubleFunction<net.minecraft.world.entity.player.Player>) HarnessWarmth::cool);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for harness warmth: {}", e.toString());
+		}
 		// (0.7.477) an Emberborn drinks fire and lava, and water only hisses on their tongue
 		try {
 			Class.forName("com.jaymoskitchen.climate.Thirst").getMethod("setFireDrinker", java.util.function.Predicate.class)
