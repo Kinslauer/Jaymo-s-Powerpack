@@ -6006,5 +6006,14 @@
 		"sounds": [
 			"jaymoskingdoms:goblin_band/jug"
 		]
+	},
+	"scene_music.midnight_bargain": {
+		"sounds": [
+			{
+				"name": "minecraft:music/game/ancestry",
+				"stream": true,
+				"volume": 0.8
+			}
+		]
 	}
 }

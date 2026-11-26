@@ -97,6 +97,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.films.BossIntroClient.register();
 		// the Family farmhand's wake-up talk, letterboxed (FarmhandWake)
 		com.jaymoskingdoms.client.films.FarmWakeFilmClient.register();
+		com.jaymoskingdoms.client.scenes.StorySceneClient.register();
+		com.jaymoskingdoms.client.scenes.SpokenSpells.register();
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// a handgonne's or an arquebus's ball (EarlyGuns)
 		EntityRenderers.register(com.jaymoskingdoms.GunBall.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.5F, false));
