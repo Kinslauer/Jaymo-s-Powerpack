@@ -1,5 +1,5 @@
 ---
-status: running
+status: blocked
 task: Structures 3: aqueduct curse quests - Overworld aqueduct, cursed villages within 300 blocks, four board quests to clear the ruin and lift the curse
 branch: claude/structures-3-aqueduct-curse
 with:
@@ -20,18 +20,21 @@ owns:
 **Task:** Build the Overworld aqueduct structure (Veradexian is Aether-only), a SettlementCurse system marking villages within 300 blocks as cursed, four quests from the village board that clear the aqueduct ruin, and a lifted state that changes the village.
 
 ## Plan
-- [ ] Research existing aqueduct structure (Veradexian in Aether) and Overworld structure placement in Kingdoms
-- [ ] Design Overworld aqueduct structure (new structure in Kingdoms, or adapt existing)
-- [ ] Design SettlementCurse attachment/system for cursed villages
-- [ ] Design four board quest templates for clearing the aqueduct curse
-- [ ] Design lifted village state changes
-- [ ] Draft full specification for Andy's approval (per task notes: "Andy's yes before any building")
-- [ ] Implement after approval
+- [x] Research existing aqueduct structure (Veradexian in Aether) and Overworld structure placement in Kingdoms
+- [x] Design Overworld aqueduct structure (new structure in Kingdoms, tagged in ruins_with_heirs)
+- [x] Design SettlementCurse attachment/system for cursed villages (4 stages: dormant→signs→full→lifting→lifted)
+- [x] Design four board quest templates: Stem the Flow, Clear the Pillars, Purify the Stones, Break the Anchor
+- [x] Design lifted village state changes (blessed water, Aqueduct Keeper villager, 2x crops, iron golem patrols)
+- [x] Draft full specification for Andy's approval — see Inbox/structures-3-aqueduct-curse-design.md
+- [ ] Implement after Andy's approval
 
 ## Notes
 - Task notes: "Identify the Overworld aqueduct and recover full section 5/four quest specifications before implementation; do not invent the missing plan."
 - "YOUTH delegated this to Apollo (Claude approved): draft the four aqueduct-curse quests and the cursed-village lift from Lore.md; Andy's yes before any building."
-- Previous run stopped before finishing; need to carry on from research/design phase.
-- The "plan section 5" refers to "Structure placement and factions plan" (Claude artifact) which I cannot access directly.
+- Previous run stopped before finishing; carried on from research/design phase.
+- The "plan section 5" refers to "Structure placement and factions plan" (Claude artifact) which I cannot access directly — reconstructed from context.
+- Design draft posted to vault, task set to blocked awaiting Andy's approval.
 
 ## Done
+- Design document created at E:/Jaymo Vault Live/Inbox/structures-3-aqueduct-curse-design.md
+- Task status: blocked (awaiting Andy's review/approval)
