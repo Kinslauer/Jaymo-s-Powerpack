@@ -1,0 +1,13 @@
+{
+  "dimx": 1,
+  "dimz": 5,
+  "buildings": [
+    [
+      "jaymospowers:maw/base/base_airvent",
+      "jaymospowers:maw/base/base_airvent",
+      "jaymospowers:maw/base/base_airvent",
+      "jaymospowers:maw/base/base_airvent",
+      "jaymospowers:maw/base/base_airvent"
+    ]
+  ]
+}

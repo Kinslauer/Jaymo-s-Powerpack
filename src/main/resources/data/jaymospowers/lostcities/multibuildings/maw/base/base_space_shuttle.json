@@ -1,0 +1,24 @@
+{
+  "dimx": 3,
+  "dimz": 4,
+  "buildings": [
+    [
+      "jaymospowers:maw/base/base_space_shuttle00",
+      "jaymospowers:maw/base/base_space_shuttle01",
+      "jaymospowers:maw/base/base_space_shuttle02",
+      "jaymospowers:maw/base/base_space_shuttle03"
+    ],
+    [
+      "jaymospowers:maw/base/base_space_shuttle10",
+      "jaymospowers:maw/base/base_space_shuttle11",
+      "jaymospowers:maw/base/base_space_shuttle12",
+      "jaymospowers:maw/base/base_space_shuttle13"
+    ],
+    [
+      "jaymospowers:maw/base/base_space_shuttle20",
+      "jaymospowers:maw/base/base_space_shuttle21",
+      "jaymospowers:maw/base/base_space_shuttle22",
+      "jaymospowers:maw/base/base_space_shuttle23"
+    ]
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "dimx": 2,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/quarry/quarry_office00",
+      "jaymospowers:maw/quarry/quarry_office01"
+    ],
+    [
+      "jaymospowers:maw/quarry/quarry_office10",
+      "jaymospowers:maw/quarry/quarry_office11"
+    ]
+  ]
+}

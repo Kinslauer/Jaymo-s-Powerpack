@@ -1,0 +1,89 @@
+{
+  "palette": [
+    {
+      "char": "+",
+      "block": "minecraft:deepslate_tile_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "!",
+      "block": "minecraft:deepslate_tiles",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ",",
+      "block": "minecraft:iron_block",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "5",
+      "block": "minecraft:deepslate_brick_wall[east=tall,north=none,south=tall,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "0",
+      "block": "minecraft:smooth_stone",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "7",
+      "block": "minecraft:deepslate_brick_wall[east=none,north=none,south=tall,up=true,waterlogged=false,west=tall]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "9",
+      "block": "minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "'",
+      "block": "minecraft:polished_deepslate",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "8",
+      "block": "minecraft:chiseled_deepslate",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "<",
+      "block": "minecraft:waxed_weathered_copper",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ">",
+      "block": "minecraft:stone",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "#",
+      "block": "minecraft:cut_red_sandstone",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "2",
+      "block": "minecraft:red_sand",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "6",
+      "block": "minecraft:red_nether_bricks",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "$",
+      "block": "minecraft:oak_leaves[distance=7,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "3",
+      "block": "minecraft:chiseled_polished_blackstone",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "&",
+      "block": "minecraft:polished_andesite",
+      "damaged": "minecraft:iron_bars"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/factory/factory_furnace00",
+      "jaymospowers:maw/factory/factory_furnace01",
+      "jaymospowers:maw/factory/factory_furnace02"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_furnace10",
+      "jaymospowers:maw/factory/factory_furnace11",
+      "jaymospowers:maw/factory/factory_furnace12"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_furnace20",
+      "jaymospowers:maw/factory/factory_furnace21",
+      "jaymospowers:maw/factory/factory_furnace22"
+    ]
+  ]
+}

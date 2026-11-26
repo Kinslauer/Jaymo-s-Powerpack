@@ -1,0 +1,24 @@
+{
+  "palette": [
+    {
+      "char": "X",
+      "block": "minecraft:infested_stone_bricks",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "$",
+      "block": "minecraft:stone_slab[type=double]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "#",
+      "variant": "jaymospowers:maw/stonebrick",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "}",
+      "variant": "jaymospowers:maw/stonebrick",
+      "damaged": "minecraft:iron_bars"
+    }
+  ]
+}

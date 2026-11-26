@@ -1,0 +1,30 @@
+{
+  "dimx": 3,
+  "dimz": 6,
+  "buildings": [
+    [
+      "jaymospowers:maw/factory/factory_building_sub00",
+      "jaymospowers:maw/factory/factory_building_sub01",
+      "jaymospowers:maw/factory/factory_building_sub02",
+      "jaymospowers:maw/factory/factory_building_sub03",
+      "jaymospowers:maw/factory/factory_building_sub04",
+      "jaymospowers:maw/factory/factory_building_sub05"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_building_sub10",
+      "jaymospowers:maw/factory/factory_building_sub11",
+      "jaymospowers:maw/factory/factory_building_sub12",
+      "jaymospowers:maw/factory/factory_building_sub13",
+      "jaymospowers:maw/factory/factory_building_sub14",
+      "jaymospowers:maw/factory/factory_building_sub15"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_building_sub20",
+      "jaymospowers:maw/factory/factory_building_sub21",
+      "jaymospowers:maw/factory/factory_building_sub22",
+      "jaymospowers:maw/factory/factory_building_sub23",
+      "jaymospowers:maw/factory/factory_building_sub24",
+      "jaymospowers:maw/factory/factory_building_sub25"
+    ]
+  ]
+}

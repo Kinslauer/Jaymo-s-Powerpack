@@ -1,0 +1,12 @@
+{
+  "dimx": 1,
+  "dimz": 4,
+  "buildings": [
+    [
+      "jaymospowers:maw/base/base_missile_launcher_l",
+      "jaymospowers:maw/base/base_missile_launcher_l",
+      "jaymospowers:maw/base/base_missile_launcher_l",
+      "jaymospowers:maw/base/base_missile_launcher_l"
+    ]
+  ]
+}

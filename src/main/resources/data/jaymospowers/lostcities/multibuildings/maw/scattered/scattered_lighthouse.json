@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_lighthouse00",
+      "jaymospowers:maw/scattered/scattered_lighthouse01",
+      "jaymospowers:maw/scattered/scattered_lighthouse02"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_lighthouse10",
+      "jaymospowers:maw/scattered/scattered_lighthouse11",
+      "jaymospowers:maw/scattered/scattered_lighthouse12"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_lighthouse20",
+      "jaymospowers:maw/scattered/scattered_lighthouse21",
+      "jaymospowers:maw/scattered/scattered_lighthouse22"
+    ]
+  ]
+}
