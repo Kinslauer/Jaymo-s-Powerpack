@@ -115,6 +115,10 @@ public final class DragonBreath {
 		if (kindred(dragon, target)) {
 			return true;
 		}
+		if (dragon instanceof WindDragon realm && realm.realmGuard() && target instanceof net.minecraft.world.entity.npc.villager.AbstractVillager) {
+			// a realm's dragon spares the realm's folk
+			return true;
+		}
 		if (!(dragon instanceof OwnableEntity ownable)) {
 			return false;
 		}
