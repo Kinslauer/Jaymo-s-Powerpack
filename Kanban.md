@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 20:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 20:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,6 +23,7 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
+- [ ] [[Inbox/nycto-4|nycto-4]] · for any · open
 
 
 ## Being built
