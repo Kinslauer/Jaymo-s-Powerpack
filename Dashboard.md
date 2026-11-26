@@ -22,7 +22,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-11 waiting for a bot, 1 being built, 6 in review: see [[Kanban]].
+12 waiting for a bot, 1 being built, 6 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -92,7 +92,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-17 problems in the notes: [[Health]].
+18 problems in the notes: [[Health]].
 
 ## Last week
 
