@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 04:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 00:16). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,19 +23,21 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/symbiote-113-picks|symbiote-113-picks]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
-- [[Agents/youth-delegates-ready|youth-delegates-ready]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/youth-delegates-ready|youth-delegates-ready]]: stalled, last change 2026-11-25. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-9 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
+8 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2206 Giant mushrooms repainted in the pack's vanilla style (Kingdoms, 2026-11-26)
 - [ ] #2205 anacondas lie on the ground, live in the jungle and hunt from trees and water (Kingdoms, 2026-11-26)
 - [ ] #2204 story scenes and the Warlock's midnight bargain, spoken spells (Kingdoms, 2026-11-26)
 - [ ] #2201 ships rigged when they're made; pillager long ships sail; crews fish for their food; every NPC fights its fish in view (Kingdoms, 2026-11-26)
+- [ ] #2200 Crocodiles and alligators death roll their prey and drag it into the water (Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2199 Alone in the wild never leaves you on the sea (Kingdoms, 2026-11-26)
 - [ ] #2197 Mobs slow down under heavy weapons; no blood on lost limbs; owls spare the downed (Powers, Kitchen, 2026-11-26)
 - [ ] #2196 Ki Cell has its icon and name (Powers, Kingdoms, 2026-11-26)
@@ -91,13 +93,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2140 Squashed bugs and spiders burst in their own blood (Powers, Kingdoms, 2026-11-25)
 - [ ] #2139 refusal hints - a turned-down talk option says why (Kingdoms, 2026-11-25)
 - [ ] #2138 Tectonic leaves the pack (Powers, Kingdoms, 2026-11-25)
-- [ ] #2137 Corpse hint drops "search the body" when nothing is left (Powers, Kitchen, 2026-11-25)
-- [ ] #2136 Riders no longer start with a spare saddle (Kingdoms, 2026-11-25)
-- …and 583 older ones.
+- …and 585 older ones.
 
 ## Health
 
-20 problems in the notes: [[Health]].
+18 problems in the notes: [[Health]].
 
 ## Last week
 
