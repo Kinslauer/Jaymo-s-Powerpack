@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 02:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 02:38). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,11 +20,11 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · 🪶 Quill · #2209 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
