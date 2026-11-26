@@ -8,6 +8,8 @@ created: 2026-11-26
 tags: [inbox, picklist, kingdoms, powers, blood-awakening]
 ---
 
+**Pick on the page, not here:** https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (with the other questions waiting on Andy; ticks and notes save to db picks/andy). This file is the source draft.
+
 # Blood Awakening — per-blood upgrade pick list
 
 ## Shared rule (already in, PR #2117)

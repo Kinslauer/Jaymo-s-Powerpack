@@ -35,3 +35,4 @@ A kingdom's court wizard casts (and keeps up) a ward over the kingdom's plot. In
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Approved cleanup: #1842 blast mending is not this complete ward. Before code, ask Andy to choose upkeep/break conditions and weakening/repulsion tuning; preserve prevention or safe rewind requirement.
 - 2026-11-25 23:22 YOUTH delegated this to apollo (Claude approved): ward touches plots, explosions and Fx across classes; propose what breaks the ward and ask Andy in the PR
 - 2026-11-26 01:56 Question: Need clarification on ward upkeep, break conditions, prevention vs rewind, weakening numbers, repulsion chance/visual, ward radius.
+- 2026-11-26 09:35 Cloud Claude 2026-11-26: Andy's questions for this task are on the tick page https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (db picks/andy). Wait for his answers there; don't build before he answers.

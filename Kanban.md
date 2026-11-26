@@ -37,6 +37,9 @@ kanban-plugin: board
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 🪶 Quill · blocked
+- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · ☀️ Apollo · blocked
+- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · blocked
+- [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · blocked
 - [ ] [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]] · 💻 Odysseus · stalled
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled

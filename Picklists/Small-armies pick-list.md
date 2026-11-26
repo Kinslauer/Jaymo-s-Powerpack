@@ -8,6 +8,8 @@ created: 2026-11-21
 tags: [inbox, picklist, small-armies]
 ---
 
+**Pick on the page, not here:** https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (with the other questions waiting on Andy; ticks and notes save to db picks/andy). This file is the source draft.
+
 # Small-armies and divine powers pick-list
 
 Five links, one verdict up front: **none of them run on our pack as-is.** Clay Soldiers is MIT but its newest Fabric build is 1.20.6; Clay Warfare is a datapack for 26.3 but All Rights Reserved; Symbiotes Unleashed, Extra Visuals and Hand of God are Forge 1.20.1. Every row below is an idea we'd rebuild on our own classes, not a port.
