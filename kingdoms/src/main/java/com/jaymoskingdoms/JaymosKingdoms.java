@@ -311,6 +311,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		CampfireWard.register();
 		Clearing.register();
 		Herds.register();
+		WeatherShelter.register();
 		Strays.register();
 		BloodChores.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
