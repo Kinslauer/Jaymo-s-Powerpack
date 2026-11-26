@@ -26,6 +26,8 @@ public final class Tropics {
 	private static final float DRY_THIRST = 1.4F;
 	/** How much likelier fire is to catch a neighbouring block in the dry season. */
 	public static final float DRY_FIRE = 1.6F;
+	/** Forest Fire's air dampness in the dry season, as a share of its own (ForestFireDryMixin). */
+	public static final float DRY_HUMIDITY = 0.6F;
 
 	private Tropics() {
 	}

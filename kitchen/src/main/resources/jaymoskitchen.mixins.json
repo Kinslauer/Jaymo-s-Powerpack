@@ -23,6 +23,7 @@
 		"EntityMixin",
 		"FiniteWaterMixin",
 		"FireDryMixin",
+		"ForestFireDryMixin",
 		"RainRefillMixin",
 		"FishingHookMixin",
 		"FreshBarMixin",

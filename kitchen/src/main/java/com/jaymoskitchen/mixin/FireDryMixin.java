@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Fire spreads more readily in the dry season in the hot lands ({@link Tropics#DRY_FIRE}): a flame is likelier to catch
- * a flammable block next to it, vanilla fire's own spread. (Forest Fire's own simulation reads only the weather and
- * isn't touched here.)
+ * a flammable block next to it, vanilla fire's own spread. Forest Fire's wildfires get the dry season through
+ * {@code ForestFireDryMixin}.
  */
 @Mixin(FireBlock.class)
 abstract class FireDryMixin {

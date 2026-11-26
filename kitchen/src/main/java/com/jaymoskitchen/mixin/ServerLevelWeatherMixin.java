@@ -7,6 +7,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(ServerLevel.class)
 abstract class ServerLevelWeatherMixin {
 	@Shadow
+	@Final
 	private static IntProvider THUNDER_DELAY;
 
 	@WrapOperation(method = "advanceWeatherCycle", at = @At(value = "INVOKE",
