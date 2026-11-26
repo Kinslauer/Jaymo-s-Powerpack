@@ -1,12 +1,13 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 06:55). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 07:21). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**12 problems.**
+**13 problems.**
 
 ## Statuses the pipeline doesn't know
 
+- [[Inbox/structures-3-aqueduct-curse-design|structures-3-aqueduct-curse-design]]: `status: (none)` (known: blocked, changes, claimed, done, in-review, open, ready, sent, writing)
 - [[Agents/corpse-limbs-drag-arm-digger-pits|corpse-limbs-drag-arm-digger-pits]]: `status: stopped` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 
 ## Stalled agent notes
