@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: bacchus
 from: coordinator
 asked: 2026-11-24
@@ -10,7 +10,7 @@ suggested_owns:
   - kingdoms data/jaymoskingdoms/structure (new nbt), worldgen pools
   - kingdoms Stables.java, Mines.java hooks
 writer: hermes-writer
-text_pass: 
+text_pass: done
 ---
 # Structures 6: new stable, mine and farm structures
 
