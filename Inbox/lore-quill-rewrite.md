@@ -23,7 +23,7 @@ suggested_owns:
 - This is a vault page, not code: no worktree, no branch, no build, no PR.
 - Set `status: blocked` and add a note under the task's Notes when the rewrite is done, waiting for Andy's review.
 
-**No worktree — vault page only.** Edit `E:/Jaymo Vault Live/Lore.md` directly.
+**Vault page only.** Preserve canonical `Lore.md` unchanged. Cloud Claude owns the separate draft; Andy reviews before any replacement.
 
 ## Notes
 - 2026-11-24 09:05 quill's claim had no sign of work for 30 min: handed back as open.
