@@ -125,6 +125,8 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   blocks over the water as Dynamic Waters meant. And in open-gorge mode (the default) a lowland river's banks climb
   at most one block for every two out from the water, out to the gorge's reach (`BANK_GENTLE_RUN`), so low ground
   eases down to a river as a valley; the drainage routing's ground (`lowlandRouteGround`) takes the same slope.
+  Mountain streams running through low ground (under the gorge height, not in a ravine, at a gorge rim or in a
+  tunnel) get the same gentle banks (Andy, 2026-11-26, "yes soften": their 1:1 cuts were dressed as bare stone faces).
   Built; not played; new chunks only.
 
 - **The river planner reads the ground, not the caves under it**: `CoarseHeightField` finds each column's ground by

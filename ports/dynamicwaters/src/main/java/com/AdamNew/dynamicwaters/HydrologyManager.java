@@ -131,9 +131,10 @@ public class HydrologyManager {
     private static final double BANK_TALUS = 1.0;
 
     /**
-     * Gentle lowland banks (open-gorge mode, the default): a lowland river's banks climb at most one block for every
-     * {@code BANK_GENTLE_RUN} out from the water, out to the gorge's reach, so the ground eases down to the water the way
-     * a river valley does instead of breaking off in a sheer cut. High ground still makes a gorge.
+     * Gentle lowland banks (open-gorge mode, the default): a lowland river's banks, and a mountain stream's where it runs
+     * through low ground, climb at most one block for every {@code BANK_GENTLE_RUN} out from the water, out to the
+     * gorge's reach, so the ground eases down to the water the way a river valley does instead of breaking off in a
+     * sheer cut. High ground still makes a gorge.
      */
     private static final double BANK_GENTLE_RUN = 2.0;
     private static final double BANK_GENTLE_TALUS = 1.0 / BANK_GENTLE_RUN;
@@ -3395,6 +3396,10 @@ public class HydrologyManager {
                         boolean isNearOutlet = distToOutlet < 24.0;
 
                         double reach = Math.max(BANK_ZONE_MIN, BANK_ZONE_PER_WIDTH * chanW);
+                        // gentle banks where a stream runs through low ground (not into a gorge, ravine or tunnel)
+                        final double gentle = ravine == null && !atRim && !tunnel
+                                && originalY < aboveSea(GORGE_FROM) ? gentleBank(originalY - data.y) : 0.0;
+                        reach = Math.max(reach, gentle);
 
                         if (data.beyondEnd && (data.distance >= chanW || channelBowl(data, chanW) == 0)
                                 && data.distance < chanW + Math.max(reach, RAVINE_NEAR)
@@ -3551,7 +3556,7 @@ public class HydrologyManager {
                                         }
                                     }
 
-                                    final double bankWidth = bankMeet(chanW);
+                                    final double bankWidth = Math.max(bankMeet(chanW), gentle);
                                     final double tOut = Math.min(1.0, dOut / bankWidth);
 
                                     final double wallNoise = RIVER_BED_NOISE.get(x * 0.15, z * 0.15) * 0.25;
@@ -3587,7 +3592,8 @@ public class HydrologyManager {
                                         finalTargetY = bermTop;
                                     } else {
                                         int bankTop = (int) Math.floor(data.y
-                                                + ChannelForm.bankRise(dOut, originalY - data.y, bankWidth, BANK_TALUS) + wallNoise);
+                                                + ChannelForm.bankRise(dOut, originalY - data.y, bankWidth,
+                                                        gentle > 0.0 ? BANK_GENTLE_TALUS : BANK_TALUS) + wallNoise);
 
                                         if (originalY <= seaLevel + 1 && bankTop < seaLevel + 1) {
                                             bankTop = Math.max(bankTop, seaLevel + 1);
