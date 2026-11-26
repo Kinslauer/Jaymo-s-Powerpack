@@ -140,3 +140,21 @@ https://claude.ai/artifact/DJgp8W4XAaLJPyuTMVxBED). The game fetches each one fr
 Don't copy pixels from Pixel Perfection Fidelity into our own textures: share-alike would then cover them. New art for our
 own items goes to an art agent, starting from the CC0 and MIT sources Andy picked (OpenGameArt weapon, RPG item, block
 and ship sets; Computercraft Greentech, CC Industrialized, Militech, Wares Recalibration, Vanilla Military, Starlight 16x).
+
+### Open art sets used as they are (2026-11-26, batch 1)
+Other artists' pixels, unchanged (no recolour, no redraw). `tools/open_art/sources/` keeps each source file with its
+licence; `python3 tools/open_art/apply.py` copies them onto our textures and must run after the old generators
+(`kingdoms/tools/gen_hidden_blade.py`, `gen_items.py`, `tools/vanilla_style/*.py`), which would draw these again.
+
+| Texture | From | Author | Licence |
+|---|---|---|---|
+| Kingdoms engineer's hammer | 16x16 Weapon RPG Icons, steel sheet | Shade (OpenGameArt) | CC0 |
+| Powers far-world moon, Glacia and Verdant rock | 16x16 Block Texture Set (stone_generic, ice_glacier, serpentine) | aroachifoundonmypillow (OpenGameArt) | CC0 |
+| Powers Space Pod icon; the flight screen's raider pod and derelict pod (`textures/gui/pod_raider.png`, `pod_wreck.png`) | 16x16 Ship Collection (yellow row 9, red row 1, yellow row 9; black ground made clear) | Master484 (OpenGameArt) | CC0 |
+| Powers Gravity Machine (all faces, on and off), Fuel Works sides and top, Landing Beacon base | Militech (Oritech retexture) | LutherDev (Modrinth) | MIT, notice in `sources/militech/LICENSE.txt` |
+
+Tried and dropped: Shade's sword and dagger on the silver sword and hidden blade (Andy, 2026-11-26), the block set's slate tiles and bricks on the mason table (they lose the table's plan and tools) and
+Militech's steel block on the landing beacon (soft diagonal gradient). The hammer keeps Shade's black outline,
+which the style rules above otherwise avoid. 16x16 RPG Items (DB32) is not used yet. Pods go by who flies them (Andy, 2026-11-26): yours, a raider's, a
+derelict's; the Galactic Patrol's never shows on the flight screen, so it has no ship yet. Later each pod type also gets
+a matching pod model (an art agent's job).
