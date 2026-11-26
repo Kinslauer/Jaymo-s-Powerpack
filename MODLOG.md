@@ -8567,3 +8567,10 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - **Bodies no longer burst when a small creature finishes them** (Andy: a villager killed by a digger burst into gibs). A downed body finished off, a head or body gone black, or a bleed-out is dealt as one endless blow credited to whoever felled them. BlastGore read that as a crushing blow (18+ damage within reach, no blade), so about one such death in three blew the body apart, whatever the killer was: a digger, a zombie, a bare-handed bandit, a club. BlastGore.crushing now skips these kills (Wounds and Bleeding damage, or any kill dealt as Float.MAX_VALUE). A real slam or heavy blow that leads to the death still bursts as before, since it is counted the tick it lands.
 - A ravager's or the warden's execution (MobExecutions CRUSH) still can burst a body, as often as before (BlastGore.crushes marks it).
 - Built; not played.
+
+## 0.27.94 (2026-11-26): Bands sleep until you approach (#2246)
+
+- The Aether and the other bands above and below the Overworld go still, like an unloaded dimension, until a non-spectator player comes within 144 blocks. The Overworld's force-loaded farms keep working, and ordinary worlds stay unchanged.
+- Distant leaves stop decaying into piles of sticks and lizards under the islands at spawn. Skyroot lizards only come from leaves in the Aether, including its separate dimension in ordinary worlds.
+- Classes: BandSleep, Stacked, BandSleepLevelMixin, BandSleepBlockEntityMixin and AetherAnimals; registered both sleep mixins in jaymospowers.mixins.json. Scheduled block and fluid ticks remain untouched.
+- Built by CI; not played. No local build was run; CI results are pending. Not tested in game: approach and departure, force-loaded columns and farms, passengers, block entities, CustomChunks wrapper chaining, separate dimensions or server restart cache clearing.
