@@ -1,8 +1,8 @@
 ---
-status: stalled
-task: Hollow captains fix: captain keeps his WALKING place when due back; tuning numbers as static finals; 12 Hollow slots per player on their own ladders
+status: running
+task: hollow-captains-fix
 branch: claude/hollow-captains-fix
-with: Hephaestus (hermes-fixer)
+with:
 pr:
 mods: kingdoms
 versions:
@@ -12,8 +12,9 @@ owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Captains.java
   - kingdoms/src/main/java/com/jaymoskingdoms/Rivals.java
   - kingdoms/src/main/java/com/jaymoskingdoms/Ladders.java
+  - kingdoms/src/client/java/com/jaymoskingdoms/client/LadderScreen.java
 ---
-# Hollow captains fix
+# Hollow captains: keep the count, 12 per player, own ladders
 
 **Task:** Follows PR #2144 (squash 668d46a). Agent note: [[Agents/hollow-captains|hollow-captains]] (merged work). One PR in Kingdoms, owns HollowCaptains.java, Captains.java, Rivals.java, Ladders.java; no other task touches them.
 
@@ -31,7 +32,7 @@ owns:
 ## Notes
 - Open questions (ask Andy if they change the build): exact constant names/placement; whether world-wide 6 (`START`) stays alongside per-player ladders; what happens to a player's ladder while offline.
 - Never touch `version=`, the MODLOGs or `docs/codemap/`.
+- Per-player design: each player gets a COUNT (12) and WALKING list tracked by player UUID. When a Hollow captain kills a player, they're promoted and added to that player's ladder. Captains can be on multiple ladders (intersect). When a player is offline, their ladder slots are frozen - no roaming/horde filling for them; their captains don't walk for them until they log back in. When they return, their ladder refills from available captains.
 
 ## Done
 What a player will see, and what wasn't tested.
-- 2026-11-26 01:25 No sign of work for 30 min: marked stalled (whoever ran it stopped).
