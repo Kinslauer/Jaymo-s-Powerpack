@@ -40,6 +40,8 @@ import net.minecraft.world.phys.Vec3;
  * reaches a copy pops it and is left slowed ({@link #POP_SLOW}).</li>
  * <li><b>Swaps:</b> now and then, with something hostile close, you and a copy change places and the foe goes for the
  * spot you left ({@link #SWAP_EVERY}).</li>
+ * <li><b>A copy that fights:</b> one of them runs at the nearest hostile creature and strikes it ({@link #fight}); sneak
+ * swaps places with it.</li>
  * </ul>
  * The copies are only positions on the server (nothing to hit or kill); the clients draw them ({@link Sync}).
  * Chrono's running trail of afterimages is Overclock's own streak ({@code ChronoStreak}), not this.
@@ -66,6 +68,10 @@ public final class ChronoDecoys {
 	/** Clients this far (blocks) from you are sent the copies. */
 	static final int SYNC_RADIUS = 96;
 	static final int COLOR = 0xBFE8FF;
+	/** The fighting copy: how far it looks for a foe, how close it strikes, how fast it runs (blocks a tick), how often it strikes and swaps (ticks), its blow (plus per ability mastered). */
+	static final double FIGHT_RANGE = 16.0, FIGHT_REACH = 2.0, FIGHT_SPEED = 0.45;
+	static final int FIGHT_EVERY = 8, FIGHT_SWAP_GAP = 20;
+	static final float FIGHT_DAMAGE = 2.0F, FIGHT_PER_LEVEL = 0.4F;
 
 	/** Server to clients: where {@code owner}'s copies stand (an empty list takes them away) and how long they last (ticks). */
 	public record Sync(int owner, int life, List<Vec3> spots, List<Float> yaws) implements CustomPacketPayload {
@@ -107,6 +113,28 @@ public final class ChronoDecoys {
 		final List<Float> yaws = new ArrayList<>();
 		long until;
 		long swapReadyAt;
+		/** The copy that fights: where it stands (null if none), which way it faces, when it can strike and swap again, and whether you were sneaking last tick. */
+		Vec3 fighter;
+		float fighterYaw;
+		long nextHit, fighterSwapAt;
+		boolean sneaked;
+
+		/** Every copy to draw: the standing ones, then the fighter. */
+		List<Vec3> allSpots() {
+			List<Vec3> all = new ArrayList<>(spots);
+			if (fighter != null) {
+				all.add(fighter);
+			}
+			return all;
+		}
+
+		List<Float> allYaws() {
+			List<Float> all = new ArrayList<>(yaws);
+			if (fighter != null) {
+				all.add(fighterYaw);
+			}
+			return all;
+		}
 	}
 
 	private static final Map<UUID, Copies> SETS = new HashMap<>();
@@ -168,6 +196,10 @@ public final class ChronoDecoys {
 		if (set.spots.isEmpty()) {
 			return;
 		}
+		// one of them fights beside you (sneak swaps places with it)
+		int last = set.spots.size() - 1;
+		set.fighter = set.spots.remove(last);
+		set.fighterYaw = set.yaws.remove(last);
 		set.until = now + LIFE;
 		set.swapReadyAt = now + SWAP_EVERY;
 		SETS.put(player.getUUID(), set);
@@ -191,7 +223,7 @@ public final class ChronoDecoys {
 
 	private static void send(ServerPlayer owner, Copies set) {
 		Sync payload = set == null ? new Sync(owner.getId(), 0, List.of(), List.of())
-			: new Sync(owner.getId(), (int)Math.max(1L, set.until - owner.level().getGameTime()), List.copyOf(set.spots), List.copyOf(set.yaws));
+			: new Sync(owner.getId(), (int)Math.max(1L, set.until - owner.level().getGameTime()), set.allSpots(), set.allYaws());
 		if (ServerPlayNetworking.canSend(owner, Sync.TYPE)) {
 			ServerPlayNetworking.send(owner, payload);
 		}
@@ -210,7 +242,8 @@ public final class ChronoDecoys {
 			var entry = it.next();
 			Copies set = entry.getValue();
 			ServerPlayer owner = server.getPlayerList().getPlayer(entry.getKey());
-			if (owner == null || !owner.isAlive() || !Powers.has(owner, ChronoPower.INSTANCE) || owner.level().getGameTime() >= set.until || set.spots.isEmpty()) {
+			if (owner == null || !owner.isAlive() || !Powers.has(owner, ChronoPower.INSTANCE) || owner.level().getGameTime() >= set.until
+				|| set.spots.isEmpty() && set.fighter == null) {
 				it.remove();
 				if (owner != null) {
 					send(owner, null);
@@ -226,8 +259,9 @@ public final class ChronoDecoys {
 			if (now >= set.swapReadyAt && !set.spots.isEmpty()) {
 				changed |= swap(level, owner, set, now);
 			}
+			changed |= fight(level, owner, set, now);
 			if (changed) {
-				if (set.spots.isEmpty()) {
+				if (set.spots.isEmpty() && set.fighter == null) {
 					it.remove();
 					send(owner, null);
 				} else {
@@ -279,6 +313,79 @@ public final class ChronoDecoys {
 		set.yaws.remove(index);
 		MagicFx.burst(level, spot.x, spot.y + 1.0, spot.z, COLOR, 0.7F, 8, 0.3, 0.6, 0.3);
 		level.playSound(null, spot.x, spot.y, spot.z, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 0.9F, 1.6F);
+	}
+
+	/**
+	 * The copy that fights (Andy's "vibrate and split off an afterimage that fights"): it runs at the nearest hostile creature
+	 * within {@link #FIGHT_RANGE} and, in reach, strikes it every {@link #FIGHT_EVERY} ticks. Sneak (a fresh press, with
+	 * {@link #FIGHT_SWAP_GAP} ticks between) swaps places with it. True when the clients should be sent the copies again.
+	 */
+	private static boolean fight(ServerLevel level, ServerPlayer owner, Copies set, long now) {
+		if (set.fighter == null) {
+			return false;
+		}
+		boolean changed = false;
+		boolean sneak = owner.isShiftKeyDown();
+		if (sneak && !set.sneaked && now >= set.fighterSwapAt) {
+			Vec3 there = set.fighter, here = owner.position();
+			set.fighter = here;
+			set.fighterYaw = owner.getYRot();
+			set.fighterSwapAt = now + FIGHT_SWAP_GAP;
+			MagicFx.burst(level, here.x, here.y + 1.0, here.z, COLOR, 0.8F, 8, 0.3, 0.6, 0.3);
+			owner.teleportTo(level, there.x, there.y, there.z, Set.of(), owner.getYRot(), owner.getXRot(), false);
+			MagicFx.burst(level, there.x, there.y + 1.0, there.z, COLOR, 0.8F, 8, 0.3, 0.6, 0.3);
+			level.playSound(null, there.x, there.y, there.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7F, 1.8F);
+			changed = true;
+		}
+		set.sneaked = sneak;
+		Mob foe = null;
+		double best = FIGHT_RANGE * FIGHT_RANGE;
+		for (Mob mob : level.getEntitiesOfClass(Mob.class, new AABB(set.fighter, set.fighter).inflate(FIGHT_RANGE), m -> m instanceof Enemy && m.isAlive())) {
+			double d = mob.distanceToSqr(set.fighter);
+			if (d < best) {
+				best = d;
+				foe = mob;
+			}
+		}
+		if (foe == null) {
+			return changed;
+		}
+		Vec3 to = foe.getBoundingBox().getCenter().subtract(set.fighter.add(0.0, 1.0, 0.0));
+		Vec3 flat = to.horizontal();
+		double gap = flat.length();
+		if (gap > 1.0E-3) {
+			set.fighterYaw = (float)Math.toDegrees(Math.atan2(-flat.x, flat.z));
+		}
+		if (gap > FIGHT_REACH) {
+			Vec3 step = flat.scale(Math.min(FIGHT_SPEED, gap - FIGHT_REACH * 0.7) / gap);
+			Vec3 on = settle(level, owner, set.fighter.x + step.x, set.fighter.y, set.fighter.z + step.z);
+			if (on != null) {
+				set.fighter = on;
+				changed |= now % 2 == 0;
+			}
+		} else if (now >= set.nextHit) {
+			set.nextHit = now + FIGHT_EVERY;
+			Vec3 from = set.fighter.add(0.0, 1.1, 0.0);
+			Vec3 at = foe.getBoundingBox().getCenter();
+			MagicFx.stroke(level, from, at, 0.3F, 0xFFE08A);
+			foe.setInvulnerableTime(0);
+			foe.hurtServer(level, level.damageSources().indirectMagic(owner, owner), FIGHT_DAMAGE + FIGHT_PER_LEVEL * com.jaymospowers.core.Mastery.unlocked(owner));
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.6F, 1.5F);
+			level.sendParticles(MagicFx.spark(0xFFE08A, 0.8F), at.x, at.y, at.z, 3, 0.2, 0.2, 0.2, 0.0);
+			changed = true;
+		}
+		return changed;
+	}
+
+	/** Open air over a floor at {@code x, z}, within a step up or a few down of {@code y}, for a copy the size of {@code player}; or null. */
+	private static Vec3 settle(ServerLevel level, ServerPlayer player, double x, double y, double z) {
+		for (int dy = 1; dy >= -3; dy--) {
+			AABB box = player.getBoundingBox().move(x - player.getX(), y + dy - player.getY(), z - player.getZ());
+			if (level.noCollision(player, box) && !level.noCollision(player, box.move(0.0, -0.3, 0.0))) {
+				return new Vec3(x, y + dy, z);
+			}
+		}
+		return null;
 	}
 
 	/** With something hostile close, you and a copy change places; the foe goes for the spot you left. */

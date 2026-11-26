@@ -144,6 +144,11 @@ public final class UltimateCinematic {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> stop(client));
 	}
 
+	/** How far through your own film is (0-1) this frame; the wormhole's art times itself by it. */
+	public static float progress(float partialTicks) {
+		return Mth.clamp((age + partialTicks) / Math.max(1, length), 0.0F, 1.0F);
+	}
+
 	/** Whether your own film is running (its camera and the cleared HUD). */
 	public static boolean filming() {
 		return running && !witness;
@@ -196,6 +201,9 @@ public final class UltimateCinematic {
 		facing = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : look.normalize();
 		hurtBefore = self.hurtTime;
 		handsBefore = true;
+		if (!witness && (shot == UltimateFilm.WORMHOLE || shot == UltimateFilm.DRAG)) {
+			com.jaymospowers.client.power.chrono.ChronoWormholeArt.begin(self, shot, length, at, target);
+		}
 		// presses from before it started don't skip it
 		while (skipKey != null && skipKey.consumeClick()) {
 		}
@@ -236,6 +244,10 @@ public final class UltimateCinematic {
 	}
 
 	private static void stop(Minecraft minecraft) {
+		if (running && !witness && (shot == UltimateFilm.WORMHOLE || shot == UltimateFilm.DRAG)) {
+			// the wormhole's trip lands when its film is over, or skipped
+			com.jaymospowers.client.power.chrono.ChronoWormholeArt.end();
+		}
 		if (running && !witness && viewBefore != null) {
 			minecraft.options.setCameraType(viewBefore);
 		}
@@ -370,6 +382,9 @@ public final class UltimateCinematic {
 			}
 			case UltimateFilm.MEETING -> {
 				return com.jaymospowers.client.power.web.WebMeetingClient.view(self, at, t, side);
+			}
+			case UltimateFilm.WORMHOLE, UltimateFilm.DRAG -> {
+				return com.jaymospowers.client.power.chrono.ChronoWormholeArt.view(self, partialTicks, t);
 			}
 			default -> {
 				return null;
@@ -560,7 +575,7 @@ public final class UltimateCinematic {
 		return new Vec3[] {focus.add(Math.cos(angle) * dist, lift, Math.sin(angle) * dist), focus};
 	}
 
-	private static double[] aimed(Vec3 pos, Vec3 look, float roll) {
+	public static double[] aimed(Vec3 pos, Vec3 look, float roll) {
 		Vec3 dir = look.subtract(pos);
 		dir = dir.lengthSqr() < 1.0E-6 ? facing : dir.normalize();
 		double yaw = Math.toDegrees(Math.atan2(-dir.x, dir.z));

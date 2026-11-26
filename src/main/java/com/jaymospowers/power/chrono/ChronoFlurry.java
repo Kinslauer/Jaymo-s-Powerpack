@@ -232,7 +232,11 @@ public final class ChronoFlurry {
 	private static boolean strike(ServerPlayer player, LivingEntity target, float damage) {
 		target.setInvulnerableTime(0);
 		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.flurry", 1);
-		return target.hurtServer(player.level(), player.damageSources().playerAttack(player), damage);
+		boolean hurt = target.hurtServer(player.level(), player.damageSources().playerAttack(player), damage);
+		if (hurt) {
+			ChronoBlitz.struck(player, target);
+		}
+		return hurt;
 	}
 
 	/** The nearest creature in front of you, in reach and in sight; never a friend or your own pet. */
