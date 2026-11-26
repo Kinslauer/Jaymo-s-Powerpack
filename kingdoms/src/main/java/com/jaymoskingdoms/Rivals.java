@@ -444,11 +444,7 @@ public final class Rivals {
 			// of the dead, put off till the land is loaded: HollowCaptains)
 			if (waiting != null) {
 				String id = waiting.id();
-				// Find a player who has this captain on their ladder (intersecting captains: pick one)
-				ServerPlayer owner = HollowCaptains.findPlayerWithCaptain(server, id);
-				if (owner != null) {
-					HollowCaptains.later(() -> HollowCaptains.comeBack(level, id, mob, owner));
-				}
+				HollowCaptains.later(() -> HollowCaptains.comeBack(level, id, mob));
 			}
 		} else if (waiting != null) {
 			Captains.embodyIn(level, waiting, mob);

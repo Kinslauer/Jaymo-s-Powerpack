@@ -398,6 +398,10 @@ public final class HollowCaptains {
 			if (owner == null) {
 				return;
 			}
+			// No room: a new Hollow may have walked in while this captain was due back; he stays fallen until a slot opens
+			if (playerRoom(owner) <= 0) {
+				return;
+			}
 			// (one of the Hollow gets up again as himself; his ladder spot was reserved)
 			boolean hollow = Factions.level(level.getServer()).getAttachedOrElse(LOOKS, Map.of()).containsKey(id);
 			PathfinderMob body = hollow ? riseOr(level, dead, id, owner) : dead;
