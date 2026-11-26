@@ -22,8 +22,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · claimed
-- [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 🪶 Quill · claimed
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 🔨 Hephaestus · claimed
+- [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · 🪶 Quill · claimed
 
 
 ## In review
