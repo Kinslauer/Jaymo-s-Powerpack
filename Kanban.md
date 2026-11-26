@@ -22,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
+- [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
 
 
 ## Being built
