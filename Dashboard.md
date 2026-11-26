@@ -16,6 +16,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Stuck
 
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-kanban-cleanup|codex-kanban-cleanup]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -26,12 +27,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-8 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
+9 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2205 anacondas lie on the ground, live in the jungle and hunt from trees and water (Kingdoms, 2026-11-26)
 - [ ] #2204 story scenes and the Warlock's midnight bargain, spoken spells (Kingdoms, 2026-11-26)
 - [ ] #2201 ships rigged when they're made; pillager long ships sail; crews fish for their food; every NPC fights its fish in view (Kingdoms, 2026-11-26)
 - [ ] #2199 Alone in the wild never leaves you on the sea (Kingdoms, 2026-11-26)
@@ -91,12 +93,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2138 Tectonic leaves the pack (Powers, Kingdoms, 2026-11-25)
 - [ ] #2137 Corpse hint drops "search the body" when nothing is left (Powers, Kitchen, 2026-11-25)
 - [ ] #2136 Riders no longer start with a spare saddle (Kingdoms, 2026-11-25)
-- [ ] #2135 journal map page shows Xaero's minimap, World map button (Kingdoms, 2026-11-25)
-- …and 582 older ones.
+- …and 583 older ones.
 
 ## Health
 
-19 problems in the notes: [[Health]].
+20 problems in the notes: [[Health]].
 
 ## Last week
 
