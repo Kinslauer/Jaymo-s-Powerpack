@@ -1,7 +1,6 @@
 package com.jaymoskingdoms.wild;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -24,29 +23,41 @@ import org.jspecify.annotations.Nullable;
 /**
  * Andy (2026-11-25): "crocodiles should be among the first, they should deathroll with a mob in its jaws, dealing damage
  * every violent turn, then drag it's prey into the water to feed. like it's natural behavior". A crocodile or an
- * alligator ({@link #JAWS}) that bites something no bigger than {@link #MOST_PREY} times itself keeps it in its jaws: it
- * thrashes side to side ({@link #turn}: the other mods' crocodiles can't be drawn rolling over), a violent turn every
- * {@link #ROLL_EVERY} ticks, each one hurting the prey ({@link #ROLL_DAMAGE}), splashing in
- * water. After {@link #ROLLS} turns it drags the prey to the nearest water ({@link #WATER_SEARCH}), and there it holds it
+ * alligator ({@link #JAWS}) that bites something small enough for it ({@link Jaws#mostPrey} times its own bulk) keeps
+ * it in its jaws: it rolls over with it, a full turn every {@link #ROLL_EVERY} ticks ({@link #ROLLING}, drawn by
+ * {@code client/CrocRoll}: both mods' models are drawn by Minecraft's own living renderer, so both can be turned over),
+ * each one hurting the prey ({@link Jaws#rollDamage}), splashing in water. After {@link Jaws#rolls} turns it drags the prey to the nearest water ({@link #WATER_SEARCH}), and there it holds it
  * under and rolls on. If the prey dies in its jaws, it drags the body into the water instead and lets it go there, to
  * eat it (Jaymo's Kitchen's scavengers: crocodiles and alligators are in its {@code scavengers} tag). Hurting it hard
  * enough ({@link #BREAK_FREE}) makes it let go, as stabbing at a real one's eyes does.
+ * <p>
+ * The two differ as the real ones do ({@link Jaws}): the crocodile is the bigger killer, taking beasts up to four times
+ * its bulk and rolling hardest; the alligator takes smaller prey, rolls longer and lighter, and hunts beasts only from
+ * the water ({@link Crocodiles#takePrey}).
  */
 public final class DeathRoll {
-	/** Cube Animals' crocodile and Naturalist's alligator. */
-	static final Set<Identifier> JAWS = Set.of(Identifier.fromNamespaceAndPath("cubeanimals", "crocodile"),
-		Identifier.fromNamespaceAndPath("naturalist", "alligator"));
+	/**
+	 * How each kind hunts: the biggest prey it takes in its jaws (a share of its own bulk, width x width x height), turns
+	 * before it drags, harm of each turn, and whether it hunts beasts only from the water.
+	 */
+	record Jaws(double mostPrey, int rolls, float rollDamage, boolean fromWater) {
+	}
+
+	/** Cube Animals' crocodile (a Nile or saltwater one: takes a horse or an ox) and Naturalist's alligator (a deer, a dog). */
+	static final Map<Identifier, Jaws> JAWS = Map.of(
+		Identifier.fromNamespaceAndPath("cubeanimals", "crocodile"), new Jaws(4.0, 4, 3.5F, false),
+		Identifier.fromNamespaceAndPath("naturalist", "alligator"), new Jaws(2.5, 5, 2.5F, true));
+	/** Synced to every client while it turns over: the game time its present turn began ({@code client/CrocRoll}). */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Long> ROLLING =
+		net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(com.jaymoskingdoms.JaymosKingdoms.id("croc_rolling"),
+			builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG,
+				net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
 	/** Jaymo's Kitchen's body. */
 	static final Identifier CORPSE = Identifier.fromNamespaceAndPath("jaymoskitchen", "corpse");
-	/** The biggest prey it takes in its jaws, as a share of its own bulk (width x width x height): a horse, an ox (Andy: "go after bigger prey"). */
-	static final double MOST_PREY = 4.0;
-	/** Ticks between violent turns, turns on land before it drags, harm of each turn. */
-	static final int ROLL_EVERY = 12, ROLLS = 4;
-	static final float ROLL_DAMAGE = 3.0F;
+	/** Ticks a turn over takes (and between them). */
+	public static final int ROLL_EVERY = 12;
 	/** In the water it turns this much slower (it holds the prey under between). */
 	static final int WATER_ROLL_EVERY = 24;
-	/** How far each thrash wrenches its head and body to one side of where it faced at the bite (degrees, both ways). */
-	static final float THRASH = 55.0F, THRASH_JITTER = 20.0F;
 	/** Harm taken since the bite that makes it let go. */
 	static final float BREAK_FREE = 6.0F;
 	/** How far it looks for water to drag to (blocks), and how long it drags before it gives up (ticks). */
@@ -64,9 +75,6 @@ public final class DeathRoll {
 		Phase phase = Phase.ROLL;
 		int turns, ticks, dragged;
 		final float healthAtBite;
-		/** Which way it faced at the bite, and the side it thrashes to next (1 or -1). */
-		float facing;
-		int side = 1;
 		/** The prey died: waiting for its body (game time it died), or the body is held. */
 		long diedAt = -1;
 		boolean body;
@@ -87,10 +95,8 @@ public final class DeathRoll {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (taken > 0.0F && source.getEntity() instanceof Mob croc && source.getDirectEntity() == croc && jaws(croc)
 				&& !croc.isBaby() && !GRIPS.containsKey(croc) && entity.isAlive() && !held(entity) && !jaws(entity)
-				&& !entity.isPassenger() && bulk(entity) <= bulk(croc) * MOST_PREY) {
-				Grip grip = new Grip(entity, croc.getHealth());
-				grip.facing = croc.getYRot();
-				GRIPS.put(croc, grip);
+				&& !entity.isPassenger() && bulk(entity) <= bulk(croc) * jawsOf(croc).mostPrey()) {
+				GRIPS.put(croc, new Grip(entity, croc.getHealth()));
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -100,6 +106,7 @@ public final class DeathRoll {
 			for (Map.Entry<Mob, Grip> e : GRIPS.entrySet().toArray(Map.Entry[]::new)) {
 				if (!tick(e.getKey(), e.getValue())) {
 					GRIPS.remove(e.getKey());
+					e.getKey().removeAttached(ROLLING);
 				}
 			}
 		});
@@ -107,7 +114,13 @@ public final class DeathRoll {
 
 	/** Whether {@code e} is a crocodile or an alligator. */
 	static boolean jaws(Entity e) {
-		return JAWS.contains(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()));
+		return JAWS.containsKey(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()));
+	}
+
+	/** How {@code croc} hunts ({@link Jaws}); the crocodile's if it's neither. */
+	static Jaws jawsOf(Entity croc) {
+		Jaws jaws = JAWS.get(BuiltInRegistries.ENTITY_TYPE.getKey(croc.getType()));
+		return jaws != null ? jaws : JAWS.get(Identifier.fromNamespaceAndPath("cubeanimals", "crocodile"));
 	}
 
 	/** Whether something is in a crocodile's jaws. */
@@ -163,12 +176,13 @@ public final class DeathRoll {
 				croc.getNavigation().stop();
 				if (grip.ticks % ROLL_EVERY == 0) {
 					turn(level, croc, prey, grip);
-					if (++grip.turns >= ROLLS) {
+					if (++grip.turns >= jawsOf(croc).rolls()) {
 						grip.phase = wet ? Phase.HOLD : Phase.DRAG;
 					}
 				}
 			}
 			case DRAG -> {
+				croc.removeAttached(ROLLING);
 				if (grip.water == null) {
 					grip.water = water(level, croc.blockPosition());
 					if (grip.water == null) {
@@ -197,18 +211,13 @@ public final class DeathRoll {
 	}
 
 	/**
-	 * A violent turn. Andy (2026-11-25): "for the ones we cant roll, they should thrash side to side" (the other mods'
-	 * crocodiles can't be drawn turning over): it wrenches its head and body hard to one side of where it faced at the bite,
-	 * then to the other, and what it holds is hurt by each.
+	 * A violent turn: the crocodile turns over once ({@link #ROLLING}, drawn by its clients over {@link #ROLL_EVERY}
+	 * ticks), wrenching what it holds, which is hurt by it.
 	 */
 	private static void turn(ServerLevel level, Mob croc, Entity prey, Grip grip) {
-		grip.side = -grip.side;
-		float yaw = grip.facing + grip.side * (THRASH + croc.getRandom().nextFloat() * THRASH_JITTER);
-		croc.setYRot(yaw);
-		croc.setYBodyRot(yaw);
-		croc.setYHeadRot(yaw);
+		croc.setAttached(ROLLING, level.getGameTime());
 		if (prey instanceof LivingEntity living) {
-			living.hurtServer(level, level.damageSources().mobAttack(croc), ROLL_DAMAGE);
+			living.hurtServer(level, level.damageSources().mobAttack(croc), jawsOf(croc).rollDamage());
 		}
 		boolean wet = croc.isInWater();
 		level.playSound(null, croc.getX(), croc.getY(), croc.getZ(), wet ? SoundEvents.PLAYER_SPLASH : SoundEvents.PLAYER_ATTACK_STRONG,

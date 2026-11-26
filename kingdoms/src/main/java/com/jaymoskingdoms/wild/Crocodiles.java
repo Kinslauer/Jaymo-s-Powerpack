@@ -13,7 +13,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Enemy;
 
@@ -33,6 +32,8 @@ public final class Crocodiles {
 	static final double HUNT_RANGE = 10.0;
 	/** Blocks added to the distance when weighing prey by size (the bigger, the more a far beast is worth the swim). */
 	static final double PREY_BIAS = 4.0;
+	/** Villagers keep this far from a grown crocodile they can see (blocks), and walk off at this speed. */
+	static final double WARY = 10.0, WARY_SPEED = 0.8;
 	/** How often it's checked (ticks). */
 	static final int CHECK_TICKS = 20;
 
@@ -60,6 +61,9 @@ public final class Crocodiles {
 					if (!croc.isBaby() && croc.getTarget() == null) {
 						takePrey(croc);
 					}
+					if (!croc.isBaby()) {
+						wary(croc);
+					}
 				}
 			}
 		});
@@ -68,17 +72,20 @@ public final class Crocodiles {
 	/**
 	 * Sets the crocodile on prey in sight within its notice range: a monster, or (Andy, 2026-11-25: "go after bigger
 	 * prey") a wild beast, the bigger the likelier ({@link #PREY_BIAS}: a cow or a deer before a chicken, a near one before
-	 * a far one). Never another crocodile or alligator, a pet or a beast too big for its jaws ({@link DeathRoll#MOST_PREY}).
-	 * A fed one takes up nothing (Jaymo's Kitchen's scavengers).
+	 * a far one). Never another crocodile or alligator, or a beast too big for its jaws ({@link DeathRoll.Jaws#mostPrey});
+	 * pets are taken like any beast (Andy: "they will NOT leave pets alone. nothing is safe"). An alligator goes for beasts
+	 * only from the water. A fed one takes up nothing (Jaymo's Kitchen's scavengers).
 	 */
 	private static void takePrey(Mob croc) {
 		double reach = croc.getAttributeValue(Attributes.FOLLOW_RANGE);
-		double most = DeathRoll.bulk(croc) * DeathRoll.MOST_PREY;
+		DeathRoll.Jaws jaws = DeathRoll.jawsOf(croc);
+		double most = DeathRoll.bulk(croc) * jaws.mostPrey();
+		boolean beasts = !jaws.fromWater() || croc.isInWater();
 		LivingEntity prey = null;
 		double best = 0.0;
 		for (LivingEntity e : croc.level().getEntitiesOfClass(LivingEntity.class, croc.getBoundingBox().inflate(reach),
-				e -> e.isAlive() && !DeathRoll.jaws(e) && (e instanceof Enemy || e instanceof Animal animal
-					&& !(animal instanceof TamableAnimal pet && pet.isTame()) && DeathRoll.bulk(animal) <= most))) {
+				e -> e.isAlive() && !DeathRoll.jaws(e) && (e instanceof Enemy || beasts && e instanceof Animal animal
+					&& DeathRoll.bulk(animal) <= most))) {
 			double d = Math.sqrt(e.distanceToSqr(croc));
 			if (d > reach) {
 				continue;
@@ -91,6 +98,25 @@ public final class Crocodiles {
 		}
 		if (prey != null) {
 			croc.setTarget(prey);
+		}
+	}
+
+	/**
+	 * Andy (2026-11-25): "nothing is safe. thats why you should also see villagers more cautious if they are nearby".
+	 * Villagers who see a grown crocodile or alligator within {@link #WARY} walk away from it (not one who's fighting).
+	 */
+	private static void wary(Mob croc) {
+		for (net.minecraft.world.entity.npc.villager.AbstractVillager v : croc.level().getEntitiesOfClass(
+				net.minecraft.world.entity.npc.villager.AbstractVillager.class, croc.getBoundingBox().inflate(WARY),
+				v -> v.isAlive() && v.getTarget() == null && !v.isPassenger() && v.distanceToSqr(croc) < WARY * WARY)) {
+			if (v.getNavigation().isInProgress() && v.getNavigation().getTargetPos() != null
+				&& v.getNavigation().getTargetPos().distSqr(croc.blockPosition()) > WARY * WARY || !v.hasLineOfSight(croc)) {
+				continue;
+			}
+			net.minecraft.world.phys.Vec3 away = net.minecraft.world.entity.ai.util.DefaultRandomPos.getPosAway(v, (int) WARY + 4, 4, croc.position());
+			if (away != null) {
+				v.getNavigation().moveTo(away.x, away.y, away.z, WARY_SPEED);
+			}
 		}
 	}
 
