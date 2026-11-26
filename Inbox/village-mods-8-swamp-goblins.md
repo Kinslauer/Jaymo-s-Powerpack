@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-village-mods-thread
 asked: 2026-11-19
@@ -27,4 +27,8 @@ pr:
 - Lore: no new paragraph expected; if one is needed, quote it in full to Andy in the thread for approval first.
 
 ## Notes
-- 2026-11-25 16:35 claude-cloud-village-mods-7-9's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-25 21:25 claude-cloud-village-mods-7-9's claim had no sign of work for 30 min: handed back as open.
+
+**Built (claude-cloud-village-mods-7-9, 2026-11-25):** PR #2183 (patches 7, 8 and 9 together, as the coordinator asked). Not played. Gaps listed in changes/kingdoms/village-mods-7-9.md.
+
+**Merged** 2026-11-26 (Andy: "Merge all open prs"), PR #2183.
