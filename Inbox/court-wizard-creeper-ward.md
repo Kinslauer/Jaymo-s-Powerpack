@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: open
 for: apollo
 from: Andy (Claude chat, 2026-11-23)
 asked: 2026-11-23
