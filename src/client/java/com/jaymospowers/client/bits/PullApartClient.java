@@ -5,7 +5,6 @@ import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.client.bits.mixin.HoveredSlotAccessor;
 import com.jaymospowers.client.mixin.ContainerScreenAccessor;
 import com.mojang.blaze3d.platform.InputConstants;
-import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
@@ -114,9 +113,9 @@ public final class PullApartClient {
 			}
 		}
 		if (Util.getMillis() - turnedOn < EXPLAIN_MS && !pick.isHovered()) {
-			UiStyle.tip(graphics, Minecraft.getInstance().font, List.of(
-				Component.translatable("button.jaymospowers.pull_apart.on.title").withColor(UiStyle.GOLD),
-				Component.translatable("button.jaymospowers.pull_apart.on")), pick.getX() + Pick.SIZE, pick.getY() + Pick.SIZE + 4);
+			// Andy: "use this shorter descp", the hover text
+			UiStyle.tip(graphics, Minecraft.getInstance().font, Component.translatable("button.jaymospowers.pull_apart.hover"),
+				pick.getX() + Pick.SIZE, pick.getY() + Pick.SIZE + 4);
 		}
 	}
 

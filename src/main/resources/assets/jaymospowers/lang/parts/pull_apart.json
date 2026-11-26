@@ -4,7 +4,5 @@
   "jei.jaymospowers.pull_apart.back": "The crafting grid puts the parts back together.",
   "button.jaymospowers.pull_apart": "Deconstruct",
   "button.jaymospowers.pull_apart.hover": "Deconstruct mode: click to pull things apart into their parts (wool into string, cobblestone into rocks...).",
-  "button.jaymospowers.pull_apart.hover_on": "Deconstruct mode is on. Click to turn it off.",
-  "button.jaymospowers.pull_apart.on.title": "Deconstruct mode",
-  "button.jaymospowers.pull_apart.on": "What can come apart is outlined in gold. Click one to pull it apart, or Shift-click to pull apart the whole stack. The crafting grid puts the parts back together. Click the pick again to stop."
+  "button.jaymospowers.pull_apart.hover_on": "Deconstruct mode is on. Click to turn it off."
 }
