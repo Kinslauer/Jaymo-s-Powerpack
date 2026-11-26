@@ -60,7 +60,7 @@ public final class BodyWeapons {
 	private static final int BACK_ITEM = -1, NONE = -2;
 
 	/** The kinds of carried thing, each with the homes it takes, first free first. */
-	enum Kind {
+	public enum Kind {
 		PISTOL(Home.CHEST_LEFT, Home.CHEST_RIGHT, Home.SASH_LEFT, Home.SASH_RIGHT),
 		LONG(Home.BACK_RIGHT, Home.BACK_LEFT),
 		SHIELD(Home.BACK_SHIELD),
@@ -213,7 +213,7 @@ public final class BodyWeapons {
 	}
 
 	/** Which kind of carried thing {@code stack} is, or null if it isn't shown on the body. */
-	static @Nullable Kind kind(ItemStack stack) {
+	public static @Nullable Kind kind(ItemStack stack) {
 		if (stack.isEmpty()) {
 			return null;
 		}

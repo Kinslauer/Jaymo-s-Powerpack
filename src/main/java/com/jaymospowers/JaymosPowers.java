@@ -191,6 +191,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.armory.GunLasers.init();
 		com.jaymospowers.armory.FlintlockDraw.init();
 		com.jaymospowers.armory.BodyWeapons.init();
+		com.jaymospowers.armory.WeaponWheel.init();
 		com.jaymospowers.armory.GunBlast.init();
 		// (0.21.53) realistic fishing: a bite hooks a live fish and the player reels it in tug-of-war style
 		com.jaymospowers.fishing.FishingReal.init();

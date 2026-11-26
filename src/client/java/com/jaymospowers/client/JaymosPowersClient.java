@@ -297,6 +297,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.armory.GunHandling.init();
 		com.jaymospowers.client.armory.MusketSights.init();
 		com.jaymospowers.client.armory.BodyWeaponsLayer.init();
+		com.jaymospowers.client.armory.WeaponWheelScreen.register();
 		com.jaymospowers.client.armory.guns.AnimatedGunModel.init();
 		com.jaymospowers.client.armory.HeldItems.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
