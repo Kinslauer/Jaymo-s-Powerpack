@@ -22,3 +22,4 @@ Open question for Andy: which ores the tribes use.
 
 ## Notes
 - 2026-11-25 23:01 2026-11-25 approved cleanup: Question sent to Andy: ores for blossom kingdoms and barbarian tribes. Keep distinct from already merged continent/blossom generation. Rare pillager/barbarian mixed bands, shared gear/tactics/language remain in scope.
+- 2026-11-26 09:35 Cloud Claude 2026-11-26: Andy's questions for this task are on the tick page https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4 (db picks/andy). Wait for his answers there; don't build before he answers.
