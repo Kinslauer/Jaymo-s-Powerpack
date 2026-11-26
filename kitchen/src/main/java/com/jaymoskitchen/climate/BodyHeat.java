@@ -22,6 +22,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -49,6 +50,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.equipment.trim.ArmorTrim;
+import net.minecraft.world.item.equipment.trim.TrimMaterial;
+import net.minecraft.world.item.equipment.trim.TrimMaterials;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
@@ -155,6 +159,17 @@ public final class BodyHeat {
 	static final int CLEMENCY_TICKS = 10 * 60 * 20, NEWCOMER_TICKS = 5 * 60 * 20;
 	/** Clothes: a warm piece against the cold, the same piece in the heat, a cool piece in the heat. */
 	static final float WARM_PIECE = 9.0F, STUFFY_PIECE = 4.0F, COOL_PIECE = 8.0F;
+	/**
+	 * (Climate track D) An armour trim of copper holds warmth, one of quartz stays cool: each trimmed piece counts as this
+	 * much of a warm (or cool) piece, a quarter of a wool shirt's worth.
+	 */
+	static final float TRIM_PIECE = 0.25F;
+	/**
+	 * (Climate track D) A piece lined with a dragon's hide ({@link Lining#TEMPERED}) keeps the body between these: no colder than
+	 * chilly, no hotter than warm. Already past them (the piece put on late), it comes back this much a second.
+	 */
+	static final float TEMPERED_LOW = CHILLY, TEMPERED_HIGH = WARM, TEMPERED_PULL = 10.0F;
+	private static final EquipmentSlot[] ARMOUR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 	/** Metal in the sun: this much per point of armour. */
 	static final float ARMOUR_IN_SUN = 0.6F;
 	/** A stew or soup still fresh in your stomach (eaten in the last {@code HOT_MEAL_TICKS}). */
@@ -508,6 +523,14 @@ public final class BodyHeat {
 			// just spawned, back from dying or on a first wake: the world can't make it worse yet, only better
 			next = body;
 		}
+		if (tempered(player)) {
+			// a dragon-hide lining: never worse than chilly or warm; past that already, back by TEMPERED_PULL a second
+			if (next > TEMPERED_HIGH) {
+				next = Math.max(TEMPERED_HIGH, Math.min(next, body) - TEMPERED_PULL);
+			} else if (next < TEMPERED_LOW) {
+				next = Math.min(TEMPERED_LOW, Math.max(next, body) + TEMPERED_PULL);
+			}
+		}
 		body = next;
 		set(player, new Heat(body, ambient, BARE.getOrDefault(player.getUUID(), ambient)));
 		announce(player, body);
@@ -691,7 +714,7 @@ public final class BodyHeat {
 		// what you wear
 		float warm = warmPieces(player);
 		float cool = pieces(player, COOL_CLOTHING) + Warmth.lined(player, false) + com.jaymoskitchen.tanning.HideTraits.coolPieces(player)
-			+ worn(COOL_WORN, player);
+			+ trims(player, TrimMaterials.QUARTZ) + worn(COOL_WORN, player);
 		// held in a hand: a lit torch or lantern against the cold, ice or a snowball against the heat; riding a warm beast
 		boolean heldWarm = player.getMainHandItem().is(WARMS_IN_HAND) || player.getOffhandItem().is(WARMS_IN_HAND);
 		boolean heldCool = player.getMainHandItem().is(COOLS_IN_HAND) || player.getOffhandItem().is(COOLS_IN_HAND);
@@ -872,7 +895,7 @@ public final class BodyHeat {
 	/** Warm clothes worn, warm linings sewn into what's worn ({@link Lining}), and llama leather (half a piece each). */
 	static float warmPieces(Player player) {
 		float warm = pieces(player, WinterCold.WARM_CLOTHING) + Warmth.lined(player, true) + com.jaymoskitchen.tanning.HideTraits.warmPieces(player)
-			+ (pieces(player, STUDDED) == 4 ? 1.0F : 0.0F) + worn(WARM_WORN, player);
+			+ (pieces(player, STUDDED) == 4 ? 1.0F : 0.0F) + trims(player, TrimMaterials.COPPER) + worn(WARM_WORN, player);
 		if (Wetness.soaked(player)) {
 			// wet wool still keeps you warm; soaked leather, linings and the rest keep half
 			int wool = woolPieces(player);
@@ -891,6 +914,28 @@ public final class BodyHeat {
 			}
 		}
 		return n;
+	}
+
+	/** What the armour trims of {@code material} on worn pieces count as, in warm (copper) or cool (quartz) pieces. */
+	static float trims(Player player, ResourceKey<TrimMaterial> material) {
+		float n = 0.0F;
+		for (EquipmentSlot slot : ARMOUR) {
+			ArmorTrim trim = player.getItemBySlot(slot).get(DataComponents.TRIM);
+			if (trim != null && trim.material().is(material)) {
+				n += TRIM_PIECE;
+			}
+		}
+		return n;
+	}
+
+	/** Wearing a piece lined with a dragon's hide ({@link Lining#TEMPERED}). */
+	static boolean tempered(Player player) {
+		for (EquipmentSlot slot : ARMOUR) {
+			if (player.getItemBySlot(slot).get(Warmth.LINING) == Lining.TEMPERED) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	static int pieces(Player player, TagKey<Item> tag) {

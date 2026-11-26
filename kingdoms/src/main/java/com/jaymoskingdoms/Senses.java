@@ -528,6 +528,8 @@ public final class Senses {
 		f *= Stench.factor(player, looker);
 		// a Ranger moves quietly through the country (Rangers)
 		f *= Rangers.quiet(player);
+		// a ranger's leaf cloak in the woods (LeafCloak)
+		f *= LeafCloak.sight(player);
 		// a Skulker is hard to see in the dim and when sneaking, a shadow Monk too
 		f *= FeatsBody.sight(player, light) * Paths.sight(player, light);
 		// morning mist (Mist): a mob sees less far through it, so a player in it is noticed at half the range at its thickest

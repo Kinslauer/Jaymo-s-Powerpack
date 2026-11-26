@@ -340,6 +340,7 @@ public final class ForestRangers {
 					}));
 			}
 			charm(player, choices);
+			LeafCloak.offer(player, choices);
 			choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.not_now"), p -> {
 			}));
 			Menus.ask(player, v, Component.translatable("speech.jaymoskingdoms.ranger.offer"), choices);
@@ -350,6 +351,7 @@ public final class ForestRangers {
 		answers.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.thanks"), p -> {
 		}));
 		charm(player, answers);
+		LeafCloak.offer(player, answers);
 		Menus.ask(player, v, Component.translatable("speech.jaymoskingdoms.ranger.lesson." + lesson), answers);
 	}
 

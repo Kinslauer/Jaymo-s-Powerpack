@@ -1,0 +1,8 @@
+{
+  "item.jaymospowers.hot_stone_pouch": "Hot-Stone Pouch",
+  "item.jaymospowers.cold_clay_flask": "Cold-Clay Flask",
+  "item.jaymospowers.equinox_charm": "Equinox Charm",
+  "tooltip.jaymospowers.climate_charm.hot_stone_pouch": "A stone warmed at the fire, wrapped in wool: keeps the cold off while worn at the belt.",
+  "tooltip.jaymospowers.climate_charm.cold_clay_flask": "Clay kept cool in a stream: keeps the heat off while worn at the belt.",
+  "tooltip.jaymospowers.climate_charm.equinox_charm": "Sun on one face, snow on the other: keeps the cold and the heat off while worn at the belt."
+}
