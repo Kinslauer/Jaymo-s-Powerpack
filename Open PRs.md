@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-25 17:24
+updated: 2026-11-25 19:30
 ---
 # Open PRs
 
-4 open, as of 2026-11-25 17:24. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-25 19:30. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2183](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2183) Village mods 7-9: CTOV back, Tidal Towns, swamp goblins and their band, your own company
