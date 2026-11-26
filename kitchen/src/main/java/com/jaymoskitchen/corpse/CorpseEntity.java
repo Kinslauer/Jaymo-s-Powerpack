@@ -2498,7 +2498,9 @@ public class CorpseEntity extends Entity {
 			return false;
 		}
 		if (looting == null) {
-			looting = new CorpseLoot(this, wornGear());
+			// (the harness is worn first: wornGear marks the gear as worn, and the harness is worn by the same mark)
+			ItemStack[] harness = wornHarness();
+			looting = new CorpseLoot(this, wornGear(), harness);
 		}
 		CorpseLoot shared = looting;
 		server.openMenu(new net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider<Integer>() {
@@ -2573,7 +2575,7 @@ public class CorpseEntity extends Entity {
 	/** Whether it still wears or holds anything. */
 	private boolean hasGear() {
 		CompoundTag tag = parse(look());
-		return tag != null && !tag.getCompoundOrEmpty("equipment").isEmpty();
+		return tag != null && (!tag.getCompoundOrEmpty("equipment").isEmpty() || !isPlayerCorpse() && CorpseHarness.present(tag));
 	}
 
 	/**
@@ -2634,6 +2636,51 @@ public class CorpseEntity extends Entity {
 		if (!look.equals(look())) {
 			this.entityData.set(LOOK, look);
 		}
+	}
+
+	/**
+	 * What a mob's body wears of the harness (Jaymo's Kingdoms; see {@link CorpseHarness}), by place, read out of its look and
+	 * worn the way its gear is: put on once, the first time it's looked at (before {@link #wornGear} marks the gear worn), and
+	 * kept on the body. A player's body keeps its harness in its own slots, so none here. Empty if it wears none.
+	 */
+	ItemStack[] wornHarness() {
+		CompoundTag tag = isPlayerCorpse() ? null : parse(look());
+		if (tag == null) {
+			return new ItemStack[0];
+		}
+		ItemStack[] harness = CorpseHarness.read(tag, registryAccess().createSerializationContext(NbtOps.INSTANCE));
+		if (!gearWorn) {
+			boolean worn = false;
+			for (ItemStack piece : harness) {
+				if (!piece.isEmpty() && piece.isDamageableItem()) {
+					wear(piece, false);
+					worn = true;
+				}
+			}
+			if (worn) {
+				putHarness(harness);
+			}
+		}
+		return harness;
+	}
+
+	/** Puts {@code harness} (by place, as {@link #wornHarness} gave it) back on it as what it wears, so it's drawn wearing just that. */
+	void putHarness(ItemStack[] harness) {
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return;
+		}
+		CorpseHarness.write(tag, harness, registryAccess().createSerializationContext(NbtOps.INSTANCE));
+		String look = tag.toString();
+		if (!look.equals(look())) {
+			this.entityData.set(LOOK, look);
+		}
+	}
+
+	/** How many places of harness the loot screen shows for this body (0 for a player's, or a body with none on it). */
+	public int harnessPlaces() {
+		CompoundTag tag = isPlayerCorpse() ? null : parse(look());
+		return tag == null ? 0 : CorpseHarness.places(tag);
 	}
 
 	/** Its pockets, as they are (the loot screen reads and takes from this list itself). */
