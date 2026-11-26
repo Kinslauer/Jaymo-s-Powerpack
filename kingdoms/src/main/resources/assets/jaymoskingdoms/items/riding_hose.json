@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jaymoskingdoms:item/riding_hose",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": -10597838
+      }
+    ]
+  }
+}

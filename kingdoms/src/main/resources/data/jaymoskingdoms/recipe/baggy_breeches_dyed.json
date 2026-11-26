@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_dye",
+  "dye": "#minecraft:dyes",
+  "group": "dyed_armor",
+  "result": {
+    "id": "jaymoskingdoms:baggy_breeches"
+  },
+  "target": "jaymoskingdoms:baggy_breeches"
+}

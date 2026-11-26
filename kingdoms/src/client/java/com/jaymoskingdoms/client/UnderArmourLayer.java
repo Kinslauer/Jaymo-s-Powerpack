@@ -52,6 +52,9 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 	static final float MAIL_SIT = 0.5F;
 	static final ModelLayerLocation LAYER = new ModelLayerLocation(JaymosKingdoms.id("under_armour"), "main");
 	static final ModelLayerLocation MAIL_LAYER = new ModelLayerLocation(JaymosKingdoms.id("under_armour_mail"), "main");
+	/** (Mordhau harness 4) Hose, on the legs alone: they sit out from the skin less than the suit does. */
+	static final ModelLayerLocation HOSE_LAYER = new ModelLayerLocation(JaymosKingdoms.id("under_armour_hose"), "main");
+	static final float HOSE_SIT = 0.25F;
 	private static final Identifier HAUBERGEON = JaymosKingdoms.id("textures/entity/under_armour/haubergeon.png");
 	private static final Identifier DOUBLET = JaymosKingdoms.id("textures/entity/under_armour/doublet.png");
 	private static final Identifier MAIL = JaymosKingdoms.id("textures/entity/under_armour/gambeson_mail.png");
@@ -89,16 +92,22 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 
 	private final Suit suit;
 	private final Suit mail;
+	/** Hose on both legs, on the wearer's left leg alone and on the right alone (a piece of two colours has one on each). */
+	private final Legs hose, hoseLeft, hoseRight;
 
 	private UnderArmourLayer(RenderLayerParent<S, HumanoidModel<S>> renderer, EntityRendererProvider.Context context) {
 		super(renderer);
 		this.suit = new Suit(context.bakeLayer(LAYER), this::getParentModel);
 		this.mail = new Suit(context.bakeLayer(MAIL_LAYER), this::getParentModel);
+		this.hose = new Legs(context.bakeLayer(HOSE_LAYER), this::getParentModel, true, true);
+		this.hoseLeft = new Legs(context.bakeLayer(HOSE_LAYER), this::getParentModel, true, false);
+		this.hoseRight = new Legs(context.bakeLayer(HOSE_LAYER), this::getParentModel, false, true);
 	}
 
 	public static void register() {
 		ModelLayerRegistry.registerModelLayer(LAYER, () -> LayerDefinition.create(HumanoidModel.createMesh(new CubeDeformation(SIT), 0.0F), 64, 32));
 		ModelLayerRegistry.registerModelLayer(MAIL_LAYER, () -> LayerDefinition.create(HumanoidModel.createMesh(new CubeDeformation(MAIL_SIT), 0.0F), 64, 32));
+		ModelLayerRegistry.registerModelLayer(HOSE_LAYER, () -> LayerDefinition.create(HumanoidModel.createMesh(new CubeDeformation(HOSE_SIT), 0.0F), 64, 32));
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
 			if (renderer.getModel() instanceof HumanoidModel<?>) {
 				helper.register(create(renderer, context));
@@ -149,6 +158,11 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 		}
 		ItemStack padding = worn.get(com.jaymoskingdoms.Harness.Slot.PADDING.ordinal());
 		ItemStack mail = worn.get(com.jaymoskingdoms.Harness.Slot.MAIL.ordinal());
+		// (hose are drawn first, under it all; they don't stop the leggings' suit being drawn when no shirt is worn)
+		ItemStack hose = worn.get(com.jaymoskingdoms.Harness.Slot.HOSE.ordinal());
+		if (!hose.isEmpty()) {
+			hose(poseStack, collector, lightCoords, state, hose);
+		}
 		if (padding.isEmpty() && mail.isEmpty()) {
 			return false;
 		}
@@ -163,6 +177,25 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 				SHEETS.getOrDefault(BuiltInRegistries.ITEM.getKey(mail.getItem()).getPath(), HAUBERGEON_SHEET));
 		}
 		return true;
+	}
+
+	/**
+	 * (Mordhau harness 4) A pair of hose on the legs: its sheet tinted with its dye on both legs; a piece of two colours either
+	 * has the dye on the wearer's left leg and the second colour on the right, or (layered) the second colour showing through the
+	 * slits of the dye's on both.
+	 */
+	private void hose(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, ItemStack worn) {
+		Hose hose = HOSES.get(BuiltInRegistries.ITEM.getKey(worn.getItem()).getPath());
+		if (hose == null) {
+			return;
+		}
+		Legs first = hose.second() == null || hose.layered() ? this.hose : this.hoseLeft;
+		collector.submitModel(first, state, poseStack, RenderTypes.armorCutoutNoCull(hose.texture()), lightCoords, OverlayTexture.NO_OVERLAY,
+			ARGB.opaque(DyedItemColor.getOrDefault(worn, hose.undyed())), null, state.outlineColor);
+		if (hose.second() != null) {
+			collector.submitModel(hose.layered() ? this.hose : this.hoseRight, state, poseStack, RenderTypes.armorCutoutNoCull(hose.second()), lightCoords,
+				OverlayTexture.NO_OVERLAY, ARGB.opaque(worn.getOrDefault(HeraldryArmour.SECOND_COLOUR, hose.secondUndyed())), null, state.outlineColor);
+		}
 	}
 
 	/** {@code worn}'s sheet on {@code model}: tinted with its dye if it takes one, then the second colour's sheet if it has two colours. */
@@ -188,6 +221,43 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 			return IRON;
 		}
 		return null;
+	}
+
+	/** (Mordhau harness 4) A pair of hose's sheet: its texture, the colour an undyed pair is tinted with, a second sheet and its colour (-1: none), and whether that shows through the first's slits (else it is the right leg's). */
+	private record Hose(Identifier texture, int undyed, @Nullable Identifier second, int secondUndyed, boolean layered) {
+		static Hose of(String name, int undyed, int secondUndyed, boolean layered) {
+			return new Hose(JaymosKingdoms.id("textures/entity/under_armour/" + name + ".png"), undyed,
+				secondUndyed < 0 ? null : JaymosKingdoms.id("textures/entity/under_armour/" + name + "_second.png"), secondUndyed, layered);
+		}
+	}
+
+	/** Every pair of hose, by item name (gen_heraldry_legs.py's UNDYED). */
+	private static final Map<String, Hose> HOSES = Map.ofEntries(Map.entry("shorts", Hose.of("shorts", 0xB8A878, -1, false)),
+		Map.entry("breeches", Hose.of("breeches", 0x6B5A44, -1, false)), Map.entry("baggy_breeches", Hose.of("baggy_breeches", 0x7A6A48, -1, false)),
+		Map.entry("linen_hose", Hose.of("linen_hose", 0xECE6D6, -1, false)), Map.entry("joined_hose", Hose.of("joined_hose", 0x8E2B2B, 0x2B4A8E, false)),
+		Map.entry("riding_hose", Hose.of("riding_hose", 0x5E4A32, -1, false)), Map.entry("landsknecht_hose", Hose.of("landsknecht_hose", 0x2B4A8E, 0xD8B034, true)));
+
+	/** Hose: the legs alone (the wearer's left, right or both), posed as the wearer is. */
+	private static final class Legs extends WornModel {
+		private final boolean left, right;
+
+		Legs(ModelPart root, Supplier<HumanoidModel<?>> wearer, boolean left, boolean right) {
+			super(root, wearer);
+			this.left = left;
+			this.right = right;
+		}
+
+		@Override
+		public void setupAnim(HumanoidRenderState state) {
+			super.setupAnim(state);
+			this.head.visible = false;
+			this.hat.visible = false;
+			this.body.visible = false;
+			this.rightArm.visible = false;
+			this.leftArm.visible = false;
+			this.leftLeg.visible = this.left;
+			this.rightLeg.visible = this.right;
+		}
 	}
 
 	/** The suit: body and arms only, posed as the wearer is. */
