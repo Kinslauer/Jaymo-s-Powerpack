@@ -12,7 +12,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * the snail, from {@code MoCModelSnail}: its tail working along, its shell pulled down over it when it hides
+ * the snail, from {@code MoCModelSnail}: gliding on its foot, its shell pulled down over it when it hides
  * (of DrZhark's Mo' Creatures, GPL-3, see {@code licenses/mocreatures}), ported to 26.3 by {@code tools/gen_moc_small.py}:
  * its boxes and its animation as they were.
  */
@@ -57,15 +57,16 @@ final class SnailModel extends EntityModel<BeastState> {
 		rig(state.walkAnimationPos, state.walkAnimationSpeed, state.ageInTicks, state.yRot, state.xRot);
 	}
 
+	/**
+	 * Andy: snails "should slide". It glides on its foot: while it moves, a slow wave runs along it, the tail drawing out
+	 * and in and the shell easing with it, with nothing lifting off the ground (the old rig flicked the tail back and
+	 * forth). It eases in and out as it starts and stops, so it doesn't snap.
+	 */
 	private void rig(float f, float f1, float f2, float f3, float f4) {
-
-        //super.setRotationAngles(f, f1, f2, f3, f4, 0.0625F);
-        float tailMov = Mth.cos((f2 * 0.3F)) * 0.8F;
-        if (f1 < 0.1F) {
-            tailMov = 0F;
-        }
-        this.Tail.z = 2F + tailMov;
-        this.ShellUp.xRot = 0.2268928F + (tailMov / 10F);
-    
+		float going = Mth.clamp(f1 * 4.0F, 0.0F, 1.0F);
+		float wave = Mth.sin(f2 * 0.12F) * 0.5F + 0.5F;
+		this.Tail.z = 2.4F + wave * 1.2F * going;
+		this.Head.z = -1.0F - wave * 0.4F * going;
+		this.ShellUp.xRot = 0.2268928F + (wave - 0.5F) * 0.06F * going;
 	}
 }

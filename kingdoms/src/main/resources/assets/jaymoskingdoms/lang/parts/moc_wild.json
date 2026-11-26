@@ -27,5 +27,6 @@
   "item.jaymoskingdoms.bone_charm_bound": "Bone Charm",
   "item.jaymoskingdoms.bone_charm_bound.named": "Bone Charm (%s)",
   "speech.jaymoskingdoms.ranger.charm": "Carve me a charm from this bone (%s emeralds).",
-  "message.jaymoskingdoms.ranger.charmed": "The ranger turns the bone over, cuts a loop in it and hands it back."
+  "message.jaymoskingdoms.ranger.charmed": "The ranger turns the bone over, cuts a loop in it and hands it back.",
+  "item.jaymoskingdoms.snail_slime": "Snail Slime"
 }

@@ -48,6 +48,8 @@ import net.minecraft.world.phys.AABB;
  * other mods' ants, caterpillars, cockroaches, flies, snails and slugs) are squashed and struck down the same way, by the
  * same size tiers. A squashed bug leaves no body: it bursts flat in its own blood, a few drops and a splat sized to it
  * (Powers' {@code BladeBlood.squashed}). A squashed spider spatters the same, beside its legs.
+ * <p>Andy: snails "should squash into slime and you should be able to collect it." A squashed snail or slug ({@link #SLIMY})
+ * leaves its slime on the ground as well, an item to pick up (Kingdoms' snail slime; four make a slimeball).
  */
 public final class SpiderSquash {
 	// ================================================================================================================
@@ -76,6 +78,8 @@ public final class SpiderSquash {
 	private static final boolean KITCHEN = FabricLoader.getInstance().isModLoaded("jaymoskitchen");
 	/** The small bugs squashed like small spiders (and struck down as easily). */
 	public static final TagKey<EntityType<?>> BUGS = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("squashable_bugs"));
+	/** The bugs that squash into slime you can pick up (snails and slugs). */
+	public static final TagKey<EntityType<?>> SLIMY = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("slimy_bugs"));
 
 	/** How a spider can be squashed. */
 	public enum Tier {
@@ -216,6 +220,13 @@ public final class SpiderSquash {
 		if (bug) {
 			// a small wet crunch (no body for Kitchen to burst)
 			level.playSound(null, spider.getX(), spider.getY(), spider.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.NEUTRAL, 0.5F, 1.3F);
+			if (spider.getType().builtInRegistryHolder().is(SLIMY) && com.jaymoskingdoms.monsters.MocWild.SNAIL_SLIME != null) {
+				// Andy: "they should squash into slime and you should be able to collect it": a snail's slime left where it burst
+				net.minecraft.world.entity.item.ItemEntity slime = new net.minecraft.world.entity.item.ItemEntity(level, spider.getX(), spider.getY() + 0.05,
+					spider.getZ(), new net.minecraft.world.item.ItemStack(com.jaymoskingdoms.monsters.MocWild.SNAIL_SLIME), 0.0, 0.05, 0.0);
+				slime.setDefaultPickUpDelay();
+				level.addFreshEntity(slime);
+			}
 		} else if (!KITCHEN) {
 			// (Kitchen squelches as it bursts the body; without it, the squelch is ours)
 			level.playSound(null, spider.getX(), spider.getY(), spider.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.0F, 0.6F);

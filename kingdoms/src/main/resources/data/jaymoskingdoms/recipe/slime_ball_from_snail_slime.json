@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskingdoms:snail_slime",
+    "jaymoskingdoms:snail_slime",
+    "jaymoskingdoms:snail_slime",
+    "jaymoskingdoms:snail_slime"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:slime_ball"
+  }
+}

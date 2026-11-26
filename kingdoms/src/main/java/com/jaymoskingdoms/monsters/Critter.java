@@ -77,6 +77,9 @@ public class Critter extends PathfinderMob {
 	/** How long one lasts at most (ticks) unless the world keeps it; the movement speeds. */
 	static final int LIFE_TICKS = 12000;
 	static final double WALK = 0.2, SNAIL = 0.04, FLIGHT = 0.4;
+	/** A snail never jumps: against a ledge it slides up the face this fast (blocks a tick: a block in under two seconds),
+	 * not at a spider's scramble. */
+	static final double SNAIL_CLIMB = 0.03;
 
 	private static final EntityDataAccessor<Integer> COAT = SynchedEntityData.defineId(Critter.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> HIDING = SynchedEntityData.defineId(Critter.class, EntityDataSerializers.BOOLEAN);
@@ -179,6 +182,10 @@ public class Critter extends PathfinderMob {
 			this.discard();
 			return;
 		}
+		if (this.kind == Kind.SNAIL && this.hiding()) {
+			// drawn into its shell it stays put until it comes out again
+			this.getNavigation().stop();
+		}
 		if (this.tickCount % SmallLife.EVERY == 0) {
 			SmallLife.act(level, this);
 		}
@@ -206,6 +213,36 @@ public class Critter extends PathfinderMob {
 			this.discard();
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * Andy: "the snails seem to jump like frogs or crickets instead of sliding." A snail glides on its foot: it never
+	 * jumps (the game would hop it up every ledge on its path), it climbs a ledge by sliding up its face
+	 * ({@link #onClimbable}), and drawn into its shell it doesn't move at all.
+	 */
+	@Override
+	public void jumpFromGround() {
+		if (this.kind != Kind.SNAIL) {
+			super.jumpFromGround();
+		}
+	}
+
+	/** A snail against a block's face climbs it, as real ones go up walls. */
+	@Override
+	public boolean onClimbable() {
+		return this.kind == Kind.SNAIL ? this.horizontalCollision && !this.hiding() : super.onClimbable();
+	}
+
+	@Override
+	public void travel(net.minecraft.world.phys.Vec3 input) {
+		super.travel(this.kind == Kind.SNAIL && this.hiding() ? net.minecraft.world.phys.Vec3.ZERO : input);
+		if (this.kind == Kind.SNAIL && this.horizontalCollision) {
+			// (the game lifts any climber at a spider's pace: a snail creeps up instead)
+			net.minecraft.world.phys.Vec3 move = this.getDeltaMovement();
+			if (move.y > SNAIL_CLIMB) {
+				this.setDeltaMovement(move.x, SNAIL_CLIMB, move.z);
+			}
+		}
 	}
 
 	@Override
