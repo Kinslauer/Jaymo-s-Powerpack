@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: otherworld-fabric-picklist
 branch: none (read-only comparison)
 pr:
@@ -14,3 +14,4 @@ Andy asked to port Otherworld DnD to Fabric and make a picklist of differences b
 
 ## Notes
 - 2026-11-24 13:11 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-26 Andy (Waiting on Andy page): restart it: picked up again as Inbox task otherworld-fabric-picklist-restart.
