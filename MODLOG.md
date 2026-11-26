@@ -8418,3 +8418,11 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 
 - The Tinkerer's **Ki Cell** showed the purple and black missing texture and its raw name: it had no item definition (`items/ki_cell.json`), no icon and no name under its real id. It now has all three: a brass-capped glass cell with ki glowing inside, in the ki-drink cyan (painted by `tools/ki_cell_icon.py`).
 - Built; not played.
+
+## 0.27.76 (2026-11-26): Mobs slow down under heavy weapons; no blood on lost limbs; owls spare the downed (#2197)
+
+- Andy (2026-11-25): "they should move slower when carrying something for example the baby zombie was sprinting ... with a giant spear in hand it just didnt make sense".
+- **Heavy load** (`combat/HeavyLoad`, from `ArmourWearMobMixin`): what a mob holds weighs on it by its size. A spear, halberd or any long or two-handed weapon is a full load, a shield half, a one-handed weapon 0.3; a man-sized body bears 0.6 freely, and past that loses 30% of its speed per load more, at most 60%, and doesn't sprint. A grown zombie with a spear is about 10% slower; a baby zombie with the same spear moves at 40% of its usual pace, slower than a grown zombie walks. Players aren't affected.
+- **No blood on limbs that are gone** (`client/blood/LimbCut`, `BloodCoatLayer`): Andy, of a guard whose legs the zombies ate, "the red you see IS the blood drawn in the wrong place, its attached to limbs that arent there". The blood and dirt overlay now has the lost parts (each arm, leg and the head, with the sleeve, trouser or hat over it) cut out of its texture before it's drawn, on living bodies (`Dismembered.MISSING`) and on Kitchen corpses (`Severed.KEY`), MCA villagers too. Only square overlays in the player skin layout are cut.
+- **Owls leave downed players be** (`Downed.SPARE_DOWNED`, tag `jaymospowers:spare_downed`: Cube Animals' barn owl): Andy, "owls should no longer finish downed players". Their blows on a downed player do nothing, and they drop them as a target.
+- Built with Gradle; not played.
