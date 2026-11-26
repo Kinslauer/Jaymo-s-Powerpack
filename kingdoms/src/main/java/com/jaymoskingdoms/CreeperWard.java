@@ -303,8 +303,8 @@ public final class CreeperWard {
      * Finds the center of the nearest warded area.
      */
     private static Vec3 findNearestWardCenter(Vec3 pos, Set<Long> wardedChunks, ServerLevel level) {
-        int bestX = (int)(pos.x >> 4);
-        int bestZ = (int)(pos.z >> 4);
+        int bestX = ((int)pos.x) >> 4;
+        int bestZ = ((int)pos.z) >> 4;
         double bestDist = Double.MAX_VALUE;
         for (long packed : wardedChunks) {
             int cx = unpackX(packed) << 4;
@@ -441,7 +441,7 @@ public final class CreeperWard {
      */
     public static void weakenCreeperInWard(Creeper creeper) {
         creeper.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN,
+                net.minecraft.world.effect.MobEffects.SLOWNESS,
                 20 * 10,
                 1, // amplifier 1 = 30% slow
                 false, false
@@ -452,6 +452,6 @@ public final class CreeperWard {
      * Restores a creeper's original stats when it leaves the ward.
      */
     public static void restoreCreeperFromWard(Creeper creeper) {
-        creeper.removeEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
+        creeper.removeEffect(net.minecraft.world.effect.MobEffects.SLOWNESS);
     }
 }
