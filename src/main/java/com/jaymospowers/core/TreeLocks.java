@@ -18,7 +18,7 @@ public final class TreeLocks {
 		SHIELD_MOVES = "shield_moves", SWAT = "swat", TWO_BLADES = "two_blades", THROWER = "thrower", SWEEP_KICK = "sweep_kick",
 		AIR_COMBO = "air_combo", BATTLE_RHYTHM = "battle_rhythm",
 		SECOND_WIND = "second_wind", BATTLE_CRY = "battle_cry", BOXING = "boxing", HAUL_BOUND = "haul_bound", MEDITATE = "meditate",
-		ANGLER = "angler", ALCHEMIST = "alchemist";
+		ANGLER = "angler", ALCHEMIST = "alchemist", COYOTE_TIME = "coyote_time";
 	/**
 	 * Blood Awakening, learned (Andy, 2026-11-23): a blood's own moves are everyone's from the start, and the perk upgrades
 	 * them. Every wait on one is this share as long (Kingdoms' {@code TreeLocks.AWAKENED_WAIT}).

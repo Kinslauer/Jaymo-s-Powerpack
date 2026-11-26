@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "X X",
+    "XXX",
+    "XXX"
+  ],
+  "key": {
+    "X": "#jaymospowers:copper_chains"
+  },
+  "result": {
+    "id": "jaymospowers:copper_chainmail_chestplate",
+    "count": 1
+  }
+}

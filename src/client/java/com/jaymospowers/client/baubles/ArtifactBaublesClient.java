@@ -61,7 +61,9 @@ public final class ArtifactBaublesClient {
 			spent = false;
 			floating = false;
 			air = Math.min(FLOAT_TICKS, air + (float) FLOAT_TICKS / FLOAT_REFILL);
-		} else if (free && pressed && !spent && ArtifactEffects.wears(player, ArtifactBaubles.CLOUD_IN_A_BOTTLE)) {
+		} else if (free && pressed && !spent && ArtifactEffects.wears(player, ArtifactBaubles.CLOUD_IN_A_BOTTLE)
+			&& !com.jaymospowers.client.freerun.moves.CoyoteTimeClient.justTook(player)) {
+			// (a late jump off an edge, CoyoteTime, was this press's: the cloud waits for the next)
 			spent = true;
 			cloudTick = player.tickCount;
 			double yaw = Math.toRadians(player.getYRot());
