@@ -16,7 +16,6 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · for any · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · for any · open
-- [ ] [[Inbox/hunters-road-4|hunters-road-4]] · for any · open
 
 
 ## Being built
@@ -47,6 +46,7 @@ kanban-plugin: board
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for any · blocked
+- [ ] [[Inbox/hunters-road-4|hunters-road-4]] · for any · blocked
 
 
 ## Done
