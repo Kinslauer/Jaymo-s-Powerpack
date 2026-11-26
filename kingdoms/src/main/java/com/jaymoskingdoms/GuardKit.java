@@ -382,7 +382,18 @@ public final class GuardKit {
 		harness(m, kit);
 	}
 
+	/** A piece of harness was taken off {@code m} (a loot screen): what he was issued for that place goes with it, so he is not paid for it again or put back in it. */
+	static void forget(LivingEntity m, Harness.Slot place) {
+		Kit kit = m.getAttached(KIT);
+		if (kit != null) {
+			m.setAttached(KIT, kit.with(HARNESS + place.ordinal(), ItemStack.EMPTY));
+		}
+	}
+
 	private static void harness(Mob m, Kit kit) {
+		if (m.entityTags().contains(Harness.TAKEN_TAG)) {
+			return;
+		}
 		ItemStack[] pieces = new ItemStack[Harness.SLOTS];
 		for (Harness.Slot slot : Harness.Slot.values()) {
 			pieces[slot.ordinal()] = kit.piece(HARNESS + slot.ordinal()).copy();
@@ -399,7 +410,8 @@ public final class GuardKit {
 				PathfinderMob m = w.mob();
 				ungild(m);
 				Kit kit = m.getAttached(KIT);
-				if (kit == null || now - kit.reviewed() < REVIEW || m.getTarget() != null) {
+				// (someone took harness off him: he is not looked over and bought for again)
+				if (kit == null || now - kit.reviewed() < REVIEW || m.getTarget() != null || m.entityTags().contains(Harness.TAKEN_TAG)) {
 					continue;
 				}
 				Faction f = serves(m);

@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -19,6 +20,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -93,6 +95,13 @@ public final class Harness {
 			.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	public static MenuType<HarnessMenu> MENU;
+	/** The screen for the harness of someone alive and down ({@link DownedHarnessMenu}), opened with the body's network id. */
+	public static ExtendedMenuType<DownedHarnessMenu, Integer> LOOT_MENU;
+	/**
+	 * On a mob someone took harness from. Nothing dresses it again ({@link #dress}, {@code GuardKit}'s kit and sweep,
+	 * {@code HeraldryWear}'s restyle), so stripping a downed person and getting them up never makes more harness.
+	 */
+	public static final String TAKEN_TAG = "jaymoskingdoms.harness_taken";
 
 	/** Player → server: open the harness. */
 	public record Open() implements CustomPacketPayload {
@@ -132,6 +141,7 @@ public final class Harness {
 
 	static void register() {
 		MENU = Registry.register(BuiltInRegistries.MENU, JaymosKingdoms.id("harness"), new MenuType<>(HarnessMenu::new, FeatureFlags.VANILLA_SET));
+		LOOT_MENU = Registry.register(BuiltInRegistries.MENU, JaymosKingdoms.id("downed_harness"), new ExtendedMenuType<>(DownedHarnessMenu::new, ByteBufCodecs.VAR_INT));
 		PayloadTypeRegistry.serverboundPlay().register(Open.TYPE, Open.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Open.TYPE, (payload, context) -> context.server().execute(() -> {
 			ServerPlayer player = context.player();
@@ -195,6 +205,9 @@ public final class Harness {
 
 	/** Puts each of {@code pieces} in its own place on {@code wearer}, over whatever was there. */
 	public static void dress(LivingEntity wearer, ItemStack... pieces) {
+		if (wearer.entityTags().contains(TAKEN_TAG)) {
+			return;
+		}
 		List<ItemStack> now = new ArrayList<>(worn(wearer));
 		for (ItemStack piece : pieces) {
 			Slot slot = slotOf(piece);
@@ -203,6 +216,12 @@ public final class Harness {
 			}
 		}
 		put(wearer, now);
+	}
+
+	/** A piece of {@code place} was taken off {@code wearer} (a loot screen): it is marked so nothing dresses it again, and a guard's kit forgets the piece. */
+	static void taken(LivingEntity wearer, Slot place) {
+		wearer.addTag(TAKEN_TAG);
+		GuardKit.forget(wearer, place);
 	}
 
 	private static void put(LivingEntity wearer, List<ItemStack> worn) {

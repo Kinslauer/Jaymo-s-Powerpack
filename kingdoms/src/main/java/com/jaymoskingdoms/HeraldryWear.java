@@ -547,7 +547,7 @@ public final class HeraldryWear {
 			}
 			harness(folk, faction, finish);
 		} else {
-			if (folk.hasAttached(Harness.WORN)) {
+			if (folk.hasAttached(Harness.WORN) && !folk.entityTags().contains(Harness.TAKEN_TAG)) {
 				Harness.clear(folk);
 			}
 			// (Andy: "most people should opt for harness gear": a working person's own shirt, hose, hood and cloak)
