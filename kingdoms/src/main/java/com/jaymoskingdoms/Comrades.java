@@ -210,6 +210,11 @@ public final class Comrades {
 		if (e instanceof Worker w && w.factionId() >= 0) {
 			return "f:" + w.factionId();
 		}
+		int hired = CampBeasts.hiredCamp(e);
+		if (hired >= 0) {
+			// a sellsword or creature a camp keeps fights on its side
+			return "f:" + hired;
+		}
 		Illagers.Tag tag = Illagers.tag(e);
 		if (tag != null) {
 			return "f:" + tag.camp();
@@ -433,6 +438,10 @@ public final class Comrades {
 			if (Downed.isDowned(e) || e instanceof Player p && (p.isCreative() || p.isSpectator())) {
 				continue;
 			}
+			if (Captives.bound(e) || e.isInvulnerable()) {
+				// a captive in chains, or anything no blow can hurt: a band would only stand round it swinging for ever
+				continue;
+			}
 			String theirs = side(e);
 			if (theirs.equals(mine)) {
 				continue;
@@ -467,6 +476,11 @@ public final class Comrades {
 		boolean close = stance != null && stance.kind() == QuickOrders.COME && leader != null;
 		LivingEntity current = target(m);
 		if (close && current != null && current.distanceToSqr(leader) > CLOSE_DROP * CLOSE_DROP) {
+			stand(m);
+			current = null;
+		}
+		if (current != null && Captives.bound(current)) {
+			// a captive in chains is nobody's foe: let go of them
 			stand(m);
 			current = null;
 		}

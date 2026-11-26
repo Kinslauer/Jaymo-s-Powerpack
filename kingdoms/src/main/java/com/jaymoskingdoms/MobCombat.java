@@ -276,8 +276,8 @@ public final class MobCombat {
 	 */
 	public static void attackTick(Mob mob, LivingEntity target) {
 		Duellists.engaged(mob, target);
-		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds)
-		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG)) {
+		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds, and a fight among people, Turns)
+		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG) || Turns.waiting(mob)) {
 			return;
 		}
 		Moves moves = BetterCombatBridge.moves(mob.getMainHandItem());
@@ -406,8 +406,8 @@ public final class MobCombat {
 	 */
 	public static void plainBlow(Mob mob, LivingEntity target) {
 		Duellists.engaged(mob, target);
-		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds)
-		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG)) {
+		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds, and a fight among people, Turns)
+		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG) || Turns.waiting(mob)) {
 			return;
 		}
 		long now = level.getGameTime();

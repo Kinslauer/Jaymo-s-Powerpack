@@ -125,6 +125,7 @@ public final class VariantLooks {
 		style(Variant.FELINE, 0xFFC8FF60, HeritageLooks.Eyes.NIGHT, null, 0, When.ALWAYS);
 		style(Variant.KITSUNE, 0xFFFFA040, HeritageLooks.Eyes.ALWAYS, FOX_FIRE, 24, When.NIGHT);
 		style(Variant.SERPEN, 0xFFE8F060, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
+		style(Variant.SCALEBOUND, 0xFFF0A030, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
 		// the Hollow dead
 		style(Variant.ZOMBIE, 0xFFA8FF70, HeritageLooks.Eyes.NIGHT, null, 0, When.ALWAYS);
 		style(Variant.SKELETON, 0xFFF0F4EC, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);

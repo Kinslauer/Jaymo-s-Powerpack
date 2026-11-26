@@ -285,6 +285,8 @@ public final class HeritageKits {
 		look(HeritageVariants.Variant.FELINE, Move.POUNCE, Perk.NINE_LIVES, Perk.HATES_WATER);
 		look(HeritageVariants.Variant.KITSUNE, Move.FOXFIRE, Perk.LUCKY, Perk.SPIRIT_FRAIL);
 		look(HeritageVariants.Variant.SERPEN, Move.SHED_SKIN, Perk.POISON_PROOF, Perk.COLD_BLOODED);
+		// the Scalebound, the sellswords' kin: a lizard's shed skin, a bowman's aim, a lizard's cold blood
+		look(HeritageVariants.Variant.SCALEBOUND, Move.SHED_SKIN, Perk.ARCHER, Perk.COLD_BLOODED);
 		look(HeritageVariants.Variant.ZOMBIE, Move.UNDYING_HUNGER, Perk.TOUGH, Perk.SUN_DECAY);
 		look(HeritageVariants.Variant.SKELETON, Move.CONSCRIPT_THE_DEAD, Perk.ARCHER, Perk.BRITTLE);
 		look(HeritageVariants.Variant.WRAITH, Move.SPECTRAL_PHASE, Perk.GHOSTLY, Perk.SUN_HOLY);

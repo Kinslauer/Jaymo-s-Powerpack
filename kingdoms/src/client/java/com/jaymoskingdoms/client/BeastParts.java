@@ -129,6 +129,9 @@ public final class BeastParts {
 		ARACHNID("arachnid", null, null, Wings.NONE, true, false, false, false),
 		SERPEN("serpen", null, new Tail(new float[] {-0.7F, -0.2F, 0.15F, 0.2F, 0.2F, 0.1F, 0.05F, 0.05F, 0.05F},
 			new float[] {4.4F, 4.2F, 3.8F, 3.4F, 3.0F, 2.6F, 2.1F, 1.7F, 1.3F}, 3.6F, 0.32F, true), Wings.NONE, false, false, false, false),
+		// the Scalebound: a lizard's tail, thick at the root and tapering short, held off the ground
+		SCALEBOUND("scalebound", null, new Tail(new float[] {-0.65F, -0.12F, 0.06F, 0.1F, 0.1F, 0.06F}, new float[] {4.2F, 3.6F, 3.0F, 2.4F, 1.8F, 1.2F}, 3.4F,
+			0.22F, true), Wings.NONE, false, false, false, false),
 		SPRITE("sprite", null, null, Wings.GOSSAMER, false, false, true, false),
 		FAERIE("faerie", null, null, Wings.GOSSAMER, false, false, true, false),
 		DRYAD("dryad", null, null, Wings.NONE, false, true, false, false);
@@ -162,6 +165,7 @@ public final class BeastParts {
 				case AVIAN -> AVIAN;
 				case ARACHNID -> ARACHNID;
 				case SERPEN -> SERPEN;
+				case SCALEBOUND -> SCALEBOUND;
 				case SPRITE -> SPRITE;
 				case FAERIE -> FAERIE;
 				case DRYAD -> DRYAD;
