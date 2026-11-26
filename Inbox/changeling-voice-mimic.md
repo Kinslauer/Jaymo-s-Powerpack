@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: codex
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
 claimed_by: codex
-pr: 
+pr: 2248
 suggested_owns:
   - kingdoms new ChangelingVoices.java (Simple Voice Chat server plugin, beside VoiceRange.java)
   - kingdoms BorrowedFaces.java (hook only)
