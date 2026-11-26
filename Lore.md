@@ -791,6 +791,8 @@ Every grudge below rests on something the game already does to a blood, or on an
 
 **How it shows in the street.** In a city of one blood, folk of another are jeered and shouldered aside ("This is a Stoneborn street"), and kin are welcomed like family. Purist cities are the worst for it. Unwashed folk are smelled before they are seen, and the greenskins like the smell. The havens are villages of the non-human peoples, of one blood or many. They turn the Bio-built away at first, and a haven's good name comes slowly and goes fast.
 
+**The lizard kin and the river's jaws** (new) (Claude's placement for Andy's crocodiles, 2026-11-25; Andy: "they will NOT leave pets alone. nothing is safe. thats why you should also see villagers more cautious if they are nearby, and nearly everyone hates them. this raises alot of suspicion/hatred around the lizard beastfolk"; for Andy to approve). The crocodiles of the warm rivers and the alligators of the swamps take whatever comes down to the water: a deer, a calf, a dog at its master's heel, a child who wandered off. They hold it, roll it under and drag it down, and what they leave is found days later in the reeds. River folk keep their animals back from the bank and walk wide of a still log. Because the Serpen of the jungles and the Scalebound of the swamps have the same scales and the same unblinking eyes, they carry the blame. Folk who shrug at a tail or a pair of ears still mutter at a lizard's face, and even the other bloods who know what it is to be stared at keep their distance. Nobody says a Scalebound fed a crocodile. They only wonder aloud whose dog it was.
+
 ## The realms and their creeds
 
 A realm is founded on one creed, and the creed decides how it treats its neighbours:
