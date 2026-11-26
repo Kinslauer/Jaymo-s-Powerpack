@@ -192,6 +192,9 @@ public class NoiseChunkGeneratorMixin {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 int originalY = chunk.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
+                final boolean watched = com.AdamNew.dynamicwaters.ColumnWatch.on(startX + x, startZ + z);
+                if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + x, startZ + z, "ground y=" + originalY + " "
+                        + com.AdamNew.dynamicwaters.ColumnWatch.block(chunk.getBlockState(new BlockPos(startX + x, originalY, startZ + z))));
 
                 net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biomeHolder = chunk.getNoiseBiome(x >> 2, originalY >> 2, z >> 2);
 
@@ -200,7 +203,9 @@ public class NoiseChunkGeneratorMixin {
                     final java.util.BitSet guard = protectedBlocksMap[x + z * 16];
                     final int g0 = Math.max(0, originalY - 2 - minH), g1 = Math.max(0, seaLevel + 2 - minH);
                     if (guard == null || guard.nextSetBit(g0) < 0 || guard.nextSetBit(g0) > g1) {
+                        final int before = originalY;
                         originalY = HydrologyManager.fillPool(chunk, startX + x, startZ + z, originalY, seaLevel, poolGround);
+                        if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + x, startZ + z, "pool fill " + before + "->" + originalY);
                     }
                 }
                 preCarve[x + z * 16] = originalY;
@@ -214,6 +219,8 @@ public class NoiseChunkGeneratorMixin {
             if (HydrologyManager.isOceanBiome(columnBiomes[i]) && preCarve[i] < seaLevel - 4) continue;
             carvings[i] = HydrologyManager.calculateRiverCarving(startX + (i & 15), startZ + (i >> 4), preCarve[i], seaLevel,
                     (net.minecraft.world.level.chunk.ChunkGenerator) (Object) this, chunk, random);
+            if (com.AdamNew.dynamicwaters.ColumnWatch.on(startX + (i & 15), startZ + (i >> 4))) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + (i & 15), startZ + (i >> 4),
+                    "carve first: " + com.AdamNew.dynamicwaters.ColumnWatch.carving(carvings[i]));
         }
         final int[] guard = HydrologyManager.caveGuard(carvings);
 
@@ -248,6 +255,8 @@ public class NoiseChunkGeneratorMixin {
             }
             HydrologyManager.gorgeDress(chunk, sx, sz, preCarve[i], seaLevel - 1, false, protectedBlocksMap[i], minH,
                     surfaceGround, rim);
+            if (com.AdamNew.dynamicwaters.ColumnWatch.on(sx, sz)) com.AdamNew.dynamicwaters.ColumnWatch.note(sx, sz, "refill hollow " + was + "->" + preCarve[i] + " then dressed, rim " + rim
+                    + ", top now " + com.AdamNew.dynamicwaters.ColumnWatch.block(chunk.getBlockState(new BlockPos(sx, preCarve[i], sz))));
         }
 
         final int[] laidBed = new int[256];
@@ -280,11 +289,15 @@ public class NoiseChunkGeneratorMixin {
                 preCarve[i] = HydrologyManager.fillHollow(chunk, sx, sz, was, floor, poolGround, protectedBlocksMap[i], minH);
             }
             if (preCarve[i] != was) refilled = true;
+            if (preCarve[i] != was && com.AdamNew.dynamicwaters.ColumnWatch.on(sx, sz)) com.AdamNew.dynamicwaters.ColumnWatch.note(sx, sz, (channelBed[i] ? "refill mouth (channel bed) " : "refill mouth ")
+                    + was + "->" + preCarve[i]);
         }
         for (int i = 0; i < 256; i++) {
             if (guard[i] == Integer.MIN_VALUE) continue;
             HydrologyManager.cancelCaves(chunk, startX + (i & 15), startZ + (i >> 4), preCarve[i], guard[i], poolGround,
                     protectedBlocksMap[i], minH);
+            if (com.AdamNew.dynamicwaters.ColumnWatch.on(startX + (i & 15), startZ + (i >> 4))) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + (i & 15), startZ + (i >> 4),
+                    "seal caves under " + preCarve[i] + " up to " + guard[i] + " with " + com.AdamNew.dynamicwaters.ColumnWatch.block(poolGround));
         }
 
         for (int x = 0; x < 16; x++) {
@@ -303,6 +316,10 @@ public class NoiseChunkGeneratorMixin {
                 int targetY = carving.targetY;
                 int cavernRoofY = carving.cavernRoofY;
                 int carveTopY = Math.min(originalY, cavernRoofY);
+                final int wx = startX + x, wz = startZ + z;
+                final boolean watched = com.AdamNew.dynamicwaters.ColumnWatch.on(wx, wz);
+                if (watched && carving != carvings[x + z * 16]) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "carve again (refilled): ground "
+                        + originalY + " " + com.AdamNew.dynamicwaters.ColumnWatch.carving(carving));
 
                 java.util.BitSet protectedBlocks = protectedBlocksMap[x + z * 16];
                 if (protectedBlocks == null) {
@@ -320,8 +337,10 @@ public class NoiseChunkGeneratorMixin {
                     }
                 }
 
+                if (watched && hasSurfaceStructure) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "structure here, carving skipped");
                 if (carving.gorgeSeal && !hasSurfaceStructure) {
                     HydrologyManager.gorgeSeal(chunk, startX + x, startZ + z, seaLevel, originalY, protectedBlocks, minH);
+                    if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "seal gorge stone from " + seaLevel + " to " + originalY);
                 }
 
                 if (carving.modifies) {
@@ -362,8 +381,12 @@ public class NoiseChunkGeneratorMixin {
                     if (hasSurfaceStructure) {
                         continue;
                     }
+                    if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "palette top=" + com.AdamNew.dynamicwaters.ColumnWatch.block(topBlock) + " filler="
+                            + com.AdamNew.dynamicwaters.ColumnWatch.block(fillerBlock) + " base=" + com.AdamNew.dynamicwaters.ColumnWatch.block(baseBlock));
 
                     if (carving.isWatershedWall && targetY < originalY) {
+                        if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "cut wall " + carveTopY + "->" + targetY + ", bed "
+                                + (carving.waterLevel > targetY + 3 ? "gravel over " + com.AdamNew.dynamicwaters.ColumnWatch.block(baseBlock) : com.AdamNew.dynamicwaters.ColumnWatch.block(topBlock)));
                         for (int y = carveTopY; y > targetY; y--) {
                             if (y >= minH && protectedBlocks.get(y - minH)) continue;
                             chunk.setBlockState(new BlockPos(startX + x, y, startZ + z), Blocks.AIR.defaultBlockState(), 3);
@@ -383,6 +406,8 @@ public class NoiseChunkGeneratorMixin {
                     }
 
                     if (carving.isWatershedWall && targetY > originalY) {
+                        if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "placed wall " + (originalY + 1) + ".." + targetY + " top "
+                                + com.AdamNew.dynamicwaters.ColumnWatch.block(topBlock) + " base " + com.AdamNew.dynamicwaters.ColumnWatch.block(baseBlock));
                         for (int y = originalY + 1; y <= targetY; y++) {
                             if (y >= minH && protectedBlocks.get(y - minH)) continue;
                             if (y == targetY) {
@@ -396,6 +421,7 @@ public class NoiseChunkGeneratorMixin {
                     }
 
                     if (originalY >= HydrologyManager.aboveSea(90)) {
+                        if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "placed cave fill " + seaLevel + ".." + originalY + " " + com.AdamNew.dynamicwaters.ColumnWatch.block(baseBlock));
                         for (int y = seaLevel; y <= originalY; y++) {
                             if (y >= minH && protectedBlocks.get(y - minH)) continue;
                             BlockState currentState = chunk.getBlockState(new BlockPos(startX + x, y, startZ + z));
@@ -406,6 +432,8 @@ public class NoiseChunkGeneratorMixin {
                     }
 
                     int fillFrom = Math.max(minH, Math.min(carving.sealFloorY, targetY));
+                    int placedFill = 0;
+                    BlockState lastFill = null;
 
                     for (int scan = fillFrom; scan <= targetY; scan++) {
                         if (scan >= minH && protectedBlocks.get(scan - minH)) continue;
@@ -439,10 +467,16 @@ public class NoiseChunkGeneratorMixin {
                             }
 
                             chunk.setBlockState(pos, stateToPlace, 3);
+                            placedFill++;
+                            lastFill = stateToPlace;
                         }
                     }
+                    if (watched && placedFill > 0) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "placed fill " + placedFill + " block(s) "
+                            + fillFrom + ".." + targetY + ", top " + com.AdamNew.dynamicwaters.ColumnWatch.block(lastFill));
 
                     if (targetY < carveTopY) {
+                        if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "cut air " + carveTopY + "->" + targetY + ", exposes "
+                                + com.AdamNew.dynamicwaters.ColumnWatch.block(chunk.getBlockState(new BlockPos(wx, targetY, wz))));
                         for (int y = carveTopY; y > targetY; y--) {
                             if (y >= minH && protectedBlocks.get(y - minH)) continue;
                             chunk.setBlockState(new BlockPos(startX + x, y, startZ + z), Blocks.AIR.defaultBlockState(), 3);
@@ -487,7 +521,9 @@ public class NoiseChunkGeneratorMixin {
                             }
                         }
 
+                        if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "water " + (targetY + 1) + ".." + carving.waterLevel);
                         if (targetY < originalY && (targetY < minH || !protectedBlocks.get(targetY - minH))) {
+                            if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "placed bed stone at " + targetY);
                             chunk.setBlockState(new BlockPos(startX + x, targetY, startZ + z), Blocks.STONE.defaultBlockState(), 3);
                             int hash = (int)(startX + x) * 31337 + (int)(startZ + z) * 42069;
                             hash ^= (hash >> 16);
@@ -507,11 +543,34 @@ public class NoiseChunkGeneratorMixin {
                     if ((carving.gorgeWall || carving.dressCut) && targetY >= carving.waterLevel && targetY < originalY) {
                         HydrologyManager.gorgeDress(chunk, startX + x, startZ + z, targetY, carving.waterLevel,
                                 carving.gorgeSteep, protectedBlocks, minH, surfaceGround, originalY);
+                        if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "dress cut face at " + targetY + ", top now "
+                                + com.AdamNew.dynamicwaters.ColumnWatch.block(chunk.getBlockState(new BlockPos(wx, targetY, wz))));
+                    } else if (watched && targetY < originalY && targetY >= carving.waterLevel) {
+                        com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "cut not dressed (no dressCut/gorgeWall), top stays "
+                                + com.AdamNew.dynamicwaters.ColumnWatch.block(chunk.getBlockState(new BlockPos(wx, targetY, wz))));
                     }
                 }
             }
         }
         com.AdamNew.dynamicwaters.LakeHollows.clearChunkGround();
+    }
+
+    @Inject(method = "buildSurface", at = @At("RETURN"))
+    private void dynamicwaters$watchSurface(ChunkAccess chunk, net.minecraft.world.level.levelgen.NoiseChunk noiseChunk,
+            RandomState random, net.minecraft.world.level.biome.BiomeManager biomeManager, java.util.Set<Holder<Biome>> possibleBiomes,
+            net.minecraft.world.level.levelgen.material.rule.MaterialRule materialRule, CallbackInfo ci) {
+        final int startX = chunk.getPos().getMinBlockX(), startZ = chunk.getPos().getMinBlockZ();
+        if (!com.AdamNew.dynamicwaters.ColumnWatch.on(startX, startZ) && !com.AdamNew.dynamicwaters.ColumnWatch.on(startX + 15, startZ + 15)
+                && !com.AdamNew.dynamicwaters.ColumnWatch.on(startX, startZ + 15) && !com.AdamNew.dynamicwaters.ColumnWatch.on(startX + 15, startZ)) {
+            return;
+        }
+        for (int i = 0; i < 256; i++) {
+            final int wx = startX + (i & 15), wz = startZ + (i >> 4);
+            if (!com.AdamNew.dynamicwaters.ColumnWatch.on(wx, wz)) continue;
+            final int y = chunk.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, i & 15, i >> 4);
+            com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "surface rules done: top y=" + y + " "
+                    + com.AdamNew.dynamicwaters.ColumnWatch.block(chunk.getBlockState(new BlockPos(wx, y, wz))));
+        }
     }
 
     @Inject(method = "generateCarvers", at = @At("HEAD"))
@@ -627,9 +686,13 @@ public class NoiseChunkGeneratorMixin {
                     }
                     skinCarvings[x + z * 16] = carving;
                     skinOriginal[x + z * 16] = originalY;
+                    final boolean watched = com.AdamNew.dynamicwaters.ColumnWatch.on(startX + x, startZ + z);
+                    if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + x, startZ + z, "carve after carvers" + (skinOnly ? " (skin only)" : "")
+                            + ": ground " + originalY + " " + com.AdamNew.dynamicwaters.ColumnWatch.carving(carving));
                     if (skinOnly) continue;
 
                     if (carving.isPillar) {
+                        if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + x, startZ + z, "repair pillar stone " + (seaLevel - 15) + ".." + originalY);
                         for (int y = originalY; y >= seaLevel - 15; y--) {
                             if (y >= minH && protectedBlocks2.get(y - minH)) continue;
                             BlockState s = chunk.getBlockState(new BlockPos(startX + x, y, startZ + z));
@@ -691,6 +754,8 @@ public class NoiseChunkGeneratorMixin {
                         }
                     }
 
+                    if (watched && sealedFloorY < targetY) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + x, startZ + z, "repair floor " + sealedFloorY + ".."
+                            + targetY + " " + com.AdamNew.dynamicwaters.ColumnWatch.block(fillerBlock2) + "/" + com.AdamNew.dynamicwaters.ColumnWatch.block(baseBlock2));
                     int repairBottomY = Math.min(sealedFloorY, carving.waterLevel - 8);
                     if (carving.isWatershedWall) {
                         int maxPipeDepth = carving.waterLevel - 5;
@@ -698,6 +763,9 @@ public class NoiseChunkGeneratorMixin {
                     }
 
                     int repairTopY = carving.isWatershedWall ? Math.max(originalY, targetY + 2) : Math.max(carveTopY, carving.waterLevel);
+                    if (watched) com.AdamNew.dynamicwaters.ColumnWatch.note(startX + x, startZ + z, "repair column " + repairBottomY + ".." + repairTopY + " (solid to "
+                            + targetY + " as " + com.AdamNew.dynamicwaters.ColumnWatch.block(originalY > carving.waterLevel + 2 ? baseBlock2 : fillerBlock2)
+                            + (carving.isWatershedWall && targetY >= carving.waterLevel ? ", top " + com.AdamNew.dynamicwaters.ColumnWatch.block(topBlock2) : "") + ")");
 
                     for (int y = repairTopY; y > repairBottomY; y--) {
                         if (y >= minH && protectedBlocks2.get(y - minH)) continue;

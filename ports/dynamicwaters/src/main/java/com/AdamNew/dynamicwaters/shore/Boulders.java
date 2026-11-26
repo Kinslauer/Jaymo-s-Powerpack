@@ -97,6 +97,8 @@ public final class Boulders {
             final Palette palette = palette(ShoreSkin.landBiome(here, wx >> 2, surface[i] >> 2, wz >> 2,
                     biomeSource, sampler, lands), pos);
             final BitSet bits = protectedMap[i];
+            if (com.AdamNew.dynamicwaters.ColumnWatch.on(wx, wz)) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz,
+                    "boulder " + (bed + 1) + ".." + top + " (water " + surface[i] + ")");
             for (int ky = bed + 1; ky <= top; ky++) {
                 if (bits != null && ky >= minH && bits.get(ky - minH)) break;
                 chunk.setBlockState(pos.set(wx, ky, wz), stone(wx, ky, wz, palette, ky == top, bands), 3);

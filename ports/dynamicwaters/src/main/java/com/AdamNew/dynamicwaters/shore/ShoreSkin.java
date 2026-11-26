@@ -137,6 +137,9 @@ public final class ShoreSkin {
             if (loose && !solid(chunk.getBlockState(pos.set(wx, sy - 1, wz)))) continue;
             if (!skin.equals(current)) chunk.setBlockState(pos.set(wx, sy, wz), skin, 3);
             WatershedStats.bankSkins.increment();
+            if (com.AdamNew.dynamicwaters.ColumnWatch.on(wx, wz)) com.AdamNew.dynamicwaters.ColumnWatch.note(wx, wz, "skin "
+                    + com.AdamNew.dynamicwaters.ColumnWatch.block(skin) + " at " + sy + " (" + (flat ? "flats" : wet[i] ? "wet" : "dry bank")
+                    + ", was " + com.AdamNew.dynamicwaters.ColumnWatch.block(current) + ")");
             if (loose) continue;
 
             int exposure = 0;

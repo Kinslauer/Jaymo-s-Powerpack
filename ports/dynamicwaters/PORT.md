@@ -137,6 +137,9 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   The walk now reads `WiredRouter.withoutCaves(finalDensity)`: every density function the router takes from a
   `caves/` file stands in as solid rock. Built; not played; new chunks only.
 
+- **Column watch** (`ColumnWatch`, `/dynamicwaters watch|column`, ours): a test tool that notes each carving step (pool fill,
+  hollow refill, cuts, fills, dressing, surface rules, repair pass, bank skin, boulders) for the columns in a box as
+  their chunks generate, and reports bare-rock banks with the step that made them. Costs one check per column when off.
 - **Left clicks in the shore editors**: 26.3 numbers mouse buttons from 1 (`InputConstants.MOUSE_BUTTON_LEFT` is 1,
   right is 3), so the block picker, riverbank palette and water plant set screens, which waited for button 0, never
   took a left click. They compare with `InputConstants.MOUSE_BUTTON_LEFT` now. Built; not played.
