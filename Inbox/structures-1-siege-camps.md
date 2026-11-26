@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: apollo
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
 claimed_by: hermes-a
-pr: 
+pr: 2209
 suggested_owns:
   - kingdoms Camps.java, Sieges.java, SiegeTrain.java
   - kingdoms lang/parts/siege-camps.json
