@@ -120,6 +120,9 @@ import org.jspecify.annotations.Nullable;
 public final class Downed {
 	/** On someone for the moment their wounds' death is let through (they gave up, or bled out): no save may turn it away. */
 	public static final String FINISHING_TAG = "jaymospowers.finishing";
+	/** Animals that never harm a downed player (Andy, 2026-11-25: "owls should no longer finish downed players"). */
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> SPARE_DOWNED =
+		net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, JaymosPowers.id("spare_downed"));
 	/** A downed one's health: what mobs, fire and falls have left to take. */
 	public static final float DOWNED_HEALTH = 6.0F;
 	/**
@@ -504,6 +507,14 @@ public final class Downed {
 		// (and a mark their body didn't use isn't kept for their next death)
 		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> DownedLie.clearBody(newPlayer));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			if (entity instanceof Player && isDowned(entity) && source.getEntity() instanceof Mob attacker
+				&& attacker.getType().builtInRegistryHolder().is(SPARE_DOWNED)) {
+				// (Andy, 2026-11-25) "owls should no longer finish downed players": it lets them be
+				if (attacker.getTarget() == entity) {
+					attacker.setTarget(null);
+				}
+				return false;
+			}
 			// (Andy, 2026-11-18) a crushing blow (a mutant's slam) on the downed: "theres just simply no place else for that
 			// force to go, so obviously they get gibbed"; knocked out cold or not
 			boolean crushed = isDowned(entity) && com.jaymospowers.core.BlastGore.crushedNow(entity);

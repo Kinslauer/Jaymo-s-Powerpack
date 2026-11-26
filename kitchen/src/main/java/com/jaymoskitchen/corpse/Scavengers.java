@@ -45,9 +45,9 @@ import org.jspecify.annotations.Nullable;
  * Andy (2026-11-23, a clip of vultures making off with his body while he watched from Limbo): "vultures should land and
  * pick at the body limb from limb, until disturbed by other mobs or players ... all scavengers and body eaters should go
  * limb at a time, giving players more time to recover their party members or revive a fallen MCA." So a body is eaten a
- * part at a time ({@link CorpseEntity#nextPart}): the head (the brains), then the belly (the guts), then each arm and leg, are torn off and eaten there beside
+ * part at a time ({@link CorpseEntity#nextPart}): each arm and leg, then the belly (the guts), then the head, are torn off and eaten there beside
  * it ({@link #CHEW_TICKS}, the part in its mouth), and only then is the trunk torn open. A flier comes down onto the
- * ground to eat; a lone eater or two eat the head and the guts and move on, and only a horde or a blood moon goes on to the limbs
+ * ground to eat; a lone eater or two eat the limbs and the guts and move on, and only a horde or a blood moon goes on to the head
  * ({@link #finishes}); no more than {@link #MAX_EATERS} tear at one body at once, the rest wait their turn. A full scavenger
  * leaves what's left. Feeding, it notices less ({@link #FEEDING_SIGHT}, {@code ScavengerSightMixin}): the skittish ones
  * ({@link #SKITTISH}: vultures, foxes, coyotes) let a sneaking player come closer before they bolt, a moment after they
@@ -320,10 +320,11 @@ public final class Scavengers {
 	/**
 	 * Andy (2026-11-25): "the only time someone should be completely devoured is during an encounter with a horde (as they
 	 * all will want a bite) and during blood moons", then "they should focus on the head and body, then move on. so the
-	 * hordes will be the ones to start the limbs and finish". Whether {@code eater} goes on eating a body that's
-	 * {@link CorpseEntity#pickedOver picked over} (head and guts gone), its limbs and then its trunk: when it's ravenous, or
+	 * hordes will be the ones to start the limbs and finish", and at last "mobs will moreso go for limbs and then body and
+	 * move, most leaving the head alone". Whether {@code eater} goes on eating a body that's
+	 * {@link CorpseEntity#pickedOver picked over} (limbs and guts gone), its head and then its trunk: when it's ravenous, or
 	 * when {@link #HORDE} scavengers or more are about the body (within {@link #HORDE_REACH}). Otherwise the body is left
-	 * lying with its limbs on and what it wore.
+	 * lying with its head on and what it wore there.
 	 */
 	private static boolean finishes(ServerLevel level, Mob eater, CorpseEntity body) {
 		return ravenous(eater) || level.getEntitiesOfClass(Mob.class, body.getBoundingBox().inflate(HORDE_REACH),
@@ -597,7 +598,7 @@ public final class Scavengers {
 				mob.playAmbientSound();
 			}
 			if (body.pickedOver() && !finishes(level, mob, body)) {
-				// (the head and guts are gone: it leaves the rest lying, unless a horde is at it or the moon is red)
+				// (the limbs and guts are gone: it leaves the rest lying, unless a horde is at it or the moon is red)
 				body = null;
 				return;
 			}
@@ -755,7 +756,7 @@ public final class Scavengers {
 	 * flesh falls away in patches as the meal goes on ({@link CorpseEntity#eaten}).
 	 */
 	private static float eatenShare(CorpseEntity body, int bites, int needed) {
-		// (the belly torn open is a stage of its own, between the head and the limbs)
+		// (the belly torn open is a stage of its own, between the limbs and the head)
 		int lost = Integer.bitCount(body.missing() & CorpseEntity.ALL_PARTS) + (body.gutted() ? 1 : 0);
 		int stages = lost > 0 || body.nextPart() != 0 ? Integer.bitCount(CorpseEntity.ALL_PARTS) + 2 : 1;
 		return Math.min(0.99F, (lost + Math.min(1.0F, bites / (float) Math.max(1, needed))) / stages);
@@ -763,8 +764,8 @@ public final class Scavengers {
 
 	/**
 	 * One bite into {@code body} by {@code eater}, its jaws coming in along {@code in}: the body is dragged a little after
-	 * them and blood flies. Each {@code needed} bites tear off its next part ({@link CorpseEntity#nextPart}: the head, the
-	 * belly, then the arms and legs), and that's returned; with none left, the trunk is torn open: its meat spilled for the
+	 * them and blood flies. Each {@code needed} bites tear off its next part ({@link CorpseEntity#nextPart}: the arms and
+	 * legs, the belly, then the head), and that's returned; with none left, the trunk is torn open: its meat spilled for the
 	 * scavengers, a villager's grave emptied, the body gone ({@link #GONE}). {@link #BITTEN} for a bite and no more.
 	 */
 	private static int tear(ServerLevel level, net.minecraft.world.entity.Entity eater, CorpseEntity body, Vec3 in, int needed) {

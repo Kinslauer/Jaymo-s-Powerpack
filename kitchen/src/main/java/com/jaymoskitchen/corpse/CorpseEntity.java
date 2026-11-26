@@ -3339,23 +3339,24 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * Andy (2026-11-23): "all scavengers and body eaters should go limb at a time, giving players more time to recover
-	 * their party members", and (2026-11-25) "they should also prioritize brains, then guts/entrails, then limbs". The part a
-	 * scavenger tears off next, as a {@code PART_} bit: the head, then the belly ({@link #GUTS}, if it isn't gutted yet),
-	 * then an arm or a leg it still has (any); 0 once only the trunk is left, or for a body not built with limbs (a fish, a
-	 * critter, a slime, a snake), which is torn open whole.
+	 * their party members", and (2026-11-25) "mobs will moreso go for limbs and then body and move, most leaving the head
+	 * alone". The part a scavenger tears off next, as a {@code PART_} bit: an arm or a leg it still has (any), then the belly
+	 * ({@link #GUTS}, if it isn't gutted yet), then the head (only a horde or a blood moon gets that far:
+	 * {@link #pickedOver}); 0 once only the trunk is left, or for a body not built with limbs (a fish, a critter, a slime, a
+	 * snake), which is torn open whole.
 	 */
 	int nextPart() {
 		RagdollRig.Shape shape = rig().shape;
 		if (isFish() || shape != RagdollRig.Shape.HUMANOID && shape != RagdollRig.Shape.QUADRUPED) {
 			return 0;
 		}
-		if ((missing() & PART_HEAD) == 0) {
-			return PART_HEAD;
-		}
-		if (!gutted) {
-			return GUTS;
-		}
 		int left = LIMBS & ~missing();
+		if (left == 0) {
+			if (!gutted) {
+				return GUTS;
+			}
+			left = PART_HEAD & ~missing();
+		}
 		if (left == 0) {
 			return 0;
 		}
@@ -3372,14 +3373,14 @@ public class CorpseEntity extends Entity {
 	 * drawn on the body, an arm lets go of what it held, and the bites start over for the next part.
 	 */
 	/**
-	 * Picked over: a body built with limbs whose head and guts are eaten (Andy, 2026-11-25: "they should focus on the head
-	 * and body, then move on. so the hordes will be the ones to start the limbs and finish"). Most eaters leave it there
-	 * with its limbs on; only a horde or a blood moon goes on to the limbs and the trunk ({@link Scavengers}).
+	 * Picked over: a body built with limbs whose limbs and guts are eaten (Andy, 2026-11-25: "mobs will moreso go for limbs
+	 * and then body and move, most leaving the head alone"). Most eaters leave it there with its head on; only a horde or
+	 * a blood moon goes on to the head and the trunk ({@link Scavengers}).
 	 */
 	boolean pickedOver() {
 		RagdollRig.Shape shape = rig().shape;
 		return !isFish() && (shape == RagdollRig.Shape.HUMANOID || shape == RagdollRig.Shape.QUADRUPED)
-			&& (missing() & PART_HEAD) != 0 && gutted;
+			&& (missing() & LIMBS) == LIMBS && gutted;
 	}
 
 	/** Bites taken toward the part being torn at now. */
