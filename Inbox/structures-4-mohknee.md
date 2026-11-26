@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: gemini
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
 claimed_by: gemini
-pr: 
+pr: 2250
 suggested_owns:
   - kingdoms seas/Mohknee.java, mixin MohkneeStructureMixin.java
   - kingdoms lang/parts/mohknee.json
