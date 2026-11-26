@@ -8431,3 +8431,14 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 
 - **Zombie sounds back**: Tissou's Zombie Pack (its zombie, husk and zombie villager groans, and the future's zombie skins) had dropped out of the selected resource packs, so zombies sounded like the game's own again; it was only ever switched on once per install. It's now kept on like the medieval villagers pack: switched back on at any launch it's found off. A player who'd rather not have it creates `config/jaymospowers-tissou-zombies-off` (`PackResourcePacks`).
 - Not run in game: couldn't see Andy's options or log from here, so why it dropped out is a guess (the same thing happened to the medieval villagers pack on 2026-11-04).
+
+## 0.27.78 (2026-11-26): The salmon run: salmon swim upriver in autumn, spawn in the headwaters and die there (#2207)
+
+- Andy (2026-11-26, nature picks): "YES" to salmon swimming upriver in autumn, and his note: "they should deteriorate in the water after spawning like they do irl". Vanilla salmon, nothing about the fish changed; it needs Kitchen's seasons (`fishing/SalmonRun`).
+- **The run**: in autumn every grown salmon in a river swims against the flow (Powers' river flow says which way). Where the water steps up it leaps, over and over, with a splash, and makes it about one try in three. Near players, schools of the run (3 to 6 salmon) come up the river every 30 seconds while the reach's run lasts.
+- **The beds**: once a salmon has come 48 blocks upriver it spawns on the first shallow gravel it finds (after 160 blocks, on any shallow bed, or where the river ends). From then it's spent: 60% slower, drifting back downstream and losing a third of its health every two-thirds of a day, so it dies about two days after spawning and leaves its body on the bed. A run salmon that never spawns is spent where it is when winter comes.
+- **Spring**: the small salmon of each bed that took (up to 8) come up from it and drift down to the sea, and the banks round a bed where many died grow lusher: grass and ferns, now and then a berry bush.
+- **A fished-out river runs thin**: each 64-block reach of river remembers how many spawned on its beds, and next autumn's run there is twice that plus 2 (12 the first year, 40 at most). Catch-and-release puts the same fish back in the run.
+- **Fishers work the run** (lore "The run", for Andy to approve): by day in autumn a fisherman villager near you walks down to the run and takes a salmon now and then, but always leaves 2 of a school to go on to the beds. Salmon fetches half at a fisherman's on a run river while the run is in.
+- **Spring shallows** (`fishing/SpringShallows`): in spring the river and lake fish that bite better in spring than in winter come into water 2 blocks deep or less and splash there, and where 3 or more of a kind gather within 8 blocks a young one is born every 2 minutes (at most 12 of that kind within 32).
+- Built with Gradle; not played.
