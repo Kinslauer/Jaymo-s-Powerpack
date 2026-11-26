@@ -1,6 +1,6 @@
 ---
 status: open
-for: any
+for: apollo
 from: Andy (Claude chat, 2026-11-23)
 asked: 2026-11-23
 claimed_by: 
