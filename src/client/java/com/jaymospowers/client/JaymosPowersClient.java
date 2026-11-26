@@ -75,6 +75,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.bodymenu.BodyMenuClient.init();
 		// (Andy, 2026-11-20) first-time cards for the body menu, executions, the lasso, being downed and the wall sit
 		com.jaymospowers.client.hud.BodyTips.init();
+		// (Andy, 2026-11-26) first-time cards for loading the Ship's Cannon and the Field Mortar
+		com.jaymospowers.client.hud.GunTips.init();
 		// biome name, use bar, chat mentions and Shift+T item sharing (client/bits)
 		com.jaymospowers.client.bits.BiomeTitle.init();
 		com.jaymospowers.client.bits.UseBar.init();
