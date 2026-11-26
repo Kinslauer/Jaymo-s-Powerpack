@@ -17851,3 +17851,9 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - Only those packets wait: the world, entities and the loading screen's own packets go through as before. Plain system lines are capped at 200 per hidden player (oldest dropped); signed chat and advancement updates are always kept.
 - `JoinHush` (gate: `StoryGround.unseen` plus vanilla's client-loaded flag at join), `JoinHushSendMixin` (ServerCommonPacketListenerImpl.send), `JoinHushAwardMixin` (PlayerAdvancements.award), `JoinHushBroadcastMixin` (PlayerList.broadcastSystemMessage).
 - Built; not played. Mixin targets checked with javap against the 26.3 jar.
+
+## 0.13.38 (2026-11-26): Couched Lance only where the lance reaches; Riders start with a spear (#2226)
+
+- The Couched Lance spear form now works only from a mount the lance reaches down from (horse, pig, goat, llama...), not anything over 2 blocks tall or a camel, elephant, mammoth, dragon or wyvern: the same rule as Powers' couched lance (`SpearForms.mounted`). Skill and perk text no longer say any mount.
+- The Rider class starts with an iron spear instead of an iron lance (`Classes`).
+- Built; not played.
