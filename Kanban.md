@@ -23,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/symbiote-113-picks-restart|symbiote-113-picks-restart]] · for any · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
-- [ ] [[Inbox/nycto-3|nycto-3]] · for any · open
 
 
 ## Being built
@@ -59,6 +58,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-10|hunters-road-10]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
 - [ ] [[Inbox/nycto-2|nycto-2]] · for any · blocked
+- [ ] [[Inbox/nycto-3|nycto-3]] · for any · blocked
 
 
 ## Done
