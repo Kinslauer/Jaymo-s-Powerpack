@@ -52,7 +52,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for any · blocked
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · for any · blocked
 - [ ] [[Inbox/hunters-road-5|hunters-road-5]] · for any · blocked
-- [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
 - [ ] [[Inbox/hunters-road-10|hunters-road-10]] · for any · blocked
 - [ ] [[Inbox/nycto-2|nycto-2]] · for any · blocked
@@ -64,6 +63,7 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-7|nycto-7]] · for any · blocked
 - [ ] [[Inbox/hunters-road-6|hunters-road-6]] · for any · blocked
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · for any · blocked
+- [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
 
 
 ## Done
