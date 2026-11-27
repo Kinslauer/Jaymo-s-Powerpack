@@ -65,14 +65,62 @@ SEED = {  # written by --setup when the branch doesn't exist yet
 }
 
 
+# Variables that redirect git to another repo, worktree, index or object store (they override `git -C`).
+GIT_ENV_VARS = frozenset({
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_IMPLICIT_WORK_TREE",
+    "GIT_INDEX_FILE",
+    "GIT_COMMON_DIR",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_PREFIX",
+    "GIT_GRAFT_FILE",
+    "GIT_SHALLOW_FILE",
+})
+READ_ONLY_GIT = frozenset({
+    "cat-file", "describe", "diff", "for-each-ref", "log", "ls-files",
+    "ls-remote", "merge-base", "rev-parse", "show", "show-ref", "status",
+})
+
+
 def run(args, cwd=None, check=True):
-    out = subprocess.run(args, cwd=cwd, capture_output=True, text=True, encoding="utf-8")
+    env = {k: v for k, v in os.environ.items() if k.upper() not in GIT_ENV_VARS}
+    out = subprocess.run(args, cwd=cwd, env=env, capture_output=True, text=True, encoding="utf-8")
     if check and out.returncode != 0:
         raise SystemExit(f"{' '.join(args)} failed: {(out.stderr or out.stdout).strip()}")
     return out
 
 
+def is_read_only_git(args):
+    i = 0
+    while i < len(args) and args[i].startswith("-"):
+        i += 2 if args[i] in ("-c", "--config-env") else 1
+    if i >= len(args):
+        return True
+    cmd, rest = args[i], args[i + 1:]
+    return cmd in READ_ONLY_GIT or (cmd == "config" and len(rest) == 1 and not rest[0].startswith("-"))
+
+
+def require_live_repo(live):
+    """Refuse to change git state unless `live` is the root of its own git checkout (never a parent repo)."""
+    out = run(["git", "-C", live, "rev-parse", "--show-toplevel"], check=False)
+    top = out.stdout.strip() if out.returncode == 0 else ""
+    live_real = os.path.realpath(live)
+    if top and os.path.normcase(os.path.realpath(top)) == os.path.normcase(live_real):
+        return
+    if "--hook" in sys.argv:
+        sys.exit(0)
+    shown_live = (live_real if os.path.normcase(os.path.abspath(live)) == os.path.normcase(live_real)
+                  else f"{live} ({live_real})")
+    shown_top = os.path.realpath(top) if top else "(not a git repository)"
+    print(f"Refusing to write into wrong git repo: live is {shown_live}, toplevel is {shown_top}", file=sys.stderr)
+    sys.exit(1)
+
+
 def git(live, *args, check=True):
+    if not is_read_only_git(args):
+        require_live_repo(live)
     return run(["git", "-C", live, *args], check=check)
 
 
@@ -99,7 +147,8 @@ def setup(live):
     if is_checkout(live):
         print(f"{live} is already set up.")
         return
-    git(live, "init", "-q")
+    run(["git", "-C", live, "init", "-q"])
+    require_live_repo(live)
     git(live, "remote", "add", "origin", remote_url())
     git(live, "config", "core.autocrlf", "false")
     identity(live)
@@ -370,6 +419,7 @@ def write_kanban(live):
 
 
 def sync(live):
+    require_live_repo(live)
     lock = os.path.join(live, ".sync-lock")
     try:
         fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
