@@ -4,6 +4,7 @@ import com.jaymospowers.core.PowerEvents;
 import com.jaymospowers.power.arsenal.ArsenalPower;
 import com.jaymospowers.power.chrono.ChronoPower;
 import com.jaymospowers.power.gravity.GravityPower;
+import com.jaymospowers.power.handofgod.HandOfGodPower;
 import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.wind.WindPower;
 import net.fabricmc.api.ModInitializer;
@@ -161,6 +162,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.xenoform.XenoformPower.init();
 		com.jaymospowers.power.zfighter.ZFighterPower.init();
 		com.jaymospowers.power.smoke.SmokePower.init();
+		HandOfGodPower.init();
 		// (Awakening picks) the Reactor Heart, the Blinker and the Lawgiver are folded into other kits: their old holders are moved over
 		com.jaymospowers.core.RetiredPowers.init();
 		// (Awakening picks) each power's ladder of trials
