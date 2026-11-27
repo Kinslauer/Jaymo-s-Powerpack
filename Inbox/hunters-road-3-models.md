@@ -5,7 +5,8 @@ from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
 claimed_by: 
 pr: 
-thread: t3 mcp:e02bb8e9-0436-4a45-baef-82a67433c5f9
+thread: t3 mcp:dc4cbd14-749f-4b32-8dea-525553f7418e
+text_pass: 
 ---
 
 # Hunter's Road 3 models: Corpse-eaters (Kingdoms `monsters/`) rows B1 B5 B6 B7 F1 F2

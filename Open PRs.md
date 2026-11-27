@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 15:16
+updated: 2026-11-27 15:50
 ---
 # Open PRs
 
-14 open, as of 2026-11-27 15:16. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+12 open, as of 2026-11-27 15:50. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -52,7 +52,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[mohknee-rare-structure-starts]]
 
 ## [#2251](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2251) Blood Awakening per-blood upgrades, Patch 1 (Plain, Mountain & Elemental/Sky)
-- **Branch:** `t3/blood-awakening-per-blood-patch-1` · **Updated:** 2026-11-26 (today)
+- **Branch:** `t3/blood-awakening-per-blood-patch-1` · **Updated:** 2026-11-26 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
@@ -64,14 +64,4 @@ Andy merges only on "merge", one at a time.
 ## [#2280](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2280) Hand of God: Celestial Hold and Celestial Turn
 - **Branch:** `claude/small-armies-picks-4` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2323](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2323) Captive chains reach 9 blocks like a lead, escape hints once each, crude lockpick
-- **Branch:** `claude/project-thread-ams5w3` · **Updated:** 2026-11-27 (today)
-- **Checks:** ⏳ 4 of 4 running
-- **Agent:** no agent note
-
-## [#2324](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2324) Night view: dip to black instead of sliding through the bedroom wall; no idle cam in bed
-- **Branch:** `claude/project-thread-qwa9rl` · **Updated:** 2026-11-27 (today)
-- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
