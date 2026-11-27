@@ -1,11 +1,12 @@
 ---
-status: writing
+status: in-review
 for: bacchus
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
 claimed_by: hermes-b
 pr: 2281
 writer: hermes-writer
+text_pass: done
 ---
 
 # Legends patch 3: the big symbiote, after their Hulk
