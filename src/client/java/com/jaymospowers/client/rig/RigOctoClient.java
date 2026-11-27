@@ -50,6 +50,9 @@ import net.minecraft.world.phys.Vec3;
  * all four claws together ahead of the chest. Other moves pose them by hand: the lower pair stabs and lifts for the
  * skewer, all four spin flat for the pinwheel, the lower pair plants behind for the vault and all four point down for the
  * dive; the flurry and the watch thrust one arm. Every angle eases toward its target, so the arms move like machinery.
+ * <p>The arms never pass through the wearer (Andy: "does it clip through the body in game?"): each elbow goes out a way
+ * that keeps the arm clear ({@link #clear}), the upper pair back and out over the shoulders and the lower pair out past
+ * the hips, and every move's claw points sit where the forearms reach them around the body, not through it.
  * <p>Also here, on the wearer's own client (movement is the client's): the wall climb (the arms grip, and you go up a wall
  * as on a ladder) and the arm walk (carried on the four arms, held up off the ground between them, the symbiote's stride).
  * Drawn on the body bone, after the suit ({@link RigSuit}).
@@ -80,7 +83,7 @@ public final class RigOctoClient {
 	/** The arms' paintable sheets ({@code tools/gen_rig_paint.py}): their plates in light greys, and their lights in white. */
 	static final Identifier PAINT = JaymosPowers.id("textures/entity/rig/octo_paint.png");
 	static final Identifier LIGHTS = JaymosPowers.id("textures/entity/rig/octo_lights.png");
-	/** On the render state: per arm {pitch, yaw, elbow, reach, claw open}, then the spin and time; null when the arms aren't worn. */
+	/** On the render state: per arm {pitch, yaw, roll, elbow, upper reach, fore reach, claw open}; null when the arms aren't worn. */
 	static final RenderStateDataKey<float[]> ARMS = RenderStateDataKey.create(() -> "jaymospowers:rig_octo");
 
 	/** Arm order: upper right, upper left, lower right, lower left. Where each meets the back (body bone pixels). */
@@ -89,7 +92,9 @@ public final class RigOctoClient {
 	private static final float UPPER = 10.0F, FORE = 9.0F, CLAW_TIP = 4.2F;
 	/** How much each strut grows (pixels) for every unit of reach past 1: the rods sliding out. */
 	private static final float UPPER_ROD = 9.0F, FORE_ROD = 8.0F;
-	private static final int VALUES = 5;
+	private static final int VALUES = 7;
+	/** The longest the shoulder strut runs out to its elbow (pixels), however far the claw is going. */
+	private static final float ELBOW_MAX = 26.0F;
 
 	private static final Map<UUID, float[]> POSE = new HashMap<>();
 	private static final Map<UUID, Float> UNFOLD = new HashMap<>();
@@ -167,39 +172,86 @@ public final class RigOctoClient {
 		// the left arms mirror the right
 		t[o] = pitch;
 		t[o + 1] = i % 2 == 0 ? -yaw : yaw;
-		t[o + 2] = elbow;
-		t[o + 3] = reach;
-		t[o + 4] = open;
+		t[o + 2] = 0.0F;
+		t[o + 3] = elbow;
+		t[o + 4] = reach;
+		t[o + 5] = reach;
+		t[o + 6] = open;
+	}
+
+	/** -1 for the right arms, 1 for the left. */
+	private static float side(int i) {
+		return i % 2 == 0 ? -1.0F : 1.0F;
+	}
+
+	/**
+	 * Where arm {@code i}'s elbow goes to keep it clear of the body: a way out from the mount, then the share of the
+	 * distance to the claw's point the shoulder strut runs out. The upper pair goes back and out over the shoulders (up
+	 * through the helm otherwise), the lower pair out past the hips.
+	 */
+	private static float[] clear(int i) {
+		return i < 2 ? new float[] {side(i) * 1.2F, -0.6F, 0.8F, 0.35F} : new float[] {side(i), 0.15F, 0.3F, 0.35F};
+	}
+
+	/** Walking and climbing: the knees up and out like a spider's. */
+	private static float[] knee(int i) {
+		return i < 2 ? new float[] {side(i) * 1.2F, -0.7F, 0.6F, 0.45F} : new float[] {side(i), -0.5F, 0.1F, 0.45F};
+	}
+
+	/** The upper pair's elbows riding higher, so the forearms come forward over the shoulders, not through them. */
+	private static float[] high(int i) {
+		return new float[] {side(i) * 1.2F, -1.2F, 0.7F, 0.4F};
+	}
+
+	/** {@link #reach} with the elbow out the way that keeps the arm clear of the body. */
+	static void reach(float[] t, int i, Vec3 tip, float open, float maxReach) {
+		reach(t, i, tip, open, maxReach, clear(i));
 	}
 
 	/**
 	 * Arm {@code i} posed to put its claw's tips on {@code tip} (body model space, pixels: +X the wearer's left, +Y down, +Z
-	 * back): aimed at it from its mount, the rods run out as far as it takes (up to {@code maxReach}) to leave the elbow a
-	 * little bent, and the elbow raised in the arm's own upright plane so the knee juts up, the way a leg's does.
+	 * back). The elbow goes out {@code way} from the mount ({@link #clear}: a direction, then the share of the distance), the
+	 * shoulder strut's rod running out to it; then the forearm's rod runs out to the point (up to {@code maxReach} each). The
+	 * arm turns in its socket (yaw, pitch and roll) to point at the elbow with the forearm's bend toward the point.
 	 */
-	static void reach(float[] t, int i, Vec3 tip, float open, float maxReach) {
-		double dx = tip.x - MOUNT[i][0], dy = tip.y - MOUNT[i][1], dz = tip.z - MOUNT[i][2];
-		double far = Math.sqrt(dx * dx + dy * dy + dz * dz);
+	static void reach(float[] t, int i, Vec3 tip, float open, float maxReach, float[] way) {
+		Vec3 mount = new Vec3(MOUNT[i][0], MOUNT[i][1], MOUNT[i][2]);
+		double far = tip.distanceTo(mount);
 		if (far < 1.0E-3) {
 			return;
 		}
-		double pitch = Math.asin(Mth.clamp(-dy / far, -1.0, 1.0));
-		double yaw = Math.atan2(dx, dz);
-		// how far out the rods run: enough for the arm to reach with the elbow a little bent
-		double ext = Mth.clamp((far / 0.92 - (UPPER + FORE + CLAW_TIP)) / (UPPER_ROD + FORE_ROD) + 1.0, 1.0, maxReach);
-		double a = UPPER + UPPER_ROD * (ext - 1.0);
-		double b = FORE + FORE_ROD * (ext - 1.0) + CLAW_TIP;
-		double atShoulder = 0.0, atTip = 0.0;
-		if (far < a + b) {
-			atShoulder = Math.acos(Mth.clamp((a * a + far * far - b * b) / (2.0 * a * far), -1.0, 1.0));
-			atTip = Math.acos(Mth.clamp((b * b + far * far - a * a) / (2.0 * b * far), -1.0, 1.0));
+		double strut = Mth.clamp(way[3] * far, UPPER, Math.min(ELBOW_MAX, UPPER + UPPER_ROD * (maxReach - 1.0)));
+		Vec3 elbow = mount.add(new Vec3(way[0], way[1], way[2]).normalize().scale(strut));
+		// the forearm can't fold shorter than itself: back the elbow off along the line from the point
+		double shortest = FORE + CLAW_TIP;
+		if (tip.distanceTo(elbow) < shortest) {
+			elbow = tip.add(elbow.subtract(tip).normalize().scale(shortest));
 		}
+		double upperReach = Math.max(1.0, (elbow.distanceTo(mount) - UPPER) / UPPER_ROD + 1.0);
+		double foreReach = Mth.clamp((tip.distanceTo(elbow) - shortest) / FORE_ROD + 1.0, 1.0, maxReach);
+		Vec3 z = elbow.subtract(mount).normalize(), w = tip.subtract(elbow).normalize();
+		// the arm's own frame: z down the strut, y away from the way the forearm bends (the elbow bends about x)
+		Vec3 bend = w.subtract(z.scale(w.dot(z)));
+		Vec3 y;
+		if (bend.lengthSqr() < 1.0E-8) {
+			Vec3 q = new Vec3(0.0, -1.0, 0.0).subtract(z.scale(-z.y));
+			if (q.lengthSqr() < 1.0E-8) {
+				q = new Vec3(1.0, 0.0, 0.0).subtract(z.scale(z.x));
+			}
+			y = q.normalize();
+		} else {
+			y = bend.normalize().scale(-1.0);
+		}
+		Vec3 x = y.cross(z);
 		int o = i * VALUES;
-		t[o] = (float)(pitch + atShoulder);
-		t[o + 1] = (float)yaw;
-		t[o + 2] = (float)-(atShoulder + atTip);
-		t[o + 3] = (float)ext;
-		t[o + 4] = open;
+		// as a ModelPart turns (z, then y, then x)
+		t[o] = (float)Math.atan2(y.z, z.z);
+		t[o + 1] = (float)Math.asin(Mth.clamp(-x.z, -1.0, 1.0));
+		t[o + 2] = (float)Math.atan2(x.y, x.x);
+		t[o + 3] = (float)Math.acos(Mth.clamp(z.dot(w), -1.0, 1.0));
+		t[o + 4] = (float)upperReach;
+		t[o + 5] = (float)foreReach;
+		t[o + 6] = open;
 	}
 
 	/** Out and at rest: the upper pair arched over the shoulders, the lower pair down and out. */
@@ -218,29 +270,22 @@ public final class RigOctoClient {
 		}
 	}
 
-	/** An upper arm reaching straight ahead over the shoulder. */
-	private static void forward(float[] t, int i, float reach, float open) {
-		set(t, i, 1.35F, 0.25F, 1.45F, reach, open);
-	}
-
-	/** A lower arm reaching ahead past the hip, lifted by {@code lift}. */
-	private static void low(float[] t, int i, float lift, float reach, float open) {
-		set(t, i, -0.15F + lift, 2.45F, 0.1F, reach, open);
-	}
-
 	/**
 	 * Where arm {@code i}'s claw tips are in pose {@code t} (body model space, pixels), so a move can carry the claw from
 	 * there to a point in a straight line rather than swinging the joints across.
 	 */
 	private static Vec3 tip(float[] t, int i) {
 		int o = i * VALUES;
-		float reach = t[o + 3];
-		double ext = Math.max(1.0F, reach), shrink = Mth.clamp(reach, 0.2F, 1.0F);
-		double a = (UPPER + UPPER_ROD * (ext - 1.0)) * shrink, b = (FORE + FORE_ROD * (ext - 1.0) + CLAW_TIP) * shrink;
-		double pitch = t[o], yaw = t[o + 1], fore = pitch + t[o + 2];
-		return new Vec3(MOUNT[i][0] + Math.sin(yaw) * (Math.cos(pitch) * a + Math.cos(fore) * b),
-			MOUNT[i][1] - Math.sin(pitch) * a - Math.sin(fore) * b,
-			MOUNT[i][2] + Math.cos(yaw) * (Math.cos(pitch) * a + Math.cos(fore) * b));
+		float upperReach = t[o + 4], foreReach = t[o + 5];
+		double shrink = Mth.clamp(upperReach, 0.2F, 1.0F);
+		double a = (UPPER + UPPER_ROD * (Math.max(1.0F, upperReach) - 1.0)) * shrink;
+		double b = (FORE + FORE_ROD * (Math.max(1.0F, foreReach) - 1.0) + CLAW_TIP) * shrink;
+		double ca = Math.cos(t[o]), sa = Math.sin(t[o]), cb = Math.cos(t[o + 1]), sb = Math.sin(t[o + 1]);
+		double cc = Math.cos(t[o + 2]), sc = Math.sin(t[o + 2]), bend = t[o + 3];
+		Vec3 y = new Vec3(cc * sb * sa - sc * ca, sc * sb * sa + cc * ca, cb * sa);
+		Vec3 z = new Vec3(cc * sb * ca + sc * sa, sc * sb * ca - cc * sa, cb * ca);
+		Vec3 w = z.scale(Math.cos(bend)).subtract(y.scale(Math.sin(bend)));
+		return new Vec3(MOUNT[i][0], MOUNT[i][1], MOUNT[i][2]).add(z.scale(a)).add(w.scale(b));
 	}
 
 	/** A point in the world, in the body's model space (pixels: +X the wearer's left, +Y down from the neck, +Z back). */
@@ -277,8 +322,21 @@ public final class RigOctoClient {
 		return hit != null ? hit.getEntity().getBoundingBox().getCenter() : end;
 	}
 
-	/** What the arms want to look like on {@code player} now; returns whether a claw is placed somewhere in the world. */
-	private static boolean target(Player player, float partial, float[] t, float now) {
+	/** {@link #target}'s answer: a claw is placed somewhere (the arms ease faster), and the pose is taken as it is (no ease). */
+	private static final int PLACED = 1, SNAP = 2;
+
+	/** Arm {@code i}'s claw on a point (body model space), telescoping as far as it takes. */
+	private static int at(float[] t, int i, Vec3 point, float open) {
+		reach(t, i, point, open, EXT_FAR);
+		return PLACED;
+	}
+
+	private static Vec3 v(double x, double y, double z) {
+		return new Vec3(x, y, z);
+	}
+
+	/** What the arms want to look like on {@code player} now; returns {@link #PLACED} and {@link #SNAP}. */
+	private static int target(Player player, float partial, float[] t, float now) {
 		rest(t, now);
 		RigMoves.Move move = RigMoves.get(player);
 		int held = RigOcto.heldId(player);
@@ -292,14 +350,14 @@ public final class RigOctoClient {
 				k = Mth.clamp(age / len, 0.0F, 1.0F);
 			}
 		}
-		boolean placed = false;
+		int flags = 0;
 		// walking or climbing: the claws on whatever they planted on (the upper pair stays free while a move needs it)
 		Vec3[] claws = RigOctoWalk.claws(player, partial, held >= 0 || kind != 0 && kind != RigOcto.MOVE_WATCH);
 		if (claws != null) {
 			for (int i = 0; i < 4; i++) {
 				if (claws[i] != null) {
-					reach(t, i, model(player, partial, claws[i]), 0.15F, EXT_WALK);
-					placed = true;
+					reach(t, i, model(player, partial, claws[i]), 0.15F, EXT_WALK, knee(i));
+					flags |= PLACED;
 				}
 			}
 		}
@@ -308,47 +366,57 @@ public final class RigOctoClient {
 		if (hold != null) {
 			// the upper claws on either side of it, telescoping out to it wherever it is
 			boolean reaching = kind == RigOcto.MOVE_GRAB && k < 0.5F;
-			Vec3 at = model(player, partial, hold.getBoundingBox().getCenter());
+			Vec3 point = model(player, partial, hold.getBoundingBox().getCenter());
 			double side = (hold.getBbWidth() * 0.5 + 0.1) * 16.0 / player.getScale();
-			reach(t, 0, at.add(-side, 0.0, 0.0), reaching ? 0.9F : 0.0F, EXT_FAR);
-			reach(t, 1, at.add(side, 0.0, 0.0), reaching ? 0.9F : 0.0F, EXT_FAR);
-			placed = true;
+			flags |= at(t, 0, point.add(-side, 0.0, 0.0), reaching ? 0.9F : 0.0F);
+			flags |= at(t, 1, point.add(side, 0.0, 0.0), reaching ? 0.9F : 0.0F);
 		} else if (held >= 0 || kind == RigOcto.MOVE_GRAB || kind == RigOcto.MOVE_HOLD) {
+			// reaching out ahead, then drawn in close
 			boolean reaching = kind == RigOcto.MOVE_GRAB && k < 0.5F;
-			forward(t, 0, reaching ? 1.6F : 1.15F, reaching ? 0.9F : 0.0F);
-			forward(t, 1, reaching ? 1.6F : 1.15F, reaching ? 0.9F : 0.0F);
+			for (int i = 0; i < 2; i++) {
+				flags |= at(t, i, v(side(i) * 3.0F, -2.0, reaching ? -30.0 : -20.0), reaching ? 0.9F : 0.0F);
+			}
 		}
 		if (kind != RigOcto.MOVE_ANCHOR) {
 			ANCHORS.remove(player.getUUID());
 		}
 		switch (kind) {
 			case RigOcto.MOVE_HURL -> {
-				// snapped forward, claws open, the rods run out with the throw
-				forward(t, 0, 1.8F, 1.0F);
-				forward(t, 1, 1.8F, 1.0F);
-				t[2] = t[7] = 1.65F;
+				// snapped forward and up, claws open, the rods run out with the throw
+				for (int i = 0; i < 2; i++) {
+					flags |= at(t, i, v(side(i) * 4.0F, -6.0, -34.0), 1.0F);
+				}
 			}
 			case RigOcto.MOVE_SKEWER -> {
-				// the lower pair stabs ahead, then lifts what it ran through overhead and brings it down
-				float lift = k < 0.25F ? 0.0F : k < 0.65F ? (k - 0.25F) / 0.4F * 1.5F : 1.5F - (k - 0.65F) / 0.35F * 1.8F;
-				low(t, 2, lift, k < 0.25F ? 0.6F + k * 4.0F : 1.6F, 0.0F);
-				low(t, 3, lift, k < 0.25F ? 0.6F + k * 4.0F : 1.6F, 0.0F);
+				// the lower pair stabs ahead, then lifts what it ran through overhead and brings it down ahead
+				for (int i = 2; i < 4; i++) {
+					float s = side(i);
+					Vec3 stab = v(s * 5.0F, 10.0, -30.0), lift = v(s * 5.0F, -24.0, -14.0), down = v(s * 5.0F, 26.0, -26.0);
+					Vec3 point = k < 0.25F ? tip(base, i).lerp(stab, k / 0.25F) : k < 0.65F ? stab.lerp(lift, (k - 0.25F) / 0.4F)
+						: lift.lerp(down, (k - 0.65F) / 0.35F);
+					flags |= at(t, i, point, 0.0F);
+				}
 			}
 			case RigOcto.MOVE_PINWHEEL -> {
-				// all four flat out, spinning (added after the ease, below)
+				// all four flat out in a wheel behind the back, spinning (posed as it turns, not eased)
+				float spin = (now - move.start()) * SPIN_RATE;
+				float[] start = {-0.75F * Mth.PI, -0.25F * Mth.PI, 0.75F * Mth.PI, 0.25F * Mth.PI};
 				for (int i = 0; i < 4; i++) {
-					set(t, i, i < 2 ? 0.15F : -0.15F, i < 2 ? 1.2F : 2.0F, 0.0F, 1.4F, 0.8F);
+					float c = Mth.cos(start[i] + spin), s = Mth.sin(start[i] + spin);
+					reach(t, i, v(c * 18.0F, 6.0F + s * 18.0F, 10.0), 0.8F, EXT_FAR, new float[] {c, s, 1.2F, 0.5F});
 				}
+				flags |= PLACED | SNAP;
 			}
 			case RigOcto.MOVE_VAULT -> {
 				// the lower pair planted behind and below, pushing
-				set(t, 2, -1.15F, 0.3F, 0.0F, 1.6F, 0.6F);
-				set(t, 3, -1.15F, 0.3F, 0.0F, 1.6F, 0.6F);
+				for (int i = 2; i < 4; i++) {
+					flags |= at(t, i, v(side(i) * 8.0F, 30.0, 20.0), 0.6F);
+				}
 			}
 			case RigOcto.MOVE_DIVE -> {
 				// all four point down at what's below
 				for (int i = 0; i < 4; i++) {
-					set(t, i, -1.5F, i < 2 ? 2.7F : 2.3F, 0.0F, 1.6F, 0.0F);
+					flags |= at(t, i, i < 2 ? v(side(i) * 12.0F, 38.0, -6.0) : v(side(i) * 11.0F, 40.0, 6.0), 0.0F);
 				}
 			}
 			case RigOcto.MOVE_ANCHOR -> {
@@ -359,27 +427,31 @@ public final class RigOctoClient {
 					ANCHORS.put(player.getUUID(), anchor);
 				}
 				// shot straight out from where the claw was
-				reach(t, 0, tip(base, 0).lerp(model(player, partial, anchor.at()), Math.min(1.0F, k / 0.25F)), 0.0F, EXT_FAR);
-				placed = true;
+				flags |= at(t, 0, tip(base, 0).lerp(model(player, partial, anchor.at()), Math.min(1.0F, k / 0.25F)), 0.0F);
 			}
-			case RigOcto.MOVE_LANCE -> forward(t, 0, 1.0F + bump(k) * 0.9F, 0.0F);
-			case RigOcto.MOVE_CRESCENT -> set(t, 1, 0.9F, Mth.lerp(k, 0.4F, 2.6F), 1.2F, 1.3F, 0.6F);
+			case RigOcto.MOVE_LANCE -> flags |= at(t, 0, v(-3.0, -4.0, -14.0 - bump(k) * 20.0F), 0.0F);
+			case RigOcto.MOVE_CRESCENT -> {
+				// the upper left arm sweeps across ahead of the face, far enough out that the forearm passes clear of it
+				float f = Mth.lerp(k, 1.1F, -1.1F);
+				flags |= at(t, 1, v(Mth.sin(f) * 13.0F, -4.0, -28.0F - Mth.cos(f) * 3.0F), 0.6F);
+			}
 			case RigOcto.MOVE_CLAMP -> {
-				forward(t, 0, 1.3F, 1.0F - k);
-				forward(t, 1, 1.3F, 1.0F - k);
+				for (int i = 0; i < 2; i++) {
+					flags |= at(t, i, v(side(i) * 3.0F, -2.0, -22.0), 1.0F - k);
+				}
 			}
 			case RigOcto.MOVE_LAUNCH -> {
-				low(t, 2, bump(k) * 1.4F, 1.4F, 0.2F);
-				low(t, 3, bump(k) * 1.4F, 1.4F, 0.2F);
+				for (int i = 2; i < 4; i++) {
+					flags |= at(t, i, v(side(i) * 5.0F, 22.0, -16.0).lerp(v(side(i) * 5.0F, -10.0, -22.0), bump(k)), 0.2F);
+				}
 			}
 			case RigOcto.MOVE_JAB, RigOcto.MOVE_CROSS -> {
 				// a telescoping punch out to the first thing down the look, and back: the right arm jabs, the left crosses
 				// (straight out from where the claw was, as a jab goes, not swung round)
 				int arm = kind == RigOcto.MOVE_JAB ? 0 : 1;
-				reach(t, arm, tip(base, arm).lerp(model(player, partial, punchAt(player, partial)), punch(k)), 0.0F, EXT_FAR);
+				flags |= at(t, arm, tip(base, arm).lerp(model(player, partial, punchAt(player, partial)), punch(k)), 0.0F);
 				// the other arm guards, drawn in close over the shoulder
-				forward(t, 1 - arm, 0.8F, 0.0F);
-				placed = true;
+				flags |= at(t, 1 - arm, v(side(1 - arm) * 6.0F, -6.0, -8.0), 0.0F);
 			}
 			case RigOcto.MOVE_BLAST -> {
 				// all four claws close on one point ahead of the chest, open, and tremble as it builds
@@ -387,24 +459,22 @@ public final class RigOctoClient {
 				Vec3 focus = model(player, partial, eye.add(look.scale(1.6)).subtract(0.0, 0.3, 0.0));
 				float shake = k < 0.5F ? Mth.sin(now * 3.1F) * 0.35F : 0.0F;
 				for (int i = 0; i < 4; i++) {
-					double sx = (i % 2 == 0 ? -1.2 : 1.2) + shake, sy = i < 2 ? -1.0 : 1.0;
-					reach(t, i, tip(base, i).lerp(focus.add(sx, sy, 0.0), Math.min(1.0F, k / 0.2F)), k < 0.5F ? 1.0F : 0.5F, EXT_FAR);
+					double sx = side(i) * 1.2 + shake, sy = i < 2 ? -1.0 : 1.0;
+					Vec3 point = tip(base, i).lerp(focus.add(sx, sy, 0.0), Math.min(1.0F, k / 0.2F));
+					reach(t, i, point, k < 0.5F ? 1.0F : 0.5F, EXT_FAR, i < 2 ? high(i) : clear(i));
 				}
-				placed = true;
+				flags |= PLACED;
 			}
 			case RigOcto.MOVE_WATCH -> {
 				// one arm darts out, a different one each time
 				int i = (int)(move.start() % 4L);
-				if (i < 2) {
-					forward(t, i, 1.0F + bump(k) * 0.9F, 0.0F);
-				} else {
-					low(t, i, 0.2F, 1.0F + bump(k) * 0.8F, 0.0F);
-				}
+				Vec3 point = i < 2 ? v(side(i) * 3.0F, -4.0, -14.0 - bump(k) * 20.0F) : v(side(i) * 5.0F, 14.0, -12.0 - bump(k) * 18.0F);
+				flags |= at(t, i, point, 0.0F);
 			}
 			default -> {
 			}
 		}
-		return placed;
+		return flags;
 	}
 
 	/** Out and back over a move (0..1..0). */
@@ -436,33 +506,33 @@ public final class RigOctoClient {
 		UNFOLD.put(id, unfold);
 		float[] want = new float[4 * VALUES];
 		float[] fold = new float[4 * VALUES];
-		boolean placed = false;
+		int flags = 0;
 		if (out) {
-			placed = target(player, partialTicks, want, now);
+			flags = target(player, partialTicks, want, now);
 		} else {
 			rest(want, now);
 		}
 		folded(fold);
 		for (int i = 0; i < want.length; i++) {
-			want[i] = Mth.lerp(unfold, fold[i], want[i]);
+			// the three turns of the socket go the short way round
+			want[i] = i % VALUES < 3 ? fold[i] + turn(fold[i], want[i]) * unfold : Mth.lerp(unfold, fold[i], want[i]);
 		}
 		float[] pose = POSE.get(id);
-		if (pose == null) {
+		if (pose == null || (flags & SNAP) != 0) {
 			pose = want.clone();
 			POSE.put(id, pose);
 		} else {
-			float ease = placed ? EASE_PLACED : EASE;
+			float ease = (flags & PLACED) != 0 ? EASE_PLACED : EASE;
 			for (int i = 0; i < pose.length; i++) {
-				pose[i] += (want[i] - pose[i]) * ease;
+				pose[i] += (i % VALUES < 3 ? turn(pose[i], want[i]) : want[i] - pose[i]) * ease;
 			}
 		}
-		float[] data = new float[4 * VALUES + 2];
-		System.arraycopy(pose, 0, data, 0, pose.length);
-		RigMoves.Move move = RigMoves.get(player);
-		boolean spinning = move != null && move.kind() == RigOcto.MOVE_PINWHEEL && now - move.start() < RigOcto.PINWHEEL_TICKS;
-		data[4 * VALUES] = spinning ? (now - move.start()) * SPIN_RATE : 0.0F;
-		data[4 * VALUES + 1] = now;
-		state.setData(ARMS, data);
+		state.setData(ARMS, pose.clone());
+	}
+
+	/** The short way round from angle {@code from} to {@code to} (radians). */
+	private static float turn(float from, float to) {
+		return Mth.wrapDegrees((to - from) * Mth.RAD_TO_DEG) * Mth.DEG_TO_RAD;
 	}
 
 	/** (From {@link RigSuit}'s layer) draws the arms on the body bone. */
@@ -472,24 +542,23 @@ public final class RigOctoClient {
 			return;
 		}
 		bake();
-		float spin = p[4 * VALUES];
 		for (int i = 0; i < 4; i++) {
 			int o = i * VALUES;
 			ModelPart arm = ARM[i];
-			// a part's own pitch: up is negative in model space, and a part points back out of the spine (+z)
+			// a part points back out of the spine (+z), turned in its socket
 			arm.xRot = p[o];
-			arm.yRot = p[o + 1] + (i % 2 == 0 ? -spin : spin);
-			arm.zRot = 0.0F;
-			float reach = p[o + 3];
-			// short of full length the whole arm draws in (folded); past it the rods slide out of both struts
-			arm.zScale = Mth.clamp(reach, 0.2F, 1.0F);
-			float ext = Math.max(1.0F, reach);
-			UPPER_RODS[i].zScale = ext;
-			FORE_PART[i].z = UPPER + UPPER_ROD * (ext - 1.0F);
-			FORE_PART[i].xRot = p[o + 2];
-			FORE_RODS[i].zScale = ext;
-			CLAW[i].z = FORE + FORE_ROD * (ext - 1.0F);
-			float open = Mth.clamp(p[o + 4], 0.0F, 1.0F) * 0.6F;
+			arm.yRot = p[o + 1];
+			arm.zRot = p[o + 2];
+			float upperReach = p[o + 4], foreReach = p[o + 5];
+			// short of full length the whole arm draws in (folded); past it the rods slide out of each strut
+			arm.zScale = Mth.clamp(upperReach, 0.2F, 1.0F);
+			float upper = Math.max(1.0F, upperReach), fore = Math.max(1.0F, foreReach);
+			UPPER_RODS[i].zScale = upper;
+			FORE_PART[i].z = UPPER + UPPER_ROD * (upper - 1.0F);
+			FORE_PART[i].xRot = p[o + 3];
+			FORE_RODS[i].zScale = fore;
+			CLAW[i].z = FORE + FORE_ROD * (fore - 1.0F);
+			float open = Mth.clamp(p[o + 6], 0.0F, 1.0F) * 0.6F;
 			PRONG_A[i].xRot = -open;
 			PRONG_B[i].xRot = open * 0.5F;
 			PRONG_B[i].yRot = -open;
