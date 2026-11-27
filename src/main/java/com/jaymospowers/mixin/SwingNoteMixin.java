@@ -19,6 +19,9 @@ abstract class SwingNoteMixin {
 	private void jaymospowers$noteSwing(InteractionHand hand, SwingAnimation animation, boolean sendToSwingingEntity, CallbackInfoReturnable<Boolean> cir) {
 		if (cir.getReturnValueZ()) {
 			Feints.swung((LivingEntity) (Object) this);
+			if ((Object) this instanceof net.minecraft.server.level.ServerPlayer player) {
+				com.jaymospowers.combat.KatanaForms.swung(player);
+			}
 		}
 	}
 }

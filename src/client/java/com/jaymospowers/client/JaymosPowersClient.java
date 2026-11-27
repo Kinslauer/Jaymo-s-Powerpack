@@ -390,6 +390,24 @@ public class JaymosPowersClient implements ClientModInitializer {
 		return ABILITY_KEYS[key.ordinal()];
 	}
 
+	/**
+	 * Whether any power key (an ability, Power Mode or the ascended ability) is held or being tapped for you this tick; a
+	 * Sneak press with one of them is a combo's, not a tap on its own ({@code AirFlipClient}).
+	 */
+	public static boolean anyPowerKeyDown() {
+		for (KeyMapping key : ABILITY_KEYS) {
+			if (key != null && key.isDown()) {
+				return true;
+			}
+		}
+		for (int tap : tapped) {
+			if (tap > 0) {
+				return true;
+			}
+		}
+		return modeKey != null && modeKey.isDown() || ultimateKey != null && ultimateKey.isDown();
+	}
+
 	/** The Power Mode key mapping. */
 	public static KeyMapping modeKey() {
 		return modeKey;

@@ -151,7 +151,7 @@ public final class PowerJumpClient {
 	}
 
 	/** Not a time for a second jump: in a power's flight, on a web line, on a ride, gliding. */
-	private static boolean busy(LocalPlayer player) {
+	public static boolean busy(LocalPlayer player) {
 		return player.isSpectator() || player.isFallFlying() || player.isSleeping() || positive(player.getAttached(WindPower.FLIGHT))
 			|| Boolean.TRUE.equals(player.getAttached(WindJet.JETTING)) || positive(player.getAttached(ZFighterPower.FLIGHT))
 			|| positive(player.getAttached(XenoformState.FLIGHT)) || player.getAttached(GravityPower.ROCK_FLIGHT) != null
