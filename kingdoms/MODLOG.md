@@ -18418,3 +18418,11 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **No more pop-in** (Andy: "some bad pop in with these summons from the necromancer"): every thrall a necromancer, a Scroll of Raising, a Death Sorcerer, Shades or the Reaper raises now starts sunk to the crown and climbs up out of the earth over 3 s, slowing as it comes clear, the ground's own soil breaking round it with a wisp of souls and two break sounds. It stands still and can't be caught in the earth while it climbs, then fights as before. Fliers (a vex) and anything raised with no solid ground under it just appear, as before; a Bio-built's bud is not raised from the ground.
 - `Thralls#rise`, `Thralls#rising`, `Thralls.RISE_TOP` (saved, so a thrall caught half out when the world stops is standing on load).
 - Built; not played. The climb takes 3 s (60 ticks), as Andy asked.
+
+## 0.14.3 (2026-11-27): Cleric medallion board on laptops, holy symbol worn at the neck (#2318)
+
+- **No numpad needed**: while a Cleric's medallion board is up, the hotbar keys 1 to 9 lay its marks as the numpad's 1 to 9 do (same numbers, so every pattern stays the same), and pick no hotbar slot. Anything else bound to those keys stays quiet while the board is up, as the numpad's other bindings already did; combat mode's 6 to 9 (belt picks and art keys) stand down while it is up too. The numpad still works.
+- **Holy symbol worn as a medallion**: the holy symbol fits Jaymo's Powers' amulet slot. Worn there it counts as held for the medallion board, the class key (Bless the Band, Sanctify), the Lantern Warden's Hush, the Warden's ward and a spell's trifle (fifth edition lets a holy symbol be worn as an amulet). A tap to cast the bound spell, sneak to turn it, and holding it up to turn the undead still want it in hand.
+- The class keys' heading in Controls had no name (its key still used the old `key.categories.` form); it now reads "Jaymo's Kingdoms: Classes". "Hold your holy symbol" now says it can be worn. Two new loading hints.
+- Classes: MedallionClient, ArtKeysClient, FormsClient, Clerics (worn, hasSymbol), MedallionBoard, Litany, Paths, SpellParts, StoryHoldScreen.
+- Built; not played.

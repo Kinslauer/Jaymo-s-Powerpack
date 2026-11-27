@@ -8965,3 +8965,9 @@ Deviations from the plan:
 - **Willing people**: new `Carry.WILLING_CHECKS` (Kingdoms fills it): someone standing who's willing to be carried by you is lifted with sneak + hold right-click (2 s), as a player is, and held like anyone carried. Runs before other mods' sneak-use on villagers.
 - Classes: core.Carry (SET_DOWN_TICKS, keptSafe, willing, sheltered, bringAlong, settle, clearOfGround, Let.LAY), wounds.Downed (step), wind.WindFumble, client CarryUseMixin. Lang: carry.carrying_person, carry.land_first, bar setting_down.
 - Built; not played.
+
+## 0.28.32 (2026-11-27): Holy symbol drawn worn at the neck, under armour (#2318)
+
+- **Worn holy symbol**: Jaymo's Kingdoms' holy symbol worn in the amulet slot is drawn on the body: a small gold cross with an iron heart on a cord, swinging with the stride. It sits against the chest with no push-out, so a chestplate covers it, and under a chestplate it swings only about a third as far so it never shows through.
+- New swing kind `tucked` in WornLooks; tools/gen_worn_looks.py takes another mod's item id for a look (texture under textures/entity/worn/<namespace>/).
+- Built; not played.
