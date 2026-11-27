@@ -625,6 +625,9 @@ public final class Construction {
 
 	/** Column {@code i} has something to dig out or fill. */
 	private static boolean needsPrep(ServerLevel level, Planner.Layout l, int i) {
+		if (i >= l.footprint()) {
+			return wreckTop(level, l, i) != Integer.MIN_VALUE;
+		}
 		if (fill(level, l, i) > 0) {
 			return true;
 		}
@@ -632,25 +635,70 @@ public final class Construction {
 		for (int y = column.getY(), top = clearTop(level, l, column); y <= top; y++) {
 			BlockPos at = column.atY(y);
 			BlockState state = level.getBlockState(at);
-			if (!state.isAir() && !l.filled().contains(at) && inWay(level, l, at, state)) {
+			if (!state.isAir() && digs(level, l, at, state)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
+	/**
+	 * A block readying the ground takes out: one in the way ({@link #inWay}) where the building has none of its own;
+	 * but at floor height, where the building has nothing, the land's own soil and stone stay (the yard round it, not a
+	 * trench).
+	 */
+	private static boolean digs(ServerLevel level, Planner.Layout l, BlockPos at, BlockState state) {
+		if (l.filled().contains(at) || at.getY() == l.min().getY() && Storehouse.ground(state)) {
+			return false;
+		}
+		return inWay(level, l, at, state);
+	}
+
+	/**
+	 * The highest block of the old structure left in wreck column {@code i} (round the footprint: {@link Ruins#wreck}),
+	 * from the floor up to as high as its pieces reach there; {@code Integer.MIN_VALUE} if none is left.
+	 */
+	private static int wreckTop(ServerLevel level, Planner.Layout l, int i) {
+		BlockPos column = l.column(i);
+		int top = Math.min(Ruins.pieceTop(level, column.getX(), column.getZ()), column.getY() + Ruins.TEAR_HEIGHT);
+		for (int y = top; y >= column.getY(); y--) {
+			BlockPos at = column.atY(y);
+			if (Ruins.wreckable(level, at, level.getBlockState(at))) {
+				return y;
+			}
+		}
+		return Integer.MIN_VALUE;
+	}
+
 	/** Readies column {@code i}: digs out what's in the building's way above the floor, fills any hollow under it. */
 	private static boolean prep(ServerLevel level, Faction f, Planner.Layout l, int i) {
 		BlockPos column = l.column(i);
 		int floor = column.getY();
+		if (i >= l.footprint()) {
+			// round the footprint: what's left of the old structure comes down (into storage), the land stays as it is
+			for (int y = wreckTop(level, l, i); y >= floor; y--) {
+				BlockPos at = column.atY(y);
+				BlockState state = level.getBlockState(at);
+				if (Ruins.wreckable(level, at, state)) {
+					remove(level, f, at, state, true, true);
+					if (y == floor) {
+						patch(level, at);
+					}
+				}
+			}
+			return true;
+		}
 		for (int y = clearTop(level, l, column); y >= floor; y--) {
 			BlockPos at = column.atY(y);
 			BlockState state = level.getBlockState(at);
-			if (state.isAir() || l.filled().contains(at)) {
+			if (state.isAir()) {
 				continue;
 			}
-			if (inWay(level, l, at, state)) {
+			if (digs(level, l, at, state)) {
 				remove(level, f, at, state, salvaged(l, state), !l.plot());
+				if (y == floor && l.ruins() && !Storehouse.ground(state)) {
+					patch(level, at);
+				}
 			}
 		}
 		int fill = fill(level, l, i);
@@ -660,6 +708,15 @@ public final class Construction {
 			effects(level, column.atY(y), stone);
 		}
 		return true;
+	}
+
+	/** Where an old structure's floor came out at floor height (and there's ground under it), soil goes back: no pits. */
+	private static void patch(ServerLevel level, BlockPos at) {
+		if (level.getBlockState(at).isAir() && level.getBlockState(at.below()).isSolid()) {
+			BlockState dirt = Blocks.DIRT.defaultBlockState();
+			level.setBlock(at, dirt, Block.UPDATE_CLIENTS);
+			effects(level, at, dirt);
+		}
 	}
 
 	/**
