@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 15:50
+updated: 2026-11-27 17:09
 ---
 # Open PRs
 
-12 open, as of 2026-11-27 15:50. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-27 17:09. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -64,4 +64,9 @@ Andy merges only on "merge", one at a time.
 ## [#2280](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2280) Hand of God: Celestial Hold and Celestial Turn
 - **Branch:** `claude/small-armies-picks-4` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2329](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2329) Knight quips: rare easter-egg lines in an old knight's voice
+- **Branch:** `claude/project-thread-hopke3` · **Updated:** 2026-11-27 (today)
+- **Checks:** ⏳ 1 of 5 running
 - **Agent:** no agent note
