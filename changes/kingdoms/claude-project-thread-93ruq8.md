@@ -1,0 +1,4 @@
+# Raised dead climb out of the ground
+- **No more pop-in** (Andy: "some bad pop in with these summons from the necromancer"): every thrall a necromancer, a Scroll of Raising, a Death Sorcerer, Shades or the Reaper raises now starts sunk to the crown and climbs up out of the earth over 3 s, slowing as it comes clear, the ground's own soil breaking round it with a wisp of souls and two break sounds. It stands still and can't be caught in the earth while it climbs, then fights as before. Fliers (a vex) and anything raised with no solid ground under it just appear, as before; a Bio-built's bud is not raised from the ground.
+- `Thralls#rise`, `Thralls#rising`, `Thralls.RISE_TOP` (saved, so a thrall caught half out when the world stops is standing on load).
+- Built; not played. The climb takes 3 s (60 ticks), as Andy asked.

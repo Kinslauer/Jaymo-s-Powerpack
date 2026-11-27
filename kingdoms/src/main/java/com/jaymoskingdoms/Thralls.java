@@ -3,8 +3,10 @@ package com.jaymoskingdoms;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -12,8 +14,10 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -27,13 +31,16 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -66,6 +73,18 @@ public final class Thralls {
 
 	private static final Set<Mob> LOADED = new HashSet<>();
 
+	/**
+	 * Andy (2026-11-27): "some bad pop in with these summons from the necromancer". The raised dead don't appear whole
+	 * where they stand: each climbs up out of the ground over {@link #RISE_TICKS}, sunk to the crown at first, held still
+	 * (no thinking, no falling, not caught in the earth) while the soil breaks round it. Fliers (a vex, a phantom) and
+	 * anything raised where there is no ground under it just appear, as before.
+	 */
+	static final int RISE_TICKS = 60;
+	/** The height it stands at when it's out (saved, so one caught half-risen when the world stops is out on load). */
+	static final AttachmentType<Double> RISE_TOP = AttachmentRegistry.create(JaymosKingdoms.id("thrall_rise"), builder -> builder.persistent(Codec.DOUBLE));
+	/** What's climbing out now, and how many ticks it has been at it. */
+	private static final Map<Mob, Integer> RISING = new HashMap<>();
+
 	private Thralls() {
 	}
 
@@ -74,14 +93,23 @@ public final class Thralls {
 			if (entity instanceof Mob mob && tag(mob) != null) {
 				LOADED.add(mob);
 			}
+			if (entity instanceof Mob mob && !RISING.containsKey(mob) && mob.getAttached(RISE_TOP) != null) {
+				// saved half out of the ground: it's out
+				risen(mob);
+			}
 		});
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
 			if (entity instanceof Mob mob) {
 				LOADED.remove(mob);
+				RISING.remove(mob);
 			}
 		});
+		ServerTickEvents.END_SERVER_TICK.register(Thralls::rising);
 		ServerTickEvents.END_SERVER_TICK.register(Thralls::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LOADED.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			LOADED.clear();
+			RISING.clear();
+		});
 	}
 
 	public static @Nullable Tag tag(Entity entity) {
@@ -118,7 +146,7 @@ public final class Thralls {
 
 	/**
 	 * Raises a thrall of {@code type} at {@code at} for {@code faction} (or for the player {@code master} if {@code player}),
-	 * for {@code life} ticks, set on {@code foe} if there is one. It climbs out of the ground in a burst of souls.
+	 * for {@code life} ticks, set on {@code foe} if there is one. It climbs out of the ground in a burst of souls ({@link #rise}).
 	 */
 	public static @Nullable Mob raise(ServerLevel level, EntityType<? extends Mob> type, Vec3 at, int faction, UUID master, boolean player, int life,
 		@Nullable LivingEntity foe) {
@@ -152,10 +180,84 @@ public final class Thralls {
 		if (foe != null && foe.isAlive() && !refuses(mob, foe)) {
 			mob.setTarget(foe);
 		}
+		if (type != BioBud.TYPE) {
+			// (a Bio-built's bud is split off its maker, not raised from the earth)
+			rise(level, mob);
+		}
 		level.sendParticles(ParticleTypes.SOUL, at.x, at.y + 0.3, at.z, 14, 0.35, 0.2, 0.35, 0.03);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 0.1, at.z, 8, 0.35, 0.1, 0.35, 0.01);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 1.0F, 0.7F);
 		return mob;
+	}
+
+	/** {@code mob}, just added where it should stand, starts climbing up out of the ground there (see {@link #RISE_TICKS}). */
+	static void rise(ServerLevel level, Mob mob) {
+		if (mob.isNoGravity() || mob instanceof Vex || mob.getNavigation() instanceof FlyingPathNavigation) {
+			return;
+		}
+		BlockPos under = BlockPos.containing(mob.getX(), mob.getY() - 0.2, mob.getZ());
+		if (!level.getBlockState(under).isFaceSturdy(level, under, net.minecraft.core.Direction.UP)) {
+			return;
+		}
+		double top = mob.getY();
+		mob.setAttached(RISE_TOP, top);
+		mob.setNoAi(true);
+		mob.setNoGravity(true);
+		mob.noPhysics = true;
+		mob.setDeltaMovement(Vec3.ZERO);
+		mob.setPos(mob.getX(), top - mob.getBbHeight(), mob.getZ());
+		RISING.put(mob, 0);
+	}
+
+	/** One tick of everything climbing out: up a little (fast at first, slowing as it comes clear), soil breaking round it. */
+	private static void rising(MinecraftServer server) {
+		if (RISING.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<Mob, Integer> e : List.copyOf(RISING.entrySet())) {
+			Mob mob = e.getKey();
+			Double top = mob.getAttached(RISE_TOP);
+			if (mob.isRemoved() || top == null || !(mob.level() instanceof ServerLevel level)) {
+				RISING.remove(mob);
+				continue;
+			}
+			int t = e.getValue() + 1;
+			if (t >= RISE_TICKS || !mob.isAlive()) {
+				RISING.remove(mob);
+				risen(mob);
+				continue;
+			}
+			RISING.put(mob, t);
+			double left = 1.0 - (double) t / RISE_TICKS;
+			mob.setDeltaMovement(Vec3.ZERO);
+			mob.setPos(mob.getX(), top - mob.getBbHeight() * left * left, mob.getZ());
+			if (t % 3 == 1) {
+				BlockState ground = ground(level, mob, top);
+				double w = mob.getBbWidth() * 0.6;
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), mob.getX(), top + 0.05, mob.getZ(), 6, w, 0.05, w, 0.1);
+				level.sendParticles(ParticleTypes.SOUL, mob.getX(), top + 0.2, mob.getZ(), 1, w, 0.1, w, 0.02);
+			}
+			if (t == 1 || t == RISE_TICKS / 2) {
+				level.playSound(null, mob.getX(), top, mob.getZ(), ground(level, mob, top).getSoundType().getBreakSound(), SoundSource.HOSTILE, 0.8F, 0.7F);
+			}
+		}
+	}
+
+	private static BlockState ground(ServerLevel level, Mob mob, double top) {
+		return level.getBlockState(BlockPos.containing(mob.getX(), top - 0.2, mob.getZ()));
+	}
+
+	/** Out of the ground: standing where it should, and itself again. */
+	private static void risen(Mob mob) {
+		Double top = mob.getAttached(RISE_TOP);
+		mob.removeAttached(RISE_TOP);
+		if (top != null) {
+			mob.setPos(mob.getX(), top, mob.getZ());
+		}
+		mob.noPhysics = false;
+		mob.setNoGravity(false);
+		mob.setNoAi(false);
+		mob.setDeltaMovement(Vec3.ZERO);
 	}
 
 	/** What rose as itself, for the Reaper (a scoreboard tag): it smokes black, and anything with no fight of its own is given one. */
@@ -186,6 +288,11 @@ public final class Thralls {
 			}
 			mob.setUUID(UUID.randomUUID());
 			mob.entityTags().removeIf(t -> t.contains("downed"));
+			if (mob.getAttached(RISE_TOP) != null) {
+				// it died climbing out last time: its climb isn't carried over
+				mob.removeAttached(RISE_TOP);
+				mob.setNoGravity(false);
+			}
 		}
 		if (mob.getMaxHealth() > RISEN_MOST_HEALTH) {
 			mob.discard();
@@ -199,6 +306,7 @@ public final class Thralls {
 		}
 		level.addFreshEntity(mob);
 		bind(level, mob, master, life);
+		rise(level, mob);
 		level.sendParticles(ParticleTypes.SOUL, at.x, at.y + 0.3, at.z, 14, 0.35, 0.2, 0.35, 0.03);
 		level.sendParticles(Fx.miasma(Reaper.SMOKE, 1.6F), at.x, at.y + 0.6, at.z, 24, 0.35, 0.5, 0.35, 0.01);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 1.0F, 0.7F);
