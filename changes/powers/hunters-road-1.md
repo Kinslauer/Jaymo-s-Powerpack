@@ -1,0 +1,6 @@
+# Hunter's Road 1 - yellow tells, zombie and husk lunges, buried husks
+- **Yellow tells**: a third kind of blow, shown with a gold star and its own cue. It can be parried or dodged but not blocked: a raised guard or shield is knocked aside and the blow lands (`Guard.UNBLOCKABLE_TAG`, `AttackTells.tellYellow`, `UnblockableMixin`). White blows can still be blocked, parried or dodged, and red blows blocked or dodged.
+- **Lunges**: zombies and husks 4 to 6 blocks from their target crouch for 14 ticks under a yellow star and leap (`LungeGoal`, `ZombieLungeMixin`). If parried, they land sprawled at your feet for 30 ticks, or 60 after a perfect parry. If dodged, they sprawl past for 25 ticks (`Pounce`). Spiders, wolves, cats and every other vanilla leap at a player now wait 12 ticks under a yellow star first, and their blow is yellow (`LeapTellMixin`).
+- **Husks in the sand**: once the world has reached Dread, half of the husks that spawn on sand after dark lie buried. A buried husk is invisible, silent and can't be targeted. It digs out in a spray of sand when someone comes within 7 blocks or it is hurt, and digs back under after losing its target (`HuskBurrow`, `BuriedPickMixin`).
+- Ideas after LungeAttackGoal and the Excavator goals in The Conjunction of the Spheres by Tenebris Mors (MIT; `licenses/conjunction-of-the-spheres/`).
+- Built; not played.
