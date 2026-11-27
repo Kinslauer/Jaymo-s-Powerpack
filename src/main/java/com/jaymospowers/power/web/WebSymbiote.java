@@ -1004,10 +1004,6 @@ public final class WebSymbiote {
 		return until != null && player.level().getGameTime() < until;
 	}
 
-	/**
-	 * A takeover has you: present the whole time, holding how far your struggle bar is filled (0-1, in steps of
-	 * {@link #STRUGGLE_SYNC_STEP}). Synced to everyone: the suit visibly peels back off you as it fills (WebSuitGrowth).
-	 */
 	public static final int BEAT_PERIOD = 16;
 	private static final int BEAT_WINDOW = 3;
 	private static final float BEAT_PRESS = 4.0F, BEAT_FADE = 0.035F;
