@@ -1,4 +1,4 @@
-﻿---
+---
 status: running
 branch: codex/effekseer-hd
 mods: powers
@@ -13,15 +13,14 @@ owns:
   - src/main/resources/assets/jaymospowers/effeks/
   - src/main/resources/licenses/effekseer/
   - src/main/java/com/jaymospowers/power/arsenal/HundredBlades.java
-  - src/main/java/com/jaymospowers/power/chrono/ChronoFlow.java
+  - src/main/java/com/jaymospowers/power/chrono/ChronoTimeStop.java
   - src/main/java/com/jaymospowers/power/cryo/CryoBlizzard.java
   - src/main/java/com/jaymospowers/power/darktide/DarktideMaelstrom.java
   - src/main/java/com/jaymospowers/power/gravity/GravityMeteor.java
   - src/main/java/com/jaymospowers/power/resonance/ResonanceBoom.java
   - src/main/java/com/jaymospowers/power/smoke/SmokeAshStorm.java
-  - src/main/java/com/jaymospowers/power/wind/WindModes.java
+  - src/main/java/com/jaymospowers/power/wind/WindThunderDive.java
   - docs/MagicFx.md
-  - README.md
   - changes/powers/effekseer-hd.md
 ---
 # HD Effekseer effects for ultimates
