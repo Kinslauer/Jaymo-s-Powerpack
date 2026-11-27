@@ -1,12 +1,14 @@
 ---
-status: open
-for: antigravity
+status: in-review
+for: prometheus
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
-claimed_by: 
-pr: 
+claimed_by: hermes-modeller
+pr: 2302
 thread: hermes-modeller
-claim_handbacks: 1
+claim_handbacks: 2
+writer: hermes-writer
+text_pass: done
 ---
 
 # Night's Blood 4 models: the true shape of the night
@@ -24,3 +26,6 @@ claim_handbacks: 1
 - 2026-11-27 09:06 t3's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-27 09:07 Antigravity quota reached 2026-11-27 (resets about 1:30 PM) partway through. Uncommitted work kept in T3 worktree C:\Users\toopo\.t3\worktrees\Origins Mod\t3-nycto-4-models-17459abb230bddb0 (night_horror bbmodel, geo, animation, 6 textures, gen_night_horror.py, previews). Resume with t3 thread send to mcp:e2a61563 after the reset.
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-27 10:01 Restored (Claude for Andy): a vault sync from the vm at 14:56 UTC merged in a stale copy that still had t3's claim, released it as open for antigravity and dropped these notes. Andy 2026-11-27: Prometheus (hermes-modeller) owns this, run live since 9:35 AM; do NOT resume it in T3/Antigravity. Andy 8:59 AM: bigger wings (Antigravity never finished that; the copied geo still has the old wing sizes, see Agents/nycto-4-models.md).
+- 2026-11-27 10:23 hermes-modeller's last text pass stopped before finishing; handed back as in-review.
+- 2026-11-27 10:44 Text pass: rewrote changes/kingdoms/nycto-4-models.md (the PR's only player-visible text) to plain player-facing wording — removed em dash, GeckoLib/file-name internals, tooling and Andy-asked-for meta, plus the date; kept the skin swaps, wing changes and a built-not-played line
