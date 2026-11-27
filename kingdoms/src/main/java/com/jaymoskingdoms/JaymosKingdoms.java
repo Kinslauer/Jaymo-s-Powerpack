@@ -796,6 +796,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Milestones.register();
 		GhostlyCrossbow.register();
 		Cavalry.register();
+		Hitching.register();
+		MakeWay.register();
 		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
 		com.jaymoskingdoms.equestrian.Equestrian.register();
 		com.jaymoskingdoms.equestrian.MythicMounts.register();

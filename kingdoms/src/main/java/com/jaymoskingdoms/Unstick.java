@@ -81,6 +81,10 @@ public final class Unstick {
 			return;
 		}
 		s.still++;
+		if (s.still % HOP_TICKS == 0 && s.still <= GIVE_UP_TICKS) {
+			// (someone standing in the way, a rider in a doorway: asked to move, and they do: MakeWay)
+			MakeWay.stalled(level, mob, nav.getPath());
+		}
 		if (mob instanceof Folk folk && s.still >= PUFF_TICKS && puff(level, folk, target)) {
 			s.reset();
 			return;
