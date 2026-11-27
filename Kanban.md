@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,15 +29,14 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · #2248 · in-review
-- [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
-- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
-- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
+- [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
-- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
-- [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · 💻 Odysseus · #2283 · in-review
+- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
+- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
+- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -58,8 +57,8 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-2|nycto-2]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-3|nycto-3]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-4|nycto-4]] · ☁️ Cloud · blocked
+- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-5|nycto-5]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-6|nycto-6]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-7|nycto-7]] · ☁️ Cloud · blocked
@@ -71,14 +70,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/legends-p6-followups|legends-p6-followups]]
 - [x] [[Inbox/Done/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]]
+- [x] [[Inbox/Done/legends-p6-followups|legends-p6-followups]]
+- [x] [[Inbox/Done/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]]
 - [x] [[Inbox/Done/legends-p3-big-symbiote|legends-p3-big-symbiote]]
 - [x] [[Inbox/Done/legends-p6-core-animations|legends-p6-core-animations]]
-- [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
-- [x] [[Inbox/Done/village-mods-6-small-structures|village-mods-6-small-structures]]
-- [x] [[Inbox/Done/village-mods-5-town-life-hats|village-mods-5-town-life-hats]]
-- [x] [[Inbox/Done/village-mods-4-board-work|village-mods-4-board-work]]
+- [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
+- [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
+- [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
 
 
 %% kanban:settings
