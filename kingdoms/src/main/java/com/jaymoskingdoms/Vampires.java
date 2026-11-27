@@ -408,7 +408,7 @@ public final class Vampires {
 
 	/** A silver weapon (silver as {@link Garlic#bane} has it, without the garlic; a weapon, not an ingot or a nugget). */
 	static boolean silver(net.minecraft.world.item.ItemStack stack) {
-		return stack.has(net.minecraft.core.component.DataComponents.WEAPON) && !stack.is(Garlic.GARLIC) && Garlic.bane(stack);
+		return stack.has(net.minecraft.core.component.DataComponents.WEAPON) && !Garlic.garlic(stack) && Garlic.bane(stack);
 	}
 
 	public static boolean isVampire(Entity e) {
@@ -758,6 +758,11 @@ public final class Vampires {
 			}
 			return;
 		}
+		if (HunterKit.slips(level, mob, prey)) {
+			// a wreath or a hunter's coat: the bite slips off and it breaks away
+			flee(level, mob, prey, nightNo, now);
+			return;
+		}
 		if (prey.isSleeping()) {
 			prey.stopSleeping();
 		}
@@ -768,6 +773,12 @@ public final class Vampires {
 			return;
 		}
 		prey.hurtServer(level, source, bite);
+		if (HunterKit.sour(prey)) {
+			// sour blood (the garlic draught): it retches, lets go and gets nothing from the bite
+			HunterKit.retch(level, mob);
+			flee(level, mob, prey, nightNo, now);
+			return;
+		}
 		prey.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, HOLD_TICKS, elder ? ELDER_HOLD : HOLD, false, false, false));
 		mob.heal(bite * HEAL_SHARE);
 		HUNTS.computeIfPresent(mob.getUUID(), (id, h) -> {
@@ -1167,6 +1178,7 @@ public final class Vampires {
 	}
 
 	private static void died(LivingEntity entity, DamageSource source) {
+		HunterKit.slew(entity, source);
 		UUID id = entity.getUUID();
 		HUNTS.remove(id);
 		FLEES.remove(id);

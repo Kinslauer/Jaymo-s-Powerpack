@@ -53,7 +53,8 @@ public final class ArtifactBaublesClient {
 			return;
 		}
 		boolean jump = minecraft.options.keyJump.isDown();
-		boolean pressed = jump && !wasJump;
+		// a press that kicks off a foe in an air combo is the enemy step's, not the cloud's or the bladder's
+		boolean pressed = jump && !wasJump && !com.jaymospowers.client.jump.EnemyStepClient.takes(player);
 		wasJump = jump;
 		boolean grounded = player.onGround() || player.isInWater() || player.isInLava() || player.getAbilities().flying;
 		boolean free = !player.isSpectator() && !player.isPassenger() && !player.isFallFlying() && !player.onClimbable();
