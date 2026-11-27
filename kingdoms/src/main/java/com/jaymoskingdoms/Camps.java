@@ -65,10 +65,12 @@ public final class Camps {
 	/** A camp rises this far from a kingdom (or fiefdom), and at least {@code MIN_DISTANCE} from any settlement. */
 	static final double MIN_DISTANCE = 150.0, MAX_DISTANCE = 300.0;
 	/** At most this many standing camps within {@code CAMP_AREA} of a kingdom; camps keep {@code CAMP_SPACING} apart. */
-	static final int CAMPS_PER_KINGDOM = 2;
-	static final double CAMP_AREA = 360.0, CAMP_SPACING = 160.0;
+	static final int CAMPS_PER_KINGDOM = 4;
+	static final double CAMP_AREA = 360.0, CAMP_SPACING = 120.0;
 	/** The chance a kingdom with room for a camp gets one, each spawn check. */
-	static final float CAMP_CHANCE = 0.2F;
+	static final float CAMP_CHANCE = 0.15F;
+	/** When placing a group of camps around a kingdom, how many to place at once. */
+	static final int GROUP_SIZE_MIN = 3, GROUP_SIZE_MAX = 4;
 	/** Sites are tried round players near the kingdom, out of their sight: this far from any player, up to this much farther. */
 	static final int HIDE_RANGE = 56, SITE_SPREAD = 72, SITE_TRIES = 10;
 	/** No village bell this near a site (it would be taken for part of the village). */
@@ -363,7 +365,8 @@ public final class Camps {
 
 	/**
 	 * Every so often a kingdom with room for a camp may get one, out in the wild near a player passing through: a
-	 * barbarian camp anywhere, an illager camp in pillager country ({@link IllagerCamps#land}).
+	 * barbarian camp anywhere (in a ring of 3-4, like a quickly thrown-up raid shelter), an illager camp in
+	 * pillager country, etc.
 	 */
 	private static void spawnCamps(MinecraftServer server, ServerLevel level) {
 		RandomSource random = level.getRandom();
@@ -376,9 +379,8 @@ public final class Camps {
 				continue;
 			}
 			// (with Grim Kingdoms, a barbarian camp waits for a Grim ruin in reach rather than pitching tents in the wild)
-			if (campsNear(server, realm, BARBARIAN) < CAMPS_PER_KINGDOM && random.nextFloat() < CAMP_CHANCE && !GrimSites.prefersGrim(server, realm)
-				&& trySite(server, level, realm, players, BARBARIAN)) {
-				return;
+			if (campsNear(server, realm, BARBARIAN) + GROUP_SIZE_MAX <= CAMPS_PER_KINGDOM && random.nextFloat() < CAMP_CHANCE && !GrimSites.prefersGrim(server, realm)) {
+				trySiteGroup(server, level, realm, players, BARBARIAN, GROUP_SIZE_MIN, GROUP_SIZE_MAX);
 			}
 			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, IllagerCamps.KIND) < IllagerCamps.CAMPS_PER_KINGDOM
 				&& random.nextFloat() < IllagerCamps.CAMP_CHANCE && trySite(server, level, realm, players, IllagerCamps.KIND)) {
@@ -454,6 +456,71 @@ public final class Camps {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Tries to place a group of {@code count} camps of {@code kind} around {@code realm}'s seat, in a rough ring.
+	 * Each camp is placed at a random angle and distance from the seat, avoiding other camps and settlements.
+	 */
+	private static void trySiteGroup(MinecraftServer server, ServerLevel level, Faction realm, List<ServerPlayer> players, String kind,
+		int minCount, int maxCount) {
+		RandomSource random = level.getRandom();
+		int count = minCount + random.nextInt(maxCount - minCount + 1);
+		// Base angle for the ring, so camps are spread around the seat
+		double baseAngle = random.nextDouble() * Math.PI * 2.0;
+		double angleStep = Math.PI * 2.0 / count;
+		int placed = 0;
+		for (int i = 0; i < count && placed < count; i++) {
+			double angle = baseAngle + i * angleStep + (random.nextDouble() - 0.5) * angleStep * 0.5;
+			// Distance from seat: between MIN_DISTANCE and MAX_DISTANCE, with some variance
+			double d = MIN_DISTANCE + random.nextDouble() * (MAX_DISTANCE - MIN_DISTANCE);
+			BlockPos at = realm.seat().offset((int)Math.round(Math.cos(angle) * d), 0, (int)Math.round(Math.sin(angle) * d));
+			// Adjust Y to find a valid floor
+			boolean illager = IllagerCamps.KIND.equals(kind), goblin = GoblinVillages.KIND.equals(kind), orc = OrcCamps.KIND.equals(kind);
+			boolean pirate = PirateCoves.KIND.equals(kind);
+			int floor = pirate ? IllagerBuildings.floor(level, at, PirateCoves.MAX_SPREAD, PirateCoves.RADIUS)
+				: orc ? IllagerBuildings.floor(level, at, OrcCamps.MAX_SPREAD, OrcBuildings.CLEAR_RADIUS)
+				: goblin ? (SwampGoblins.swamp(level, at) ? SwampGoblins.floor(level, at)
+					: IllagerBuildings.floor(level, at, GoblinVillages.MAX_SPREAD, GoblinBuildings.CLEAR_RADIUS))
+				: illager ? IllagerBuildings.floor(level, at, IllagerCamps.MAX_SPREAD)
+				: CampBuildings.floor(level, at, MAX_SPREAD);
+			if (floor == Integer.MIN_VALUE) {
+				continue;
+			}
+			// Check if the site is valid (loaded, not owned, far from players, no bell)
+			if (!open(server, level, at)) {
+				continue;
+			}
+			// Check kind-specific land requirements
+			if (illager && !IllagerCamps.land(level, at)) {
+				continue;
+			}
+			if (goblin && !GoblinVillages.land(level, at)) {
+				continue;
+			}
+			if (orc && !OrcCamps.land(level, at)) {
+				continue;
+			}
+			if (pirate && !PirateCoves.land(level, at)) {
+				continue;
+			}
+			Direction gate = Direction.getApproximateNearest(realm.seat().getX() - at.getX(), 0, realm.seat().getZ() - at.getZ());
+			Faction camp = null;
+			if (pirate) {
+				camp = PirateCoves.found(level, at, floor);
+			} else if (orc) {
+				camp = OrcCamps.found(level, at, floor, gate);
+			} else if (goblin) {
+				camp = GoblinVillages.found(level, at, floor, gate);
+			} else if (illager) {
+				camp = IllagerCamps.found(level, at, floor, gate);
+			} else {
+				camp = found(level, at, floor, gate);
+			}
+			if (camp != null) {
+				placed++;
+			}
+		}
 	}
 
 	/** {@code at} is free for a camp: loaded, nobody's land, far from every settlement and camp, out of every player's sight, no bell near. */
@@ -736,6 +803,13 @@ public final class Camps {
 		}
 		McaCompat.scatterRaiders(level, camp.id(), new AABB(camp.seat()).inflate(SCATTER_RANGE));
 		Illagers.scatter(level, camp.id(), camp.seat(), SCATTER_RANGE, chief);
+		// The victor takes the camp's storage
+		Faction victor = killer != null ? Factions.of(server, killer.getUUID()) : null;
+		if (victor != null && Storage.loaded(level, camp)) {
+			for (ItemStack stack : Storage.contents(level, camp)) {
+				Storage.put(level, victor, stack);
+			}
+		}
 		Factions.update(server, camp.id(), f -> f.withFallen(true).withLeader(Optional.empty())
 			.withHoldings(f.holdings().withRoster(Map.of()).withVacancies(Map.of()).withStorage(List.of(), Optional.empty())));
 		for (Faction other : Factions.all(server, FactionType.BARBARIAN)) {

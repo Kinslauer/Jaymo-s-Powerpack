@@ -136,11 +136,14 @@ final class WarParties {
 		/**
 		 * (am-sieges) Its siege's waves ({@link Sieges}): the wave it's on (0 before the first), whether it's the lull after
 		 * it, and since when; where it falls back to in a lull; whether the siege is over; each player's side in it.
+		 * Muster period before the first wave: true while the siege is mustering and drawing supplies from camps.
 		 */
 		int wave;
-		boolean lull, siegeOver, siegeEnded;
+		boolean lull, siegeOver, siegeEnded, muster;
 		long waveAt;
 		@Nullable BlockPos camp;
+		/** Supplies drawn from nearby camps during the muster period; each reinforcement costs 10. */
+		int supply;
 		final Map<UUID, Integer> sides = new HashMap<>();
 		/** (am-warchest) The guards the besieged's war chest took on, the gate it shut (place, block), what the siege broke (place, what stood). */
 		final List<UUID> levies = new ArrayList<>();
@@ -519,27 +522,24 @@ final class WarParties {
 		return new Joined(false, Component.translatable("message.jaymoskingdoms.war.join_none", mine.name()));
 	}
 
-	/** Its siege over, a party with players in it takes the enemy's riches: a share of its treasury and goods from its storehouse. */
+	/** Its siege over, a party with players in it takes the enemy's riches: all of its treasury and goods from its storehouse.
+	 * The defender is routed: its faction falls, its people scatter, and its land goes to the victor. */
 	private static void seize(ServerLevel level, Party party, Faction target) {
 		party.sacked = true;
 		MinecraftServer server = level.getServer();
+		Faction from = Factions.get(server, party.faction);
 		boolean cart = cart(level, party) != null;
-		long share = Math.round(target.treasury() * SPOILS_SHARE);
-		// (no cart to haul it: only what the soldiers can carry, and no goods)
-		long silver = cart ? share : Math.min(share, (long)party.soldiers.size() * SOLDIER_CARRIES);
+		// Victor takes ALL treasury and storage
+		long silver = target.treasury();
 		if (silver > 0) {
-			Factions.update(server, target.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - silver)));
+			Factions.update(server, target.id(), f -> f.withTreasury(0L));
 			party.spoilsSilver += silver;
 		}
 		int goods = 0;
 		if (cart && Storage.loaded(level, target)) {
-			for (int i = 0; i < SPOILS_STACKS; i++) {
-				List<ItemStack> contents = Storage.contents(level, target);
-				if (contents.isEmpty()) {
-					break;
-				}
-				ItemStack pick = contents.get(level.getRandom().nextInt(contents.size()));
-				ItemStack taken = Storage.take(level, target, x -> ItemStack.isSameItemSameComponents(x, pick), pick.getMaxStackSize());
+			List<ItemStack> contents = Storage.contents(level, target);
+			for (ItemStack stack : contents) {
+				ItemStack taken = Storage.take(level, target, x -> ItemStack.isSameItemSameComponents(x, stack), stack.getCount());
 				if (!taken.isEmpty()) {
 					goods += taken.getCount();
 					party.spoils.add(taken);
@@ -548,6 +548,15 @@ final class WarParties {
 		}
 		tellPlayers(level, party, Component.translatable(cart ? "message.jaymoskingdoms.war.seized" : "message.jaymoskingdoms.war.seized_no_cart",
 			target.name(), silver, goods).withStyle(ChatFormatting.GOLD));
+		// Defender is routed: faction falls, people scatter, land goes to victor
+		if (from != null) {
+			// Transfer land claims
+			KingdomEvents.transferLand(server, target, from);
+			// Rout the defenders' soldiers (they flee, can be caught)
+			Sieges.routDefender(level, target, from);
+		}
+		// Mark target as fallen
+		Factions.update(server, target.id(), f -> f.withFallen(true));
 		// (0.7.530) the sacked town is in trouble
 		TownTroubles.event(server, target.id(), TownTroubles.WAR, Integer.toString(party.faction));
 		// (0.5.29) a warlord's war-party decree done

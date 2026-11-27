@@ -24,6 +24,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -48,6 +49,8 @@ public final class Sieges {
 	/** Waves before the sack, at a seat and at a homestead; how long each lasts and the lull after it (ticks). */
 	static final int WAVES = 5, HOME_WAVES = 1;
 	static final long WAVE_TICKS = 20 * 75, LULL_TICKS = 20 * 40;
+	/** Muster period before the first wave (ticks): attackers draw supplies from nearby camps. */
+	static final long MUSTER_TICKS = 20 * 60;
 	/** The attackers' camp in a lull: this far back from their banner, and they keep within this of it (blocks). */
 	static final double CAMP_BACK = 26.0;
 	static final int CAMP_RADIUS = 6;
@@ -108,6 +111,23 @@ public final class Sieges {
 		}
 		if (party.wave == 0) {
 			begin(level, party, from, target, goal, now);
+			party.muster = true;
+			party.waveAt = now;
+		}
+		if (party.muster) {
+			// Muster period: draw supplies from nearby camps
+			if (now - party.waveAt < MUSTER_TICKS) {
+				if (target != null && (now - party.waveAt) % (MUSTER_TICKS / 4) == 0) {
+					drawFromCamps(level, party, from, target, goal);
+				}
+				return false;
+			}
+			// Muster complete, start first wave
+			party.muster = false;
+			party.lull = false;
+			party.wave = 1;
+			party.waveAt = now;
+			horn(level, goal, 1.0F);
 		}
 		asks(level, party, target);
 		if (!party.lull) {
@@ -198,6 +218,37 @@ public final class Sieges {
 					ASKS.put(p.getUUID(), new Ask(party, asker.getUUID(), now));
 				}
 			}
+		}
+	}
+
+	/** During the muster period, the siege draws supplies from nearby camps. A camp cleared mid-siege weakens it. */
+	private static void drawFromCamps(ServerLevel level, WarParties.Party party, Faction from, Faction target, BlockPos goal) {
+		MinecraftServer server = level.getServer();
+		int taken = 0;
+		for (Faction camp : Factions.all(server, FactionType.BARBARIAN)) {
+			if (camp.fallen() || camp.id() == from.id()) {
+				continue;
+			}
+			double dist = Raids.horizontal(camp.seat(), goal);
+			if (dist > 40000.0) { // within 200 blocks
+				continue;
+			}
+			Camps.CampData data = Camps.data(server, camp.id());
+			if (data == null || data.clearedAt() >= 0 || !Storage.loaded(level, camp)) {
+				continue;
+			}
+			taken += Storage.take(level, camp, Items.COOKED_MUTTON, 8).getCount();
+			taken += Storage.take(level, camp, Items.COOKED_BEEF, 8).getCount();
+			taken += Storage.take(level, camp, Items.COOKED_PORKCHOP, 8).getCount();
+			taken += Storage.take(level, camp, Items.COOKED_CHICKEN, 8).getCount();
+			taken += Storage.take(level, camp, Items.OAK_LOG, 16).getCount();
+			taken += Storage.take(level, camp, Items.SPRUCE_LOG, 16).getCount();
+			taken += Storage.take(level, camp, Items.IRON_INGOT, 4).getCount();
+			taken += Storage.take(level, camp, Items.ARROW, 16).getCount();
+		}
+		if (taken > 0) {
+			party.supply += taken;
+			JaymosKingdoms.LOGGER.debug("Siege of {} drew {} supplies from nearby camps", target.name(), taken);
 		}
 	}
 
@@ -292,8 +343,14 @@ public final class Sieges {
 		if (from.treasury() <= 0) {
 			return;
 		}
+		// Fewer reinforcements when supply runs short: each reinforcement costs 10
+		int count = Math.min(REINFORCE, party.supply / 10);
+		if (count <= 0) {
+			return;
+		}
+		party.supply -= count * 10;
 		List<UUID> squad = new ArrayList<>();
-		for (int i = 0; i < REINFORCE; i++) {
+		for (int i = 0; i < count; i++) {
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, camp.offset(level.getRandom().nextInt(5) - 2, 0,
 				level.getRandom().nextInt(5) - 2));
 			Worker s = WarParties.soldier(level, from, at, level.getRandom().nextFloat() * 360.0F, goal);
@@ -489,5 +546,19 @@ public final class Sieges {
 		return level.getEntitiesOfClass(Mob.class, new AABB(goal).inflate(ASK_RANGE), m -> m.isAlive() && m instanceof Worker w
 			&& (w.role() == Folk.GUARD || w.role() == Folk.ARCHER) && w.factionId() >= 0 && !party.soldiers.contains(m.getUUID())
 			&& besieged(server, party, w.factionId()));
+	}
+
+	/** The defender has lost the siege: its soldiers are routed (they flee, can be caught). Its land is already being transferred. */
+	static void routDefender(ServerLevel level, Faction defender, Faction victor) {
+		// Rout the defender's soldiers: they flee, can be caught
+		for (Folk f : level.getEntitiesOfClass(Folk.class, new AABB(defender.seat()).inflate(160.0),
+			f -> f.factionId() == defender.id() && f.isAlive() && (f.role() == Folk.GUARD || f.role() == Folk.ARCHER))) {
+			if (f.isCarrying()) {
+				f.spawnAtLocation(level, f.takeCarried());
+			}
+			f.setFactionId(-1);
+		}
+		McaCompat.scatterRaiders(level, defender.id(), new AABB(defender.seat()).inflate(160.0));
+		JaymosKingdoms.LOGGER.info("The realm of {} is routed by {}", defender.name(), victor.name());
 	}
 }
