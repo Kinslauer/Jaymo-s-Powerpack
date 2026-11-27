@@ -1208,3 +1208,5 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - **Applies to:** Powers.
 
 - 2026-11-26: Great Ape keeps R = charge ki (Sneak+R = hold back power); Patch 7's roar moves to another key. Andy: "R should still charge ki" (PR #2255 review).
+
+- 2026-11-26 (Andy, shadows thread, PR #2262 merged): Shadows see-through in the ghost skin, sized 0.6-1.5x, 2 in 5 wispy-tailed, gone between strikes; the sun, lamp light, carried lights and the Dawnborn's Sunflare unmake them at once. Lore "How a shadow walks" approved.
