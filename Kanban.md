@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:48). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,9 +19,9 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for codex · open
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
-- [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · for codex · open
 - [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
+- [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · for codex · open
 
 
 ## Being built
