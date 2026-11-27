@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
-- [ ] [[Inbox/hunters-road-1|hunters-road-1]] · ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · ☁️ Cloud · open
@@ -37,6 +36,7 @@ kanban-plugin: board
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
+- [ ] [[Inbox/hunters-road-1|hunters-road-1]] · ☁️ Cloud · #2284 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
