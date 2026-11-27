@@ -1,0 +1,16 @@
+---
+status: running
+task: legends-p3-big-symbiote
+branch: codex/legends-p3
+pr:
+mods: powers
+started: 2026-11-26
+owns:
+  - src/main/java/com/jaymospowers/power/web/ (Patch 3 brute, leap, fury, wall, pose and takeover files)
+  - src/client/java/com/jaymospowers/client/power/web/ (Patch 3 brute inputs, poses and HUD)
+  - src/main/resources/assets/jaymospowers/lang/parts/web.json
+  - changes/powers/legends-big-symbiote.md
+---
+# Legends Patch 3
+
+Andy assigned the big symbiote patch directly to Codex. Isolated worktree on the Legends stack. Push the branch for Claude to review.
