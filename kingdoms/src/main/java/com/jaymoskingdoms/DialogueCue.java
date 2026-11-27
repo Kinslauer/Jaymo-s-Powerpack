@@ -26,9 +26,12 @@ public record DialogueCue(int villager, @Nullable Speaker speaker) implements Cu
 		return ordinal >= 0 && ordinal < Speaker.values().length ? Speaker.values()[ordinal] : null;
 	}
 
-	/** The one talking right now. */
+	/**
+	 * The one talking right now. {@code LAST}: the villager, with their last word: the talk ends once it's been shown
+	 * (bored of you, or left waiting: {@link Conversations}).
+	 */
 	public enum Speaker {
-		PLAYER, VILLAGER
+		PLAYER, VILLAGER, LAST
 	}
 
 	private DialogueCue() {
@@ -55,10 +58,44 @@ public record DialogueCue(int villager, @Nullable Speaker speaker) implements Cu
 		}
 	}
 
+	/**
+	 * Client to server (Andy 2026-11-27: "it should go back to the wheel"): {@code villager}'s menu shut after a talk
+	 * action and their reply has been shown: the talk goes back to the wheel, or ends if it's over ({@link Conversations#again}).
+	 */
+	public record Again(int villager) implements CustomPacketPayload {
+		public static final Type<Again> TYPE = new Type<>(JaymosKingdoms.id("dialogue_again"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Again> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeInt(p.villager), buf -> new Again(buf.readInt()));
+
+		@Override
+		public Type<Again> type() {
+			return TYPE;
+		}
+	}
+
+	/**
+	 * Client to server: the talk with {@code villager} is set aside for another screen that belongs to it (Family Tree, one
+	 * of our talk screens), and goes on after ({@link Conversations#aside}).
+	 */
+	public record Aside(int villager) implements CustomPacketPayload {
+		public static final Type<Aside> TYPE = new Type<>(JaymosKingdoms.id("dialogue_aside"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Aside> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeInt(p.villager), buf -> new Aside(buf.readInt()));
+
+		@Override
+		public Type<Aside> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(TYPE, CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Done.TYPE, Done.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Again.TYPE, Again.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Aside.TYPE, Aside.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Done.TYPE, (payload, context) -> Conversations.done(context.player(), payload.villager()));
+		ServerPlayNetworking.registerGlobalReceiver(Again.TYPE, (payload, context) -> Conversations.again(context.player(), payload.villager()));
+		ServerPlayNetworking.registerGlobalReceiver(Aside.TYPE, (payload, context) -> Conversations.aside(context.player(), payload.villager()));
 		Conversations.register();
 		TalkBusy.register();
 		// (and who is busy, told to the players near them for the talk line by the crosshair)
@@ -70,6 +107,10 @@ public record DialogueCue(int villager, @Nullable Speaker speaker) implements Cu
 	public static void cue(ServerPlayer player, Entity villager, Speaker speaker) {
 		if (villager != null && ServerPlayNetworking.canSend(player, TYPE)) {
 			Conversations.begin(player, villager, true);
+			if (speaker == Speaker.PLAYER) {
+				// (a pick on the wheel: it spends their patience)
+				Conversations.picked(player, villager);
+			}
 			ServerPlayNetworking.send(player, new DialogueCue(villager.getId(), speaker));
 		}
 	}
@@ -83,8 +124,19 @@ public record DialogueCue(int villager, @Nullable Speaker speaker) implements Cu
 
 	/** The talk with {@code villager} was broken off here: end {@code player}'s cutscene. */
 	static void end(ServerPlayer player, Entity villager) {
+		end(player, villager.getId());
+	}
+
+	static void end(ServerPlayer player, int villagerId) {
 		if (ServerPlayNetworking.canSend(player, TYPE)) {
-			ServerPlayNetworking.send(player, new DialogueCue(villager.getId(), null));
+			ServerPlayNetworking.send(player, new DialogueCue(villagerId, null));
+		}
+	}
+
+	/** {@code villager} has said their last word in the talk: {@code player}'s cutscene shows it, then ends. */
+	static void last(ServerPlayer player, Entity villager) {
+		if (ServerPlayNetworking.canSend(player, TYPE)) {
+			ServerPlayNetworking.send(player, new DialogueCue(villager.getId(), Speaker.LAST));
 		}
 	}
 }

@@ -110,6 +110,15 @@ abstract class McaDialogueBoxMixin extends Screen {
 		return text;
 	}
 
+	/**
+	 * Andy (2026-11-27): the player leaving the talk (Esc) ends it, where any other close goes back to the wheel after the
+	 * reply ({@link DialogueCinematic#left}).
+	 */
+	@Inject(method = "onClose", at = @At("HEAD"))
+	private void jaymoskingdoms$left(CallbackInfo ci) {
+		DialogueCinematic.left();
+	}
+
 	/** A new question starts the wheel on its first answers. */
 	@Inject(method = "setDialogue", at = @At("TAIL"))
 	private void jaymoskingdoms$newQuestion(String question, List<String> answers, CallbackInfo ci) {

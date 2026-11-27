@@ -59,6 +59,14 @@ import org.jspecify.annotations.Nullable;
  * <p>Andy (2026-11-21): the answers as a wheel worded by your origin ({@link TalkWheel}), and "the chat should also be
  * hidden for the duration of the interaction". The line you pick is what you say: it goes in the box under your own name
  * ({@link #mine}) until the villager answers. Chat isn't drawn while the talk runs; what was said there is still in it after.
+ *
+ * <p>Andy (2026-11-27): "conversations end prematurely it should go back to the wheel unless you end the conversation,
+ * they get bored or refuse talking to you, or something outside influences it". When MCA's menu shuts after any talk
+ * action (not by Esc: {@link #left}), the reply plays out as above and then the client asks for the talk again
+ * ({@link DialogueCue.Again}): the menu opens back on the wheel, the camera staying on them throughout. The server ends it
+ * instead when it's over ({@link com.jaymoskingdoms.Conversations}), with their last word shown first
+ * ({@link DialogueCue.Speaker#LAST}). Family Tree, or one of our talk screens opened on them, sets the talk aside
+ * ({@link DialogueCue.Aside}) and it carries on when that shuts.
  */
 public final class DialogueCinematic {
 	/** Each bar's height, as a share of the screen; how much of the way they slide a tick. */
@@ -82,6 +90,8 @@ public final class DialogueCinematic {
 	/** The villager's box: how fast their words come out (letters a tick), and how long a reply stays up once it's all out (ticks). */
 	static final float CHARS_PER_TICK = 1.5F;
 	static final int READ_TICKS = 50;
+	/** Asked for the talk again, the menu not open this long after (ticks): the talk is over. */
+	static final int AGAIN_WAIT = 40;
 	/** With nothing said yet, the answers come up this long after the talk opens (ticks), in case a greeting is on its way. */
 	static final int OPEN_WAIT = 10;
 	/** The box: its left margin, its width at most and its text's wrap width, its padding, and its gap above the bottom bar (GUI pixels). */
@@ -105,6 +115,13 @@ public final class DialogueCinematic {
 	private static int ticks, holdUntil;
 	/** The menu has shut after a pick: the reply plays out (from {@code replyFrom}) with no screen up. */
 	private static boolean replying;
+	/**
+	 * The player left the talk (Esc), or the villager's last word is in: no going back to the wheel after the reply. The
+	 * talk was MCA's (not an illager's, which ends as before). The talk has been asked for again (since {@code againFrom}).
+	 * It's set aside for another screen on them.
+	 */
+	private static boolean leaving, mca, again, aside;
+	private static int againFrom;
 	private static int replyFrom, lastCue = Integer.MIN_VALUE / 2;
 	/** What the villager is saying in the box (null: nothing yet, or the player's turn), its rows, its letters, and the tick it began. */
 	private static @Nullable Component line;
@@ -144,6 +161,9 @@ public final class DialogueCinematic {
 		stop(minecraft);
 		running = true;
 		replying = false;
+		leaving = false;
+		again = false;
+		aside = false;
 		speaker = Speaker.VILLAGER;
 		DialogueCinematic.villager = villager;
 		viewBefore = minecraft.options.getCameraType();
@@ -160,6 +180,14 @@ public final class DialogueCinematic {
 		}
 		DialogueCinematic.villager = villager;
 		lastCue = ticks;
+		if (speaker == Speaker.LAST) {
+			// their last word: shown from their shot, then the talk is over
+			leaving = true;
+			again = false;
+			replying = true;
+			replyFrom = ticks;
+			speaker = Speaker.VILLAGER;
+		}
 		if (speaker == Speaker.PLAYER) {
 			// the player's line gets its moment on camera; a reply sent the same tick waits for it
 			DialogueCinematic.speaker = speaker;
@@ -190,6 +218,9 @@ public final class DialogueCinematic {
 		}
 		running = false;
 		replying = false;
+		leaving = false;
+		again = false;
+		aside = false;
 		speaker = null;
 		pending = null;
 		holdUntil = 0;
@@ -200,6 +231,16 @@ public final class DialogueCinematic {
 		rows = List.of();
 		camAt = null;
 		camLook = null;
+	}
+
+	/** The player shut the talk menu themselves (Esc): the talk ends after any reply, and doesn't go back to the wheel. */
+	public static void left() {
+		leaving = true;
+	}
+
+	/** What the villager last said in the box, if it's theirs and the talk is on (the wheel's reply answers it): else null. */
+	public static @Nullable Component lastLine(int villagerId) {
+		return running && villagerId == villager && !lineMine ? line : null;
 	}
 
 	/** Whether {@code entity} isn't drawn now: the player, while the villager is speaking to them. */
@@ -282,16 +323,52 @@ public final class DialogueCinematic {
 		}
 		if (talking) {
 			replying = false;
-		} else if (running && !replying && screen == null && self != null && minecraft.level != null && ticks - lastCue <= REPLY_WINDOW) {
-			// the menu shut just after a pick: their reply is still to come
+			again = false;
+			leaving = false;
+			mca = screen instanceof InteractScreen;
+			if (aside) {
+				// (back from Family Tree: the talk goes on; the server is told so)
+				aside = false;
+				if (ClientPlayNetworking.canSend(DialogueCue.Again.TYPE)) {
+					ClientPlayNetworking.send(new DialogueCue.Again(villager));
+				}
+			}
+		} else if (running && mca && !leaving && aside(screen)) {
+			// Family Tree, or one of our talk screens on them: the talk waits for it
+			if (!aside) {
+				aside = true;
+				replying = false;
+				again = false;
+				if (ClientPlayNetworking.canSend(DialogueCue.Aside.TYPE)) {
+					ClientPlayNetworking.send(new DialogueCue.Aside(villager));
+				}
+			}
+		} else if (running && !replying && !again && screen == null && self != null && minecraft.level != null
+			&& (mca && !leaving || ticks - lastCue <= REPLY_WINDOW)) {
+			// the menu shut after a pick (or, Andy 2026-11-27, any talk action, or a screen set aside): their reply is still
+			// to come, and then the talk goes on
 			replying = true;
 			replyFrom = ticks;
+			aside = false;
 		}
 		if (replying && pending == null && speaker == Speaker.PLAYER && ticks >= holdUntil) {
 			// (nothing more came from the server: it's their turn all the same)
 			speaker = Speaker.VILLAGER;
 		}
-		if (running && (!(talking || replying && screen == null) || self == null || minecraft.level == null || replying && replied(minecraft))) {
+		if (running && replying && mca && !leaving && replied(minecraft)) {
+			// (Andy 2026-11-27) said and read: back to the wheel, unless the server says the talk is over
+			replying = false;
+			again = true;
+			againFrom = ticks;
+			if (ClientPlayNetworking.canSend(DialogueCue.Again.TYPE)) {
+				ClientPlayNetworking.send(new DialogueCue.Again(villager));
+			} else {
+				stop(minecraft);
+			}
+		}
+		boolean waiting = (replying || again) && screen == null;
+		if (running && (!(talking || waiting || aside && aside(screen)) || self == null || minecraft.level == null
+			|| replying && replied(minecraft) || again && ticks - againFrom > AGAIN_WAIT)) {
 			stop(minecraft);
 		}
 		if (running) {
@@ -314,6 +391,11 @@ public final class DialogueCinematic {
 			return false;
 		}
 		return ticks >= shot + REPLY_MAX || line != null && !lineMine && ticks >= lineDoneAt() + READ_TICKS;
+	}
+
+	/** Whether {@code screen} is one that belongs to the talk on now: MCA's Family Tree, or one of our talk screens on them. */
+	private static boolean aside(@Nullable Screen screen) {
+		return screen instanceof net.conczin.mca.client.gui.FamilyTreeScreen || screen instanceof TalkScreen talk && talk.entityId() == villager;
 	}
 
 	@Nullable

@@ -80,6 +80,11 @@ final class TalkScreen extends Screen {
 		});
 	}
 
+	/** Who this talk is with (their entity id). */
+	int entityId() {
+		return this.ask.entityId();
+	}
+
 	@Override
 	public boolean isPauseScreen() {
 		return false;

@@ -30,6 +30,8 @@ abstract class McaRefusalMixin {
 		original.call(actions, villager, player);
 		if (why != null) {
 			RefusalHints.hint(player, villager, why);
+			// (Andy 2026-11-27) a no spends more of their patience with you; talked out for the day, it ends the talk
+			com.jaymoskingdoms.Conversations.refused(player, villager, why == RefusalHints.Cause.TIRED);
 		}
 	}
 

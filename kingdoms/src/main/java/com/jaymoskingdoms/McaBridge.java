@@ -114,6 +114,41 @@ final class McaBridge {
 		return entity instanceof VillagerEntityMCA m && m.getInteractions().getInteractingPlayer().filter(p -> p == player).isPresent();
 	}
 
+	/** {@link McaCompat#talkSay}. */
+	static void talkSay(net.minecraft.world.entity.Entity entity, ServerPlayer player, Component line) {
+		if (entity instanceof VillagerEntityMCA v) {
+			v.sendChatMessage(line, player);
+		}
+	}
+
+	/** {@link McaCompat#talkReopen}. */
+	static boolean talkReopen(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		if (!(entity instanceof VillagerEntityMCA v)) {
+			return false;
+		}
+		if (!interactingWith(v, player)) {
+			v.getInteractions().interactAt(player, player.position(), net.minecraft.world.InteractionHand.MAIN_HAND);
+		}
+		return true;
+	}
+
+	/** {@link McaCompat#talkClose}. */
+	static void talkClose(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		if (entity instanceof VillagerEntityMCA v && interactingWith(v, player)) {
+			v.getInteractions().stopInteracting();
+		}
+	}
+
+	/** {@link McaCompat#talkMain}. */
+	static boolean talkMain(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (!(entity instanceof VillagerEntityMCA v) || main == null) {
+			return false;
+		}
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, v), player);
+		return true;
+	}
+
 	// ---- borrowed faces (BorrowedFaces, Doubles) -----------------------------------------------------------------------
 
 	/** What of an MCA look is the face and body someone is known by (with every gene, saved as {@code Gene...}). */

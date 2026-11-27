@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Conversations;
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Questioning;
 import com.jaymoskingdoms.Replies;
@@ -49,6 +50,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Andy (2026-11-27): one with a gold ! or a ? over them has Quests on the first ring too (next after the reply), and a
  * tip says so ({@link QuestTip}).
+ *
+ * <p>Andy (2026-11-27): the talk goes back to the wheel after every reply, and ends when you end it: "Take your leave"
+ * ({@link Conversations#GOODBYE}) is last on the first ring. Back on the wheel, the reply spoke answers what they said last.
  */
 public final class TalkFirst {
 	/** A spoke that isn't one of MCA's answers: this prefix, then the MCA button it presses (or one of ours below). */
@@ -96,7 +100,8 @@ public final class TalkFirst {
 			askExtras.clear();
 			trail.clear();
 			talkAsked = false;
-			said = null;
+			// (Andy 2026-11-27) back on the wheel after a reply: the reply spoke answers what they last said
+			said = DialogueCinematic.lastLine(((McaInteractScreenAccessor) s).jaymoskingdoms$villager().asEntity().getId());
 		}
 	}
 
@@ -218,6 +223,10 @@ public final class TalkFirst {
 				out.addFirst(Replies.answer(topic()));
 			}
 			out.addAll(answers);
+			if (MAIN.equals(question) && !questioned) {
+				// (Andy 2026-11-27) the talk goes on till you end it: last on the wheel, take your leave
+				out.add(Conversations.GOODBYE);
+			}
 		}
 		return out;
 	}
