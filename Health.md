@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 23:55). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 23:57). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**28 problems.**
+**27 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -39,7 +39,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/bleed-out-npc-items|bleed-out-npc-items]]: `for: coordinator` matches no bot or agent, so no one will claim it.
 - [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]]: `for: gemini` matches no bot or agent, so no one will claim it.
 - [[Inbox/changeling-voice-mimic|changeling-voice-mimic]]: `for: codex` matches no bot or agent, so no one will claim it.
-- [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]]: `for: codex` matches no bot or agent, so no one will claim it.
 - [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]]: `for: held-for-p3` matches no bot or agent, so no one will claim it.
 - [[Inbox/legends-p6-followups|legends-p6-followups]]: `for: codex` matches no bot or agent, so no one will claim it.
 - [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]]: `for: gemini` matches no bot or agent, so no one will claim it.
