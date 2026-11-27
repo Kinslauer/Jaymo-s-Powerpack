@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: codex
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes, 2026-11-26)
 asked: 2026-11-26
-claimed_by: codex
+claimed_by: 
 pr: 
 ---
 
@@ -25,3 +25,4 @@ Power: core/combat, shared.
 ## Notes
 - 2026-11-26 21:03 codex's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-26 claimed again (codex thread, continued by Claude after Codex/Antigravity hit usage limits). Work is in worktree E:\legends-p6-core-animations, branch codex/legends-p6-core-animations; build passed, reviewing before the PR.
+- 2026-11-26 20:39 codex's claim had no sign of work for 30 min: handed back as open.
