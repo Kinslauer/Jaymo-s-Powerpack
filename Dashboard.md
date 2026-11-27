@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 22:48). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -33,25 +33,27 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hollow-captains-fix|hollow-captains-fix]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/legends-p3|legends-p3]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/legends-p3|legends-p3]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-6-stable-mine-farm|structures-6-stable-mine-farm]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-14 waiting for a bot, 9 being built, 3 in review: see [[Kanban]].
+15 waiting for a bot, 8 being built, 3 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2265 Building news is found out, not told in chat (Kingdoms, 2026-11-27)
 - [ ] #2264 crows over a body no longer hang flapping in one spot in the sky (Kingdoms, 2026-11-27)
 - [ ] #2263 Arrows stuck in you are real arrows, not tools on your back (Powers, 2026-11-27)
 - [ ] #2261 Nothing drops on its own unless a player is near (Kingdoms, 2026-11-27)
 - [ ] #2260 New players start with low-end mode on and the vanilla texture look (Powers, 2026-11-27)
+- [ ] #2258 Legends Core animation library, landings by height, shared movement set and katana stance set (Powers, 2026-11-27)
 - [ ] #2257 Chrono: the wormhole, time skip, blitz poses, a fighting afterimage, blur steps (Powers, 2026-11-27)
 - [ ] #2254 swamp fire lag - fallen trees drawn lighter, windfall goes in a minute (Kingdoms, 2026-11-26)
 - [ ] #2253 NPC controls by the crosshair - downed and tied-up bodies (Powers, Kingdoms, 2026-11-26)
@@ -73,6 +75,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2231 Dyed and grey sheep no longer sprout stray boxes (Powers, 2026-11-26)
 - [ ] #2230 /texturelook vanilla|reason - switch the pack's retexture packs off and back on (Powers, 2026-11-26)
 - [ ] #2229 cannon loading tip cards (Powers, 2026-11-26)
+- [ ] #2228 face parts - snouts, beaks, fangs and horns on the painted faces (Kingdoms, 2026-11-26)
 - [ ] #2227 Dragonforge mechanics for our dragons (parts, bite, dive slam, sprint flight, tremor, horn, home patrols, realm wyverns) (Kingdoms, 2026-11-26)
 - [ ] #2226 lance couching from the saddle (Powers, Kingdoms, 2026-11-26)
 - [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
@@ -105,14 +108,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2185 Mordhau harness 3: more harness at the smith's anvil (Powers, Kingdoms, 2026-11-26)
 - [ ] #2184 harness furs and turbans count for body heat; straw hats keep the sun off (Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2183 Village mods 7-9: CTOV back, Tidal Towns, swamp goblins and their band, your own company (Kingdoms, 2026-11-26)
-- [ ] #2180 space pods fly: a climb through the sky, a piloted crossing, raiders, wrecks, rocks, a sling past the Maw, towing and Patrol posts (Powers, Kingdoms, 2026-11-25)
-- [ ] #2179 Fae Woods: shipped mods for the Blossom land, balloon gusts (Powers, Kingdoms, Kitchen, 2026-11-25)
-- [ ] #2178 Mordhau harness 2: the coif's cuts and the wrapper at the anvil, the champion's wreath (Powers, Kingdoms, 2026-11-25)
-- …and 566 older ones.
+- …and 627 older ones.
 
 ## Health
 
-29 problems in the notes: [[Health]].
+28 problems in the notes: [[Health]].
 
 ## Last week
 
