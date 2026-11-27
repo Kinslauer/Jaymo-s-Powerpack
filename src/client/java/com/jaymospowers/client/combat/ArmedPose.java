@@ -120,6 +120,11 @@ public final class ArmedPose {
 
 	/** From the avatar renderer's extractRenderState. */
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+		if (entity instanceof net.minecraft.world.entity.player.Player player
+			&& com.jaymospowers.client.freerun.CoreMotionClient.active(player)) {
+			state.setData(KEY, null);
+			return;
+		}
 		ItemStack main = entity.getMainHandItem();
 		Armed.Kind kind = Armed.kind(main);
 		if (kind == null && entity instanceof net.minecraft.world.entity.player.Player zf && com.jaymospowers.power.zfighter.ZFighterKiWeapon.wielded(zf)

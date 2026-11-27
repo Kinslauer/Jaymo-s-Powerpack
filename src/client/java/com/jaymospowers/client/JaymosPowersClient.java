@@ -364,6 +364,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.fishing.FishingRealClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
 		com.jaymospowers.client.freerun.FreerunClient.init();
+		com.jaymospowers.client.freerun.CoreMotionClient.init();
+		com.jaymospowers.client.combat.KatanaFormsClient.init();
 		com.jaymospowers.client.freerun.moves.RunMovesClient.init();
 		com.jaymospowers.client.freerun.CameraFollow.init();
 		// (0.19.24) campfire embers and hot spring steam

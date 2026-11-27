@@ -121,7 +121,7 @@ public final class Acrobatics {
 
 	/** Whether {@code player} has learnt the standing backflip (both sides: the client reads the synced ranks). */
 	public static boolean backflipLearnt(Player player) {
-		return Freerun.perk(player, Freerun.Perk.BACKFLIP) > 0;
+		return Powers.of(player) != null || Freerun.perk(player, Freerun.Perk.BACKFLIP) > 0;
 	}
 
 	/** {@code player}'s trick rank as last synced (both sides): Freerunner's rank, at least 1 for a web slinger, at most 2. */
@@ -184,7 +184,7 @@ public final class Acrobatics {
 	}
 
 	static void backflip(ServerPlayer player) {
-		if (Freerun.rank(player, Freerun.Perk.BACKFLIP) < 1 || !Freerun.canMove(player) || player.isPassenger() || player.isInWater()
+		if ((Powers.of(player) == null && Freerun.rank(player, Freerun.Perk.BACKFLIP) < 1) || !Freerun.canMove(player) || player.isPassenger() || player.isInWater()
 			|| !Feathers.canSpend(player, BACKFLIP_COST)) {
 			return;
 		}
