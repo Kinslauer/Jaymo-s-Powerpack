@@ -586,6 +586,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (Andy, 2026-11-19) downed near barbarians: bound and taken to their camp, not finished
 		TakenAlive.register();
 		Shackles.register();
+		CaptiveTips.register();
 		// (Andy, 2026-11-08) tombs and other #jaymoskingdoms:no_build_dungeons structures: no digging or building inside
 		NoBuildDungeons.register();
 		// the Stormborn Tomb (MIT port): a barrow over a tomb, laid out by its own structure type

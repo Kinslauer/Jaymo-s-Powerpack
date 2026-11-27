@@ -41,8 +41,8 @@ import com.jaymoskingdoms.money.Money;
  * {@link LifeStory.Start#EVICTED}, {@link LifeStory.Start#CAST_OUT}): what each asks of the player once they've woken.
  *
  * <ul>
- * <li><b>Still in chains</b>: shackled where they woke, among a barbarian camp's captives. The chain lets them shuffle
- * {@link #CHAIN_REACH} blocks and no further, and nothing in the camp harms them while they're bound (the raiders'
+ * <li><b>Still in chains</b>: shackled where they woke, among a barbarian camp's captives. The chain lets them go
+ * {@link #CHAIN_REACH} blocks and pulls them back past that, as a lead does (Andy, 2026-11-27), and nothing in the camp harms them while they're bound (the raiders'
  * {@link Barbarians#prey} lets them be). A lockpick used in hand runs the Pin game on the shackle
  * ({@link Lockpicking#pickVirtual}); or, at night, sneaking perfectly still for {@link #SLIP_TICKS} slips it. Free, the camp
  * hunts them for a day, as an escaped captive's does ({@link LifeStory#startHunt}).</li>
@@ -62,8 +62,17 @@ import com.jaymoskingdoms.money.Money;
 public final class StoryHard {
 	// ---- tuning --------------------------------------------------------------------------------------------------------
 
-	/** Still in chains: how far the chain lets them go (blocks), how hard the shackle's lock is, and the picks they wake with. */
-	static final double CHAIN_REACH = 2.5;
+	/**
+	 * Still in chains: how far the chain lets them go (blocks), how hard the shackle's lock is, and the picks they wake with.
+	 * Andy (2026-11-27): "you should be tethered and able to move 8-10 blocks, that way you can sneak around and you wont be
+	 * yanked back with a teleport. it should be like the lasso or lead."
+	 */
+	public static final double CHAIN_REACH = 9.0;
+	/**
+	 * Past the chain's reach: the pull back toward the stake per block over (a tick), the most it pulls, and how far over
+	 * (a pearl, a blast that flings them) before the chain can't hold and they're set back by it.
+	 */
+	static final double CHAIN_PULL = 0.15, CHAIN_PULL_MOST = 0.6, CHAIN_SNAP = 8.0;
 	static final int SHACKLE_LEVEL = 2, CHAIN_PICKS = 2;
 	/** Slipping the shackle: how long perfectly still and sneaking at night it takes (ticks), checked this often. */
 	static final int SLIP_TICKS = 100, SLIP_CHECK = 5;
@@ -131,7 +140,7 @@ public final class StoryHard {
 		ServerTickEvents.END_SERVER_TICK.register(StoryHard::tick);
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			if (!(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel) || hand != InteractionHand.MAIN_HAND
-				|| !sp.getMainHandItem().is(Lockpicking.LOCKPICK)) {
+				|| !Lockpicking.isPick(sp.getMainHandItem())) {
 				return InteractionResult.PASS;
 			}
 			Shackle shackle = sp.getAttached(SHACKLE);
@@ -272,11 +281,28 @@ public final class StoryHard {
 			return;
 		}
 		Vec3 anchor = Vec3.atBottomCenterOf(shackle.at());
-		if (player.level() != level || player.position().distanceToSqr(anchor) > CHAIN_REACH * CHAIN_REACH) {
+		double over = player.level() != level ? Double.MAX_VALUE : player.position().distanceTo(anchor) - CHAIN_REACH;
+		if (over > CHAIN_SNAP) {
+			// (another world, or flung far past the chain: it can't have let them go so far, so they're set back by it)
 			player.teleportTo(level, anchor.x, anchor.y, anchor.z, Set.<net.minecraft.world.entity.Relative>of(), player.getYRot(), player.getXRot(), false);
 			player.setDeltaMovement(Vec3.ZERO);
 			level.playSound(null, anchor.x, anchor.y, anchor.z, SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.8F, 0.8F);
-			if (now % 20L < 10L) {
+			SLIPPING.remove(player.getUUID());
+			return;
+		}
+		if (over > 0.0) {
+			// past the reach the chain draws taut and pulls them back like a lead: no step further out, and a pull toward the
+			// stake the harder the further over they are
+			Vec3 in = anchor.subtract(player.position()).normalize();
+			Vec3 v = player.getDeltaMovement();
+			double toward = v.dot(in);
+			if (toward < 0.0) {
+				v = v.subtract(in.scale(toward));
+			}
+			player.setDeltaMovement(v.add(in.scale(Math.min(CHAIN_PULL_MOST, over * CHAIN_PULL))));
+			player.syncVelocity = true;
+			if (now % 20L == 0L) {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.5F, 0.8F);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hard.chains.hold").withStyle(ChatFormatting.GRAY));
 			}
 			SLIPPING.remove(player.getUUID());
@@ -432,7 +458,7 @@ public final class StoryHard {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cell.paid", fine).withStyle(ChatFormatting.YELLOW));
 			return;
 		}
-		if (held.is(Lockpicking.LOCKPICK)) {
+		if (Lockpicking.isPick(held)) {
 			if (!KneelFirst.ready(player, "lock")) {
 				// (Andy, 2026-11-14) a lock is picked from a kneel ({@link KneelFirst})
 				return;

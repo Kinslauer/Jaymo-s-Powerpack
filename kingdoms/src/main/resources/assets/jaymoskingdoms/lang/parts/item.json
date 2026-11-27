@@ -43,6 +43,7 @@
   "item.jaymoskingdoms.building_plan.not_laid": "Use it on the ground to lay it out; sneak-use to turn it.",
   "item.jaymoskingdoms.building_plan.laid": "Laid out at %s, turned %s degrees. Fill its ghost blocks, or put it in a mason's table.",
   "item.jaymoskingdoms.lockpick": "Lockpick",
+  "item.jaymoskingdoms.crude_lockpick": "Crude Lockpick",
   "item.jaymoskingdoms.heirloom": "%s's Family Blade",
   "item.jaymoskingdoms.manacles": "Manacles",
   "item.jaymoskingdoms.clockwork_golem": "Clockwork Golem",
