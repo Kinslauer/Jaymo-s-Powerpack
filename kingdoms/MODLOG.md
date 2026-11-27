@@ -18065,3 +18065,98 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Disasters**: when a quake, flood, storm (sandstorm, blizzard, hail, hurricane), tornado touchdown, fire from the sky (volcano, meteor, ash), great wave or slide strikes, up to three guards near a player shout the townsfolk to safety. Fires keep their own alarm.
 - **No repeats**: a line anyone said in the last 45 seconds is passed over while fresh ones are left, so a squad doesn't shout the same words. All speech bubbles, nothing in chat.
 - Built; not played.
+
+## 0.13.65 (2026-11-27): hoods and over-garments fit what is under them (#2271)
+
+- Andy (2026-11-27): "insane amount of space on these armor pieces. can you make it conform to the piece underneath?" (a villager in the everyday hood and cloak).
+- The harness's hoods (hood, torn hood, fur hood, cowl, mantle, coifs) and over-garments (cloak, giornea, tabard, surcoat, kaftan, monk's robe, motley, sash) were cut to go over a helm and a cuirass, so on a bare head or a shirt they stood 1-2 pixels off all round and the cloak's cape hung far out behind.
+- New `HarnessFit`: as `HeraldryLayer` draws a wearer's pieces innermost first, it keeps a box of what is on so far (the bare body with MCA's clothes and the suit, then each piece). A hood or over-garment is drawn smaller about its bone until it sits 0.3 (head) or 0.4 (body, legs) past that box, never larger than made. The cloak's cape keeps 40% of its 7 degree swing back when fitted. Over a harness helm or cuirass the piece fits that piece's box; over armour from anywhere else (vanilla, Armory, Fantasy Armor) it is left as made. Hats and sleeves are left as they are.
+- `BbModel.bounds(bone)`: each bone's box round its cubes and its children's.
+- Built (compileClientJava); not played. Walking legs can show through the front of long fitted skirts (tabard, robe, giornea) more than before.
+
+## 0.13.66 (2026-11-27): Quests on the talk wheel's first ring, with a tip (#2275)
+
+- Talking to a villager or king with a gold **!** (work on offer) or a **?** (one of your quests) over their head, **Quests** is now on the talk wheel's first ring, right after the reply spoke. It is still under Ask of Them... as well.
+- A tip sits where your line goes (bottom right, while you're not pointing at a spoke): "They have work for you. Pick Quests on the wheel to hear it", or for a ? "Pick Quests on the wheel to check on it or hand it in". It stops after you've picked Quests from the wheel 3 times (kept in `config/jaymoskingdoms-tips.properties`), and never shows with `/hints off` (or `/tips off`).
+- `TalkFirst` (Quests spoke, `questTip`), new `QuestTip`, `QuestClient.mark`, `McaDialogueBoxMixin` (draws the tip).
+- Built (compileJava); not played.
+
+## 0.13.67 (2026-11-27): Buildings put up over old ruins take the whole ruin down; no trench round new buildings (#2274)
+
+- Seen at Haldale (Deck, 2026-11-26): its windmill (1849,74,-2048) and butcher's shop (1799,74,-2083) both went up "over an old structure". The saved world shows both were built, but only the old structure's blocks inside the new footprint came down: the windmill stood among the stumps of a stone tower, the butcher's shop jammed under the stone pillars and platform of an old raised hut. Around the windmill's tower the grass at floor height had been dug out, leaving a one-block trench round it.
+- **Old structures come down whole**: a site on an old structure now also clears every column of each structure piece it touches (`Ruins.wreck`, up to 12 blocks past the footprint; a site whose old structure reaches further isn't taken). Only the structure's own made blocks go (into storage, as before): never the land's soil and stone, paths, trees, plants or water, nothing in another building or plot, nothing a living villager has claimed (`Ruins.wreckable`). The extra columns are readied after the footprint's own, by the crew, by sleep's catch-up and by an at-once finish alike (`Planner.Layout.wreck`). The guard check (seats, keeps, storage, claimed beds) now covers the whole cleared area.
+- **No trench**: readying the ground no longer digs the land's own soil at floor height where the building has nothing of its own (`Construction.digs`); where an old structure's floor comes out at floor height, dirt goes back (`Construction.patch`).
+- Built; not played.
+
+## 0.13.68 (2026-11-27): Greetings fit the moment (#2270)
+
+- **Carrying on, not recalling**: talk to someone again within three minutes of something passing between you (you fed them, gave a gift, struck them...) while they can still see you (16 blocks) and they carry on from it ("Thank you again for the food. Did you want something?") instead of a "remember when" line. 25 sets of lines (`recall.jaymoskingdoms.just.*`), 22 for their own kinds and warm, cold and plain ones for the rest. `Recollections.say/justNow`, used by `opening` and `remark`.
+- **They eat what you hand them**: food given to a hungry villager ("Spare a crust...") is held in their hand and eaten over 3 seconds (stood still, bites, crumbs, a burp at the end, nutrition healed), then their own item goes back in their hand (`HandedFood`). Only while they're eating does talking to them get the mouth-full lines (`recall.jaymoskingdoms.just.fed_eating.*`). After that it's plain thanks.
+- **No greeting after you've already dealt with them**: if anything has already passed between you and a villager (any memory of their own of you), using them opens their menu straight away. No hand out, wave, handshake or bow. `Recollections.dealtWith`, checked in `Handshakes.greet`.
+- **Who greets at all**: the first-meeting wave, handshake or bow is only for rulers, court wizards and grown villagers with a trade. Nitwits, the jobless and children's menus open as they are (`Handshakes.greets`).
+- Built (`compileClientJava`); not played. Villagers coming over to you on their own (ComingOver) are unchanged.
+
+## 0.13.69 (2026-11-27): spectate viewcone shows the NPC's focus, or that it's thinking or stuck (#2277)
+
+- **What it's focused on** (Andy: "that spectate viewcone should label their current focus, or if they are thinking"): the
+  label over an NPC an operator spectates no longer says only its fight senses ("At ease" whenever it had no foe). It now
+  reads its AI: the top line is its focus (the foe it's fighting, else the first goal or brain behaviour it's running, else
+  where it's walking), or **Thinking: picking what to do next** (no target, no path, nothing running but the always-on
+  looking and door goals), **Thinking: re-planning its path** (3 or more new paths in 3 s), or **Stuck** (a path but under
+  a block of headway across the ground in 3 s, with "climbing" when it's hanging on vines or a ladder). Under it: its alert
+  (the old line, "At ease" now reads "No foe in mind"), the task Jade shows, its brain's activity, the goals and
+  behaviours running (by their code names, so they can be looked up), its target and distance, where its path goes and
+  whether it gets there (and how far short it ends), and its brain's walk target when that's somewhere else.
+- **Drawn too**: its path ahead (white line node to node; the end cross magenta when the path stops short of its goal)
+  and its walk target (pale green cross). The top line is white when focused, yellow thinking, orange re-planning, red stuck.
+- Only for operators spectating (or any spectator in a dev game), as before. `NpcFocus` (new), `NpcEyes.View`,
+  `NpcEyesClient`, lang part `npc-eyes`.
+- Built; not played. Which always-on behaviours MCA's people run hasn't been seen: any that show in "Running" every time
+  can be added to `NpcFocus.BACKGROUND`.
+
+## 0.13.70 (2026-11-27): Villages' overgrown rooms tidied, forest trees kept off buildings, stuck walkers push through (#2276)
+
+- Andy (clip of Haldale): "broken pathing on these poorly generated buildings." Haldale's save (the Deck's region file, read block by block) showed the cause. Its town centre is Epic Structures: Villages' great square (`plains_meeting_point_3`, 45 x 48 x 45), placed intact but drawn as an overgrown ruin: a tower whose rooms and stairwell hold leaves (set persistent) and cobwebs at floor level, and oak trunks either side of its front door by the bell. Beside it, in the alley where the clip's villagers were wedged, stand trees the square's template doesn't hold (oak wood columns, most likely Just Better Forest's: its trees are pasted by the game's `minecraft:template` feature, which only checks the block under the trunk). The server log's `[stall]` lines put Haldale's stuck villagers there, at the bell.
+- **New villages** (`Overgrowth.tidy`, from `StructureStartMixin`): as a village's pieces are placed, cobwebs where folk would walk and leaves at foot or head height under a roof are taken out. Hedges and trees out in the open are left.
+- **New worlds** (`Overgrowth.crowds`, `TemplateFeatureMixin`): while the world generates, a template tree, log, bush or boulder that would land in or within a block of anything built (any block that isn't the land's own: planks, bricks, glass, doors, fences, stripped logs, a road's dirt path, a field's farmland) isn't set down. Our own grown trees (`GrownTrees`) skip the same way (their wood plus 2 blocks for leaves). Saplings that players grow aren't checked.
+- **Settlements already standing** (`Groundwork`): the groundskeeper also clears the overgrowth ("clearing the overgrowth"): cobwebs and indoor leaves where folk walk (through the buildings' floors, up to 24 blocks down each column) and wild (not persistent) leaves at foot or head height in the streets. So Haldale's tower gets cleared out without a new world. Wood is never cut (a trunk cut would fell its tree on the houses), so the square's trunks and the alley's extra trees stay.
+- **Stuck walkers push through** (`Unstick`, `Overgrowth.pushThrough`): a villager or one of our folk whose fresh path still can't get there brushes aside that overgrowth round where the path gives out and round itself, then paths again. The stall watcher's "sent on" step does the same round the villager, next to opening a shut door.
+- Not changed: two of Haldale's street pieces lie underground (`straight_05`/`straight_06` at y 55 to 62; a guard was stuck at y 51), and the buildings that never generated are another thread's.
+- Built; not played.
+
+## 0.13.71 (2026-11-27): Guards grow suspicious of what they half see or hear, light up and go to look (#2279)
+
+- **Suspicion** (Andy: "guards should also react and investigate based on your concealment. it should factor in light
+  level, (guards will have to get closer or turn on lights and approach) sounds, and other factors"): a guard (a realm's,
+  a camp's, an MCA guard) no longer either sees you at once or not at all. How hidden you are uses the same reckoning as a
+  monster's eyes: the light on you and any light he carries, sneaking, standing still, the slow pace, cover, a hood,
+  weather and mist, smell, being lit or on fire, and the rest. Within that reach he sees you. Out to 2.5 times it, in
+  front of him with nothing solid between, he catches a glimpse and grows suspicious, faster the nearer you are to being
+  seen. Your footsteps and other noises he hears raise it too, by how loud they come through the walls.
+- **What he does**: at a quarter suspicion he stops and looks where he last glimpsed or heard you. At 60% he goes to look,
+  following fresher glimpses. If it's dark there or where he stands and he has nothing lit in hand, he lights one first
+  (his kept lantern, one from his pocket, else one from the stores, else a torch), day or night, and keeps it lit till
+  he's done. With the light he sees farther, so he closes in until he can make you out. Once he sees you properly he
+  stops, looks you over for 3 s and goes back to his post. What he then makes of you is up to the law as before. He
+  won't suspect you again for 30 s. Suspicion fades by itself.
+- **You can see it**: the awareness eye fills with a guard's suspicion and shows searching while he investigates. The
+  spectate view lists "Suspicious of <player>: 45%" or "Investigating <player>".
+- `GuardWatch` (new), `Footsteps.heard`, `NightLights.lightUp` (new) and keeping the light while investigating,
+  `Senses` (gauge, `sight` opened to the package), `NpcFocus`, lang part `npc-eyes`.
+- Built; not played.
+
+## 0.13.72 (2026-11-27): NPCs take a second to think before setting on a player they've just picked out (#2279)
+
+- **The extra second** (Andy: "npcs across the board should think for an extra second to give stealth users the required
+  time to close in for a stealth takedown"): every mob that picks out a player it would fight (any target goal or brain
+  attack sensor, through `TargetingConditions.test`) now spends 1 s sizing them up before it can take them as its foe.
+  This includes monsters, animals, the folk, MCA's guards and bosses. All that second it isn't after them, so it still
+  counts as unaware for a stealth kill, a sneak attack or an assassination. It doesn't turn round either: the takedown
+  from behind still works. If it still has them after the second, it sets on them as before. Not picked out for 2 s,
+  they're sized up afresh next time.
+- **No second when**: it's already after them, a friend just told it where they are, or they just hurt it (a blow is
+  answered at once). Creative and spectator players are untouched.
+- **You can see it**: the awareness eye fills over the second, and the spectate dev view's top line reads "Thinking:
+  sizing up <player> (0.6 s left)" in yellow.
+- `ThinkFirst` (new), `mixin.TargetingThinkMixin` (new, combat mixins), `Senses` (gauge), `NpcFocus`, lang part `npc-eyes`.
+- Built; not played.

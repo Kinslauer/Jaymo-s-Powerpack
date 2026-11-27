@@ -1,4 +1,7 @@
 {
   "gui.jaymoskingdoms.talk.ask": "Ask of Them...",
-  "gui.jaymoskingdoms.talk.back": "Back"
+  "gui.jaymoskingdoms.talk.back": "Back",
+  "gui.jaymoskingdoms.talk.tip": "Tip",
+  "gui.jaymoskingdoms.talk.quest_tip.offer": "They have work for you. Pick Quests on the wheel to hear it. It's also under Ask of Them...",
+  "gui.jaymoskingdoms.talk.quest_tip.yours": "You're doing work for them. Pick Quests on the wheel to check on it or hand it in."
 }

@@ -46,6 +46,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Andy (2026-11-27): "there should always be an option to address what they say here. either the first on the tree
  * or a button". First on the talk's first ring: a reply to the line they opened with ({@link Replies}).
+ *
+ * <p>Andy (2026-11-27): one with a gold ! or a ? over them has Quests on the first ring too (next after the reply), and a
+ * tip says so ({@link QuestTip}).
  */
 public final class TalkFirst {
 	/** A spoke that isn't one of MCA's answers: this prefix, then the MCA button it presses (or one of ours below). */
@@ -55,6 +58,8 @@ public final class TalkFirst {
 	/** MCA's buttons that are never spokes: the column's two, the talk itself, MCA's back arrow (Back stands in). */
 	static final String TALK = "gui.button.talk", INTERACT = "gui.button.interact", TRADE = "gui.button.trade", GIFT = "gui.button.gift",
 		BACK_ARROW = "gui.button.backarrow", FAMILY = "gui.button.familyTree";
+	/** The main page's Quests button: on Ask of them..., and on the first ring too while they have a quest mark over them. */
+	static final String QUESTS = "gui.button.quests";
 	/** The main page's buttons that go on "Ask of them..." with the Interact page's, not on the first ring. */
 	static final Set<String> TO_ASK = Set.of("gui.button.inventory", "gui.button.work", "gui.button.quests", "gui.button.tailor",
 		"gui.button.costume", "gui.button.costume_table");
@@ -197,6 +202,10 @@ public final class TalkFirst {
 		}
 		boolean questioned = answers != null && !answers.isEmpty() && Questioning.ANSWERS.containsAll(answers);
 		if ((question == null || MAIN.equals(question)) && !questioned) {
+			if (questsUp(v)) {
+				// (Andy 2026-11-27) one with a ! or a ? over them: Quests on the first ring, not only under Ask of them...
+				out.add(LOCAL + QUESTS);
+			}
 			for (AbstractWidget w : page) {
 				if (w.active) {
 					out.add(LOCAL + ((McaButtonExAccessor) w).jaymoskingdoms$apiButton().identifier());
@@ -211,6 +220,24 @@ public final class TalkFirst {
 			out.addAll(answers);
 		}
 		return out;
+	}
+
+	/** Whether Quests goes on the first ring for {@code v}: it's on their main page, and they have a ! or a ? over them. */
+	private static boolean questsUp(Entity v) {
+		return askExtras.containsKey(QUESTS) && QuestClient.mark(v) != 0;
+	}
+
+	/**
+	 * (Andy 2026-11-27) The tip for the talk now ({@link QuestTip}): on the first ring, with Quests on it, while the talk is
+	 * under way; null for none.
+	 */
+	public static @Nullable Component questTip(InteractScreen s) {
+		forScreen(s);
+		if (!MAIN.equals(s.getActiveScreen())) {
+			return null;
+		}
+		Entity v = ((McaInteractScreenAccessor) s).jaymoskingdoms$villager().asEntity();
+		return stranger(v) || !questsUp(v) ? null : QuestTip.tip(v);
 	}
 
 	/** The villager said {@code text} in the talk box (MCA's question line, or one of ours): the reply spoke answers it. */
@@ -307,6 +334,9 @@ public final class TalkFirst {
 			return;
 		}
 		String id = spoke.substring(LOCAL.length());
+		if (id.equals(QUESTS)) {
+			QuestTip.picked();
+		}
 		Spoke extra = askExtras.get(id);
 		MCAButton button = extra != null ? extra.button() : null;
 		for (AbstractWidget w : page) {

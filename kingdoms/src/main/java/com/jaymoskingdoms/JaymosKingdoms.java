@@ -284,6 +284,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		ClericHeals.register();
 		SmithMending.register();
 		GuardMeals.register();
+		HandedFood.register();
 		GuardKicks.register();
 		AlarmBells.register();
 		com.jaymoskingdoms.deep.Deeps.register();
@@ -705,6 +706,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Lamplight.register();
 		// NPCs need light to see by: they fetch a torch or lantern for the dark, and the night watch always carries one
 		NightLights.register();
+		// guards grow suspicious of a player they half make out or hear, and go to look (lit up in the dark)
+		GuardWatch.register();
 		// medieval picks: lamps gutter in abandoned places, and the court wizards' everburning mote lantern
 		GutteringLamps.register();
 		MoteLanterns.register();

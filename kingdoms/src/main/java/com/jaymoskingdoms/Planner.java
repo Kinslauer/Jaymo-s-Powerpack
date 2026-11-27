@@ -69,10 +69,12 @@ public final class Planner {
 
 	/**
 	 * A blueprint set down at a site and turned: its footprint ({@code min} to {@code max}, x and z), its height, its
-	 * blocks in the order they're laid (bottom up, like materials together), and the spots it fills.
+	 * blocks in the order they're laid (bottom up, like materials together), and the spots it fills. On an old structure,
+	 * {@code wreck} holds the columns round the footprint where the rest of that structure comes down too
+	 * ({@link Ruins#wreck}); they're readied after the footprint's own.
 	 */
 	public record Layout(Blueprint blueprint, String entry, BlockPos min, BlockPos max, int height, List<Op> ops, Set<BlockPos> filled, boolean plot,
-		boolean ruins) {
+		boolean ruins, List<BlockPos> wreck) {
 		public int width() {
 			return this.max.getX() - this.min.getX() + 1;
 		}
@@ -81,7 +83,13 @@ public final class Planner {
 			return this.max.getZ() - this.min.getZ() + 1;
 		}
 
+		/** The columns readied before the building goes up: the footprint's, then the old structure's round it. */
 		public int columns() {
+			return this.footprint() + this.wreck.size();
+		}
+
+		/** The footprint's own columns (the first {@link #columns} are these). */
+		public int footprint() {
 			return this.width() * this.depth();
 		}
 
@@ -89,8 +97,11 @@ public final class Planner {
 			return new BlockPos((this.min.getX() + this.max.getX()) / 2, this.min.getY(), (this.min.getZ() + this.max.getZ()) / 2);
 		}
 
-		/** Column {@code i} (prep goes column by column, row by row). */
+		/** Column {@code i} (prep goes column by column, row by row, then round the footprint on an old structure). */
 		public BlockPos column(int i) {
+			if (i >= this.footprint()) {
+				return this.wreck.get(i - this.footprint());
+			}
 			return new BlockPos(this.min.getX() + i % this.width(), this.min.getY(), this.min.getZ() + i / this.width());
 		}
 	}
@@ -397,7 +408,29 @@ public final class Planner {
 			return ka.compareTo(kb);
 		});
 		BlockPos max = origin.offset(size[0] - 1, 0, size[1] - 1);
-		return new Layout(bp, entry, origin, max, bp.height(), List.copyOf(ops), filled, plot, ruins && !plot);
+		boolean onRuins = ruins && !plot;
+		List<BlockPos> wreck = List.of();
+		if (onRuins) {
+			// the rest of the old structure comes down with it (none if it now reaches too far: the footprint alone, as before)
+			List<BlockPos> round = Ruins.wreck(level, origin.getX(), origin.getZ(), max.getX(), max.getZ(), origin.getY(),
+				origin.getY() + bp.height() + CLEARANCE, kept(level.getServer()));
+			wreck = round == null ? List.of() : List.copyOf(round);
+		}
+		return new Layout(bp, entry, origin, max, bp.height(), List.copyOf(ops), filled, plot, onRuins, wreck);
+	}
+
+	/** Every building finished and every plot marked, of every faction ({minX, minZ, maxX, maxZ}): never torn down round a new one. */
+	static List<int[]> kept(MinecraftServer server) {
+		List<int[]> out = new ArrayList<>(WalledTowns.raised(server));
+		for (Works.Site site : Works.all(server).values()) {
+			for (Works.Built b : site.built()) {
+				out.add(new int[] {b.min().getX(), b.min().getZ(), b.max().getX(), b.max().getZ()});
+			}
+			for (Works.Plot p : site.plots()) {
+				out.add(new int[] {p.min().getX(), p.min().getZ(), p.max().getX(), p.max().getZ()});
+			}
+		}
+		return out;
 	}
 
 	// ---- sites ----------------------------------------------------------------------------------------------------
@@ -633,8 +666,23 @@ public final class Planner {
 				}
 			}
 		}
-		if (ruins && Ruins.guarded(level, x0, z0, x1, z1, floor - LEVEL_TOLERANCE, floor + height + CLEARANCE)) {
-			return null;
+		if (ruins) {
+			// the whole of the old structure comes down, not just what's in the footprint: it must be small enough, and
+			// nothing round it that mustn't be cleared
+			List<BlockPos> wreck = Ruins.wreck(level, x0, z0, x1, z1, floor, floor + height + CLEARANCE, taken);
+			if (wreck == null) {
+				return null;
+			}
+			int wx0 = x0, wz0 = z0, wx1 = x1, wz1 = z1;
+			for (BlockPos c : wreck) {
+				wx0 = Math.min(wx0, c.getX());
+				wz0 = Math.min(wz0, c.getZ());
+				wx1 = Math.max(wx1, c.getX());
+				wz1 = Math.max(wz1, c.getZ());
+			}
+			if (Ruins.guarded(level, wx0, wz0, wx1, wz1, floor - LEVEL_TOLERANCE, floor + height + CLEARANCE)) {
+				return null;
+			}
 		}
 		return new Footing(floor, ruins);
 	}
