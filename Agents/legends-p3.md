@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: legends-p3-big-symbiote
 branch: codex/legends-p3
 pr:
@@ -17,3 +17,6 @@ owns:
 # Legends Patch 3
 
 Andy assigned the big symbiote patch directly to Codex. Isolated worktree on the Legends stack. Push the branch for Claude to review.
+
+## Notes
+- 2026-11-27 01:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
