@@ -28,4 +28,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 **Where to start:** `Dismembered` (hiding parts one at a time), `SeveredPart`, the powers' own kill effects (codemap, `docs/Abilities.md`).
 
 ## Notes
-- 
+- 2026-11-27 18:00 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on all six gore parts (2026-11-27)
