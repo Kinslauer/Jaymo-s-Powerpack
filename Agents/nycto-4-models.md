@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: nycto-4-models
 branch: claude/nycto-4-models
 with:
-pr:
+pr: 2302
 mods: kingdoms
 versions:
 started: 2026-11-27
@@ -27,5 +27,7 @@ owns:
 ## Notes
 - 2026-11-27 09:35 Claimed by hermes-modeller after Antigravity quota was reached.
 - 2026-11-27 09:58 Andy wants bigger wings (his steer to Antigravity at 8:59, just before its quota ran out). Antigravity never finished it: its last step said the wings were still too small, then the quota hit. The copied geo still has the old wing sizes (inner membrane 9x11.8, outer 12x14.85). Make the folded membrane wings clearly larger and re-check the previews. (Added by Claude for Andy.)
+- 2026-11-27 10:48 Addressed Andy's bigger-wings note: inner span 9→11, outer 12→15, taller membranes; removed wrist-claw/outer finger-bone cubes that looked like stray geometry in rest pose. PR #2302 updated.
 
 ## Done
+PR #2302 opened with the model, textures, animations, generator and previews; kingdoms builds cleanly.
