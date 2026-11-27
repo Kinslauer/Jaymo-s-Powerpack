@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 04:38
+updated: 2026-11-27 04:49
 ---
 # Open PRs
 
-14 open, as of 2026-11-27 04:38. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+14 open, as of 2026-11-27 04:49. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -34,7 +34,7 @@ Andy merges only on "merge", one at a time.
 ## [#2245](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2245) Hollow captains: 12 per player, own ladders, intersecting captains
 - **Branch:** `claude/hollow-captains-fix` · **Updated:** 2026-11-27 (today)
 - **Checks:** ❌ failing: Build Kingdoms
-- **Agent:** no agent note
+- **Agent:** [[hollow-captains-fix]]
 
 ## [#2248](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2248) Let changelings mimic players' voices while stalking
 - **Branch:** `t3/changeling-voice-mimic` · **Updated:** 2026-11-26 (today)
