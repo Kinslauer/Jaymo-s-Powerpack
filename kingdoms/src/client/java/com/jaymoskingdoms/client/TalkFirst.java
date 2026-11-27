@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Questioning;
+import com.jaymoskingdoms.Replies;
 import com.jaymoskingdoms.ZFighterFolk;
 import com.jaymoskingdoms.client.mixin.mca.McaButtonExAccessor;
 import com.jaymoskingdoms.client.mixin.mca.McaInteractScreenAccessor;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import net.conczin.mca.client.gui.InteractScreen;
 import net.conczin.mca.client.gui.MCAButton;
+import net.conczin.mca.entity.CommonSpeechManager;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.network.Network;
 import net.conczin.mca.network.c2s.InteractionDialogueInitMessage;
@@ -21,6 +23,7 @@ import net.conczin.mca.network.c2s.InteractionDialogueMessage;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.Nullable;
 
@@ -40,6 +43,9 @@ import org.jspecify.annotations.Nullable;
  * <p>Kept from before: one you haven't been introduced to gets only Introduce yourself on the wheel (with Gift and Trade);
  * the talk starts once they've told you who they are. The Judge, the Keeper and the masters get only their own talk, no
  * Gift. Held down for questioning, only the questions.
+ *
+ * <p>Andy (2026-11-27): "there should always be an option to address what they say here. either the first on the tree
+ * or a button". First on the talk's first ring: a reply to the line they opened with ({@link Replies}).
  */
 public final class TalkFirst {
 	/** A spoke that isn't one of MCA's answers: this prefix, then the MCA button it presses (or one of ours below). */
@@ -63,6 +69,8 @@ public final class TalkFirst {
 	private static final Deque<String> trail = new ArrayDeque<>();
 	/** The talk has been asked for (it starts once, when the screen first lays out for one you know). */
 	private static boolean talkAsked;
+	/** What the villager last said in the talk box: the reply spoke answers it ({@link Replies}). */
+	private static @Nullable Component said;
 
 	/** One of the main page's buttons kept for the Ask ring: MCA's button and its label. */
 	private record Spoke(MCAButton button, Component label) {
@@ -83,6 +91,7 @@ public final class TalkFirst {
 			askExtras.clear();
 			trail.clear();
 			talkAsked = false;
+			said = null;
 		}
 	}
 
@@ -195,9 +204,70 @@ public final class TalkFirst {
 			}
 		}
 		if (answers != null) {
+			if (MAIN.equals(question) && !questioned && !special(v)) {
+				// (Andy 2026-11-27) "there should always be an option to address what they say": first on the wheel
+				out.addFirst(Replies.answer(topic()));
+			}
 			out.addAll(answers);
 		}
 		return out;
+	}
+
+	/** The villager said {@code text} in the talk box (MCA's question line, or one of ours): the reply spoke answers it. */
+	public static void said(InteractScreen s, Component text) {
+		forScreen(s);
+		said = text;
+	}
+
+	/** The topic of what they last said ({@link Replies#topicOf}), from the key MCA picked for it and its words. */
+	static String topic() {
+		Component line = said;
+		if (line == null) {
+			return Replies.GENERAL;
+		}
+		if (line != topicOf || topic == null) {
+			TranslatableContents tc = translatable(line, 0);
+			topic = Replies.topicOf(tc == null ? null : key(tc), line.getString());
+			topicOf = line;
+		}
+		return topic;
+	}
+
+	/** The last line's topic, worked out once (the wheel asks every frame). */
+	private static @Nullable Component topicOf;
+	private static @Nullable String topic;
+
+	/** The first translated part of {@code c} (the line itself, or its parts and arguments). */
+	private static @Nullable TranslatableContents translatable(Component c, int depth) {
+		if (c.getContents() instanceof TranslatableContents tc) {
+			return tc;
+		}
+		if (depth > 4) {
+			return null;
+		}
+		for (Component part : c.getSiblings()) {
+			TranslatableContents tc = translatable(part, depth + 1);
+			if (tc != null) {
+				return tc;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * The line's key: the one MCA's pooled lines resolved it to (e.g. {@code guard.dialogue.main.night/4}, which tells the
+	 * creeper warning from the other night lines), when that is a pick of this line's own key; else the key it was sent
+	 * with, less MCA's {@code #G..}/{@code #P..} speaker parts.
+	 */
+	private static String key(TranslatableContents tc) {
+		String sent = tc.getKey();
+		int hash = sent.lastIndexOf('#');
+		String base = hash < 0 ? sent : sent.substring(sent.indexOf('.', hash) + 1);
+		String resolved = CommonSpeechManager.INSTANCE.translations.get(tc);
+		if (resolved != null && resolved.replaceAll("/\\d+$", "").endsWith(base)) {
+			return resolved;
+		}
+		return base;
 	}
 
 	/** A spoke's label. */
