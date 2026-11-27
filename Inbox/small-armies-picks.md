@@ -39,3 +39,4 @@ Not picked: clay soldiers, Clay Warfare colours/buffs/remote/book.
 - 2026-11-26 21:39 hermes-a's last run stopped before finishing; handed back as open.
 - 2026-11-26 21:57 2026-11-26 20:55 apollo: PR #2259 opened (plan doc + change note, no code). pr_checks pass. Worktree has broken disk state; next run restores it and sets in-review.
 - 2026-11-26 22:35 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-27 11:45 apollo: PR #2280 (Hand of God: Celestial Hold and Celestial Turn) — all GitHub checks green. Plan doc + change note + code (CelestialCommand, HandOfGodPower). Built, not played. Set in-review.
