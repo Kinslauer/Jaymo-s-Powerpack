@@ -13,7 +13,7 @@
 		"server": ["com.jaymoskingdoms.JaymosKingdomsServer"],
 		"jade": ["com.jaymoskingdoms.client.compat.JadeIntroductions"],
 		"jei_mod_plugin": ["com.jaymoskingdoms.client.compat.TierJei", "com.jaymoskingdoms.client.compat.ClassJei"],
-		"voicechat": ["com.jaymoskingdoms.VoiceRange"]
+		"voicechat": ["com.jaymoskingdoms.VoiceRange", "com.jaymoskingdoms.ChangelingVoices"]
 	},
 	"mixins": [
 		"jaymoskingdoms.combat.mixins.json",

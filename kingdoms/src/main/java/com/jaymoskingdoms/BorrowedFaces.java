@@ -56,6 +56,7 @@ public final class BorrowedFaces {
 	}
 
 	static void register() {
+		ChangelingLures.register();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (entity instanceof ServerPlayer p && p.hasAttached(OWN) && p.getHealth() <= p.getMaxHealth() * PAIN_SLIP) {
 				drop(p);
