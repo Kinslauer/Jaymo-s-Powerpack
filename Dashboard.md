@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 12:23). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 13:21). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -9,18 +9,15 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 2026-11-27 04:46 Text pass content is complete (reviewed captain-ground.json lang keys and changes/kingdoms/hollow-captains-fix.md; all player-facing, no rewri…
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
-- [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gn…
+- [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-27 13:20 hunters-road-2 merged (#2287); still waits on hunters-road-3-models.
 - [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gn…
 - [[Inbox/hunters-road-5|hunters-road-5]] · 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gn…
-- [[Inbox/hunters-road-7|hunters-road-7]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-8|hunters-road-8]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-9|hunters-road-9]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
-- [[Inbox/nycto-3|nycto-3]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/nycto-4|nycto-4]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/nycto-5|nycto-5]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
-- [[Inbox/nycto-6|nycto-6]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/nycto-7|nycto-7]] · 2026-11-27 11:41 Stays ON HOLD: built after hunters-road-7 (reuses its oils/bombs), alongside wave 4.
 - [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · 2026-11-26 07:21 Design draft complete: Overworld aqueduct structure, SettlementCurse system, 4 board quests (Stem the Flow, Clear the Pillars, Purify the Ston…
 
@@ -38,12 +35,18 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-9 waiting for a bot, 1 being built, 14 in review: see [[Kanban]].
+11 waiting for a bot, 2 being built, 9 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2289 Hunter's Road 6, part A: toxicity, tolerance, the gauge, five harms, hunter's eyes (Powers, Kingdoms, Kitchen, 2026-11-27)
+- [ ] #2288 Night's Blood 2 - the Blood page, the shrine and the pacts (Kingdoms, 2026-11-27)
+- [ ] #2287 silver and steel by monster kind (Powers, Kingdoms, 2026-11-27)
+- [ ] #2286 FastNoiseLite worldgen: Pale Moon craters, softer Aether clouds (Powers, Kingdoms, 2026-11-27)
+- [ ] #2285 Night's Blood 1 - one body of blood (mB reserve, every move on the bar, chains) (Kingdoms, 2026-11-27)
+- [ ] #2284 Hunter's Road 1 - yellow tells, zombie and husk lunges, buried husks (Powers, Kingdoms, 2026-11-27)
 - [ ] #2283 Symbiote suit moves and the suit-up pose (Powers, 2026-11-27)
 - [ ] #2282 Legends patch 6 fixes - air flips, air step, landings, katana forms (Powers, 2026-11-27)
 - [ ] #2281 Big symbiote combat (Powers, 2026-11-27)
@@ -98,13 +101,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2215 Two new Rig suits: Hail and Tinker (Powers, Kitchen, 2026-11-26)
 - [ ] #2214 Open art sets, batch 1: machines and far-world rock (Powers, Kingdoms, 2026-11-26)
 - [ ] #2213 Maw ruins from Pomkot's World (Powers, 2026-11-26)
-- [ ] #2212 CC0 picks: pack weight, death toll, weapon wheel, coyote time, better chainmail, axe throw, rust, falling snow, snores, clumsy undead, soap scrub, leaves on Fast, eight new pack mods (Powers, Kingdoms, Kitchen, 2026-11-26)
-- [ ] #2211 fire engulfs faster, burns longer, buildings crumble (Kingdoms, 2026-11-26)
-- [ ] #2210 Medieval resource packs under the Reason look (Powers, Kingdoms, 2026-11-26)
-- [ ] #2208 Reason look pack replaces Excalibur; art check on PRs (Powers, 2026-11-26)
-- [ ] #2207 The salmon run: salmon swim upriver in autumn, spawn in the headwaters and die there (Powers, Kingdoms, 2026-11-26)
-- [ ] #2206 Giant mushrooms repainted in the pack's vanilla style (Kingdoms, 2026-11-26)
-- …and 645 older ones.
+- …and 651 older ones.
 
 ## Health
 
