@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 08:27
+updated: 2026-11-27 11:11
 ---
 # Open PRs
 
-12 open, as of 2026-11-27 08:27. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+17 open, as of 2026-11-27 11:11. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -65,3 +65,28 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/small-armies-picks-4` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
+
+## [#2296](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2296) Night's Blood 7: hunters
+- **Branch:** `claude/project-thread-oiiwvx-ny7` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2298](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2298) Night's Blood 6: days and nights
+- **Branch:** `claude/project-thread-oiiwvx-ny6` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2299](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2299) Night's Blood 5: servants and your get (draft)
+- **Branch:** `claude/project-thread-oiiwvx-ny5` · **Updated:** 2026-11-27 (today)
+- **Checks:** no checks
+- **Agent:** no agent note
+
+## [#2301](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2301) Rig Octo Core: four mechanical arms with tendril moves
+- **Branch:** `claude/project-thread-trrqwf` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2302](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2302) Night's Blood 4 models: the true shape of the night
+- **Branch:** `claude/nycto-4-models` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[nycto-4-models]]
