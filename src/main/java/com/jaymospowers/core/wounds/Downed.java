@@ -1420,6 +1420,12 @@ public final class Downed {
 			getUp(level, mob);
 			return;
 		}
+		if (wounds != null && Carry.isCarried(mob)) {
+			// (Andy, 2026-11-27: "i was trying to save this prisoner and he died") in someone's arms, dragged to safety or
+			// slung over a horse, the bleeding-out clock holds: the last hit moves on with every tick they're held
+			wounds += 1L << 4;
+			mob.setAttached(WOUNDS, wounds);
+		}
 		if (wounds != null && now - (wounds >> 4) >= BLEED_OUT_TICKS) {
 			finish(level, mob);
 			return;
