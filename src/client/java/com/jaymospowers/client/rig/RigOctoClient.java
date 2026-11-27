@@ -1,6 +1,7 @@
 package com.jaymospowers.client.rig;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigMoves;
 import com.jaymospowers.rig.RigOcto;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -76,6 +77,9 @@ public final class RigOctoClient {
 
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/rig/octo.png");
 	static final Identifier GLOW = JaymosPowers.id("textures/entity/rig/octo_glow.png");
+	/** The arms' paintable sheets ({@code tools/gen_rig_paint.py}): their plates in light greys, and their lights in white. */
+	static final Identifier PAINT = JaymosPowers.id("textures/entity/rig/octo_paint.png");
+	static final Identifier LIGHTS = JaymosPowers.id("textures/entity/rig/octo_lights.png");
 	/** On the render state: per arm {pitch, yaw, elbow, reach, claw open}, then the spin and time; null when the arms aren't worn. */
 	static final RenderStateDataKey<float[]> ARMS = RenderStateDataKey.create(() -> "jaymospowers:rig_octo");
 
@@ -494,8 +498,15 @@ public final class RigOctoClient {
 		}
 		poseStack.pushPose();
 		parent.body.translateAndRotate(poseStack);
-		collector.submitModelPart(root, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF);
-		collector.submitModelPart(root, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF);
+		// painted at the Forge: the arms take the trim's paint (else the Core's plates'), and the lights' colour
+		Integer trim = state.getData(RigSuit.TRIM);
+		int[] plates = state.getData(RigSuit.COLORS);
+		int paint = trim != null ? trim : plates != null ? plates[Rig.Piece.CORE.ordinal()] : -1;
+		Integer lights = state.getData(RigSuit.LIGHTS);
+		collector.submitModelPart(root, poseStack, RenderTypes.entityCutout(paint < 0 ? TEXTURE : PAINT), light, OverlayTexture.NO_OVERLAY, null,
+			RigSuit.tint(paint));
+		collector.submitModelPart(root, poseStack, RenderTypes.eyes(lights == null ? GLOW : LIGHTS), light, OverlayTexture.NO_OVERLAY, null,
+			lights == null ? 0xFFFFFFFF : RigSuit.tint(lights));
 		poseStack.popPose();
 	}
 

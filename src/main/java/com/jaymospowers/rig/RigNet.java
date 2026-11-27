@@ -52,10 +52,6 @@ public final class RigNet {
 		}
 	}
 
-	/**
-	 * Client → server, from the Forge's screen: what it is set to build ({@code selection}, {@code frame} by ordinal), the
-	 * paints (a dye's id, {@link #PAINT_WASH} to wash it off, {@link #PAINT_LEAVE} to leave it), and whether to build now.
-	 */
 	/** The Forge screen's finish pick ({@link RigFinish}), for the suit worn. */
 	public record Finish(net.minecraft.core.BlockPos pos, int finish) implements CustomPacketPayload {
 	public static final Type<Finish> TYPE = new Type<>(JaymosPowers.id("rig_finish"));
@@ -68,11 +64,16 @@ public final class RigNet {
 		}
 	}
 
-	public record ForgeSet(net.minecraft.core.BlockPos pos, int selection, int frame, int plates, int trim, boolean build) implements CustomPacketPayload {
+	/**
+	 * Client → server, from the Forge's screen: what it is set to build ({@code selection}, {@code frame} by ordinal), the
+	 * four paints in {@link RigForgeEntity#PLATES} order (an rgb, {@link #PAINT_WASH} to wash it off, {@link #PAINT_LEAVE}
+	 * to leave it), and whether to build now.
+	 */
+	public record ForgeSet(net.minecraft.core.BlockPos pos, int selection, int frame, java.util.List<Integer> paints, boolean build) implements CustomPacketPayload {
 	public static final Type<ForgeSet> TYPE = new Type<>(JaymosPowers.id("rig_forge_set"));
 	public static final StreamCodec<ByteBuf, ForgeSet> CODEC = StreamCodec.composite(
 	net.minecraft.core.BlockPos.STREAM_CODEC, ForgeSet::pos, ByteBufCodecs.VAR_INT, ForgeSet::selection, ByteBufCodecs.VAR_INT, ForgeSet::frame,
-	ByteBufCodecs.INT, ForgeSet::plates, ByteBufCodecs.INT, ForgeSet::trim, ByteBufCodecs.BOOL, ForgeSet::build, ForgeSet::new);
+	ByteBufCodecs.INT.apply(ByteBufCodecs.list(RigForgeEntity.PAINTS)), ForgeSet::paints, ByteBufCodecs.BOOL, ForgeSet::build, ForgeSet::new);
 
 		@Override
 		public Type<ForgeSet> type() {

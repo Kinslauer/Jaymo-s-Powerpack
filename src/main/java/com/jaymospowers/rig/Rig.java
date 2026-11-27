@@ -82,6 +82,8 @@ public final class Rig {
 	public static DataComponentType<String> FRAME;
 	/** On every Rig piece: the trim's paint (rgb), picked at the Forge; none is unpainted. The plates' paint is the dyed colour. */
 	public static DataComponentType<Integer> TRIM;
+	/** On every Rig piece: the under-suit's paint and the lights' colour (rgb), picked at the Forge; none keeps the frame's own. */
+	public static DataComponentType<Integer> UNDER, LIGHTS;
 	/** On every Rig piece: the finish over its plates ({@link RigFinish}); none is plain. */
 	public static DataComponentType<Integer> FINISH;
 
@@ -178,6 +180,10 @@ public final class Rig {
 		FRAME = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_frame"),
 			DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 		TRIM = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_trim"),
+			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		UNDER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_under"),
+			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		LIGHTS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_lights"),
 			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 		FINISH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_finish"),
 			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());

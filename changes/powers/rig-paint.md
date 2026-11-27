@@ -1,0 +1,6 @@
+# Rig Forge paints: under-suit, lights and a colour mixer
+- **Four paints at the Forge** (Andy: "You should also be able to customize the rigs in the forge. Im going for an iron spider with this idea, so I'd like the ability to recolor it"): the Forge screen's paint panel has a tab each for the **plates**, the **trim**, the **under-suit** (new) and the **lights** (new: the visor, reactor, seams and vents, in any colour instead of the frame's own glow). Each is carried on every Rig piece it paints, like the plates and trim were (`Rig.UNDER`, `Rig.LIGHTS`, `RigForgeEntity.paint`).
+- **A colour mixer**: beside the sixteen dyes, a hue bar and a shade bar (black, the pure hue, white) give any colour. A dye's colour costs that dye as before; a mixed colour costs one of the nearest dye (`RigForgeBlock.nearestDye`). A water bucket on the Forge now washes all four paints off.
+- **Truer paint**: a painted suit is drawn from light-grey sheets of each frame's plates (`tools/gen_rig_paint.py`), so red is red and gold is gold rather than the paint darkened by the gunmetal under it. The frame's wear (seams, scorch, rust spots) still shows through.
+- **The Octo Core's arms** take the trim's paint (else the Core's plates'), and the lights' colour on their joints.
+- Built; not played.

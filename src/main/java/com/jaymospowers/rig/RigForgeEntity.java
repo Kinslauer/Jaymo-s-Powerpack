@@ -16,8 +16,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 /**
- * What the Rig Forge holds: the salvage fed into it (in points), the piece and frame picked, and the two paints (plates
- * and trim). Synced to everyone near, because the Forge draws the suit over itself as a turning hologram
+ * What the Rig Forge holds: the salvage fed into it (in points), the piece and frame picked, and the four paints (plates,
+ * trim, under-suit and lights). Synced to everyone near, because the Forge draws the suit over itself as a turning hologram
  * (client {@code RigForgeRenderer}): the plates of the picked piece light as the salvage goes in.
  */
 public class RigForgeEntity extends BlockEntity {
@@ -31,7 +31,11 @@ public class RigForgeEntity extends BlockEntity {
 	private int fed;
 	private int selection;
 	private RigFrame frame = RigFrame.STANDARD;
-	private int plates = NO_PAINT, trim = NO_PAINT;
+	/** The paints, by {@link #PLATES}, {@link #TRIM}, {@link #UNDER}, {@link #LIGHTS}: rgb or {@link #NO_PAINT}. */
+	private final int[] paints = {NO_PAINT, NO_PAINT, NO_PAINT, NO_PAINT};
+	/** The paints the Forge puts on: the plates, the trim, the under-suit, the lights. */
+	public static final int PLATES = 0, TRIM = 1, UNDER = 2, LIGHTS = 3, PAINTS = 4;
+	private static final String[] PAINT_KEYS = {"plates", "trim", "under", "lights"};
 
 	public RigForgeEntity(BlockPos pos, BlockState state) {
 		super(TYPE, pos, state);
@@ -89,12 +93,17 @@ public class RigForgeEntity extends BlockEntity {
 
 	/** The plates' paint (rgb) or {@link #NO_PAINT}. */
 	public int plates() {
-		return this.plates;
+		return this.paints[PLATES];
 	}
 
 	/** The trim's paint (rgb) or {@link #NO_PAINT}. */
 	public int trim() {
-		return this.trim;
+		return this.paints[TRIM];
+	}
+
+	/** One paint ({@link #PLATES}...{@link #LIGHTS}): rgb or {@link #NO_PAINT}. */
+	public int paint(int which) {
+		return this.paints[which];
 	}
 
 	public void setFed(int fed) {
@@ -107,9 +116,14 @@ public class RigForgeEntity extends BlockEntity {
 		changed();
 	}
 
-	public void setPaint(int plates, int trim) {
-		this.plates = plates;
-		this.trim = trim;
+	public void setPaint(int which, int rgb) {
+		this.paints[which] = rgb;
+		changed();
+	}
+
+	/** Every paint washed off. */
+	public void wash() {
+		java.util.Arrays.fill(this.paints, NO_PAINT);
 		changed();
 	}
 
@@ -126,8 +140,9 @@ public class RigForgeEntity extends BlockEntity {
 		this.fed = input.getIntOr("fed", 0);
 		this.selection = input.getIntOr("piece", 0);
 		this.frame = RigFrame.byId(input.getStringOr("frame", ""));
-		this.plates = input.getIntOr("plates", NO_PAINT);
-		this.trim = input.getIntOr("trim", NO_PAINT);
+		for (int i = 0; i < PAINTS; i++) {
+			this.paints[i] = input.getIntOr(PAINT_KEYS[i], NO_PAINT);
+		}
 	}
 
 	@Override
@@ -136,8 +151,9 @@ public class RigForgeEntity extends BlockEntity {
 		output.putInt("fed", this.fed);
 		output.putInt("piece", this.selection);
 		output.putString("frame", this.frame.id());
-		output.putInt("plates", this.plates);
-		output.putInt("trim", this.trim);
+		for (int i = 0; i < PAINTS; i++) {
+			output.putInt(PAINT_KEYS[i], this.paints[i]);
+		}
 	}
 
 	@Override
