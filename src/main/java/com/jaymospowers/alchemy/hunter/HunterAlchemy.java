@@ -22,7 +22,7 @@ public final class HunterAlchemy {
 		Pastes.init();
 		LabFurniture.init();
 		NEEDLE = Alchemy.item("testing_needle", p -> new NeedleItem(p.stacksTo(1)));
-		FLASK = Alchemy.item("hunters_flask", p -> new HuntersFlask(p.stacksTo(1), HuntersFlask.LONGER));
-		NETHERITE_FLASK = Alchemy.item("netherite_hunters_flask", p -> new HuntersFlask(p.stacksTo(1).fireResistant(), HuntersFlask.LONGER_NETHERITE));
+		FLASK = Alchemy.item("hunters_flask", p -> new HuntersFlask(p.stacksTo(1).enchantable(10), HuntersFlask.LONGER));
+		NETHERITE_FLASK = Alchemy.item("netherite_hunters_flask", p -> new HuntersFlask(p.stacksTo(1).fireResistant().enchantable(15), HuntersFlask.LONGER_NETHERITE));
 	}
 }
