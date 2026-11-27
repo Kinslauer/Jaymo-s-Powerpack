@@ -18001,3 +18001,10 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Animals' own drops**: a chicken's egg, an armadillo's or grown turtle's scute, a sniffer's dug-up seed and a panda's sneezed slimeball aren't left with nobody within 32 blocks; that one is skipped and the next comes at its usual time (`UnwatchedGiftMixin`). A mob's death loot is unchanged (it already goes into its Kitchen corpse, not onto the ground).
 - Windfall's one-minute life for sticks, saplings, apples and leaves nobody threw is kept for the ones that do drop.
 - Built; not played.
+
+## 0.13.57 (2026-11-27): crows over a body no longer hang flapping in one spot in the sky (#2264)
+
+- **What was wrong**: the crows that come down to a body lying out (`wild.HuntWays`) are let into the world 18 blocks above it. On their first tick `Crow` took that spot in the air as their perch, and `ReturnToPerch` pulled them back to it every few ticks, so they hung there flapping in place, well after the body was gone (they never despawn). The circling also only gave each bird its next point every 5 seconds, so they reached it and hovered between.
+- **Now**: only a hanging tree's crow keeps a perch. A crow with no tree and no field has none: it circles and lands where the body draws it, and flies off for good once no body is within 64 blocks, at dusk or in rain, or after 5 minutes. A crow flying off is no longer called back by the circling, and the circling now gives each bird its next point on the ring every second.
+- Crows already in a world with a perch saved in the air (no tree) drop it when loaded, so the ones Andy saw stuck over Haldale should fly off.
+- Built; not played.
