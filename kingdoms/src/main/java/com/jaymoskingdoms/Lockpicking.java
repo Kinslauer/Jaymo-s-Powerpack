@@ -115,6 +115,14 @@ public final class Lockpicking {
 		builder -> builder.persistent(Lock.CODEC).syncWith(Lock.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	public static Item LOCKPICK;
+	/**
+	 * Andy (2026-11-27): "lockpicks should be craftable with a stick and a rock. for a weaker one with less durability". A
+	 * crude lockpick, a stick with a chipped rock lashed on, works every lock a lockpick does, but its strain builds
+	 * {@link #CRUDE_STRAIN} times as fast, so it snaps (and is used up) sooner.
+	 */
+	public static Item CRUDE_LOCKPICK;
+	/** How much faster a crude lockpick's strain builds than a lockpick's. */
+	static final float CRUDE_STRAIN = 1.8F;
 
 	/**
 	 * Server → player: play this lock. {@code width} and {@code strain} are the factors on its sweet spots and on the
@@ -160,6 +168,8 @@ public final class Lockpicking {
 	private static final Map<UUID, BlockPos> PICKING = new HashMap<>();
 	/** (0.7.412) Player → what happens when the lock they're picking is no container's but a story's (a shackle, a cell door): see {@link #pickVirtual}. */
 	private static final Map<UUID, Pending> VIRTUAL = new HashMap<>();
+	/** Players picking with a crude lockpick just now (its snaps use up crude ones). */
+	private static final java.util.Set<UUID> CRUDE = new java.util.HashSet<>();
 
 	/** (0.7.497) What a story's lock does when picked, and its level (for the practice it earns). */
 	private record Pending(Runnable picked, int level) {
@@ -171,17 +181,21 @@ public final class Lockpicking {
 	static void register() {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("lockpick"));
 		LOCKPICK = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).stacksTo(16)));
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.insertAfter(Items.SHEARS, LOCKPICK));
+		ResourceKey<Item> crudeKey = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("crude_lockpick"));
+		CRUDE_LOCKPICK = Registry.register(BuiltInRegistries.ITEM, crudeKey, new Item(new Item.Properties().setId(crudeKey).stacksTo(16)));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.insertAfter(Items.SHEARS, LOCKPICK, CRUDE_LOCKPICK));
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Result.TYPE, Result.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Result.TYPE, (payload, context) -> result(context.player(), payload));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			PICKING.remove(handler.getPlayer().getUUID());
 			VIRTUAL.remove(handler.getPlayer().getUUID());
+			CRUDE.remove(handler.getPlayer().getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			PICKING.clear();
 			VIRTUAL.clear();
+			CRUDE.clear();
 		});
 		UseBlockCallback.EVENT.register(Lockpicking::use);
 	}
@@ -236,7 +250,8 @@ public final class Lockpicking {
 			// (Andy's skill-tree locks) picking a lock is learned: Lockpicking Prowess (a Thief knows how)
 			return InteractionResult.FAIL;
 		}
-		int picks = sp.getInventory().countItem(LOCKPICK);
+		boolean crude = crudeInUse(sp);
+		int picks = sp.getInventory().countItem(crude ? CRUDE_LOCKPICK : LOCKPICK);
 		if (picks == 0) {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.no_pick." + (lock.kind() == Kind.ROTARY.ordinal() ? "rotary" : "pin"),
 				Component.translatable("message.jaymoskingdoms.lock.level." + lock.level())).withStyle(ChatFormatting.GRAY));
@@ -251,10 +266,11 @@ public final class Lockpicking {
 		}
 		VIRTUAL.remove(sp.getUUID());
 		PICKING.put(sp.getUUID(), lockPos);
+		setCrude(sp, crude);
 		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
 		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
 		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp) * LendAHand.lockWidth(sp);
-		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess) * LendAHand.lockStrain(sp);
+		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess) * LendAHand.lockStrain(sp) * (crude ? CRUDE_STRAIN : 1.0F);
 		ServerPlayNetworking.send(sp, new Open(lockPos, lock.kind(), lock.level(), lock.seed(), width, strain, prowess >= PROWESS_FEEL,
 			prowess >= PROWESS_FORGIVE ? 1 : 0, picks));
 		return InteractionResult.SUCCESS;
@@ -346,16 +362,18 @@ public final class Lockpicking {
 			// (an oath or a pact that forbids it: told so, as above)
 			return true;
 		}
-		int picks = sp.getInventory().countItem(LOCKPICK);
+		boolean crude = crudeInUse(sp);
+		int picks = sp.getInventory().countItem(crude ? CRUDE_LOCKPICK : LOCKPICK);
 		if (picks == 0 || !ServerPlayNetworking.canSend(sp, Open.TYPE)) {
 			return false;
 		}
 		VIRTUAL.put(sp.getUUID(), new Pending(picked, level));
 		PICKING.put(sp.getUUID(), at);
+		setCrude(sp, crude);
 		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
 		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
 		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp) * LendAHand.lockWidth(sp);
-		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess) * LendAHand.lockStrain(sp);
+		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess) * LendAHand.lockStrain(sp) * (crude ? CRUDE_STRAIN : 1.0F);
 		ServerPlayNetworking.send(sp, new Open(at, kind.ordinal(), level, seed, width, strain, prowess >= PROWESS_FEEL,
 			prowess >= PROWESS_FORGIVE ? 1 : 0, picks));
 		return true;
@@ -426,17 +444,51 @@ public final class Lockpicking {
 		return true;
 	}
 
-	/** Uses up one of {@code player}'s lockpicks; false when that was their last (or they had none). */
+	/** Uses up one of {@code player}'s lockpicks (of the kind they're picking with); false when that was their last (or they had none). */
 	private static boolean usePick(ServerPlayer player) {
+		Item kind = CRUDE.contains(player.getUUID()) ? CRUDE_LOCKPICK : LOCKPICK;
 		var inventory = player.getInventory();
 		for (int i = 0; i < inventory.getContainerSize(); i++) {
 			ItemStack stack = inventory.getItem(i);
-			if (stack.is(LOCKPICK)) {
+			if (stack.is(kind)) {
 				stack.shrink(1);
-				return inventory.countItem(LOCKPICK) > 0;
+				return inventory.countItem(kind) > 0;
 			}
 		}
 		return false;
+	}
+
+	/** Whether {@code stack} is a lockpick of either kind. */
+	public static boolean isPick(ItemStack stack) {
+		return stack.is(LOCKPICK) || stack.is(CRUDE_LOCKPICK);
+	}
+
+	/** Whether {@code player} carries a lockpick of either kind. */
+	static boolean carriesPick(ServerPlayer player) {
+		return player.getInventory().countItem(LOCKPICK) > 0 || player.getInventory().countItem(CRUDE_LOCKPICK) > 0;
+	}
+
+	/**
+	 * Whether {@code player} picks with a crude lockpick: the one in hand if they hold either kind, else a lockpick when they
+	 * carry one, and a crude one only when that's all they have.
+	 */
+	private static boolean crudeInUse(ServerPlayer player) {
+		ItemStack held = player.getMainHandItem();
+		if (held.is(CRUDE_LOCKPICK)) {
+			return true;
+		}
+		if (held.is(LOCKPICK)) {
+			return false;
+		}
+		return player.getInventory().countItem(LOCKPICK) == 0 && player.getInventory().countItem(CRUDE_LOCKPICK) > 0;
+	}
+
+	private static void setCrude(ServerPlayer player, boolean crude) {
+		if (crude) {
+			CRUDE.add(player.getUUID());
+		} else {
+			CRUDE.remove(player.getUUID());
+		}
 	}
 
 	// ---- reading a chest -----------------------------------------------------------------------------------------

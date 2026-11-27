@@ -2,6 +2,15 @@
 # the line over the hotbar, each is shown as a tip card in the top right (client.hud.HintCards). One translation key a
 # line; Kingdoms' and Kitchen's keys are here too. A line not listed stays on the action bar.
 cafe.jaymoskingdoms.placed
+captive_tip.jaymoskingdoms.cell
+captive_tip.jaymoskingdoms.cell_door
+captive_tip.jaymoskingdoms.cell_out
+captive_tip.jaymoskingdoms.chain
+captive_tip.jaymoskingdoms.chained
+captive_tip.jaymoskingdoms.hogtied
+captive_tip.jaymoskingdoms.pick
+captive_tip.jaymoskingdoms.rope
+captive_tip.jaymoskingdoms.slip
 fightpit.jaymoskingdoms.you.step_in
 illager_talk.jaymoskingdoms.too_little
 item.jaymoskitchen.frying_pan.how_to_cook

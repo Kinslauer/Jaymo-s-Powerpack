@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:stick",
+    "#jaymoskingdoms:lockpick_rocks"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:crude_lockpick",
+    "count": 1
+  }
+}

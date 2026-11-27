@@ -18,7 +18,7 @@ import net.minecraft.world.phys.EntityHitResult;
  * comes up, one {@link TipCard} says how it works: someone down in front of you (the body menu on a tap of use, the drag on
  * a hold, the revive), someone you could execute (a hold of attack), someone you stand behind unseen with a weapon in hand
  * (the stealth kill), a lasso in your hand (throw, hogtie, then the menu),
- * a live maggot (taken for bait with a tap of use), your first fishing line out (Alt zooms alone then; reeling and letting go), yourself downed (getting up), and yourself downed with a wall beside you (sitting up against it and rising up it). Each
+ * a live maggot (taken for bait with a tap of use), yourself webbed up (tearing free), your first fishing line out (Alt zooms alone then; reeling and letting go), yourself downed (getting up), and yourself downed with a wall beside you (sitting up against it and rising up it). Each
  * is shown once per player, flagged {@code body_tip.<player uuid>.<part>} in {@code config/jaymospowers-client.properties};
  * one waits until the card before it is gone, as {@link UiTips}' do. Keys are named by their bindings.
  */
@@ -49,6 +49,11 @@ public final class BodyTips {
 		LocalPlayer player = minecraft.player;
 		if (player == null || player.tickCount < SETTLE_TICKS || player.tickCount % EVERY != 0 || TipCard.busy() || minecraft.gui.screen() != null
 			|| player.isSpectator()) {
+			return;
+		}
+		if (!shown(player, "webbed") && com.jaymospowers.power.web.Webbed.held(player)) {
+			// (Andy, 2026-11-27: a hint for each way of being held, once) webbed up, as one wakes in a spider's lair
+			offer(player, "webbed", key("key.forward"), key("key.left"), key("key.back"), key("key.right"));
 			return;
 		}
 		if (Downed.isDowned(player)) {

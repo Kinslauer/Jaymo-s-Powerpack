@@ -1,0 +1,11 @@
+{
+  "captive_tip.jaymoskingdoms.chained": "In chains. Your captors leave you be while you keep your place. Striking anyone, breaking a block, opening a chest or working at the shackle where they can see is acting up, and the third time they put you to death.",
+  "captive_tip.jaymoskingdoms.slip": "Slip the shackle: at night, hold %1$s and stay perfectly still for a few seconds.",
+  "captive_tip.jaymoskingdoms.pick": "Pick the shackle: kneel (%1$s + scroll down, then hold still) and press %2$s with a lockpick in hand. It needs Lockpicking Prowess, unless you're a Thief. A stick and a rock make a crude lockpick.",
+  "captive_tip.jaymoskingdoms.chain": "Break the chain: kneel and press %2$s with a rock or flint in hand, again and again. Every slam is loud, and a captor near may hear it.",
+  "captive_tip.jaymoskingdoms.rope": "Saw through the rope: kneel and press %2$s with a blade, flint or shears in hand, again and again. A captor watching may see you at it.",
+  "captive_tip.jaymoskingdoms.cell": "In the cells. Wait out your time (it shows on the bar), or try the door. Dying won't get you out.",
+  "captive_tip.jaymoskingdoms.cell_door": "The cell door: press %2$s on it with coin in hand to pay the fine and walk out clean, or kneel and pick it with a lockpick.",
+  "captive_tip.jaymoskingdoms.cell_out": "Breaking out: pick the door or dig your way out, and you're free but an outlaw there. A forged writ shown to a guard may get you let out.",
+  "captive_tip.jaymoskingdoms.hogtied": "Hogtied. Mash %1$s to work free of the knots. A punch from whoever holds you sets you back."
+}

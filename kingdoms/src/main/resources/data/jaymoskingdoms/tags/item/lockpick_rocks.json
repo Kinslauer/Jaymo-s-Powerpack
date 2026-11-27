@@ -1,0 +1,80 @@
+{
+  "values": [
+    {
+      "id": "jaymospowers:andesite_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:basalt_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:blackstone_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:cinder_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:deepslate_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diorite_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:glacia_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:granite_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:holystone_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:maw_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:moon_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:mossy_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherrack_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:red_sandstone_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:rustfall_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:sandstone_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:tuff_rock",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:verdant_rock",
+      "required": false
+    }
+  ]
+}

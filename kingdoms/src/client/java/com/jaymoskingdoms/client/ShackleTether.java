@@ -29,6 +29,8 @@ public final class ShackleTether {
 	static final double LINK = 0.16, LINK_WIDTH = 0.11, ROPE_RADIUS = 0.035, COLLAR = 0.24, COLLAR_THICK = 0.05;
 	/** How far below the eyes the neck is, and how much the line sags per block of length. */
 	static final double NECK_DROP = 0.22, SAG = 0.18;
+	/** The least share of its sag a line keeps when drawn out to the chain's full reach. */
+	static final double TAUT = 0.15;
 	/** Sides round the rope and collar, pieces round the collar, pieces along the rope. */
 	static final int SIDES = 6, RING = 16, PIECES = 12;
 
@@ -82,10 +84,14 @@ public final class ShackleTether {
 		}
 	}
 
-	/** Where the line hangs {@code s} of the way from {@code from} to {@code to}. */
+	/**
+	 * Where the line hangs {@code s} of the way from {@code from} to {@code to}: slack and sagging close in, drawn nearly
+	 * taut as it runs out to the chain's reach ({@code StoryHard.CHAIN_REACH}), like a lead.
+	 */
 	public static Vec3 along(Vec3 from, Vec3 to, double s) {
 		double length = to.subtract(from).length();
-		return from.add(to.subtract(from).scale(s)).add(0.0, -Math.sin(s * Math.PI) * length * SAG, 0.0);
+		double slack = Math.max(TAUT, 1.0 - length / com.jaymoskingdoms.StoryHard.CHAIN_REACH);
+		return from.add(to.subtract(from).scale(s)).add(0.0, -Math.sin(s * Math.PI) * length * SAG * slack, 0.0);
 	}
 
 	/** Links of chain, each two crossed quads, every other one turned a quarter. */
