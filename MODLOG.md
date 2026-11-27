@@ -8887,3 +8887,8 @@ Deviations from the plan:
 - **Fire burst** bomb now hurts with fire damage (in-fire type), so a vampire takes its 4x fire weakness from the blast itself as well as from the burning.
 - **Farmers** sell wild garlic (level 2): four for an emerald. The herb already grew in forests and swamps and could be planted; no second garlic was made.
 - Built; not played. Art for the flask is a script-drawn placeholder (`tools/gen_ny7_powers.py`).
+
+## 0.28.23 (2026-11-27): Night's Blood 6 - the night-cloak (#2298)
+
+- **Night-cloak**: a deep-hooded cloak (head slot, `costume/NightCloak`), joined to a cloak like the Archers' hoods (`cloak_hoods` tag, `HoodedCloakLayer` draws `hooded_cloak_night.png`). No recipe; Kingdoms' tailors sell it. Art by `tools/vanilla_style/night_blood.py`.
+- Built; not played.
