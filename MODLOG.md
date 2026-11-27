@@ -9011,3 +9011,11 @@ Deviations from the plan:
 
 - Andy: "stop the idlecam while sleeping so it doesnt disturb this shot". The idle camera (Ji AFK Cinematic) no longer starts while you lie in bed, and one already playing ends when you lie down, so it doesn't cut across the night view circling your house or the pillow view. Lying in bed counts as activity for it, the same way a fishing line out does. `AfkCinematicFishing`.
 - Built; not played.
+
+## 0.28.38 (2026-11-27): Rig wrap suit-up - arms out, the suit closes on piece by piece, filmed from the front (#2327)
+
+- **Wrap suit-up** (a fifth suit-up, after Andy's Iron Man 2 suit-up gif): calling the parked Rig while standing still and unhurt for 5 s throws your arms out in a T; the suit flies in as one shell and comes apart round you. The gauntlets slide up the outstretched arms from past the hands, the chest closes over the reactor, the legs clamp shut, and last the helm folds over the head from behind, the faceplate drops and the eyes light. Each plate closes on its limb held open, then swings shut and clunks home. Moving or hurt lately still gets the slam; the post, flight and fall suit-ups are unchanged; a piece put on by hand never plays it.
+- **Front camera**: on your own screen the view swings round in front of you, holds on the chest while the plates lock, drifts round, comes in on the face for the helm, pulls back wide, then returns behind you (first person goes to third person for it and back). Getting hurt ends it.
+- Each piece has its own sounds (ratcheting gauntlets, the chest closing with the reactor's hum, leg pistons, the helm shutting and powering up).
+- Classes: `RigSuitUp` (WRAP, pick, sounds), `RigMoves.SUITUP_WRAP`, `RigCall` (the wrap's longer settle), `RigPose` (the T pose), `RigSuit` (each plate's close-then-fold flight), new `RigSuitUpCamera`, `RigKickCameraMixin` (also asks the new camera).
+- Built; not played.
