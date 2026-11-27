@@ -69,8 +69,13 @@ public final class NpcTasks {
 		if (v.isSleeping()) {
 			return "sleeping";
 		}
-		if (McaCompat.panicking(v) || Frights.afraid(v.getUUID())) {
+		if (McaCompat.panicking(v) || Frights.scared(v.getUUID())) {
 			return "fleeing";
+		}
+		BlockPos cover = Frights.covering(v.getUUID());
+		if (cover != null) {
+			// only going in out of the rain or the night (TakeCover), not frightened: home, or under the nearest roof
+			return home(v, cover) ? far(v, MemoryModuleType.HOME, HOME_NEAR) ? "going_home" : "resting" : "sheltering";
 		}
 		LivingEntity foe = v.getTarget();
 		if (foe != null && foe.isAlive() || Duels.busy(v.getUUID())) {
@@ -195,6 +200,12 @@ public final class NpcTasks {
 	private static String trade(Villager v) {
 		String job = BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath();
 		return "trade." + job;
+	}
+
+	/** {@code at} is {@code v}'s home (its bed). */
+	private static boolean home(Villager v, BlockPos at) {
+		Optional<GlobalPos> home = v.getBrain().getMemoryInternal(MemoryModuleType.HOME);
+		return home != null && home.isPresent() && home.get().dimension() == v.level().dimension() && home.get().pos().equals(at);
 	}
 
 	/** {@code v} is further than {@code near} from the place {@code memory} holds (and it's in this world). */

@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Who goes where when the weather or the dark turns (Reference Mods patch 4, U7; Andy: "villagers also need to run for
  * cover at night, near fire, or monsters. only the brave and guards should ever fight"). It extends the fear that is
- * already there ({@link Frights}, {@link Firefighting}) rather than a second system: cover is a {@link Frights#shelter}.
+ * already there ({@link Frights}, {@link Firefighting}) rather than a second system: cover is a {@link Frights#cover} (going in, not frightened).
  * <ul>
  * <li><b>Heavy rain</b>: whoever carries an umbrella opens it on their way ({@link Parasols}); of the rest, half pull
  * a hood up and carry on (taken off when it eases), half run for cover: home if it's near, else the nearest roofed spot.</li>
@@ -126,7 +126,7 @@ final class TakeCover {
 		}
 		BlockPos to = shelter(level, v);
 		if (to != null) {
-			Frights.shelter(level, v, to, now + COVER_TICKS);
+			Frights.cover(level, v, to, now + COVER_TICKS, rained);
 		}
 	}
 
