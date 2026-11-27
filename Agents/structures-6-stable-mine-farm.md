@@ -30,5 +30,13 @@ owns:
 - Patch 6 precedent (PR #2110): data-only, no Java changes.
 
 ## Done
-(none yet)
-- 2026-11-26 19:32 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- Review fixes applied to all 6 points on PR #2217:
+  1) farm() crops at y=2 above farmland, grid 4 high
+  2) farm() shed roof at y=3 no longer dropped
+  3) stable() chimney bricks from y=6 through the roof
+  4) stable() + farm shed interiors cleared
+  5) stable() horse entity added (entity support in small_structures.py)
+  6) mine() ladder added down north-west corner
+- NBTs regenerated via tools/small_structures.py
+- Build passes (-x genSources, no Java changed), pr_checks.py passes
+- Pushed to PR #2217, set in-review
