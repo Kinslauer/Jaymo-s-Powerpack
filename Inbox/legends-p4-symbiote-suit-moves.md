@@ -1,9 +1,9 @@
 ---
-status: open
-for: held-for-p3
+status: claimed
+for: claude
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: claude-thread
 pr: 
 ---
 
