@@ -179,6 +179,12 @@ public final class DodgeClient {
 			wanted = false;
 			landingRoll = 0;
 		}
+		boolean clash = com.jaymospowers.client.compat.ComboClashClient.active();
+		if (wanted && clash) {
+			// Combo Clash's combat mode: Alt is its dash and evasive (it sits on the same key), not ours
+			wanted = false;
+			landingRoll = 0;
+		}
 		if (wanted && com.jaymospowers.client.power.chrono.ChronoFlickerClient.step(player)) {
 			// a Chrono overclocked in a low gear, with left, right, back or jump held: a blur step instead of the dash
 			wanted = false;
@@ -227,7 +233,7 @@ public final class DodgeClient {
 				landingRoll--;
 			}
 		}
-		tickHold(player, down);
+		tickHold(player, down && !clash);
 	}
 
 	/**

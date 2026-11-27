@@ -16,7 +16,8 @@ import org.spongepowered.asm.mixin.injection.At;
  * A work tool ({@link RegionSwings#tool}: an axe, pick, shovel or hoe not made for war) swings Better Combat's way only
  * while you're locked on: otherwise Better Combat sees no weapon in the hand when you click, and the plain swing and
  * hit go ahead. Balkon's flail never swings Better Combat's way: its left click is its own wind-up and jab (armory/Lash,
- * client/armory/FlailSwingClient).
+ * client/armory/FlailSwingClient). In Combo Clash's combat mode nothing does: the click is its 4-hit string
+ * ({@code client.compat.ComboClashClient}).
  */
 @Mixin(value = AttackInteractor.class, remap = false)
 abstract class ToolSwingGateMixin {
@@ -24,7 +25,8 @@ abstract class ToolSwingGateMixin {
 		target = "Lnet/bettercombat/logic/WeaponRegistry;getAttributes(Lnet/minecraft/world/item/ItemStack;)Lnet/bettercombat/api/WeaponAttributes;"))
 	private WeaponAttributes jaymospowers$toolsOnlyLocked(ItemStack stack, Operation<WeaponAttributes> original) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player != null && (RegionSwings.tool(stack) && !RegionSwings.lockedOn(player) || com.jaymospowers.armory.Lash.isBallFlail(stack))) {
+		if (player != null && (RegionSwings.tool(stack) && !RegionSwings.lockedOn(player) || com.jaymospowers.armory.Lash.isBallFlail(stack)
+			|| com.jaymospowers.client.compat.ComboClashClient.active())) {
 			return null;
 		}
 		return original.call(stack);

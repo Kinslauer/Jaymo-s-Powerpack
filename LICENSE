@@ -45,6 +45,8 @@ These keep their own licences, which ship beside them. Nothing in this notice li
 - The flintlock gun models (art/guns/, CC BY 4.0, makers in art/guns/CREDITS.md), and the blunderbuss and musketoon
   models from cleannrooster's Frontier Armaments (MIT, src/main/resources/licenses/LICENSE_frontier_armaments and
   kingdoms/src/main/resources/licenses/frontier-armaments-MIT.txt).
+- "Combo Clash" by HanHoYoung (all rights reserved): the modpack includes its unmodified jar, which its licence allows
+  in a free modpack that credits it. Nothing of it is copied into our mods; they only talk to it while it is installed.
 - Every other mod, resource pack and shader the modpack downloads or ships (including the MCA jar and ports/trmt),
   under its own licence. The modpack zip lists most of them for CurseForge to download, and does not relicense them.
 

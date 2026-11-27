@@ -275,6 +275,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		UltimateCinematic.init();
 		com.jaymospowers.client.sound.SceneMusic.register();
 		com.jaymospowers.client.compat.FreecamCompat.init();
+		com.jaymospowers.client.compat.ComboClashClient.init();
 		FrontCamera.init();
 		AimCrosshair.init();
 		GreatHelmView.init();

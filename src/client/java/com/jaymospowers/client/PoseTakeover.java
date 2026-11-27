@@ -169,7 +169,10 @@ public final class PoseTakeover {
 			|| s.getData(com.jaymospowers.client.combat.ParryPose.KEY) != null || com.jaymospowers.client.combat.ArmedPose.on(s);
 	}
 
-	/** (0.16.21) One of our poses other than nursing a wound (which lets go under any of them) is on. */
+	/**
+	 * (0.16.21) One of our poses other than nursing a wound (which lets go under any of them) is on, or one of Combo Clash's
+	 * motions is: ours give way to it.
+	 */
 	public static boolean posedOtherwise(AvatarRenderState s) {
 		return aiming(s) || ragdolled(s) || s.getData(CrawlPose.KEY) != null || s.getData(LedgePose.KEY) != null
 			|| s.getData(com.jaymospowers.client.freerun.RunPose.SLIDE) != null || s.getData(com.jaymospowers.client.freerun.BalancePose.KEY) != null || s.getData(com.jaymospowers.client.water.SwimStrokePose.KEY) != null || s.getData(com.jaymospowers.client.freerun.UpRunPose.KEY) != null || s.getData(com.jaymospowers.client.freerun.BarHangPose.KEY) != null || s.getData(MeditatePose.KEY) != null || s.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null || s.getData(CrouchPose.KEY) != null || s.getData(FreefallPose.KEY) != null
@@ -212,6 +215,8 @@ public final class PoseTakeover {
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterSwayPose.KEY) != null
 			|| s.getData(ArsenalArmPose.KEY) != null || s.getData(ArsenalArmPose.AIM_KEY) != null
 			|| s.getData(ArsenalArmPose.DRAW_KEY) != null
-			|| s.getData(MountClimbPose.KEY) != null || s.getData(MountClimbPose.REACH) != null;
+			|| s.getData(MountClimbPose.KEY) != null || s.getData(MountClimbPose.REACH) != null
+			// one of Combo Clash's motions (its strings, dashes, blocks and flinches) is on this player
+			|| com.jaymospowers.client.compat.ComboClashClient.moving(s);
 	}
 }
