@@ -554,6 +554,12 @@ public final class Freerun {
 		return move != null && move / 8 == UP_RUN;
 	}
 
+	/** Clinging to or climbing a wall, or running up one, as last synced (any player): what onlookers would gape at. */
+	public static boolean onWall(Player player) {
+		Integer move = player.getAttached(MOVE);
+		return move != null && (move / 8 == CLING || move / 8 == UP_RUN);
+	}
+
 	/** Balancing on a narrow top, arms out (any side, any player). (0.15.67) Everyone now, not only Sure Footing. */
 	public static boolean balancing(Player player) {
 		return onNarrowTop(player) && !player.isShiftKeyDown();

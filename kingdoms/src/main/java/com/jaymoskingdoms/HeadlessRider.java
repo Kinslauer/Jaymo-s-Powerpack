@@ -72,7 +72,9 @@ final class HeadlessRider {
 	static final int GRAVE_REACH = 6, REWARD_EMERALDS = 12, REWARD_XP = 60;
 
 	static Item HEAD;
-	private static final String TAG = "jaymoskingdoms_rider", ROAD = "jaymoskingdoms_rider_road:", GRAVE = "jaymoskingdoms_rider_grave:";
+	/** The rider's tag (Quips knows him by it). */
+	static final String TAG = "jaymoskingdoms_rider";
+	private static final String ROAD = "jaymoskingdoms_rider_road:", GRAVE = "jaymoskingdoms_rider_grave:";
 	/** The roads he has been laid to rest on. */
 	private static final AttachmentType<List<String>> RESTED = AttachmentRegistry.create(JaymosKingdoms.id("rider_rested"),
 		b -> b.persistent(Codec.STRING.listOf()));

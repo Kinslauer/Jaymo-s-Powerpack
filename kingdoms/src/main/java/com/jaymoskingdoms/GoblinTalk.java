@@ -80,7 +80,8 @@ public final class GoblinTalk {
 	private GoblinTalk() {
 	}
 
-	private record Token(String text, boolean word) {
+	/** A word, or what lies between words (shared with {@link OldenTalk}). */
+	record Token(String text, boolean word) {
 	}
 
 	/** {@code line} as a goblin says it (a lang template: its {@code %s} holes and § colour codes are kept as they are). */
@@ -149,7 +150,7 @@ public final class GoblinTalk {
 	}
 
 	/** A gap that ends a sentence ("! ", ". "; not "..." trailing off, nor a comma). */
-	private static boolean ends(String gap) {
+	static boolean ends(String gap) {
 		String t = gap.strip();
 		return !t.isEmpty() && !t.contains("...") && (t.endsWith(".") || t.endsWith("!") || t.endsWith("?") || t.endsWith(".\"")
 			|| t.endsWith("!\"") || t.endsWith("?\""));
@@ -169,7 +170,7 @@ public final class GoblinTalk {
 	}
 
 	/** {@code said} in {@code original}'s case: SHOUTED, with a capital ({@code up}) or plain. */
-	private static String cased(String original, String said, boolean up) {
+	static String cased(String original, String said, boolean up) {
 		if (said.equals(original.toLowerCase(Locale.ROOT)) && (up || !Character.isUpperCase(original.charAt(0)) || !original.equals("I"))) {
 			return up && !Character.isUpperCase(original.charAt(0)) ? Character.toUpperCase(said.charAt(0)) + said.substring(1) : original;
 		}
@@ -184,7 +185,7 @@ public final class GoblinTalk {
 	}
 
 	/** The words and what lies between them; a {@code %s} hole is never a word. */
-	private static List<Token> tokens(String line) {
+	static List<Token> tokens(String line) {
 		List<Token> out = new ArrayList<>();
 		StringBuilder gap = new StringBuilder();
 		int i = 0;
@@ -226,7 +227,7 @@ public final class GoblinTalk {
 	}
 
 	/** Puts the line back together; a dropped word (\0) takes one space with it. */
-	private static String join(List<String> parts) {
+	static String join(List<String> parts) {
 		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < parts.size(); i++) {
 			String p = parts.get(i);
@@ -244,7 +245,7 @@ public final class GoblinTalk {
 		return b.toString();
 	}
 
-	private static boolean endsSentence(String s) {
+	static boolean endsSentence(String s) {
 		String t = s.stripTrailing();
 		return !t.isEmpty() && ".!?".indexOf(t.charAt(t.length() - 1)) >= 0 && !t.endsWith("...");
 	}

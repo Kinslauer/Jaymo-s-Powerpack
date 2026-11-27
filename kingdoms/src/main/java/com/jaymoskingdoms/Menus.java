@@ -57,7 +57,7 @@ final class Menus {
 		}
 		open(player, speaker, choices);
 		// (a goblin says it in its broken English: Dialects.broken)
-		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), title, Dialects.goblin(speaker) ? Dialects.broken(words) : words,
+		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), title, Dialects.voiced(speaker, words),
 			labels, enabled));
 	}
 

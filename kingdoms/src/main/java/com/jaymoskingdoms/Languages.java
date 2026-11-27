@@ -278,7 +278,8 @@ public final class Languages {
 	/** Whether {@code player} and {@code speaker} understand each other (always, with anyone who isn't townsfolk). */
 	public static boolean understands(ServerPlayer player, Entity speaker) {
 		Tongue t = of(speaker);
-		return t == null || speaks(player, t) || (speaker instanceof Villager v && McaCompat.family(v, player))
+		// (an old-tongued knight speaks the common speech of old, which anyone follows: OldKnights)
+		return t == null || Dialects.old(speaker) || speaks(player, t) || (speaker instanceof Villager v && McaCompat.family(v, player))
 			// (a tongue-speaker companion by you puts it into words you know: docs/Pawn-Plan.md row G2)
 			|| Specialties.translated(player);
 	}
@@ -431,6 +432,10 @@ public final class Languages {
 		if (Dialects.goblin(speaker) || Dialects.goblinLine(words)) {
 			// (a goblin: broken English anyone can follow, Dialects.broken)
 			return Dialects.broken(words);
+		}
+		if (Dialects.old(speaker) || Dialects.oldLine(words)) {
+			// (an old-tongued knight: the common speech of old, anyone can follow it, OldKnights)
+			return Dialects.olden(words);
 		}
 		if (IllagerTongue.speaker(speaker)) {
 			// (an illager: their own tongue, learned bit by bit, IllagerTongue)

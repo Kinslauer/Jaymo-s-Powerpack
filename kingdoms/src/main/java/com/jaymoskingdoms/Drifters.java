@@ -102,6 +102,27 @@ public final class Drifters {
 			PITCHED.clear();
 		});
 		UseEntityCallback.EVENT.register(Drifters::use);
+		// (OldKnights) bring an old-tongued knight here, for trying him out
+		net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(
+			net.minecraft.commands.Commands.literal("kingdom").then(net.minecraft.commands.Commands.literal("oldknight")
+				.requires(net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS))
+				.executes(c -> oldKnight(c.getSource())))));
+	}
+
+	/** {@code /kingdom oldknight}: an old-tongued fallen knight for hire where the player stands. */
+	private static int oldKnight(net.minecraft.commands.CommandSourceStack source) {
+		if (!(source.getEntity() instanceof ServerPlayer player) || !(player.level() instanceof ServerLevel level)) {
+			return 0;
+		}
+		VillagerEntityMCA v = make(level, player.position(), Factions.near(level.getServer(), player.blockPosition(), 256.0), Veterans.KNIGHT,
+			level.getGameTime());
+		if (v == null) {
+			source.sendFailure(Component.literal("No knight could be made here."));
+			return 0;
+		}
+		OldKnights.make(v, v.getGenetics().getGender() == Gender.FEMALE);
+		source.sendSuccess(() -> Component.literal(v.getName().getString() + " stands here, for hire."), false);
+		return 1;
 	}
 
 	/** {@code e} is a drifter (hired or not). */
@@ -195,8 +216,21 @@ public final class Drifters {
 		if (at == null || !level.isPositionEntityTicking(at)) {
 			return null;
 		}
+		VillagerEntityMCA v = make(level, Vec3.atBottomCenterOf(at), f, Veterans.roll(random, tavern), now);
+		if (v != null && Veterans.grade(v) == Veterans.KNIGHT && random.nextFloat() < OldKnights.CHANCE) {
+			// a fallen knight who still speaks as the old courts spoke (OldKnights)
+			OldKnights.make(v, v.getGenetics().getGender() == Gender.FEMALE);
+		}
+		if (v != null) {
+			JaymosKingdoms.LOGGER.debug("A drifter came to {}", f.name());
+		}
+		return v;
+	}
+
+	/** A drifter of {@code grade} ({@link Veterans}) standing at {@code at}, raised in {@code f}'s tree if there's a realm. */
+	static @Nullable VillagerEntityMCA make(ServerLevel level, Vec3 at, @Nullable Faction f, int grade, long now) {
 		VillagerProfession job = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NITWIT).value();
-		Villager made = McaCompat.visitor(level, Vec3.atBottomCenterOf(at), job, false);
+		Villager made = McaCompat.visitor(level, at, job, false);
 		if (!(made instanceof VillagerEntityMCA v)) {
 			return null;
 		}
@@ -204,15 +238,15 @@ public final class Drifters {
 		LOADED.add(v);
 		weaken(v);
 		// (medieval picks) taken on, they are raised in this realm's tree (Ranks)
-		Ranks.enlist(v, f);
-		int grade = Veterans.roll(random, tavern);
+		if (f != null) {
+			Ranks.enlist(v, f);
+		}
 		if (grade > Veterans.GREEN) {
 			Veterans.make(v, grade);
 			Learners.apply(v);
 		}
 		String gender = v.getGenetics().getGender() == Gender.FEMALE ? "female" : "male";
 		v.setClothes(String.format(CLOTHES, gender));
-		JaymosKingdoms.LOGGER.debug("A drifter came to {}", f.name());
 		return v;
 	}
 

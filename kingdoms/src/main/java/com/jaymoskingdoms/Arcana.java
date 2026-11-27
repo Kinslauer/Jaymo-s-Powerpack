@@ -219,7 +219,7 @@ public final class Arcana {
 		if (ForbiddenArts.forbidden(spell) && ForbiddenArts.stayed(player)) {
 			return false;
 		}
-		return switch (spell) {
+		boolean took = switch (spell) {
 			case "raising" -> raising(level, player, power);
 			case "draining" -> draining(level, player, power);
 			case "fire" -> fire(level, player, power);
@@ -239,6 +239,11 @@ public final class Arcana {
 			case "frenzy" -> Hemomancy.frenzy(level, player, power);
 			default -> NewSpells.ours(spell) ? NewSpells.cast(spell, level, player, power) : SorceryPicks.ours(spell) && SorceryPicks.cast(spell, level, player, power);
 		};
+		if (took) {
+			// a guard who saw may take you for a witch (Quips)
+			Quips.cast(level, player);
+		}
+		return took;
 	}
 
 	/** The scroll that teaches {@code spell}. */
