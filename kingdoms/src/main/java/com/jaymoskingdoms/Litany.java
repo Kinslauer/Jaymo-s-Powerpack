@@ -261,9 +261,9 @@ public final class Litany {
 		}
 	}
 
-	/** The Lantern Warden's Hush: {@code cleric}, symbol in hand, is not one the dead go after unless struck by them lately. */
+	/** The Lantern Warden's Hush: {@code cleric}, symbol in hand or worn, is not one the dead go after unless struck by them lately. */
 	private static boolean hushed(ServerPlayer cleric, long now) {
-		return has(cleric, PATRON) && Patrons.of(cleric) == Patron.LANTERN_WARDEN && Clerics.isSymbol(cleric.getMainHandItem()) | Clerics.isSymbol(cleric.getOffhandItem())
+		return has(cleric, PATRON) && Patrons.of(cleric) == Patron.LANTERN_WARDEN && Clerics.hasSymbol(cleric)
 			&& STRUCK_DEAD.getOrDefault(cleric.getUUID(), Long.MIN_VALUE / 2) + HUSH_FORGIVE < now;
 	}
 

@@ -27,8 +27,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The Cleric's medallion board (Andy, 2026-11-23): the medallion key ({@code MedallionClient}, default Y) lifts the holy symbol
- * before the chest, and while it is up the numpad's 1 to 9 are its nine marks, each its own sigil, laid out as the pad is
- * (7 8 9 on top, 1 2 3 below). Each key lays a sigil; the order is the prayer. Every spell's pattern ({@link #PATTERNS})
+ * (in either hand, or worn at the neck: {@link Clerics#worn}) before the chest, and while it is up the numpad's 1 to 9 (or the
+ * hotbar keys 1 to 9, for a keyboard with none) are its nine marks, each its own sigil, laid out as the pad is (7 8 9 on top,
+ * 1 2 3 below). Each key lays a sigil; the order is the prayer. Every spell's pattern ({@link #PATTERNS})
  * is four different marks, so a pattern that matches is cast at once, and marks that begin no pattern the Cleric knows fizzle.
  * Finished while sneaking, the pattern binds the spell to the medallion instead (the spell the symbol is turned to), which a
  * tap of the symbol in either hand casts ({@link CastingFocus}). A cast, a bind, or the key again lowers the board.
@@ -176,11 +177,12 @@ public final class MedallionBoard {
 		return player.isAlive() && !player.isSpectator() && Classes.is(player, PlayerClass.CLERIC) && symbol(player) != null;
 	}
 
+	/** The Cleric's focus: in the main hand, the off hand, or worn at the neck as a medallion ({@link Clerics#worn}). */
 	private static @Nullable ItemStack symbol(ServerPlayer player) {
 		if (Clerics.focus(player, player.getMainHandItem())) {
 			return player.getMainHandItem();
 		}
-		return Clerics.focus(player, player.getOffhandItem()) ? player.getOffhandItem() : null;
+		return Clerics.focus(player, player.getOffhandItem()) ? player.getOffhandItem() : Clerics.worn(player);
 	}
 
 	private static void raise(ServerPlayer player, boolean up) {

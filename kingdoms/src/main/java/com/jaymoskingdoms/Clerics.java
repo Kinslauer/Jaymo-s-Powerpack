@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The Cleric (a priest sworn to a patron god, picked with the class and sworn at once, {@link Patrons}) and the holy symbol both
@@ -127,7 +128,7 @@ public final class Clerics {
 	}
 
 	private static boolean holds(ServerPlayer player) {
-		return focus(player, player.getMainHandItem()) || focus(player, player.getOffhandItem());
+		return focus(player, player.getMainHandItem()) || focus(player, player.getOffhandItem()) || worn(player) != null;
 	}
 
 	/** The symbol is raised and has been held {@code held} ticks. */
@@ -359,5 +360,25 @@ public final class Clerics {
 	/** Whether {@code stack} is {@code who}'s focus for a Cleric's prayers: a holy symbol, or a Truth Cleric's book ({@link #prayerBook}). */
 	public static boolean focus(LivingEntity who, ItemStack stack) {
 		return isSymbol(stack) || prayerBook(who, stack);
+	}
+
+	/**
+	 * (Andy, 2026-11-27: "you should also be able to wear the holy symbol as a medallion") The holy symbol worn at the neck, in
+	 * Jaymo's Powers' amulet slot (tag {@code jaymospowers:baubles/amulet}), or null. Worn, it serves as it does in hand for the
+	 * medallion board, the class key, the Lantern Warden's Hush, the Warden's ward and a spell's trifle; only a tap (casting the
+	 * bound spell, turning it) and holding it up to turn the undead want it in hand. Null without Powers.
+	 */
+	public static @Nullable ItemStack worn(Player player) {
+		for (ItemStack stack : PowersCompat.baubles(player)) {
+			if (isSymbol(stack)) {
+				return stack;
+			}
+		}
+		return null;
+	}
+
+	/** Whether {@code player} has a holy symbol in either hand or worn at the neck ({@link #worn}). */
+	public static boolean hasSymbol(Player player) {
+		return isSymbol(player.getMainHandItem()) || isSymbol(player.getOffhandItem()) || worn(player) != null;
 	}
 }

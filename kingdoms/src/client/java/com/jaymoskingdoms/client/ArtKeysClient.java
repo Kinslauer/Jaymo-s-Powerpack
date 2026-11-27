@@ -34,8 +34,9 @@ final class ArtKeysClient {
 			}
 		}
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
-			// combat mode: 6 to 9 are art keys, so they pick no hotbar slot
-			if (FormsClient.combatMode() && minecraft.player != null && minecraft.gui.screen() == null) {
+			// combat mode: 6 to 9 are art keys, so they pick no hotbar slot (while a Cleric's medallion board is up they lay
+			// its marks instead, MedallionClient)
+			if (FormsClient.combatMode() && !MedallionClient.up() && minecraft.player != null && minecraft.gui.screen() == null) {
 				for (int i = 0; i < ArtKeys.ARTS; i++) {
 					if (i == ArtKeys.CLAW) {
 						continue;
@@ -51,7 +52,7 @@ final class ArtKeysClient {
 				if (i == ArtKeys.CLAW) {
 					continue;
 				}
-				boolean now = (KEYS[i].isDown() || FormsClient.combatMode() && minecraft.options.keyHotbarSlots[Forms.BELT_SLOTS + i].isDown())
+				boolean now = (KEYS[i].isDown() || FormsClient.combatMode() && !MedallionClient.up() && minecraft.options.keyHotbarSlots[Forms.BELT_SLOTS + i].isDown())
 					&& minecraft.player != null && minecraft.gui.screen() == null;
 				if (now != DOWN[i]) {
 					DOWN[i] = now;

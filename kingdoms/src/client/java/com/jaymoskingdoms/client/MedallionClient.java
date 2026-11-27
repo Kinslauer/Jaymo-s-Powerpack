@@ -22,7 +22,9 @@ import net.minecraft.util.Mth;
 
 /**
  * The Cleric's medallion board on the client ({@link MedallionBoard}): the medallion key lifts and lowers it, and while the
- * server says it is up the numpad's 1 to 9 lay its marks (rebindable, under the class keys). The board is drawn in the middle
+ * server says it is up the numpad's 1 to 9 lay its marks (rebindable, under the class keys), and so do the hotbar keys 1 to 9,
+ * for a keyboard with no numpad (Andy: "add the hotbar fix"): while the board is up they lay the mark of the same number and
+ * pick no hotbar slot. The board is drawn in the middle
  * of the screen laid out as the pad is (7 8 9 on top): the medallion's face, its rim of marks, nine sigils each its own, the
  * ones laid lit and joined by crackling strokes; beside it the prayers the Cleric knows, each with its shape drawn small, the
  * ones the marks so far could still become bright.
@@ -65,6 +67,33 @@ public final class MedallionClient {
 		return MARKS;
 	}
 
+	/** Whether the board is up (the server's word): the hotbar keys lay marks then, so the combat-mode art keys stand down. */
+	public static boolean up() {
+		return up;
+	}
+
+	/** Whether {@code mapping} is one of the hotbar keys 1 to 9, which lay marks while the board is up. */
+	private static boolean hotbar(KeyMapping mapping) {
+		KeyMapping[] slots = Minecraft.getInstance().options.keyHotbarSlots;
+		for (int i = 0; i < 9; i++) {
+			if (slots[i] == mapping) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Whether {@code key} is one the hotbar keys 1 to 9 sit on. */
+	private static boolean onHotbar(InputConstants.Key key) {
+		KeyMapping[] slots = Minecraft.getInstance().options.keyHotbarSlots;
+		for (int i = 0; i < 9; i++) {
+			if (((MedallionKeyMappingAccessor) slots[i]).jaymoskingdoms$key().equals(key)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Whether the board is up and {@code key} is on the numpad: then only the marks hear it, no other binding (Andy: "all numpad
 	 * binds should be disabled while the cleric board is active"; {@code MedallionNumpadMixin}).
@@ -79,11 +108,13 @@ public final class MedallionClient {
 	}
 
 	/**
-	 * Whether {@code mapping}, bound to {@code bound}, is silenced by the board: the board is up, the key is on the numpad, and
-	 * the mapping isn't one of the marks or the medallion key itself. It then reads as not held and its presses are thrown away ({@code MedallionNumpadMixin}).
+	 * Whether {@code mapping}, bound to {@code bound}, is silenced by the board: the board is up, the key is on the numpad or
+	 * shared with a hotbar key 1 to 9, and the mapping isn't one of the marks, the hotbar keys (read here as marks) or the
+	 * medallion key itself. It then reads as not held and its presses are thrown away ({@code MedallionNumpadMixin}).
 	 */
 	public static boolean silenced(KeyMapping mapping, InputConstants.Key bound) {
-		if (!up || bound == null || mapping == key || !holdsPad(bound)) {
+		if (!up || bound == null || mapping == key || bound.getType() != InputConstants.Type.KEYBOARD || !holdsPad(bound) && !onHotbar(bound)
+			|| hotbar(mapping)) {
 			return false;
 		}
 		for (KeyMapping mark : MARKS) {
@@ -130,15 +161,24 @@ public final class MedallionClient {
 			if (up) {
 				silencePad();
 			}
+			// with no screen open the hotbar keys 1 to 9 are marks too: their presses are taken here, before the game's own
+			// key handling would pick a hotbar slot with them (as combat mode takes 6 to 9 in ArtKeysClient)
+			boolean board = up && minecraft.gui.screen() == null;
+			KeyMapping[] slots = minecraft.options.keyHotbarSlots;
 			for (int i = 0; i < 9; i++) {
 				boolean clicked = false;
 				while (MARKS[i].consumeClick()) {
 					clicked = true;
 				}
-				if (up && clicked && !HELD[i] && minecraft.gui.screen() == null) {
+				if (board) {
+					while (slots[i].consumeClick()) {
+						clicked = true;
+					}
+				}
+				if (board && clicked && !HELD[i]) {
 					ClientPlayNetworking.send(new MedallionBoard.Mark(i + 1));
 				}
-				HELD[i] = MARKS[i].isDown();
+				HELD[i] = MARKS[i].isDown() || board && slots[i].isDown();
 			}
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("medallion_board"), MedallionClient::draw);

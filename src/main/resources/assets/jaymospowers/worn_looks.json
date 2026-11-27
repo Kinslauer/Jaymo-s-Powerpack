@@ -1005,6 +1005,239 @@
    }
   ]
  },
+ "jaymoskingdoms:holy_symbol": {
+  "texture": "jaymospowers:textures/entity/worn/jaymoskingdoms/holy_symbol.png",
+  "width": 64,
+  "height": 16,
+  "hide_cape": false,
+  "parts": [
+   {
+    "bone": "body",
+    "pivot": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0,
+     0,
+     0
+    ],
+    "boxes": [],
+    "swing": null,
+    "sides": "right",
+    "armour": null,
+    "children": [
+     {
+      "bone": "body",
+      "pivot": [
+       -2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       -0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         0,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       2.8,
+       0,
+       -2.25
+      ],
+      "rot": [
+       0,
+       0,
+       0.5
+      ],
+      "boxes": [
+       {
+        "uv": [
+         4,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.25
+        ],
+        "size": [
+         1,
+         5.6,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": null,
+      "sides": "right",
+      "armour": null,
+      "children": []
+     },
+     {
+      "bone": "body",
+      "pivot": [
+       0,
+       4.6,
+       -2.0
+      ],
+      "rot": [
+       0,
+       0,
+       0
+      ],
+      "boxes": [
+       {
+        "uv": [
+         12,
+         0
+        ],
+        "frm": [
+         -0.5,
+         0,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         16,
+         0
+        ],
+        "frm": [
+         -0.5,
+         1,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         20,
+         0
+        ],
+        "frm": [
+         -1.5,
+         2,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         24,
+         0
+        ],
+        "frm": [
+         -0.5,
+         2,
+         -0.6
+        ],
+        "size": [
+         1,
+         1,
+         0.6
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         28,
+         0
+        ],
+        "frm": [
+         0.5,
+         2,
+         -0.5
+        ],
+        "size": [
+         1,
+         1,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       },
+       {
+        "uv": [
+         8,
+         0
+        ],
+        "frm": [
+         -0.5,
+         3,
+         -0.5
+        ],
+        "size": [
+         1,
+         2,
+         0.5
+        ],
+        "inflate": 0.0,
+        "fit": false
+       }
+      ],
+      "swing": {
+       "axis": "x",
+       "amp": 0.2,
+       "phase": 0.0,
+       "kind": "tucked"
+      },
+      "sides": "right",
+      "armour": null,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
  "jaymospowers:heartstone_amulet": {
   "texture": "jaymospowers:textures/entity/worn/heartstone_amulet.png",
   "width": 64,

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.forms;
 
+import com.jaymoskingdoms.client.MedallionClient;
 import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.CombatArts;
@@ -139,7 +140,8 @@ public final class FormsClient {
 					: "message.jaymoskingdoms.combat_mode.off"), false);
 			}
 			LocalPlayer player = minecraft.player;
-			if (!combat || player == null || minecraft.gui.screen() != null || !Forms.book(player).stance()
+			// a Cleric's raised medallion board takes the hotbar keys for its marks (MedallionClient)
+			if (!combat || player == null || minecraft.gui.screen() != null || MedallionClient.up() || !Forms.book(player).stance()
 				|| !ClientPlayNetworking.canSend(Forms.Pick.TYPE) || !ClientPlayNetworking.canSend(Forms.Fire.TYPE)) {
 				return;
 			}
