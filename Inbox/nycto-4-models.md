@@ -1,9 +1,9 @@
 ---
-status: in-review
+status: claimed
 for: prometheus
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
-claimed_by: claude-cloud
+claimed_by: hermes-modeller
 pr: 2302
 thread: hermes-modeller
 claim_handbacks: 2
