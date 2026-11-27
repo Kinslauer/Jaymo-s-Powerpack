@@ -18195,3 +18195,7 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **The steel blueprint** (Andy: "it can be written into lore as a specific crafting blueprint gatekept by the kingdom who has it. it is very valuable and closely kept so the information is highly sought after"). A new item, kept by one smith of each steel realm, with the realm named on it. Never sold or copied: a player gets one by pickpocketing that smith or off the smith's body, and the realm draws up a new one three days after it was given. With Jaymo's Powers, the anvil hammers plain steel only for a player who carries one or is sworn to a steel realm (anyone else gets the dull clank). Steel ingots still come from the smeltery and blast furnace for anyone; folded steel and the peoples' steels keep their own rules. Lore.md: "The steel blueprint" and "A town's tools" (new, for Andy to approve).
 - Trades (data pack `trade_set/sexton`, four levels): wheat and iron and coal bought; candles, bone meal, the lych lantern, a sponge and an iron shovel sold. Own wants (`OwnWants`): candles, a sponge, iron. MCA dresses them as a leatherworker and keeps the trade (`IS_IMPORTANT`).
 - Speech bubbles only, never chat (lang part `sextons`). Built; not played.
+
+## 0.13.75 (2026-11-27): Cross Slash blade form (#2255)
+
+- Cross Slash: new Blade Weapon Form art (taught by the Blade school) that dashes through foes drawing a glowing X across each, bursting a moment later for bonus damage.

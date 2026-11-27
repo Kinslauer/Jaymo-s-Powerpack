@@ -8746,3 +8746,27 @@ Deviations from the plan:
 - Foes too big to haul (as the tendril haul measures) and bosses take every blow but are not shoved or dragged.
 - Thrown stones belong to the world they were thrown in and are cleared when you change world.
 - The normal slam now breaks the ground under the same rules as the new moves: it needs build permission, mob griefing on, and every block in reach to be one you may interact with. A landing counts on the ground or within a block and a half above it.
+
+## 0.28.12 (2026-11-27): Z Fighter and weapon moves (#2255)
+
+- Great Ape moves: added alternating left and right arm swipes (quick left-click tap), a staggering shockwave roar (Sprint+R while a Great Ape; R alone still charges ki), a two-handed overhead ground slam pose on earthwork stomps, a crashing leap smash (Sneak+B or B midair), and a boulder scoop-and-throw (Sneak+G), each with its own pose.
+- Staged beam firing: Z Fighter beams now progress through gather, hold, fire, sustain (the tip burst lands as soon as the beam arrives, the first part of the sustain is only the beam lingering with no damage, and holding V past it extends the beam, tracks aim gently and does the sustained damage for ki), and end stages; foes caught inside a beam you are holding are outlined in red on your screen.
+- Instant Step: once Ki Sense has been learned and is switched on, B with a sensed foe picked or in your sights (and the ki, stamina and a free spot behind it) puts two fingers to the brow and blinks you behind that foe, with a short ki shimmer at both ends. It only takes the press when it can go; otherwise B is Flash Step as before, and Divine Sneak+B, Verdant heal and legend-heart Sneak+B keep their priority. Stamina is spent only once the landing is found.
+- Overburn: hold Sneak+X to stack a crimson aura boost up to 4 stages (layered over base or any active form on the ki aura); stages above half hurt periodically, letting go holds the boost for a while, and when it fades you are left slowed.
+- Chain Blades on the Chain Axe: Sneak+right-click while embedded (or Sneak on throw release) pulls a hooked foe to you (bosses are not pulled and bodies too heavy to lift barely budge), and Sneak+left-click (once the swing is at least 60 percent recharged) launches a spinning 360-degree cyclone of chained blades around you.
+
+Deviations from `docs/Legends-Plan.md` Patch 7:
+
+- Chain blades exist only on the Chain Axe, not on the other chain weapons the plan names.
+- Instant Step only blinks behind a foe; it has no forward blink and no Sneak variant (the plan's "a few blocks ahead" is not built).
+- Not checked in a running game: only compiled.
+
+## 0.28.13 (2026-11-27): Legends patch 6 fixes - air flips, air step, landings, katana forms (#2282)
+
+- **Andy's ruling kept**: power users get Slide, the Backflip, vaults and air flips free, without the skill tree. The skill-tree locks stay as merged (nothing changed there).
+- **Air flips**: a Sneak tap in the air no longer flips when it is part of a power combo. If any power key (R, G, V, B, Z, C) is held when you press Sneak, or is pressed within the tap window after it, the flip stays out of it: Talon's takedown (Sneak + R), the tail sweep (Sneak + Z), Gravity's Sneak + R rocks and the other Sneak air moves are untouched. Feathers are spent only when a flip actually happens.
+- **Air step (double jump / cat leap)**: there is no free key for a default bind (every letter but L and T is a power's, and those are vanilla's), so for powers with no second jump of their own a fresh Jump press in the air now steps (after a few ticks off the ground, 4 Feathers), but only when nothing else took that press: not wall kicks, cling, wall run or bar moves, a sky dive start or end, the cloud in a bottle, the Mettle draught, the gravitite double jump or the Kingdoms sorcerer jump. The "Air Step" key is still there to bind if you want it. Powers that already have a double jump (PowerJump) keep theirs. The step now takes its lift off the fall distance instead of wiping the whole fall.
+- **Landings**: the landing clip is dropped when the hero landing or the safety tap plays, and when a roll takes the landing. The 14+ block crack and dust ring now waits out the roll window (about half a second) to see what the landing was: no dust a second time after the hero landing, no cracks on top of Gravity's own leap cracks, none when a roll (even a late one) took the fall or the fall killed you. The hero landing's own dust is thrown at touchdown, so a late roll can't take that back.
+- **Short landings**: the held-weapon pose and body weight stay on during the quick landing clips of small drops.
+- **Katana forms**: the combo now steps on the swing (a miss too, so misses chain and the clip leads the hit); only a main-hand swing in the air or at a creature counts (mining, clicks on blocks, right-clicks and off-hand swings do not, so a charged draw is never spent on a block); a hit adds that cut's launch, spike or push. The charged draw (hold, let go, 4 Feathers) now makes the next swing a draw slash with 1.5 blocks more reach and an extra hit of about three quarters of the damage (armour and Resistance apply to it again).
+- Built (compileClientJava); not played.
