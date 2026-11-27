@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 18:10
+updated: 2026-11-26 19:45
 ---
 # Open PRs
 
-10 open, as of 2026-11-26 18:10. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+11 open, as of 2026-11-26 19:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -55,3 +55,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `t3/blood-awakening-per-blood-patch-1` · **Updated:** 2026-11-26 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
+
+## [#2255](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2255) Legends Patch 7: Z Fighter and weapon moves
+- **Branch:** `gemini/legends-p7-zfighter-weapon-moves` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[legends-p7-zfighter-weapon-moves]]
