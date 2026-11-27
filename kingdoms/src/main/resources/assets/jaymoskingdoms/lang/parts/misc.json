@@ -80,6 +80,8 @@
   "crime.jaymoskingdoms.robbing": "robbing the dead",
   "death.attack.jaymoskingdoms.gloom": "%1$s was taken by the dark",
   "death.attack.jaymoskingdoms.gloom.player": "%1$s was taken by the dark while fleeing %2$s",
+  "death.attack.jaymoskingdoms.sun_decay": "%1$s rotted away in the sun",
+  "death.attack.jaymoskingdoms.sun_decay.player": "%1$s rotted away in the sun while fleeing %2$s",
   "wealth.jaymoskingdoms.wealthy.her": "wealthy (mounted guards and archers, the queen's carriage)",
   "royal.jaymoskingdoms.dress.plate": "Bring my armour.",
   "royal.jaymoskingdoms.dress.plate.hurried": "To arms! My armour, quickly!",

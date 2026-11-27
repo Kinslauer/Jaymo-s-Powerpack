@@ -21,8 +21,10 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,6 +35,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -132,6 +135,20 @@ public final class HeritageKits {
 	/** Sun decay: the harm and how often (ticks). Sun, wet, cold and the rest: the shares off blows and speed. */
 	static final float SUN_DECAY_DAMAGE = 1.0F;
 	static final int SUN_DECAY_EVERY = 40, PHOTO_EVERY = 60, DRY_LIMIT_TICKS = 6000;
+	/**
+	 * The Hollow's sun-rot as its own damage type. It was plain {@code generic} damage, which the hurt line could only call
+	 * "What was that?!": Andy, a risen Hollow, lost a heart every few seconds in daylight and couldn't tell why (clip
+	 * 2026-11-27 13:51, "the player needs to always know why they are taking damage so they can prevent it").
+	 */
+	public static final ResourceKey<DamageType> SUN_DECAY_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosKingdoms.id("sun_decay"));
+	/**
+	 * Set on a player burning in the sun (Andy, same thread: "you should catch fire if burning from sunlight, so players
+	 * know"): they're alight while they stand in it, like any of the risen dead, and the flames go out in shade. The fire
+	 * itself does no harm while it's set (the sun-rot already does); Powers' hurt line reads it to say it's the sun.
+	 */
+	public static final String SUNBURN_TAG = "jaymos_sunburn";
+	/** The sun's flames are kept lit this long ahead (ticks); checked each second. */
+	static final int SUN_FIRE_TICKS = 50;
 	static final float PHOTO_HEAL = 1.0F, SOUL_TAKER_HEAL = 3.0F;
 	static final double SUN_WEAK_DAMAGE = 0.12, SUN_HOLY_DAMAGE = 0.10, SUN_HOLY_SPEED = 0.05, WET_DAMAGE = 0.15, WET_SPEED = 0.15;
 	static final double COLD_BLOOD_DAMAGE = 0.15, COLD_BLOOD_SPEED = 0.20, DRY_DAMAGE = 0.15, DRY_SPEED = 0.10, LAND_SPEED = 0.05;
@@ -321,6 +338,10 @@ public final class HeritageKits {
 		// phased: nothing touches them; a risen skeleton never hurts a player
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
 			if (entity instanceof ServerPlayer player && phased(player) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+				return false;
+			}
+			// the sun's flames on a Hollow are its sign, not more harm: the sun-rot (SUN_DECAY_TYPE) is the hurt
+			if (entity instanceof ServerPlayer player && source.is(DamageTypes.ON_FIRE) && player.entityTags().contains(SUNBURN_TAG)) {
 				return false;
 			}
 			Entity by = source.getEntity();
@@ -530,6 +551,9 @@ public final class HeritageKits {
 		if (kit == null) {
 			if (entity instanceof ServerPlayer player) {
 				HEALTH.remove(player.getUUID());
+				if (player.removeTag(SUNBURN_TAG)) {
+					player.clearFire();
+				}
 			}
 			return;
 		}
@@ -554,10 +578,19 @@ public final class HeritageKits {
 		if (kit.has(Perk.PHOTOSYNTH) && serverTick % PHOTO_EVERY == 0 && sun(player) && player.getHealth() < player.getMaxHealth()) {
 			player.heal(PHOTO_HEAL);
 		}
-		if (kit.has(Perk.SUN_DECAY) && serverTick % SUN_DECAY_EVERY == 0 && sun(player) && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty()
-			&& !player.isCreative() && !player.isSpectator()) {
-			level.sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY(1.0), player.getZ(), 6, 0.3, 0.5, 0.3, 0.02);
-			player.hurtServer(level, level.damageSources().generic(), SUN_DECAY_DAMAGE);
+		boolean sunburnt = kit.has(Perk.SUN_DECAY) && sun(player) && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty() && !player.isCreative()
+			&& !player.isSpectator() && !player.isInWater();
+		if (sunburnt) {
+			// alight while in the sun, so it's plain why it hurts
+			player.addTag(SUNBURN_TAG);
+			player.setRemainingFireTicks(Math.max(player.getRemainingFireTicks(), SUN_FIRE_TICKS));
+			if (serverTick % SUN_DECAY_EVERY == 0) {
+				level.sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY(1.0), player.getZ(), 6, 0.3, 0.5, 0.3, 0.02);
+				player.hurtServer(level, level.damageSources().source(SUN_DECAY_TYPE), SUN_DECAY_DAMAGE);
+			}
+		} else if (player.removeTag(SUNBURN_TAG)) {
+			// out of the sun (shade, a hat, rain): its flames go out
+			player.clearFire();
 		}
 		if (player.isInWaterOrRain()) {
 			LAST_WET.put(player.getUUID(), level.getGameTime());
