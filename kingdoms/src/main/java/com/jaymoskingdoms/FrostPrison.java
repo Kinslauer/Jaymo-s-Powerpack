@@ -56,6 +56,9 @@ public final class FrostPrison {
 	static final Identifier FREEZING = Identifier.fromNamespaceAndPath("jaymospowers", "freezing");
 	/** The biggest thing that fits in a prison: width and height (blocks). */
 	static final double MAX_WIDTH = 2.0, MAX_HEIGHT = 3.2;
+	/** Awakened Frostbind: nearby hostile foes within this many blocks of the prisoner are also chilled. */
+	static final double AWAKENED_SPLASH_RANGE = 4.5;
+	static final int AWAKENED_SPLASH_TICKS = 100;
 
 	/** When each player last froze something (game time). Saved, kept through death. */
 	public static final AttachmentType<Long> LAST = AttachmentRegistry.create(JaymosKingdoms.id("frost_prison_last"),
@@ -72,8 +75,8 @@ public final class FrostPrison {
 		}
 	}
 
-	/** A prison standing: who's in it, the ice placed, and when it falls away (game time). */
-	private record Prison(ServerLevel level, LivingEntity target, List<BlockPos> ice, long until) {
+	/** A prison standing: who cast it, who's in it, the ice placed, and when it falls away (game time). */
+	private record Prison(ServerLevel level, java.util.UUID caster, LivingEntity target, List<BlockPos> ice, long until) {
 	}
 
 	private static final List<Prison> PRISONS = new ArrayList<>();
@@ -105,8 +108,9 @@ public final class FrostPrison {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long last = player.getAttached(LAST);
+		boolean awakened = TreeLocks.awakened(player);
 		// (Blood Awakening) awakened, the ice comes back twice a day
-		long cooldown = TreeLocks.awakened(player) ? Math.round(COOLDOWN_TICKS * TreeLocks.AWAKENED_WAIT) : COOLDOWN_TICKS;
+		long cooldown = awakened ? Math.round(COOLDOWN_TICKS * TreeLocks.AWAKENED_WAIT) : COOLDOWN_TICKS;
 		if (last != null && now - last < cooldown && now >= last) {
 			// (0.7.153) the day's ice is spent: Jaymo's Powers fires its thin white beam instead (FrostBeam)
 			player.addTag(BEAM_TAG);
@@ -134,15 +138,39 @@ public final class FrostPrison {
 			}
 		}
 		player.setAttached(LAST, now);
-		PRISONS.add(new Prison(level, target, ice, now + HOLD_TICKS));
+		PRISONS.add(new Prison(level, player.getUUID(), target, ice, now + HOLD_TICKS));
 		Holder<MobEffect> freezing = BuiltInRegistries.MOB_EFFECT.get(FREEZING).orElse(null);
 		if (freezing != null) {
 			target.addEffect(new MobEffectInstance(freezing, HOLD_TICKS + LINGER_TICKS, FREEZING_LEVEL), player);
+		}
+		if (awakened) {
+			// Blood Awakening: Frostbind spreads its chill outward around the prisoner
+			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(AWAKENED_SPLASH_RANGE),
+				e -> e != player && e != target && e.isAlive() && e instanceof net.minecraft.world.entity.monster.Enemy
+					&& e.distanceToSqr(target) <= AWAKENED_SPLASH_RANGE * AWAKENED_SPLASH_RANGE)) {
+				near.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, AWAKENED_SPLASH_TICKS, 2), player);
+				if (freezing != null) {
+					near.addEffect(new MobEffectInstance(freezing, AWAKENED_SPLASH_TICKS, 0), player);
+				} else {
+					near.setTicksFrozen(Math.max(near.getTicksFrozen(), near.getTicksRequiredToFreeze()));
+				}
+			}
 		}
 		hold(target);
 		target.setDeltaMovement(0.0, Math.min(0.0, target.getDeltaMovement().y), 0.0);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 1.0F, 0.8F);
+	}
+
+	/** Whether {@code player} currently has a Frostbind ice prison standing. */
+	public static boolean active(ServerPlayer player) {
+		java.util.UUID id = player.getUUID();
+		for (Prison prison : PRISONS) {
+			if (prison.caster.equals(id)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Whether {@code entity} is in a prison now. */

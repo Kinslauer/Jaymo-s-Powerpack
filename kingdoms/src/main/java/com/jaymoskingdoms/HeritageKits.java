@@ -1,8 +1,10 @@
 package com.jaymoskingdoms;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -10,10 +12,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import com.jaymoskingdoms.mixin.MobAccessor;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -22,6 +28,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -43,6 +50,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -57,9 +65,16 @@ import net.minecraft.world.entity.monster.ElderGuardian;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -147,6 +162,43 @@ public final class HeritageKits {
 	static final int EYES_TICKS = 300;
 	/** Gossamer flight: while sneaking in the air they fall like a feather, refreshed this often (ticks). */
 	static final int GOSSAMER_EVERY = 4, GOSSAMER_TICKS = 12;
+	// ---- tuning: Blood Awakening per-blood upgrades (Patch 1, added on top of PR #2117's shared rule) ----
+	/** Heartlander: extra Luck while awakened, kill-drop bonus chance (base + per Luck, capped), and crit cooldown shave (ticks, rate limit). */
+	static final double HEARTLANDER_AWAKENED_LUCK = 2.0;
+	static final float HEARTLANDER_LOOT_BASE = 0.25F, HEARTLANDER_LOOT_PER_LUCK = 0.05F, HEARTLANDER_LOOT_MAX = 0.75F;
+	static final int HEARTLANDER_CRIT_SHAVE = 60, HEARTLANDER_CRIT_EVERY = 10;
+	/** Sunfreckled: extra dash velocity multiplier, lift, and extra cooldown factor on top of shared 0.5x. */
+	static final double DASH_AWAKENED_MULT = 1.4, DASH_AWAKENED_UP = 0.2;
+	static final float DASH_AWAKENED_CDR = 0.7F;
+	/** Skymarked: base stand seconds, extra seconds when awakened, and share of Heavy Footed kept while awakened. */
+	static final int STAND_SECONDS = 5, STAND_AWAKENED_EXTRA = 3;
+	static final double HEAVY_FOOTED_AWAKENED_SHARE = 0.5;
+	/** Stoneborn: extra Shield Wall seconds on top of shared 1.5x, and knockback resistance while active. */
+	static final int WALL_AWAKENED_EXTRA = 3;
+	static final double WALL_AWAKENED_KB = 1.0;
+	/** Obsidian: extra Rune of Warding seconds, ground ward radius, colour, and blast rewind delay/span/batch. */
+	static final int WARD_AWAKENED_EXTRA = 5, WARD_COLOUR = 0x7A42D8;
+	static final double WARD_AURA_RADIUS = 10.0;
+	static final int WARD_REWIND_DELAY = 25, WARD_REWIND_SPAN = 40, WARD_REWIND_STEP = 2, WARD_REWIND_PER_STEP = 6, WARD_SIGIL_EVERY = 40;
+	/** Magmavein: awakened leap height/forward boost and window (ticks) to cast a second leap before cooldown. */
+	static final double LEAP_AWAKENED_UP = 1.25, LEAP_AWAKENED_FORWARD = 1.15;
+	static final int LEAP_DOUBLE_WINDOW = 100;
+	/** Earthling: awakened Second Wind heal and seconds the Hungry flaw pauses after casting (scaled by shared 1.5x). */
+	static final float WIND_AWAKENED_HEAL = 10.0F;
+	static final int WIND_HUNGER_PAUSE_SECONDS = 20;
+	/** Inkmarked: awakened Arcane Overflow blast radius/damage/shove/colour, and share of Frail kept. */
+	static final double OVERFLOW_BURST_RANGE = 8.0, OVERFLOW_BURST_SHOVE = 0.85, FRAIL_AWAKENED_SHARE = 0.5;
+	static final float OVERFLOW_BURST_DAMAGE = 6.0F;
+	static final int OVERFLOW_COLOUR = 0x9B6BFF;
+	/** Warriorborn: awakened War Cry ally aura radius, fear radius, fear duration (seconds), and roar shove. */
+	static final double CRY_AWAKENED_AURA_RANGE = 12.0, CRY_FEAR_RANGE = 16.0, CRY_FEAR_SHOVE = 0.55;
+	static final int CRY_FEAR_SECONDS = 6, CRY_COLOUR = 0xD85030;
+	/** Emberborn (Steam stride + forge-hot edge): burn seconds on blessed weapon hit, and steam hiss cadence (ticks). */
+	static final float FORGE_EDGE_BURN = 4.0F;
+	static final int STEAM_HISS_EVERY = 16;
+	/** Frostborn: eased Fire Frail multiplier while Frostbind is active, and Powers' FrostBeam active scoreboard tag. */
+	static final float FROST_AWAKENED_FIRE_TAKEN = 0.85F;
+	static final String FROST_BEAMING_TAG = "jaymospowers_frost_beaming";
 
 	/** The tracked static attributes' modifier ids start with this. */
 	private static final String KIT_ID = "heritage_kit_";
@@ -301,10 +353,33 @@ public final class HeritageKits {
 	 * Per player: when the ability is ready again (game time), and the windows the abilities open. (0.7.490) {@code READY} and
 	 * {@code LIVED} outlast a logout, so a relog doesn't reset a cooldown.
 	 */
+	/** Synced while an awakened Emberborn's Forge Blessing is up: Heavy Water stops slowing/sinking them on both sides. */
+	public static final AttachmentType<Boolean> STEAM_STRIDE = AttachmentRegistry.create(JaymosKingdoms.id("steam_stride"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Synced to an awakened Nightborn while Shadowmeld is up: Darkvision reaches twice as far. */
+	public static final AttachmentType<Boolean> MELD_VISION = AttachmentRegistry.create(JaymosKingdoms.id("meld_vision"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
+
 	private static final Map<UUID, Long> READY = new HashMap<>();
 	private static final Map<UUID, Long> PHASED = new HashMap<>(), REFLEX = new HashMap<>(), POUNCED = new HashMap<>(), LIVED = new HashMap<>(), LAST_WET = new HashMap<>();
+	private static final Map<UUID, Long> SHIELD_WALL_UNTIL = new HashMap<>(), DOUBLE_LEAP_UNTIL = new HashMap<>(), HUNGER_PAUSED = new HashMap<>(),
+		FORGE_BLESSING_UNTIL = new HashMap<>(), HEARTLANDER_CRIT_LAST = new HashMap<>();
+	/** Last Blood Awakening state applied to each player's static kit attributes, so learning or respec refreshes them at once. */
+	private static final Map<UUID, Boolean> AWAKENED_ATTRS = new HashMap<>();
+	/** Nightborn Shadowmeld window: {@code {untilGameTime, killHalvedFlag}}. */
+	private static final Map<UUID, long[]> MELDED_UNTIL = new HashMap<>();
 	private static final Map<UUID, long[]> STEAL = new HashMap<>();
 	private static final Map<UUID, Float> HEALTH = new HashMap<>();
+	/** Obsidian awakened Rune of Warding ground circle: protects allies and rewinds explosion block damage inside it. */
+	private record ObsidianWard(ServerLevel level, UUID owner, Vec3 at, long until) {
+	}
+
+	/** One block recorded from an explosion inside an Obsidian ward, waiting to rewind back into place. */
+	private record RewindBlock(ServerLevel level, BlockPos pos, BlockState state, long restoreAt) {
+	}
+
+	private static final Map<UUID, ObsidianWard> OBSIDIAN_WARDS = new HashMap<>();
+	private static final List<RewindBlock> WARD_REWINDS = new ArrayList<>();
 	/** The risen skeletons (id → its caller and the game time it falls) and where to find them. */
 	private record Conscript(ServerLevel level, UUID owner, long until) {
 	}
@@ -318,6 +393,7 @@ public final class HeritageKits {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(HeritageKits::tickAll);
+		LootTableEvents.MODIFY_DROPS.register(HeritageKits::heartlanderLoot);
 		// phased: nothing touches them; a risen skeleton never hurts a player
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
 			if (entity instanceof ServerPlayer player && phased(player) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
@@ -330,6 +406,7 @@ public final class HeritageKits {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			landed(entity, source, taken, blocked);
 			reflexed(entity, source, taken, blocked);
+			heartlanderCrit(entity, source, taken, blocked);
 		});
 		// Nine Lives: the Feline gets up at one health, now and then
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
@@ -342,11 +419,12 @@ public final class HeritageKits {
 			}
 			return !(entity instanceof ServerPlayer player) || !nineLives(player, source);
 		});
-		// Soul Taker: a kill mends the Reaper
+		// Soul Taker: a kill mends the Reaper; awakened Nightborn halves Shadowmeld's remaining wait on a kill while melded
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer dead) {
 				// (a new life starts at full health: that is not a mend to cut)
 				HEALTH.remove(dead.getUUID());
+				clearAwakenedWindows(dead);
 			} else {
 				// (0.7.490) a dead villager's dry count goes with it
 				LAST_WET.remove(entity.getUUID());
@@ -359,6 +437,9 @@ public final class HeritageKits {
 						level.sendParticles(ParticleTypes.SOUL, killer.getX(), killer.getY(0.6), killer.getZ(), 6, 0.3, 0.4, 0.3, 0.02);
 					}
 				}
+				if (killer instanceof ServerPlayer sp && TreeLocks.awakened(sp) && sp.level() instanceof ServerLevel level) {
+					nightbornKill(sp, level);
+				}
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -370,6 +451,14 @@ public final class HeritageKits {
 			LAST_WET.remove(id);
 			STEAL.remove(id);
 			HEALTH.remove(id);
+			HEARTLANDER_CRIT_LAST.remove(id);
+			if (DOUBLE_LEAP_UNTIL.remove(id) != null) {
+				READY.put(id, handler.player.level().getGameTime() + Math.round(Move.MOUNTAIN_LEAP.cooldown * 20L * TreeLocks.AWAKENED_WAIT));
+			}
+			HUNGER_PAUSED.remove(id);
+			OBSIDIAN_WARDS.remove(id);
+			AWAKENED_ATTRS.remove(id);
+			clearAwakenedWindows(handler.player);
 		});
 		// (0.7.490) an unloaded villager's dry count is dropped (a player's is kept until they log off)
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
@@ -388,6 +477,15 @@ public final class HeritageKits {
 				dismiss(id);
 			}
 			CONSCRIPTS.clear();
+			flushWardRewinds();
+			OBSIDIAN_WARDS.clear();
+			SHIELD_WALL_UNTIL.clear();
+			DOUBLE_LEAP_UNTIL.clear();
+			HUNGER_PAUSED.clear();
+			FORGE_BLESSING_UNTIL.clear();
+			MELDED_UNTIL.clear();
+			HEARTLANDER_CRIT_LAST.clear();
+			AWAKENED_ATTRS.clear();
 		});
 	}
 
@@ -435,6 +533,7 @@ public final class HeritageKits {
 	/** Puts the kit's plain attribute changes on {@code entity}, and takes any other's off. */
 	public static void attributes(LivingEntity entity) {
 		Kit kit = kit(entity);
+		boolean awakened = entity instanceof Player p && TreeLocks.awakened(p);
 		for (Holder<Attribute> attribute : TRACKED) {
 			for (AttributeModifier.Operation op : new AttributeModifier.Operation[] {AttributeModifier.Operation.ADD_VALUE, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL}) {
 				double amount = 0.0;
@@ -442,7 +541,18 @@ public final class HeritageKits {
 					for (Perk perk : new Perk[] {kit.gift, kit.flaw}) {
 						for (Mod m : perk.mods) {
 							if (m.attribute().equals(attribute) && m.operation() == op) {
-								amount += m.amount();
+								double val = m.amount();
+								if (awakened) {
+									// Blood Awakening per-blood attribute adjustments (Patch 1)
+									if (perk == Perk.LUCKY && kit.move == Move.STROKE_OF_FORTUNE && attribute.equals(Attributes.LUCK)) {
+										val += HEARTLANDER_AWAKENED_LUCK;
+									} else if (perk == Perk.HEAVY_FOOTED && kit.move == Move.UNBREAKABLE_STAND) {
+										val *= HEAVY_FOOTED_AWAKENED_SHARE;
+									} else if (perk == Perk.FRAIL && kit.move == Move.ARCANE_OVERFLOW) {
+										val *= FRAIL_AWAKENED_SHARE;
+									}
+								}
+								amount += val;
 							}
 						}
 					}
@@ -514,9 +624,17 @@ public final class HeritageKits {
 					player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, GOSSAMER_TICKS, 0, true, false, false));
 				}
 			}
+			tickAwakenedWindows(server, tick);
 		}
-		if (tick % Heritage.TICK_EVERY == 0 && !CONSCRIPTS.isEmpty()) {
-			conscripts(server);
+		if (tick % WARD_REWIND_STEP == 0 && !WARD_REWINDS.isEmpty()) {
+			stepWardRewinds();
+		}
+		if (tick % Heritage.TICK_EVERY == 0) {
+			if (!CONSCRIPTS.isEmpty()) {
+				conscripts(server);
+			}
+			tickObsidianWards(server, tick);
+			tickDoubleLeapAndHunger(server);
 		}
 	}
 
@@ -544,6 +662,10 @@ public final class HeritageKits {
 		}
 		if (!(entity instanceof ServerPlayer player) || !(player.level() instanceof ServerLevel level)) {
 			return;
+		}
+		boolean awakened = TreeLocks.awakened(player);
+		if (!Boolean.valueOf(awakened).equals(AWAKENED_ATTRS.put(player.getUUID(), awakened))) {
+			attributes(player);
 		}
 		// (the eyes' gifts, night eyes, deep eyes and moonsight, are darkvision now: grey shapes out to 16 blocks, seen on the player's
 		// own screen alone, see Darkvision; no Night Vision is given)
@@ -592,11 +714,12 @@ public final class HeritageKits {
 			if (kit.has(Perk.LANDBOUND) && !wet(entity)) {
 				speed -= LAND_SPEED;
 			}
-			if (kit.has(Perk.HEAVY_WATER) && entity.isInWater()) {
+			if (kit.has(Perk.HEAVY_WATER) && entity.isInWater() && !Boolean.TRUE.equals(entity.getAttached(STEAM_STRIDE))) {
 				// (0.7.490) wading; the swim itself is slowed in travelInWater ({@link #heavyInWater})
 				speed -= HEAVY_SPEED;
 			}
-			if (kit.has(Perk.WET_GROUNDED) && entity.isInWater()) {
+			if (kit.has(Perk.WET_GROUNDED) && entity.isInWater()
+				&& !(entity instanceof Player p && TreeLocks.awakened(p) && p.level().isRaining())) {
 				damage -= GROUNDED_DAMAGE;
 			}
 			if (kit.has(Perk.MOONSIGHT) && night(entity)) {
@@ -618,6 +741,9 @@ public final class HeritageKits {
 	 * {@code mixin.heritage.LivingEntityHeavyWaterMixin} after each tick's swim.
 	 */
 	public static boolean heavyInWater(LivingEntity entity) {
+		if (Boolean.TRUE.equals(entity.getAttached(STEAM_STRIDE))) {
+			return false;
+		}
 		Kit kit = kit(entity);
 		return kit != null && kit.has(Perk.HEAVY_WATER);
 	}
@@ -669,7 +795,10 @@ public final class HeritageKits {
 			f *= RAVENOUS_HUNGER;
 		}
 		if (kit.has(Perk.HUNGRY)) {
-			f *= HUNGRY_HUNGER;
+			Long paused = HUNGER_PAUSED.get(player.getUUID());
+			if (paused == null || player.level().getGameTime() >= paused) {
+				f *= HUNGRY_HUNGER;
+			}
 		}
 		if (kit.has(Perk.UNDEAD_STOMACH)) {
 			f *= Heritage.saving(player, STOMACH_HUNGER);
@@ -696,7 +825,12 @@ public final class HeritageKits {
 		boolean fire = source.is(DamageTypeTags.IS_FIRE);
 		boolean magic = source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC);
 		if (fire && kit.has(Perk.FIRE_FRAIL)) {
-			amount *= FIRE_FRAIL_TAKEN;
+			if (target instanceof ServerPlayer p && Heritage.is(p, Heritage.Kind.FROSTBORN) && TreeLocks.awakened(p)
+				&& (FrostPrison.active(p) || p.entityTags().contains(FROST_BEAMING_TAG) || p.getTicksFrozen() > 0)) {
+				amount *= FROST_AWAKENED_FIRE_TAKEN;
+			} else {
+				amount *= FIRE_FRAIL_TAKEN;
+			}
 		}
 		if (fire && kit.has(Perk.TRIPLE_FIRE)) {
 			amount *= TRIPLE_FIRE_TAKEN;
@@ -787,6 +921,17 @@ public final class HeritageKits {
 		if (steal != null && striker.level().getGameTime() < steal[0] && striker.isAlive()) {
 			striker.heal(taken * steal[1] / 100.0F);
 		}
+		// Emberborn Blood Awakening (A forge-hot edge): held weapon hits briefly ignite the foe with sparks while Forge Blessing lasts
+		if (striker instanceof ServerPlayer sp && target.isAlive() && !sp.getMainHandItem().isEmpty()
+			&& sp.level() instanceof ServerLevel level) {
+			Long until = FORGE_BLESSING_UNTIL.get(sp.getUUID());
+			if (until != null && level.getGameTime() < until) {
+				target.igniteForSeconds(FORGE_EDGE_BURN);
+				level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY(0.6), target.getZ(), 4, 0.25, 0.3, 0.25, 0.02);
+				level.sendParticles(ParticleTypes.FLAME, target.getX(), target.getY(0.6), target.getZ(), 6, 0.25, 0.3, 0.25, 0.04);
+				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.4F, 1.5F);
+			}
+		}
 	}
 
 	/** (0.7.490) Arcane Reflex: a blow that got through inside the window throws its striker back. */
@@ -865,7 +1010,13 @@ public final class HeritageKits {
 		// (Blood Awakening) every blood has its move from the start; awakened, it comes back in half the time and what it gives lasts longer
 		boolean awakened = TreeLocks.awakened(player);
 		long cooldown = awakened ? Math.round(move.cooldown * 20L * TreeLocks.AWAKENED_WAIT) : move.cooldown * 20L;
-		if (ready != null && now < ready && ready - now <= move.cooldown * 20L) {
+		if (awakened && move == Move.MESSENGERS_DASH) {
+			cooldown = Math.max(20L, Math.round(cooldown * DASH_AWAKENED_CDR));
+		}
+		// Magmavein Blood Awakening: a second Mountain Leap may fire within the double-leap window before cooldown begins
+		Long leapWindow = awakened && move == Move.MOUNTAIN_LEAP ? DOUBLE_LEAP_UNTIL.get(player.getUUID()) : null;
+		boolean secondLeap = leapWindow != null && now < leapWindow;
+		if (!secondLeap && ready != null && now < ready && ready - now <= move.cooldown * 20L) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.kit.cooldown", Component.translatable("kit.jaymoskingdoms.move." + move.key()),
 				(ready - now + 19) / 20).withStyle(ChatFormatting.GRAY), true);
 			return;
@@ -873,24 +1024,34 @@ public final class HeritageKits {
 		longer = awakened ? TreeLocks.AWAKENED_LONGER : 1.0F;
 		boolean cast;
 		try {
-			cast = cast(player, level, move, now);
+			cast = cast(player, level, move, now, awakened);
 		} finally {
 			longer = 1.0F;
 		}
 		if (cast) {
-			READY.put(player.getUUID(), now + cooldown);
+			if (awakened && move == Move.MOUNTAIN_LEAP && !secondLeap) {
+				DOUBLE_LEAP_UNTIL.put(player.getUUID(), now + LEAP_DOUBLE_WINDOW);
+			} else {
+				DOUBLE_LEAP_UNTIL.remove(player.getUUID());
+				READY.put(player.getUUID(), now + cooldown);
+			}
 			settle(player);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.kit.cast", Component.translatable("kit.jaymoskingdoms.move." + move.key()))
 				.withStyle(ChatFormatting.GOLD), true);
 		}
 	}
 
-	private static boolean cast(ServerPlayer p, ServerLevel level, Move move, long now) {
+	private static boolean cast(ServerPlayer p, ServerLevel level, Move move, long now, boolean awakened) {
 		switch (move) {
 			case SHADOWMELD -> {
 				fx(p, MobEffects.INVISIBILITY, SHADOWMELD_SECONDS, 0);
 				fx(p, MobEffects.SPEED, SHADOWMELD_SECONDS, 0);
 				calm(p, 16.0);
+				if (awakened) {
+					long until = now + Math.round(SHADOWMELD_SECONDS * 20 * longer);
+					MELDED_UNTIL.put(p.getUUID(), new long[] {until, 0L});
+					p.setAttached(MELD_VISION, Boolean.TRUE);
+				}
 				burst(p, ParticleTypes.SMOKE, 24);
 				sound(p, SoundEvents.ENDERMAN_TELEPORT, 0.5F, 0.6F);
 			}
@@ -908,24 +1069,48 @@ public final class HeritageKits {
 				}
 				fx(p, MobEffects.HASTE, FORGE_SECONDS, 1);
 				fx(p, MobEffects.STRENGTH, FORGE_SECONDS, 0);
+				if (awakened) {
+					long until = now + Math.round(FORGE_SECONDS * 20 * longer);
+					FORGE_BLESSING_UNTIL.put(p.getUUID(), until);
+					p.setAttached(STEAM_STRIDE, Boolean.TRUE);
+				}
 				burst(p, ParticleTypes.FLAME, 24);
 				sound(p, SoundEvents.FIRECHARGE_USE, 0.8F, 0.8F);
 			}
 			case SHIELD_WALL -> {
-				fx(p, MobEffects.RESISTANCE, WALL_SECONDS, 1);
-				fx(p, MobEffects.SLOWNESS, WALL_SECONDS, 0);
+				int secs = awakened ? WALL_SECONDS + WALL_AWAKENED_EXTRA : WALL_SECONDS;
+				fx(p, MobEffects.RESISTANCE, secs, 1);
+				fx(p, MobEffects.SLOWNESS, secs, 0);
+				if (awakened) {
+					long until = now + Math.round(secs * 20 * longer);
+					SHIELD_WALL_UNTIL.put(p.getUUID(), until);
+					put(p, Attributes.KNOCKBACK_RESISTANCE, KIT_ID + "wall_kb", WALL_AWAKENED_KB, AttributeModifier.Operation.ADD_VALUE);
+					put(p, Attributes.EXPLOSION_KNOCKBACK_RESISTANCE, KIT_ID + "wall_kb", WALL_AWAKENED_KB, AttributeModifier.Operation.ADD_VALUE);
+				}
 				burst(p, ParticleTypes.CRIT, 20);
 				sound(p, SoundEvents.SHIELD_BLOCK.value(), 1.0F, 0.7F);
 			}
 			case RUNE_OF_WARDING -> {
-				fx(p, MobEffects.ABSORPTION, WARD_SECONDS, 2);
-				fx(p, MobEffects.RESISTANCE, WARD_SECONDS, 0);
+				int secs = awakened ? WARD_SECONDS + WARD_AWAKENED_EXTRA : WARD_SECONDS;
+				fx(p, MobEffects.ABSORPTION, secs, 2);
+				fx(p, MobEffects.RESISTANCE, secs, 0);
+				if (awakened) {
+					long until = now + Math.round(secs * 20 * longer);
+					for (LivingEntity ally : around(p, WARD_AURA_RADIUS, e -> ally(p, e))) {
+						fx(ally, MobEffects.ABSORPTION, secs, 2);
+						fx(ally, MobEffects.RESISTANCE, secs, 0);
+					}
+					OBSIDIAN_WARDS.put(p.getUUID(), new ObsidianWard(level, p.getUUID(), p.position(), until));
+					Fx.sigil(level, p.position().add(0.0, 0.05, 0.0), (float) WARD_AURA_RADIUS, WARD_COLOUR, WARD_SIGIL_EVERY);
+				}
 				burst(p, Fx.GLYPH, 40);
 				sound(p, SoundEvents.EVOKER_CAST_SPELL, 0.8F, 1.2F);
 			}
 			case MOUNTAIN_LEAP -> {
 				Vec3 look = flat(p);
-				launch(p, look.x * LEAP_FORWARD, LEAP_UP, look.z * LEAP_FORWARD);
+				double fwd = awakened ? LEAP_FORWARD * LEAP_AWAKENED_FORWARD : LEAP_FORWARD;
+				double up = awakened ? LEAP_AWAKENED_UP : LEAP_UP;
+				launch(p, look.x * fwd, up, look.z * fwd);
 				fx(p, MobEffects.SLOW_FALLING, 4, 0);
 				burst(p, ParticleTypes.POOF, 16);
 			}
@@ -985,20 +1170,45 @@ public final class HeritageKits {
 				ring(p, ParticleTypes.HAPPY_VILLAGER, 24);
 			}
 			case WAR_CRY -> {
-				for (LivingEntity e : around(p, CRY_RANGE, e -> e instanceof Player)) {
+				double auraRange = awakened ? CRY_AWAKENED_AURA_RANGE : CRY_RANGE;
+				for (LivingEntity e : around(p, auraRange, e -> awakened ? ally(p, e) : e instanceof Player)) {
 					fx(e, MobEffects.STRENGTH, CRY_SECONDS, 0);
 					fx(e, MobEffects.SPEED, CRY_SECONDS, 0);
+					if (awakened) {
+						fx(e, MobEffects.RESISTANCE, CRY_SECONDS, 0);
+					}
 				}
 				fx(p, MobEffects.STRENGTH, CRY_SECONDS, 0);
 				fx(p, MobEffects.SPEED, CRY_SECONDS, 0);
+				if (awakened) {
+					fx(p, MobEffects.RESISTANCE, CRY_SECONDS, 0);
+					int fearTicks = Math.round(CRY_FEAR_SECONDS * 20 * longer);
+					for (LivingEntity e : around(p, CRY_FEAR_RANGE, e -> foe(p, e))) {
+						Fear.expose(e, p, fearTicks);
+						if (e instanceof Mob mob && (mob.getTarget() == p || mob.getTarget() != null && ally(p, mob.getTarget()))) {
+							mob.setTarget(null);
+						}
+						Vec3 away = e.position().subtract(p.position()).multiply(1.0, 0.0, 1.0);
+						if (away.lengthSqr() > 1.0E-4) {
+							away = away.normalize().scale(CRY_FEAR_SHOVE);
+							e.setDeltaMovement(e.getDeltaMovement().add(away.x, 0.15, away.z));
+							e.syncVelocity = true;
+						}
+					}
+					Fx.ring(level, p.position().add(0.0, 0.2, 0.0), (float) (CRY_FEAR_RANGE * 0.5), CRY_COLOUR);
+				}
 				ring(p, ParticleTypes.ANGRY_VILLAGER, 16);
 				sound(p, SoundEvents.RAVAGER_ROAR, 1.0F, 1.0F);
 			}
 			case SECOND_WIND -> {
-				p.heal(WIND_HEAL);
+				p.heal(awakened ? WIND_AWAKENED_HEAL : WIND_HEAL);
 				fx(p, MobEffects.REGENERATION, 5, 0);
 				p.removeEffect(MobEffects.SLOWNESS);
 				p.removeEffect(MobEffects.WEAKNESS);
+				if (awakened) {
+					p.removeEffect(MobEffects.HUNGER);
+					HUNGER_PAUSED.put(p.getUUID(), now + Math.round(WIND_HUNGER_PAUSE_SECONDS * 20 * longer));
+				}
 				burst(p, ParticleTypes.HAPPY_VILLAGER, 16);
 				sound(p, SoundEvents.PLAYER_LEVELUP, 0.6F, 1.2F);
 			}
@@ -1006,7 +1216,22 @@ public final class HeritageKits {
 				fx(p, MobEffects.HASTE, 15, 1);
 				fx(p, MobEffects.REGENERATION, 10, 0);
 				fx(p, MobEffects.LUCK, 30, 0);
-				burst(p, Fx.GLYPH, 50);
+				if (awakened) {
+					for (LivingEntity e : around(p, OVERFLOW_BURST_RANGE, e -> foe(p, e))) {
+						e.hurtServer(level, level.damageSources().indirectMagic(p, p), OVERFLOW_BURST_DAMAGE);
+						Vec3 away = e.position().subtract(p.position()).multiply(1.0, 0.0, 1.0);
+						if (away.lengthSqr() > 1.0E-4) {
+							away = away.normalize().scale(OVERFLOW_BURST_SHOVE);
+							e.setDeltaMovement(e.getDeltaMovement().add(away.x, 0.25, away.z));
+							e.syncVelocity = true;
+						}
+					}
+					Fx.blast(level, p.getBoundingBox().getCenter(), (float) OVERFLOW_BURST_RANGE, OVERFLOW_COLOUR);
+					Fx.ring(level, p.position().add(0.0, 0.1, 0.0), (float) OVERFLOW_BURST_RANGE, OVERFLOW_COLOUR);
+					burst(p, Fx.GLYPH, 80);
+				} else {
+					burst(p, Fx.GLYPH, 50);
+				}
 				sound(p, SoundEvents.EVOKER_CAST_SPELL, 0.8F, 1.0F);
 			}
 			case STROKE_OF_FORTUNE -> {
@@ -1017,13 +1242,17 @@ public final class HeritageKits {
 			}
 			case MESSENGERS_DASH -> {
 				Vec3 look = flat(p);
-				launch(p, look.x * DASH, 0.15, look.z * DASH);
+				double speed = awakened ? DASH * DASH_AWAKENED_MULT : DASH;
+				launch(p, look.x * speed, awakened ? DASH_AWAKENED_UP : 0.15, look.z * speed);
 				fx(p, MobEffects.SPEED, 4, 1);
 				burst(p, ParticleTypes.POOF, 12);
 			}
 			case UNBREAKABLE_STAND -> {
-				fx(p, MobEffects.RESISTANCE, 5, 2);
-				fx(p, MobEffects.SLOWNESS, 5, 0);
+				int secs = awakened ? STAND_SECONDS + STAND_AWAKENED_EXTRA : STAND_SECONDS;
+				fx(p, MobEffects.RESISTANCE, secs, 2);
+				if (!awakened) {
+					fx(p, MobEffects.SLOWNESS, secs, 0);
+				}
 				p.setDeltaMovement(Vec3.ZERO);
 				burst(p, ParticleTypes.CRIT, 24);
 				sound(p, SoundEvents.SHIELD_BLOCK.value(), 1.0F, 0.5F);
@@ -1458,5 +1687,310 @@ public final class HeritageKits {
 			c.level().sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY(0.5), mob.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
 			mob.discard();
 		}
+	}
+
+	// ---- Blood Awakening per-blood helpers (Patch 1) ------------------------------------------------------------------------
+
+	/** Someone {@code p} treats as an ally for War Cry and Rune of Warding: players, kingdom folk, or their own pets. */
+	private static boolean ally(ServerPlayer p, LivingEntity e) {
+		return e instanceof Player || e instanceof Folk || e instanceof OwnableEntity owned && p.equals(owned.getOwner());
+	}
+
+	/** Clears transient Blood Awakening windows and attachments on {@code player} (death or disconnect). */
+	private static void clearAwakenedWindows(ServerPlayer player) {
+		UUID id = player.getUUID();
+		if (SHIELD_WALL_UNTIL.remove(id) != null) {
+			put(player, Attributes.KNOCKBACK_RESISTANCE, KIT_ID + "wall_kb", 0.0, AttributeModifier.Operation.ADD_VALUE);
+			put(player, Attributes.EXPLOSION_KNOCKBACK_RESISTANCE, KIT_ID + "wall_kb", 0.0, AttributeModifier.Operation.ADD_VALUE);
+		}
+		if (FORGE_BLESSING_UNTIL.remove(id) != null || player.hasAttached(STEAM_STRIDE)) {
+			player.removeAttached(STEAM_STRIDE);
+		}
+		if (MELDED_UNTIL.remove(id) != null || player.hasAttached(MELD_VISION)) {
+			player.removeAttached(MELD_VISION);
+		}
+	}
+
+	/** Heartlander Blood Awakening: Luck raises loot quality on mob kills (bonus stackable drop scaled by Luck). */
+	private static void heartlanderLoot(Holder<LootTable> table, LootContext context, List<ItemStack> drops) {
+		if (drops.isEmpty() || table.unwrapKey().map(k -> !k.identifier().getPath().startsWith("entities/")).orElse(true)) {
+			return;
+		}
+		Player killer = context.getOptional(LootContextParams.LAST_DAMAGE_PLAYER);
+		if (!(killer instanceof ServerPlayer sp) || !TreeLocks.awakened(sp)) {
+			return;
+		}
+		Kit kit = kit(sp);
+		if (kit == null || kit.move != Move.STROKE_OF_FORTUNE || !kit.has(Perk.LUCKY)) {
+			return;
+		}
+		float chance = Math.min(HEARTLANDER_LOOT_MAX, HEARTLANDER_LOOT_BASE + Math.max(0.0F, sp.getLuck()) * HEARTLANDER_LOOT_PER_LUCK);
+		if (context.getRandom().nextFloat() >= chance) {
+			return;
+		}
+		List<ItemStack> stackable = new ArrayList<>();
+		for (ItemStack stack : drops) {
+			if (!stack.isEmpty() && stack.getMaxStackSize() > 1) {
+				stackable.add(stack);
+			}
+		}
+		if (stackable.isEmpty()) {
+			return;
+		}
+		ItemStack pick = stackable.get(context.getRandom().nextInt(stackable.size()));
+		drops.add(pick.copyWithCount(1));
+		Vec3 at = context.getOptional(LootContextParams.ORIGIN);
+		if (at != null) {
+			context.getLevel().sendParticles(ParticleTypes.HAPPY_VILLAGER, at.x, at.y + 0.5, at.z, 6, 0.3, 0.3, 0.3, 0.02);
+		}
+	}
+
+	/** Heartlander Blood Awakening: a critical strike shaves seconds off Stroke of Fortune's remaining wait. */
+	private static void heartlanderCrit(LivingEntity target, DamageSource source, float taken, boolean blocked) {
+		if (blocked || taken <= 0.0F || !(source.getEntity() instanceof ServerPlayer sp) || sp == target || !TreeLocks.awakened(sp)) {
+			return;
+		}
+		Kit kit = kit(sp);
+		if (kit == null || kit.move != Move.STROKE_OF_FORTUNE) {
+			return;
+		}
+		boolean crit = source.getDirectEntity() instanceof AbstractArrow arrow ? arrow.isCritArrow()
+			: source.getDirectEntity() == sp && sp.fallDistance > 0.0 && !sp.onGround() && !sp.onClimbable()
+				&& !sp.isInWater() && !sp.isPassenger() && !sp.hasEffect(MobEffects.BLINDNESS);
+		if (!crit) {
+			return;
+		}
+		long now = sp.level().getGameTime();
+		Long last = HEARTLANDER_CRIT_LAST.get(sp.getUUID());
+		if (last != null && now - last < HEARTLANDER_CRIT_EVERY && now >= last) {
+			return;
+		}
+		Long ready = READY.get(sp.getUUID());
+		if (ready == null || ready <= now) {
+			return;
+		}
+		HEARTLANDER_CRIT_LAST.put(sp.getUUID(), now);
+		READY.put(sp.getUUID(), Math.max(now, ready - HEARTLANDER_CRIT_SHAVE));
+		sp.level().sendParticles(ParticleTypes.HAPPY_VILLAGER, sp.getX(), sp.getY(0.9), sp.getZ(), 5, 0.25, 0.25, 0.25, 0.02);
+	}
+
+	/** Nightborn Blood Awakening: killing a living foe while melded halves Shadowmeld's remaining cooldown (once per meld). */
+	private static void nightbornKill(ServerPlayer killer, ServerLevel level) {
+		long[] meld = MELDED_UNTIL.get(killer.getUUID());
+		long now = level.getGameTime();
+		if (meld == null || now >= meld[0] || meld[1] != 0L) {
+			return;
+		}
+		Long ready = READY.get(killer.getUUID());
+		if (ready == null || ready <= now) {
+			return;
+		}
+		meld[1] = 1L;
+		READY.put(killer.getUUID(), now + (ready - now) / 2L);
+		level.sendParticles(ParticleTypes.SMOKE, killer.getX(), killer.getY(0.7), killer.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+		sound(killer, SoundEvents.AMETHYST_BLOCK_CHIME, 0.6F, 0.7F);
+	}
+
+	/** Every 4 ticks: maintains active Blood Awakening windows (Shield Wall knockback block, Emberborn steam/edge, Nightborn meld sight). */
+	private static void tickAwakenedWindows(MinecraftServer server, int tick) {
+		if (!SHIELD_WALL_UNTIL.isEmpty()) {
+			for (UUID id : new ArrayList<>(SHIELD_WALL_UNTIL.keySet())) {
+				ServerPlayer p = server.getPlayerList().getPlayer(id);
+				if (p == null || !p.isAlive() || p.level().getGameTime() >= SHIELD_WALL_UNTIL.get(id)) {
+					SHIELD_WALL_UNTIL.remove(id);
+					if (p != null) {
+						put(p, Attributes.KNOCKBACK_RESISTANCE, KIT_ID + "wall_kb", 0.0, AttributeModifier.Operation.ADD_VALUE);
+						put(p, Attributes.EXPLOSION_KNOCKBACK_RESISTANCE, KIT_ID + "wall_kb", 0.0, AttributeModifier.Operation.ADD_VALUE);
+					}
+				}
+			}
+		}
+		if (!FORGE_BLESSING_UNTIL.isEmpty()) {
+			for (UUID id : new ArrayList<>(FORGE_BLESSING_UNTIL.keySet())) {
+				ServerPlayer p = server.getPlayerList().getPlayer(id);
+				if (p == null || !p.isAlive() || !Heritage.is(p, Heritage.Kind.EMBERBORN)
+					|| p.level().getGameTime() >= FORGE_BLESSING_UNTIL.get(id)) {
+					FORGE_BLESSING_UNTIL.remove(id);
+					if (p != null && p.hasAttached(STEAM_STRIDE)) {
+						p.removeAttached(STEAM_STRIDE);
+					}
+					continue;
+				}
+				ServerLevel level = p.level();
+				if (p.isInWaterOrRain()) {
+					// Steam stride: water boils off in rising steam while Forge Blessing holds
+					level.sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY(0.5), p.getZ(), 4, 0.35, 0.4, 0.35, 0.02);
+					if (tick % STEAM_HISS_EVERY == 0) {
+						level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.35F, 1.5F);
+					}
+				}
+				if (!p.getMainHandItem().isEmpty()) {
+					// A forge-hot edge: held weapon sparks hot while the blessing lasts
+					Vec3 look = p.getLookAngle();
+					double yaw = Math.toRadians(p.getYRot());
+					Vec3 at = p.getEyePosition().add(look.scale(0.65)).add(-Math.cos(yaw) * 0.3, -0.35, -Math.sin(yaw) * 0.3);
+					level.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y, at.z, 2, 0.12, 0.12, 0.12, 0.01);
+				}
+			}
+		}
+		if (!MELDED_UNTIL.isEmpty()) {
+			for (UUID id : new ArrayList<>(MELDED_UNTIL.keySet())) {
+				ServerPlayer p = server.getPlayerList().getPlayer(id);
+				long[] meld = MELDED_UNTIL.get(id);
+				if (p == null || !p.isAlive() || !Heritage.is(p, Heritage.Kind.NIGHTBORN)
+					|| p.level().getGameTime() >= meld[0]) {
+					MELDED_UNTIL.remove(id);
+					if (p != null && p.hasAttached(MELD_VISION)) {
+						p.removeAttached(MELD_VISION);
+					}
+				}
+			}
+		}
+	}
+
+	/** Every second: expires unused Magmavein double-leap windows (starting their cooldown) and Earthling hunger pauses. */
+	private static void tickDoubleLeapAndHunger(MinecraftServer server) {
+		if (!DOUBLE_LEAP_UNTIL.isEmpty()) {
+			for (UUID id : new ArrayList<>(DOUBLE_LEAP_UNTIL.keySet())) {
+				ServerPlayer p = server.getPlayerList().getPlayer(id);
+				if (p == null) {
+					DOUBLE_LEAP_UNTIL.remove(id);
+					continue;
+				}
+				long now = p.level().getGameTime();
+				if (now >= DOUBLE_LEAP_UNTIL.get(id)) {
+					DOUBLE_LEAP_UNTIL.remove(id);
+					long cd = Math.round(Move.MOUNTAIN_LEAP.cooldown * 20L * TreeLocks.AWAKENED_WAIT);
+					READY.put(id, now + cd);
+				}
+			}
+		}
+		if (!HUNGER_PAUSED.isEmpty()) {
+			for (UUID id : new ArrayList<>(HUNGER_PAUSED.keySet())) {
+				ServerPlayer p = server.getPlayerList().getPlayer(id);
+				if (p == null || p.level().getGameTime() >= HUNGER_PAUSED.get(id)) {
+					HUNGER_PAUSED.remove(id);
+				}
+			}
+		}
+	}
+
+	/** Every second: expires finished Obsidian ground wards and refreshes their visible ground sigil. */
+	private static void tickObsidianWards(MinecraftServer server, int tick) {
+		if (OBSIDIAN_WARDS.isEmpty()) {
+			return;
+		}
+		for (UUID id : new ArrayList<>(OBSIDIAN_WARDS.keySet())) {
+			ObsidianWard ward = OBSIDIAN_WARDS.get(id);
+			ServerPlayer owner = server.getPlayerList().getPlayer(id);
+			if (owner == null || !owner.isAlive() || ward.level().getGameTime() >= ward.until()) {
+				OBSIDIAN_WARDS.remove(id);
+				continue;
+			}
+			if (tick % WARD_SIGIL_EVERY == 0) {
+				Fx.sigil(ward.level(), ward.at().add(0.0, 0.05, 0.0), (float) WARD_AURA_RADIUS, WARD_COLOUR, WARD_SIGIL_EVERY);
+			}
+		}
+	}
+
+	/**
+	 * (From {@link BlastMend#noted}) An explosion is about to break {@code targets}: any block inside an active awakened
+	 * Obsidian Rune of Warding circle is cleared without dropping items and queued to rewind back into place like the court
+	 * wizard's ward.
+	 */
+	static void obsidianWardBlast(ServerLevel level, Vec3 center, List<BlockPos> targets) {
+		if (OBSIDIAN_WARDS.isEmpty() || targets.isEmpty()) {
+			return;
+		}
+		long now = level.getGameTime();
+		List<ObsidianWard> local = new ArrayList<>();
+		for (ObsidianWard w : OBSIDIAN_WARDS.values()) {
+			if (w.level() == level && now < w.until() && w.at().distanceToSqr(center) <= (WARD_AURA_RADIUS + 16.0) * (WARD_AURA_RADIUS + 16.0)) {
+				local.add(w);
+			}
+		}
+		if (local.isEmpty()) {
+			return;
+		}
+		List<BlockPos> caught = new ArrayList<>();
+		List<BlockState> states = new ArrayList<>();
+		for (Iterator<BlockPos> it = targets.iterator(); it.hasNext(); ) {
+			BlockPos pos = it.next();
+			boolean inside = false;
+			for (ObsidianWard w : local) {
+				if (pos.distToCenterSqr(w.at()) <= WARD_AURA_RADIUS * WARD_AURA_RADIUS) {
+					inside = true;
+					break;
+				}
+			}
+			if (!inside) {
+				continue;
+			}
+			BlockState state = level.getBlockState(pos);
+			if (state.isAir() || state.hasBlockEntity() || !state.getFluidState().isEmpty()
+				|| state.getDestroySpeed(level, pos) < 0.0F || state.is(Blocks.TNT)) {
+				continue;
+			}
+			caught.add(pos.immutable());
+			states.add(state);
+			// remove from the explosion's block list and clear without drops so rewinding never duplicates items
+			it.remove();
+			level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+		}
+		if (caught.isEmpty()) {
+			return;
+		}
+		// sort lowest-Y first so supporting blocks rewind before blocks resting on them
+		List<Integer> order = new ArrayList<>(caught.size());
+		for (int i = 0; i < caught.size(); i++) {
+			order.add(i);
+		}
+		order.sort(Comparator.comparingInt(i -> caught.get(i).getY()));
+		int total = order.size();
+		for (int idx = 0; idx < total; idx++) {
+			int i = order.get(idx);
+			long at = now + WARD_REWIND_DELAY + (long) idx * WARD_REWIND_SPAN / Math.max(1, total);
+			WARD_REWINDS.add(new RewindBlock(level, caught.get(i), states.get(i), at));
+		}
+		Fx.ring(level, center, 3.0F, WARD_COLOUR);
+		level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0F, 0.7F);
+	}
+
+	/** Rewinds due blocks from Obsidian ward blast captures, never overwriting blocks placed since. */
+	private static void stepWardRewinds() {
+		int restored = 0;
+		for (Iterator<RewindBlock> it = WARD_REWINDS.iterator(); it.hasNext() && restored < WARD_REWIND_PER_STEP; ) {
+			RewindBlock rb = it.next();
+			ServerLevel level = rb.level();
+			if (level.getGameTime() < rb.restoreAt()) {
+				continue;
+			}
+			it.remove();
+			if (!level.isLoaded(rb.pos())) {
+				continue;
+			}
+			BlockState current = level.getBlockState(rb.pos());
+			if (!current.isAir() && !current.canBeReplaced()) {
+				continue;
+			}
+			level.setBlock(rb.pos(), rb.state(), Block.UPDATE_ALL);
+			level.sendParticles(Fx.mote(WARD_COLOUR, 0.8F), rb.pos().getX() + 0.5, rb.pos().getY() + 0.5, rb.pos().getZ() + 0.5, 4, 0.25, 0.25, 0.25, 0.02);
+			level.playSound(null, rb.pos().getX(), rb.pos().getY(), rb.pos().getZ(), rb.state().getSoundType().getPlaceSound(), SoundSource.BLOCKS, 0.45F, 1.2F);
+			restored++;
+		}
+	}
+
+	/** Restores any pending rewound blocks immediately on server stop so restarts leave no un-rewound holes. */
+	private static void flushWardRewinds() {
+		for (RewindBlock rb : WARD_REWINDS) {
+			ServerLevel level = rb.level();
+			if (level.isLoaded(rb.pos())) {
+				BlockState current = level.getBlockState(rb.pos());
+				if (current.isAir() || current.canBeReplaced()) {
+					level.setBlock(rb.pos(), rb.state(), Block.UPDATE_ALL);
+				}
+			}
+		}
+		WARD_REWINDS.clear();
 	}
 }

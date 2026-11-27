@@ -21,6 +21,8 @@ import org.jspecify.annotations.Nullable;
 public final class Darkvision {
 	/** How far (blocks) the grey shapes reach. The post effect's own reach is set to the same in its JSON. */
 	public static final double RANGE = 16.0;
+	/** Extended reach while an awakened Nightborn is melded (matches {@code post_effect/darkvision_far.json}). */
+	public static final double RANGE_AWAKENED = 32.0;
 
 	/** The bloods that see in the dark (a table; add a blood here and it sees). */
 	static final Set<Heritage.Kind> BLOODS = EnumSet.of(Heritage.Kind.NIGHTBORN, Heritage.Kind.DEEPBORN, Heritage.Kind.STONEBORN,
@@ -48,6 +50,11 @@ public final class Darkvision {
 	/** Whether a blood of {@code kind}, in {@code look} (null: its first look), sees in the dark. */
 	public static boolean has(Heritage.Kind kind, HeritageVariants.@Nullable Variant look) {
 		return BLOODS.contains(kind) || look != null && look.heritage == kind && LOOKS.contains(look);
+	}
+
+	/** Whether {@code who} currently sees farther in the dark (an awakened Nightborn while Shadowmeld is active). */
+	public static boolean far(@Nullable Entity who) {
+		return who != null && Boolean.TRUE.equals(who.getAttached(HeritageKits.MELD_VISION));
 	}
 
 	/** Whether {@code who} sees in the dark in any way at all (blood, a potion, a power). */

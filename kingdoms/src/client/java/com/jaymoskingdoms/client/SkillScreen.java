@@ -1054,6 +1054,12 @@ final class SkillScreen extends Screen {
 				// (Andy, 2026-11-23) and a Verdant's push-button regrowth
 				text.add(Component.translatable("gui.jaymoskingdoms.skills.blood.verdant").withColor(Ui.GOLD));
 			}
+			if (kit != null && kit.move() != com.jaymoskingdoms.HeritageKits.Move.NONE) {
+				String upKey = "gui.jaymoskingdoms.skills.blood.upgrade." + kit.move().key();
+				if (net.minecraft.locale.Language.getInstance().has(upKey)) {
+					text.add(Component.translatable(upKey).withColor(Ui.GOLD));
+				}
+			}
 		}
 		Component cost = Component.translatable("gui.jaymoskingdoms.skills.cost", perk.cost);
 		if (perk.minLevel > 0) {

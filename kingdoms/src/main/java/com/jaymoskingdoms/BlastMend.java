@@ -73,6 +73,11 @@ public final class BlastMend {
 	 * noted for its builders; elsewhere the soft ground it takes is marked to heal ({@link Craters}).
 	 */
 	public static void noted(ServerLevel level, net.minecraft.world.phys.Vec3 center, List<BlockPos> targets, boolean player) {
+		// Obsidian's awakened Rune of Warding catches blast damage inside its circle and rewinds the blocks back
+		HeritageKits.obsidianWardBlast(level, center, targets);
+		if (targets.isEmpty()) {
+			return;
+		}
 		MinecraftServer server = level.getServer();
 		BlockPos at = BlockPos.containing(center);
 		Faction f = level == Factions.level(server) ? Factions.around(server, level, at, Upkeep.NOTE_RADIUS) : null;

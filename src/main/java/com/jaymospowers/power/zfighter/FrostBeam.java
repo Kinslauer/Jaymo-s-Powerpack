@@ -85,6 +85,12 @@ public final class FrostBeam {
 	public static final float WOUND_CHANCE = 0.4F, CRIPPLE_SHARE = 0.5F;
 	/** Kingdoms puts this on a Frost-born whose hold found the ice prison on its daily cooldown; taken off here. */
 	public static final String BEAM_TAG = "jaymospowers_frost_beam";
+	/** Held on a Frost-born while their frost beam runs, so Kingdoms knows Frostbind is active (e.g. eased Fire Frail). */
+	public static final String BEAMING_TAG = "jaymospowers_frost_beaming";
+	/** Blood Awakening (Frostborn): held frost grows outward from the beam tip up to this radius as the hold continues. */
+	static final double AWAKENED_RADIUS_MIN = 1.0, AWAKENED_RADIUS_MAX = 4.0;
+	static final int AWAKENED_RADIUS_GROW_TICKS = 60, AWAKENED_CHILL_EVERY = 10, AWAKENED_SLOW_TICKS = 40;
+	static final float AWAKENED_AURA_DAMAGE = 1.0F;
 	/** (0.21.30) Kingdoms puts this on a vampire who casts the eye laser from the skill bar; taken off here. */
 	public static final String GAZE_TAG = "jaymospowers_blood_gaze";
 	/** (0.21.30) How long the eye laser blasts (ticks), its colour, and where the eyes are (out along the look, to each side, blocks). */
@@ -114,6 +120,8 @@ public final class FrostBeam {
 	private static final Map<UUID, Long> LAST = new HashMap<>();
 	/** Who has the beam out, and until when (game time) unless the client says it's still held. */
 	private static final Map<UUID, Long> ON = new HashMap<>();
+	/** When each Frost-born started their current held beam (game time), for awakened growing frost radius. */
+	private static final Map<UUID, Long> HELD_SINCE = new HashMap<>();
 	/** (0.21.30) Whose eye laser is out, and until when (game time). */
 	private static final Map<UUID, Long> GAZING = new HashMap<>();
 	/** Where and when each beam last left its mark. */
@@ -159,6 +167,9 @@ public final class FrostBeam {
 
 	private static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (!ON.containsKey(player.getUUID()) && player.entityTags().contains(BEAMING_TAG)) {
+				player.removeTag(BEAMING_TAG);
+			}
 			if (player.entityTags().contains(BEAM_TAG)) {
 				player.removeTag(BEAM_TAG);
 				fire(player);
@@ -186,13 +197,20 @@ public final class FrostBeam {
 			if (player == null || !player.isAlive() || player.isSpectator() || ZFighterLineage.of(player) != ZFighterLineage.FROST
 				|| player.level().getGameTime() > on.getValue()) {
 				it.remove();
-				if (player != null && player.hasAttached(BEAMING)) {
-					player.removeAttached(BEAMING);
+				HELD_SINCE.remove(on.getKey());
+				if (player != null) {
+					if (player.hasAttached(BEAMING)) {
+						player.removeAttached(BEAMING);
+					}
+					player.removeTag(BEAMING_TAG);
 				}
 				continue;
 			}
 			if (!player.hasAttached(BEAMING)) {
 				player.setAttached(BEAMING, Boolean.TRUE);
+			}
+			if (!player.entityTags().contains(BEAMING_TAG)) {
+				player.addTag(BEAMING_TAG);
 			}
 			beam(player, false);
 		}
@@ -206,6 +224,8 @@ public final class FrostBeam {
 		ServerLevel level = player.level();
 		boolean fresh = ON.put(player.getUUID(), level.getGameTime() + KEEP_TICKS) == null;
 		if (fresh) {
+			HELD_SINCE.put(player.getUUID(), level.getGameTime());
+			player.addTag(BEAMING_TAG);
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2F, 1.8F);
 			beam(player, false);
 		}
@@ -243,6 +263,9 @@ public final class FrostBeam {
 		if (now % HUM_EVERY == 0L) {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.5F, gaze ? 0.9F : 1.9F);
 		}
+		if (!gaze && now % AWAKENED_CHILL_EVERY == 0L && com.jaymospowers.core.TreeLocks.awakened(player)) {
+			spread(player, level, end, now);
+		}
 		if (target == null) {
 			if (wall instanceof BlockHitResult block && wall.getType() == HitResult.Type.BLOCK) {
 				mark(player, level, end, block, gaze, now);
@@ -278,6 +301,33 @@ public final class FrostBeam {
 		MARKED_AT.put(id, end);
 		MARKED_WHEN.put(id, now);
 		MagicFx.scorch(level, end, n, MARK_RADIUS, gaze ? BURN_GLOW : FROST_GLOW, gaze ? BURN_CHAR : FROST_RIME, MARK_TICKS);
+	}
+
+	/** Blood Awakening (Frostborn): while the beam is held, frost spreads outward in a growing radius round its tip. */
+	private static void spread(ServerPlayer player, ServerLevel level, Vec3 end, long now) {
+		long held = Math.max(0L, now - HELD_SINCE.getOrDefault(player.getUUID(), now));
+		double frac = Math.min(1.0, held / (double) AWAKENED_RADIUS_GROW_TICKS);
+		double radius = AWAKENED_RADIUS_MIN + (AWAKENED_RADIUS_MAX - AWAKENED_RADIUS_MIN) * frac;
+		MagicFx.ring(level, end, (float) radius, FROST_GLOW);
+		level.sendParticles(ParticleTypes.SNOWFLAKE, end.x, end.y + 0.2, end.z, 8 + (int) (radius * 4.0), radius * 0.5, 0.35, radius * 0.5, 0.02);
+		net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(end, end).inflate(radius);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box,
+			e -> e != player && e.isAlive() && !e.isSpectator() && e instanceof net.minecraft.world.entity.monster.Enemy
+				&& e.distanceToSqr(end) <= radius * radius)) {
+			e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, AWAKENED_SLOW_TICKS, 1), player);
+			e.setTicksFrozen(Math.max(e.getTicksFrozen(), e.getTicksRequiredToFreeze()));
+			e.hurtServer(level, ZFighterKi.source(player), AWAKENED_AURA_DAMAGE);
+		}
+		int r = (int) Math.floor(radius);
+		BlockPos origin = BlockPos.containing(end);
+		for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-r, -1, -r), origin.offset(r, 1, r))) {
+			if (pos.distToCenterSqr(end) <= radius * radius && com.jaymospowers.core.Loaded.made(level, pos)
+				&& level.getFluidState(pos).is(Fluids.WATER)
+				&& level.getFluidState(pos).isSource() && level.getBlockState(pos).is(Blocks.WATER)) {
+				level.setBlockAndUpdate(pos, Blocks.FROSTED_ICE.defaultBlockState());
+				level.scheduleTick(pos, Blocks.FROSTED_ICE, FROST_TICKS);
+			}
+		}
 	}
 
 	/** Still water the beam crosses freezes for a moment (frosted ice, which melts away), and fire where it lands goes out. */

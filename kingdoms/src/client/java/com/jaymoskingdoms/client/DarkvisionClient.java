@@ -21,8 +21,9 @@ import org.jspecify.annotations.Nullable;
  * how dark a pixel is, and would grey sunlit grass and dark stone.
  */
 public final class DarkvisionClient {
-	/** The post effect ({@code assets/jaymoskingdoms/post_effect/darkvision.json}). */
+	/** The post effect ({@code assets/jaymoskingdoms/post_effect/darkvision.json}) and its extended Shadowmeld range. */
 	public static final Identifier EFFECT = JaymosKingdoms.id("darkvision");
+	public static final Identifier EFFECT_FAR = JaymosKingdoms.id("darkvision_far");
 
 	/** The light at the eyes (0-15: lamps, or the sky's by how high the Sun stands) from which the sight is off. */
 	static final int LIT = 12;
@@ -44,6 +45,6 @@ public final class DarkvisionClient {
 		BlockPos at = BlockPos.containing(eye);
 		float day = Mth.clamp((float)SunMoon.sun(minecraft.level, eye).y / SUN_FULL, 0.0F, 1.0F);
 		float light = Math.max(minecraft.level.getBrightness(LightLayer.BLOCK, at), minecraft.level.getBrightness(LightLayer.SKY, at) * day);
-		return light >= LIT ? null : EFFECT;
+		return light >= LIT ? null : Darkvision.far(player) ? EFFECT_FAR : EFFECT;
 	}
 }

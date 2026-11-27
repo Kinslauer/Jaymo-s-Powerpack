@@ -77,10 +77,16 @@ public final class HeritageMoves {
 	/** Thunderclap: how far it reaches (blocks), and its cooldowns (ticks), plain and in a thunderstorm. */
 	static final double CLAP_RANGE = 48.0;
 	static final int CLAP_COOLDOWN = 1200, CLAP_STORM_COOLDOWN = 400;
+	/** Blood Awakening (Stormborn): Thunderclap arcs to this many nearby mobs within this reach for this much lightning damage. */
+	static final int CLAP_AWAKENED_CHAIN = 2;
+	static final double CLAP_AWAKENED_CHAIN_RANGE = 7.0;
+	static final float CLAP_AWAKENED_CHAIN_DAMAGE = 5.0F;
 	/** Sunflare: its reach (blocks), how long the undead burn (seconds), the blindness (ticks), the heal, the cooldown (ticks). */
 	static final double FLARE_RADIUS = 6.0;
 	static final float FLARE_BURN = 8.0F, FLARE_HEAL = 4.0F;
 	static final int FLARE_BLIND_TICKS = 100, FLARE_COOLDOWN = 1200;
+	/** Blood Awakening (Dawnborn): blindness duration multiplier and direct radiant damage dealt to undead. */
+	static final float FLARE_AWAKENED_BLIND_MULT = 2.0F, FLARE_AWAKENED_UNDEAD_DAMAGE = 6.0F;
 	/** The client's word lasts this long (ticks). */
 	static final int TIMEOUT = 40;
 	/** How often (ticks) the heritage is read off the Kingdoms tags. */
@@ -315,8 +321,51 @@ public final class HeritageMoves {
 		bolt.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
 		bolt.setCause(player);
 		level.addFreshEntity(bolt);
+		if (com.jaymospowers.core.TreeLocks.awakened(player)) {
+			// Blood Awakening (Stormborn): Thunderclap arcs from the first strike to nearby mobs
+			LivingEntity primary = hit != null && hit.getEntity() instanceof LivingEntity living ? living : null;
+			chainClap(player, level, primary != null ? primary.getBoundingBox().getCenter() : Vec3.atCenterOf(at), primary);
+		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		return true;
+	}
+
+	/** Awakened Thunderclap: arcs lightning from the strike point to up to {@link #CLAP_AWAKENED_CHAIN} nearby mobs. */
+	private static void chainClap(ServerPlayer player, ServerLevel level, Vec3 origin, @org.jspecify.annotations.Nullable LivingEntity primary) {
+		java.util.List<LivingEntity> struck = new java.util.ArrayList<>();
+		if (primary != null) {
+			struck.add(primary);
+		}
+		Vec3 from = origin;
+		for (int i = 0; i < CLAP_AWAKENED_CHAIN; i++) {
+			Vec3 anchor = from;
+			LivingEntity nearest = null;
+			double best = CLAP_AWAKENED_CHAIN_RANGE * CLAP_AWAKENED_CHAIN_RANGE;
+			AABB box = new AABB(anchor, anchor).inflate(CLAP_AWAKENED_CHAIN_RANGE);
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box,
+				e -> e != player && e instanceof Mob mob && e.isAlive() && !e.isSpectator() && !struck.contains(e)
+					&& (e instanceof net.minecraft.world.entity.monster.Enemy || player.equals(mob.getTarget()))
+					&& !(e instanceof OwnableEntity owned && player.equals(owned.getOwner())))) {
+				double d = e.getBoundingBox().getCenter().distanceToSqr(anchor);
+				if (d < best) {
+					best = d;
+					nearest = e;
+				}
+			}
+			if (nearest == null) {
+				return;
+			}
+			Vec3 to = nearest.getBoundingBox().getCenter();
+			for (int s = 0; s <= 8; s++) {
+				double t = s / 8.0;
+				level.sendParticles(MagicFx.CRACKLE, anchor.x + (to.x - anchor.x) * t, anchor.y + (to.y - anchor.y) * t,
+					anchor.z + (to.z - anchor.z) * t, 2, 0.05, 0.05, 0.05, 0.0);
+			}
+			level.playSound(null, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.5F, 1.5F);
+			nearest.hurtServer(level, level.damageSources().lightningBolt(), CLAP_AWAKENED_CHAIN_DAMAGE);
+			struck.add(nearest);
+			from = to;
+		}
 	}
 
 	/**
@@ -360,6 +409,8 @@ public final class HeritageMoves {
 
 	/** The flash: the undead set alight, other mobs blinded, friends healed a little. */
 	private static boolean sunflare(ServerPlayer player, ServerLevel level) {
+		boolean awakened = com.jaymospowers.core.TreeLocks.awakened(player);
+		int blindTicks = awakened ? Math.round(FLARE_BLIND_TICKS * FLARE_AWAKENED_BLIND_MULT) : FLARE_BLIND_TICKS;
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.6, 0.0);
 		AABB box = player.getBoundingBox().inflate(AbilityPower.size(player, FLARE_RADIUS));
 		// shadows come apart in it, before anything else is touched
@@ -369,11 +420,16 @@ public final class HeritageMoves {
 			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= AbilityPower.size(player, FLARE_RADIUS) * AbilityPower.size(player, FLARE_RADIUS))) {
 			if (e.is(EntityTypeTags.UNDEAD)) {
 				e.igniteForSeconds(FLARE_BURN);
+				if (awakened) {
+					// Blood Awakening (Dawnborn): undead take direct radiant flare damage
+					e.hurtServer(level, level.damageSources().indirectMagic(player, player), FLARE_AWAKENED_UNDEAD_DAMAGE);
+					level.sendParticles(MagicFx.LIGHT, e.getX(), e.getY(0.6), e.getZ(), 10, 0.3, 0.4, 0.3, 0.05);
+				}
 			} else if (e instanceof Player || e instanceof OwnableEntity owned && player.equals(owned.getOwner())) {
 				e.heal(FLARE_HEAL);
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, e.getX(), e.getY(0.8), e.getZ(), 4, 0.3, 0.3, 0.3, 0.0);
 			} else if (e instanceof Mob) {
-				e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, FLARE_BLIND_TICKS, 0), player);
+				e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, blindTicks, 0), player);
 			}
 		}
 		// a ring of light thrown out, and a burst at the hands

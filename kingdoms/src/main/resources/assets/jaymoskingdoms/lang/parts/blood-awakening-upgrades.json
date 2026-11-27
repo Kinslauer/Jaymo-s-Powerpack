@@ -1,0 +1,16 @@
+{
+  "gui.jaymoskingdoms.skills.blood.upgrade.stroke_of_fortune": "Awakened bonus: Luck raises kill loot quality, and critical strikes shave 3 s off the wait.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.messengers_dash": "Awakened bonus: Messenger's Dash carries you farther and comes back sooner.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.unbreakable_stand": "Awakened bonus: Unbreakable Stand lasts longer with no slowness, and Heavy Footed is halved.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.shield_wall": "Awakened bonus: Shield Wall holds longer and blocks knockback while active.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.rune_of_warding": "Awakened bonus: Rune of Warding lasts longer, shields allies inside its circle, and rewinds explosion damage inside the ward.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.mountain_leap": "Awakened bonus: Mountain Leap reaches higher and can be cast twice before its cooldown begins.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.second_wind": "Awakened bonus: Second Wind heals more and pauses the Hungry flaw for a time.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.arcane_overflow": "Awakened bonus: Arcane Overflow unleashes a wider arcane blast that damages and pushes foes back, and Frail is halved.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.war_cry": "Awakened bonus: War Cry grants Resistance to nearby allies too and frightens hostile mobs across a wider radius.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.forge_blessing": "Awakened bonus: Steam stride boils water off so Heavy Water stops slowing you while the blessing lasts, and your held weapon glows hot, setting foes alight on hit.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.frostbind": "Awakened bonus: Frostbind's chill spreads wider the longer it is held (and around an ice prison), and Fire Frail eases while Frostbind is active.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.thunderclap": "Awakened bonus: Thunderclap arcs lightning to nearby mobs, and Wet Grounded does not apply in the rain.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.sunflare": "Awakened bonus: Sunflare blinds mobs twice as long and sears undead with direct radiant damage.",
+  "gui.jaymoskingdoms.skills.blood.upgrade.shadowmeld": "Awakened bonus: Darkvision reaches twice as far while melded, and a kill while melded halves Shadowmeld's remaining wait."
+}
