@@ -25,6 +25,86 @@
       "id": "jaymospowers:caveman_boots",
       "required": false
     },
+    {
+      "id": "jaymospowers:dark_caveman_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_caveman_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_caveman_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_caveman_boots",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:trapper_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:trapper_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:trapper_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:trapper_boots",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_trapper_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_trapper_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_trapper_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_trapper_boots",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:barbarian_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:barbarian_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:barbarian_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:barbarian_boots",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_barbarian_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_barbarian_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_barbarian_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:dark_barbarian_boots",
+      "required": false
+    },
     "jaymoskingdoms:ronin_helmet",
     "jaymoskingdoms:ronin_chestplate",
     "jaymoskingdoms:ronin_leggings",

@@ -44,6 +44,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.corpse.CorpseEntity.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		com.jaymoskitchen.client.hands.HandsClient.register();
 		com.jaymoskitchen.client.stomach.StomachHud.register();
+		com.jaymoskitchen.client.stomach.BitesHud.register();
 		// (0.5.25) thirst row, thermometer, heat edges, sips
 		com.jaymoskitchen.client.climate.ClimateHud.register();
 		// (Hardrock picks) a familiar farm animal shows its hearts
@@ -106,6 +107,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		BlockEntityRenderers.register(com.jaymoskitchen.delight.Delight.CUTTING_BOARD_ENTITY,
 			com.jaymoskitchen.client.delight.CuttingBoardRenderer::new);
 		com.jaymoskitchen.client.delight.DelightFarmClient.register();
+		// the thrown toxic cake, drawn as the cake item
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymoskitchen.cooking.PoisonedSweets.CAKE_ENTITY,
+			net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
 		// the stove's grill, and the skillet's models
 		com.jaymoskitchen.client.delight.DelightHomeClient.register();
 		// (0.5.27) hides hanging on drying racks
@@ -131,6 +135,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		});
 
 		com.jaymoskitchen.client.season.SeasonTints.register();
+		com.jaymoskitchen.client.season.SeasonTooltip.register();
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenButcher.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ButcherScreen(payload)));
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenKitchen.TYPE, (payload, ctx) -> {
 			Station station = Station.byIndex(payload.station());

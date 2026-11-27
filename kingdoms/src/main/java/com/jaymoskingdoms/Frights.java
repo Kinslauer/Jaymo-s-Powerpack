@@ -43,10 +43,18 @@ public final class Frights {
 	/** How far they run; how near home must be to run there; how long they keep hiding (ticks). */
 	static final int RUN = 14, HOME_NEAR = 40;
 	static final long HIDE_TICKS = 200L;
-	/** The share of grown villagers who take a child along, and their pace. */
-	static final float TAKE_CHILD = 0.35F, SPEED = 0.75F;
+	/** The share of grown villagers who take a child along, and their pace; the pace of one only going in out of the night. */
+	static final float TAKE_CHILD = 0.35F, SPEED = 0.75F, WALK = 0.5F;
 
-	private record Fright(BlockPos to, @Nullable UUID child, long until) {
+	/**
+	 * Where it runs, with which child, until when, and at what pace. {@code cover}: it's only going in out of the rain or
+	 * the night ({@link #cover}), not frightened: Jade says it's going home or sheltering, and a monster that turns up
+	 * frightens it at once.
+	 */
+	private record Fright(BlockPos to, @Nullable UUID child, long until, boolean cover, float speed) {
+		Fright(BlockPos to, @Nullable UUID child, long until) {
+			this(to, child, until, false, SPEED);
+		}
 	}
 
 	private static final Map<UUID, Fright> FRIGHTS = new HashMap<>();
@@ -59,9 +67,21 @@ public final class Frights {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> FRIGHTS.clear());
 	}
 
-	/** (0.5.21) It's running from a monster, or hiding from one. */
+	/** (0.5.21) It's running from a monster, or hiding from one (or going in out of the rain or the night: {@link #cover}). */
 	static boolean afraid(UUID villager) {
 		return FRIGHTS.containsKey(villager);
+	}
+
+	/** It's frightened: running from a monster, a blast, a twister or a war party, not only going in out of the weather. */
+	static boolean scared(UUID villager) {
+		Fright f = FRIGHTS.get(villager);
+		return f != null && !f.cover();
+	}
+
+	/** Where it's going in out of the rain or the night ({@link #cover}); null if it isn't, or is frightened instead. */
+	static @Nullable BlockPos covering(UUID villager) {
+		Fright f = FRIGHTS.get(villager);
+		return f != null && f.cover() ? f.to() : null;
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -83,11 +103,12 @@ public final class Frights {
 				LivingEntity monster = monster(level, v, f);
 				Fright fright = FRIGHTS.get(v.getUUID());
 				if (monster != null) {
-					if (fright == null) {
+					if (fright == null || fright.cover()) {
 						// (0.6.11) a symbiote, a shade, an alien: they cry out what it is
 						Oddities.cry(level, v, monster, f);
 					}
-					if (fright == null || fright.until() - now < HIDE_TICKS / 2) {
+					// (one only going in out of the night takes fright at once, and runs from it, not on to where it was going)
+					if (fright == null || fright.cover() || fright.until() - now < HIDE_TICKS / 2) {
 						fright = frighten(level, v, monster, now);
 					}
 				}
@@ -104,7 +125,8 @@ public final class Frights {
 			// (a guard whose band broke runs with the rest)
 			return false;
 		}
-		if (BlastFright.standsGround(v)) {
+		if (BlastFright.standsGround(v) || Temperaments.fearless(v)) {
+			// (a guard, or one of the brave: TakeCover has the brave go at the monster)
 			return true;
 		}
 		if (!(v instanceof Worker w) || w.factionId() < 0 || Temperaments.runs(v)) {
@@ -120,7 +142,7 @@ public final class Frights {
 	 * the symbiote's suit or walking as a shade, and a mob the symbiote has taken ({@link Oddities#monstrous}); (0.7.10) and a Z Fighter
 	 * with a tail out, unless they have explained it to {@code v} ({@link Tails}).
 	 */
-	private static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
+	static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
 		LivingEntity best = null;
 		// ((0.7.186) the brave hardly at all, the timid from farther: Temperaments)
 		double range = Temperaments.frightRange(v, FRIGHT);
@@ -139,7 +161,8 @@ public final class Frights {
 
 	/** {@code m} is one of {@code v}'s own faction's people (a camp's raiders don't frighten its crew). */
 	private static boolean sameSide(Villager v, LivingEntity m) {
-		return v instanceof Worker a && m instanceof Worker b && a.factionId() >= 0 && a.factionId() == b.factionId();
+		// (and a sellsword or creature its camp keeps: CampBeasts)
+		return v instanceof Worker a && m instanceof Worker b && a.factionId() >= 0 && a.factionId() == b.factionId() || CampBeasts.spares(v, m);
 	}
 
 	private static boolean frightful(Mob m) {
@@ -158,7 +181,7 @@ public final class Frights {
 	/** (0.6.11) Something came down at {@code at} (a meteor, a star): it runs from the spot and hides a while. */
 	public static void scare(ServerLevel level, Villager v, Vec3 at) {
 		long now = level.getGameTime();
-		if (!FRIGHTS.containsKey(v.getUUID())) {
+		if (!scared(v.getUUID())) {
 			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);
 		}
 		Fright fright = new Fright(away(level, v, at), null, now + HIDE_TICKS);
@@ -181,7 +204,7 @@ public final class Frights {
 				continue;
 			}
 			Fright had = FRIGHTS.get(v.getUUID());
-			if (had == null) {
+			if (had == null || had.cover()) {
 				level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);
 			}
 			Fright fright = new Fright(away(level, v, at), had != null ? had.child() : null,
@@ -194,10 +217,42 @@ public final class Frights {
 	/** (0.7.65) It hides at {@code to} (its home) until {@code until}, as from a monster: a war party is coming ({@link WarAlert}). */
 	static void shelter(ServerLevel level, Villager v, BlockPos to, long until) {
 		Fright had = FRIGHTS.get(v.getUUID());
-		if (had != null && had.until() >= until) {
+		if (had != null && !had.cover() && had.until() >= until) {
 			return;
 		}
-		Fright fright = new Fright(had != null ? had.to() : to, had != null ? had.child() : null, until);
+		Fright fright = new Fright(had != null && !had.cover() ? had.to() : to, had != null ? had.child() : null, until);
+		FRIGHTS.put(v.getUUID(), fright);
+		flee(level, v, fright);
+	}
+
+	/**
+	 * It runs for cover at {@code to} and stays there until {@code until}: a tornado bearing down ({@code Tornadoes}).
+	 * Unlike {@link #shelter} the place is always the new one (whatever it was running from before, this is worse), and a
+	 * child it was taking along still comes too.
+	 */
+	public static void takeCover(ServerLevel level, Villager v, BlockPos to, long until) {
+		Fright had = FRIGHTS.get(v.getUUID());
+		if (had == null || had.cover()) {
+			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);
+		}
+		Fright fright = new Fright(to, had != null ? had.child() : null, Math.max(until, had != null ? had.until() : 0L));
+		FRIGHTS.put(v.getUUID(), fright);
+		flee(level, v, fright);
+	}
+
+	/**
+	 * Andy (2026-11-27): a villager going in at night showed "Running scared" with its activity "rest", and nothing near it.
+	 * It goes in out of the rain or the night ({@link TakeCover}) to {@code to}, and stays in until {@code until}. It isn't
+	 * frightened: at night it walks ({@link #WALK}), in the rain it hurries ({@code hurry}), it doesn't cry out, and Jade
+	 * says it's going home or sheltering ({@link NpcTasks}). A real fright it's already in stands; a monster that turns up
+	 * frightens it at once ({@link #tick}).
+	 */
+	static void cover(ServerLevel level, Villager v, BlockPos to, long until, boolean hurry) {
+		Fright had = FRIGHTS.get(v.getUUID());
+		if (had != null && (!had.cover() || had.until() >= until)) {
+			return;
+		}
+		Fright fright = new Fright(had != null ? had.to() : to, had != null ? had.child() : null, until, true, hurry ? SPEED : WALK);
 		FRIGHTS.put(v.getUUID(), fright);
 		flee(level, v, fright);
 	}
@@ -219,7 +274,7 @@ public final class Frights {
 				.min((a, b) -> Double.compare(a.distanceToSqr(v), b.distanceToSqr(v))).orElse(null);
 			child = c == null ? null : c.getUUID();
 		}
-		if (!FRIGHTS.containsKey(v.getUUID())) {
+		if (!scared(v.getUUID())) {
 			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);
 		}
 		Fright fright = new Fright(to, child, now + Temperaments.hideTicks(v, HIDE_TICKS));
@@ -230,12 +285,12 @@ public final class Frights {
 	private static void flee(ServerLevel level, Villager v, Fright fright) {
 		if (fright.child() != null && level.getEntity(fright.child()) instanceof Villager c && c.isAlive()) {
 			if (v.distanceToSqr(c) > 4.0) {
-				BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(c, false), SPEED, 1);
+				BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(c, false), fright.speed(), 1);
 				return;
 			}
-			BehaviorUtils.setWalkAndLookTargetMemories(c, fright.to(), SPEED, 1);
+			BehaviorUtils.setWalkAndLookTargetMemories(c, fright.to(), fright.speed(), 1);
 		}
-		BehaviorUtils.setWalkAndLookTargetMemories(v, fright.to(), SPEED, 1);
+		BehaviorUtils.setWalkAndLookTargetMemories(v, fright.to(), fright.speed(), 1);
 	}
 
 	/** A spot on the ground {@link #RUN} blocks from {@code monster}, the way {@code v} already is from it. */

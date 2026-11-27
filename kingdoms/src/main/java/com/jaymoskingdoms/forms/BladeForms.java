@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.forms;
 
 import com.jaymoskingdoms.CombatArts;
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.PowersCompat;
 import com.jaymoskingdoms.Senses;
 import com.jaymoskingdoms.forms.Forms.Family;
@@ -43,11 +44,18 @@ import net.minecraft.world.phys.Vec3;
 final class BladeForms {
 	static final Form SHEATH_DRAW = new Form("sheath_draw", Family.BLADE, Kind.ART, 70, 6, 1.5F, 6);
 	static final Form CRESCENT_SWEEP = new Form("crescent_sweep", Family.BLADE, Kind.ART, 110, 8, 2.0F, 6);
+	static final Form CROSS_SLASH = new Form("cross_slash", Family.BLADE, Kind.ART, 120, 6, 2.0F, 6);
 	static final Form RAIN_OF_CUTS = new Form("rain_of_cuts", Family.BLADE, Kind.MASTERSTROKE, 400, 8, 3.0F, 4);
 
 	/** Sheath Draw: how far the dash goes (blocks), the cut's width either side of the line and the reach past its end, what it deals (times your attack), the bonus on an unaware foe. */
 	static final double DASH = 4.0, DRAW_WIDTH = 1.2, DRAW_REACH = 1.2;
 	static final float DRAW_DAMAGE = 1.25F, UNAWARE_BONUS = 1.5F;
+	/** Cross Slash: dash through foes drawing an X across them, bursting after {@link #CROSS_DELAY} ticks. */
+	static final double CROSS_DASH = 5.5, CROSS_WIDTH = 1.4, CROSS_REACH = 1.4;
+	static final float CROSS_CUT_DAMAGE = 0.85F, CROSS_BURST_DAMAGE = 1.05F;
+	static final int CROSS_DELAY = 16;
+	static final float CROSS_SHAKE = 0.35F, CROSS_BURST_SHAKE = 0.65F;
+	static final int CROSS_COLOR = 0xFFE4A0, CROSS_BURST_COLOR = 0xFF6B3D;
 	/** Crescent Sweep: how far the arc reaches (blocks), how wide it is (cosine of the half-angle; -0.2 is a little over a half circle), what it deals (times your attack). */
 	static final double SWEEP_REACH = 3.2, SWEEP_ARC = -0.2;
 	static final float SWEEP_DAMAGE = 0.9F;
@@ -70,6 +78,7 @@ final class BladeForms {
 	static void addTo(Map<String, Form> forms) {
 		forms.put(SHEATH_DRAW.id(), SHEATH_DRAW);
 		forms.put(CRESCENT_SWEEP.id(), CRESCENT_SWEEP);
+		forms.put(CROSS_SLASH.id(), CROSS_SLASH);
 		forms.put(RAIN_OF_CUTS.id(), RAIN_OF_CUTS);
 	}
 
@@ -91,11 +100,24 @@ final class BladeForms {
 
 	private static final Map<UUID, Flurry> FLURRIES = new HashMap<>();
 
+	/** A pending Cross Slash X mark on a foe, waiting to burst at {@code at}. */
+	private record CrossMark(UUID who, UUID foe, int rank, long at, Vec3 right) {
+	}
+
+	private static final List<CrossMark> CROSS_MARKS = new ArrayList<>();
+
 	/** Called from {@link Forms#register}. */
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(BladeForms::tick);
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> FLURRIES.remove(handler.player.getUUID()));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> FLURRIES.clear());
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			UUID id = handler.player.getUUID();
+			FLURRIES.remove(id);
+			CROSS_MARKS.removeIf(m -> m.who().equals(id));
+		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			FLURRIES.clear();
+			CROSS_MARKS.clear();
+		});
 	}
 
 	static void perform(ServerPlayer player, Form form, int rank) {
@@ -106,6 +128,8 @@ final class BladeForms {
 			sheathDraw(level, player, form, rank);
 		} else if (form == CRESCENT_SWEEP) {
 			crescentSweep(level, player, form, rank);
+		} else if (form == CROSS_SLASH) {
+			crossSlash(level, player, form, rank);
 		} else if (form == RAIN_OF_CUTS) {
 			rainOfCuts(level, player, rank);
 		}
@@ -202,6 +226,67 @@ final class BladeForms {
 		Forms.landed(player, form, hits);
 	}
 
+	/** Cross Slash: dash through foes drawing a glowing X across each; moments later the X bursts. */
+	private static void crossSlash(ServerLevel level, ServerPlayer player, Form form, int rank) {
+		Vec3 look = player.getLookAngle().multiply(1.0, 0.0, 1.0);
+		if (look.lengthSqr() < 1.0E-4) {
+			return;
+		}
+		look = look.normalize();
+		Vec3 right = new Vec3(-look.z, 0.0, look.x);
+		Vec3 start = player.position();
+		Vec3 end = start;
+		double dash = Forms.reach(CROSS_DASH, rank);
+		for (double d = 0.5; d <= dash; d += 0.5) {
+			Vec3 step = start.add(look.scale(d));
+			if (!level.noCollision(player, player.getBoundingBox().move(step.subtract(start)))) {
+				break;
+			}
+			end = step;
+		}
+		Vec3 ahead = end.add(look.scale(CROSS_REACH));
+		List<LivingEntity> hits = new ArrayList<>(Forms.targets(level, player,
+			new AABB(start, ahead).inflate(CROSS_WIDTH, 1.0, CROSS_WIDTH).expandTowards(0.0, player.getBbHeight(), 0.0)));
+		for (double d = 0.0; d < start.distanceTo(end); d += 0.65) {
+			Vec3 at = start.add(look.scale(d));
+			level.sendParticles(ParticleTypes.CLOUD, at.x, at.y + 0.25, at.z, 1, 0.12, 0.05, 0.12, 0.0);
+		}
+		Vec3 sMid = start.add(0.0, 1.0, 0.0);
+		Vec3 eMid = ahead.add(0.0, 1.0, 0.0);
+		Trails.blade(level, sMid.add(right.scale(0.35)).add(0.0, 0.25, 0.0), eMid.subtract(right.scale(0.35)).add(0.0, -0.25, 0.0));
+		Trails.blade(level, sMid.subtract(right.scale(0.35)).add(0.0, 0.25, 0.0), eMid.add(right.scale(0.35)).add(0.0, -0.25, 0.0));
+		Fx.stroke(level, sMid, eMid, 0.85F, CROSS_COLOR);
+		if (end.distanceToSqr(start) > 1.0E-4) {
+			player.teleportTo(level, end.x, end.y, end.z, Set.of(), player.getYRot(), player.getXRot(), false);
+		}
+		level.playSound(null, end.x, end.y, end.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 1.65F);
+		level.playSound(null, end.x, end.y, end.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.9F, 1.25F);
+		long burstAt = level.getGameTime() + CROSS_DELAY;
+		for (LivingEntity hit : hits) {
+			CombatArts.strike(level, player, hit, Forms.damage(player, CROSS_CUT_DAMAGE, rank));
+			drawCross(level, hit, right, 0.75F, CROSS_COLOR);
+			if (hit.isAlive()) {
+				CROSS_MARKS.add(new CrossMark(player.getUUID(), hit.getUUID(), rank, burstAt, right));
+			}
+		}
+		PowersCompat.shake(player, CROSS_SHAKE);
+		Forms.landed(player, form, hits);
+	}
+
+	private static void drawCross(ServerLevel level, LivingEntity foe, Vec3 right, float width, int color) {
+		Vec3 c = foe.getBoundingBox().getCenter();
+		double r = Math.max(0.65, foe.getBbWidth() * 0.75);
+		double h = Math.max(0.65, foe.getBbHeight() * 0.45);
+		Vec3 a1 = c.add(right.scale(r)).add(0.0, h, 0.0);
+		Vec3 b1 = c.subtract(right.scale(r)).add(0.0, -h, 0.0);
+		Vec3 a2 = c.subtract(right.scale(r)).add(0.0, h, 0.0);
+		Vec3 b2 = c.add(right.scale(r)).add(0.0, -h, 0.0);
+		Trails.blade(level, a1, b1);
+		Trails.blade(level, a2, b2);
+		Fx.stroke(level, a1, b1, width, color);
+		Fx.stroke(level, a2, b2, width, color);
+	}
+
 	// ---- Rain of Cuts (0.7.382) ----------------------------------------------------------------------------------------
 
 	private static void rainOfCuts(ServerLevel level, ServerPlayer player, int rank) {
@@ -216,6 +301,46 @@ final class BladeForms {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (!CROSS_MARKS.isEmpty()) {
+			for (Iterator<CrossMark> it = CROSS_MARKS.iterator(); it.hasNext(); ) {
+				CrossMark mark = it.next();
+				ServerPlayer player = server.getPlayerList().getPlayer(mark.who());
+				if (player == null || !(player.level() instanceof ServerLevel level)) {
+					it.remove();
+					continue;
+				}
+				Entity found = level.getEntity(mark.foe());
+				if (!(found instanceof LivingEntity foe) || !foe.isAlive()) {
+					it.remove();
+					continue;
+				}
+				long now = level.getGameTime();
+				if (now < mark.at()) {
+					if ((mark.at() - now) % 4 == 0) {
+						Vec3 c = foe.getBoundingBox().getCenter();
+						level.sendParticles(Fx.wisp(CROSS_COLOR, 1.0F), c.x, c.y, c.z, 3, 0.25, 0.25, 0.25, 0.02);
+					}
+					continue;
+				}
+				it.remove();
+				Vec3 c = foe.getBoundingBox().getCenter();
+				drawCross(level, foe, mark.right(), 1.35F, CROSS_BURST_COLOR);
+				Fx.blast(level, c, 2.0F, CROSS_BURST_COLOR);
+				Fx.ring(level, foe.position().add(0.0, 0.2, 0.0), 2.4F, CROSS_BURST_COLOR);
+				level.sendParticles(ParticleTypes.CRIT, c.x, c.y, c.z, 16, 0.4, 0.4, 0.4, 0.3);
+				level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.75F, 1.4F);
+				level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.1F, 0.85F);
+				CombatArts.strike(level, player, foe, Forms.damage(player, CROSS_BURST_DAMAGE, mark.rank()));
+				if (foe.isAlive()) {
+					foe.setDeltaMovement(foe.getDeltaMovement().add(0.0, 0.32, 0.0));
+					foe.needsSync = true;
+				}
+				PowersCompat.shake(player, CROSS_BURST_SHAKE);
+				if (mark.rank() >= Forms.RANKS) {
+					PowersCompat.impactFrame(level, c);
+				}
+			}
+		}
 		if (FLURRIES.isEmpty()) {
 			return;
 		}

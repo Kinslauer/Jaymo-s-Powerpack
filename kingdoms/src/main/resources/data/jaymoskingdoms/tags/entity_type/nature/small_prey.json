@@ -1,0 +1,21 @@
+{
+ "values": [
+  "minecraft:rabbit",
+  {
+   "id": "cubeanimals:mouse",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:marmot",
+   "required": false
+  },
+  {
+   "id": "naturalist:squirrel",
+   "required": false
+  },
+  {
+   "id": "jaymoskitchen:rat",
+   "required": false
+  }
+ ]
+}

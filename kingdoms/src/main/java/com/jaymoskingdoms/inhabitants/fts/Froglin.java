@@ -177,6 +177,11 @@ public class Froglin extends Monster implements GeoEntity {
 		this.camp = camp;
 	}
 
+	/** The camp keeping it; -1 for none. */
+	public int camp() {
+		return this.camp;
+	}
+
 	@Override
 	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
 		@Nullable SpawnGroupData data) {

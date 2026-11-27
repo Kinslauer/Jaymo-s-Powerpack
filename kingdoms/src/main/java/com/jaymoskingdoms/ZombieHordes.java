@@ -626,6 +626,10 @@ public final class ZombieHordes {
 				continue;
 			}
 			special(level, horde, tier, random);
+			if (kind.dead() || kind == Kind.SKELETONS) {
+				// (now and then one of the Hollow walks with them: HollowCaptains)
+				HollowCaptains.joinHorde(level, horde.members);
+			}
 			if (kind == Kind.SQUAD) {
 				// its leader carries the poster of who they've come for, and now and then a horn
 				Mob leader = horde.members.getFirst();
@@ -762,7 +766,7 @@ public final class ZombieHordes {
 		}
 		mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
 		if (armed && (mob instanceof Zombie || mob instanceof Vindicator) && mob.getMainHandItem().isEmpty()) {
-			mob.setItemSlot(EquipmentSlot.MAINHAND, tier <= 0 ? oldTool(random) : MonsterGear.weaponFor(level, random, tier));
+			mob.setItemSlot(EquipmentSlot.MAINHAND, tier <= 0 ? oldTool(random) : MonsterGear.weaponFor(level, mob, random, tier));
 		}
 		join(mob, horde.danger);
 		level.addFreshEntityWithPassengers(mob);
@@ -945,7 +949,7 @@ public final class ZombieHordes {
 	/** {@code mob} carries something worth having: a better, enchanted (it glints) weapon that it's sure to drop, unworn. */
 	private static void loot(ServerLevel level, Mob mob, int tier, RandomSource random) {
 		mob.addTag(LOOT_TAG);
-		ItemStack prize = mob instanceof AbstractSkeleton ? new ItemStack(Items.BOW) : MonsterGear.weaponFor(level, random, Math.min(4, Math.max(1, tier) + 1));
+		ItemStack prize = mob instanceof AbstractSkeleton ? new ItemStack(Items.BOW) : MonsterGear.weaponFor(level, mob, random, Math.min(4, Math.max(1, tier) + 1));
 		if (!prize.isEnchanted()) {
 			prize = EnchantmentHelper.enchantItem(random, prize, LOOT_ENCHANT_LEVEL, level.registryAccess(),
 				level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(EnchantmentTags.ON_MOB_SPAWN_EQUIPMENT));

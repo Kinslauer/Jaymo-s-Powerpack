@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "jaymoskitchen:block/forage/mycelial_soil_top",
+    "side": "jaymoskitchen:block/forage/mycelial_soil_side",
+    "bottom": "jaymoskitchen:block/forage/mycelial_soil"
+  }
+}

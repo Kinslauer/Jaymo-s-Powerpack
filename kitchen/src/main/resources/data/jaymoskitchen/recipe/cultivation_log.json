@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "LLL",
+    "TST"
+  ],
+  "key": {
+    "L": "#minecraft:logs_that_burn",
+    "T": "jaymoskitchen:mycelial_thread",
+    "S": "jaymoskitchen:mycelial_soil"
+  },
+  "result": {
+    "id": "jaymoskitchen:cultivation_log",
+    "count": 2
+  }
+}

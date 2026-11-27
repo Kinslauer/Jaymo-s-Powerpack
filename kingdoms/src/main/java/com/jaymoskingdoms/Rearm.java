@@ -259,6 +259,22 @@ public final class Rearm {
 		Speech.say(level, mob, Dialects.trShared(mob, "talk.jaymoskingdoms." + kind + "." + mob.getRandom().nextInt(lines)), color, SPEECH_RANGE);
 	}
 
+	/** Whether {@code mob}'s belt sidearm ({@link #SIDEARM}) is still at its belt, not yet drawn this life. */
+	static boolean sidearmLeft(Mob mob) {
+		State state = STATES.get(mob);
+		return state == null || !state.sidearmDrawn;
+	}
+
+	/** {@code mob} draws its belt sidearm ({@link WeaponSense}, a foe on top of a shooter): true if it was still there; it is drawn once a life. */
+	static boolean drawSidearm(Mob mob) {
+		State state = STATES.computeIfAbsent(mob, m -> new State());
+		if (state.sidearmDrawn) {
+			return false;
+		}
+		state.sidearmDrawn = true;
+		return true;
+	}
+
 	/** Whether {@code folk} is on its way to a weapon (its other goals that move it wait). */
 	static boolean fetching(Folk folk) {
 		State state = STATES.get(folk);

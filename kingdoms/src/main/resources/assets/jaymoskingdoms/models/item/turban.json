@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/turban",
+    "layer1": "jaymoskingdoms:item/turban_trim"
+  }
+}

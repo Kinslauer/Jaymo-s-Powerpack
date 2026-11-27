@@ -31,6 +31,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -85,6 +88,11 @@ import org.jspecify.annotations.Nullable;
  * of the tongue, then partly translated ({@link #partial}: the client's {@code IllagerWords} picks out the words you
  * know, the same words every time, more as you learn), and whole once fluent. From {@link #TALK_FROM} they can be
  * talked to ({@link IllagerTalk}). The level shows on the H menu's Character page.
+ * <p>
+ * Their tongue is the one carved on Alex's Caves' <b>Cave Tablets</b> (Andy, 2026-11-24: "i want the illagers to speak
+ * whatever tounge is uncovered within alex's caves"): what you don't know of it is written in the tablets' glyphs
+ * ({@link #GLYPHS}, the same script the Spelunkery Table translates), and each tablet translated there teaches some of
+ * it ({@link #tablet}, up to {@link #TABLET_TO}).
  */
 public final class IllagerTongue {
 	/** Points: speaking it; talking at all (halting); bluffing (good command); the whole scale. */
@@ -95,6 +103,10 @@ public final class IllagerTongue {
 	static final int SCRAWL_POINTS = 3, SCRAWL_TO = 40, LEDGER_POINTS = 8, LEDGER_TO = 70, GRIMOIRE_POINTS = 20;
 	/** A banner studied, how far banners can take you; a painting studied. */
 	static final int BANNER_POINTS = 4, BANNER_TO = 35, PAINTING_POINTS = 6;
+	/** A Cave Tablet translated at a Spelunkery Table (Alex's Caves), and how far tablets can take you. */
+	static final int TABLET_POINTS = 6, TABLET_TO = 80;
+	/** The Cave Tablets' script (the game's {@code minecraft:alt} glyphs, which Alex's Caves writes its tablets in): their words you don't know. */
+	public static final Style GLYPHS = Style.EMPTY.withFont(new FontDescription.Resource(Identifier.withDefaultNamespace("alt")));
 	/** How long a writing takes to study (ticks), and a banner or painting (ticks, keeping still and crouched). */
 	static final int READ_TICKS = 60, STUDY_TICKS = 80;
 	/** How far you may stand from what you study (blocks). */
@@ -315,6 +327,17 @@ public final class IllagerTongue {
 		}
 	}
 
+	/**
+	 * Alex's Caves' SpelunkeryTableMenu.onMessageFromScreen: {@code player} has translated a Cave Tablet at a Spelunkery
+	 * Table. Its glyphs are the illagers' tongue, so they learn some (up to {@link #TABLET_TO}).
+	 */
+	public static void tablet(ServerPlayer player) {
+		int before = points(player);
+		if (before < TABLET_TO) {
+			learn(player, Math.min(TABLET_POINTS, TABLET_TO - before), "tablet");
+		}
+	}
+
 	// ---- what you hear -------------------------------------------------------------------------------------------------
 
 	/**
@@ -326,9 +349,9 @@ public final class IllagerTongue {
 		if (p >= FLUENT) {
 			return words;
 		}
+		// (even knowing none of it, the client is sent the words, to write them in the tablets' glyphs: IllagerWords)
 		long seed = speaker.getUUID().hashCode() * 31L + words.toString().hashCode();
-		Component garbled = garble(seed);
-		return p <= 0 ? garbled : partial(p, words, garbled);
+		return partial(Math.max(0, p), words, garble(seed));
 	}
 
 	/** A line the client shows partly translated: the words {@code points} in 100 covers, the rest gibberish ({@code IllagerWords}). */
@@ -336,20 +359,38 @@ public final class IllagerTongue {
 		return Component.translatable(PARTIAL, Integer.toString(points), words, garbled);
 	}
 
-	/** A line of their gibberish. */
+	/** A line of their gibberish, in the tablets' glyphs (where nobody's client reads it word by word, as in chat). */
 	public static Component garble(long seed) {
 		RandomSource random = RandomSource.create(seed);
 		StringBuilder line = new StringBuilder();
 		int count = 3 + random.nextInt(5);
 		for (int w = 0; w < count; w++) {
 			String word = word(random, 1 + random.nextInt(3));
-			if (w == 0) {
-				word = Character.toUpperCase(word.charAt(0)) + word.substring(1);
-			}
 			line.append(w == 0 ? "" : random.nextInt(6) == 0 ? ", " : " ").append(word);
 		}
 		line.append(random.nextInt(3) == 0 ? "!" : ".");
-		return Component.literal(line.toString()).withStyle(ChatFormatting.ITALIC);
+		return glyphs(line.toString());
+	}
+
+	/** {@code text} written in the tablets' glyphs: its letters in {@link #GLYPHS}, anything else (which the glyphs lack) as it is. */
+	public static MutableComponent glyphs(String text) {
+		MutableComponent out = Component.empty();
+		StringBuilder run = new StringBuilder();
+		boolean letters = false;
+		for (int i = 0; i <= text.length(); i++) {
+			boolean end = i == text.length();
+			char c = end ? 0 : text.charAt(i);
+			boolean letter = !end && c < 128 && Character.isLetter(c);
+			if ((end || letter != letters) && !run.isEmpty()) {
+				out.append(letters ? Component.literal(run.toString()).withStyle(GLYPHS) : Component.literal(run.toString()));
+				run.setLength(0);
+			}
+			if (!end) {
+				run.append(letter ? Character.toLowerCase(c) : c);
+				letters = letter;
+			}
+		}
+		return out;
 	}
 
 	/** A word of gibberish, {@code syllables} long (also the client's, for the words you don't know). */

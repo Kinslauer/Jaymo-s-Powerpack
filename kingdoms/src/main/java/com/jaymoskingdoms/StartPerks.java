@@ -106,12 +106,14 @@ public final class StartPerks {
 		PERKS.put(Start.LAB, Perk.of(Circle.SCHOLARS, Boon.LORE, Boon.NEWS));
 		PERKS.put(Start.ANDROID, Perk.of(Circle.SMITHS, Boon.FEED));
 		PERKS.put(Start.MOON_CURSED, Perk.of(Circle.HERMITS, Boon.HIDE));
+		PERKS.put(Start.BITTEN, Perk.of(Circle.HERMITS, Boon.HIDE));
 		PERKS.put(Start.MOON, Perk.of(Circle.SCHOLARS, Boon.SHELTER));
 		PERKS.put(Start.VERDANT, Perk.of(Circle.HERMITS, Boon.NEWS));
 		PERKS.put(Start.RUSTFALL, Perk.of(Circle.SMITHS, Boon.SHELTER));
 		PERKS.put(Start.MAW, Perk.of(Circle.UNDERWORLD, Boon.NEWS));
 		PERKS.put(Start.DEMON, Perk.of(Circle.UNDERWORLD, Boon.DISCOUNT));
 		PERKS.put(Start.AFTERLIFE, Perk.of(Circle.PRIESTS, Boon.LORE));
+		PERKS.put(Start.MONSTERBORN, Perk.of(Circle.GREENSKINS, Boon.FEED));
 	}
 
 	private StartPerks() {

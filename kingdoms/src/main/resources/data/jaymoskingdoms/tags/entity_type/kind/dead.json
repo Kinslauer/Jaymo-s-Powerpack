@@ -1,0 +1,86 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:undead",
+    {
+      "id": "jaymoskingdoms:zombie_knight",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:skeleton_lord",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:silver_skeleton",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:risen_orc",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:unburied",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:draugr",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:revenant",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:running_skull",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:laughing_bones",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:reaped_pillager",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:reaped_vindicator",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:reaped_evoker",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:zombified_hornkin",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:zombified_imp",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:harvest_lich",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:great_necromancer",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:raid_king",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:lich_steed",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:fossil_skeleton",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:zombie_player",
+      "required": false
+    }
+  ]
+}

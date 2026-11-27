@@ -97,6 +97,8 @@ public final class VariantLooks {
 		style(Variant.VOIDPALE, 0xFF2A1440, HeritageLooks.Eyes.ALWAYS, Fx.VOID, 14, When.DRY);
 		style(Variant.GOLDSCALE, 0xFFFFD060, HeritageLooks.Eyes.NIGHT, GILT_MOTE, 40, When.ALWAYS);
 		style(Variant.RIMEWYRM, 0xFFB8E8FF, HeritageLooks.Eyes.NIGHT, ParticleTypes.SNOWFLAKE, 18, When.ALWAYS);
+		style(Variant.STORMWYRM, 0xFFC8C0FF, HeritageLooks.Eyes.STORM, LODE_SPARK, 14, When.ALWAYS);
+		style(Variant.VENOMSCALE, 0xFFB8FF60, HeritageLooks.Eyes.NIGHT, ParticleTypes.SNEEZE, 40, When.ALWAYS);
 		style(Variant.HOLLOW, 0xFFF0FFFC, HeritageLooks.Eyes.ALWAYS, ParticleTypes.SCULK_SOUL, 50, When.DARK_PLACE);
 		style(Variant.GEODE, 0xFFD6AAFF, HeritageLooks.Eyes.ALWAYS, GEODE_GLINT, 20, When.ALWAYS);
 		// (0.7.262) the Divine-born's, the Bio-built's and the Rubber-folk's
@@ -123,6 +125,7 @@ public final class VariantLooks {
 		style(Variant.FELINE, 0xFFC8FF60, HeritageLooks.Eyes.NIGHT, null, 0, When.ALWAYS);
 		style(Variant.KITSUNE, 0xFFFFA040, HeritageLooks.Eyes.ALWAYS, FOX_FIRE, 24, When.NIGHT);
 		style(Variant.SERPEN, 0xFFE8F060, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
+		style(Variant.SCALEBOUND, 0xFFF0A030, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
 		// the Hollow dead
 		style(Variant.ZOMBIE, 0xFFA8FF70, HeritageLooks.Eyes.NIGHT, null, 0, When.ALWAYS);
 		style(Variant.SKELETON, 0xFFF0F4EC, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);

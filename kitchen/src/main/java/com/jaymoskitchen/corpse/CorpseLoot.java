@@ -15,9 +15,14 @@ import net.minecraft.world.item.ItemStack;
  * A player's body carries everything they had ({@link CorpseEntity#inventory}, laid out as their own inventory): its
  * armour and off hand in the gear slots, the rest in {@link #PLAYER_POCKETS} pockets (main inventory, then the hotbar),
  * then what other mods left on it (harness, baubles and the like: {@link CorpseEntity#EXTRA_SLOTS}).
+ * <p>
+ * A mob's body shows the harness it wore ({@link CorpseHarness}) in those same last slots ({@link #HARNESS}), kept in the
+ * body's look like its gear, so a take is written back at once: it is drawn without it, and nothing is taken twice.
  */
 final class CorpseLoot implements Container {
 	static final int GEAR = 7, POCKETS = 12, PLAYER_POCKETS = 36, SIZE = GEAR + PLAYER_POCKETS + CorpseEntity.EXTRA_SLOTS;
+	/** Where the last slots start: a player's handed-over pieces, a mob's harness. */
+	static final int HARNESS = GEAR + PLAYER_POCKETS;
 	/** A player's body: the inventory slot each gear slot shows (head, chest, legs, feet, off hand), -1 for none. */
 	private static final int[] PLAYER_GEAR = {39, 38, 37, 36, -1, -1, 40};
 	/** How far away (blocks) the screen stays open. */
@@ -25,13 +30,16 @@ final class CorpseLoot implements Container {
 
 	final CorpseEntity corpse;
 	private final ItemStack[] gear;
+	/** A mob's harness by place ({@link CorpseHarness}); no slots at all for a body that wore none. */
+	private final ItemStack[] harness;
 	/** The look this last wrote: changed by anything else (an arm cut off, a blood mark), the screen closes. */
 	private String look;
 	private int users;
 
-	CorpseLoot(CorpseEntity corpse, ItemStack[] gear) {
+	CorpseLoot(CorpseEntity corpse, ItemStack[] gear, ItemStack[] harness) {
 		this.corpse = corpse;
 		this.gear = gear;
+		this.harness = harness;
 		this.look = corpse.look();
 	}
 
@@ -58,6 +66,9 @@ final class CorpseLoot implements Container {
 		}
 		if (slot < GEAR) {
 			return slot >= 0 ? gear[slot] : ItemStack.EMPTY;
+		}
+		if (slot >= HARNESS) {
+			return slot - HARNESS < harness.length ? harness[slot - HARNESS] : ItemStack.EMPTY;
 		}
 		List<ItemStack> pockets = corpse.pockets();
 		int i = slot - GEAR;
@@ -99,6 +110,10 @@ final class CorpseLoot implements Container {
 		}
 		if (slot < GEAR) {
 			gear[slot] = stack;
+		} else if (slot >= HARNESS) {
+			if (slot - HARNESS < harness.length) {
+				harness[slot - HARNESS] = stack;
+			}
 		} else {
 			List<ItemStack> pockets = corpse.pockets();
 			int i = slot - GEAR;
@@ -128,6 +143,18 @@ final class CorpseLoot implements Container {
 			return;
 		}
 		corpse.putGear(gear);
+		if (harness.length > 0) {
+			corpse.putHarness(harness);
+		}
+		look = corpse.look();
+	}
+
+	/** The body changed under it (a part cut off, the gear on it gone with the part): what's on it read again. */
+	void reload() {
+		if (!corpse.isPlayerCorpse()) {
+			ItemStack[] now = corpse.wornGear();
+			System.arraycopy(now, 0, gear, 0, Math.min(now.length, gear.length));
+		}
 		look = corpse.look();
 	}
 

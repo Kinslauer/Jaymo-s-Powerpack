@@ -77,6 +77,22 @@ final class Hunts {
 	private static final Map<UUID, Hunt> ACTIVE = new HashMap<>();
 	private static final List<Entity> STRAYS = new ArrayList<>();
 
+	/** The men of the hunt sent after {@code player}, those loaded; empty if none are out ({@link Fledglings} come to their sire's side). */
+	static List<Mob> men(MinecraftServer server, UUID player) {
+		Hunt hunt = ACTIVE.get(player);
+		List<Mob> out = new ArrayList<>();
+		if (hunt != null) {
+			for (UUID id : hunt.men) {
+				for (ServerLevel level : server.getAllLevels()) {
+					if (level.getEntity(id) instanceof Mob m && m.isAlive()) {
+						out.add(m);
+					}
+				}
+			}
+		}
+		return out;
+	}
+
 	private Hunts() {
 	}
 
@@ -203,7 +219,7 @@ final class Hunts {
 	}
 
 	/** One of {@code from}'s hunters at {@code at}: a realm's guard (MCA's with MCA), or a camp's raider. */
-	private static @Nullable Mob man(ServerLevel level, Faction from, int i, BlockPos at) {
+	static @Nullable Mob man(ServerLevel level, Faction from, int i, BlockPos at) {
 		float yaw = level.getRandom().nextFloat() * 360.0F;
 		if (from.type() == FactionType.BARBARIAN) {
 			return Raids.member(level, from, i, at, at, (int)LOSE, false);

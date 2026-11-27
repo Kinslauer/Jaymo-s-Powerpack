@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.power.web.WebSymbiote;
+import com.jaymospowers.power.web.WebPose;
 import com.jaymospowers.power.web.WebTendrils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -157,6 +158,21 @@ public final class WebClimbPose {
 		float[] was = WebFeral.snapshot(h);
 		pose(h, avatar, climb);
 		WebFeral.blend(h, was, climb.in());
+	}
+
+	/** The big body's hand-over-hand wall moves are timed by the server. */
+	static void brute(HumanoidModel<?> h, int kind, float t, float side, boolean slim) {
+		float heave = kind == WebPose.BRUTE_WALL_HEAVE ? Mth.sin(Math.min(1.0F, t / 8.0F) * Mth.PI) : 0.0F;
+		boolean ledge = kind == WebPose.BRUTE_WALL_LEDGE;
+		float perch = kind == WebPose.BRUTE_WALL_SIDE ? side : 0.0F;
+		float grab = kind == WebPose.BRUTE_WALL_GRAB ? 1.0F - Math.min(1.0F, t / 7.0F) : 0.0F;
+		WebBrutePose.lean(h, ledge ? 0.79F : 0.22F + heave * 0.27F, slim);
+		WebBrutePose.legs(h, ledge ? 0.68F : 0.5F + 0.32F * heave, 0.2F);
+		float reach = ledge ? -2.35F : -1.92F - heave * 0.72F - grab * 0.39F;
+		WebBrutePose.arms(h, reach + perch * 0.46F, reach - perch * 0.46F, 0.18F + 0.23F * grab);
+		h.body.zRot = perch * 0.23F;
+		h.leftLeg.xRot += perch * 0.44F;
+		h.rightLeg.xRot -= perch * 0.44F;
 	}
 
 	/** The climb outright: set from the render state alone, so applying it twice changes nothing. */

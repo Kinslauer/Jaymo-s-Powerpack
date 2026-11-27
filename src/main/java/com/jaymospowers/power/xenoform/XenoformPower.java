@@ -526,6 +526,10 @@ public final class XenoformPower implements Power {
 		Powers.register(INSTANCE);
 		XenoNet.register();
 		com.jaymospowers.power.xenoform.nadir.NadirNet.register();
+		com.jaymospowers.power.xenoform.nadir.NadirGrip.init();
+		com.jaymospowers.power.xenoform.nadir.NadirSnap.init();
+		com.jaymospowers.power.xenoform.nadir.NadirStar.init();
+		com.jaymospowers.power.xenoform.nadir.NadirReality.init();
 		XenoDouble.init();
 		// (0.18.107, Scan B) Rime has Cryokinesis's moves lent
 		com.jaymospowers.power.cryo.CryoLent.lender = p -> XenoformState.form(p) == XenoForms.RIME;

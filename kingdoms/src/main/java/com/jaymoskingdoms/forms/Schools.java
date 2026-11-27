@@ -92,7 +92,7 @@ public final class Schools {
 
 	/** The five schools, one for each weapon family. */
 	public enum School {
-		BLADE(Forms.Family.BLADE, "weapon/katana_blade", "rain_of_cuts", "sheath_draw", "crescent_sweep", "wheel_cut", "figure_eight", "hurled_blade"),
+		BLADE(Forms.Family.BLADE, "weapon/katana_blade", "rain_of_cuts", "sheath_draw", "crescent_sweep", "cross_slash", "wheel_cut", "figure_eight", "hurled_blade"),
 		SPEAR(Forms.Family.SPEAR, "weapon/spear_tip", "pinning_throw", "spear_lunge", "couched_lance", "mill_charge"),
 		FIST(Forms.Family.FIST, null, null, "ground_stomp", "falling_fist"),
 		KNIFE(Forms.Family.KNIFE, "weapon/kunai_blade", null, "marked_quarry", "cast_off_cloak", "tangle_cord", "disarm_rush", "dry_remark"),

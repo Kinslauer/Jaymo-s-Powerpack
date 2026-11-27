@@ -31,8 +31,9 @@ import org.jspecify.annotations.Nullable;
  * (0.7.628) Andy: "https://www.curseforge.com/minecraft/mc-mods/felled ... it captures what i wanted for our trees". Felled
  * (Raiiiden, all rights reserved, shipped unchanged from CurseForge with its Zarith physics library) brings a tree down as
  * a real rigid body: it tips over its stump, rolls, snaps on a hard landing, floats, and can be stood on. When it's in the
- * pack, a player's chopping still goes through ours (the cut narrows, the chop meter, a woodcutter's credit), but the
- * stroke that would fell the tree hands it to Felled's {@code FellingHandler.fellFrom} instead of our {@link FallingTree}.
+ * pack, a player's chopping still goes through ours (the cut through the trunk, its cracks and creaks, the stump, a
+ * woodcutter's credit: {@link Felling}), but the stroke that cuts it through hands the tree to Felled's
+ * {@code FellingHandler.fellFrom} instead of our {@link FallingTree}, pushed the way its notch chose.
  * Everything else that brings trees down (blasts, giants, tornadoes, gatherers, Grimsby's axe) stays ours. Called by
  * reflection only, so Kingdoms runs the same without it.
  */
@@ -61,6 +62,13 @@ public final class FelledCompat {
 	static final double[] KNOCK_AHEAD = {0.0, 0.6, 1.1};
 	/** How far (blocks, sideways) round where its trunk first stood counts as its own stump. */
 	static final double STUMP = 1.6;
+	/** How far back (blocks) from the trunk Felled is told the stroke came from, when the cut chose the way it falls. */
+	static final double PUSH_FROM = 2.0;
+	/**
+	 * Its landing (the ground's answer, {@link Felling#landed}): once its top has gone at least {@link #FALLING} blocks a
+	 * tick, the first tick it's down to {@link #STILL} or less.
+	 */
+	static final double FALLING = 0.15, STILL = 0.03;
 
 	/** Felled's trees in loaded levels. */
 	private static final Set<Entity> TREES = Collections.newSetFromMap(new WeakHashMap<>());
@@ -72,6 +80,8 @@ public final class FelledCompat {
 		double speed;
 		/** How many logs it had when last counted ({@code -1}: not yet). */
 		int logs = -1;
+		/** It has been falling fast, and has landed (once). */
+		boolean falling, landed;
 	}
 
 	static void register() {
@@ -141,6 +151,12 @@ public final class FelledCompat {
 		}
 		m.top = top;
 		m.speed = speed;
+		if (speed >= FALLING) {
+			m.falling = true;
+		} else if (m.falling && !m.landed && speed <= STILL) {
+			m.landed = true;
+			landed(level, tree);
+		}
 		boolean leaning = tree.tickCount < LEAN_LOOK && top.y - m.stump.y >= LEANING;
 		if (m.way == null && leaning) {
 			// (stopped before it ever got going: it leans the way its top lies from its stump)
@@ -177,13 +193,37 @@ public final class FelledCompat {
 					if (sx * sx + sz * sz < STUMP * STUMP || !level.getBlockState(pos).is(BlockTags.LOGS)) {
 						continue;
 					}
-					if (Trees.knock(level, pos, heading, null, Trees.FELL_MOST) > 0) {
+					// (a Felled tree is always one a player cut: what it knocks over is their doing, FallingTree#byPlayer)
+					if (Trees.knock(level, pos, heading, null, Trees.FELL_MOST, 0.0F, true) > 0) {
 						level.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.4F, 0.5F);
 						level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
 					}
 				}
 			}
 		}
+	}
+
+	/** Felled's {@code tree} struck the ground: where its logs lie, and its leaves, for {@link Felling#landed}. */
+	private static void landed(ServerLevel level, Entity tree) throws ReflectiveOperationException {
+		Object grid = mGrid.invoke(tree);
+		IntList ids = (IntList)mLiveIds.invoke(grid);
+		List<Vec3> logs = new ArrayList<>();
+		BlockState leaf = null;
+		Vector3d at = new Vector3d();
+		for (int i = 0; i < ids.size(); i++) {
+			int id = ids.getInt(i);
+			BlockState state = (BlockState)mState.invoke(grid, id);
+			if (state == null) {
+				continue;
+			}
+			if (state.is(BlockTags.LOGS)) {
+				mCellToWorld.invoke(tree, id, at);
+				logs.add(new Vec3(at.x, at.y, at.z));
+			} else if (leaf == null && state.is(BlockTags.LEAVES)) {
+				leaf = state;
+			}
+		}
+		Felling.landed(level, logs, leaf);
 	}
 
 	/** Whether Felled is loaded (and its felling found). */
@@ -203,12 +243,13 @@ public final class FelledCompat {
 	}
 
 	/**
-	 * {@code player}'s stroke at {@code cut} fells the tree (its {@code logs} over the cut): Felled takes it, as it would a
-	 * log broken whole. The chopped logs are made whole again first (Felled only knows logs), and the cut itself is broken
-	 * as the player's. How many logs came down, or 0 if Felled didn't take it (too big for it, no physics): then the tree
-	 * is left whole, for ours to fell.
+	 * {@code player}'s stroke at {@code cut} fells the tree (its {@code logs} over the cut, already standing on its stump):
+	 * Felled takes it, as it would a log broken whole. Any chopped logs in it are made whole again first (Felled only knows
+	 * logs). Felled pushes a tree over away from where its stroke came from: from {@code way}'s other side when the cut
+	 * chose its way ({@link Felling#way}), else from the player. How many logs came down, or 0 if Felled didn't take it
+	 * (too big for it, no physics): then the tree is left standing, for ours to fell.
 	 */
-	static int fell(ServerLevel level, BlockPos cut, List<BlockPos> logs, ServerPlayer player) {
+	static int fell(ServerLevel level, BlockPos cut, List<BlockPos> logs, ServerPlayer player, @Nullable Float way) {
 		if (!loaded()) {
 			return 0;
 		}
@@ -216,9 +257,14 @@ public final class FelledCompat {
 		for (BlockPos p : logs) {
 			mend(level, p);
 		}
+		Vec3 from = player.getEyePosition();
+		if (way != null) {
+			from = new Vec3(cut.getX() + 0.5 - Mth.cos(way) * PUSH_FROM, player.getEyeY(), cut.getZ() + 0.5 - Mth.sin(way) * PUSH_FROM);
+		}
+		Felling.flush(level, Trees.leavesOf(level, logs));
 		int felled;
 		try {
-			felled = (int)fellFrom.invoke(null, level, cut, player, player.getEyePosition());
+			felled = (int)fellFrom.invoke(null, level, cut, player, from);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			JaymosKingdoms.LOGGER.warn("Felled couldn't fell the tree at {}; it falls our way", cut, e);
 			return 0;

@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:beast_grease",
+  "essences": {
+    "venom": 6,
+    "life": 2,
+    "salt": 2
+  },
+  "result": {
+    "item": "jaymospowers:oil_poison",
+    "count": 1,
+    "grade": "plain"
+  },
+  "research": "hunters_oils"
+}

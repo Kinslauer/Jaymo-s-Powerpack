@@ -166,6 +166,17 @@ public final class Stacked {
 		return realm != Level.OVERWORLD && band(server, realm) != null;
 	}
 
+	/** Band bounds ({min, max exclusive}), or null when absent or unreadable, so sleeping never uses vanilla fallbacks. */
+	static int[] sleepRange(MinecraftServer server, ResourceKey<Level> realm) {
+		Object band = band(server, realm);
+		if (band == null) {
+			return null;
+		}
+		int min = read(band, bandMin, Integer.MIN_VALUE);
+		int max = read(band, bandMax, Integer.MAX_VALUE);
+		return min == Integer.MIN_VALUE || max == Integer.MAX_VALUE || min >= max ? null : new int[] {min, max};
+	}
+
 	/** The level that holds this realm: the stacked Overworld when the realm is one of its bands, else its own (may be null). */
 	public static ServerLevel level(MinecraftServer server, ResourceKey<Level> realm) {
 		return band(server, realm) != null ? server.overworld() : server.getLevel(realm);
@@ -250,7 +261,12 @@ public final class Stacked {
 	 * anything in the level); anywhere else the level's own, shift 0. The same as Kingdoms' {@code Stacked.overworldGround}.
 	 */
 	public static Ground overworldGround(ServerLevel level) {
-		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), Level.OVERWORLD) : null;
+		return ground(level, Level.OVERWORLD);
+	}
+
+	/** {@link #overworldGround}, for any realm's band (the Nether's, for its castles): the level's own when it isn't stacked. */
+	public static Ground ground(ServerLevel level, ResourceKey<Level> realm) {
+		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), realm) : null;
 		if (band != null) {
 			try {
 				return new Ground((ChunkGenerator) bandGenerator.invoke(band), (RandomState) bandRandomState.invoke(band),
@@ -268,7 +284,12 @@ public final class Stacked {
 	 * runs, the level's structure checks are worked out by that band's generator. An ordinary world just runs it.
 	 */
 	public static <T> T searchingOverworld(ServerLevel level, java.util.function.Supplier<T> body) {
-		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), Level.OVERWORLD) : null;
+		return searching(level, Level.OVERWORLD, body);
+	}
+
+	/** {@link #searchingOverworld}, for any realm's band. */
+	public static <T> T searching(ServerLevel level, ResourceKey<Level> realm, java.util.function.Supplier<T> body) {
+		Object band = level.dimension() == Level.OVERWORLD ? band(level.getServer(), realm) : null;
 		ThreadLocal<Object> mark = searching;
 		if (band == null || mark == null) {
 			return body.get();

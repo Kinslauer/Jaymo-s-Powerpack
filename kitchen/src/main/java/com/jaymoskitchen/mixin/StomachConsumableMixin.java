@@ -2,6 +2,7 @@ package com.jaymoskitchen.mixin;
 
 import com.jaymoskitchen.climate.Climate;
 import com.jaymoskitchen.climate.Thirst;
+import com.jaymoskitchen.climate.Warmth;
 import com.jaymoskitchen.stomach.Stomach;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,6 +32,14 @@ abstract class StomachConsumableMixin {
 	private void jaymoskitchen$thirst(Level level, LivingEntity user, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
 		if (user instanceof ServerPlayer player && player.level().getGameRules().get(Climate.THIRST)) {
 			Thirst.consumed(player, stack);
+		}
+	}
+
+	/** A cup of juice or ice cream cools you, a hot food or a bite fresh off the spit warms you ({@link Warmth#consumed}). */
+	@Inject(method = "onConsume", at = @At("HEAD"))
+	private void jaymoskitchen$climate(Level level, LivingEntity user, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
+		if (user instanceof ServerPlayer player && player.level().getGameRules().get(Climate.BODY_HEAT)) {
+			Warmth.consumed(player, stack);
 		}
 	}
 

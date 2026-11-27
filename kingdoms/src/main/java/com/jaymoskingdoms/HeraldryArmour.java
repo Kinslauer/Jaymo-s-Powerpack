@@ -111,6 +111,26 @@ public final class HeraldryArmour {
 			"crest_unicorn", "crest_snake", "crest_griffin", "crest_bear", "crest_wolf", "crest_raven", "crest_hound");
 		public static final List<String> SPAULDERS = List.of("plate_spaulders", "mail_spaulders", "brigandine_spaulders", "spiked_spaulders", "gilt_banded_spaulders", "fur_lined_spaulders");
 
+	/** (Mordhau harness 2) The cloth hoods and hats, and the mail coif's cuts. */
+	public static final List<String> HOODS = List.of("tight_hood", "monks_cowl", "clerics_mantle", "headsmans_hood", "linen_coif", "bag_hat",
+		"archers_cap", "field_hat", "hunters_hat", "landsknecht_bonnet", "fur_hat", "turban", "veiled_turban", "jesters_hood", "laurel_wreath");
+	/** (Mordhau harness 3) The new cuirasses, worn in the chestplate slot (plate, in every finish). */
+	public static final List<String> CUIRASSES = List.of("gothic_cuirass", "kastenbrust", "peascod_cuirass", "hussar_cuirass", "muscle_cuirass", "embossed_cuirass");
+	/** The finish of plate covered in cloth (the cloth's colour is the piece's dye). */
+	public static final String COVERED = "covered";
+	public static final List<String> COIFS = List.of("lowered_mail_coif", "square_mail_coif", "ventailed_mail_coif", "square_ventailed_mail_coif");
+	/** A two-coloured piece's other colour (rgb: the slashed bonnet's lining, the jester's hood's other half), set by the dye it was made with. */
+	public static final DataComponentType<Integer> SECOND_COLOUR = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKingdoms.id("second_colour"),
+		DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).build());
+
+	/**
+	 * Whether {@code stack} is a ruler's crown ({@link Regalia}): any crown can be worn over a helm in the crest's place
+	 * (Andy, 2026-11-25: "you should be able to wear any crown").
+	 */
+	public static boolean regaliaCrown(ItemStack stack) {
+		return !stack.isEmpty() && Regalia.ITEMS.containsValue(stack.getItem());
+	}
+
 	private HeraldryArmour() {
 	}
 
@@ -132,6 +152,23 @@ public final class HeraldryArmour {
 			helm("lobster_tail", Face.VISORED, 0.25F, 1.5F);
 			helm("grotesque_visor", Face.VISORED, 0.2F, 1.8F);
 			helm("veiled_helm", Face.VISORED, 0.3F, 1.5F);
+			// (Mordhau harness 1) the kettle hat's other cuts and its deep kin, the open sallets, and the older and the far
+			// helms. Not in HELMS: a realm's own helm is picked from that list by position, so it stays as it was
+			helm("broad_kettle", Face.OPEN, 1.0F, 0.0F);
+			helm("tall_kettle", Face.OPEN, 1.0F, 3.4F);
+			helm("deep_kettle", Face.VISORED, 0.34F, 0.8F);
+			helm("kettle_sallet", Face.OPEN, 0.95F, 0.5F);
+			helm("archers_sallet", Face.OPEN, 1.0F, 0.0F);
+			helm("long_sallet", Face.VISORED, 0.32F, 0.6F);
+			helm("gallowglass_helm", Face.OPEN, 1.0F, 5.0F);
+			helm("visored_barbute", Face.VISORED, 0.3F, 0.5F);
+			helm("visored_great_helm", Face.VISORED, 0.15F, 0.0F);
+			helm("flat_top_helm", Face.OPEN, 0.9F, 0.0F);
+			helm("nasal_helm", Face.OPEN, 0.95F, 3.2F);
+			helm("spired_helm", Face.OPEN, 0.95F, 5.0F);
+			helm("spectacle_helm", Face.FIXED, 0.55F, 1.4F);
+			helm("skullcap", Face.OPEN, 1.0F, 1.6F);
+			helm("turban_helm", Face.OPEN, 0.95F, 4.2F);
 			worn("plate_cuirass", ArmorType.CHESTPLATE);
 		worn("plate_sabatons", ArmorType.BOOTS);
 		// the harness: slot, armour, toughness, durability, what mends it
@@ -200,6 +237,68 @@ public final class HeraldryArmour {
 		part("bevor", Harness.Slot.NECK, 1, 0.5F, 240, true, null, "bevor");
 		part("mail_skirt", Harness.Slot.WAIST, 1, 0.0F, 240, false, Items.IRON_INGOT, "mail_skirt");
 		part("leather_tassets", Harness.Slot.WAIST, 1, 0.0F, 180, false, Items.LEATHER, "leather_tassets");
+		// (Mordhau harness 2, kingdoms/tools/gen_heraldry_hoods.py) hoods and hats, the coif's cuts, crests and the wrapper
+		for (String hood : HOODS) {
+			part(hood, Harness.Slot.HOOD, 0, 0.0F, 0, false, null, hood);
+		}
+		part("arming_cap", Harness.Slot.HOOD, 1, 0.0F, 160, false, Items.STRING, "arming_cap");
+		for (String coif : COIFS) {
+			part(coif, Harness.Slot.HOOD, 1, 0.0F, 220, false, Items.IRON_INGOT, coif);
+		}
+		for (String crest : List.of("orle", "crest_crown", "crest_antlers", "crest_mantling")) {
+			part(crest, Harness.Slot.CREST, 0, 0.0F, 0, false, null, crest);
+		}
+		part("armet_wrapper", Harness.Slot.NECK, 1, 0.5F, 240, true, null, "armet_wrapper");
+		// (Mordhau harness 3, kingdoms/tools/gen_heraldry_body.py) the body: padding and mail (their sheets are UnderArmourLayer's),
+		// cuirasses, the brigandine coat, over-garments, large pauldrons and ailettes, mitten gauntlets
+		for (String cuirass : CUIRASSES) {
+			worn(cuirass, ArmorType.CHESTPLATE);
+		}
+		coat("brigandine_coat");
+		part("chequered_gambeson", Harness.Slot.PADDING, 1, 0.0F, 160, false, Items.STRING, null);
+		part("linen_shirt", Harness.Slot.PADDING, 0, 0.0F, 0, false, null, null);
+		part("wool_tunic", Harness.Slot.PADDING, 0, 0.0F, 0, false, null, "wool_tunic");
+		part("cloth_vest", Harness.Slot.PADDING, 0, 0.0F, 0, false, null, null);
+		part("leather_jack", Harness.Slot.PADDING, 1, 0.0F, 200, false, Items.LEATHER, null);
+		// (its puffed sleeves are a model hung with the sheet, as the wool tunic's skirt is)
+		part("landsknecht_doublet", Harness.Slot.PADDING, 1, 0.0F, 160, false, Items.STRING, "landsknecht_doublet");
+		part("mail_hauberk", Harness.Slot.MAIL, 3, 0.0F, 340, false, Items.IRON_INGOT, "mail_hauberk");
+		part("plated_mail", Harness.Slot.MAIL, 3, 0.5F, 320, false, Items.IRON_INGOT, null);
+		part("scale_shirt", Harness.Slot.MAIL, 2, 0.0F, 280, false, Items.IRON_INGOT, null);
+		for (String garment : List.of("surcoat", "monks_robe", "kaftan", "jesters_motley", "sash")) {
+			part(garment, Harness.Slot.OVER, 0, 0.0F, 0, false, null, garment);
+		}
+		// (the torn surcoat is the surcoat's model with its cloth torn away, as the torn cloak is the cloak's)
+		part("torn_surcoat", Harness.Slot.OVER, 0, 0.0F, 0, false, null, "surcoat");
+		part("pauldrons", Harness.Slot.SHOULDERS, 2, 1.0F, 340, true, null, "pauldrons");
+		part("ailettes", Harness.Slot.SHOULDERS, 0, 0.0F, 0, false, null, "ailettes");
+		part("mitten_gauntlets", Harness.Slot.HANDS, 1, 0.0F, 260, true, null, "mitten_gauntlets");
+		// (Mordhau harness 4, kingdoms/tools/gen_heraldry_legs.py) the waist, thighs, shins and feet, and the new HOSE place (its sheets are
+		// UnderArmourLayer's)
+		part("long_tassets", Harness.Slot.WAIST, 2, 0.5F, 320, true, null, "long_tassets");
+		part("coat_of_plates_skirt", Harness.Slot.WAIST, 1, 0.0F, 200, false, Items.IRON_INGOT, "coat_of_plates_skirt");
+		part("lamellar_skirt", Harness.Slot.WAIST, 1, 0.0F, 240, false, Items.IRON_INGOT, "lamellar_skirt");
+		part("leather_lamellar_skirt", Harness.Slot.WAIST, 1, 0.0F, 180, false, Items.LEATHER, "leather_lamellar_skirt");
+		part("padded_skirt", Harness.Slot.WAIST, 1, 0.0F, 160, false, Items.STRING, "padded_skirt");
+		part("scale_skirt", Harness.Slot.WAIST, 1, 0.0F, 240, false, Items.IRON_INGOT, "scale_skirt");
+		for (String skirt : List.of("cloth_skirt", "short_skirt", "long_skirt", "apron", "pleated_base", "embroidered_skirt")) {
+			part(skirt, Harness.Slot.WAIST, 0, 0.0F, 0, false, null, skirt);
+		}
+		part("fluted_cuisses", Harness.Slot.THIGHS, 2, 1.0F, 340, true, null, "fluted_cuisses");
+		part("brigandine_cuisses", Harness.Slot.THIGHS, 2, 0.0F, 220, false, Items.IRON_INGOT, "brigandine_cuisses");
+		part("leather_cuisses", Harness.Slot.THIGHS, 1, 0.0F, 200, false, Items.LEATHER, "leather_cuisses");
+		part("mail_chausses", Harness.Slot.THIGHS, 2, 0.0F, 300, false, Items.IRON_INGOT, "mail_chausses");
+		part("schynbald", Harness.Slot.SHINS, 1, 0.5F, 260, true, null, "schynbald");
+		part("leg_wraps", Harness.Slot.SHINS, 0, 0.0F, 0, false, null, "leg_wraps");
+		worn("scale_sabatons", ArmorType.BOOTS);
+		worn("mail_shoes", ArmorType.BOOTS);
+		part("shorts", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, null);
+		part("breeches", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, null);
+		part("baggy_breeches", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, "baggy_breeches");
+		part("linen_hose", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, null);
+		part("joined_hose", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, null);
+		part("riding_hose", Harness.Slot.HOSE, 1, 0.0F, 200, false, Items.LEATHER, null);
+		part("landsknecht_hose", Harness.Slot.HOSE, 0, 0.0F, 0, false, null, "landsknecht_hose");
 		List<Item> all = new ArrayList<>();
 		PIECES.values().forEach(p -> all.add(p.item()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

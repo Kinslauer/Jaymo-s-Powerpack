@@ -2,6 +2,7 @@ package com.jaymoskitchen.client.corpse;
 
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.corpse.CorpseEntity;
+import com.jaymoskitchen.corpse.Wear;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
@@ -36,8 +37,32 @@ public final class Dressed {
 	/** The hollow and its ribs; a rib every this many pixels along a face's long side. */
 	private static final int HOLLOW = 0x54121A, RIB = 0xCEBCA2;
 	private static final int RIB_EVERY = 3;
+	/** The belly cut (its deep line and the raw lips either side) and the insides spilling out of an opened body (pink, darker pink). */
+	private static final int CUT = 0x5E0F14, CUT_LIP = 0xB03038, GUT = 0xB86A72, GUT_DARK = 0x7E3F4A;
 	/** Parts that are a body's trunk, in any case (Cube Animals' are Polish). */
 	private static final String[] TRUNKS = {"body", "torso", "tulow", "chest"};
+
+	/** Where a body's weathering ({@link Wear#PAINT_MASK}) sits in the dressed number. */
+	public static final int WEAR_SHIFT = 12;
+	/** Rot's darkest, bare bone, charcoal and ice, the colours a weathered body is painted toward. */
+	private static final int ROT = 0x4A4228, BONE = 0xE6DFCB, CHARCOAL = 0x1A1512, ICE = 0xD2EEFF;
+	/** How far toward charcoal each char level goes, and the greyest a body gets (share of its colour lost, at the last level). */
+	private static final float[] CHAR_SHARE = {0.25F, 0.5F, 0.75F, 0.9F};
+	private static final float GREY_MOST = 0.8F, ROT_SHARE = 0.6F, ICE_SHARE = 0.7F;
+	/**
+	 * Patches of rot and bared bone: soft blobs about this many pixels across (a smooth noise, with a finer one for a ragged
+	 * edge). Andy (2026-11-27), a rotting black bear: "the bear texture on the ground is broken". They were hard 3-pixel
+	 * squares scattered over the whole skin, so bone-white checks on black fur and thin legs striped like a ladder.
+	 */
+	private static final int BLOTCH = 6, RAGGED = 2;
+	private static final float RAGGED_SHARE = 0.3F;
+	/** The noise bunches round its middle: spread out about this middle by this much, so each level of rot bares about its share. */
+	private static final float NOISE_MIDDLE = 0.47F, NOISE_SPREAD = 1.9F;
+	/** Round a patch of bare bone, a rim of raw, dried flesh this wide (in the noise's 0-1), so it reads as torn back to the bone. */
+	private static final float RIM = 0.06F;
+	private static final int RAW = 0x6E2C24;
+	/** Bone's grain: each pixel up to this much darker. */
+	private static final float GRAIN = 0.12F;
 
 	/** Painted copies: per model, original texture and state to copy. */
 	private static final Map<Object, Map<String, Identifier>> DONE = new IdentityHashMap<>();
@@ -81,6 +106,8 @@ public final class Dressed {
 		}
 		if ((dressed & CorpseEntity.DRESSED_GUTTED) != 0) {
 			ribs(painted, trunkFaces(model.root()));
+		} else if ((dressed >> CorpseEntity.DRESSED_CUT_SHIFT & CorpseEntity.DRESSED_CUT_MASK) != 0) {
+			cut(painted, trunkFaces(model.root()), dressed >> CorpseEntity.DRESSED_CUT_SHIFT & CorpseEntity.DRESSED_CUT_MASK);
 		}
 		if ((dressed & ROAST_CHARRED) != 0) {
 			roast(painted, CHAR, 0.8F);
@@ -88,6 +115,9 @@ public final class Dressed {
 			roast(painted, ROAST, 0.7F);
 		} else if ((dressed & ROAST_BROWNING) != 0) {
 			roast(painted, ROAST, 0.35F);
+		}
+		if ((dressed >> WEAR_SHIFT & Wear.PAINT_MASK) != 0) {
+			weather(painted, dressed >> WEAR_SHIFT & Wear.PAINT_MASK);
 		}
 		Identifier id = JaymosKitchen.id("dressed/" + texture.getNamespace() + "/" + texture.getPath().replace(".png", "") + "_" + made++);
 		Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(id::toString, painted));
@@ -114,6 +144,79 @@ public final class Dressed {
 					Math.min(255, (int) ((colour >> 8 & 0xFF) * shade)), Math.min(255, (int) ((colour & 0xFF) * shade))));
 			}
 		}
+	}
+
+	/**
+	 * A body's weathering ({@link Wear}): bone where the rot has bared it (patches, the same cells that darkened first, so
+	 * the flesh falls away from where it went dark), dark rot-brown in patches, grey with age, charred, or frozen pale blue.
+	 */
+	private static void weather(NativeImage image, int wear) {
+		int charred = Wear.get(wear, Wear.CHAR), dark = Wear.get(wear, Wear.DARK), bare = Wear.get(wear, Wear.BARE), grey = Wear.get(wear, Wear.GREY);
+		boolean frozen = Wear.frozen(wear);
+		for (int y = 0; y < image.getHeight(); y++) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				int argb = image.getPixel(x, y);
+				if (ARGB.alpha(argb) == 0) {
+					continue;
+				}
+				float r = ARGB.red(argb), g = ARGB.green(argb), b = ARGB.blue(argb);
+				float lum = (r * 299 + g * 587 + b * 114) / 1000.0F;
+				float shade = 0.75F + 0.25F * lum / 255.0F;
+				float cell = patch(x, y);
+				if (grey > 0) {
+					float k = GREY_MOST * grey / Wear.LEVELS;
+					r += (lum - r) * k;
+					g += (lum - g) * k;
+					b += (lum - b) * k;
+				}
+				if (dark > 0 && cell < dark / (float) Wear.LEVELS) {
+					r += ((ROT >> 16 & 0xFF) * shade - r) * ROT_SHARE;
+					g += ((ROT >> 8 & 0xFF) * shade - g) * ROT_SHARE;
+					b += ((ROT & 0xFF) * shade - b) * ROT_SHARE;
+				}
+				float bared = bare / (float) Wear.LEVELS;
+				if (bare >= Wear.LEVELS || bare > 0 && cell < bared) {
+					float bone = shade * (1.0F - GRAIN * (hash(x, y, 12) % 5) / 4.0F);
+					r = (BONE >> 16 & 0xFF) * bone;
+					g = (BONE >> 8 & 0xFF) * bone;
+					b = (BONE & 0xFF) * bone;
+				} else if (bare > 0 && cell < bared + RIM) {
+					r = (RAW >> 16 & 0xFF) * shade;
+					g = (RAW >> 8 & 0xFF) * shade;
+					b = (RAW & 0xFF) * shade;
+				}
+				if (charred > 0) {
+					float k = Math.min(1.0F, CHAR_SHARE[charred - 1] + (hash(x, y, 8) % 7 - 3) * 0.02F);
+					r += ((CHARCOAL >> 16 & 0xFF) * shade - r) * k;
+					g += ((CHARCOAL >> 8 & 0xFF) * shade - g) * k;
+					b += ((CHARCOAL & 0xFF) * shade - b) * k;
+				}
+				if (frozen) {
+					r += ((ICE >> 16 & 0xFF) * shade - r) * ICE_SHARE;
+					g += ((ICE >> 8 & 0xFF) * shade - g) * ICE_SHARE;
+					b += ((ICE & 0xFF) * shade - b) * ICE_SHARE;
+				}
+				image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), Math.min(255, (int) r), Math.min(255, (int) g), Math.min(255, (int) b)));
+			}
+		}
+	}
+
+	/** Where the rot and the bone come through first (0 to 1, low first): soft blobs with a ragged edge, the same on every copy. */
+	private static float patch(int x, int y) {
+		float v = smooth(x, y, BLOTCH, 7) * (1.0F - RAGGED_SHARE) + smooth(x, y, RAGGED, 13) * RAGGED_SHARE;
+		return Math.clamp((v - NOISE_MIDDLE) * NOISE_SPREAD + 0.5F, 0.0F, 1.0F);
+	}
+
+	/** Value noise: a random level at each corner of a {@code size}-pixel grid, eased smoothly between them. */
+	private static float smooth(int x, int y, int size, int salt) {
+		int cx = Math.floorDiv(x, size), cy = Math.floorDiv(y, size);
+		float fx = (x - cx * size + 0.5F) / size, fy = (y - cy * size + 0.5F) / size;
+		fx = fx * fx * (3.0F - 2.0F * fx);
+		fy = fy * fy * (3.0F - 2.0F * fy);
+		float a = hash(cx, cy, salt) / 65535.0F, b = hash(cx + 1, cy, salt) / 65535.0F;
+		float c = hash(cx, cy + 1, salt) / 65535.0F, d = hash(cx + 1, cy + 1, salt) / 65535.0F;
+		float top = a + (b - a) * fx, bottom = c + (d - c) * fx;
+		return top + (bottom - top) * fy;
 	}
 
 	private static void roast(NativeImage image, int colour, float amount) {
@@ -153,6 +256,52 @@ public final class Dressed {
 					boolean edge = x == rect[0] || x == rect[2] - 1 || y == rect[1] || y == rect[3] - 1;
 					int along = wide ? x - rect[0] : y - rect[1];
 					int colour = !end && !edge && along % RIB_EVERY == 1 ? RIB : HOLLOW + (hash(x, y, 3) % 5 * 4 << 16);
+					// the insides slump out along the lower side of the opening
+					boolean low = (wide ? y - rect[1] : x - rect[0]) * 5 >= (wide ? rect[3] - rect[1] : rect[2] - rect[0]) * 3;
+					if (!end && !edge && low && colour != RIB && hash(x / 2, y, 9) % 3 != 0) {
+						colour = (x + y) % 3 == 0 ? GUT_DARK : GUT;
+					}
+					image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), colour >> 16 & 0xFF, colour >> 8 & 0xFF, colour & 0xFF));
+				}
+			}
+		}
+	}
+
+	/**
+	 * The cut along the belly after {@code strokes} strokes of {@link com.jaymoskitchen.corpse.Gutting#CUT_STROKES}: a dark line
+	 * along the middle of the long side of each face of the trunk's box (but its two ends), with a raw lip each side, as long
+	 * as the strokes made so far.
+	 */
+	private static void cut(NativeImage image, List<float[]> faces, int strokes) {
+		float reach = Math.min(1.0F, strokes / (float) com.jaymoskitchen.corpse.Gutting.CUT_STROKES);
+		int smallest = Integer.MAX_VALUE;
+		List<int[]> rects = new ArrayList<>();
+		for (float[] face : faces) {
+			int[] rect = {Math.max(0, Math.round(face[0] * image.getWidth())), Math.max(0, Math.round(face[1] * image.getHeight())),
+				Math.min(image.getWidth(), Math.round(face[2] * image.getWidth())), Math.min(image.getHeight(), Math.round(face[3] * image.getHeight()))};
+			if (rect[2] > rect[0] && rect[3] > rect[1]) {
+				rects.add(rect);
+				smallest = Math.min(smallest, (rect[2] - rect[0]) * (rect[3] - rect[1]));
+			}
+		}
+		for (int[] rect : rects) {
+			if ((rect[2] - rect[0]) * (rect[3] - rect[1]) <= smallest) {
+				continue;
+			}
+			boolean wide = rect[2] - rect[0] >= rect[3] - rect[1];
+			int length = wide ? rect[2] - rect[0] : rect[3] - rect[1];
+			int mid = wide ? (rect[1] + rect[3]) / 2 : (rect[0] + rect[2]) / 2;
+			for (int along = 0; along < Math.round(length * reach); along++) {
+				for (int across = -1; across <= 1; across++) {
+					int x = wide ? rect[0] + along : mid + across, y = wide ? mid + across : rect[1] + along;
+					if (x < rect[0] || x >= rect[2] || y < rect[1] || y >= rect[3]) {
+						continue;
+					}
+					int argb = image.getPixel(x, y);
+					if (ARGB.alpha(argb) == 0) {
+						continue;
+					}
+					int colour = across == 0 ? CUT : CUT_LIP;
 					image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), colour >> 16 & 0xFF, colour >> 8 & 0xFF, colour & 0xFF));
 				}
 			}

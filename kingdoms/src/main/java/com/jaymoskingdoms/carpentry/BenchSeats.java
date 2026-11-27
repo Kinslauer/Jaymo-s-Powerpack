@@ -23,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
  * it is sat on through that; a bare one is given a {@link #TAG tagged} cushion for as long as someone sits there, gone
  * (dropping nothing) once they stand up or the bench is broken. Facing a table beside the bench if there is one.
  */
-final class BenchSeats {
+public final class BenchSeats {
 	/** Marks a cushion that's only there while someone sits on a bare bench. */
 	static final String TAG = "jaymoskingdoms.bench_seat";
 	/** How often (ticks) empty bench seats are cleared away. */
@@ -97,6 +97,38 @@ final class BenchSeats {
 		return true;
 	}
 
+	/**
+	 * Seats {@code player} at {@code at} facing {@code yaw} on a seat of the same kind with nothing drawn (a tree stump's
+	 * top, {@code TreeStump}); gone once they stand. False if there's no room or someone sits there already.
+	 */
+	public static boolean seat(ServerLevel level, Vec3 at, float yaw, Player player) {
+		AABB box = EntityTypes.CUSHION.getSpawnAABB(at);
+		for (Cushion cushion : level.getEntitiesOfClass(Cushion.class, box)) {
+			if (!cushion.isVehicle()) {
+				return cushion.interact(player, InteractionHand.MAIN_HAND, cushion.position()).consumesAction();
+			}
+			return false;
+		}
+		if (!Cushion.canBePlacedAt(level, box)) {
+			return false;
+		}
+		Cushion seat = EntityTypes.CUSHION.create(level, EntitySpawnReason.TRIGGERED);
+		if (seat == null) {
+			return false;
+		}
+		seat.setInvisible(true);
+		seat.setPermanentlyInvulnerable(true);
+		seat.addTag(TAG);
+		seat.snapTo(at, yaw, 0.0F);
+		level.addFreshEntity(seat);
+		SEATS.add(seat);
+		if (!seat.interact(player, InteractionHand.MAIN_HAND, seat.position()).consumesAction()) {
+			seat.discard();
+			return false;
+		}
+		return true;
+	}
+
 	/** The way to a table beside the bench, else the way the sitter faces. */
 	private static Direction facing(ServerLevel level, BlockPos pos, Player player) {
 		for (Direction d : Direction.Plane.HORIZONTAL) {
@@ -105,6 +137,16 @@ final class BenchSeats {
 			}
 		}
 		return player.getDirection();
+	}
+
+	/** Takes away the seat {@link #seat} put at {@code at} (its stump gone), setting down whoever sat there. */
+	public static void clearAt(ServerLevel level, Vec3 at) {
+		for (Cushion cushion : level.getEntitiesOfClass(Cushion.class, EntityTypes.CUSHION.getSpawnAABB(at).inflate(0.1))) {
+			if (cushion.entityTags().contains(TAG)) {
+				cushion.ejectPassengers();
+				cushion.discard();
+			}
+		}
 	}
 
 	/** Takes away the bench seats on a bench that's gone (before they'd drop a cushion for want of support). */

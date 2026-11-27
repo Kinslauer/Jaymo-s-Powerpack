@@ -139,6 +139,8 @@ final class LifeStoryScreen extends Screen {
 
 	private final boolean forced;
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after, lockedButton;
+	/** The narrator's squelch ({@link NarratorSetting}): in the top right corner, or left of Next on a panel page. */
+	private @Nullable Button squelch;
 	/** (0.7.474) On the greenskin road: a half-orc's skin. */
 	private @Nullable ToneSlider tone;
 	/** The question pages' layout (figure, list, info panel), and whether the footer buttons are placed for it now. */
@@ -177,6 +179,8 @@ final class LifeStoryScreen extends Screen {
 	/** (0.7.417, Start Together) The party mates who took a road lately, as the server last told. */
 	private static List<LifeStory.Mate> mates = List.of();
 	private static long quietUntil;
+	/** Why the server refused the story last sent ({@link LifeStory.Refused}), shown on the story page till the next is sent (null: none). */
+	private static @Nullable String refused;
 	private static List<LifeStory.Realm> realms = List.of();
 	/** (0.7.419) The locked roads the server said this player can take whatever their past (a deed, ops, a road they took), and those ops shut (keys). */
 	private static List<String> unlockedRoads = List.of(), shutRoads = List.of();
@@ -225,12 +229,31 @@ final class LifeStoryScreen extends Screen {
 			}
 			context.client().gui.setScreen(new LifeStoryScreen(payload.forced()));
 		});
+		ClientPlayNetworking.registerGlobalReceiver(LifeStory.Refused.TYPE, (payload, context) -> {
+			// the screen comes straight back, at the first page that wants mending (a realm that fell is unnamed again)
+			refused = payload.reason();
+			quietUntil = 0L;
+			if (realmName(Question.RAISED) == null) {
+				draft.raisedRealm = -1;
+			}
+			if (realmName(Question.ROAD) == null) {
+				draft.roadRealm = -1;
+			}
+			List<Step> all = steps();
+			for (int i = 0; i < all.size(); i++) {
+				if (!answered(all.get(i))) {
+					draft.step = i;
+					break;
+				}
+			}
+		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!owed || minecraft.player == null) {
 				return;
 			}
 			if (done()) {
 				owed = false;
+				refused = null;
 				draft = new Draft();
 			} else if (tabbed()) {
 				// a skipped story waits for MCA's creator and its tab. Should the creator never come (or shut without the
@@ -250,6 +273,7 @@ final class LifeStoryScreen extends Screen {
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			owed = false;
+			refused = null;
 			creatorAhead = false;
 			mates = List.of();
 			unlockedRoads = List.of();
@@ -378,6 +402,10 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	private static @Nullable Answer picked(Question q) {
+		// the road waits for MCA's creator: one left over from before (an earlier page, an earlier open) isn't this story's yet
+		if (q == Question.ROAD && creatorAhead && !roadOnly()) {
+			return null;
+		}
 		int i = draft.answers[q.ordinal()];
 		// (0.7.356) on the road alone, the rest is the story told before MCA's creator
 		Minecraft minecraft = Minecraft.getInstance();
@@ -479,11 +507,18 @@ final class LifeStoryScreen extends Screen {
 			if (draft.explicit && McaCompat.LOADED && draft.gender < 0) {
 				return false;
 			}
+			// a realm the story names has to be one there is (it may have fallen since it was picked)
+			for (Question q : new Question[] {Question.RAISED, Question.ROAD}) {
+				Answer a = picked(q);
+				if (a != null && a.realm() && realmName(q) == null) {
+					return false;
+				}
+			}
 			Classes.PlayerClass cls = youthClass();
 			return cls == null || cls.options.isEmpty() || draft.option >= 0;
 		}
 		if (s.realm) {
-			return realmOf(s.question) >= 0;
+			return realmName(s.question) != null;
 		}
 		// (0.7.356) the carousel shows every road, open or not: only an open one goes on
 		Answer a = picked(s.question);
@@ -819,6 +854,8 @@ final class LifeStoryScreen extends Screen {
 			.bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
 		this.dropFace = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.doppel.drop"), b -> keepFace(false))
 			.bounds(ax + ASK_W / 2 + 4, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+		// Andy: "can you make a button in the story to squelch the narrator?" (placed as the page is drawn)
+		this.squelch = addRenderableWidget(NarratorSetting.button(this.width - 4 - NarratorSetting.SIZE, 4));
 	}
 
 	/**
@@ -1082,6 +1119,12 @@ final class LifeStoryScreen extends Screen {
 	 * quietly.
 	 */
 	private static void narrate(Step s, boolean asking) {
+		// (squelched: nothing is read, and the page isn't marked read, so letting the narrator speak again reads it from the top)
+		if (NarratorSetting.squelched()) {
+			hush();
+			narrated = null;
+			return;
+		}
 		Minecraft minecraft = Minecraft.getInstance();
 		long now = System.currentTimeMillis();
 		// (the character creator is made in silence: there's no tale to read, and every row changed would start one over)
@@ -1180,6 +1223,7 @@ final class LifeStoryScreen extends Screen {
 				return;
 			}
 			Answer road = picked(Question.ROAD);
+			refused = null;
 			ClientPlayNetworking.send(new LifeStory.Road(draft.answers[Question.ROAD.ordinal()], road != null && road.realm() ? draft.roadRealm : -1, lookIndex(),
 				draft.tone));
 			quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
@@ -1195,6 +1239,7 @@ final class LifeStoryScreen extends Screen {
 		if (draft.explicit) {
 			settle();
 		}
+		refused = null;
 		ClientPlayNetworking.send(life(draft.gender));
 		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
 		onClose();
@@ -1204,7 +1249,8 @@ final class LifeStoryScreen extends Screen {
 	private static LifeStory.Live life(int gender) {
 		List<Integer> answers = new ArrayList<>();
 		for (Question q : Question.values()) {
-			answers.add(q.asked() ? draft.answers[q.ordinal()] : -1);
+			// (with MCA's creator to come the road is told after it: none is sent now, whatever the draft held)
+			answers.add(q.asked() && !(q == Question.ROAD && creatorAhead) ? draft.answers[q.ordinal()] : -1);
 		}
 		Answer raised = picked(Question.RAISED), road = picked(Question.ROAD);
 		return new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
@@ -1568,6 +1614,17 @@ final class LifeStoryScreen extends Screen {
 			this.keepFace.visible = offered != null;
 			this.dropFace.visible = offered != null;
 		}
+		if (this.squelch != null) {
+			// a question page fills the screen and its top right corner is bare; a panel's corner holds its heading, so
+			// there it sits in the footer, left of Next
+			if (picking || this.next == null) {
+				this.squelch.setX(this.width - 4 - NarratorSetting.SIZE);
+				this.squelch.setY(4);
+			} else {
+				this.squelch.setX(this.next.getX() - 4 - NarratorSetting.SIZE);
+				this.squelch.setY(this.next.getY());
+			}
+		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
@@ -1637,6 +1694,7 @@ final class LifeStoryScreen extends Screen {
 		java.util.Map.entry("lab", new int[] {0xFF0C1A14, 0xFF4A9A6A, 0xFF3A3A34}),
 		java.util.Map.entry("android", new int[] {0xFF14181E, 0xFF8A7A5A, 0xFF4A4C50}),
 		java.util.Map.entry("moon_cursed", new int[] {0xFF0A0610, 0xFFA02A2A, 0xFF2A2A2E}),
+		java.util.Map.entry("bitten", new int[] {0xFF1A0A12, 0xFF7A1A28, 0xFF30262C}),
 		java.util.Map.entry("moon", new int[] {0xFF000004, 0xFF10101A, 0xFFB8B8C0}),
 		java.util.Map.entry("verdant", new int[] {0xFF2A6A2A, 0xFF9AD07A, 0xFF4A8A2A}),
 		java.util.Map.entry("rustfall", new int[] {0xFF3A1A0A, 0xFFA05A2A, 0xFF5A3A2A}),
@@ -2006,6 +2064,14 @@ final class LifeStoryScreen extends Screen {
 		int px = paneX(), pw = paneW(), textW = pw - 22;
 		int y = top() + HEADER + 4 - this.scroll;
 		int startY = y;
+		// the server refused the story last sent: why, over the tale
+		if (refused != null) {
+			for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.story.refused." + refused), textW)) {
+				graphics.text(this.font, line, px + 10, y, Ui.BAD);
+				y += Ui.LINE;
+			}
+			y += 4;
+		}
 		List<FormattedCharSequence> tale = this.font.split(tale(), textW);
 		for (FormattedCharSequence line : tale) {
 			graphics.text(this.font, line, px + 10, y, Ui.TEXT);
@@ -3286,12 +3352,44 @@ final class LifeStoryScreen extends Screen {
 			boolean mine = r.id() == picked;
 			graphics.fill(x + 1, y + 1, x + CARD_W - 1, y + CARD_H - 1, mine ? Ui.ROW_PICKED : i == hover ? Ui.ROW_HOVER : Ui.ROW_ALT);
 			graphics.fill(x + 1, y + 1, x + CARD_W - 1, y + 3, realmRgb(r));
-			if (!mine) {
+			// (Andy, 2026-11-26: the picked card stood empty) the picked one's figure is back on its card once it has walked over
+			if (!mine || r.id() != walkRealm || System.currentTimeMillis() - walkAt >= WALK_MS) {
 				drawRealmFolk(graphics, r, x + 4, y + CARD_TOP, x + CARD_W - 4, y + CARD_H - CARD_FOOT, false, mouseX, mouseY);
 			}
-			Ui.line(graphics, this.font, Component.literal(r.name()), x + 4, y + CARD_H - CARD_FOOT + 2, CARD_W - 8, mine ? ACCENT : i == hover ? Ui.TEXT : Ui.DIM);
+			// its patron's glyph in the corner
+			com.jaymoskingdoms.Patron theirs = com.jaymoskingdoms.Patron.byKey(r.patron());
+			if (theirs != null) {
+				graphics.pose().pushMatrix();
+				graphics.pose().translate(x + CARD_W - 12, y + 5);
+				graphics.pose().scale(0.625F, 0.625F);
+				drawGlyph(graphics, com.jaymoskingdoms.JaymosKingdoms.id("textures/block/shrine_glyph_" + theirs.key + ".png"), 0, 0);
+				graphics.pose().popMatrix();
+			}
+			cardName(graphics, r.name(), x + 4, y + CARD_H - CARD_FOOT + 2, CARD_W - 8, mine ? ACCENT : i == hover ? Ui.TEXT : Ui.DIM);
 		}
 	}
+
+	/** (Andy, 2026-11-26: "Ardengar(") A realm's name on its card, drawn smaller when it is longer than the card, so all of it shows at once. */
+	private void cardName(GuiGraphicsExtractor graphics, String name, int x, int y, int width, int colour) {
+		int w = this.font.width(name);
+		if (w <= width) {
+			graphics.text(this.font, name, x, y, colour);
+			return;
+		}
+		float k = Math.max(CARD_NAME_MIN_SCALE, width / (float)w);
+		if (w * k > width) {
+			Ui.line(graphics, this.font, Component.literal(name), x, y, width, colour);
+			return;
+		}
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x, y + (1.0F - k) * this.font.lineHeight / 2.0F);
+		graphics.pose().scale(k, k);
+		graphics.text(this.font, name, 0, 0, colour);
+		graphics.pose().popMatrix();
+	}
+
+	/** The smallest a realm's name is drawn on its card before it slides instead. */
+	static final float CARD_NAME_MIN_SCALE = 0.6F;
 
 	/**
 	 * The realm page's left: the review card. The person of the realm picked walks over from its card and stands on it, over
@@ -3320,18 +3418,46 @@ final class LifeStoryScreen extends Screen {
 				free++;
 			}
 		}
+		Answer faith = picked(Question.FAITH);
+		com.jaymoskingdoms.Patron patron = faith == null ? null : faith.patron();
+		// (Andy, 2026-11-26) what this realm gives its own: its land's and creed's points, its patron, the Crown's goodwill or Coin's account
+		List<Component> realmGifts = new ArrayList<>();
+		if (r != null) {
+			boolean gives = com.jaymoskingdoms.RealmGifts.GIVING.contains(keyOf(picked(s.question)));
+			com.jaymoskingdoms.Patron theirs = com.jaymoskingdoms.Patron.byKey(r.patron());
+			if (theirs != null) {
+				realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.patron", theirs.named()).withColor(0xFF000000 | theirs.colour));
+			}
+			if (!r.creed().isEmpty()) {
+				realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.creed", Component.translatable("creed.jaymoskingdoms." + r.creed())));
+			}
+			if (gives) {
+				points.merge(com.jaymoskingdoms.RealmGifts.landStat(com.jaymoskingdoms.Climate.byId(r.climate())), 1, Integer::sum);
+				com.jaymoskingdoms.Stats.Stat creedStat = com.jaymoskingdoms.RealmGifts.creedStat(r.creed());
+				if (creedStat != null) {
+					points.merge(creedStat, 1, Integer::sum);
+				}
+				if (theirs != null && theirs == patron) {
+					realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.kindred", com.jaymoskingdoms.RealmGifts.KINDRED_FAVOUR));
+				}
+				if ("crown".equals(r.creed())) {
+					realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.crown", com.jaymoskingdoms.RealmGifts.CROWN_GOODWILL));
+				} else if ("coin".equals(r.creed())) {
+					realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.coin", com.jaymoskingdoms.RealmGifts.COIN_PURSE));
+				}
+			} else {
+				realmGifts.add(Component.translatable("gui.jaymoskingdoms.story.realm.none").withColor(Ui.DIM));
+			}
+		}
+		// (a story answer's point is worth GIFT_STEP, as Stats.fromStory counts it)
 		for (var e : points.entrySet()) {
 			good.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + e.getKey().key()),
-				e.getValue() * com.jaymoskingdoms.Stats.STEP));
+				e.getValue() * com.jaymoskingdoms.Stats.GIFT_STEP));
 		}
 		if (free > 0) {
 			good.add(Component.translatable("gui.jaymoskingdoms.story.gives.free", free * com.jaymoskingdoms.Stats.STEP));
 		}
-		Answer faith = picked(Question.FAITH);
-		com.jaymoskingdoms.Patron patron = faith == null ? null : faith.patron();
-		if (r != null) {
-			good.add(Component.translatable("gui.jaymoskingdoms.story.review.realm", r.name()));
-		}
+		good.addAll(realmGifts);
 		int bottom = y + panelH() - FOOTER - 2;
 		// the faith, its glyph beside it, at the foot of the card
 		net.minecraft.resources.Identifier faithGlyph = faith == null ? null : glyph(faith);

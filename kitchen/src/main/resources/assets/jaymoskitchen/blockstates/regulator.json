@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,lit=false,cold=false": {
+      "model": "jaymoskitchen:block/regulator_warm"
+    },
+    "facing=north,lit=false,cold=true": {
+      "model": "jaymoskitchen:block/regulator_cold"
+    },
+    "facing=north,lit=true,cold=false": {
+      "model": "jaymoskitchen:block/regulator_warm_lit"
+    },
+    "facing=north,lit=true,cold=true": {
+      "model": "jaymoskitchen:block/regulator_cold_lit"
+    },
+    "facing=east,lit=false,cold=false": {
+      "model": "jaymoskitchen:block/regulator_warm",
+      "y": 90
+    },
+    "facing=east,lit=false,cold=true": {
+      "model": "jaymoskitchen:block/regulator_cold",
+      "y": 90
+    },
+    "facing=east,lit=true,cold=false": {
+      "model": "jaymoskitchen:block/regulator_warm_lit",
+      "y": 90
+    },
+    "facing=east,lit=true,cold=true": {
+      "model": "jaymoskitchen:block/regulator_cold_lit",
+      "y": 90
+    },
+    "facing=south,lit=false,cold=false": {
+      "model": "jaymoskitchen:block/regulator_warm",
+      "y": 180
+    },
+    "facing=south,lit=false,cold=true": {
+      "model": "jaymoskitchen:block/regulator_cold",
+      "y": 180
+    },
+    "facing=south,lit=true,cold=false": {
+      "model": "jaymoskitchen:block/regulator_warm_lit",
+      "y": 180
+    },
+    "facing=south,lit=true,cold=true": {
+      "model": "jaymoskitchen:block/regulator_cold_lit",
+      "y": 180
+    },
+    "facing=west,lit=false,cold=false": {
+      "model": "jaymoskitchen:block/regulator_warm",
+      "y": 270
+    },
+    "facing=west,lit=false,cold=true": {
+      "model": "jaymoskitchen:block/regulator_cold",
+      "y": 270
+    },
+    "facing=west,lit=true,cold=false": {
+      "model": "jaymoskitchen:block/regulator_warm_lit",
+      "y": 270
+    },
+    "facing=west,lit=true,cold=true": {
+      "model": "jaymoskitchen:block/regulator_cold_lit",
+      "y": 270
+    }
+  }
+}

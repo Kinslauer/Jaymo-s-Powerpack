@@ -39,7 +39,9 @@ import org.jspecify.annotations.Nullable;
 public final class Suspicion {
 	// ---- tuning --------------------------------------------------------------------------------------------------------
 
-	public static final String VAMPIRE = "vampire", WOLF = "wolf";
+	public static final String VAMPIRE = "vampire", WOLF = "wolf", AWAY = "away";
+	/** Points a thrall's kin add for a night it spent away from home. */
+	static final int ADD_AWAY = 1;
 	/** The most a suspicion can reach, and the share from which it is strong. */
 	static final int MAX = 4, STRONG = 3;
 	/** What one sighting adds: a feeding, a change, a tell or a hunt shown. */
@@ -122,7 +124,7 @@ public final class Suspicion {
 		Map<UUID, Mark> marks = new HashMap<>(who.getAttachedOrElse(MARKS, Map.of()));
 		UUID key = Recollections.key(player, who);
 		Mark old = marks.get(key);
-		String name = Recollections.nameTo(player, who).getString();
+		String name = kind.equals(VAMPIRE) && NightCloaks.up(player) ? NightCloaks.name().getString() : Recollections.nameTo(player, who).getString();
 		if (old == null || old.now(now) <= 0 || !old.kind().equals(kind)) {
 			marks.put(key, new Mark(name, kind, Math.min(MAX, add), now, now));
 		} else if (now - old.added() >= ADD_GAP) {
@@ -131,8 +133,33 @@ public final class Suspicion {
 			marks.put(key, new Mark(name, kind, old.strength(), now, old.added()));
 		}
 		who.setAttached(MARKS, marks);
+		if (kind.equals(VAMPIRE) && (old == null || old.now(now) <= 0 || now - old.added() >= ADD_GAP)) {
+			// (Night's Blood) a realm's folk suspecting a vampire adds to the realm's own suspicion of them, which sends hunters to their lair
+			Faction realm = who.level().getServer() == null ? null : Aliens.factionOf(who.level().getServer(), who);
+			if (realm != null) {
+				LairHunts.suspect(player, realm, add, now);
+			}
+		}
 		// (0.7.581) a Truth follower who comes to suspect it, rightly, turns on them
 		CastOut.learned(who, player, false);
+	}
+
+	/**
+	 * A thrall's kin notice the nights it spends away from home ({@link Servants}): {@code who} comes to suspect {@code player}
+	 * of keeping them, as {@link #AWAY}, or, if they already suspect a vampire, strengthens that. A realm's folk doing so add
+	 * to the realm's own suspicion too.
+	 */
+	static void noticed(LivingEntity who, ServerPlayer player) {
+		long now = who.level().getGameTime();
+		Mark old = who.getAttachedOrElse(MARKS, Map.<UUID, Mark>of()).get(Recollections.key(player, who));
+		String kind = old != null && old.now(now) > 0 ? old.kind() : AWAY;
+		mark(who, player, kind, ADD_AWAY, now);
+		if (kind.equals(AWAY) && who.level().getServer() != null) {
+			Faction realm = Aliens.factionOf(who.level().getServer(), who);
+			if (realm != null) {
+				LairHunts.suspect(player, realm, ADD_AWAY, now);
+			}
+		}
 	}
 
 	/** How strongly {@code who} suspects {@code player} now (0 for none). */

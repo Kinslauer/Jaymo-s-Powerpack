@@ -197,6 +197,8 @@ public final class Quests {
 		List<Quest> list = new ArrayList<>(log(player));
 		list.removeIf(q -> q.id().equals(id));
 		player.setAttached(LOG, List.copyOf(list));
+		// (a board notice's terms, and the player's copy of it, go with it)
+		BoardTerms.forget(player, id);
 	}
 
 	/** {@code quest} goes into {@code player}'s log, in place of one with its id if there is one (a tale's open step, {@link Tales}). */
@@ -251,6 +253,11 @@ public final class Quests {
 
 	/** Whether {@code q} is done and can be turned in. */
 	static boolean ready(ServerPlayer player, Quest q) {
+		// (and what a board notice asks besides: BoardTerms)
+		return readyOf(player, q) && BoardTerms.alsoCarried(player, q);
+	}
+
+	private static boolean readyOf(ServerPlayer player, Quest q) {
 		return switch (q.kind()) {
 			case Quest.GATHER -> count(player, item(q.objective().target()), minGrade(q.objective().target())) >= q.objective().count();
 			case Quest.FETCH -> find(player, q.id()) >= 0;
@@ -401,6 +408,8 @@ public final class Quests {
 		if (rep <= Reputation.HOSTILE || (giver instanceof Folk && rep < Reputation.WELCOME)) {
 			Speech.tell(level, giver, player, Component.translatable(giver instanceof Folk ? "quest.jaymoskingdoms.refuse.king" : "quest.jaymoskingdoms.refuse"),
 				Speech.RED);
+			// (refusal hints) your name in their town
+			RefusalHints.hint(player, giver, RefusalHints.Cause.REPUTE, Component.literal(f.name()));
 			send(player, new QuestNet.Open(giver.getId(), name, List.of(),
 				Component.translatable(giver instanceof Folk ? "quest.jaymoskingdoms.untrusted.king" : "quest.jaymoskingdoms.untrusted", f.name())));
 			return;
@@ -551,6 +560,19 @@ public final class Quests {
 		if (q == null || !q.giver().uuid().equals(giver.getUUID()) || !ready(player, q) || QuestJobs.undone(level, player, q)) {
 			return;
 		}
+		complete(level, player, giver, f, q);
+	}
+
+	/** (village mods 4) Done board work handed in at its town's board, its poster away ({@link BoardTerms#handIn}). */
+	static void turnInAtBoard(ServerLevel level, ServerPlayer player, Faction f, Quest q) {
+		complete(level, player, null, f, q);
+	}
+
+	/** {@code q} handed in and paid: to {@code giver}, or (null) at a board with nobody to thank you. */
+	private static void complete(ServerLevel level, ServerPlayer player, @Nullable LivingEntity giver, Faction f, Quest q) {
+		// (what a board notice asked besides, and its early bonus, before its terms go with it: BoardTerms)
+		BoardTerms.takeAlso(player, q);
+		long early = BoardTerms.earlyBonus(level, player, q, q.reward().milli());
 		if (q.kind() == Quest.GATHER) {
 			take(player, item(q.objective().target()), q.objective().count(), minGrade(q.objective().target()));
 			TownTroubles.handedIn(level, f, q); // (0.7.530) food and timber brought for a trouble go into the town's stores
@@ -559,7 +581,7 @@ public final class Quests {
 			if (slot >= 0) {
 				player.getInventory().getItem(slot).shrink(1);
 			}
-		} else if (q.kind() == Quest.BREAK_IN || q.kind() == Quest.STUD) {
+		} else if ((q.kind() == Quest.BREAK_IN || q.kind() == Quest.STUD) && giver != null) {
 			// (0.5.47) the horse goes to the giver's stable
 			Stables.questTurnIn(level, player, giver, f, q);
 		} else if (q.kind() == Quest.LEAD) {
@@ -572,11 +594,12 @@ public final class Quests {
 				animal.addTag(HANDED_IN_TAG);
 			}
 		}
-		if (q.kind() == Quest.CAPTURE) {
+		if (q.kind() == Quest.CAPTURE && giver != null) {
 			// (the criminal brought in is handed over to the cells)
 			QuestJobs.handIn(level, player, giver, q);
 		}
 		remove(player, q.id());
+		ErrandBooks.finished(player, q);
 		if (q.kind() >= Quest.PACK) {
 			// (board work: what it put in the world is cleared, and the board's name grows)
 			QuestJobs.over(level, player, q);
@@ -587,16 +610,18 @@ public final class Quests {
 		// (Awakening pick) any quest done gives a Powers trial's swap back
 		PowersCompat.questDone(player);
 		// (0.7.0) a priest's hunt: the rite, there and then
-		Cures.rite(level, player, giver, q);
+		if (giver != null) {
+			Cures.rite(level, player, giver, q);
+		}
 		// a Rider is paid more for carrying things and people (Riders.COURIER_PAY)
 		long pay = q.kind() == Quest.DELIVER || q.kind() == Quest.ESCORT ? com.jaymoskingdoms.equestrian.Riders.courierPay(player, q.reward().milli())
 			: q.reward().milli();
-		Money.pay(player, Factions.get(level.getServer(), q.giver().faction()), pay);
+		Money.pay(player, Factions.get(level.getServer(), q.giver().faction()), pay + early);
 		for (ItemStack stack : goods(level, q)) {
 			give(player, stack);
 		}
 		Quest.Reward r = q.reward();
-		if (r.hearts() > 0) {
+		if (r.hearts() > 0 && giver != null) {
 			McaCompat.hearts(giver, player, r.hearts());
 		}
 		Reputation.change(player, f, r.reputation());
@@ -608,10 +633,15 @@ public final class Quests {
 		if (member != null && r.standing() > 0) {
 			KingdomEvents.standing(level.getServer(), player, f, member.standing() + r.standing());
 		}
-		Speech.tell(level, giver, player, Component.translatable(q.royal() ? "quest.jaymoskingdoms.said.thanks.king" : "quest.jaymoskingdoms.said.thanks"),
-			Speech.GOLD);
-		// (0.7.109) and they remember it
-		Recollections.remember(giver, player, Recollections.Kind.QUEST_DONE, title(q));
+		if (giver != null) {
+			Speech.tell(level, giver, player, Component.translatable(q.royal() ? "quest.jaymoskingdoms.said.thanks.king" : "quest.jaymoskingdoms.said.thanks"),
+				Speech.GOLD);
+			// (0.7.109) and they remember it
+			Recollections.remember(giver, player, Recollections.Kind.QUEST_DONE, title(q));
+		} else {
+			// (handed in at the board: the pay was left there for whoever did it)
+			player.sendSystemMessage(Component.translatable("notice.jaymoskingdoms.handed_in", q.giver().name()).withStyle(ChatFormatting.GRAY));
+		}
 		QuestPast.add(player, title(q), QuestPast.DONE, Component.translatable("past.jaymoskingdoms.done", q.giver().name()));
 		// a town errand toward the story's first act, for the party near too (only the ones marked as such: storyErrand)
 		if (storyErrand(q)) {
@@ -1480,6 +1510,11 @@ public final class Quests {
 
 	/** What's left to do (or that it's done). */
 	static Component objective(ServerLevel level, ServerPlayer player, Quest q) {
+		// (and what a board notice asks besides, while it isn't done: BoardTerms)
+		return ready(player, q) ? objectiveOf(level, player, q) : BoardTerms.withAlso(player, q, objectiveOf(level, player, q));
+	}
+
+	private static Component objectiveOf(ServerLevel level, ServerPlayer player, Quest q) {
 		if (q.kind() >= Quest.PACK && !(Tales.ofTale(q) || ready(player, q))) {
 			return QuestJobs.objective(level, player, q);
 		}

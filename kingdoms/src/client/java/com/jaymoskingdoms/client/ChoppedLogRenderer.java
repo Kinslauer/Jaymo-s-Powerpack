@@ -12,6 +12,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
@@ -32,9 +33,10 @@ import org.jspecify.annotations.Nullable;
  * (0.5.25) A chopped log: the log it was, with the bites the axe has cut out of it ({@link WoodVolume}; Andy, 2026-11-16:
  * "i want the trunk to carve out, retaining the interior texture and all"): its bark outside and its end grain inside
  * the cut, the way Immersive Tree Chop draws one (Litewer, MIT; {@code docs/licenses/Immersive-Tree-Chop-MIT.txt}). A
- * log nothing has been cut from is drawn whole, with the game's own cracks while someone's axe is at it.
+ * log nothing has been cut from is drawn whole, with the game's own cracks while someone's axe is at it. A tree stump
+ * ({@code TreeStump}) is drawn the same way: what's left of its log under the cut, darker as it rots.
  */
-public final class ChoppedLogRenderer implements BlockEntityRenderer<ChoppedLog.Entity, ChoppedLogRenderer.State> {
+public final class ChoppedLogRenderer<T extends BlockEntity & ChoppedLog.Carved> implements BlockEntityRenderer<T, ChoppedLogRenderer.State> {
 	public static final class State extends BlockEntityRenderState {
 		final MovingBlockRenderState block = new MovingBlockRenderState();
 		/** The log's cracks (null: none), how deep (0-9), and whether its model is see-through. */
@@ -46,6 +48,8 @@ public final class ChoppedLogRenderer implements BlockEntityRenderer<ChoppedLog.
 		final TextureAtlasSprite[] sprites = new TextureAtlasSprite[6];
 		final int[] light = new int[6];
 		int axis;
+		/** How dark it's drawn (1 as the log is). */
+		float shade = 1.0F;
 	}
 
 	/** How much darker the wood inside a cut is drawn (1 the same). */
@@ -62,7 +66,7 @@ public final class ChoppedLogRenderer implements BlockEntityRenderer<ChoppedLog.
 	}
 
 	@Override
-	public void extractRenderState(ChoppedLog.Entity log, State state, float partialTicks, Vec3 camera,
+	public void extractRenderState(T log, State state, float partialTicks, Vec3 camera,
 		ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
 		BlockEntityRenderer.super.extractRenderState(log, state, partialTicks, camera, breakProgress);
 		state.block.blockState = log.log();
@@ -75,6 +79,7 @@ public final class ChoppedLogRenderer implements BlockEntityRenderer<ChoppedLog.
 		}
 		state.cracks = null;
 		state.faces = null;
+		state.shade = log.shade();
 		if (log.log().getRenderShape() != RenderShape.MODEL) {
 			return;
 		}
@@ -140,6 +145,7 @@ public final class ChoppedLogRenderer implements BlockEntityRenderer<ChoppedLog.
 		// (copied: the state is filled again for the next frame)
 		TextureAtlasSprite[] sprites = state.sprites.clone();
 		int[] light = state.light.clone();
+		float dark = state.shade;
 		TextureAtlasSprite end = sprites[SIDES[grain][1].ordinal()];
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(TextureAtlas.LOCATION_BLOCKS), (pose, buffer) -> {
 			for (WoodVolume.Face face : faces) {
@@ -157,7 +163,7 @@ public final class ChoppedLogRenderer implements BlockEntityRenderer<ChoppedLog.
 				Direction side = SIDES[face.axis()][face.positive() ? 1 : 0];
 				boolean bark = face.outside() && face.axis() != grain;
 				TextureAtlasSprite sprite = bark ? sprites[side.ordinal()] : end;
-				int shade = face.outside() ? 255 : Math.round(255 * INSIDE_SHADE);
+				int shade = Math.round((face.outside() ? 255 : 255 * INSIDE_SHADE) * dark);
 				int argb = 0xFF000000 | shade << 16 | shade << 8 | shade;
 				// across the grain the texture goes by the two ways across it; along it, the grain runs down the texture
 				int a = face.axis() == grain ? (grain + 1) % 3 : 3 - face.axis() - grain;

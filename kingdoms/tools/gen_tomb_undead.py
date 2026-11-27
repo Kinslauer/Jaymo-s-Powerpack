@@ -26,6 +26,9 @@ import uuid
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ART = os.path.join(ROOT, "kingdoms", "art")
@@ -120,29 +123,40 @@ def shade(c, k):
 	return tuple(max(0, min(255, int(v * k))) for v in c)
 
 
+# The Reason look (docs/Vanilla-Style.md): a script that sets this paints each face in its light's one shade, without the
+# per-pixel jitter that made sheets look script-made. Patterns (mail, fur, grain, edges) stay.
+CLEAN = False
+
+
+def hit(lx, ly, a, b, n):
+	"""CLEAN's stand-in for a random speckle: a fixed scatter, hit on about 1 in n pixels of a face, the same every run."""
+	return (lx * a + ly * b + (lx * ly) % 3) % n == 0
+
+
 def paint_face(img, box, mat, face, rng):
 	x0, y0, x1, y1 = box
 	base = PALETTE[mat]
 	light = {"up": 1.12, "down": 0.72, "north": 1.0, "south": 0.9, "east": 0.94, "west": 0.94}[face]
 	for y in range(y0, y1):
 		for x in range(x0, x1):
-			k = light * (0.9 + rng.random() * 0.18)
+			jitter = 0.9 + rng.random() * 0.18
+			k = light * (1.0 if CLEAN else jitter)
 			c = base
 			lx, ly = x - x0, y - y0
 			if mat == "mail" and (lx + ly) % 2 == 0:
 				k *= 1.25
-			elif mat in ("fur", "tail") and rng.random() < 0.35:
+			elif mat in ("fur", "tail") and (hit(lx, ly, 2, 5, 3) if CLEAN else rng.random() < 0.35):
 				k *= 0.78 if lx % 2 else 1.2
 			elif mat in ("wood", "leather") and lx % 3 == 0:
 				k *= 0.85
 			elif mat in ("iron", "steel", "gold") and (ly == 0 or lx == 0):
 				k *= 1.25
-			elif mat == "skin" and rng.random() < 0.12:
-				c = PALETTE["bone"] if rng.random() < 0.3 else shade(base, 0.7)
+			elif mat == "skin" and (hit(lx, ly, 5, 3, 8) if CLEAN else rng.random() < 0.12):
+				c = PALETTE["bone"] if (lx + ly) % 3 == 0 and CLEAN or not CLEAN and rng.random() < 0.3 else shade(base, 0.7)
 			elif mat == "shell" and ly == 0:
 				c = PALETTE["shell_hi"]
-			elif mat == "rime" and rng.random() < 0.45:
-				c = PALETTE["tail"] if rng.random() < 0.6 else (226, 238, 244)  # fur under the frost, and the frost's glitter
+			elif mat == "rime" and (hit(lx, ly, 3, 5, 2) if CLEAN else rng.random() < 0.45):
+				c = PALETTE["tail"] if (lx * 3 + ly) % 5 < 3 and CLEAN or not CLEAN and rng.random() < 0.6 else (226, 238, 244)  # fur under the frost, and the frost's glitter
 			img.putpixel((x, y), shade(c, k) + (255,))
 
 
@@ -877,20 +891,10 @@ EGGS = {"draugr": ((84, 94, 104), (160, 232, 255)), "barrow_beetle": ((36, 50, 4
 
 
 def eggs():
-	"""Spawn eggs: the Skeleton Lord's egg's shape, shaded in each mob's two colours (base, spots)."""
+	"""Spawn eggs: vanilla's spotted egg (vanilla_egg.py) in each mob's two colours (base, spots)."""
 	assets = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms")
-	src = Image.open(os.path.join(assets, "textures", "item", "skeleton_lord_spawn_egg.png")).convert("RGBA")
 	for name, (base, spots) in EGGS.items():
-		img = Image.new("RGBA", src.size)
-		for y in range(src.height):
-			for x in range(src.width):
-				r, g, b, a = src.getpixel((x, y))
-				if a == 0:
-					continue
-				lum = (r * 0.3 + g * 0.59 + b * 0.11) / 255.0
-				spot = (x * 7 + y * 13) % 11 < 2 and 0.35 < lum < 0.9
-				img.putpixel((x, y), shade(spots if spot else base, 0.55 + lum * 0.9) + (a,))
-		img.save(os.path.join(assets, "textures", "item", name + "_spawn_egg.png"))
+		vanilla_egg.save(os.path.join(assets, "textures", "item", name + "_spawn_egg.png"), base, spots)
 		with open(os.path.join(assets, "items", name + "_spawn_egg.json"), "w", encoding="utf-8", newline="\n") as f:
 			f.write('{\n\t"model": {\n\t\t"type": "minecraft:model",\n\t\t"model": "jaymoskingdoms:item/%s_spawn_egg"\n\t}\n}\n' % name)
 		with open(os.path.join(assets, "models", "item", name + "_spawn_egg.json"), "w", encoding="utf-8", newline="\n") as f:

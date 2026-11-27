@@ -131,7 +131,16 @@ public final class Research {
 		addTopic(fears());
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (level.isClientSide() || hand != net.minecraft.world.InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel sl)
-				|| player.isShiftKeyDown() || !level.getBlockState(hit.getBlockPos()).is(Blocks.LECTERN) || shelves(sl, hit.getBlockPos()) < SHELVES) {
+				|| player.isShiftKeyDown() || !level.getBlockState(hit.getBlockPos()).is(Blocks.LECTERN)) {
+				return InteractionResult.PASS;
+			}
+			int shelves = shelves(sl, hit.getBlockPos());
+			if (shelves < SHELVES) {
+				if (sp.getMainHandItem().isEmpty() && !level.getBlockState(hit.getBlockPos()).getValue(net.minecraft.world.level.block.LecternBlock.HAS_BOOK)) {
+					// an empty lectern does nothing by itself: say how many shelves research wants round it
+					sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.station.research_shelves", SHELVES, shelves)
+						.withStyle(net.minecraft.ChatFormatting.GRAY));
+				}
 				return InteractionResult.PASS;
 			}
 			open(sp, null, hit.getBlockPos());
@@ -164,6 +173,9 @@ public final class Research {
 			public Component learn(ServerPlayer player, String subject) {
 				boolean fear = FoeStudy.fears(subject) != null && !FoeStudy.learned(player, subject);
 				FoeStudy.teach(player, subject);
+				// (a sage's lesson on a kind is also a line in the bestiary)
+				net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getOptional(net.minecraft.resources.Identifier.withDefaultNamespace(subject))
+					.ifPresent(type -> Bestiary.told(player, type));
 				Component kind = Component.translatable("entity.minecraft." + subject);
 				FoeStudy.Fears f = FoeStudy.fears(subject);
 				if (fear && f != null) {

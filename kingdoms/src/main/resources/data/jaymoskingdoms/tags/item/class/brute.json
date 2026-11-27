@@ -1,0 +1,39 @@
+{
+  "replace": false,
+  "values": [
+    "#jaymoskingdoms:bludgeons",
+    "jaymoskingdoms:school_mask_fist",
+    {
+      "id": "rogues:berserker_armor_head",
+      "required": false
+    },
+    {
+      "id": "rogues:berserker_armor_chest",
+      "required": false
+    },
+    {
+      "id": "rogues:berserker_armor_legs",
+      "required": false
+    },
+    {
+      "id": "rogues:berserker_armor_feet",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_berserker_armor_head",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_berserker_armor_chest",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_berserker_armor_legs",
+      "required": false
+    },
+    {
+      "id": "rogues:netherite_berserker_armor_feet",
+      "required": false
+    }
+  ]
+}

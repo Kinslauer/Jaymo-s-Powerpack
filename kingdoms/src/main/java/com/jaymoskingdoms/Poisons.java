@@ -67,6 +67,11 @@ import java.util.WeakHashMap;
  * <li><b>In the air</b>: a glass bottle in the other hand is filled with the gas; thrown, it breaks into a cloud
  * {@link #CLOUD_RADIUS} blocks wide that doses everyone breathing in it ({@link GasBottle}).</li>
  * </ul>
+ * <p>
+ * <b>The five harms</b> (Hunter's Road, patch 6): toxin, acid, flammable, crippling and hunting poisons are kinds too, with
+ * their own vials. What they do is Jaymo's Powers' {@code Harms} (through {@link PowersCompat#harm}), so they do nothing
+ * without Powers.
+ * <p>
  * The antidote ({@code antidote}, sold by clerics and healers) cures every one of them and vanilla poison with it.
  */
 public final class Poisons {
@@ -74,8 +79,12 @@ public final class Poisons {
 	static final int COAT_HITS = 3;
 	/** The plain poison's time (ticks), the sleep draught's, the stiffening venom's. */
 	static final int PLAIN_TICKS = 20 * 12, SLEEP_TICKS = 20 * 20, STIFF_TICKS = 20 * 8;
+	/** How long each of Powers' harms lasts (ticks): toxin, acid, flammable, crippling, hunting. A poison the body turned lasts a third of it. */
+	static final int TOXIN_TICKS = 20 * 10, ACID_TICKS = 20 * 45, FLAMMABLE_TICKS = 20 * 60, CRIPPLE_TICKS = 20 * 45, HUNT_TICKS = 20 * 90;
 	/** The truth draught lasts this long (ticks). */
 	static final int TRUTH_TICKS = 20 * 180;
+	/** Ergot's fits: the sickness and the burning limbs last this long (ticks). */
+	static final int ERGOT_TICKS = 20 * 40;
 	/** Midnight in the day's clock (ticks), and a day's length. */
 	static final long MIDNIGHT = 18000L, DAY = 24000L;
 	/** A midnight-poisoned body is sick now and then (ticks between), for this long (ticks). */
@@ -89,7 +98,12 @@ public final class Poisons {
 	/** The poisons. {@code color} is the colour of its gas and vial. */
 	public enum Kind {
 		PLAIN("poison_vial", 0x6FA03A), SLEEP("sleep_draught", 0x8A7AC8), STIFFENING("stiffening_venom", 0xB8A860),
-		TRUTH("truth_draught", 0x9ADCE8), MIDNIGHT("midnight_poison", 0x3A2A52);
+		TRUTH("truth_draught", 0x9ADCE8), MIDNIGHT("midnight_poison", 0x3A2A52),
+		/** The five harms of Jaymo's Powers ({@code Harms}), delivered by the same four ways. */
+		TOXIN("toxin_vial", 0x7FB020), ACID("acid_vial", 0xB8D030), FLAMMABLE("flammable_vial", 0xE88020), CRIPPLE("crippling_vial", 0x907060),
+		HUNT("hunting_vial", 0xB02828),
+		/** Hunter's Road, patch 7: ergot, the wheat's blight (Powers' ergot), a poison of the mind and the limbs. */
+		ERGOT("ergot_vial", 0x6A2A3A);
 
 		public final String item;
 		public final int color;
@@ -219,6 +233,18 @@ public final class Poisons {
 					victim.addTag(TRUTH_TAG);
 				}
 			}
+			case TOXIN -> harm(victim, "toxin", TOXIN_TICKS, turned);
+			case ACID -> harm(victim, "acid", ACID_TICKS, turned);
+			case FLAMMABLE -> harm(victim, "flammable", FLAMMABLE_TICKS, turned);
+			case CRIPPLE -> harm(victim, "cripple", CRIPPLE_TICKS, turned);
+			case HUNT -> harm(victim, "hunt", HUNT_TICKS, turned);
+			case ERGOT -> {
+				victim.addEffect(new MobEffectInstance(MobEffects.NAUSEA, turned ? ERGOT_TICKS / 3 : ERGOT_TICKS, 0));
+				if (!turned) {
+					victim.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, ERGOT_TICKS, 1));
+					victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ERGOT_TICKS, 0));
+				}
+			}
 			case MIDNIGHT -> {
 				if (turned) {
 					victim.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SICK_TICKS, 0));
@@ -231,6 +257,11 @@ public final class Poisons {
 			}
 		}
 		level.playSound(null, victim.getX(), victim.getEyeY(), victim.getZ(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.3F, 1.5F);
+	}
+
+	/** One of Powers' harms (nothing without Powers), for a third as long when the poison save turned it. */
+	private static void harm(LivingEntity victim, String id, int ticks, boolean turned) {
+		PowersCompat.harm(victim, id, turned ? ticks / 3 : ticks, 0);
 	}
 
 	/** Whether {@code who} has taken a truth draught that hasn't worn off: other systems (an interrogation, a talk) may read this. */
@@ -258,6 +289,7 @@ public final class Poisons {
 		who.removeEffect(MobEffects.NAUSEA);
 		who.removeEffect(MobEffects.HUNGER);
 		who.removeEffect(MobEffects.WITHER);
+		PowersCompat.clearHarms(who);
 		HeldFast.release(who);
 		who.removeAttached(MIDNIGHT_AT);
 		MIDNIGHTERS.remove(who);

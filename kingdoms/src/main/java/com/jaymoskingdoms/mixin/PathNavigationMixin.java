@@ -1,10 +1,16 @@
 package com.jaymoskingdoms.mixin;
 
+import com.jaymoskingdoms.Climbing;
 import com.jaymoskingdoms.GapJumps;
+import com.jaymoskingdoms.Passages;
 import com.jaymoskingdoms.Unstick;
+import com.jaymoskingdoms.VillagerFixes;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.pathfinder.Path;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,7 +21,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Hands every mob's walking to {@link Unstick} after each step, so one that makes no headway works itself loose, and
- * (0.7.533) to {@link GapJumps}, so a humanoid whose path stops at the edge of a gap jumps it.
+ * (0.7.533) to {@link GapJumps}, so a humanoid whose path stops at the edge of a gap jumps it; and to {@link Climbing} and
+ * {@link Passages}, so a fighter climbs the ladders and opens the doors its path goes through. A villager or golem takes
+ * a path step as reached only once truly over it ({@link VillagerFixes#reached}), so it doesn't hop for a stair too high.
  */
 @Mixin(PathNavigation.class)
 abstract class PathNavigationMixin {
@@ -26,6 +34,8 @@ abstract class PathNavigationMixin {
 	protected double speedModifier;
 	@Shadow
 	private int reachRange;
+	@Shadow
+	protected float maxDistanceToWaypoint;
 
 	@Unique
 	private final Unstick.State jaymoskingdoms$unstick = new Unstick.State();
@@ -36,5 +46,15 @@ abstract class PathNavigationMixin {
 	private void jaymoskingdoms$unstick(CallbackInfo ci) {
 		Unstick.tick(this.mob, (PathNavigation) (Object) this, this.jaymoskingdoms$unstick, this.speedModifier, this.reachRange);
 		GapJumps.tick(this.mob, (PathNavigation) (Object) this, this.jaymoskingdoms$gapJumps, this.speedModifier);
+		// a fighter climbs the ladder its path takes, and opens the doors on it
+		Climbing.tick(this.mob, (PathNavigation) (Object) this, this.speedModifier);
+		Passages.tick(this.mob, (PathNavigation) (Object) this);
+	}
+
+	@WrapOperation(method = "followThePath", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/pathfinder/Path;advance()V"))
+	private void jaymoskingdoms$reached(Path path, Operation<Void> original) {
+		if (VillagerFixes.reached(this.mob, path, this.maxDistanceToWaypoint)) {
+			original.call(path);
+		}
 	}
 }

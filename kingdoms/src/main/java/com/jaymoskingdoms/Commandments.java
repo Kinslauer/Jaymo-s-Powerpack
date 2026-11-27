@@ -322,6 +322,25 @@ public final class Commandments {
 		JaymosKingdoms.LOGGER.debug("{} broke {}'s commandment {}", sp.getName().getString(), p.key, n + 1);
 	}
 
+	/**
+	 * Forgives up to {@code how} of the commandments {@code sp} has broken, the last in the book first (an offering made while
+	 * haunted, or a patron's colossus having had its due, {@link com.jaymoskingdoms.colossus.Colossi}). How many it forgave.
+	 */
+	public static int forgive(ServerPlayer sp, int how) {
+		Kept k = state(sp);
+		int broken = k.broken, n = 0;
+		for (int i = COUNT - 1; i >= 0 && n < how; i--) {
+			if ((broken & 1 << i) != 0) {
+				broken &= ~(1 << i);
+				n++;
+			}
+		}
+		if (n > 0) {
+			sp.setAttached(KEPT, new Kept(k.patron, broken, k.day, k.today, k.wet, k.night));
+		}
+		return n;
+	}
+
 	/** (From {@link Theft#commit}) a crime, seen or not, by {@code player}. */
 	static void crime(ServerPlayer player, Theft.Crime crime, boolean seen, boolean heavy) {
 		if (THEFTS.contains(crime)) {

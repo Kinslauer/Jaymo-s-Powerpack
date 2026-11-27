@@ -120,7 +120,10 @@ public final class Hemomancy {
 		});
 		// Frenzy: your blows heal you
 		// (0.7.481) a bottle of Kitchen's blood: a vampire's thirst and a Blood Sorcerer's pool take it; anyone else retches
-		KitchenCompat.onBloodDrunk(Hemomancy::drankBottle);
+		// a bottle that remembers whose blood it is is handed to the hook with it
+		if (!KitchenCompat.onBloodBottleDrunk(Hemomancy::drankBottle)) {
+			KitchenCompat.onBloodDrunk(Hemomancy::drankBottle);
+		}
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player && entity != player && damageTaken > 0.0F
 				&& !blocked && frenzied(player)) {
@@ -427,10 +430,30 @@ public final class Hemomancy {
 
 	/** (0.7.481) {@code player} drank a bottle of blood: theirs if they're a vampire (fed, the fever eased) or a Blood Sorcerer (into the pool). */
 	static boolean drankBottle(ServerPlayer player) {
+		return drankBottle(player, net.minecraft.world.item.ItemStack.EMPTY);
+	}
+
+	/**
+	 * As {@link #drankBottle(ServerPlayer)}, for the bottle {@code bottle}: a full vampire's reserve takes its 250 mB, doubled if
+	 * the blood was a king's or lord's, halved if a Verdant's, and tastes of the donor's people ({@link BloodTaste}); a bottle
+	 * from a grate is plain blood. The donor's blood may be the one the blood asks for ({@link BloodRequests#drankOf}).
+	 */
+	static boolean drankBottle(ServerPlayer player, net.minecraft.world.item.ItemStack bottle) {
 		boolean used = false;
 		if (VampirePlayers.vampire(player)) {
 			player.heal(BOTTLE_HEAL);
-			player.getFoodData().eat(BOTTLE_FOOD, 0.6F);
+			KitchenCompat.BottleBlood blood = KitchenCompat.bottleBlood(bottle);
+			Heritage.Kind kind = blood == null ? null : BloodTaste.kindOf(blood.taste());
+			if (VampireBlood.full(player)) {
+				// (a full vampire's reserve takes the bottle's own 250 mB, as its blood is worth)
+				BloodTaste.drank(player, BloodTaste.scaled(VampireBlood.BOTTLE_MB, kind, blood != null && blood.great()), kind, true);
+				if (blood != null && blood.id() != null) {
+					BloodRequests.drankOf(player, blood.id());
+				}
+			} else {
+				// (a dhampir eats it as food)
+				VampireBlood.feedMb(player, VampireBlood.BOTTLE_MB, BOTTLE_FOOD, 0.6F);
+			}
 			// (0.7.635) and quenches their thirst
 			KitchenCompat.drink(player, VampirePlayers.BOTTLE_WATER);
 			BloodFever.bit(player);

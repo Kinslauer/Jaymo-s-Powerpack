@@ -32,8 +32,8 @@ import net.minecraft.world.entity.player.Player;
  * <li>By day under the open sky: weak; round midday ({@link #NOON_FROM}-{@link #NOON_TO}) with nothing on their head,
  * they burn.</li>
  * <li>Blood: sneak and right-click a grown villager or a realm's folk with an empty hand to drink (a bite every
- * second): it feeds them, heals them, and the bitten turn too, if they live. Two nights without it and they're
- * starving (Hunger, Weakness) until they drink. Anyone of that realm who sees it cries out (a heavy crime); at night
+ * second): it feeds them (their blood is kept in mB, {@link VampireBlood}), heals them, and the bitten turn too, if they live. Under
+ * {@link VampireBlood#STARVE_BELOW} mB they're starving (Hunger, Weakness) until they drink. Anyone of that realm who sees it cries out (a heavy crime); at night
  * they show themselves too, and the guards hunt them till dawn.</li>
  * <li>The cure, for the bitten or the turned (or a werewolf, {@link WerewolfPlayers}): a rare quest from a priest
  * ({@link Cures}).</li>
@@ -41,6 +41,9 @@ import net.minecraft.world.entity.player.Player;
  * {@link Vampires.Kind#DHAMPIR dhampir}, with none of a vampire's weaknesses (no sun, no starving, fire burns them no
  * worse) and none of its night strength, but its gifts ({@link NightGifts}). Whoever turns wakes in a crypt dug beneath
  * where they stood ({@link Lairs#crypt}), their bed a coffin.</li>
+ * <li>Andy: "it should be dug under a random area within 1000 blocks": the crypt they wake in is dug under a random spot
+ * within 1000 blocks of where they turned ({@link Lairs#farCrypt}); they are carried there during the black of the
+ * turning ({@link #CRYPT_AHEAD} before they wake), so nothing shows.</li>
  * </ul>
  */
 public final class VampirePlayers {
@@ -60,7 +63,7 @@ public final class VampirePlayers {
 	/** (0.7.630) Lapping a pool on the ground: how near the spot, the most a gulp takes (stain size), what each unit gives. */
 	static final double LAP_RANGE = 1.5;
 	static final float LAP_MOST = 0.5F, LAP_HEAL = 3.0F, LAP_FOOD = 4.0F;
-	/** Nights without blood before they starve. */
+	/** Nights a full reserve lasts with no blood taken, before they starve ({@link VampireBlood}'s drain is set to it; a Nightborn's is longer). */
 	static final int STARVE_NIGHTS = 2;
 
 	private static final Map<UUID, Long> LAST_DRINK = new HashMap<>();
@@ -99,6 +102,7 @@ public final class VampirePlayers {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LAST_DRINK.clear();
 			LAPPED.clear();
+			LAID.clear();
 		});
 	}
 
@@ -136,7 +140,7 @@ public final class VampirePlayers {
 		// (0.7.630) Andy: "is this animated?": down on hands and knees, mouth to the ground, bobbing with each gulp
 		PowersCompat.drinkAtGround(player);
 		player.heal(LAP_HEAL * drawn);
-		player.getFoodData().eat(Math.max(1, Math.round(LAP_FOOD * drawn)), 0.4F);
+		VampireBlood.feed(player, Math.max(1, Math.round(LAP_FOOD * drawn)), 0.4F);
 		KitchenCompat.drink(player, Math.max(1, Math.round(LAP_WATER * drawn)));
 		fedFromBottle(player);
 		BloodFever.bit(player);
@@ -148,17 +152,26 @@ public final class VampirePlayers {
 		return Vampires.isVampire(player);
 	}
 
-	/** Gone {@link #STARVE_NIGHTS} nights without blood (a Nightborn: {@link NightbornBlood#STARVE_NIGHTS}; also read on the client, for blood vision). */
+	/** A full vampire with under {@link VampireBlood#STARVE_BELOW} mB of blood (also read on the client, for blood vision); a dhampir never starves. */
 	public static boolean starving(Player player) {
-		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
-		return v != null && v.type() != Vampires.Kind.DHAMPIR
-			&& Vampires.nightIndex(player.level().getOverworldClockTime()) - v.fedNight() >= NightbornBlood.starveNights(player);
+		return VampireBlood.starving(player);
 	}
 
 	/** A vampire's bite on {@code player}: they'll turn at the next nightfall (unless they die first, or carry the wolf's curse). */
 	static void bitten(ServerPlayer player) {
 		// (a strong enough Arcana throws the curse off: fifth edition's save)
 		if (!Vampires.isVampire(player) && !Lycans.cursed(player) && !player.hasAttached(Vampires.BITTEN) && !Saves.resist(player, Saves.Kind.CURSE)) {
+			player.setAttached(Vampires.BITTEN, player.level().getOverworldClockTime());
+			Deeds.done(player, RoadLocks.BITTEN_DEED);
+		}
+	}
+
+	/**
+	 * The bitten start ({@link LifeStory.Start#BITTEN}): the bite is already on them when they wake, no saving throw, and they
+	 * turn at the first nightfall. Not laid on a vampire, a cursed one, or one already bitten.
+	 */
+	static void laidBite(ServerPlayer player) {
+		if (!Vampires.isVampire(player) && !Lycans.cursed(player) && !player.hasAttached(Vampires.BITTEN)) {
 			player.setAttached(Vampires.BITTEN, player.level().getOverworldClockTime());
 		}
 	}
@@ -173,7 +186,19 @@ public final class VampirePlayers {
 				continue;
 			}
 			Long bitten = player.getAttached(Vampires.BITTEN);
-			if (bitten != null && night && (nightIndex(bitten) < nightNo || NightbornBlood.oldBlood(player, bitten, clock))) {
+			Long willing = player.getAttached(OldBlood.WILLING);
+			if (willing != null && bitten == null) {
+				// (the bite was lifted some other way, a priest's rite or a rebirth: so is the Elder's blood)
+				player.removeAttached(OldBlood.WILLING);
+				willing = null;
+			}
+			// the Elder's blood waits for its new moon; any other bitten one turns at the next nightfall
+			boolean due = willing != null ? OldBlood.due(overworld, willing, nightNo)
+				: bitten != null && night && (nightIndex(bitten) < nightNo || NightbornBlood.oldBlood(player, bitten, clock));
+			if (!due) {
+				LAID.remove(player.getUUID());
+			}
+			if (due) {
 				// (0.7.654) Andy: "you pass out and then turn as well": out cold first (the black edged in blood), then they
 				// wake turned; without Powers (or no knock-out), at once as before
 				Long out = TURNING_OUT.get(player.getUUID());
@@ -186,8 +211,11 @@ public final class VampirePlayers {
 				} else if (overworld.getGameTime() >= out || overworld.getGameTime() < out - TURN_OUT_TICKS) {
 					TURNING_OUT.remove(player.getUUID());
 					turn(player, nightNo);
+				} else if (overworld.getGameTime() >= out - CRYPT_AHEAD && !LAID.containsKey(player.getUUID())) {
+					// in the black, well before they wake: carried to the crypt that was dug for them (no visible teleport)
+					LAID.put(player.getUUID(), !player.isPassenger() && Lairs.farCrypt(player.level(), player));
 				}
-			} else if (bitten != null && night) {
+			} else if (bitten != null && willing == null && night) {
 				NightbornBlood.fever(player, bitten, clock);
 			}
 			Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
@@ -219,11 +247,18 @@ public final class VampirePlayers {
 			} else if (sunlit(player)) {
 				player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, false, true));
 				long t = Math.floorMod(clock, 24000L);
-				if (t >= NOON_FROM && t < NOON_TO && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-					player.igniteForSeconds(BURN_SECONDS);
+				// kindling: the noon sun reaches further into the day and burns longer
+				boolean kindling = BloodPage.has(player, BloodPage.Pact.KINDLING);
+				long widen = kindling ? BloodPage.KINDLING_NOON_WIDEN : 0L;
+				boolean noon = t >= NOON_FROM - widen && t < NOON_TO + widen;
+				if (noon && NightCloaks.up(player)) {
+					// a night-cloak's hood up: the sun stings instead of burning
+					NightCloaks.sting(player);
+				} else if (noon && (player.getItemBySlot(EquipmentSlot.HEAD).isEmpty() || NightCloaks.wears(player))) {
+					player.igniteForSeconds(kindling ? BURN_SECONDS * BloodPage.KINDLING_BURN_TIMES : BURN_SECONDS);
 				}
 			}
-			if (nightNo - v.fedNight() >= NightbornBlood.starveNights(player)) {
+			if (VampireBlood.starving(player)) {
 				player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 40, 0, true, false, true));
 				player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, false, true));
 			}
@@ -242,22 +277,31 @@ public final class VampirePlayers {
 
 	static boolean sunlit(ServerPlayer player) {
 		ServerLevel level = player.level();
-		return !level.isRainingAt(player.blockPosition()) && level.canSeeSky(BlockPos.containing(player.getEyePosition()));
+		// (an open umbrella in hand shades them, and wears)
+		return !level.isRainingAt(player.blockPosition()) && level.canSeeSky(BlockPos.containing(player.getEyePosition())) && !Parasols.shade(player);
 	}
 
 	/** They wake changed (vaguely told: they find out the rest), in a crypt where there's room for one. */
 	private static void turn(ServerPlayer player, long nightNo) {
 		Commandments.act(player, "turned");
+		Deeds.done(player, RoadLocks.BITTEN_DEED);
 		player.removeAttached(Vampires.BITTEN);
 		boolean half = Boolean.TRUE.equals(player.removeAttached(HALF_TURN));
 		Vampires.Kind kind = half ? Vampires.Kind.DHAMPIR : Vampires.Kind.PLAYER;
 		player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(kind.name().toLowerCase(java.util.Locale.ROOT), nightNo - 1, player.level().getGameTime()));
+		VampireBlood.wake(player);
 		BloodThralls.release(player); // (0.7.332) a thrall who turns is no one's thrall
 		player.sendSystemMessage(Component.translatable(half ? "message.jaymoskingdoms.vampire.turned_half" : "message.jaymoskingdoms.vampire.turned")
 			.withStyle(ChatFormatting.DARK_RED));
 		player.level().playSound(null, player.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 0.6F, 0.5F);
 		NightbornBlood.woke(player, half);
-		if (!player.isPassenger() && Lairs.crypt(player.level(), player)) {
+		player.removeAttached(OldBlood.WILLING);
+		// (laid in it already during the black, or dug now: a death's rise, or no Powers to knock them out)
+		Boolean laid = LAID.remove(player.getUUID());
+		if (laid == null) {
+			laid = !player.isPassenger() && Lairs.farCrypt(player.level(), player);
+		}
+		if (laid) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vampire.crypt").withStyle(ChatFormatting.DARK_RED));
 		}
 	}
@@ -265,6 +309,9 @@ public final class VampirePlayers {
 	/** (0.7.654) How long the bitten lie out cold at nightfall before they wake turned (ticks), and who's out for it now. */
 	static final int TURN_OUT_TICKS = 20 * 14;
 	private static final java.util.Map<java.util.UUID, Long> TURNING_OUT = new java.util.HashMap<>();
+	/** How long before they wake (ticks) the crypt is dug and they are carried to it, still in the black; and who has been (true: laid in one). */
+	static final int CRYPT_AHEAD = 20 * 5;
+	private static final java.util.Map<java.util.UUID, Boolean> LAID = new java.util.HashMap<>();
 
 	/** (0.7.643) The colour at the edges of the black for one dying bitten (RGB). */
 	static final int BITTEN_TINT = 0xA0101C;
@@ -323,6 +370,11 @@ public final class VampirePlayers {
 			return;
 		}
 		LAST_DRINK.put(player.getUUID(), now);
+		if (HunterKit.slips(level, player, target)) {
+			// a garlic wreath or a hunter's coat: the bite slips off, and the grab can't hold
+			BloodGrab.release(player, false);
+			return;
+		}
 		long clock = level.getOverworldClockTime();
 		long nightNo = Vampires.nightIndex(clock);
 		if (quiet) {
@@ -335,8 +387,17 @@ public final class VampirePlayers {
 			target.hurtServer(level, level.damageSources().playerAttack(player), DRINK_DAMAGE);
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 3, false, false, false));
 		}
+		if (HunterKit.sour(target)) {
+			// sour blood (the garlic draught): they retch, let go, and the bite gives them nothing
+			HunterKit.retch(level, player);
+			return;
+		}
 		player.heal(DRINK_HEAL);
-		player.getFoodData().eat(DRINK_FOOD, DRINK_SATURATION);
+		// fine palate: only people's blood feeds them; a great one fed upon ages the blood
+		if (!BloodPage.palateRefuses(player, target)) {
+			BloodTaste.gulp(player, target, DRINK_FOOD, DRINK_SATURATION);
+		}
+		BloodPage.fedOn(player, target);
 		KitchenCompat.drink(player, DRINK_WATER);
 		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
 		if (v != null) {
@@ -347,6 +408,8 @@ public final class VampirePlayers {
 		// (0.7.615) a bite that doesn't infect (a sleeper, the Nether's piglins and Hornkin) never turns its prey
 		if (infect && target.isAlive() && target instanceof PathfinderMob p && !Lycans.cursed(p) && !p.hasAttached(Vampires.BITTEN)) {
 			Vampires.bite(p, clock);
+			// the one who turns them is their sire (Night's Blood: your get)
+			Fledglings.sired(p, player);
 		} else if (infect && target.isAlive() && target instanceof ServerPlayer bitten) {
 			// (0.7.185) a ravenous fever's player prey ({@link BloodFever})
 			bitten(bitten);
@@ -356,6 +419,8 @@ public final class VampirePlayers {
 		if (target instanceof ServerPlayer victim && target.isAlive()) {
 			BloodThralls.drank(player, victim, nightNo);
 		}
+		// a calm drink from a person or beast held by the stare, on one more night, binds a servant (Night's Blood: servants)
+		Servants.drank(level, player, target, nightNo);
 		BloodRequests.fed(player, target);
 		Commandments.act(player, "blood");
 		VampireMask.fed(player);

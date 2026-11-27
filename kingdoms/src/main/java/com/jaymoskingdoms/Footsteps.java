@@ -234,6 +234,10 @@ public final class Footsteps {
 			return;
 		}
 		LOOKING.put(mob, new Look(at, level.getGameTime() + LOOK_TICKS));
+		if (guard) {
+			// (GuardWatch) what he hears of someone makes him suspicious of them, by how loud it came through
+			GuardWatch.heard(mob, player, at, reach, loudness);
+		}
 		if (guard && loudness >= COME_LOUDNESS && (kind == Hearing.Kind.DECOY || kind == Hearing.Kind.SHOT || kind == Hearing.Kind.IMPACT
 			|| kind == Hearing.Kind.VOICE)) {
 			// something thrown, a shot, a voice in the night: he goes over to see

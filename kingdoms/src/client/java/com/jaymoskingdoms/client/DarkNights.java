@@ -7,7 +7,10 @@ import net.minecraft.client.renderer.state.LightmapRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.attribute.EnvironmentAttributeProbe;
 import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.MoonPhase;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 /**
  * (0.7.17) Total Darkness / True Darkness's idea (LGPL-3.0, grondag; remade here, none of its code): moonlight follows
@@ -23,6 +26,13 @@ import net.minecraft.world.level.MoonPhase;
  * light levels follows it. Only if that hook didn't take (a newer Iris) does the old way come back: the shader pack is
  * switched off for a dark night and back on at dawn (Andy, 2026-10-14). Iris is reached by reflection, so it isn't a
  * compile dependency.
+ *
+ * <p>(Hardcore Darkness's ideas, CC0; our own code) The brightness slider no longer lifts a moonless night back to
+ * grey: it keeps {@link #BRIGHTNESS_KEPT} of its pull at the darkest, eased in with the night and the waning moon (the
+ * lightmap shader lifts every light level at once, so torchlit places at night lose some of the slider too). And the
+ * Nether and the End are darker places: their ambient light is cut to {@link #NETHER_AMBIENT} and {@link #END_AMBIENT},
+ * and their fog dimmed ({@link #NETHER_FOG}, {@link #END_FOG}; mixin.moons.DarkFogMixin), so a fortress hall is lit by
+ * its lava and its fires. Shader packs light those worlds their own way and are left to it.
  */
 public final class DarkNights {
 	/** Moonlight left in each phase, from full (index 0) round to waxing gibbous (7). */
@@ -42,6 +52,12 @@ public final class DarkNights {
 	 * at night turns shaders on and off, can we remove that").
 	 */
 	static final int SHADERS_OFF_AFTER = 4, SHADERS_ON_AFTER = 15;
+	/** The share of the brightness slider's lift left at a moonless midnight (all of it by day and under a full moon). */
+	static final float BRIGHTNESS_KEPT = 0.25F;
+	/** The share of their ambient light the Nether and the End keep. */
+	static final float NETHER_AMBIENT = 0.4F, END_AMBIENT = 0.4F;
+	/** The share of their fog colour the Nether and the End keep, and the least any of its parts goes to. */
+	static final float NETHER_FOG = 0.5F, END_FOG = 0.6F, FOG_LEAST = 0.03F;
 
 	/** The night and moonlight the lightmap last saw. */
 	private static volatile float lastNight, lastMoon = 1.0F;
@@ -206,7 +222,12 @@ public final class DarkNights {
 	}
 
 	public static void apply(LightmapRenderState state, float partialTicks) {
-		if (!measure(Minecraft.getInstance(), partialTicks) || state.skyFactor >= 1.0F) {
+		Minecraft minecraft = Minecraft.getInstance();
+		float ambient = otherworld(minecraft, NETHER_AMBIENT, END_AMBIENT);
+		if (ambient < 1.0F) {
+			state.ambientColor = new Vector3f(state.ambientColor).mul(ambient);
+		}
+		if (!measure(minecraft, partialTicks) || state.skyFactor >= 1.0F) {
 			return;
 		}
 		if (com.jaymoskingdoms.client.films.LoreFilmClient.night()) {
@@ -215,6 +236,24 @@ public final class DarkNights {
 			return;
 		}
 		state.skyFactor *= Mth.lerp(lastNight, 1.0F, lastMoon);
+		state.brightness *= Mth.lerp(lastNight * (1.0F - lastMoon), 1.0F, BRIGHTNESS_KEPT);
+	}
+
+	/** {@code nether} in the Nether, {@code end} in the End, else 1. */
+	static float otherworld(Minecraft minecraft, float nether, float end) {
+		if (minecraft.level == null) {
+			return 1.0F;
+		}
+		return minecraft.level.dimension() == Level.NETHER ? nether : minecraft.level.dimension() == Level.END ? end : 1.0F;
+	}
+
+	/** (mixin.moons.DarkFogMixin) The Nether's and End's air fog, dimmed; not under water or in lava. */
+	public static void dimFog(Vector4f colour, boolean inFluid) {
+		float keep = inFluid ? 1.0F : otherworld(Minecraft.getInstance(), NETHER_FOG, END_FOG);
+		if (keep < 1.0F) {
+			colour.set(Math.max(FOG_LEAST, colour.x() * keep), Math.max(FOG_LEAST, colour.y() * keep),
+				Math.max(FOG_LEAST, colour.z() * keep), colour.w());
+		}
 	}
 
 	/**

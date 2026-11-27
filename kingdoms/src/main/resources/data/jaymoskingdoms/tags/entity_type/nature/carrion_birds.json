@@ -1,0 +1,21 @@
+{
+ "values": [
+  "jaymoskingdoms:crow",
+  {
+   "id": "naturalist:vulture",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:eagle",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:bald_eagle",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:crow",
+   "required": false
+  }
+ ]
+}

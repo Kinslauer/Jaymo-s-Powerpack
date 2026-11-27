@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskitchen:block/forage/emberstool"
+      },
+      {
+        "model": "jaymoskitchen:block/forage/emberstool",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/forage/emberstool",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/forage/emberstool",
+        "y": 270
+      }
+    ]
+  }
+}

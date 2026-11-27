@@ -20,6 +20,10 @@ import org.jspecify.annotations.Nullable;
  * click". A player's body has all they carried: the screen is wider, their armour and off hand where a mob's are, and
  * their inventory in a 9 by 4 grid beside the body (the hotbar its bottom row), then what else it was left wearing (harness,
  * baubles, web shooters, hidden blades) in a block beside that, your own inventory centred below.
+ * <p>
+ * A mob's body that wore harness (Jaymo's Kingdoms' folk, knights and guards: {@link CorpseHarness}) has the screen widened
+ * for a block of its own to the right of the pockets, one slot a place, and your inventory centred below it. A body that wore
+ * none has the plain screen.
  */
 public class CorpseLootMenu extends AbstractContainerMenu {
 	/** Where the slots sit (as the screen draws them). */
@@ -30,6 +34,9 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 		PLAYER_INVENTORY_X = (PLAYER_WIDTH - 162) / 2;
 	/** The body's well, between the armour and the hands. */
 	public static final int BODY_X = 26, BODY_Y = 17, BODY_W = 70, BODY_H = 72;
+	/** A mob's body that wore harness: where the block of its pieces starts, its columns, the screen's width, and where your inventory starts. */
+	public static final int MOB_HARNESS_X = POCKETS_X + 3 * 18 + 4, MOB_HARNESS_COLUMNS = 5, MOB_HARNESS_WIDTH = MOB_HARNESS_X + MOB_HARNESS_COLUMNS * 18 + 8,
+		MOB_HARNESS_INVENTORY_X = (MOB_HARNESS_WIDTH - 162) / 2;
 	private static final int ROW = 18, POCKET_COLUMNS = 3;
 	/** Empty-slot outlines, in {@code CorpseEntity.GEAR} order (head, chest, legs, feet, body, main hand, off hand). */
 	private static final @Nullable Identifier[] ICONS = {sprite("helmet"), sprite("chestplate"), sprite("leggings"), sprite("boots"),
@@ -42,6 +49,8 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 	private final Container container;
 	/** Client: the body, by its network id, for drawing (null if it isn't here). */
 	public final @Nullable CorpseEntity corpse;
+	/** How many places of harness this screen shows (0: none, the plain screen); decided when it opens, the same on both sides. */
+	public final int harnessPlaces;
 
 	/** Client side. */
 	public CorpseLootMenu(int id, Inventory inventory, Integer corpseId) {
@@ -61,6 +70,7 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 		this.corpse = corpse;
 		container.startOpen(inventory.player);
 		boolean player = isPlayer(corpse);
+		this.harnessPlaces = !player && corpse != null ? corpse.harnessPlaces() : 0;
 		for (int i = 0; i < CorpseLoot.GEAR; i++) {
 			// (a player's held item is in its hotbar row, and a player wears no body armour)
 			boolean shown = !player || i != MAIN_HAND && i != BODY_ARMOUR;
@@ -77,10 +87,26 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 			}
 		}
 		for (int i = 0; i < com.jaymoskitchen.corpse.CorpseEntity.EXTRA_SLOTS; i++) {
-			addSlot(new Taken(container, CorpseLoot.GEAR + CorpseLoot.PLAYER_POCKETS + i, PLAYER_EXTRAS_X + (i % PLAYER_EXTRAS_COLUMNS) * ROW,
-				TOP + (i / PLAYER_EXTRAS_COLUMNS) * ROW, null, false, player));
+			if (player) {
+				addSlot(new Taken(container, CorpseLoot.HARNESS + i, PLAYER_EXTRAS_X + (i % PLAYER_EXTRAS_COLUMNS) * ROW,
+					TOP + (i / PLAYER_EXTRAS_COLUMNS) * ROW, null, false, true));
+			} else {
+				// a mob's harness: one slot a place it had, in a block of its own
+				addSlot(new Taken(container, CorpseLoot.HARNESS + i, MOB_HARNESS_X + (i % MOB_HARNESS_COLUMNS) * ROW,
+					TOP + (i / MOB_HARNESS_COLUMNS) * ROW, null, false, i < this.harnessPlaces));
+			}
 		}
-		addStandardInventorySlots(inventory, player ? PLAYER_INVENTORY_X : 8, INVENTORY_Y);
+		addStandardInventorySlots(inventory, player ? PLAYER_INVENTORY_X : this.harnessPlaces > 0 ? MOB_HARNESS_INVENTORY_X : 8, INVENTORY_Y);
+	}
+
+	/** The screen's width: wide for a player's body, wider for a mob's that wore harness. */
+	public int width(int plain) {
+		return isPlayer(this.corpse) ? PLAYER_WIDTH : this.harnessPlaces > 0 ? MOB_HARNESS_WIDTH : plain;
+	}
+
+	/** Where your own inventory (and its label) starts across the screen. */
+	public int inventoryX() {
+		return isPlayer(this.corpse) ? PLAYER_INVENTORY_X : this.harnessPlaces > 0 ? MOB_HARNESS_INVENTORY_X : 8;
 	}
 
 	/** Whether this is a player's body (the wide screen). */
@@ -97,6 +123,53 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 		return container.stillValid(player);
 	}
 
+	/** The parts a body can lose, in the order the screen lists them (button ids {@code CUT + i}). */
+	public static final int[] PARTS = {CorpseEntity.PART_HEAD, CorpseEntity.PART_RIGHT_ARM, CorpseEntity.PART_LEFT_ARM,
+		CorpseEntity.PART_RIGHT_LEG, CorpseEntity.PART_LEFT_LEG};
+	/** Button ids: cut off {@link #PARTS}{@code [id - CUT]}; cut off the part a gear slot's attached piece is on ({@code CUT_GEAR + slot}). */
+	public static final int CUT = 0, CUT_GEAR = 10;
+
+	/** Whether parts can be cut off this body here. */
+	public boolean canCutOff() {
+		return corpse != null && corpse.canCutOff();
+	}
+
+	/** What the gear in {@code slot} is attached to ({@link CorpseEntity#attachedParts}): -1 when it can be taken. */
+	public int attached(int slot) {
+		return corpse == null || slot < 0 || slot >= CorpseLoot.GEAR ? -1 : corpse.attachedParts(this.slots.get(slot).getItem());
+	}
+
+	/** The part cutting {@code slot}'s attached piece free takes off: the first of its parts still on, or 0. */
+	public int partFor(int slot) {
+		int on = attached(slot);
+		if (on <= 0 || corpse == null) {
+			return 0;
+		}
+		for (int part : PARTS) {
+			if ((on & part) != 0 && (corpse.missing() & part) == 0) {
+				return part;
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public boolean clickMenuButton(Player player, int id) {
+		if (!(container instanceof CorpseLoot loot) || !(player.level() instanceof net.minecraft.server.level.ServerLevel level)
+			|| !container.stillValid(player)) {
+			return false;
+		}
+		int part = id >= CUT && id < CUT + PARTS.length ? PARTS[id - CUT] : id >= CUT_GEAR && id < CUT_GEAR + CorpseLoot.GEAR ? partFor(id - CUT_GEAR) : 0;
+		if (part == 0 || !loot.corpse.pickCut(part, player)) {
+			return false;
+		}
+		// picked: the screen closes, and use held on the body with the blade cuts it off
+		if (player instanceof net.minecraft.server.level.ServerPlayer server) {
+			server.closeContainer();
+		}
+		return true;
+	}
+
 	@Override
 	public ItemStack quickMoveStack(Player player, int index) {
 		if (index >= CorpseLoot.SIZE) {
@@ -104,7 +177,7 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 			return ItemStack.EMPTY;
 		}
 		Slot slot = this.slots.get(index);
-		if (!slot.hasItem()) {
+		if (!slot.hasItem() || !slot.mayPickup(player)) {
 			return ItemStack.EMPTY;
 		}
 		ItemStack stack = slot.getItem();
@@ -145,6 +218,14 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 		}
 
 		@Override
+		public boolean mayPickup(Player player) {
+			// gear attached to the body comes off only with the part under it (cut off from the screen)
+			CorpseEntity body = container instanceof CorpseLoot loot ? loot.corpse
+				: player.containerMenu instanceof CorpseLootMenu menu ? menu.corpse : null;
+			return super.mayPickup(player) && (getContainerSlot() >= CorpseLoot.GEAR || body == null || body.attachedParts(getItem()) < 0);
+		}
+
+		@Override
 		public @Nullable Identifier getNoItemIcon() {
 			return icon;
 		}
@@ -159,7 +240,7 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 		public void onTake(Player player, ItemStack stack) {
 			super.onTake(player, stack);
 			if (container instanceof CorpseLoot loot && !stack.isEmpty()) {
-				loot.corpse.lootTaken(player, getContainerSlot() < CorpseLoot.GEAR);
+				loot.corpse.lootTaken(player, getContainerSlot() < CorpseLoot.GEAR || getContainerSlot() >= CorpseLoot.HARNESS);
 			}
 		}
 	}

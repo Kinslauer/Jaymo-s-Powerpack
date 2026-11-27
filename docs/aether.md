@@ -49,12 +49,16 @@ tracks C/D (see the design notes).
 - **Enchanted Gravitite** (iron pickaxe, hardness 5.0; smelt gravitite ore): floats only while powered by redstone,
   and comes down as an item rather than a block.
 
-**Aerclouds** [AercloudBlock, BlueAercloudBlock] (translucent, wool sound, hardness 0.3; drop themselves)
-- **Cold** (white) and **Golden**: only a hair-thin plate is solid, so you sink into the cloud and stand in it. Inside,
-  your fall is forgotten and cut to 0.5% a tick, and there is never fall damage on any aercloud. Falling faster than
-  a 2.5-block fall they become a 0.9-tall box and you land on top. Stacked clouds are one solid block.
-- **Blue** (sky blue): nothing to stand on; anything sinking into it is flung up at 2 blocks/tick with a splash and a
-  boing, unless sneaking (then it is a cold cloud).
+**Aerclouds** [AercloudBlock, BlueAercloudBlock] (see-through, wool sound, hardness 0.2 like leaves; drop nothing)
+- **Cold** (white) and **Golden**: soft like leaves (`core/Leaves`; Andy: "i should fall through and punch through them
+  like leaves"). Nothing in a cloud is solid to anything that moves (players, mobs, items, arrows, falling blocks): you
+  sink through it slowly with your fall cushioned, hold Jump to climb up through it, and a hard hit (a fall past your safe
+  distance, or flying in fast) bursts the clouds you hit in a puff. There is never fall damage in any aercloud. Mobs path
+  through clouds as open air and never plan a walk onto one. Broken, a cloud just goes: no drop, Silk Touch or not.
+  Bottling one is how cloud is gathered (`cloudbottle/CloudBottle`: blue, golden and purple clouds fill a bottle of their
+  own colour, every other cloud a plain Bottle of Cloud).
+- **Blue** (sky blue): anything sinking into it is flung up at 2 blocks/tick with a splash and a boing, unless sneaking
+  (then it is a cold cloud).
 
 **Skyroot** (grey-green bark, pale planks, mint leaves): **Skyroot Log / Wood / Stripped Log / Stripped Wood /
 Planks / Leaves / Sapling**. An axe strips logs and wood (`Aether.init`). Planks come from any Aether log
@@ -141,7 +145,7 @@ does.
 - **Storm Aercloud** [StormAercloudBlock]: dark grey, crackles; inside it you take 1 lightning damage every 40 ticks.
 
 **Building** [AetherBlocks.initBuilding]
-- **Cloudwool** (2 from 2x2 cold aercloud) and **Cloudwool Carpet**, in white and the 16 dyes (dye one piece of
+- **Cloudwool** (2 from 2x2 Bottles of Cloud, the glass handed back) and **Cloudwool Carpet**, in white and the 16 dyes (dye one piece of
   cloudwool); they are in the vanilla `wool` and `wool_carpets` tags.
 - **Arkenium Lantern** (a lantern around an ambrosium torch, light 15), **Arkenium Chain**, **Arkenium Bars** (iron
   bars' shapes, from inert arkenium), all in the vanilla `lanterns`/`chains`/`bars` tags.
@@ -273,11 +277,11 @@ the Aether (`compat/OneDimensionDefaults`: high sky, Aether, Cloud Sea, Overworl
 ground, no mobs, no structures. New worlds only; a world keeps the stack it was made with.
 
 - **Cloudbank** (`CloudbankBlock`): a cold aercloud that daylight passes straight down through, so the sky under the
-  overcast stays bright. One layer you sink into and stand in; two deep is solid.
+  overcast stays bright. Soft like leaves, as every aercloud is: you fall through it slowly and can climb it with Jump.
 - **Low banks**: loose clouds about 72 blocks up the band, over about a quarter of the sky.
 - **The overcast**: one bank about 184 blocks up (between 166 and 202), 6 to 22 thick, with wells through about 6% of
-  it. From underneath it is a ceiling (find a well, or dig); from on top it is a floor, and it catches most of what
-  falls off the Aether. Dropping on out of the band's floor gives Slow Falling as leaving the Aether did (`WindAether`).
+  it. You can pass it either way: from underneath climb up through it with Jump, and whatever falls off the Aether sinks
+  through it, cushioned, and drops on into the Overworld. Dropping on out of the band's floor gives Slow Falling as leaving the Aether did (`WindAether`).
 - **Veils** (`client/aether/AetherVeil`): under the Overworld's clouds neither the Cloud Sea nor the Aether is drawn;
   above them the Cloud Sea is; the Aether only once the camera is above the overcast.
 - All of it is world generation data written by `tools/gen_cloud_sea.py` (heights, cover, thickness, wells at the top).
@@ -617,7 +621,7 @@ it is open. Opening one costs 1 durability (cold 5, golden 30, blue 3, purple 3)
 an 80-tick wait; letting go early waits 2 ticks. **Blue** throws you up 2 blocks a tick as it opens, **purple** multiplies your sideways
 speed by 6 (at least 0.2, at most 3 a tick), each once until you land. The steering is on the gliding player's own client
 (Armory's bomb glider is a vehicle, so no precedent; this is the rule quicksoil's speed cap follows: players move on their own
-side); the server counts the time, wears the item and forgets the fall. Recipes: three aerclouds of the colour over cloudtwine, a centre piece (ambrosium shard, golden amber or
+side); the server counts the time, wears the item and forgets the fall. Recipes: three bottles of cloud of the colour (plain for the cold glider) over cloudtwine, a centre piece (ambrosium shard, golden amber or
 zanite) and sticks.
 
 **Enchanted fruit**: **Enchanted Blueberry**, **Enchanted Orange**, **Enchanted Wyndberry**: 6 hunger, saturation 1.0 and
@@ -680,7 +684,7 @@ branch `26.1.2-alpha.5`; the cockatrice, zephyr and tempest animations are the J
   Put on a saddled moa it gives two rows of storage, opened by sneak-clicking; it and its load drop when the moa dies.
 - **Sentry golem**: left standing, it looks around or checks itself for six seconds every 15 to 25 seconds (their
   `look_around` and `check_self`; the beat is worked out on the client from the golem's id, nothing is sent).
-- **Cloud skiff** (`aether/mob/CloudSkiff`, item `cloud_skiff`: two cold aerclouds over three skyroot planks). Their model
+- **Cloud skiff** (`aether/mob/CloudSkiff`, item `cloud_skiff`: two Bottles of Cloud over three skyroot planks). Their model
   and unfold animation; the entity is ours. It hangs where it is left, flies where its rider looks (jump climbs), seats
   two, and a player's blow folds it back into the item. **Only the just may ride** (`Karma.just`; Andy: "Only the purest
   souls can ride these, like the nimbus cloud"): anyone else sinks through, and a rider who stops being just is dropped.

@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -39,6 +40,15 @@ public final class ZFighterBeams {
 	/** (0.16.12) The Frost-born's held beam (FrostBeam.HELD_STYLE), and the glint where it lands (blocks). */
 	static final int HELD = 3;
 	static final float HELD_GLINT = 0.12F;
+	/**
+	 * (Andy, 2026-11-25: Hand of God's heat vision is the look of the Frost-born's beam) The held beam's glow and haze
+	 * round its core (times the core's width, and their alpha), how far the core's width shivers, and how fast.
+	 */
+	static final float HELD_GLOW = 4.0F, HELD_HAZE = 9.0F, HELD_SHIVER = 0.25F, HELD_SHIVER_SPEED = 1.7F;
+	static final int HELD_GLOW_ALPHA = 0x58, HELD_HAZE_ALPHA = 0x1A;
+	/** Bright red outline colour for foes inside a beam you're holding, and how many ticks a report stays fresh. */
+	static final int TARGET_OUTLINE_COLOR = 0xFF2828;
+	static final int TARGET_TTL = 4;
 
 	private record Live(Vec3 from, Vec3 to, float radius, int color, int style, int ticks, int[] age) {
 	}
@@ -70,11 +80,37 @@ public final class ZFighterBeams {
 
 	private static final List<Live> BEAMS = new ArrayList<>();
 	private static final Map<Integer, Travel> TRAVELLING = new HashMap<>();
+	/** Entity ids currently inside your held beam -> gameTime expiry. */
+	private static final Map<Integer, Long> TARGETS = new HashMap<>();
 
 	private ZFighterBeams() {
 	}
 
+	/** Red outline colour for foes inside your held beam, or 0 if not highlighted. */
+	public static int outlineColor(Entity entity) {
+		if (TARGETS.isEmpty()) {
+			return 0;
+		}
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.level == null) {
+			return 0;
+		}
+		Long until = TARGETS.get(entity.getId());
+		return until != null && minecraft.level.getGameTime() <= until ? TARGET_OUTLINE_COLOR : 0;
+	}
+
 	static void init() {
+		ClientPlayNetworking.registerGlobalReceiver(ZFighterNet.BeamTargets.TYPE, (payload, context) -> {
+			TARGETS.clear();
+			Minecraft minecraft = Minecraft.getInstance();
+			if (minecraft.level == null) {
+				return;
+			}
+			long until = minecraft.level.getGameTime() + TARGET_TTL;
+			for (int id : payload.ids()) {
+				TARGETS.put(id, until);
+			}
+		});
 		ClientPlayNetworking.registerGlobalReceiver(ZFighterNet.BeamFx.TYPE, (fx, context) -> BEAMS.add(new Live(new Vec3(fx.fx(), fx.fy(), fx.fz()),
 			new Vec3(fx.tx(), fx.ty(), fx.tz()), fx.radius(), fx.color(), fx.style(), fx.ticks(), new int[1])));
 		ClientPlayNetworking.registerGlobalReceiver(ZFighterNet.BeamHead.TYPE, (fx, context) -> {
@@ -97,11 +133,14 @@ public final class ZFighterBeams {
 			if (minecraft.level == null) {
 				BEAMS.clear();
 				TRAVELLING.clear();
+				TARGETS.clear();
 				return;
 			}
 			if (minecraft.isPaused()) {
 				return;
 			}
+			long now = minecraft.level.getGameTime();
+			TARGETS.values().removeIf(until -> now > until);
 			for (Iterator<Travel> it = TRAVELLING.values().iterator(); it.hasNext(); ) {
 				Travel travel = it.next();
 				travel.age++;
@@ -159,7 +198,25 @@ public final class ZFighterBeams {
 		int glow = GLOW_ALPHA << 24 | color;
 		float v0 = -time * SCROLL;
 		float v1 = v0 + (float)a.distanceTo(b) * 0.5F;
-		float coreRadius = needle ? radius : radius * CORE;
+		float coreRadius = held ? radius * (1.0F + HELD_SHIVER * Mth.sin(time * HELD_SHIVER_SPEED)) : needle ? radius : radius * CORE;
+		if (held) {
+			// a white-hot core in a glow of its colour, in a faint haze, the way heat vision is drawn
+			int heldCore = 0xFF000000 | mix(color, 0xFFFFFF, 0.85F);
+			int heldGlow = HELD_GLOW_ALPHA << 24 | color;
+			int heldHaze = HELD_HAZE_ALPHA << 24 | color;
+			context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, false),
+				(pose, buffer) -> tube(buffer, pose, a, b, coreRadius, heldCore, v0, v1));
+			context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
+				(pose, buffer) -> {
+					tube(buffer, pose, a, b, radius * HELD_GLOW, heldGlow, v0 * 1.3F, v1 * 1.3F);
+					tube(buffer, pose, a, b, radius * HELD_HAZE, heldHaze, -v0 * 0.5F, -v1 * 0.5F);
+				});
+			// a glint at the hand (or eye), and a flaring one where it lands
+			float flare = 1.0F + 0.35F * Mth.sin(time * 2.3F);
+			ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), a, HELD_GLINT * 0.8F, color, time, fade);
+			ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), b, HELD_GLINT * 1.8F * flare, color, time + 20.0F, fade);
+			return;
+		}
 		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, false),
 			(pose, buffer) -> tube(buffer, pose, a, b, coreRadius, core, v0, v1));
 		if (!needle) {
@@ -168,12 +225,6 @@ public final class ZFighterBeams {
 		}
 		// a ki orb where it leaves the hands and where it ends (see ZFighterOrbs)
 		float orb = needle ? radius * 6.0F + 0.2F : radius * 2.6F;
-		if (held) {
-			// (no ki orbs: a glint at the hand and one where it lands)
-			ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), a, HELD_GLINT * 0.7F, color, time, fade);
-			ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), b, HELD_GLINT, color, time + 20.0F, fade);
-			return;
-		}
 		ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), a, orb, color, time, fade);
 		ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), b, orb * endOrb, color, time + 20.0F, fade);
 	}

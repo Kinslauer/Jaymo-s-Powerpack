@@ -165,6 +165,17 @@ public final class LifeStory {
 	 */
 	static final int FREE_TRIES = 3, FREE_STEP = 480, FREE_WIDEN = 64;
 	/**
+	 * (2026-11-26, Andy woke on the sea at the world's spawn: "i spawned in the ocean") When the wild's ring has no dry land
+	 * by the seed, the nearest that is: read from the seed in rings FAR_LAND_STEP apart out to FAR_LAND blocks from where the
+	 * setting out began, a column every FAR_LAND_SPACING blocks round each (at most FAR_LAND_READS columns read, nothing made
+	 * to read them), and the spot looked for within
+	 * FAR_LAND_NEAR blocks of it. Past that, the nearest standing village, fief or kingdom ({@link #knownLand}): land that's
+	 * there for certain, since a settlement was found on it.
+	 */
+	static final int FAR_LAND = 2048, FAR_LAND_STEP = 64, FAR_LAND_SPACING = 128, FAR_LAND_READS = 1000, FAR_LAND_NEAR = 12;
+	/** How far from a settlement's seat the spot by known land is looked for (blocks). */
+	static final int KNOWN_LAND_MIN = 8, KNOWN_LAND_MAX = 48;
+	/**
 	 * (2026-11-18, Andy: respawns were too close to the last death) A start in the wild or open land is never within
 	 * DEATH_APART blocks of where the player last died, nor further than DEATH_FAR; with no spot in its own ring, the
 	 * start falls back to the DEATH_APART-DEATH_FAR ring round the death. A start that puts them inside a town, kingdom or
@@ -260,8 +271,14 @@ public final class LifeStory {
 		HEIRLOOM(false), TRADER(false), PUP(false), NOBODIES(false),
 		// (0.7.417, the powered roads) a hermit alchemist's lab (Powers), the Mad Tinkerer's bench (Powers), the moon's curse
 		LAB(false), ANDROID(false), MOON_CURSED(false),
+		// a vampire's bite already on you: you turn at the first nightfall (the moon-cursed road's sibling)
+		BITTEN(false),
 		// (0.7.349, Andy: "new starts, involving the other worlds") woken off the overworld by Jaymo's Powers ({@link #OTHER_WORLDS})
-		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false);
+		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false),
+		// reborn a monster: the goblin people's forms (MonsterBorn), opened by naming a follower
+		MONSTERBORN(false),
+		// (Andy 2026-11-25, "curate a start like an adventure map") a start built by hand: WrittenStarts
+		WRITTEN(false);
 
 		public final boolean realm;
 
@@ -299,6 +316,7 @@ public final class LifeStory {
 		TERMS.put(Start.SKYFALL, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.WHALERS, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.VERDANT, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.WRITTEN, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.BANISHED, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.CAVE, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.BURNED, new Terms(Mark.HARD, 0));
@@ -306,6 +324,7 @@ public final class LifeStory {
 		TERMS.put(Start.UNARMED, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.DEMON, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.AFTERLIFE, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.MONSTERBORN, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.EVICTED, new Terms(Mark.HARD, EVICTED_SILVER));
 		TERMS.put(Start.SENTENCED, new Terms(Mark.HARD, SENTENCED_SILVER));
 		TERMS.put(Start.HIDEOUT, new Terms(Mark.HARD, HIDEOUT_SILVER));
@@ -327,6 +346,7 @@ public final class LifeStory {
 		TERMS.put(Start.LAB, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.ANDROID, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.MOON_CURSED, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.BITTEN, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.FATE, new Terms(Mark.VARIES, 0));
 	}
 
@@ -362,6 +382,7 @@ public final class LifeStory {
 		FATE_ODDS.put(Start.CHAINED, 2);
 		FATE_ODDS.put(Start.TIMELOST, 2);
 		FATE_ODDS.put(Start.MOON_CURSED, 2);
+		FATE_ODDS.put(Start.BITTEN, 2);
 		FATE_ODDS.put(Start.ANDROID, 2);
 		FATE_ODDS.put(Start.LAB, 2);
 		FATE_ODDS.put(Start.GREENSKIN, 2);
@@ -369,6 +390,7 @@ public final class LifeStory {
 		FATE_ODDS.put(Start.VERDANT, 2);
 		FATE_ODDS.put(Start.DEMON, 2);
 		FATE_ODDS.put(Start.AFTERLIFE, 2);
+		FATE_ODDS.put(Start.MONSTERBORN, 2);
 		FATE_ODDS.put(Start.MOON, 1);
 		FATE_ODDS.put(Start.RUSTFALL, 1);
 		FATE_ODDS.put(Start.MAW, 1);
@@ -495,7 +517,7 @@ public final class LifeStory {
 
 		/** (0.7.349, Andy: "you can start as divine born again, but only if you pick that start") The heritage a start makes you, over your birth's; null for none. */
 		public Heritage.@Nullable Kind makes() {
-			return this.start == Start.AFTERLIFE ? Heritage.Kind.DIVINE : null;
+			return this.start == Start.AFTERLIFE ? Heritage.Kind.DIVINE : this.start == Start.MONSTERBORN ? Heritage.Kind.GOBLIN : null;
 		}
 	}
 
@@ -652,13 +674,16 @@ public final class LifeStory {
 				Answer.road(Start.LAB, Items.BREWING_STAND),
 				Answer.road(Start.ANDROID, Items.IRON_INGOT),
 				Answer.road(Start.MOON_CURSED, Items.GHAST_TEAR),
+				Answer.road(Start.BITTEN, Items.FERMENTED_SPIDER_EYE),
 				Answer.road(Start.MOON, Items.END_STONE),
 				Answer.road(Start.VERDANT, Items.VINE),
 				Answer.road(Start.RUSTFALL, Items.RAW_IRON),
 				Answer.road(Start.MAW, Items.CRYING_OBSIDIAN),
 				Answer.road(Start.DEMON, Items.SOUL_LANTERN),
 				Answer.road(Start.AFTERLIFE, Items.TOTEM_OF_UNDYING),
-				Answer.road(Start.FATE, Items.ENDER_EYE)));
+				Answer.road(Start.FATE, Items.ENDER_EYE),
+				Answer.road(Start.MONSTERBORN, Items.BONE),
+				Answer.road(Start.WRITTEN, Items.CAMPFIRE)));
 			// (gb-faith) the eight patrons, each drawn by its own shrine glyph on the page (the item is the fallback picture)
 			FAITH.answers.addAll(List.of(
 				Answer.faith(Patron.HEARTHKEEPER, Items.CAMPFIRE),
@@ -775,7 +800,11 @@ public final class LifeStory {
 	 * arms and its land's dress (head, chest, legs, feet, main hand, off hand), and the harness over it (its tabard, the
 	 * levy's cloth its livery gives, {@link Harness#worn}).
 	 */
-	public record Realm(int id, String name, int climate, int colour, List<ItemStack> dress, List<ItemStack> harness) {
+	public record Realm(int id, String name, int climate, int colour, List<ItemStack> dress, List<ItemStack> harness, String patron, String creed) {
+		/** (Andy, 2026-11-26) The same, with the realm's patron and creed as they stand now (RealmGifts): what the page says it gives. */
+		Realm keeping(String patron, String creed) {
+			return new Realm(this.id, this.name, this.climate, this.colour, this.dress, this.harness, patron, creed);
+		}
 	}
 
 	/** (gb-realmcards) A realm's person as last dressed, by the realm's look (id, name, colour, kind, overlord): dressed again only when that changes (it draws gear at random). */
@@ -816,7 +845,7 @@ public final class LifeStory {
 		} finally {
 			GuardKit.preview(false);
 		}
-		Realm r = new Realm(f.id(), f.name(), climate.ordinal(), colour, List.copyOf(dress), List.copyOf(harness));
+		Realm r = new Realm(f.id(), f.name(), climate.ordinal(), colour, List.copyOf(dress), List.copyOf(harness), "", "");
 		DRESSED.put(key, r);
 		return r;
 	}
@@ -843,6 +872,8 @@ public final class LifeStory {
 					buf.writeInt(r.colour);
 					ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, r.dress);
 					ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, r.harness);
+					buf.writeUtf(r.patron);
+					buf.writeUtf(r.creed);
 				}
 				buf.writeVarInt(p.mates.size());
 				for (Mate m : p.mates) {
@@ -864,7 +895,7 @@ public final class LifeStory {
 				List<Realm> realms = new ArrayList<>(n);
 				for (int i = 0; i < n; i++) {
 					realms.add(new Realm(buf.readVarInt(), buf.readUtf(), buf.readVarInt(), buf.readInt(), List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf)),
-						List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf))));
+						List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf)), buf.readUtf(), buf.readUtf()));
 				}
 				int m = buf.readVarInt();
 				List<Mate> mates = new ArrayList<>(m);
@@ -988,6 +1019,29 @@ public final class LifeStory {
 		}
 	}
 
+	/**
+	 * Server → player: the story sent back was refused, and why ({@code reason}: realm, road, blood, class, flaws or
+	 * unanswered). The story screen comes back at once with the reason on it, so a life that can't be lived is never
+	 * the same page coming back with no word of what's wrong.
+	 */
+	public record Refused(String reason) implements CustomPacketPayload {
+		public static final Type<Refused> TYPE = new Type<>(JaymosKingdoms.id("story_refused"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Refused> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeUtf(p.reason), buf -> new Refused(buf.readUtf(64)));
+
+		@Override
+		public Type<Refused> type() {
+			return TYPE;
+		}
+	}
+
+	/** Tells {@code player}'s story screen why the story it sent was refused ({@link Refused}). */
+	private static void refuse(ServerPlayer player, String reason) {
+		if (ServerPlayNetworking.canSend(player, Refused.TYPE)) {
+			ServerPlayNetworking.send(player, new Refused(reason));
+		}
+	}
+
 	private LifeStory() {
 	}
 
@@ -1016,6 +1070,7 @@ public final class LifeStory {
 		net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(LifeStory::leftWorld);
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(LifeStory::leftBand);
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Refused.TYPE, Refused.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Live.TYPE, Live.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Live.TYPE, (payload, context) -> live(context.player(), payload));
 		PayloadTypeRegistry.serverboundPlay().register(Skipped.TYPE, Skipped.CODEC);
@@ -1106,6 +1161,8 @@ public final class LifeStory {
 				n++;
 			}
 		}
+		// (Andy, 2026-11-26) what the realm named gave: its land's and its creed's points (RealmGifts)
+		n += RealmGifts.points(player, stat);
 		// (0.7.349) years under Rustfall's weight
 		if (stat == RUSTFALL_STAT && startedAs(player, Start.RUSTFALL)) {
 			n++;
@@ -1200,7 +1257,8 @@ public final class LifeStory {
 		List<Realm> realms = new ArrayList<>();
 		for (Faction f : Factions.all(server)) {
 			if (f.type().isRealm() && !f.fallen()) {
-				realms.add(dressed(Factions.level(server), f));
+				Patron patron = RealmFaiths.patron(server, f);
+				realms.add(dressed(Factions.level(server), f).keeping(patron == null ? "" : patron.key, GreatWars.creed(server, f).key()));
 			}
 		}
 		ServerPlayNetworking.send(player, new Open(forced, List.copyOf(realms), untold(player) && McaCompat.destinyPending(player), mates(player),
@@ -1266,14 +1324,21 @@ public final class LifeStory {
 		Answer born = at(Question.BORN, live.answers()), raised = at(Question.RAISED, live.answers()), child = at(Question.CHILDHOOD, live.answers()),
 			youth = at(Question.YOUTH, live.answers()), turn = at(Question.TURN, live.answers()), road = at(Question.ROAD, live.answers()),
 			faith = at(Question.FAITH, live.answers());
+		// A road with no realm to name (never named, or the realm has fallen) while MCA's creator is still to come waits for
+		// after it like any road does, rather than refusing the whole story (Andy was stuck on the story page over this)
+		if (road != null && road.realm && realm(server, live.roadRealm()) == null && McaCompat.destinyPending(player)) {
+			road = null;
+		}
 		// (0.7.356) with MCA's creator still to come, the road is told after it ({@link #road})
 		boolean later = road == null && McaCompat.destinyPending(player);
 		if (born == null || raised == null || child == null || youth == null || road == null && !later || powers() && turn == null
 			|| road != null && !road.offered()) {
+			refuse(player, "unanswered");
 			return;
 		}
 		// (0.7.420) at most two flaws, known ids only: the client is not trusted with that
 		if (!Flaws.valid(live.flaws(), live.switches())) {
+			refuse(player, "flaws");
 			return;
 		}
 		// (0.7.419) a locked road is only for a deed done in this world or a past that opens it: the client is not trusted with that
@@ -1281,6 +1346,7 @@ public final class LifeStory {
 			Answer a = at(q, live.answers());
 			return a == null ? null : a.key;
 		})) {
+			refuse(player, "road");
 			return;
 		}
 		// the heritage and class picked over the story's, if any: a heritage open to them, any class
@@ -1288,6 +1354,7 @@ public final class LifeStory {
 		if (live.heritage() >= 0) {
 			Heritage.Kind[] kinds = Heritage.Kind.values();
 			if (live.heritage() >= kinds.length || !Heritage.unlocked(player, kinds[live.heritage()])) {
+				refuse(player, "blood");
 				return;
 			}
 			heritage = kinds[live.heritage()];
@@ -1295,15 +1362,18 @@ public final class LifeStory {
 		// (0.7.448) the questions asked were the birthplace's: an answer for another blood (a vat-born's Tinkerer) is refused
 		for (Answer a : new Answer[] {raised, child, youth, turn}) {
 			if (a != null && !a.fits(born.heritage)) {
+				refuse(player, "blood");
 				return;
 			}
 		}
 		// (0.7.349) the Verdant World's start is the Verdant-born's alone (0.7.355: the demon master's, the Emberborn's); the afterlife's makes you Divine-born
 		if (road != null && !road.fits(heritage)) {
+			refuse(player, "road");
 			return;
 		}
 		// (0.7.501) an earned blood (the Bio-built's vats) is only born to one it has woken in, unless the road makes another
 		if ((road == null || road.makes() == null) && !Heritage.unlocked(player, heritage)) {
+			refuse(player, "blood");
 			return;
 		}
 		if (road != null && road.makes() != null) {
@@ -1318,6 +1388,7 @@ public final class LifeStory {
 		Faction nobleRealm = raised.realm ? realm(server, live.raisedRealm()) : null;
 		Faction roadRealm = road != null && road.realm ? realm(server, live.roadRealm()) : null;
 		if (raised.realm && nobleRealm == null || road != null && road.realm && roadRealm == null) {
+			refuse(player, "realm");
 			return;
 		}
 		Classes.PlayerClass[] classes = Classes.PlayerClass.values();
@@ -1326,6 +1397,7 @@ public final class LifeStory {
 		// (class trees) a youth that drifted makes no class yet
 		boolean classless = cls == null && youth.cls == null && live.cls() < 0;
 		if (!classless && (cls == null || !cls.options.isEmpty() && option.isEmpty())) {
+			refuse(player, "class");
 			return;
 		}
 		// (Andy, 2026-11-17) a Cleric serves the patron they grew up praying to; only one with no faith in their story picks.
@@ -1370,8 +1442,11 @@ public final class LifeStory {
 			}
 			PowersCompat.affinity(player, power);
 		}
+		// (Andy, 2026-11-26) the realm a noble family held its title in gives what it gives its own (RealmGifts)
+		RealmGifts.clear(player);
 		if (nobleRealm != null) {
 			atLeast(player, nobleRealm, NOBLE_REPUTATION);
+			RealmGifts.give(player, nobleRealm, false);
 		}
 
 		if (road == null) {
@@ -1404,6 +1479,7 @@ public final class LifeStory {
 		Answer road = payload.road() >= 0 && payload.road() < roads.size() ? roads.get(payload.road()) : null;
 		Heritage.Kind heritage = Heritage.of(player);
 		if (road == null || !road.offered() || !road.fits(heritage)) {
+			refuse(player, "road");
 			return;
 		}
 		// (0.7.419) the same lock check as the whole story's: the past is the story told before the creator
@@ -1411,10 +1487,12 @@ public final class LifeStory {
 			Answer a = answer(player, q);
 			return a == null ? null : a.key;
 		})) {
+			refuse(player, "road");
 			return;
 		}
 		Faction roadRealm = road.realm ? realm(player.level().getServer(), payload.roadRealm()) : null;
 		if (road.realm && roadRealm == null) {
+			refuse(player, "realm");
 			return;
 		}
 		if (road.makes() != null && heritage != road.makes()) {
@@ -1850,6 +1928,7 @@ public final class LifeStory {
 					to = spot(level, mate, named.seat(), CITY_MIN, CITY_MAX, random, true);
 					if (to != null) {
 						atLeast(player, named, SWORN_REPUTATION);
+						RealmGifts.give(player, named, true);
 						if (Factions.of(server, player.getUUID()) == null) {
 							Factions.update(server, named.id(), f -> f.withMember(player.getUUID(), new Faction.Member(Rank.PEASANT.ordinal(), 0)));
 						}
@@ -2104,6 +2183,18 @@ public final class LifeStory {
 					MoonCurse.curse(player);
 				}
 			}
+			case BITTEN -> {
+				// the same landing as the moon's mark (the wild, or the edge of a village if one stands near), with the bite laid on
+				// them: they turn at the first nightfall like any bitten player ({@link VampirePlayers})
+				BlockPos village = mate == null && random.nextBoolean() ? Scout.nearest(level, StructureTags.VILLAGE, spawn, STRUCTURE_SEARCH) : null;
+				to = village != null ? spot(level, null, village, MOON_CURSED_VILLAGE_MIN, MOON_CURSED_VILLAGE_MAX, random, true) : null;
+				if (to == null) {
+					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
+				}
+				if (to != null) {
+					VampirePlayers.laidBite(player);
+				}
+			}
 			case LAB, ANDROID -> {
 				// (0.7.417) Powers builds the lab or the workshop a walk from where the player stands and wakes them in it: with a mate,
 				// stand them by the mate first, so the new one is raised in the same stretch of country (it builds its own room)
@@ -2204,9 +2295,28 @@ public final class LifeStory {
 					return start;
 				}
 			}
-			case WILD, UNARMED, FATE -> {
-				// the unarmed start sets out from the wild too
-				if (start == Start.UNARMED) {
+			case WRITTEN -> {
+				// (Written starts) a build of the start's maker, raised for you out in the wild on level ground (its land made
+				// behind the loading screen first), woken in where its maker marked. A party mate's: beside them, in theirs.
+				if (mate != null) {
+					WrittenStarts.share(player, server.getPlayerList().getPlayer(mate.who));
+					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
+				} else {
+					BlockPos near = spot(level, null, spawn, WILD_MIN, WILD_MAX, random);
+					WrittenStarts.Raised raised = WrittenStarts.raise(level, player, near, random, setOut);
+					if (raised != null) {
+						player.teleportTo(level, raised.feet().x, raised.feet().y, raised.feet().z, Set.<net.minecraft.world.entity.Relative>of(), raised.yaw(), 0.0F, false);
+						landSafely(player);
+						home(player, level, player.blockPosition());
+						landedAt(player, Start.WRITTEN, -1, player.blockPosition(), -1, raised.place());
+						WrittenStarts.begin(player);
+						return Start.WRITTEN;
+					}
+				}
+			}
+			case WILD, UNARMED, FATE, MONSTERBORN -> {
+				// the unarmed start sets out from the wild too, and the monster-born wake in it
+				if (start == Start.UNARMED || start == Start.MONSTERBORN) {
 					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
 				}
 			}
@@ -2235,6 +2345,14 @@ public final class LifeStory {
 				wanted.forget();
 			}
 			to = spot(level, start == Start.WILD ? mate : null, spawn, WILD_MIN, WILD_MAX, random);
+			// (2026-11-26, Andy woke on the sea at the world's spawn) a ring with no dry land asked for nothing: the nearest
+			// the seed shows past it, else land a settlement stands on, rather than giving up there and then
+			if (to == null && (wanted == null || wanted.freshChunks.isEmpty())) {
+				to = farWild(level, spawn, random);
+			}
+			if (to == null && (wanted == null || wanted.freshChunks.isEmpty())) {
+				to = knownLand(level, spawn, random, false);
+			}
 		}
 		if (to == null) {
 			if (wanted != null && wanted.waitFor(false)) {
@@ -2243,6 +2361,10 @@ public final class LifeStory {
 			// (Andy 2026-11-14: "yes i want that") given up on: the land made for this start while they waited, rather
 			// than wherever stasis let them down (the world's spawn, where the last life may just have ended)
 			to = wanted != null ? madeGround(level, wanted) : null;
+		}
+		if (to == null) {
+			// (2026-11-26) nor that: a settlement's own land, loaded now, rather than the world's spawn out on the sea
+			to = knownLand(level, spawn, random, true);
 		}
 		if (to == null) {
 			if (!aloft(player.level(), player.blockPosition())) {
@@ -2271,6 +2393,10 @@ public final class LifeStory {
 			landed == Start.CHAINED ? StoryHard.shackleCamp(player) : landed == Start.CAPTIVE && held != null ? held.camp() : -1, yours);
 		if (landed == Start.SKYFALL) {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SKYFALL_TICKS, 0));
+		}
+		if (landed == Start.WRITTEN) {
+			// (woken beside a party mate in their written start: its tale is yours too)
+			WrittenStarts.begin(player);
 		}
 		if (landed == Start.BURNED) {
 			// (0.7.501, Andy) smoke-sick from the fire you woke in
@@ -2440,12 +2566,21 @@ public final class LifeStory {
 	/** The same, only where {@code ok} (a column, its y unused), in land already made ({@link #reach}). */
 	private static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random,
 		java.util.function.Predicate<BlockPos> ok) {
+		return ground(level, center, min, max, random, ok, true);
+	}
+
+	/**
+	 * The same; {@code bySeed} false: land known to be there (a settlement's, {@link #knownLand}), so its chunks are asked
+	 * for as they are, without the seed's say or Chunky's edge (a settlement's land was made already when it was found).
+	 */
+	private static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random,
+		java.util.function.Predicate<BlockPos> ok, boolean bySeed) {
 		int[] made = {NEW_CHUNKS};
 		Wanted wanted = WANTED;
 		// (2026-11-20) columns of land not made yet read from the seed, and how many of them came out dry land
 		int[] foreseen = {0, 0};
 		long since = System.nanoTime();
-		if (wanted != null) {
+		if (wanted != null && bySeed) {
 			// (2026-11-17) a start stands you only in the land Chunky has made ({@link Pregen}), where it's known
 			java.util.function.Predicate<BlockPos> given = ok;
 			int asked = wanted.freshChunks.size();
@@ -2611,6 +2746,9 @@ public final class LifeStory {
 		int tries;
 		/** When the first wait began (System.nanoTime), or 0: none yet. */
 		long waitingSince;
+		/** (2026-11-26) The nearest dry land the seed showed past the wild's ring ({@link #farLand}), once read; null: none. */
+		@Nullable BlockPos farLand;
+		boolean farLandRead;
 
 		Wanted(BlockPos origin) {
 			this.origin = origin.immutable();
@@ -2740,6 +2878,10 @@ public final class LifeStory {
 	 * the place couldn't be found), {@code landed} where they woke (its place's things).
 	 */
 	private static void kit(ServerPlayer player, Start start, Start landed, Answer raised, Classes.PlayerClass cls, String option, RandomSource random) {
+		if (landed == Start.WRITTEN && WrittenStarts.bare(player)) {
+			// (a written start that says so: only what its maker put in the build, and what its tale hands over)
+			return;
+		}
 		if (start == Start.SWORN) {
 			// a realm's sworn guard: an iron helmet, a chainmail chestplate, an iron sword and a shield
 			for (Item item : List.of(Items.IRON_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.IRON_SWORD, Items.SHIELD)) {
@@ -2807,6 +2949,9 @@ public final class LifeStory {
 		}
 		if (landed == Start.HIDEOUT) {
 			give(player, purse(player, HIDEOUT_SILVER));
+		}
+		if (landed == Start.MONSTERBORN) {
+			MonsterBorn.wake(player);
 		}
 		if (landed == Start.GREENSKIN) {
 			// (0.7.443) what the camp gave you: hide on your back, a stone axe, and a goblin's mask (theirs know you by it)
@@ -3052,7 +3197,8 @@ public final class LifeStory {
 
 	/** (0.7.412) The starts that tell you a line on waking (lang {@code message.jaymoskingdoms.story.<start>}). */
 	static final Set<Start> HARD_MESSAGES = Set.of(Start.CAPTIVE, Start.TIMELOST, Start.CHAINED, Start.ROCK_BOTTOM, Start.SENTENCED, Start.EVICTED,
-		Start.HIDEOUT, Start.CAST_OUT, Start.GREENSKIN, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES, Start.LAB, Start.ANDROID, Start.MOON_CURSED);
+		Start.HIDEOUT, Start.CAST_OUT, Start.GREENSKIN, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES, Start.LAB, Start.ANDROID, Start.MOON_CURSED,
+		Start.BITTEN, Start.MONSTERBORN);
 
 	/**
 	 * (0.7.417, Start Together) Where a player's road set them down: the start that came to pass, the realm it named (-1: none),
@@ -3320,6 +3466,124 @@ public final class LifeStory {
 		return at;
 	}
 
+	/**
+	 * (2026-11-26, Andy: "i spawned in the ocean") A spot in the wild by the nearest dry land the seed shows round {@code center}
+	 * ({@link #FAR_LAND}), when the wild's own ring had none: the start's ring fell all on the sea. Read once a setting out
+	 * ({@link Wanted#farLand}); its chunks are then asked for as any start's are. Null: the seed shows no free dry land that near.
+	 */
+	private static @Nullable BlockPos farWild(ServerLevel level, BlockPos center, RandomSource random) {
+		java.util.function.Predicate<BlockPos> ok = p -> freeSpot(level, p) && awayFromDeath(p);
+		Wanted wanted = WANTED;
+		BlockPos dry;
+		if (wanted != null && wanted.farLandRead) {
+			dry = wanted.farLand;
+		} else {
+			dry = farLand(level, center, p -> Pregen.inside(level, p) && ok.test(p));
+			if (wanted != null) {
+				wanted.farLandRead = true;
+				wanted.farLand = dry;
+			}
+		}
+		if (dry == null) {
+			return null;
+		}
+		if (wanted != null && level.getChunkSource().getChunkNow(dry.getX() >> 4, dry.getZ() >> 4) == null) {
+			// (the dry column itself is made for the next try, whatever the few drawn round it come to)
+			wanted.want(dry.getX(), dry.getZ());
+		}
+		BlockPos at = ground(level, dry, 0, FAR_LAND_NEAR, random, ok);
+		if (at == null && level.getChunkSource().getChunkNow(dry.getX() >> 4, dry.getZ() >> 4) != null) {
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, dry);
+			if (!aloft(level, top) && standable(level, top)) {
+				at = top;
+			}
+		}
+		return at;
+	}
+
+	/**
+	 * The nearest column to {@code center} that the seed says will be dry ground ({@link #foreseenDry}) and {@code ok} takes,
+	 * read in rings out to {@link #FAR_LAND} ({@link #FAR_LAND_READS} columns at most); null if none. Nothing is made or loaded.
+	 */
+	private static @Nullable BlockPos farLand(ServerLevel level, BlockPos center, java.util.function.Predicate<BlockPos> ok) {
+		long since = System.nanoTime();
+		int reads = 0;
+		BlockPos found = null;
+		rings:
+		for (int r = FAR_LAND_STEP; r <= FAR_LAND; r += FAR_LAND_STEP) {
+			int around = Math.max(8, (int) (2.0 * Math.PI * r / FAR_LAND_SPACING));
+			// (each ring begins at its own angle, so the columns of one don't line up behind the last's)
+			double turn = r * 0.618 * Math.PI;
+			for (int i = 0; i < around; i++) {
+				double angle = turn + i * 2.0 * Math.PI / around;
+				BlockPos column = new BlockPos(center.getX() + Mth.floor(Math.cos(angle) * r), 0, center.getZ() + Mth.floor(Math.sin(angle) * r));
+				if (!ok.test(column)) {
+					continue;
+				}
+				if (reads++ >= FAR_LAND_READS) {
+					break rings;
+				}
+				if (foreseenDry(level, column.getX(), column.getZ())) {
+					found = column;
+					break rings;
+				}
+			}
+		}
+		JaymosKingdoms.LOGGER.info("A start's search past the wild's ring read {} columns from the seed in {} ms: {}", reads,
+			(System.nanoTime() - since) / 1_000_000L, found == null ? "no dry land" : "dry land at " + found.getX() + ", " + found.getZ());
+		return found;
+	}
+
+	/**
+	 * (2026-11-26) A spot by land known to be there: the nearest standing village, fief or kingdom's seat to {@code center}
+	 * ({@link #KNOWN_LAND_MIN}-{@link #KNOWN_LAND_MAX} blocks from it), one nobody else's start took first if any is, for when
+	 * neither the wild's ring nor the seed past it held dry land. Its chunks are asked for as a start's are; {@code now}: none
+	 * will be waited for any more, so the seat's own chunk is loaded here (made already: the settlement was found on it) and
+	 * a spot taken in it. Null: no settlement stands to go by.
+	 */
+	private static @Nullable BlockPos knownLand(ServerLevel level, BlockPos center, RandomSource random, boolean now) {
+		if (level != Factions.level(level.getServer())) {
+			return null;
+		}
+		Faction seat = null;
+		boolean seatFree = false;
+		for (Faction f : Factions.all(level.getServer())) {
+			if (f.seat() == null || f.fallen() || f.type() == FactionType.BARBARIAN || aloft(level, f.seat()) || MILD && !HarshLands.temperate(level, f.seat())) {
+				continue;
+			}
+			boolean free = freePlace(level, f.seat());
+			if (seat == null || free && !seatFree || free == seatFree && flat(f.seat(), center) < flat(seat.seat(), center)) {
+				seat = f;
+				seatFree = free;
+			}
+		}
+		if (seat == null) {
+			return null;
+		}
+		BlockPos at = seat.seat();
+		JaymosKingdoms.LOGGER.info("A start found no dry land by the seed; going by {}'s land at {}, {}", seat.name(), at.getX(), at.getZ());
+		if (!now) {
+			return ground(level, at, KNOWN_LAND_MIN, KNOWN_LAND_MAX, random, p -> freeSpot(level, p), false);
+		}
+		net.minecraft.world.level.chunk.ChunkAccess chunk = level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+		BlockPos any = null;
+		for (int dx = 0; dx < 16; dx += 3) {
+			for (int dz = 0; dz < 16; dz += 3) {
+				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, chunk.getPos().getWorldPosition().offset(dx, 0, dz));
+				if (aloft(level, top) || !standable(level, top)) {
+					continue;
+				}
+				if (openGround(level.getBlockState(top.below()))) {
+					return top;
+				}
+				if (any == null) {
+					any = top;
+				}
+			}
+		}
+		return any;
+	}
+
 	/** Where {@code player} last died in the Overworld (the vanilla record, kept through the new life), or null: nowhere known. */
 	private static @Nullable BlockPos lastDeath(ServerPlayer player) {
 		return player.getLastDeathLocation().filter(d -> d.dimension().equals(player.level().getServer().overworld().dimension()))
@@ -3506,6 +3770,8 @@ public final class LifeStory {
 		Skills.refresh(player);
 		// the old life's companions live on, lost (docs/Pawn-Plan.md H3); before MCA forgets who they followed
 		Masterless.forsaken(player);
+		// their next of kin, asked of MCA's family tree before it forgets them (the bank pays out to them)
+		java.util.UUID heir = McaCompat.heir(player);
 		// Tiv: "EVERYTHING should be reset on a reincarnate". MCA's villagers forget the player (hearts, memories,
 		// relationships), the player leaves their party, and no captain remembers having met them. This runs before
 		// MCA's creator opens, so the reset can't wipe the new character being made in it.
@@ -3514,12 +3780,17 @@ public final class LifeStory {
 		}
 		Parties.reborn(player);
 		Tales.reborn(player);
+		// (the written start the last life woke in stays standing in the world; it's no longer theirs)
+		player.removeAttached(WrittenStarts.PLACED);
 		QuestPast.reborn(player);
 		Overheard.reborn(player);
+		Banks.reborn(player, heir);
 		Captains.forgetPlayer(player.level().getServer(), player);
 		// our own villagers and folk forget them too: whatever they remembered, suspected or swore against the old life
 		Recollections.bornAnew(player);
 		McaCompat.newDestiny(player);
+		// a brand-new character: Kitchen's first-wake grace from the cold and heat is theirs again
+		KitchenCompat.newCharacter(player);
 		return reincarnate(player);
 	}
 

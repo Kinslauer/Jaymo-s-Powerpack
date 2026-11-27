@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:iron_nugget",
+    "minecraft:glass_pane",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "jaymospowers:testing_needle",
+    "count": 1
+  }
+}

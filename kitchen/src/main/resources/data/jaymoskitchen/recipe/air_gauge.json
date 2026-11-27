@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "CGC",
+    "CTC",
+    "CRC"
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "G": "minecraft:glass_pane",
+    "T": "jaymoskitchen:thermometer",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "jaymoskitchen:air_gauge"
+  }
+}

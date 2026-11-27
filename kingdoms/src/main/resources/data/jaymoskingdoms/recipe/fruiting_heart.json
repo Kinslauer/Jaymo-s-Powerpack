@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "jaymoskitchen"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LTL",
+    "MCM",
+    "LTL"
+  ],
+  "key": {
+    "L": "jaymoskingdoms:lumen_spores",
+    "T": "jaymoskitchen:truffle",
+    "M": "jaymoskingdoms:mycoleather",
+    "C": "jaymoskingdoms:mycelial_core"
+  },
+  "result": {
+    "id": "jaymoskingdoms:fruiting_heart",
+    "count": 1
+  }
+}

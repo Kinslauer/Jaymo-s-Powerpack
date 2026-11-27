@@ -1,0 +1,36 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "allowFillers": false,
+  "minfloors": 4,
+  "maxfloors": 4,
+  "maxcellars": 0,
+  "parts": [
+    {
+      "floor": 0,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_airvent_0"
+    },
+    {
+      "floor": 1,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_airvent_1"
+    },
+    {
+      "floor": 2,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_airvent_2"
+    },
+    {
+      "floor": 3,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_airvent_3"
+    },
+    {
+      "floor": 4,
+      "top": true,
+      "part": "jaymospowers:maw/base/base_airvent_4"
+    }
+  ]
+}

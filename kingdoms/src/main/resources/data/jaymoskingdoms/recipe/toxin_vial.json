@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "jaymospowers"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:poison",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:pufferfish",
+    "minecraft:fermented_spider_eye"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:toxin_vial"
+  }
+}

@@ -28,7 +28,7 @@ public final class HeritageMovesClient {
 	static final int CHARGE_HOLD = 4, REFRESH = 5;
 	/** The bar's width (pixels) and its colours. (HUD rework) Where it goes is the ABOVE zone's. */
 	static final int BAR_WIDTH = 52;
-	static final int STORM_COLOR = 0x8FD3FF, DAWN_COLOR = 0xFFD45A, FULL_COLOR = 0xFFFFFF;
+	static final int STORM_COLOR = 0x8FD3FF, DAWN_COLOR = 0xFFD45A, SYLVAN_COLOR = 0x7FCF6A, FULL_COLOR = 0xFFFFFF;
 	/** The pose's blood on everyone charging ({@link HeritageMoves#STORM} or {@link HeritageMoves#DAWN}), or null. */
 	static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymospowers:heritage_charge");
 
@@ -80,13 +80,14 @@ public final class HeritageMovesClient {
 		}
 		boolean storm = HeritageMoves.blood(player) == HeritageMoves.STORM;
 		boolean full = charge >= 1.0F;
-		int color = full ? FULL_COLOR : storm ? STORM_COLOR : DAWN_COLOR;
+		boolean sylvan = HeritageMoves.blood(player) == HeritageMoves.SYLVAN;
+		int color = full ? FULL_COLOR : storm ? STORM_COLOR : sylvan ? SYLVAN_COLOR : DAWN_COLOR;
 		// (HUD rework) charge bar: ABOVE zone, row 31
 		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:heritage_charge", 31, BAR_WIDTH, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
 		if (at == null) {
 			return;
 		}
-		String move = storm ? "thunderclap" : "sunflare";
+		String move = storm ? "thunderclap" : sylvan ? "woodpath" : "sunflare";
 		Component label = Component.translatable("hud.jaymospowers.heritage." + move + (full ? ".full" : ""));
 		com.jaymospowers.client.hud.HudStyle.labelledBar(graphics, minecraft.font, label.copy().withColor(color), at[0], at[1], BAR_WIDTH, Mth.clamp(charge, 0.0F, 1.0F), color);
 	}
@@ -113,6 +114,15 @@ public final class HeritageMovesClient {
 			h.rightArm.xRot = -Mth.PI + 0.1F;
 			h.rightArm.yRot = 0.0F;
 			h.rightArm.zRot = -0.12F;
+		} else if (pose == HeritageMoves.SYLVAN) {
+			// both palms laid low and open before the body, on the wood
+			float aim = -Mth.HALF_PI * 0.5F;
+			h.rightArm.xRot = aim;
+			h.rightArm.yRot = -0.2F;
+			h.rightArm.zRot = 0.0F;
+			h.leftArm.xRot = aim;
+			h.leftArm.yRot = 0.2F;
+			h.leftArm.zRot = 0.0F;
 		} else if (pose == HeritageMoves.DAWN) {
 			float aim = -Mth.HALF_PI + avatar.xRot * Mth.DEG_TO_RAD;
 			h.rightArm.xRot = aim;

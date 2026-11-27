@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "jaymoskingdoms:inkcap_stem"
+  },
+  "result": {
+    "id": "jaymoskingdoms:inkcap_hyphae",
+    "count": 3
+  },
+  "group": "bark"
+}

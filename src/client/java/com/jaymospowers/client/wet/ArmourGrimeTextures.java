@@ -130,17 +130,22 @@ public final class ArmourGrimeTextures {
 
 	/** The same with {@code rust} ({@link Rust}) pitted into the metal under the blood and grime. */
 	public static Identifier armour(Identifier base, ArmourGrime.@Nullable Grime grime, Bloodied.@Nullable Blood blood, int rust) {
+		return armour(base, grime, blood, rust, NO_HOLES);
+	}
+
+	/** The same with the {@code holes} ({@link com.jaymospowers.core.ArmourHoles}) worn into the piece punched through it last. */
+	public static Identifier armour(Identifier base, ArmourGrime.@Nullable Grime grime, Bloodied.@Nullable Blood blood, int rust, int[] holes) {
 		boolean dirty = grime != null && grime.amount() > 0;
 		Smear smear = smear(blood);
 		int rusted = rustStage(rust);
-		if (!dirty && smear == null && rusted == 0) {
+		if (!dirty && smear == null && rusted == 0 && holes.length == 0) {
 			return base;
 		}
 		readMasks();
 		if (armourDust == null || armourMud == null || armourBlood == null) {
 			return base;
 		}
-		Identifier painted = paint(base, dirty ? grime : null, armourDust, armourMud, smear, armourBlood, false, false, false, rusted);
+		Identifier painted = paint(base, dirty ? grime : null, armourDust, armourMud, smear, armourBlood, false, false, false, rusted, holes);
 		return painted == null ? base : painted;
 	}
 
@@ -154,7 +159,8 @@ public final class ArmourGrimeTextures {
 		ArmourGrime.Grime grime = ArmourGrime.grime(stack);
 		boolean dirty = grime != null && grime.amount() > 0;
 		// (0.20.41) and blood, on any item
-		Smear smear = com.jaymospowers.client.blood.BloodSettings.off() ? null : smear(Bloodied.blood(stack));
+		Smear smear = com.jaymospowers.client.blood.BloodSettings.off() || com.jaymospowers.client.blood.BloodSettings.streamerSafe() ? null
+			: smear(Bloodied.blood(stack));
 		int rusted = rustStage(Rust.rust(stack));
 		if (!dirty && smear == null && rusted == 0) {
 			return null;
@@ -364,6 +370,12 @@ public final class ArmourGrimeTextures {
 	/** {@code rust}: a rust stage ({@link #rustStage}, 0 for none), pitted into the metal first, under blood and grime. */
 	private static @Nullable Identifier paint(Identifier base, ArmourGrime.@Nullable Grime grime, @Nullable Mask dust, @Nullable Mask mud,
 		@Nullable Smear smear, @Nullable Mask bloodMask, boolean overlay, boolean whole, boolean layered, int rust) {
+		return paint(base, grime, dust, mud, smear, bloodMask, overlay, whole, layered, rust, NO_HOLES);
+	}
+
+	/** {@code holes}: the spots of worn armour ({@link com.jaymospowers.core.ArmourHoles}) punched through the finished picture. */
+	private static @Nullable Identifier paint(Identifier base, ArmourGrime.@Nullable Grime grime, @Nullable Mask dust, @Nullable Mask mud,
+		@Nullable Smear smear, @Nullable Mask bloodMask, boolean overlay, boolean whole, boolean layered, int rust, int[] holes) {
 		if (UNREADABLE.contains(base)) {
 			return null;
 		}
@@ -373,7 +385,7 @@ public final class ArmourGrimeTextures {
 		int tint = grime == null || grime.tint() == 0 ? 0 : grime.tint() & 0xF0F0F0 | 0x080808;
 		boolean onBody = dust != null && dust == bodyDust;
 		Material material = onBody ? Material.CLOTH : Material.of(base);
-		String key = base + "|" + stage + "|" + mudStep + "|" + tint + (onBody ? "|s" : "") + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "") + (layered ? "|l" : "") + (rust > 0 ? "|r" + rust : "");
+		String key = base + "|" + stage + "|" + mudStep + "|" + tint + (onBody ? "|s" : "") + (smear == null ? "" : "|b" + smear.stage() + ":" + smear.colour()) + (overlay ? "|o" : "") + (layered ? "|l" : "") + (rust > 0 ? "|r" + rust : "") + (holes.length > 0 ? "|h" + java.util.Arrays.hashCode(holes) : "");
 		Identifier done = MADE.get(key);
 		if (done != null) {
 			return done;
@@ -495,10 +507,48 @@ public final class ArmourGrimeTextures {
 				image.setPixel(x, y, out);
 			}
 		}
+		punch(image, holes);
 		Identifier id = JaymosPowers.id("grime/" + made++);
 		Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(id::toString, image));
 		MADE.put(key, id);
 		return id;
+	}
+
+	/** Armour with no holes worn into it. */
+	private static final int[] NO_HOLES = new int[0];
+	/** A dent's ring is this much darker than the armour round it. */
+	static final float DENT_SHADE = 0.55F;
+
+	/**
+	 * Wears {@code holes} ({@link com.jaymospowers.core.ArmourHoles}) into the armour picture: each spot is a pixel of the
+	 * 64-wide layout (scaled up on a bigger picture). A hole is see-through with a dark rim of dented metal round it; a
+	 * dent ({@code 0}) is the dark rim round one scuffed pixel, not through.
+	 */
+	private static void punch(NativeImage image, int[] holes) {
+		int scale = Math.max(1, image.getWidth() / 64);
+		for (int spot : holes) {
+			int x = (spot & 0xFF) * scale, y = (spot >> 8 & 0xFF) * scale;
+			boolean through = (spot >> 16 & 1) != 0;
+			for (int dy = -scale; dy < 2 * scale; dy++) {
+				for (int dx = -scale; dx < 2 * scale; dx++) {
+					int px = x + dx, py = y + dy;
+					if (px < 0 || py < 0 || px >= image.getWidth() || py >= image.getHeight()) {
+						continue;
+					}
+					int argb = image.getPixel(px, py);
+					if ((argb >>> 24) == 0) {
+						continue;
+					}
+					boolean core = dx >= 0 && dx < scale && dy >= 0 && dy < scale;
+					if (core && through) {
+						image.setPixel(px, py, 0);
+					} else {
+						int r = Math.round((argb >> 16 & 0xFF) * DENT_SHADE), g = Math.round((argb >> 8 & 0xFF) * DENT_SHADE), b = Math.round((argb & 0xFF) * DENT_SHADE);
+						image.setPixel(px, py, argb & 0xFF000000 | r << 16 | g << 8 | b);
+					}
+				}
+			}
+		}
 	}
 
 	/**

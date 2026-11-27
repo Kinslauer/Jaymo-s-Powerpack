@@ -51,6 +51,12 @@ import java.util.UUID;
  * them round at once.</li>
  * <li><b>Coming round:</b> they get up and the letterbox opens over {@link #WAKE}. No fainting again for {@link #COOLDOWN}.</li>
  * </ul>
+ * <b>Short, and mashed out of:</b> Andy (2026-11-25): "you should be able to spam out of a feint, it should only happen
+ * once per encounter, and it should only last a max of 6s". The swoon is {@link #SWOON}, 2 s. The black is
+ * {@link #OUT}, 15 s (Andy, same day: "raise it back to 15s, because the mash can reduce it", so friends and villagers
+ * have time to come and wake them), but mashing sneak brings them round sooner, the same as a knock-out's mash
+ * ({@link #mash}): each press takes an even share off what's left, {@link Downed#mashPresses} of them in all (3). Those who'd take them while they're out ({@link TakenOut}) still get their look before the last press lets them
+ * up. (Once per encounter: Kingdoms' {@code Overcome}.)
  * <b>Overcome:</b> Kingdoms' {@code Overcome} drops a player of little occult exposure in the same faint at the sight of an
  * especially strong supernatural thing ({@link #overcome}); the swoon, the fall and the waking are the same, only shorter
  * to start ({@link #OVERCOME_SWOON}).
@@ -74,9 +80,9 @@ public final class Fainting {
 	/** Sprinting or swimming, the chance is this many times greater. */
 	static final float EXERTION = 2.0F;
 	/** Going (letterbox closing, keys lost), lying out, and coming round (ticks). */
-	public static final int SWOON = 80, OUT = 260, WAKE = 60;
+	public static final int SWOON = 40, OUT = 300, WAKE = 60;
 	/** An overcome faint starts this far into the swoon (ticks), so it comes on faster than hunger's. */
-	static final int OVERCOME_SWOON = 40;
+	static final int OVERCOME_SWOON = 20;
 	/** The warnings before a hunger or thirst faint: how far each pulse shuts the letterbox (0-1; 1 is black). */
 	public static final float[] WARN_DEPTHS = {0.35F, 0.6F, 0.85F};
 	/** Each warning closes and opens again over this long (ticks), with this long between them (and before the swoon). */
@@ -110,6 +116,8 @@ public final class Fainting {
 	private static final Map<UUID, Boolean> TIPPED = new HashMap<>();
 	/** Server: players whose faint is from something they saw (Kingdoms' {@code Overcome}), not hunger or thirst. */
 	private static final java.util.Set<UUID> OVERCOME = new java.util.HashSet<>();
+	/** Server: players in the black with sneak held since the last press counted (a hold is one press, not many). */
+	private static final java.util.Set<UUID> MASH_HELD = new java.util.HashSet<>();
 
 	private Fainting() {
 	}
@@ -128,6 +136,7 @@ public final class Fainting {
 			RESTED.clear();
 			TIPPED.clear();
 			OVERCOME.clear();
+			MASH_HELD.clear();
 		});
 	}
 
@@ -296,12 +305,20 @@ public final class Fainting {
 			player.removeAttached(FAINT);
 			TIPPED.remove(id);
 			OVERCOME.remove(id);
+			MASH_HELD.remove(id);
 			RESTED.put(id, now + COOLDOWN);
 			return;
 		}
 		if (t < SWOON) {
 			player.setSprinting(false);
-		} else if (t < SWOON + OUT && TIPPED.putIfAbsent(id, true) == null) {
+			return;
+		}
+		if (t >= SWOON + OUT) {
+			MASH_HELD.remove(id);
+			return;
+		}
+		mash(player, id, t);
+		if (TIPPED.putIfAbsent(id, true) == null) {
 			// over onto their face, the way they were facing
 			Vec3 look = player.getLookAngle();
 			double flat = Math.hypot(look.x, look.z);
@@ -311,6 +328,41 @@ public final class Fainting {
 			} catch (LinkageError e) {
 				// an older Kitchen: the client's hold still puts them down
 			}
+		}
+	}
+
+	/**
+	 * In the black ({@code t} ticks into the faint): a fresh press of sneak takes an even share off what's left
+	 * ({@link Downed#mashedLeft}), the last press bringing them round, unless those round them take them first
+	 * ({@link TakenOut#takeNow}). The knock-out's bar shows how far they've come.
+	 */
+	private static void mash(ServerPlayer player, UUID id, long t) {
+		if (t < SWOON + HOLD_GRACE) {
+			// (sneak already held as the black comes, the swoon's keys let go, isn't a press: it counts once let go and pressed again)
+			if (player.isShiftKeyDown()) {
+				MASH_HELD.add(id);
+			}
+			return;
+		}
+		boolean press = player.isShiftKeyDown() && MASH_HELD.add(id);
+		if (!player.isShiftKeyDown()) {
+			MASH_HELD.remove(id);
+		}
+		long left = SWOON + OUT - t;
+		if (press) {
+			long after = Downed.mashedLeft(left, OUT);
+			if (after <= 0L) {
+				if (!TakenOut.takeNow(player)) {
+					bringRound(player);
+				}
+				return;
+			}
+			player.setAttached(FAINT, player.getAttached(FAINT) - (left - after));
+			left = after;
+		}
+		if (press || t % Downed.HINT_TICKS == 0) {
+			com.jaymospowers.core.HudBar.hold(player, "knocked", 1.0F - Math.min(1.0F, left / (float) OUT), com.jaymospowers.core.HudBar.PURPLE,
+				net.minecraft.network.chat.Component.translatable("bar.jaymospowers.knocked"), true);
 		}
 	}
 

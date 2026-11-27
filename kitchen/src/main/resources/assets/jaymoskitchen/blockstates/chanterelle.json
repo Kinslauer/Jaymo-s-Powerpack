@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskitchen:block/forage/chanterelle"
+      },
+      {
+        "model": "jaymoskitchen:block/forage/chanterelle",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/forage/chanterelle",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/forage/chanterelle",
+        "y": 270
+      }
+    ]
+  }
+}

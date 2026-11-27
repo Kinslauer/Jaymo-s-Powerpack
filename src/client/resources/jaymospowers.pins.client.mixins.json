@@ -1,0 +1,12 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.pins",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"AdvancementWidgetHoverMixin",
+		"BetterAdvancementWidgetHoverMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

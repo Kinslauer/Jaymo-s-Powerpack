@@ -23,6 +23,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -103,6 +104,8 @@ public final class WebFury {
 
 	/** Players whose big suit is up as far as this class has seen. */
 	private static final Set<UUID> UP = new HashSet<>();
+	private record Gait(ServerLevel level, Vec3 at, double distance) {}
+	private static final Map<UUID, Gait> STEPS = new HashMap<>();
 	/** Last game time each player's fury grew. */
 	private static final Map<UUID, Long> LAST_GAIN = new HashMap<>();
 	/** Players in the slow walk. */
@@ -126,8 +129,17 @@ public final class WebFury {
 				gain(victim, Math.max(GAIN_TAKEN_MIN, Math.min(GAIN_TAKEN_MAX, Math.round(damageTaken * GAIN_TAKEN_PER_DAMAGE))));
 			}
 		});
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			UUID id = handler.player.getUUID();
+			UP.remove(id);
+			STEPS.remove(id);
+			LAST_GAIN.remove(id);
+			SLOW.remove(id);
+			BURSTS.remove(id);
+		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			UP.clear();
+			STEPS.clear();
 			LAST_GAIN.clear();
 			SLOW.clear();
 			BURSTS.clear();
@@ -142,7 +154,7 @@ public final class WebFury {
 
 	private static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			boolean bulk = WebSymbiote.bulked(player);
+			boolean bulk = player.isAlive() && !player.isSpectator() && WebSymbiote.bulked(player);
 			boolean up = UP.contains(player.getUUID());
 			if (bulk && !up) {
 				UP.add(player.getUUID());
@@ -153,6 +165,7 @@ public final class WebFury {
 			}
 			if (bulk) {
 				fade(player);
+				footsteps(player);
 			} else {
 				cage(player);
 			}
@@ -178,6 +191,16 @@ public final class WebFury {
 			player.setAttached(TOLD, true);
 			WebSymbiote.whisper(player, "fury_full");
 		}
+	}
+
+	/** Spends {@code amount} fury (the crowned onslaught's price); false, and nothing spent, if there is less. */
+	static boolean spend(ServerPlayer player, int amount) {
+		int have = fury(player);
+		if (have < amount) {
+			return false;
+		}
+		set(player, have - amount);
+		return true;
 	}
 
 	private static void set(ServerPlayer player, int value) {
@@ -211,6 +234,9 @@ public final class WebFury {
 
 	/** Out of a fight a while, fury burns down. */
 	private static void fade(ServerPlayer player) {
+		if (WebBruteArts.holdsFury(player)) {
+			return;
+		}
 		int value = fury(player);
 		if (value <= 0) {
 			return;
@@ -225,6 +251,7 @@ public final class WebFury {
 
 	/** The big suit has formed: it starts as angry as it has been kept waiting. */
 	private static void formed(ServerPlayer player) {
+		formRipple(player);
 		int caged = player.getAttachedOrElse(CAGED, 0);
 		player.removeAttached(CAGED);
 		int start = 0;
@@ -242,9 +269,43 @@ public final class WebFury {
 
 	/** The big suit is down: the fury goes with it. */
 	private static void gone(ServerPlayer player) {
+		STEPS.remove(player.getUUID());
+		formRipple(player);
 		LAST_GAIN.remove(player.getUUID());
 		BURSTS.remove(player.getUUID());
 		set(player, 0);
+	}
+
+	private static void formRipple(ServerPlayer player) {
+		if (player.isAlive() && !com.jaymospowers.core.wounds.Downed.isDowned(player)) {
+			WebBruteArts.ring(player.level(), player.position(), 3.0);
+			Shakes.heavy(player, player.position(), 10.0, 0.35F);
+		}
+	}
+
+	private static void footsteps(ServerPlayer player) {
+		UUID id = player.getUUID();
+		if (fury(player) < MAX || !WebBruteArts.able(player) || !player.onGround() || player.isPassenger()) {
+			STEPS.remove(id);
+			return;
+		}
+		Vec3 at = player.position();
+		Gait last = STEPS.get(id);
+		double walked = last != null && last.level() == player.level() ? at.subtract(last.at()).horizontalDistance() : 0.0;
+		double distance = last != null && last.level() == player.level() && walked < 2.0 ? last.distance() + walked : 0.0;
+		double step = player.isSprinting() ? 1.35 : 0.9;
+		if (distance >= step) {
+			Shakes.heavy(player, at, 9.0, 0.22F);
+			WebBruteArts.dust(player.level(), at, 5, 0.33);
+			for (LivingEntity foe : WebBruteArts.foes(player, at, 2.3, 0.9)) {
+				if (foe.onGround()) {
+					Vec3 out = foe.position().subtract(at).horizontal().normalize().scale(0.13);
+					WebBruteArts.shove(foe, foe.getDeltaMovement().add(out));
+				}
+			}
+			distance -= step;
+		}
+		STEPS.put(id, new Gait(player.level(), at, distance));
 	}
 
 	/** Counts the time the big suit is refused: the symbiote bonded, awake and about, the big suit not up. */

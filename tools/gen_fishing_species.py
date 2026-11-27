@@ -15,8 +15,13 @@ import json
 import math
 import os
 import random
+import sys
 
 from PIL import Image
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "vanilla_style"))
+import fish_icons  # noqa: E402
+import spawn_egg  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(ROOT, "src/main/resources/assets/jaymospowers")
@@ -457,7 +462,7 @@ def painter(sp, parts):
             c = mix(c, pc, 0.35)
         elif pattern == "rings":
             pass
-        return shade(c, 0.94 + n * 0.1)
+        return c
 
     def colour(part, face, a, b):
         """a, b: 0..1 across the face; returns RGBA."""
@@ -593,155 +598,16 @@ def outline(img, col):
 
 
 def fish_icon(sp, cooked=False):
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    px = img.load()
-    pal = sp["pal"]
-    back, flank, belly, fin = hexc(pal["back"]), hexc(pal["flank"]), hexc(pal["belly"]), hexc(pal["fin"])
-    k = sp["shape"]["kind"]
-    s = sp["shape"]
-    if cooked:
-        brown = (150, 96, 48, 255)
-        back, flank, belly, fin = mix(back, brown, 0.6), mix(flank, (196, 132, 66, 255), 0.6), mix(belly, (222, 176, 110, 255), 0.6), mix(fin, brown, 0.6)
-    # depth profile along the body, nose at x=1 pointing left, tail at the right, a little diagonal like vanilla fish
-    if k == "eel":
-        prof = lambda t: 1.2
-    elif k == "flat":
-        prof = lambda t: 4.5 * math.sin(math.pi * min(1, t / 0.85)) if t < 0.85 else 1.0
-    else:
-        depth = s.get("H", 3) / max(s.get("L", 8) + s.get("Lh", 3), 1) * 13.0
-        depth = max(1.4, min(5.0, depth))
-        prof = lambda t: max(0.6, depth * (math.sin(math.pi * min(1.0, (t + 0.1) / 0.9)) ** 0.8)) if t < 0.82 else 0.7
-    for xi in range(1, 13):
-        t = (xi - 1) / 12.0
-        hh = prof(t)
-        if hh <= 0.05:
-            continue
-        cy = 8.5 - (xi - 6) * (0.2 if k != "eel" else 0.0)
-        if k == "eel":
-            cy = 8 + math.sin(t * 6) * 2.5
-        for yi in range(16):
-            dy = yi + 0.5 - cy
-            if abs(dy) <= hh:
-                f = (dy + hh) / (2 * hh)
-                c = mix(back, flank, f * 2) if f < 0.5 else mix(flank, belly, (f - 0.5) * 2)
-                if not cooked:
-                    pat = pal["pattern"]
-                    if pat == "bars" and xi % 3 == 0 and f < 0.7:
-                        c = mix(c, hexc(pal["pc"]), 0.7)
-                    if pat in ("spots", "trout", "beans") and (xi * 7 + yi * 3) % 5 == 0 and f < 0.75:
-                        c = mix(c, hexc(pal.get("pc2", pal["pc"]) if (xi + yi) % 3 == 0 else pal["pc"]), 0.75)
-                    if pat == "waves" and f < 0.45 and (xi + yi) % 3 == 0:
-                        c = mix(c, hexc(pal["pc"]), 0.75)
-                    if pat == "marble" and (xi * 5 + yi * 11) % 7 < 2 and f < 0.7:
-                        c = mix(c, hexc(pal["pc"]), 0.5)
-                else:
-                    if (xi + yi) % 4 == 0:
-                        c = shade(c, 0.82)
-                px[xi, yi] = c
-    # tail
-    tx = 13
-    cy = 8.5 - (tx - 6) * 0.2 if k != "eel" else 8
-    if k != "eel":
-        for yi in range(16):
-            dy = abs(yi + 0.5 - cy)
-            for x in (13, 14):
-                if dy <= (x - 12) * 1.6 + 0.5 and not (s.get("fork") and dy < 0.8 and x == 14):
-                    px[x, yi] = fin
-    # dorsal fin and eye
-    if k in ("fish", "shark"):
-        dx = 3 + int(s.get("dpos", 0.3) * 8)
-        cy = 8.5 - (dx - 6) * 0.2
-        top = int(cy - prof((dx - 1) / 12.0)) - 1
-        for i in range(2 if k == "fish" else 3):
-            if 0 <= top - i < 16:
-                px[dx + i, top - (1 if i == 0 else 0) if k == "shark" else top] = fin
-    if k == "flat":
-        px[3, 6] = (16, 14, 12, 255)
-        px[4, 5] = (16, 14, 12, 255)
-    else:
-        cy = 8.5 - (2 - 6) * 0.2 if k != "eel" else 8 + math.sin(1 / 12 * 6) * 2.5
-        ey = int(cy - (0.6 if k != "eel" else 0.3))
-        px[2, ey] = (16, 14, 12, 255) if not cooked else (240, 230, 210, 255)
-    if s.get("bill"):
-        cy = 8.5 - (1 - 6) * 0.2
-        px[0, int(cy)] = back
-    outline(img, shade(back, 0.45) if not cooked else (70, 40, 18, 255))
-    return img
+    return fish_icons.icon(sp["id"], sp["pal"], cooked, sp["fillet"], sp.get("cooked_tint"))
 
 
 def critter_icon(sp, cooked=False):
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    px = img.load()
-    pal = sp["pal"]
-    col = hexc(sp.get("cooked_tint", pal["back"])) if cooked else hexc(pal["back"])
-    col2 = mix(col, (255, 240, 220, 255), 0.35) if cooked else hexc(pal["fin"])
-    k = sp["shape"]["kind"]
-    if k == "crab":
-        for x in range(3, 13):
-            for y in range(6, 11):
-                if (x - 7.5) ** 2 / 25 + (y - 8.5) ** 2 / 6 <= 1:
-                    px[x, y] = shade(col, 0.9 + 0.1 * (y < 8))
-        for x, y in ((1, 5), (2, 5), (1, 4), (13, 5), (14, 5), (14, 4), (2, 6), (13, 6)):
-            px[x, y] = col2
-        for x in (3, 5, 10, 12):
-            px[x, 11] = col2
-            px[x + (-1 if x < 8 else 1), 12] = col2
-        px[6, 6] = px[9, 6] = (14, 12, 10, 255)
-    elif k in ("lobster",):
-        for x in range(4, 14):
-            hh = 1.6 if x < 9 else 1.2 - (x - 9) * 0.12
-            for y in range(16):
-                if abs(y + 0.5 - 8.5) <= hh:
-                    px[x, y] = shade(col, 0.88 + 0.12 * ((x % 2) == 0))
-        for y in range(6, 11):
-            px[14, y] = col2
-        for x, y in ((3, 6), (2, 5), (1, 5), (2, 4), (3, 11), (2, 12), (1, 12), (2, 13)):
-            px[x, y] = col
-        for x in range(0, 4):
-            px[x, 7] = col2
-        if not cooked and pal["pattern"] == "spots":
-            for x, y in ((6, 8), (9, 9), (11, 8)):
-                px[x, y] = hexc(pal["pc"])
-    elif k == "shrimp":
-        pts = [(5 + 3.5 * math.cos(a), 8 + 3.5 * math.sin(a)) for a in [i * 0.3 + 3.6 for i in range(12)]]
-        for i, (x, y) in enumerate(pts):
-            for dx in (-1, 0, 1):
-                for dy in (-1, 0, 1):
-                    xx, yy = int(x + 3 + dx * 0.7), int(y + dy * 0.7)
-                    if 0 <= xx < 16 and 0 <= yy < 16:
-                        px[xx, yy] = shade(col, 0.85 + 0.15 * (i % 2))
-        for x in range(9, 15):
-            px[x, 4 - (x - 9) // 3] = col2
-    elif k == "jelly":
-        for x in range(3, 13):
-            for y in range(3, 9):
-                if (x - 7.5) ** 2 / 25 + (y - 8.5) ** 2 / 30 <= 1:
-                    px[x, y] = hexc(pal["back"], 210)
-        for x, y in ((6, 5), (9, 5), (6, 7), (9, 7)):
-            px[x, y] = hexc(pal["pc"])
-        for x in (4, 6, 8, 10, 12):
-            for y in range(9, 15):
-                if (y + x) % 3 != 0:
-                    px[x - (y % 2), y] = hexc(pal["fin"], 180)
-    outline(img, shade(col, 0.45))
-    return img
+    return fish_icons.icon(sp["id"], sp["pal"], cooked, sp["fillet"], sp.get("cooked_tint"))
 
 
 def egg_icon(sp):
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    px = img.load()
-    base = hexc(sp["pal"]["flank"])
-    spot = hexc(sp["pal"].get("pc", sp["pal"]["back"]))
-    rnd = random.Random(sp["id"] + "egg")
-    for x in range(16):
-        for y in range(16):
-            if ((x - 7.5) / 5.2) ** 2 + ((y - 8.8) / 6.6) ** 2 <= 1:
-                c = base
-                if rnd.random() < 0.22:
-                    c = spot
-                px[x, y] = shade(c, 1.05 - 0.25 * (x + y) / 30)
-    outline(img, shade(base, 0.4))
-    return img
+    """Vanilla's spawn egg in the species' flank colour with its pattern colour for the spots."""
+    return spawn_egg.egg(sp["pal"]["flank"], sp["pal"].get("pc", sp["pal"]["back"]))
 
 
 # --------------------------------------------------------------------------------------------------------------------

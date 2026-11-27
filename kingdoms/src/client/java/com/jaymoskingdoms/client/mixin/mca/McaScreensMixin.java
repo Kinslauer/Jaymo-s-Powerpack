@@ -39,12 +39,16 @@ abstract class McaScreensMixin {
 	private static final String TAILOR = "gui.button.tailor";
 	/** (0.7.69) A tailor's Costume Table and costumes sewn to order ({@code TailorCostumes}; only with Jaymo's Powers). */
 	private static final String COSTUME_TABLE = "gui.button.costume_table", COSTUME = "gui.button.costume";
+	/** (Village mods patch 5) A tailor sews the trades' hats ({@code TailorHats}; only with Jaymo's Powers). */
+	private static final String TRADE_HAT = "gui.button.trade_hat";
+	/** The monastery herbalist's belt charms ({@code HerbalistWares}; only with Jaymo's Powers). The client can't see a villager's role, so the server checks it. */
+	private static final String HERBALIST_WARES = "gui.button.herbalist_wares";
 	/** How many rows of buttons MCA's own main page has (talk ... family tree): Quests goes under them. */
 	private static final int MAIN_ROWS = 6;
 
 	/** (0.7.454) Interact's Ask the Way, the page it opens, and the places on it ({@code Directions.Place}). */
 	private static final String WAY = "gui.button.way", WAY_PAGE = "way";
-	private static final String[] PLACES = {"healer", "butcher", "smith", "tailor", "tavern", "stables", "ruler", "changer", "emeralds"};
+	private static final String[] PLACES = {"healer", "butcher", "smith", "tailor", "tavern", "stables", "ruler", "changer", "emeralds", "news"};
 	/** The Interact row Ask the Way goes on: under MCA's own (gift ... professions on row 8). */
 	private static final int WAY_ROW = 8;
 	/** MCA's Follow Me, Stay Here and Go About Your Day, which Orders replaces; the row Orders goes on; the last row of MCA's own that stays put. */
@@ -95,6 +99,10 @@ abstract class McaScreensMixin {
 			+ "{\"identifier\":\"" + COSTUME + "\",\"x\":-90,\"y\":10,\"row\":" + (row + 2)
 			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true},"
 			+ "{\"identifier\":\"" + COSTUME_TABLE + "\",\"x\":-90,\"y\":10,\"row\":" + (row + 3)
+			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true},"
+			+ "{\"identifier\":\"" + TRADE_HAT + "\",\"x\":-90,\"y\":10,\"row\":" + (row + 4)
+			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true},"
+			+ "{\"identifier\":\"" + HERBALIST_WARES + "\",\"x\":-90,\"y\":10,\"row\":" + (row + 5)
 			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true}]";
 		List<MCAButton> all = new ArrayList<>(Arrays.asList(page));
 		all.addAll(Arrays.asList(Resources.GSON.fromJson(json, MCAButton[].class)));

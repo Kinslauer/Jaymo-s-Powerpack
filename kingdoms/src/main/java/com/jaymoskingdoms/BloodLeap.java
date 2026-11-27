@@ -33,6 +33,10 @@ import net.minecraft.world.phys.Vec3;
  * they feed at once.</li>
  * <li>Not locked: a strong jump the way they look, from the ground or water.</li>
  * </ul>
+ * It costs a full vampire mB ({@link #LEAP_MB} at a locked foe, {@link #JUMP_MB} the plain jump; a dhampir pays nothing). The leap
+ * flows into Feed ({@link NightFlow#LEAP_FEED_WINDOW}: a leap that runs out of air a step short still carries in), and mist
+ * ending is thrown out in a leap, in the air too, and stronger ({@link NightFlow#MIST_LEAP_BOOST}), for half the cost.
+ * <p>
  * In the open sun by day, or near a holy thing ({@link HolyDread#hallowed}), both are weaker ({@link #WEAK_SHARE}) and slower
  * to come back ({@link #WEAK_COOLDOWN}). A dhampir has no sun to fear. No fall damage until they land
  * ({@link NightGifts#thrown}).
@@ -46,6 +50,10 @@ public final class BloodLeap {
 	static final int POUNCE_TICKS = 25, POUNCE_COOLDOWN = 60;
 	/** Arriving: this close (blocks, eyes to the prey's box) counts as reached; what's left of the speed on arrival. */
 	static final double ARRIVE = BloodGrab.REACH - 0.4, ARRIVE_KEEP = 0.15;
+	/** What the leap at a locked foe and the plain jump cost a full vampire (mB). */
+	static final int LEAP_MB = 100, JUMP_MB = 50;
+	/** A leap that ends in the air this near (blocks, past {@link #ARRIVE}) to its prey still lands on it, within the feed window. */
+	static final double LAND_SLACK = 1.2;
 	/** In the sun or near a holy thing: this share of the speed and reach, and the cooldown this many times as long. */
 	static final double WEAK_SHARE = 0.6;
 	static final int WEAK_COOLDOWN = 2;
@@ -66,6 +74,8 @@ public final class BloodLeap {
 	}
 
 	private static final Map<UUID, Pounce> POUNCING = new HashMap<>();
+	/** Leaps that ran out of flight: at whom, and until when the feed window carries them in. */
+	private static final Map<UUID, Pounce> LANDING = new HashMap<>();
 	/** When each vampire may leap again (game time). */
 	private static final Map<UUID, Long> READY = new HashMap<>();
 
@@ -78,6 +88,7 @@ public final class BloodLeap {
 		ServerTickEvents.END_SERVER_TICK.register(BloodLeap::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			POUNCING.clear();
+			LANDING.clear();
 			READY.clear();
 		});
 	}
@@ -93,15 +104,25 @@ public final class BloodLeap {
 		long now = level.getGameTime();
 		if (!Vampires.isVampire(player) || !player.isAlive() || player.isSpectator() || Downed.isDowned(player) || player.isPassenger()
 			|| !player.getMainHandItem().isEmpty() || BloodGrab.holding(player) || POUNCING.containsKey(player.getUUID())
-			|| now < READY.getOrDefault(player.getUUID(), 0L)) {
+			|| now < READY.getOrDefault(player.getUUID(), 0L) || PowersCompat.snuffed(player)) {
 			return;
 		}
+		// (mist ending in a leap: the leap takes its place, stronger, for half the blood, in the air too)
+		boolean mist = com.jaymoskingdoms.nightforms.NightForms.inMist(player);
+		boolean chained = mist || NightFlow.within(player, NightFlow.Link.MIST_LEAP);
 		boolean weak = weak(player);
-		double share = weak ? WEAK_SHARE : 1.0;
+		double share = (weak ? WEAK_SHARE : 1.0) * (chained ? NightFlow.MIST_LEAP_BOOST : 1.0) * (NewMoon.on(player) ? NewMoon.LEAP_SHARE : 1.0);
 		int slower = weak ? WEAK_COOLDOWN : 1;
 		LivingEntity target = PowersCompat.lockTarget(player);
 		if (target != null && target.isAlive() && player.hasLineOfSight(target)
 			&& target.getBoundingBox().distanceToSqr(player.getEyePosition()) <= POUNCE_RANGE * share * POUNCE_RANGE * share) {
+			if (!VampireBlood.pay(player, NightFlow.cost(LEAP_MB, chained))) {
+				return;
+			}
+			if (mist) {
+				com.jaymoskingdoms.nightforms.NightForms.end(player, false);
+			}
+			NightFlow.close(player, NightFlow.Link.MIST_LEAP);
 			READY.put(player.getUUID(), now + (long)POUNCE_COOLDOWN * slower);
 			if (reached(player, target)) {
 				arrive(level, player, target);
@@ -115,9 +136,16 @@ public final class BloodLeap {
 			launched(level, player);
 			return;
 		}
-		if (!player.onGround() && !player.isInWater()) {
+		if (!chained && !player.onGround() && !player.isInWater()) {
 			return;
 		}
+		if (!VampireBlood.pay(player, NightFlow.cost(JUMP_MB, chained))) {
+			return;
+		}
+		if (mist) {
+			com.jaymoskingdoms.nightforms.NightForms.end(player, false);
+		}
+		NightFlow.close(player, NightFlow.Link.MIST_LEAP);
 		Vec3 look = player.getLookAngle();
 		double along = JUMP_ALONG * share;
 		NightGifts.push(player, new Vec3(look.x * along, Math.max(look.y * along, 0.0) + JUMP_UP * share, look.z * along));
@@ -134,6 +162,23 @@ public final class BloodLeap {
 
 	private static boolean reached(ServerPlayer player, LivingEntity target) {
 		return target.getBoundingBox().distanceToSqr(player.getEyePosition()) <= ARRIVE * ARRIVE;
+	}
+
+	/** Leaps that ran out of flight: fed on when the prey is near enough before the window shuts. */
+	private static void landing(MinecraftServer server) {
+		Iterator<Map.Entry<UUID, Pounce>> it = LANDING.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<UUID, Pounce> e = it.next();
+			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
+			Pounce p = e.getValue();
+			if (player == null || !player.isAlive() || Downed.isDowned(player) || !p.target.isAlive() || p.target.level() != player.level()
+				|| player.level().getGameTime() > p.until) {
+				it.remove();
+			} else if (p.target.getBoundingBox().distanceToSqr(player.getEyePosition()) <= (ARRIVE + LAND_SLACK) * (ARRIVE + LAND_SLACK)) {
+				it.remove();
+				arrive(player.level(), player, p.target);
+			}
+		}
 	}
 
 	/** Straight at the middle of the target, at {@code speed}. */
@@ -153,6 +198,9 @@ public final class BloodLeap {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (!LANDING.isEmpty()) {
+			landing(server);
+		}
 		if (POUNCING.isEmpty()) {
 			return;
 		}
@@ -162,8 +210,14 @@ public final class BloodLeap {
 			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
 			Pounce p = e.getValue();
 			if (player == null || !player.isAlive() || Downed.isDowned(player) || player.isPassenger() || !p.target.isAlive() || p.target.isRemoved()
-				|| p.target.level() != player.level() || player.level().getGameTime() > p.until) {
+				|| p.target.level() != player.level()) {
 				it.remove();
+				continue;
+			}
+			if (player.level().getGameTime() > p.until) {
+				// out of flight a step short of its prey: the feed window still carries it in
+				it.remove();
+				LANDING.put(e.getKey(), new Pounce(p.target, p.speed, player.level().getGameTime() + NightFlow.LEAP_FEED_WINDOW));
 				continue;
 			}
 			if (reached(player, p.target)) {

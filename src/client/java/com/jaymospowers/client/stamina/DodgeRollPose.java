@@ -40,6 +40,12 @@ import org.jspecify.annotations.Nullable;
  * ({@link PoseBlend#bend}, {@link #DASH_LEAN}), both arms come up to a guard, and the head stays level, eyes on what was
  * dodged. Eased in fast and out slower over {@link Dodge#DASH_TICKS}. In first person the view dips and leans into a
  * side dash. (Checked in a scratch run of tools/pose_preview.py with the same knobs and formulas.)
+ * <p>Andy (2026-11-25, tap for a dodge, hold for a roll): a held dash goes on into the long roll, and the roll now
+ * comes out of the dash's stance instead of snapping upright first: for the first {@link #DASH_HANDOFF} of the roll the
+ * lunge, the guard, the lean and the hips' drop ease out under the tuck coming in ({@link Roll#carry}). The long roll a
+ * held dash goes on into turns evenly ({@link Dodge#rollShare}), not fast then slow. And the weighty walk
+ * ({@code BodyWeight}) fades out as a dodge comes on and back in as it ends ({@link #weightKept}), rather than dropping
+ * off and coming back in one frame.
  */
 public final class DodgeRollPose {
 	// ===== the knobs ================================================================================================
@@ -92,10 +98,16 @@ public final class DodgeRollPose {
 	static final float DASH_VIEW_DIP = 0.12F, DASH_VIEW_TILT = 0.07F;
 	/** A leg's length (blocks): 12 pixels. */
 	static final float LEG = 12.0F / 16.0F;
+	/** Of a long roll a held dash went on into, the share over which the dash's stance eases out under the tuck. */
+	static final float DASH_HANDOFF = 0.25F;
 	// ================================================================================================================
 
-	/** {@code t}: how far through the roll (0 to 1); {@code (x, z)}: the way it goes, a unit vector on the ground; {@code dash}: the upright dash, not a tumble. */
-	public record Roll(float t, float x, float z, boolean flip, boolean stretch, boolean dash) {
+	/**
+	 * {@code t}: how far through the roll (0 to 1); {@code (x, z)}: the way it goes, a unit vector on the ground; {@code dash}:
+	 * the upright dash, not a tumble; {@code carry}: how much of a held dash's stance is still drawn under the roll it went
+	 * on into (0 to 1, easing out over {@link #DASH_HANDOFF}).
+	 */
+	public record Roll(float t, float x, float z, boolean flip, boolean stretch, boolean dash, float carry) {
 	}
 
 	public static final RenderStateDataKey<Roll> KEY = RenderStateDataKey.create(() -> "jaymospowers:dodge_roll");
@@ -106,7 +118,6 @@ public final class DodgeRollPose {
 	/** From the avatar renderer's extractRenderState. */
 	public static void extract(Entity entity, AvatarRenderState state, float partialTicks) {
 		Roll roll = roll(entity, partialTicks);
-		state.setData(KEY, roll);
 		if (roll != null && !roll.flip() && !roll.stretch() && !roll.dash()) {
 			// the body is the low one for a roll (so it goes under a gap); the tumble draws it standing, not laid flat as a crawl is
 			state.pose = Pose.STANDING;
@@ -114,6 +125,7 @@ public final class DodgeRollPose {
 			state.swimAmount = 0.0F;
 			state.isCrouching = false;
 		}
+		state.setData(KEY, entity instanceof Player player && com.jaymospowers.client.freerun.CoreMotionClient.playing(player, "dodge") ? null : roll);
 	}
 
 	private static @Nullable Roll roll(Entity entity, float partialTicks) {
@@ -123,7 +135,7 @@ public final class DodgeRollPose {
 		long now = player.level().getGameTime();
 		long start;
 		float x, z;
-		boolean flip, extended, dash;
+		boolean flip, extended, dash, fromDash;
 		boolean own = player == Minecraft.getInstance().player;
 		if (own && DodgeClient.rollStart != Long.MIN_VALUE && DodgeClient.rollStart >= DodgeClient.dashDrawStart) {
 			// our own roll: drawn the moment we hop, not when the server's copy comes back
@@ -133,6 +145,7 @@ public final class DodgeRollPose {
 			flip = DodgeClient.rollFlip;
 			extended = DodgeClient.rollLong;
 			dash = false;
+			fromDash = DodgeClient.rollFromDash;
 		} else if (own && DodgeClient.dashDrawStart != Long.MIN_VALUE) {
 			// our own dash, likewise (the roll it may go on into starts later, and takes over above)
 			start = DodgeClient.dashDrawStart;
@@ -141,6 +154,7 @@ public final class DodgeRollPose {
 			flip = false;
 			extended = false;
 			dash = true;
+			fromDash = false;
 		} else {
 			Dodge.Rolling rolling = player.getAttached(Dodge.ROLLING);
 			if (rolling == null) {
@@ -152,12 +166,33 @@ public final class DodgeRollPose {
 			flip = rolling.flip();
 			extended = rolling.extended();
 			dash = rolling.dash();
+			fromDash = rolling.fromDash();
 		}
 		float elapsed = now - start + partialTicks;
 		// (a long roll, the key held into it, turns slower over more ground: Dodge#rollShare)
-		float t = dash ? elapsed / Dodge.DASH_TICKS : flip ? elapsed / Dodge.FLIP_TICKS : Dodge.rollShare(elapsed, extended);
+		float t = dash ? elapsed / Dodge.DASH_TICKS : flip ? elapsed / Dodge.FLIP_TICKS : Dodge.rollShare(elapsed, extended, fromDash);
+		// a roll out of a held dash starts from the dash's stance as it was at the hand-off, easing out
+		float carry = 0.0F;
+		if (fromDash && !flip && !dash) {
+			float h = Mth.clamp(t / DASH_HANDOFF, 0.0F, 1.0F);
+			carry = dashAmount(Dodge.ROLL_HOLD_TICKS / (float)Dodge.DASH_TICKS) * (1.0F - h * h * (3.0F - 2.0F * h));
+		}
 		// (a flip in the air is a flip for everyone; Rubber-folk and Verdants dash by their stretch too)
-		return t < 0.0F || t >= 1.0F ? null : new Roll(t, x, z, flip, !flip && Boolean.TRUE.equals(player.getAttached(Dodge.STRETCHY)), dash);
+		return t < 0.0F || t >= 1.0F ? null : new Roll(t, x, z, flip, !flip && Boolean.TRUE.equals(player.getAttached(Dodge.STRETCHY)), dash, carry);
+	}
+
+	/**
+	 * How much of the weighty walk ({@code BodyWeight}) is kept under {@code roll} (0 to 1): it gives way as the dash's
+	 * stance or the roll's tuck comes on and comes back as they let go, so the body never jumps between the two.
+	 */
+	public static float weightKept(Roll roll) {
+		if (roll.stretch()) {
+			return 1.0F - Mth.sin(Mth.PI * roll.t());
+		}
+		if (roll.dash()) {
+			return 1.0F - dashAmount(roll.t());
+		}
+		return Math.min(1.0F - tuck(roll.t()), 1.0F - roll.carry());
 	}
 
 	/** How far into the dash the body is (0 to 1): quickly in, slower out, eased at both ends. */
@@ -236,6 +271,10 @@ public final class DodgeRollPose {
 		float turn = t * t * (3.0F - 2.0F * t) * Mth.TWO_PI;
 		float height = state.boundingBoxHeight / Math.max(entityScale, 0.01F);
 		float middle = height * BALL_CENTRE;
+		if (roll.carry() > 0.0F) {
+			// the dash's hips still dropped, easing out
+			poseStack.translate(0.0F, -LEG * (1.0F - Mth.cos(DASH_STANCE * roll.carry())), 0.0F);
+		}
 		if (!roll.flip()) {
 			// down into a ball resting on the ground, and back up to the feet as it opens (the flip turns where it is, in the air)
 			// (standing, the feet are as far below the middle as it is above the ground: no drop till the tuck comes on, and
@@ -259,15 +298,18 @@ public final class DodgeRollPose {
 		if (roll == null || roll.stretch()) {
 			return;
 		}
-		if (roll.dash()) {
-			// a dip with the knees, and a lean into a side dash (a turn about +Z leans the top of the view right)
+		if (roll.dash() || roll.carry() > 0.0F) {
+			// a dip with the knees, and a lean into a side dash (a turn about +Z leans the top of the view right); under a
+			// roll out of a held dash, what's left of it as the roll takes over
 			float[] way = way(roll, minecraft.player.getViewYRot(partialTicks));
-			float e = dashAmount(roll.t());
+			float e = roll.dash() ? dashAmount(roll.t()) : roll.carry();
 			poseStack.translate(0.0F, DASH_VIEW_DIP * e, 0.0F);
 			if (way != null) {
 				poseStack.rotate(new Quaternionf().rotateZ(DASH_VIEW_TILT * way[1] * e));
 			}
-			return;
+			if (roll.dash()) {
+				return;
+			}
 		}
 		// the dodge's way in view space (forward is -Z, right is +X), from where we face
 		float yaw = minecraft.player.getViewYRot(partialTicks) * Mth.DEG_TO_RAD;
@@ -303,24 +345,7 @@ public final class DodgeRollPose {
 			return;
 		}
 		if (roll.dash() && !roll.stretch()) {
-			float[] way = way(roll, living.bodyRot);
-			float e = dashAmount(roll.t());
-			float forward = way == null ? 0.0F : way[0], right = way == null ? 0.0F : way[1];
-			// the stance, set outright (vanilla's walk would lift a foot off the ground; bendLimbs folds the knees)
-			float[] legs = stance(e, forward, right);
-			set(h.rightLeg, legs[0], 0.0F, legs[1], 1.0F);
-			set(h.leftLeg, legs[3], 0.0F, legs[4], 1.0F);
-			// the guard: both arms up in front, a little out (not while swinging or using something: a counter shows as it is)
-			if (!(living instanceof AvatarRenderState avatar && (avatar.swingAnimation > 0.0F || avatar.isUsingItem))) {
-				set(h.rightArm, DASH_ARM_UP, 0.0F, DASH_ARM_OUT, e);
-				set(h.leftArm, DASH_ARM_UP, 0.0F, -DASH_ARM_OUT, e);
-			}
-			// the upper body leans into the way about the hips; the head turned back against it first, so it stays level, eyes
-			// on what was dodged
-			float pitch = DASH_LEAN * forward * e, tip = DASH_LEAN * right * e;
-			h.head.xRot -= pitch;
-			h.head.zRot -= tip;
-			com.jaymospowers.client.PoseBlend.bend(h, pitch, 0.0F, tip, 0.0F, 0.0F);
+			dashPose(h, living, roll, dashAmount(roll.t()), 1.0F);
 			return;
 		}
 		if (roll.stretch()) {
@@ -331,6 +356,10 @@ public final class DodgeRollPose {
 			set(h.rightLeg, 0.0F, 0.0F, 0.02F, out);
 			set(h.leftLeg, 0.0F, 0.0F, -0.02F, out);
 			return;
+		}
+		if (roll.carry() > 0.0F) {
+			// out of a held dash: its stance first, easing out, and the tuck comes on over it (no snap upright between)
+			dashPose(h, living, roll, roll.carry(), roll.carry());
 		}
 		float w = tuck(roll.t());
 		// (the flip: knees up, the back barely rounded, and the arms left nearly as they are so the weapon stays out)
@@ -347,6 +376,29 @@ public final class DodgeRollPose {
 		h.rightLeg.z = Mth.lerp(legs, h.rightLeg.z, LEG_TOP * Mth.sin(back));
 		h.leftLeg.y = Mth.lerp(legs, h.leftLeg.y, LEG_TOP * Mth.cos(back));
 		h.leftLeg.z = Mth.lerp(legs, h.leftLeg.z, LEG_TOP * Mth.sin(back));
+	}
+
+	/**
+	 * The dash's stance at {@code e} of its fullest, its legs set {@code legsIn} of the way from where they are (1 for the
+	 * dash itself: set outright, as vanilla's walk would lift a foot off the ground; bendLimbs folds the knees).
+	 */
+	private static void dashPose(HumanoidModel<?> h, LivingEntityRenderState living, Roll roll, float e, float legsIn) {
+		float[] way = way(roll, living.bodyRot);
+		float forward = way == null ? 0.0F : way[0], right = way == null ? 0.0F : way[1];
+		float[] legs = stance(e, forward, right);
+		set(h.rightLeg, legs[0], 0.0F, legs[1], legsIn);
+		set(h.leftLeg, legs[3], 0.0F, legs[4], legsIn);
+		// the guard: both arms up in front, a little out (not while swinging or using something: a counter shows as it is)
+		if (!(living instanceof AvatarRenderState avatar && (avatar.swingAnimation > 0.0F || avatar.isUsingItem))) {
+			set(h.rightArm, DASH_ARM_UP, 0.0F, DASH_ARM_OUT, e);
+			set(h.leftArm, DASH_ARM_UP, 0.0F, -DASH_ARM_OUT, e);
+		}
+		// the upper body leans into the way about the hips; the head turned back against it first, so it stays level, eyes
+		// on what was dodged
+		float pitch = DASH_LEAN * forward * e, tip = DASH_LEAN * right * e;
+		h.head.xRot -= pitch;
+		h.head.zRot -= tip;
+		com.jaymospowers.client.PoseBlend.bend(h, pitch, 0.0F, tip, 0.0F, 0.0F);
 	}
 
 	/** Last thing before the model is drawn: the tuck's knees folded to the chest and elbows round the shins. */
@@ -370,8 +422,16 @@ public final class DodgeRollPose {
 		}
 		float w = tuck(roll.t());
 		float legs = roll.flip() ? w * FLIP_LEGS : w, arms = roll.flip() ? w * FLIP_ARMS : w;
-		KneeBend.bend(h.rightLeg, KNEE_FOLD * legs);
-		KneeBend.bend(h.leftLeg, KNEE_FOLD * legs);
+		float rightKnee = 0.0F, leftKnee = 0.0F;
+		float[] way = roll.carry() > 0.0F ? way(roll, living.bodyRot) : null;
+		if (way != null) {
+			// out of a held dash: the leg ahead's bent knee easing into the tuck's fold (one bend a leg: KneeBend keeps the first)
+			float[] stance = stance(roll.carry(), way[0], way[1]);
+			rightKnee = stance[2] * (1.0F - legs);
+			leftKnee = stance[5] * (1.0F - legs);
+		}
+		KneeBend.bend(h.rightLeg, KNEE_FOLD * legs + rightKnee);
+		KneeBend.bend(h.leftLeg, KNEE_FOLD * legs + leftKnee);
 		// (KneeBend's + swings the lower half back: a forearm comes forward on a -)
 		KneeBend.bend(h.rightArm, -ELBOW_FOLD * arms, ELBOW, false);
 		KneeBend.bend(h.leftArm, -ELBOW_FOLD * arms, ELBOW, false);

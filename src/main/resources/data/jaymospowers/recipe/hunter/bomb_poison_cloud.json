@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:gunpowder",
+    "minecraft:spider_eye"
+  ],
+  "result": {
+    "id": "jaymospowers:bomb_poison_cloud",
+    "count": 1
+  }
+}

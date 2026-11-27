@@ -172,6 +172,13 @@ public final class Downed {
 				disarm(player, (Mob) entity);
 				return false;
 			});
+		// Andy (2026-11-25): "the downed loot screen should have a harness section". Their harness comes off on a screen of its
+		// own for someone still alive and down (DownedHarnessMenu); once they are dead it is on the body's loot screen (Kitchen's).
+		PowersCompat.bodyOption("harness", 65, (player, entity) -> entity instanceof Mob body && isDowned(body) && disarmable(body)
+			&& Harness.worn(body).stream().anyMatch(piece -> !piece.isEmpty()), (player, entity) -> {
+				DownedHarnessMenu.open(player, (Mob) entity);
+				return false;
+			});
 		ServerTickEvents.END_SERVER_TICK.register(Downed::tick);
 	}
 
@@ -270,9 +277,13 @@ public final class Downed {
 		return ours(body) || !(body instanceof net.minecraft.world.entity.OwnableEntity owned && owned.getOwner() != null);
 	}
 
-	/** Whether {@code body} still has anything to take: something in either hand, or arrows ({@link MobAmmo#quiver}). */
+	/**
+	 * Whether {@code body} still has anything to take: something in either hand, a shield or blade on its back
+	 * ({@link DualBlades#backGear}), or arrows ({@link MobAmmo#quiver}).
+	 */
 	private static boolean armed(Mob body) {
-		return !body.getMainHandItem().isEmpty() || !body.getOffhandItem().isEmpty() || MobAmmo.quiver(body) > 0;
+		return !body.getMainHandItem().isEmpty() || !body.getOffhandItem().isEmpty() || DualBlades.backGear(body.getItemBySlot(EquipmentSlot.BODY))
+			|| MobAmmo.quiver(body) > 0 || !NpcPockets.has(body) && !Sidearms.belt(body).isEmpty();
 	}
 
 	/** Someone of the settlement is tending {@code body} just now ({@link FieldMedics} leaves them to it). */
@@ -544,8 +555,9 @@ public final class Downed {
 	}
 
 	/**
-	 * {@code player} takes the weapons out of a downed one's hands, and the arrows it carries (Andy, 2026-11-19: "you
-	 * should be able to take their bows"), and nothing else.
+	 * {@code player} takes the weapons out of a downed one's hands and off its back (a shield or a stowed blade,
+	 * {@link DualBlades#backGear}), and the arrows it carries (Andy, 2026-11-19: "you should be able to take their bows"), and a
+	 * folk's belt pouch ({@link BeltPouch}); nothing else.
 	 */
 	private static void disarm(Player player, Mob body) {
 		boolean took = false;
@@ -554,9 +566,9 @@ public final class Downed {
 		if (IllagerTongue.speaker(body) && !body.getMainHandItem().isEmpty()) {
 			body.addTag(IllagerTalk.ARMED_TAG);
 		}
-		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND}) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND, EquipmentSlot.BODY}) {
 			ItemStack held = body.getItemBySlot(slot);
-			if (held.isEmpty()) {
+			if (held.isEmpty() || slot == EquipmentSlot.BODY && !DualBlades.backGear(held)) {
 				continue;
 			}
 			if (!WornGear.pickedUp(body, slot)) {
@@ -567,6 +579,22 @@ public final class Downed {
 			unpack(body, held);
 			if (!player.getInventory().add(held) && !held.isEmpty()) {
 				player.drop(held, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			took = true;
+		}
+		// (a body with no pockets to search gives up its belt weapon here instead)
+		if (!NpcPockets.has(body)) {
+			ItemStack belted = Sidearms.take(body);
+			if (!belted.isEmpty()) {
+				if (!player.getInventory().add(belted) && !belted.isEmpty()) {
+					player.drop(belted, false, net.minecraft.util.Prediction.SERVER_ONLY);
+				}
+				took = true;
+			}
+		}
+		for (ItemStack pouched : BeltPouch.take(body)) {
+			if (!player.getInventory().add(pouched) && !pouched.isEmpty()) {
+				player.drop(pouched, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
 			took = true;
 		}

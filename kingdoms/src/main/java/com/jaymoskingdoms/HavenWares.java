@@ -47,6 +47,8 @@ import org.jspecify.annotations.Nullable;
 public final class HavenWares {
 	/** What a haven asks (emeralds): pearl, deep fish (two), cut gem, herbs (three), hide (two), stone tool, bow, war jerkin. */
 	static final int PEARL_PRICE = 4, FISH_PRICE = 1, GEM_PRICE = 6, HERB_PRICE = 1, HIDE_PRICE = 2, TOOL_PRICE = 4, BOW_PRICE = 6, JERKIN_PRICE = 7;
+	/** A Sylvan trader's honey bottles, honeycomb, fungal planks and fungal stems: the price (emeralds) and how many come for it. */
+	static final int HONEY_PRICE = 2, HONEY_COUNT = 3, COMB_PRICE = 2, COMB_COUNT = 3, PLANKS_PRICE = 1, PLANKS_COUNT = 8, STEM_PRICE = 1, STEM_COUNT = 4;
 	/** How many come for the price: deep fish, herbs, hides. */
 	static final int FISH_COUNT = 2, HERB_COUNT = 3, HIDE_COUNT = 2;
 	/** What a human town pays for one (emeralds): pearl, deep fish, cut gem, herbs, hide. */
@@ -152,6 +154,12 @@ public final class HavenWares {
 		} else if (blood.equals(Heritage.Kind.SYLVAN.key())) {
 			wares.add(sale(HERB_PRICE, new ItemStack(SYLVAN_HERBS, HERB_COUNT)));
 			wares.add(sale(BOW_PRICE, bow(level, blood)));
+			// the orchard's skeps, and the fungal wood of the haven's glow-woods
+			wares.add(sale(HONEY_PRICE, new ItemStack(Items.HONEY_BOTTLE, HONEY_COUNT)));
+			wares.add(sale(COMB_PRICE, new ItemStack(Items.HONEYCOMB, COMB_COUNT)));
+			com.jaymoskingdoms.glowwood.GlowWoods.WoodSet wood = com.jaymoskingdoms.glowwood.GlowWoods.WOOD.get(GlowWoodHavens.woodOf(f));
+			wares.add(sale(PLANKS_PRICE, new ItemStack(wood.planks().asItem(), PLANKS_COUNT)));
+			wares.add(sale(STEM_PRICE, new ItemStack(wood.stem().asItem(), STEM_COUNT)));
 		} else if (blood.equals(Heritage.Kind.WARRIORBORN.key())) {
 			wares.add(sale(HIDE_PRICE, new ItemStack(WAR_HIDE, HIDE_COUNT)));
 			wares.add(sale(JERKIN_PRICE, jerkin(level, blood)));

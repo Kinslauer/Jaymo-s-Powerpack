@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "jaymoskingdoms:glowcap_planks"
+  },
+  "result": {
+    "id": "jaymoskingdoms:glowcap_trapdoor",
+    "count": 2
+  },
+  "group": "wooden_trapdoor"
+}

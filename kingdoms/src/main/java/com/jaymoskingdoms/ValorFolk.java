@@ -356,6 +356,7 @@ public final class ValorFolk {
 			return Component.translatable("dialogue.chat.jaymoskingdoms.valor.none");
 		}
 		if (Recollections.refuses(villager, player)) {
+			RefusalHints.hintStanding(player, villager);
 			return Component.translatable("dialogue.chat.jaymoskingdoms.valor.refused");
 		}
 		add(player, TOLD, villager);

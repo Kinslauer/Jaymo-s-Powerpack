@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
@@ -40,7 +41,48 @@ public final class CampBeasts {
 		if (e instanceof Folk folk && folk.factionId() == camp) {
 			return true;
 		}
-		return e instanceof ScalebaneArcher || Goblins.isGoblin(e) || Orcs.isOrc(e) || Barbarians.isCampVillager(e);
+		return e instanceof ScalebaneArcher s && s.camp() == camp || Goblins.isGoblin(e) || Orcs.isOrc(e) || Barbarians.isCampVillager(e);
+	}
+
+	/**
+	 * The camp {@code e} is hired to or kept by (a scalebane sellsword, a froglin, a plague bearer), or -1: a wild one, or
+	 * anything else.
+	 */
+	public static int hiredCamp(@Nullable Entity e) {
+		if (e instanceof ScalebaneArcher s) {
+			return s.camp();
+		}
+		if (e instanceof Froglin f) {
+			return f.camp();
+		}
+		return e instanceof PlagueBearer p ? p.camp() : -1;
+	}
+
+	/**
+	 * Andy (2026-11-26): the scalebound "should be on the same team, but only when hired to the camp. otherwise they are
+	 * still hostile." {@code a} and {@code b} leave each other be because one is hired to (or kept by) a camp and the
+	 * other is that camp's own: its folk, its MCA villagers, a camp allied with it, or another creature it keeps. A wild
+	 * one gets nothing from this: the camps treat it as any monster, and it them as prey.
+	 */
+	public static boolean spares(@Nullable Entity a, @Nullable Entity b) {
+		if (a == null || b == null || a == b) {
+			return false;
+		}
+		int ca = hiredCamp(a), cb = hiredCamp(b);
+		return ca >= 0 && ownSide(ca, b) || cb >= 0 && ownSide(cb, a);
+	}
+
+	/** {@code e} is on camp {@code camp}'s side: one of its people or an allied camp's, or a creature it (or an ally) keeps. */
+	private static boolean ownSide(int camp, Entity e) {
+		int other = e instanceof Worker w ? w.factionId() : hiredCamp(e);
+		if (other < 0) {
+			return false;
+		}
+		if (other == camp) {
+			return true;
+		}
+		MinecraftServer server = e.level().getServer();
+		return server != null && Relations.between(server, camp, other) == Relation.ALLIED && !Brutality.atWar(server, camp, other);
 	}
 
 	/** A spot about the fire of camp {@code camp} for a creature to be put. */
@@ -53,6 +95,8 @@ public final class CampBeasts {
 		Froglin.hire(level, camp, fire, Froglin.START);
 		if (Camps.orc(level.getServer(), camp)) {
 			PlagueBearer.rise(level, camp, fire);
+			// (Andy, 2026-11-26: "the scalebound should spawn more with orcs") an orc camp hires scalebane bowmen too
+			ScalebaneArcher.hire(level, camp, fire, ScalebaneArcher.START);
 		}
 	}
 
@@ -63,6 +107,7 @@ public final class CampBeasts {
 			Froglin.grow(level, camp, fire, days);
 			if (Camps.orc(level.getServer(), camp)) {
 				PlagueBearer.grow(level, camp, fire, days);
+				ScalebaneArcher.grow(level, camp, fire, days);
 			}
 		}
 	}

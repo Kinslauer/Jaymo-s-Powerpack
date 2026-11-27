@@ -120,6 +120,7 @@ public final class MoneyTalk {
 	static Component answer(ServerPlayer player, Villager v) {
 		RandomSource random = v.getRandom();
 		if (McaBridge.heartsOf(v, player) < Directions.REFUSE_HEARTS) {
+			RefusalHints.hint(player, v, RefusalHints.Cause.DISLIKE);
 			return Component.translatable(line("refuse", random));
 		}
 		if (v.isBaby()) {

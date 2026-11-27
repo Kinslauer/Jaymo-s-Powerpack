@@ -328,7 +328,8 @@ public final class WebSymbioteBody {
 
 	/** Meat it eats from a hand (raw or cooked). */
 	public static boolean isMeat(ItemStack stack) {
-		return !stack.isEmpty() && (WebSymbiote.RAW_MEAT.contains(stack.getItem()) || COOKED_MEAT.contains(stack.getItem()));
+		return !stack.isEmpty() && (WebSymbiote.RAW_MEAT.contains(stack.getItem()) || COOKED_MEAT.contains(stack.getItem())
+			|| stack.is(WebSymbioteMolt.MEAT));
 	}
 
 	/** Its taste for the item: the white one won't touch carrion. */
@@ -353,12 +354,12 @@ public final class WebSymbioteBody {
 	// ---- gates --------------------------------------------------------------------------------------------------------
 
 	/** The symbiote will listen right now (bonded, awake, settled, not busy with the wheel). */
-	private static boolean ready(ServerPlayer player) {
+	static boolean ready(ServerPlayer player) {
 		return WebSymbiote.isBonded(player) && player.isAlive() && !player.isSpectator() && !WebSymbioteBond.dormant(player)
 			&& !WebSymbiote.driving(player) && !WebSymbiote.roaring(player) && !Downed.isDowned(player) && !WebSymbioteStrains.asleep(player);
 	}
 
-	private static boolean due(Map<UUID, Long> last, ServerPlayer player, int gap) {
+	static boolean due(Map<UUID, Long> last, ServerPlayer player, int gap) {
 		long now = player.level().getGameTime();
 		Long was = last.get(player.getUUID());
 		if (was != null && now - was >= 0 && now - was < gap) {
@@ -382,7 +383,7 @@ public final class WebSymbioteBody {
 
 	// ---- the arm ------------------------------------------------------------------------------------------------------
 
-	private static void setArm(ServerPlayer player, Arm arm) {
+	static void setArm(ServerPlayer player, Arm arm) {
 		if (arm.isEmpty() && arm.selected() == 0 && !arm.using()) {
 			player.removeAttached(ARM);
 		} else {
@@ -418,6 +419,7 @@ public final class WebSymbioteBody {
 			if (slot < 0) {
 				slot = arm.selected();
 				back = arm.get(slot).copy();
+				WebSymbioteArm.pried(player, slot);
 			}
 			setArm(player, arm.with(slot, hand.copy()).pick(slot));
 			player.setItemInHand(InteractionHand.MAIN_HAND, back);
@@ -440,6 +442,7 @@ public final class WebSymbioteBody {
 			return;
 		}
 		ItemStack out = arm.get(slot).copy();
+		WebSymbioteArm.pried(player, slot);
 		setArm(player, arm.with(slot, ItemStack.EMPTY).pick(slot));
 		player.setItemInHand(InteractionHand.MAIN_HAND, out);
 		stowEffects(player, false);
@@ -548,12 +551,12 @@ public final class WebSymbioteBody {
 		return hit.getType() == HitResult.Type.BLOCK ? hit : null;
 	}
 
-	private static boolean mayWork(ServerPlayer player, BlockPos pos) {
+	static boolean mayWork(ServerPlayer player, BlockPos pos) {
 		return player.level().mayInteract(player, pos) && !player.blockActionRestricted(player.level(), pos, player.gameMode.getGameModeForPlayer());
 	}
 
 	/** Runs {@code action} with {@code stack} swapped into the picked hotbar slot (the game reads tools and uses from there); what is left of it comes back. */
-	private static ItemStack asHeld(ServerPlayer player, ItemStack stack, java.util.function.Consumer<ItemStack> action) {
+	static ItemStack asHeld(ServerPlayer player, ItemStack stack, java.util.function.Consumer<ItemStack> action) {
 		Inventory inventory = player.getInventory();
 		int slot = inventory.getSelectedSlot();
 		ItemStack real = inventory.getItem(slot);
@@ -814,7 +817,7 @@ public final class WebSymbioteBody {
 		}
 		FoodProperties food = stack.get(DataComponents.FOOD);
 		int nutrition = Math.max(1, food == null ? 2 : food.nutrition());
-		boolean raw = WebSymbiote.RAW_MEAT.contains(stack.getItem());
+		boolean raw = WebSymbiote.RAW_MEAT.contains(stack.getItem()) || stack.is(WebSymbioteMolt.MEAT);
 		WebSymbiote.feed(player, nutrition * (raw ? WebSymbiote.MEAT_FEED_PER_NUTRITION : COOKED_FEED_PER_NUTRITION), FEED_CALM);
 		if (!player.isCreative()) {
 			stack.shrink(1);
@@ -957,6 +960,9 @@ public final class WebSymbioteBody {
 	}
 
 	private static void hint(ServerPlayer player, int bit, String key) {
+		if (WebSymbioteSettings.off(player, WebSymbioteSettings.Setting.HINTS)) {
+			return;
+		}
 		int seen = player.getAttachedOrElse(HINTS, 0);
 		if ((seen & bit) != 0) {
 			return;

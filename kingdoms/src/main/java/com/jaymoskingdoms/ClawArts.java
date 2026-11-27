@@ -36,16 +36,20 @@ import net.minecraft.world.phys.Vec3;
  * hurts {@link #BLEED_DAMAGE} a second, and {@link #BLEED_HEAL} of what the wounds bleed comes back to whoever opened them.
  * What has no blood (bones, golems) does not bleed.</li>
  * </ul>
- * And on the Claw key ({@link ArtKeys}):
+ * And on the skill bar ({@code night_rake}, {@code night_rend}, {@code night_pounce}, {@code night_roar}; the Claw key is gone for
+ * vampires), each costing a full vampire mB ({@link VampireBlood}; a dhampir pays nothing):
  * <ul>
- * <li><b>Rake</b> (tap, a foe in reach): {@link #RAKE_HITS} quick slashes, each a wound; twice as hard on a pinned foe;</li>
- * <li><b>Rend</b> (sneak + tap): one tearing blow; a foe at {@link #REND_SHARE} of its health or less (never a great one) is
+ * <li><b>Rake</b> ({@link #RAKE_MB}, a foe in reach): {@link #RAKE_HITS} quick slashes, each a wound; twice as hard on a pinned foe;</li>
+ * <li><b>Rend</b> ({@link #REND_MB}): one tearing blow; a foe at {@link #REND_SHARE} of its health or less (never a great one) is
  * killed outright and its blood mends you;</li>
- * <li><b>Pounce</b> (sprint + tap at a foe): you fly at it and bear it down: it is <b>pinned</b> under you for
+ * <li><b>Pounce</b> ({@link #POUNCE_MB}, at a foe): you fly at it and bear it down: it is <b>pinned</b> under you for
  * {@link #PIN_TICKS} ticks;</li>
- * <li><b>Roar of frenzy</b> (hold): everything near that can fear does, and for {@link #FRENZY_TICKS} ticks you are stronger
- * and quicker, your claws open two wounds a blow and you heal twice as fast.</li>
+ * <li><b>Roar of frenzy</b> ({@link #ROAR_MB}): everything near that can fear does, and for {@link #FRENZY_TICKS} ticks you are
+ * stronger and quicker, your claws open two wounds a blow and you heal twice as fast.</li>
  * </ul>
+ * They flow from the moves before them ({@link NightFlow}): a Blood Dash cancelled into Pounce or Rake, a Groundpound's throw
+ * followed by a Rend.
+ * <p>
  * In the sun or near a holy thing every one of them is weaker ({@link BloodLeap#WEAK_SHARE}).
  */
 public final class ClawArts {
@@ -57,6 +61,11 @@ public final class ClawArts {
 	static final float BLEED_DAMAGE = 0.5F, BLEED_HEAL = 0.5F;
 	static final int BLEED_BEAT = 20, BLEED_MAX = 8, BLEED_FADE = 160;
 	static final double BLEED_HEAL_RANGE = 24.0;
+	/** What each move costs a full vampire (mB), a chained one half ({@link NightFlow#COST_SHARE}). */
+	static final int RAKE_MB = 100, REND_MB = 150, POUNCE_MB = 150, ROAR_MB = 300;
+	/** Rend lunging at a foe a groundpound threw: its speed (blocks a tick) and the longest it flies (ticks). */
+	static final double LUNGE_SPEED = 1.3;
+	static final int LUNGE_TICKS = 16;
 	/** Rake: reach, slashes, ticks between them, harm each, the factor on a pinned foe, cooldown. */
 	static final double RAKE_REACH = 4.0;
 	static final int RAKE_HITS = 3, RAKE_SPACING = 3, RAKE_COOLDOWN = 60;
@@ -83,7 +92,11 @@ public final class ClawArts {
 		UUID by;
 	}
 
-	private record Rake(ServerPlayer player, LivingEntity target, int left, long next) {
+	private record Rake(ServerPlayer player, LivingEntity target, int left, long next, double reach) {
+	}
+
+	/** A rend that has to close in first (on a foe the groundpound threw). */
+	private record Lunge(LivingEntity target, long until) {
 	}
 
 	private record Pounce(LivingEntity target, long until) {
@@ -92,6 +105,7 @@ public final class ClawArts {
 	private static final Map<LivingEntity, Bleed> BLEEDS = new WeakHashMap<>();
 	private static final List<Rake> RAKES = new ArrayList<>();
 	private static final Map<UUID, Pounce> POUNCES = new HashMap<>();
+	private static final Map<UUID, Lunge> LUNGES = new HashMap<>();
 	private static final Map<UUID, Long> FRENZY = new HashMap<>();
 	/** Set while a move's own slash lands, so the claws' plain wound is not laid on top of the move's. */
 	private static boolean slashing;
@@ -111,6 +125,7 @@ public final class ClawArts {
 			BLEEDS.clear();
 			RAKES.clear();
 			POUNCES.clear();
+			LUNGES.clear();
 			FRENZY.clear();
 		});
 	}
@@ -121,7 +136,8 @@ public final class ClawArts {
 
 	/** {@code harm}, less in the sun or near a holy thing. */
 	private static float harm(ServerPlayer player, float harm) {
-		return BloodLeap.weak(player) ? harm * (float) BloodLeap.WEAK_SHARE : harm;
+		float base = NewMoon.on(player) ? harm * NewMoon.CLAW_SHARE : harm;
+		return BloodLeap.weak(player) ? base * (float) BloodLeap.WEAK_SHARE : base;
 	}
 
 	// ---- bleeding -------------------------------------------------------------------------------------------------------------
@@ -145,40 +161,78 @@ public final class ClawArts {
 
 	// ---- the key --------------------------------------------------------------------------------------------------------------
 
-	static void key(ServerPlayer player, ArtKeys.Gesture gesture) {
-		if (!Vampires.isVampire(player) || !(player.level() instanceof ServerLevel level) || player.isPassenger()) {
-			return;
+	/** A claw move off the skill bar ({@link NightGifts#RAKE}, {@link NightGifts#REND}, {@link NightGifts#POUNCE}, {@link NightGifts#ROAR}); whether it went. */
+	static boolean cast(ServerPlayer player, int which) {
+		if (!Vampires.isVampire(player) || !(player.level() instanceof ServerLevel level) || player.isPassenger() || Downed.isDowned(player)) {
+			return false;
 		}
-		switch (gesture) {
-			case TAP -> {
-				LivingEntity foe = ArtKeys.sight(player, RAKE_REACH, e -> !ArtKeys.mine(player, e));
+		switch (which) {
+			case NightGifts.RAKE -> {
+				// (a dash cancelled into a rake starts from further off, and is cheaper)
+				boolean chained = NightFlow.within(player, NightFlow.Link.DASH_CLAW);
+				double reach = chained ? NightFlow.DASH_RAKE_REACH : RAKE_REACH;
+				LivingEntity foe = ArtKeys.sight(player, reach, e -> !ArtKeys.mine(player, e));
 				if (foe == null) {
 					ArtKeys.refuse(player, "no_foe_near");
-				} else if (!ArtKeys.cooling(player, "claw_rake", RAKE_COOLDOWN)) {
-					RAKES.add(new Rake(player, foe, RAKE_HITS, level.getGameTime()));
+					return false;
 				}
+				if (!VampireBlood.pay(player, NightFlow.cost(RAKE_MB, chained))) {
+					return false;
+				}
+				NightFlow.close(player, NightFlow.Link.DASH_CLAW);
+				RAKES.add(new Rake(player, foe, RAKE_HITS, level.getGameTime(), reach));
+				return true;
 			}
-			case SNEAK -> {
+			case NightGifts.REND -> {
 				LivingEntity foe = ArtKeys.sight(player, REND_REACH, e -> !ArtKeys.mine(player, e));
+				boolean chained = false;
+				if (foe == null) {
+					// (a groundpound's throw followed by a rend: the nearest it threw, closed in on)
+					foe = NightFlow.poundedFoe(player);
+					chained = foe != null;
+				}
 				if (foe == null) {
 					ArtKeys.refuse(player, "no_foe_near");
-				} else if (!ArtKeys.cooling(player, "claw_rend", REND_COOLDOWN)) {
+					return false;
+				}
+				if (!VampireBlood.pay(player, NightFlow.cost(REND_MB, chained))) {
+					return false;
+				}
+				if (chained) {
+					NightFlow.close(player, NightFlow.Link.POUND_REND);
+				}
+				if (foe.getBoundingBox().distanceToSqr(player.getEyePosition()) > REND_REACH * REND_REACH) {
+					LUNGES.put(player.getUUID(), new Lunge(foe, level.getGameTime() + LUNGE_TICKS));
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_SWOOP, SoundSource.PLAYERS, 1.0F, 1.0F);
+				} else {
 					rend(player, level, foe);
 				}
+				return true;
 			}
-			case SPRINT -> {
-				LivingEntity foe = ArtKeys.sight(player, POUNCE_REACH, e -> !ArtKeys.mine(player, e));
+			case NightGifts.POUNCE -> {
+				boolean chained = NightFlow.within(player, NightFlow.Link.DASH_CLAW);
+				LivingEntity foe = ArtKeys.sight(player, chained ? NightFlow.DASH_POUNCE_REACH : POUNCE_REACH, e -> !ArtKeys.mine(player, e));
 				if (foe == null) {
 					ArtKeys.refuse(player, "no_foe");
-				} else if (!ArtKeys.cooling(player, "claw_pounce", POUNCE_COOLDOWN)) {
-					POUNCES.put(player.getUUID(), new Pounce(foe, level.getGameTime() + POUNCE_TICKS));
-					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_SWOOP, SoundSource.PLAYERS, 1.0F, 0.8F);
+					return false;
 				}
+				if (!VampireBlood.pay(player, NightFlow.cost(POUNCE_MB, chained))) {
+					return false;
+				}
+				NightFlow.close(player, NightFlow.Link.DASH_CLAW);
+				POUNCES.put(player.getUUID(), new Pounce(foe, level.getGameTime() + POUNCE_TICKS));
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_SWOOP, SoundSource.PLAYERS, 1.0F, 0.8F);
+				return true;
+			}
+			case NightGifts.ROAR -> {
+				if (!VampireBlood.pay(player, ROAR_MB)) {
+					return false;
+				}
+				roar(player, level);
+				return true;
 			}
 			default -> {
-				if (!ArtKeys.cooling(player, "claw_roar", ROAR_COOLDOWN)) {
-					roar(player, level);
-				}
+				return false;
 			}
 		}
 	}
@@ -237,16 +291,21 @@ public final class ClawArts {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (!player.isAlive() || player.isSpectator() || !Vampires.isVampire(player)) {
 				POUNCES.remove(player.getUUID());
+				LUNGES.remove(player.getUUID());
 				continue;
 			}
 			// the healing that never stops
 			int every = REGEN_EVERY * (BloodLeap.weak(player) ? REGEN_WEAK : 1) / (frenzied(player) ? 2 : 1);
-			if ((player.tickCount + player.getId()) % every == 0 && player.getHealth() < player.getMaxHealth()) {
+			if ((player.tickCount + player.getId()) % every == 0 && player.getHealth() < player.getMaxHealth() && !BloodPage.thin(player)) {
 				player.heal(REGEN);
 			}
 			Pounce pounce = POUNCES.get(player.getUUID());
 			if (pounce != null) {
 				pounce(player, pounce);
+			}
+			Lunge lunge = LUNGES.get(player.getUUID());
+			if (lunge != null) {
+				lunge(player, lunge);
 			}
 		}
 		long now = server.overworld().getGameTime();
@@ -255,13 +314,13 @@ public final class ClawArts {
 		for (Iterator<Rake> it = RAKES.iterator(); it.hasNext();) {
 			Rake r = it.next();
 			if (!(r.player.level() instanceof ServerLevel level) || !r.player.isAlive() || !r.target.isAlive() || r.target.level() != level
-				|| r.player.distanceToSqr(r.target) > (RAKE_REACH + 2.0) * (RAKE_REACH + 2.0)) {
+				|| r.player.distanceToSqr(r.target) > (r.reach + 2.0) * (r.reach + 2.0)) {
 				it.remove();
 			} else if (level.getGameTime() >= r.next) {
 				it.remove();
 				slash(r.player, level, r.target, RAKE_DAMAGE * (HeldFast.held(r.target) ? RAKE_PINNED : 1.0F), 1, r.left % 2 == 0);
 				if (r.left > 1) {
-					next.add(new Rake(r.player, r.target, r.left - 1, level.getGameTime() + RAKE_SPACING));
+					next.add(new Rake(r.player, r.target, r.left - 1, level.getGameTime() + RAKE_SPACING, r.reach));
 				}
 			}
 		}
@@ -292,6 +351,25 @@ public final class ClawArts {
 		}
 		// (hurt after walking the map: a death in the middle of it would change the map under the walk)
 		hurts.forEach(Runnable::run);
+	}
+
+	/** A rend closing in on its foe: steered at it until it is in reach, then the blow. */
+	private static void lunge(ServerPlayer player, Lunge lunge) {
+		ServerLevel level = (ServerLevel) player.level();
+		LivingEntity target = lunge.target;
+		if (!target.isAlive() || target.level() != level || level.getGameTime() >= lunge.until) {
+			LUNGES.remove(player.getUUID());
+			return;
+		}
+		if (target.getBoundingBox().distanceToSqr(player.getEyePosition()) > REND_REACH * REND_REACH) {
+			Vec3 to = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
+			NightGifts.thrown(player);
+			NightGifts.push(player, to.normalize().scale(LUNGE_SPEED * (BloodLeap.weak(player) ? BloodLeap.WEAK_SHARE : 1.0)));
+			return;
+		}
+		LUNGES.remove(player.getUUID());
+		NightGifts.push(player, Vec3.ZERO);
+		rend(player, level, target);
 	}
 
 	private static void pounce(ServerPlayer player, Pounce pounce) {

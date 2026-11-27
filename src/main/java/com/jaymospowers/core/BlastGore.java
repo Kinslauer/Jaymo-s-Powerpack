@@ -1,6 +1,8 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.wounds.BodyPart;
+import com.jaymospowers.core.wounds.BodyPlan;
 import com.jaymospowers.core.wounds.NoOneShot;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -85,6 +87,11 @@ public final class BlastGore {
 	public static final float GIB_FROM = 0.25F, GIB_MAX = 0.95F;
 	/** A survivor loses a limb: none at or below this closeness, rising evenly to {@link #LIMB_MAX} at the centre. */
 	public static final float LIMB_FROM = 0.3F, LIMB_MAX = 0.5F;
+	/**
+	 * Andy (2026-11-24): "blasts on downed enemies should blow limbs off". A body already down when a blast hits it loses a
+	 * limb at this many times a standing survivor's chance ({@link #limbChance}): certain from about two thirds of the way in.
+	 */
+	public static final float DOWNED_LIMB_SCALE = 2.0F;
 	/** After one limb, a second goes at this share of the chance. */
 	public static final float SECOND_LIMB = 0.4F;
 	/** A body killed but not gibbed keeps this share of a survivor's chance to lose a limb onto the corpse. */
@@ -143,6 +150,8 @@ public final class BlastGore {
 	private static final Map<LivingEntity, long[]> ROLLED = new WeakHashMap<>();
 	/** A body under a blunderbuss shot: the tick its first pellet landed, its health before it, and whether a limb was rolled. */
 	private static final Map<LivingEntity, long[]> SHOTS = new WeakHashMap<>();
+	/** A body already down that a blast's limbs were rolled for this tick (game time), so its after-damage doesn't roll again. */
+	private static final Map<LivingEntity, Long> DOWNED_ROLLED = new WeakHashMap<>();
 	/** A body under a crushing blow this tick (game time). */
 	private static final Map<LivingEntity, Long> CRUSHING = new WeakHashMap<>();
 	/** Bodies a crushing blow throws at the end of this tick: the way across (a unit vector) and how fast. */
@@ -241,6 +250,11 @@ public final class BlastGore {
 		if (!(target.level() instanceof ServerLevel) || blast(source) || blunderShot(source) || source.getEntity() == target) {
 			return false;
 		}
+		if (bookkept(source, amount)) {
+			// (Andy: a digger "has no realistic way" to burst someone) a death let come, credited to whoever felled them, is
+			// dealt as one endless blow; it is no blow of theirs, so their size and strength decide nothing here
+			return false;
+		}
 		if (source.is(CRUSHING_TYPES)) {
 			return true;
 		}
@@ -248,6 +262,26 @@ public final class BlastGore {
 			return false;
 		}
 		return amount >= CRUSH_ANY || bulk(by) >= CRUSH_BULK * bulk(target);
+	}
+
+	/**
+	 * Whether this is no blow at all but a death dealt by the rules: a downed body finished ({@code Downed}), a head or body
+	 * gone black ({@code Wounds}), a bleed-out, or any kill dealt as {@code Float.MAX_VALUE}. A crushing blow that led to it
+	 * was already counted when it landed ({@link #crushedNow}, the same tick).
+	 */
+	private static boolean bookkept(DamageSource source, float amount) {
+		return amount >= Float.MAX_VALUE || source.is(com.jaymospowers.core.wounds.Wounds.WOUNDS_DAMAGE)
+			|| source.is(com.jaymospowers.core.wounds.Bleeding.BLEEDING_DAMAGE);
+	}
+
+	/**
+	 * {@code target} dies under something's whole weight this tick (a ravager's or the warden's execution,
+	 * {@code MobExecutions}): its death is a crushing one, as a slam's is.
+	 */
+	public static void crushes(LivingEntity target) {
+		if (target.level() instanceof ServerLevel) {
+			CRUSHING.put(target, target.level().getGameTime());
+		}
 	}
 
 	/** Whether {@code source}'s blow was struck with a blade (a sword or an axe), which cuts and never crushes. */
@@ -278,8 +312,12 @@ public final class BlastGore {
 		return at != null && at == target.level().getGameTime();
 	}
 
-	/** How bulky a body is: its box's width across both ways, times its height. */
-	private static double bulk(LivingEntity e) {
+	/** How bulky a body is: its box's width across both ways, times its height (or what an op set, times a man's). */
+	public static double bulk(LivingEntity e) {
+		Float set = com.jaymospowers.core.reader.GoreOverrides.weight(e.getType());
+		if (set != null) {
+			return set * MAN_BULK;
+		}
 		return (double) e.getBbWidth() * e.getBbWidth() * e.getBbHeight();
 	}
 
@@ -373,6 +411,87 @@ public final class BlastGore {
 		double reach = Math.max(0.01, blast.radius() * 2.0);
 		float near = (float) Mth.clamp(1.0 - Math.sqrt(victim.distanceToSqr(blast.centre())) / reach, 0.0, 1.0);
 		return near * (float) Math.sqrt(Math.min(1.0F, blast.radius() / FULL_RADIUS));
+	}
+
+	// ---- which parts the blast can reach ----------------------------------------------------------------------------------
+
+	/** Where each body's exposure to the blast going off was last worked out: {game time, centre, mask}. */
+	private static final Map<LivingEntity, Object[]> EXPOSURE = new WeakHashMap<>();
+	/** How far a part's sample point sits from the body's axis, as a share of its box's width, for an arm, a leg and a wing. */
+	private static final double ARM_SIDE = 0.45, LEG_SIDE = 0.2, WING_SIDE = 0.7;
+
+	/**
+	 * The parts of {@code victim} that have a clear line to the vanilla blast hurting it ({@code source}), as a mask of
+	 * {@link BodyPart#ordinal} bits: a part behind a wall, or a pillar, isn't hit. -1 when this isn't a blast with a known
+	 * centre (every part counts), and if no part is clear (the blast reached it some other way) every part is too.
+	 */
+	public static int exposure(LivingEntity victim, DamageSource source) {
+		Blast blast = GOING_OFF.peek();
+		BodyPlan plan = BodyPlan.of(victim);
+		if (!blast(source) || blast == null || plan == null || !(victim.level() instanceof ServerLevel level)) {
+			return -1;
+		}
+		long now = level.getGameTime();
+		Object[] cached = EXPOSURE.get(victim);
+		if (cached != null && (Long) cached[0] == now && blast.centre().equals(cached[1])) {
+			return (Integer) cached[2];
+		}
+		int mask = 0;
+		for (int i = 0; i < plan.size(); i++) {
+			BodyPart part = plan.part(i);
+			if (clear(level, blast.centre(), samplePoint(victim, plan, part))) {
+				mask |= 1 << part.ordinal();
+			}
+		}
+		if (mask == 0) {
+			mask = -1;
+		}
+		EXPOSURE.put(victim, new Object[] {now, blast.centre(), mask});
+		return mask;
+	}
+
+	/** Whether {@code limb} (a {@link Dismember} bit) is in {@code exposed} (from {@link #exposure}). */
+	private static boolean open(int exposed, int limb) {
+		BodyPart part = com.jaymospowers.core.wounds.Breaks.part(limb);
+		return exposed == -1 || part == null || (exposed >> part.ordinal() & 1) != 0;
+	}
+
+	/** Whether {@code from} sees {@code to} with no block between. */
+	private static boolean clear(ServerLevel level, Vec3 from, Vec3 to) {
+		return level.clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+			net.minecraft.world.level.ClipContext.Fluid.NONE, net.minecraft.world.phys.shapes.CollisionContext.empty())).getType()
+			== net.minecraft.world.phys.HitResult.Type.MISS;
+	}
+
+	/** About where {@code part} of {@code victim} is: a person's from its {@link LimbBoxes}, any other body's by height and side. */
+	private static Vec3 samplePoint(LivingEntity victim, BodyPlan plan, com.jaymospowers.core.wounds.BodyPart part) {
+		if (plan == BodyPlan.HUMANOID) {
+			int limb = part == BodyPart.BODY ? LimbBoxes.TORSO : com.jaymospowers.core.wounds.Breaks.limb(part);
+			for (LimbBoxes.Box box : LimbBoxes.of(victim)) {
+				if (box.part() == limb) {
+					return part == BodyPart.LEFT_FOOT || part == BodyPart.RIGHT_FOOT ? box.center().subtract(0.0, box.half()[1] * 0.8, 0.0) : box.center();
+				}
+			}
+		}
+		net.minecraft.world.phys.AABB box = victim.getBoundingBox();
+		double h = box.getYsize(), w = box.getXsize();
+		Vec3 right = Vec3.directionFromRotation(0.0F, victim.yBodyRot + 90.0F);
+		Vec3 forward = Vec3.directionFromRotation(0.0F, victim.yBodyRot);
+		Vec3 mid = new Vec3(victim.getX(), box.minY, victim.getZ());
+		return switch (part) {
+			case HEAD -> mid.add(forward.scale(plan == BodyPlan.QUADRUPED ? w * 0.4 : 0.0)).add(0.0, h * 0.88, 0.0);
+			case LEFT_ARM -> mid.add(right.scale(-w * ARM_SIDE)).add(0.0, h * 0.6, 0.0);
+			case RIGHT_ARM -> mid.add(right.scale(w * ARM_SIDE)).add(0.0, h * 0.6, 0.0);
+			case LEFT_LEG -> mid.add(right.scale(-w * LEG_SIDE)).add(0.0, h * 0.25, 0.0);
+			case RIGHT_LEG -> mid.add(right.scale(w * LEG_SIDE)).add(0.0, h * 0.25, 0.0);
+			case LEFT_FOOT -> mid.add(right.scale(-w * LEG_SIDE)).add(0.0, h * 0.05, 0.0);
+			case RIGHT_FOOT -> mid.add(right.scale(w * LEG_SIDE)).add(0.0, h * 0.05, 0.0);
+			case FRONT_LEGS -> mid.add(forward.scale(w * 0.3)).add(0.0, h * 0.2, 0.0);
+			case HIND_LEGS -> mid.add(forward.scale(-w * 0.3)).add(0.0, h * 0.2, 0.0);
+			case LEGS -> mid.add(0.0, h * 0.2, 0.0);
+			case WINGS -> mid.add(right.scale(w * WING_SIDE)).add(0.0, h * 0.6, 0.0);
+			default -> mid.add(0.0, h * 0.55, 0.0);
+		};
 	}
 
 	/** The blast's centre, if a vanilla one is going off (the way parts fly from). */
@@ -471,7 +590,7 @@ public final class BlastGore {
 			return;
 		}
 		if (entity.getRandom().nextFloat() < (shot ? 1.0F : CORPSE_LIMB) * chance(entity, by, limbBase(source, closeness), source)) {
-			loseLimb(entity, by, from);
+			loseLimb(entity, by, from, source);
 		}
 	}
 
@@ -492,14 +611,45 @@ public final class BlastGore {
 			// a Rubber-folk the blast tore apart already (Downed): nothing more to take
 			return;
 		}
+		Long downedAt = DOWNED_ROLLED.get(entity);
+		if (downedAt != null && downedAt == entity.level().getGameTime()) {
+			// (down before it hit: rolled already, at the downed's chance)
+			return;
+		}
 		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
 		Vec3 from = centre(source);
 		float chance = chance(entity, by, limbBase(source, closeness(entity, source, taken)), source);
 		if (entity.getRandom().nextFloat() >= chance) {
 			return;
 		}
-		if (loseLimb(entity, by, from) && entity.isAlive() && entity.getRandom().nextFloat() < chance * SECOND_LIMB) {
-			loseLimb(entity, by, from);
+		if (loseLimb(entity, by, from, source) && entity.isAlive() && entity.getRandom().nextFloat() < chance * SECOND_LIMB) {
+			loseLimb(entity, by, from, source);
+		}
+	}
+
+	/**
+	 * A blast hits {@code entity} while it's down and doesn't end it (Downed, before the damage, which the downed state may
+	 * keep for itself): an arm or a leg comes off at {@link #DOWNED_LIMB_SCALE} times a survivor's chance, now and then two.
+	 */
+	public static void downedBlast(LivingEntity entity, DamageSource source, float amount) {
+		if (!blast(source) || amount < Dismember.MIN_DAMAGE || !Dismember.canLoseParts(entity)
+			|| entity instanceof Player p && (p.isCreative() || p.isSpectator())) {
+			return;
+		}
+		long now = entity.level().getGameTime();
+		Long at = DOWNED_ROLLED.get(entity);
+		if (at != null && at == now) {
+			return;
+		}
+		DOWNED_ROLLED.put(entity, now);
+		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
+		Vec3 from = centre(source);
+		float chance = Math.min(1.0F, DOWNED_LIMB_SCALE * chance(entity, by, limbChance(closeness(entity, source, amount)), source));
+		if (entity.getRandom().nextFloat() >= chance) {
+			return;
+		}
+		if (loseLimb(entity, by, from, source) && entity.isAlive() && entity.getRandom().nextFloat() < chance * SECOND_LIMB) {
+			loseLimb(entity, by, from, source);
 		}
 	}
 
@@ -524,8 +674,15 @@ public final class BlastGore {
 	}
 
 	/** One limb it still has, at random, comes off. True if one did. */
-	private static boolean loseLimb(LivingEntity entity, @Nullable LivingEntity by, @Nullable Vec3 from) {
+	private static boolean loseLimb(LivingEntity entity, @Nullable LivingEntity by, @Nullable Vec3 from, DamageSource source) {
 		int mask = Dismember.missing(entity);
+		// (a blast takes only a limb it had a clear line to)
+		int exposed = exposure(entity, source);
+		for (int limb : LIMBS) {
+			if (!open(exposed, limb)) {
+				mask |= limb;
+			}
+		}
 		int left = 0;
 		for (int limb : LIMBS) {
 			if ((mask & limb) == 0) {

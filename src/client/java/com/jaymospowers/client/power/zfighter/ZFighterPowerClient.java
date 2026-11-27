@@ -9,6 +9,7 @@ import com.jaymospowers.power.zfighter.ZFighterBranchForms;
 import com.jaymospowers.power.zfighter.ZFighterEgo;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterNet;
+import com.jaymospowers.power.zfighter.ZFighterOverburn;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.jaymospowers.power.zfighter.ZFighterState;
@@ -97,6 +98,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		com.jaymospowers.client.power.zfighter.sky.SkyPlanets.init();
 		com.jaymospowers.client.power.zfighter.sky.HighSkyClient.init();
 		ZFighterFlightScreen.register();
+		FlightClient.init();
 		// (0.17.60) the tournament bracket
 		ZFighterBracketScreen.register();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);
@@ -373,7 +375,7 @@ public final class ZFighterPowerClient implements PowerClient {
 				graphics.text(font, Integer.toString(pose), chipX + 2, y + 2, 0xFFFFFFFF);
 			}
 		}
-		boolean limit = state.limit() > 0;
+		boolean limit = state.limit() > 0 || ZFighterOverburn.stage(player) > 0;
 		special(graphics, font, x + step * next++, y, new ItemStack(limit ? Items.BLAZE_POWDER : Items.WRITABLE_BOOK), 0, 1,
 			ZFighterInputClient.keyLabel(Minecraft.getInstance()), limit ? pulse(0xFF3A2A, 0xFFB0A0, time * 0.6F) : CHIP_COLOR);
 		if (ultimate) {
@@ -412,6 +414,10 @@ public final class ZFighterPowerClient implements PowerClient {
 		}
 		if (state.limit() > 0) {
 			label = label.copy().append(Component.translatable("hud.jaymospowers.zfighter.limit", state.limit()).copy().withColor(0xFF5A40));
+		}
+		int overburn = ZFighterOverburn.stage(player);
+		if (overburn > 0) {
+			label = label.copy().append(Component.translatable("hud.jaymospowers.zfighter.overburn", overburn).copy().withColor(ZFighterOverburn.COLOR));
 		}
 		graphics.text(font, label, x, y - 9, 0xFFFFFFFF);
 		if (state.has(ZFighterState.RAGE)) {

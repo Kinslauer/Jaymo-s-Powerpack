@@ -169,6 +169,12 @@ public final class McaCompat {
 		return LOADED ? McaBridge.spawnZombie(level, at) : null;
 	}
 
+	/** An MCA villager whose job trades (not a guard's, an outlaw's, a worker's, a nitwit's or no job), so sneak + right click trades. */
+	static boolean trades(net.minecraft.world.entity.Entity entity) {
+		return isMca(entity) && entity instanceof Villager v && !v.getVillagerData().profession().is(net.minecraft.world.entity.npc.villager.VillagerProfession.NITWIT)
+			&& !v.getVillagerData().profession().is(net.minecraft.world.entity.npc.villager.VillagerProfession.NONE) && !McaBridge.cannotTrade(v);
+	}
+
 	/** (0.5.29) An MCA villager (their own menu has the Quests button). */
 	static boolean isMca(net.minecraft.world.entity.Entity entity) {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
@@ -218,6 +224,16 @@ public final class McaCompat {
 	/** (0.5.50) An MCA villager running scared. */
 	static boolean panicking(Villager villager) {
 		return LOADED && McaBridge.panicking(villager);
+	}
+
+	/** {@link NpcTasks}: the MCA chore {@code villager} is set to ("harvest", "chop", "hunt", "fish", "prospect"); null without MCA. */
+	static @Nullable String chore(Villager villager) {
+		return LOADED ? McaBridge.chore(villager) : null;
+	}
+
+	/** {@link NpcTasks}: an MCA villager a player told to stay put; false without MCA. */
+	static boolean staying(Villager villager) {
+		return LOADED && McaBridge.staying(villager);
 	}
 
 	/** {@link FarmFamily}: an MCA villager someone set to one of MCA's chores; false without MCA. */
@@ -345,6 +361,14 @@ public final class McaCompat {
 	/** (0.7.132) How {@code v} was related to someone now dead ({@code dead}, by UUID): {@link #STRANGERS} without MCA. */
 	static int kinOf(Villager v, java.util.UUID dead) {
 		return LOADED ? McaBridge.kinOf(v, dead) : STRANGERS;
+	}
+
+	/**
+	 * {@code player}'s next of kin among players (MCA's family tree): their partner, then a child, a parent, a sibling;
+	 * null if none, or without MCA.
+	 */
+	static java.util.@Nullable UUID heir(ServerPlayer player) {
+		return LOADED ? McaBridge.heir(player) : null;
 	}
 
 	/** (0.7.211) An MCA villager's personality id ("relaxed", "crabby"...); "" without MCA or for a plain villager. */
@@ -610,6 +634,24 @@ public final class McaCompat {
 		return LOADED ? McaBridge.escort(level, f, at, yaw, task, radius) : null;
 	}
 
+	/** With MCA, a Pallid captain's body ({@link HollowCaptains}): the man saved as {@code face}, or a new one; not yet in the world. Null without MCA. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob hollowBody(ServerLevel level, net.minecraft.world.phys.Vec3 at, float yaw, int role,
+		net.minecraft.nbt.@Nullable CompoundTag face) {
+		return LOADED ? McaBridge.hollowBody(level, at, yaw, role, face) : null;
+	}
+
+	/** With MCA, {@code mob}'s whole saved self, to make it again with {@link #hollowBody}; null if it isn't one of MCA's. */
+	static net.minecraft.nbt.@Nullable CompoundTag saved(net.minecraft.world.entity.LivingEntity mob) {
+		return LOADED ? McaBridge.saved(mob) : null;
+	}
+
+	/** With MCA, {@code mob} is out of MCA's family tree. */
+	static void untree(ServerLevel level, net.minecraft.world.entity.LivingEntity mob) {
+		if (LOADED) {
+			McaBridge.untree(level, mob);
+		}
+	}
+
 	/** (0.7.295) With MCA, a stranger of no settlement in {@code role} (a looter), kept to {@code radius} of {@code home}; or null. */
 	static net.minecraft.world.entity.@Nullable PathfinderMob stranger(ServerLevel level, net.minecraft.core.BlockPos at, float yaw, int role,
 		net.minecraft.core.BlockPos home, int radius) {
@@ -721,6 +763,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.dealingOpening(villager, player);
 	}
 
+	/** (From MCA's dialogue) Its menu opening on one still shaken from crying out ({@link Outcry}): they bring it up first; true if so. */
+	public static boolean outcryOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.outcryOpening(villager, player);
+	}
+
 	/** (0.7.397, from MCA's dialogue) Its menu opening on an outlaw ({@link Outlaws}): a curt word, never a stranger's welcome; true if so. */
 	public static boolean outlawOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.outlawOpening(villager, player);
@@ -750,6 +797,11 @@ public final class McaCompat {
 	/** (0.7.424) The opening of one held down for questioning ({@link McaBridge#questioningOpening}). */
 	public static boolean questioningOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.questioningOpening(villager, player);
+	}
+
+	/** A ruin keeper's opening: the next tale of their city ({@link McaBridge#keeperOpening}). */
+	public static boolean keeperOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.keeperOpening(villager, player);
 	}
 
 	/** (2026-11-19) An old druid's own opening: who she is, her grove, her want ({@link McaBridge#druidOpening}). */

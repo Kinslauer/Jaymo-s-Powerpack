@@ -1,0 +1,17 @@
+{
+  "items": {
+    "jaymospowers:poison_paste": {
+      "venom": 3,
+      "rot": 2
+    },
+    "jaymospowers:toxic_paste": {
+      "venom": 6,
+      "rot": 4,
+      "fire": 2
+    },
+    "jaymospowers:pure_toxin": {
+      "venom": 8,
+      "salt": 3
+    }
+  }
+}

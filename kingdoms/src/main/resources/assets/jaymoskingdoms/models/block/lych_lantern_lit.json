@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:block/template_lych_lantern",
+  "textures": {
+    "lantern": "minecraft:block/lantern"
+  }
+}

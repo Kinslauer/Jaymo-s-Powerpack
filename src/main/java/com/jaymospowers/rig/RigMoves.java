@@ -19,9 +19,11 @@ import org.jspecify.annotations.Nullable;
 public final class RigMoves {
 	/** {@link Move} kinds. */
 	public static final int PALM = 1, LAUNCHER = 2, UNIBEAM = 3;
-	/** The one-knee landing ({@link RigLanding}) and a Rig prosthetic leg's kick ({@link RigLimbs}). */
-	public static final int KNEE = 4, KICK = 5;
-	public static final int KNEE_TICKS = 26, KICK_TICKS = 12;
+	/** The one-knee landing ({@link RigLanding}) and a Rig prosthetic leg's kick ({@link RigLimbs}): the side kick, and in a combo the spinning roundhouse. */
+	public static final int KNEE = 4, KICK = 5, ROUNDHOUSE = 26;
+	public static final int KNEE_TICKS = 26, KICK_TICKS = 12, ROUNDHOUSE_TICKS = 17;
+	/** The kicks' wind-ups: ticks from the key to the side kick's flick landing, and to the roundhouse's shin coming round. */
+	public static final int KICK_FIRE = 4, ROUNDHOUSE_FIRE = 9;
 	/**
 	 * The take-off (a crouch, then the thrusters fire), and three quiet gestures: a scan (fingers to the helm), a suit call
 	 * (arms out, feet planted while it builds) and the wrist table (a glance at the forearm).
@@ -35,6 +37,12 @@ public final class RigMoves {
 		ARM_MIMIC = 19;
 	/** The Rig's gun actives ({@link RigGuns}): palm charge, gatling, railgun, sonic, twin beam, siege mode. */
 	public static final int PALM_CHARGE = 20, GATLING = 21, RAILGUN = 22, SONIC = 23, TWIN = 24, SIEGE = 25;
+	/**
+	 * The suit-ups ({@link RigSuitUp}): plates slamming on while standing, the step-in that folds shut, the flight-in that
+	 * locks on midair, the falling assembly and the thrusters' brake that ends it.
+	 */
+	public static final int SUITUP_SLAM = 70, SUITUP_STEP = 71, SUITUP_FLIGHT = 72, SUITUP_FALL = 73, SUITUP_BRAKE = 74;
+	public static final int SUITUP_SLAM_TICKS = 24, SUITUP_STEP_TICKS = 44, SUITUP_FLIGHT_TICKS = 30, SUITUP_FALL_TICKS = 400, SUITUP_BRAKE_TICKS = 400;
 	/** Their lengths (ticks); the wind-up before the effect fires. */
 	public static final int ARM_BLADE_TICKS = 10, ARM_BLADE_FIRE = 2;
 	public static final int ARM_MACE_TICKS = 10, ARM_MACE_FIRE = 2;
@@ -83,9 +91,15 @@ public final class RigMoves {
 			case LAUNCHER -> LAUNCHER_TICKS;
 			case KNEE -> KNEE_TICKS;
 			case KICK -> KICK_TICKS;
+			case ROUNDHOUSE -> ROUNDHOUSE_TICKS;
 			case TAKEOFF -> TAKEOFF_TICKS;
 			case SCAN -> SCAN_TICKS;
 			case CALL -> CALL_TICKS;
+			case SUITUP_SLAM -> SUITUP_SLAM_TICKS;
+			case SUITUP_STEP -> SUITUP_STEP_TICKS;
+			case SUITUP_FLIGHT -> SUITUP_FLIGHT_TICKS;
+			case SUITUP_FALL -> SUITUP_FALL_TICKS;
+			case SUITUP_BRAKE -> SUITUP_BRAKE_TICKS;
 			case TABLE -> TABLE_TICKS;
 			case DASH -> DASH_TICKS;
 			case PUNCH -> PUNCH_TICKS;
@@ -109,8 +123,8 @@ public final class RigMoves {
 			case SONIC -> SONIC_TICKS;
 			case TWIN -> TWIN_TICKS;
 			case SIEGE -> SIEGE_TICKS;
-			// the back rig's (RigBack)
-			default -> RigBack.length(kind);
+			// the back rig's (RigBack), then the Octo Core's arms (RigOcto)
+			default -> RigBack.length(kind) > 0 ? RigBack.length(kind) : RigOcto.length(kind);
 		};
 	}
 

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "X": "#c:hides"
+  },
+  "pattern": [
+    "LXL",
+    "L L",
+    "L L"
+  ],
+  "result": {
+    "id": "jaymospowers:barbarian_leggings"
+  }
+}

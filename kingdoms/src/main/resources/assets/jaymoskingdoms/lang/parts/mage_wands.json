@@ -1,0 +1,15 @@
+{
+  "item.jaymoskingdoms.amethyst_wand": "Amethyst Wand",
+  "item.jaymoskingdoms.quartz_wand": "Quartz Wand",
+  "item.jaymoskingdoms.emerald_wand": "Emerald Wand",
+  "item.jaymoskingdoms.diamond_wand": "Diamond Wand",
+  "item.jaymoskingdoms.wand.wood": "Wood: %s",
+  "item.jaymoskingdoms.wand.wood.oak": "Oak",
+  "item.jaymoskingdoms.wand.wood.birch": "Birch",
+  "item.jaymoskingdoms.wand.wood.cherry": "Cherry",
+  "item.jaymoskingdoms.wand.wood.dark_oak": "Dark oak",
+  "item.jaymoskingdoms.wand.quality": "Spells at %s%% strength, waiting %s%% as long",
+  "item.jaymoskingdoms.wand.use": "Casts the spells you have learned. Use: cast the one it is turned to. Sneak and use: turn it to the next.",
+  "message.jaymoskingdoms.wand.unlearned": "The wand answers only to one who has learned a spell.",
+  "message.jaymoskingdoms.wand.no_spells": "You have kept no spell to cast through the wand."
+}

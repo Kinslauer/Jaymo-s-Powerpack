@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskingdoms:block/glowcap"
+      },
+      {
+        "model": "jaymoskingdoms:block/glowcap",
+        "y": 90
+      },
+      {
+        "model": "jaymoskingdoms:block/glowcap",
+        "y": 180
+      },
+      {
+        "model": "jaymoskingdoms:block/glowcap",
+        "y": 270
+      }
+    ]
+  }
+}

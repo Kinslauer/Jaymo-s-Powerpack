@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/crop",
+  "textures": {
+    "crop": "jaymospowers:block/herbs/rime_mint_stage2"
+  }
+}

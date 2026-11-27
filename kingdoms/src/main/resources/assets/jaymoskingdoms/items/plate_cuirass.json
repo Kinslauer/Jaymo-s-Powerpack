@@ -108,6 +108,19 @@
           "type": "minecraft:model",
           "model": "jaymoskingdoms:item/plate_cuirass_rusted"
         }
+      },
+      {
+        "when": "covered",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/plate_cuirass_covered",
+          "tints": [
+            {
+              "type": "minecraft:dye",
+              "default": -8769990
+            }
+          ]
+        }
       }
     ],
     "fallback": {

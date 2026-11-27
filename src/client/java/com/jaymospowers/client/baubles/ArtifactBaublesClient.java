@@ -53,7 +53,8 @@ public final class ArtifactBaublesClient {
 			return;
 		}
 		boolean jump = minecraft.options.keyJump.isDown();
-		boolean pressed = jump && !wasJump;
+		// a press that kicks off a foe in an air combo is the enemy step's, not the cloud's or the bladder's
+		boolean pressed = jump && !wasJump && !com.jaymospowers.client.jump.EnemyStepClient.takes(player);
 		wasJump = jump;
 		boolean grounded = player.onGround() || player.isInWater() || player.isInLava() || player.getAbilities().flying;
 		boolean free = !player.isSpectator() && !player.isPassenger() && !player.isFallFlying() && !player.onClimbable();
@@ -61,7 +62,9 @@ public final class ArtifactBaublesClient {
 			spent = false;
 			floating = false;
 			air = Math.min(FLOAT_TICKS, air + (float) FLOAT_TICKS / FLOAT_REFILL);
-		} else if (free && pressed && !spent && ArtifactEffects.wears(player, ArtifactBaubles.CLOUD_IN_A_BOTTLE)) {
+		} else if (free && pressed && !spent && ArtifactEffects.wears(player, ArtifactBaubles.CLOUD_IN_A_BOTTLE)
+			&& !com.jaymospowers.client.freerun.moves.CoyoteTimeClient.justTook(player)) {
+			// (a late jump off an edge, CoyoteTime, was this press's: the cloud waits for the next)
 			spent = true;
 			cloudTick = player.tickCount;
 			double yaw = Math.toRadians(player.getYRot());

@@ -7,12 +7,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.20.68) An NPC off the battlefield mends its worn armour ({@link ArmourWear#rest}). */
+/** (0.20.68) An NPC off the battlefield mends its worn armour ({@link ArmourWear#rest}); a mob slows under what it holds (HeavyLoad). */
 @Mixin(Mob.class)
 abstract class ArmourWearMobMixin {
 	@Inject(method = "aiStep", at = @At("TAIL"))
 	private void jaymospowers$restArmour(CallbackInfo ci) {
 		ArmourWear.rest((Mob) (Object) this);
 		com.jaymospowers.tinkering.smithing.LightFoes.tick((Mob) (Object) this);
+		com.jaymospowers.combat.HeavyLoad.tick((Mob) (Object) this);
 	}
 }

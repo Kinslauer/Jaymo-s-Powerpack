@@ -594,6 +594,8 @@ public final class Tales {
 				at = other == null ? null : other.seat();
 			}
 			case "ruin" -> at = Rumours.place(level, from);
+			// (a written start's mark the build didn't have: its start's own place)
+			case "written" -> at = home;
 			case "camp" -> {
 				Faction camp = nearest(server, from, own, true);
 				at = camp == null ? null : camp.seat();
@@ -913,9 +915,55 @@ public final class Tales {
 		}
 	}
 
+	/**
+	 * (Village mods patch 5, {@link Pilgrims}) The same as {@link #advance} with the step's {@code noted} line written, for a
+	 * tale whose giver walked on long ago: any of {@code player}'s waiting runs of {@code taleId}. Only a mark not set yet
+	 * moves it on, so the same place doesn't count twice.
+	 */
+	static void reached(ServerPlayer player, String taleId, String mark) {
+		State s = stateOrNull(player);
+		if (s == null || s.marks.contains(mark)) {
+			return;
+		}
+		for (Run run : new ArrayList<>(s.runs)) {
+			Tale tale = run.tale.equals(taleId) ? Tale.get(run.tale) : null;
+			JsonObject step = tale == null ? null : tale.step(run.step);
+			if (step == null || !Tale.string(step, "do", "").equals("await")) {
+				continue;
+			}
+			s.marks.add(mark);
+			TaleWays.learnt(player, mark);
+			MutableComponent line = words(player, run, Tale.object(step, "noted"), mark);
+			if (line != null && !run.notes.contains(line.getString())) {
+				note(run, line.getString());
+			}
+			go(player, run, step.get("then"), null);
+			Quests.sync(player, true);
+		}
+	}
+
+	/** (Village mods patch 5) {@code player}'s run of {@code taleId} asked by {@code giver} is still at step {@code step}. */
+	static boolean atStep(ServerPlayer player, String taleId, UUID giver, String step) {
+		State s = stateOrNull(player);
+		String id = giver.toString();
+		return s != null && s.runs.stream().anyMatch(r -> r.tale.equals(taleId) && r.giver.equals(id) && r.step.equals(step));
+	}
+
+	/** (Village mods patch 5) {@code player} has a run of {@code taleId} going. */
+	static boolean running(ServerPlayer player, String taleId) {
+		State s = stateOrNull(player);
+		return s != null && s.runs.stream().anyMatch(r -> r.tale.equals(taleId));
+	}
+
 	/** A new run of {@code tale} for {@code player}, asked by {@code giver} (or nobody), from {@code home}; its first step is entered. */
 	private static Run start(ServerLevel level, ServerPlayer player, Tale tale, @Nullable LivingEntity giver, int faction, BlockPos home,
 		@Nullable LivingEntity speaker) {
+		return start(level, player, tale, giver, faction, home, speaker, Map.of());
+	}
+
+	/** The same, with some of its places already known ({@code places}: a written start's marks, {@link #written}). */
+	private static Run start(ServerLevel level, ServerPlayer player, Tale tale, @Nullable LivingEntity giver, int faction, BlockPos home,
+		@Nullable LivingEntity speaker, Map<String, Long> places) {
 		RandomSource random = level.getRandom();
 		Map<String, String> vars = tale.roll(random);
 		vars.put("~day", Long.toString(day(level)));
@@ -930,7 +978,7 @@ public final class Tales {
 		state(player).marks.removeAll(tale.marks());
 		Run run = new Run(UUID.randomUUID().toString(), tale.id, tale.first(), giver == null ? "" : giver.getUUID().toString(),
 			giver == null ? "" : giver.getName().getString(), giver == null ? "" : job(giver), faction, home.asLong(), -1L, false, vars, Map.of(), names,
-			Map.of(), Map.of(), List.of());
+			Map.of(), places, List.of());
 		state(player).runs.add(run);
 		if (giver != null) {
 			asking(level, run, true);
@@ -938,6 +986,38 @@ public final class Tales {
 		enter(player, run, speaker);
 		Quests.sync(player, true);
 		return run;
+	}
+
+	/**
+	 * (Written starts) The tale of {@code player}'s written start ({@link WrittenStarts}) is begun, from {@code home}: a tale
+	 * whose start is {@code "by": "written"}. Its places {@code "at": "written"} are the build's marks ({@code marks}, key to
+	 * spot: a place's {@code "mark"}, else its own key), exactly where its maker put them. False if there's no such tale, or
+	 * it's going or told already.
+	 */
+	static boolean written(ServerPlayer player, String taleId, BlockPos home, Map<String, Long> marks) {
+		Tale tale = Tale.get(taleId);
+		if (!(player.level() instanceof ServerLevel level) || tale == null || !tale.by().equals("written") || !fits(player, tale)) {
+			return false;
+		}
+		Map<String, Long> places = new HashMap<>();
+		for (Map.Entry<String, JsonElement> e : Tale.object(tale.json, "places").entrySet()) {
+			if (e.getValue().isJsonObject() && Tale.string(e.getValue().getAsJsonObject(), "at", "").equals("written")) {
+				Long at = marks.get(Tale.string(e.getValue().getAsJsonObject(), "mark", e.getKey()));
+				if (at != null) {
+					places.put(e.getKey(), at);
+					// (the exact spot: not looked for on the ground near it, as a wild place is)
+					places.put("~" + e.getKey(), 1L);
+				}
+			}
+		}
+		start(level, player, tale, null, factionAt(level, home), home, null, places);
+		return true;
+	}
+
+	/** Whether {@code tale}'s place {@code key} is one of a written start's marks (its exact spot). */
+	private static boolean written(Tale tale, String key) {
+		JsonObject p = tale.place(key);
+		return p != null && Tale.string(p, "at", "").equals("written");
 	}
 
 	private static int factionAt(ServerLevel level, BlockPos at) {
@@ -1224,6 +1304,10 @@ public final class Tales {
 			if (!mark.isEmpty()) {
 				state(player).marks.add(mark);
 				TaleWays.learnt(player, mark);
+			}
+			if (done) {
+				// (Written starts) the gates of the build this step opens
+				WrittenStarts.open(player, Tale.strings(step.get("opens")));
 			}
 			// (gb-haggle) as much more as was haggled for
 			int pay = done ? Haggle.talePay(Tale.pickNumber(step, "pay", facts(player, run), 0), run.vars) : 0;
@@ -2230,7 +2314,8 @@ public final class Tales {
 				data.putString(KEY_CLUE, tag);
 				stack.set(DataComponents.CUSTOM_DATA, CustomData.of(data));
 				stack.set(DataComponents.MAX_STACK_SIZE, 1);
-				BlockPos at = Construction.standable(level, site.offset(level.getRandom().nextInt(CLUE_SPREAD * 2 + 1) - CLUE_SPREAD, 0,
+				// (on a written start's mark, just where its maker put it)
+				BlockPos at = written(tale, key) ? site : Construction.standable(level, site.offset(level.getRandom().nextInt(CLUE_SPREAD * 2 + 1) - CLUE_SPREAD, 0,
 					level.getRandom().nextInt(CLUE_SPREAD * 2 + 1) - CLUE_SPREAD), 3);
 				lies = new ItemEntity(level, at.getX() + 0.5, at.getY() + 0.2, at.getZ() + 0.5, stack, 0.0, 0.0, 0.0);
 				lies.setUnlimitedLifetime();

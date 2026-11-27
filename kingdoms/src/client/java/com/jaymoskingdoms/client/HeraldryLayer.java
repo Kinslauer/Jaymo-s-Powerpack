@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -23,6 +24,7 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
@@ -47,6 +49,9 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	/** What a wearer has in the harness, by {@link Harness.Slot#ordinal()}; null for none. */
 	static final RenderStateDataKey<List<ItemStack>> HARNESS = RenderStateDataKey.create(() -> "jaymoskingdoms:harness");
 
+	/** How each loose piece (a hood, an over-garment) is drawn fitted to what is under it ({@link HarnessFit}), by model; set as the layer submits. */
+	static final RenderStateDataKey<Map<String, HarnessFit.Fit>> FITS = RenderStateDataKey.create(() -> "jaymoskingdoms:harness_fit");
+
 	/** What the wind does to the wearer's cloak: {back, side, flutter} in radians, from {@link WindCloth}; null for none. */
 	static final RenderStateDataKey<float[]> WIND = RenderStateDataKey.create(() -> "jaymoskingdoms:cloak_wind");
 
@@ -54,12 +59,40 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	private static final Map<String, String> BONES = Map.of("armorHead", "head", "armorBody", "body", "armorRightArm", "right_arm",
 		"armorLeftArm", "left_arm", "armorRightLeg", "right_leg", "armorLeftLeg", "left_leg", "armorRightBoot", "right_leg", "armorLeftBoot", "left_leg");
 	/** The harness places drawn here, innermost first. */
-	private static final Harness.Slot[] DRAWN = {Harness.Slot.SHINS, Harness.Slot.THIGHS, Harness.Slot.WAIST, Harness.Slot.HANDS, Harness.Slot.ARMS,
+	private static final Harness.Slot[] DRAWN = {Harness.Slot.HOSE, Harness.Slot.PADDING, Harness.Slot.MAIL, Harness.Slot.SHINS, Harness.Slot.THIGHS, Harness.Slot.WAIST, Harness.Slot.HANDS, Harness.Slot.ARMS,
 		Harness.Slot.NECK, Harness.Slot.SHOULDERS, Harness.Slot.OVER, Harness.Slot.HOOD, Harness.Slot.CREST};
 	/** An undyed piece of cloth's colour, by piece (as its icon's: the generator's DYED). */
 	private static final Map<String, Integer> UNDYED = Map.of("giornea", 0x8E2B2B, "cloak", 0x4A5568, "torn_cloak", 0x5A5246, "hood", 0x4A5568,
 		"torn_hood", 0x5A5246, "tabard", 0x2B4A8E, "coat_of_plates", 0x7A2E2A);
 	static final int TORSE_UNDYED = 0xB02E26;
+	/** (Mordhau harness 2) The new cloth's undyed colours (gen_heraldry_hoods.py's DYED), and the second colour of a two-coloured piece made without one. */
+	private static final Map<String, Integer> HOOD_UNDYED = Map.ofEntries(Map.entry("tight_hood", 0x6B5A44), Map.entry("monks_cowl", 0x5A4632),
+		Map.entry("clerics_mantle", 0x8E2B2B), Map.entry("arming_cap", 0xD8CCB0), Map.entry("linen_coif", 0xECE6D6), Map.entry("bag_hat", 0x6E7F4A),
+		Map.entry("archers_cap", 0x3F6B3A), Map.entry("hunters_hat", 0x5E4A32), Map.entry("landsknecht_bonnet", 0xA02828), Map.entry("turban", 0xE8E0CC),
+		Map.entry("veiled_turban", 0x3A5A8E), Map.entry("jesters_hood", 0xB02E26));
+	private static final Map<String, Integer> SECOND_UNDYED = Map.of("landsknecht_bonnet", 0xF0C838, "jesters_hood", 0xE8C83A, "jesters_motley", 0xE8C83A, "embroidered_skirt", 0xE8C83A, "landsknecht_hose", 0xD8B034,
+		"landsknecht_doublet", 0xD8B034);
+	/** (Mordhau harness 3) The body's cloth models' undyed colours (gen_heraldry_body.py's UNDYED), and the colour a covered plate piece shows undyed. */
+	private static final Map<String, Integer> BODY_UNDYED = Map.ofEntries(Map.entry("wool_tunic", 0x6B5A44), Map.entry("quilted_coat", 0xCEBE96),
+		Map.entry("surcoat", 0x2B4A8E), Map.entry("torn_surcoat", 0x5A5246), Map.entry("monks_robe", 0x5A4632), Map.entry("kaftan", 0x2F5A7A),
+		Map.entry("jesters_motley", 0xB02E26), Map.entry("sash", 0xB02E26), Map.entry("ailettes", 0x2B4A8E), Map.entry("brigandine_coat", 0x7A2E2A),
+		// (Mordhau harness 4, gen_heraldry_legs.py's UNDYED) the waist's and the legs' cloth
+		Map.entry("coat_of_plates_skirt", 0x7A2E2A), Map.entry("padded_skirt", 0xD8CCB0), Map.entry("cloth_skirt", 0x6B5A44), Map.entry("short_skirt", 0x6E7F4A),
+		Map.entry("long_skirt", 0x4A5568), Map.entry("apron", 0xCEBE96), Map.entry("pleated_base", 0x8E2B2B), Map.entry("embroidered_skirt", 0x2B4A8E),
+		Map.entry("leg_wraps", 0xB8A878), Map.entry("baggy_breeches", 0x7A6A48), Map.entry("landsknecht_hose", 0x2B4A8E),
+		Map.entry("landsknecht_doublet", 0x2B4A8E));
+	private static final int COVERED_UNDYED = 0x7A2E3A;
+	/** Dyed pieces with parts drawn as they are painted (feathers, bells, gilt: heraldry_PIECE_fixed). */
+	private static final Set<String> TRIMMED = Set.of("clerics_mantle", "archers_cap", "hunters_hat", "landsknecht_bonnet", "turban", "veiled_turban",
+		"jesters_hood", "surcoat", "torn_surcoat", "monks_robe", "kaftan", "jesters_motley", "ailettes", "coat_of_plates_skirt", "padded_skirt", "cloth_skirt", "short_skirt",
+		"long_skirt", "apron", "pleated_base");
+	/** Hats, worn bare-headed: not drawn under a helm (the hood, cowl, mantle, caps and coifs go on over or under one). */
+	private static final Set<String> HATS = Set.of("tight_hood", "headsmans_hood", "bag_hat", "archers_cap", "field_hat", "hunters_hat",
+		"landsknecht_bonnet", "fur_hat", "turban", "veiled_turban", "jesters_hood", "laurel_wreath");
+	/** Crests worn without a torse under them (the crown rings the helm; the orle is worn in the torse's place), and crests in the torse's dye. */
+	private static final Set<String> NO_TORSE = Set.of("crest_crown", "orle"), DYED_CRESTS = Set.of("orle", "crest_mantling");
+	/** Any ruler's crown over a helm: one box (gen_heraldry_hoods.py), drawn with the crown's own armour-layer sheet. */
+	private static final String CROWN_OVER_HELM = "heraldry_crown_over_helm";
 	/** How many ordinaries a tabard's arms can show (the generator's ORDINARIES, one sheet each: heraldry_tabard_arms_N). */
 	static final int ORDINARIES = 18;
 	/** The share of a plate piece's durability gone when it shows dents, and when it shows many. */
@@ -99,14 +132,18 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
+		// (what is on so far, innermost first, so the hoods and over-garments are drawn close over it: HarnessFit)
+		HarnessFit.Shell shell = new HarnessFit.Shell(foreign(state.headEquipment), foreign(state.chestEquipment), foreign(state.legsEquipment),
+			foreign(state.feetEquipment));
+		Map<String, HarnessFit.Fit> fits = new HashMap<>();
+		state.setData(FITS, fits);
 		for (ItemStack stack : new ItemStack[] {state.feetEquipment, state.chestEquipment, state.headEquipment}) {
 			HeraldryArmour.Piece piece = HeraldryArmour.of(stack);
 			if (piece != null && piece.slot() == null) {
-				// (the coat of plates is cloth outside, in its dye)
-				Integer undyed = UNDYED.get(piece.name());
-				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack),
-					undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed)));
+				// (the coat of plates is cloth outside, in its dye; plate covered in cloth the same)
+				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack), tint(piece, stack));
 				dents(poseStack, collector, lightCoords, state, piece, stack);
+				cover(shell, piece.model(), null);
 			}
 		}
 		List<ItemStack> harness = state.getData(HARNESS);
@@ -115,25 +152,56 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		}
 		for (Harness.Slot slot : DRAWN) {
 			ItemStack stack = harness.get(slot.ordinal());
+			if (slot == Harness.Slot.CREST && HeraldryArmour.regaliaCrown(stack)) {
+				// a ruler's crown over the helm, in its own sheet
+				draw(poseStack, collector, lightCoords, state, CROWN_OVER_HELM, "equipment/humanoid/" + BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath(), -1);
+				continue;
+			}
 			HeraldryArmour.Piece piece = HeraldryArmour.of(stack);
 			if (piece == null || piece.model().isEmpty()) {
 				continue;
 			}
 			if (slot == Harness.Slot.CREST) {
 				// the torse in the crest's dye, and the beast (or horns, or wings) on it
-				draw(poseStack, collector, lightCoords, state, TORSE, TORSE, ARGB.opaque(DyedItemColor.getOrDefault(stack, TORSE_UNDYED)));
-				if (!piece.model().equals(TORSE)) {
-					draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_" + piece.name(), -1);
+				int dye = ARGB.opaque(DyedItemColor.getOrDefault(stack, TORSE_UNDYED));
+				if (!NO_TORSE.contains(piece.name())) {
+					draw(poseStack, collector, lightCoords, state, TORSE, TORSE, dye);
 				}
+				if (!piece.model().equals(TORSE)) {
+					draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_" + piece.name(), DYED_CRESTS.contains(piece.name()) ? dye : -1);
+				}
+			} else if (slot == Harness.Slot.HOOD && HATS.contains(piece.name()) && !state.headEquipment.isEmpty()
+				|| (piece.name().equals("bevor") || piece.name().equals("armet_wrapper")) && sallet(state.headEquipment)) {
+				// a hat isn't worn under a helm, and the sallet has its own bevor
+				continue;
 			} else {
-				Integer undyed = UNDYED.get(piece.name());
-				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack),
-					undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed)));
+				// a hood or an over-garment, cut to go over a helm and plate, drawn close over what is on (HarnessFit)
+				HarnessFit.Fit fit = null;
+				if ((slot == Harness.Slot.OVER || slot == Harness.Slot.HOOD) && !HATS.contains(piece.name())) {
+					Worn worn = worn(piece.model());
+					fit = worn == null ? null : shell.fit(worn.bounds);
+					if (fit != null) {
+						fits.put(piece.model(), fit);
+					}
+				}
+				cover(shell, piece.model(), fit);
+				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack), tint(piece, stack));
 				dents(poseStack, collector, lightCoords, state, piece, stack);
+				// (Mordhau harness 2) feathers, bells and gilt as they are painted, and the second colour's cloth in it
+				if (TRIMMED.contains(piece.name())) {
+					draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_" + piece.name() + "_fixed", -1);
+				}
+				Integer second = SECOND_UNDYED.get(piece.name());
+				if (second != null) {
+					draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_" + piece.name() + "_second",
+						ARGB.opaque(stack.getOrDefault(HeraldryArmour.SECOND_COLOUR, second)));
+				}
 				// a tabard in a realm's arms: its ordinary laid over the field, front and back, in the charge's colour
 				HeraldryArmour.Arms arms = stack.get(HeraldryArmour.ARMS);
 				if (arms != null && arms.ordinary() >= 0 && arms.ordinary() < ORDINARIES) {
-					draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_tabard_arms_" + arms.ordinary(), ARGB.opaque(arms.charge()));
+					// (the ailettes' boards carry them on a sheet of their own)
+					draw(poseStack, collector, lightCoords, state, piece.model(), (piece.name().equals("ailettes") ? "heraldry_ailettes_arms_" : "heraldry_tabard_arms_")
+						+ arms.ordinary(), ARGB.opaque(arms.charge()));
 				}
 			}
 		}
@@ -144,7 +212,7 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	 * {@link #BATTERED} badly (the generator's {@code heraldry_PIECE_dents1} and {@code _dents2}, over any finish).
 	 */
 	private void dents(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, HeraldryArmour.Piece piece, ItemStack stack) {
-		if (!piece.plate() || !stack.isDamageableItem() || stack.getMaxDamage() <= 0) {
+		if (!piece.plate() || !stack.isDamageableItem() || stack.getMaxDamage() <= 0 || HeraldryArmour.COVERED.equals(HeraldryArmour.finish(stack))) {
 			return;
 		}
 		float worn = stack.getDamageValue() / (float)stack.getMaxDamage();
@@ -166,6 +234,47 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		return WindCloth.cape(entity);
 	}
 
+	/** An undyed piece of cloth's colour, or null for a piece that isn't dyed. */
+	private static @Nullable Integer undyed(String name) {
+		Integer undyed = UNDYED.get(name);
+		if (undyed == null) {
+			undyed = HOOD_UNDYED.get(name);
+		}
+		return undyed != null ? undyed : BODY_UNDYED.get(name);
+	}
+
+	/** The colour a piece is drawn tinted with: its dye if it is cloth, or plate covered in cloth (the cloth's colour); -1 for anything else. */
+	private static int tint(HeraldryArmour.Piece piece, ItemStack stack) {
+		Integer undyed = undyed(piece.name());
+		if (undyed == null && piece.plate() && HeraldryArmour.COVERED.equals(HeraldryArmour.finish(stack))) {
+			undyed = COVERED_UNDYED;
+		}
+		return undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed));
+	}
+
+	/** Whether {@code stack} is armour from anywhere but the harness (vanilla's, the Armory's, another mod's), which {@link HarnessFit} doesn't measure. */
+	private static boolean foreign(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return false;
+		}
+		HeraldryArmour.Piece piece = HeraldryArmour.of(stack);
+		return piece == null || piece.slot() != null;
+	}
+
+	/** Adds {@code model}, drawn {@code fit} smaller (null for as made), to what {@code shell} has on. */
+	private void cover(HarnessFit.Shell shell, String model, HarnessFit.@Nullable Fit fit) {
+		Worn worn = worn(model);
+		if (worn != null) {
+			shell.cover(worn.bounds, fit);
+		}
+	}
+
+	/** Whether {@code helm} is the sallet, whose bevor is part of it (a bevor or wrapper in the harness isn't drawn under it). */
+	private static boolean sallet(ItemStack helm) {
+		HeraldryArmour.Piece piece = HeraldryArmour.of(helm);
+		return piece != null && piece.name().equals("sallet");
+	}
+
 	/** A piece's texture: its own name's, and for plate its finish's. */
 	private static String texture(HeraldryArmour.Piece piece, ItemStack stack) {
 		String finish = piece.plate() ? HeraldryArmour.finish(stack) : "";
@@ -178,20 +287,29 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	 */
 	private static final java.util.Set<String> MISSING = new java.util.HashSet<>();
 
-	private void draw(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, String model, String texture, int color) {
+	/** This renderer's copy of {@code model}, read the first time; null for a model the mod doesn't have. */
+	private @Nullable Worn worn(String model) {
 		if (MISSING.contains(model)) {
-			return;
+			return null;
 		}
-		Worn piece;
 		try {
-			piece = this.worn.computeIfAbsent(model, name -> new Worn(MODELS.computeIfAbsent(name, n -> BbModel.load(JaymosKingdoms.MOD_ID, n)),
+			return this.worn.computeIfAbsent(model, name -> new Worn(MODELS.computeIfAbsent(name, n -> BbModel.load(JaymosKingdoms.MOD_ID, n)),
 				this::getParentModel, name));
 		} catch (IllegalStateException e) {
 			MISSING.add(model);
 			JaymosKingdoms.LOGGER.warn("Heraldry piece model {} is missing; it isn't drawn", model, e);
+			return null;
+		}
+	}
+
+	private void draw(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, String model, String texture, int color) {
+		Worn piece = worn(model);
+		if (piece == null) {
 			return;
 		}
-		Identifier at = TEXTURES.computeIfAbsent(texture, name -> JaymosKingdoms.id("textures/entity/bb/" + name + ".png"));
+		// (a crown over a helm is drawn with the crown's own armour-layer sheet)
+		Identifier at = TEXTURES.computeIfAbsent(texture, name -> JaymosKingdoms.id(name.startsWith("equipment/") ? "textures/entity/" + name + ".png"
+			: "textures/entity/bb/" + name + ".png"));
 		collector.submitModel(piece, state, poseStack, RenderTypes.armorCutoutNoCull(at), lightCoords, OverlayTexture.NO_OVERLAY, color, null, state.outlineColor);
 	}
 
@@ -202,13 +320,30 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		private final @Nullable ModelPart crest;
 		/** The cloak's cape, which the wind moves (null for anything else). */
 		private final @Nullable ModelPart cape;
+		/** The model's name, and the box round its cubes on each of the wearer's bones (by skeleton name; {@link HarnessFit}). */
+		private final String name;
+		final Map<String, float[]> bounds = new HashMap<>();
 
 		Worn(BbModel model, Supplier<HumanoidModel<?>> wearer, String name) {
 			super(ReverentLayer.skeleton(model, BONES), wearer);
 			this.visor = model.find("visor");
-			boolean stands = name.equals(TORSE) || name.startsWith("heraldry_crest_") && !name.equals("heraldry_crest_horns") && !name.equals("heraldry_crest_wings");
+			// (the crown, antlers, horns and wings are fixed round or to the sides of the helm, not on its crown)
+			boolean stands = name.equals(TORSE) || name.equals("heraldry_orle") || name.startsWith("heraldry_crest_") && !name.equals("heraldry_crest_horns")
+				&& !name.equals("heraldry_crest_wings") && !name.equals("heraldry_crest_crown") && !name.equals("heraldry_crest_antlers");
 			this.crest = stands ? model.find("armorHead") : null;
 			this.cape = name.endsWith("cloak") ? model.find("cape") : null;
+			this.name = name;
+			BONES.forEach((piece, bone) -> {
+				float[] box = model.bounds(piece);
+				if (box != null) {
+					this.bounds.merge(bone, box, (a, b) -> {
+						for (int i = 0; i < 6; i++) {
+							a[i] = i % 2 == 0 ? Math.min(a[i], b[i]) : Math.max(a[i], b[i]);
+						}
+						return a;
+					});
+				}
+			});
 		}
 
 		@Override
@@ -217,6 +352,15 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 			ItemStack helm = state.headEquipment;
 			if (this.visor != null && helm.getOrDefault(HeraldryArmour.VISOR_UP, false)) {
 				this.visor.xRot -= VISOR_LIFT;
+			}
+			// fitted close over what is under it (HarnessFit), the cloak's cape hanging nearer the back
+			Map<String, HarnessFit.Fit> fits = state.getData(FITS);
+			HarnessFit.Fit fit = fits == null ? null : fits.get(this.name);
+			if (fit != null) {
+				fit.apply(this);
+				if (this.cape != null && fit.body() != null) {
+					this.cape.xRot *= HarnessFit.CAPE_TILT;
+				}
 			}
 			float[] wind = state.getData(WIND);
 			if (this.cape != null && wind != null) {

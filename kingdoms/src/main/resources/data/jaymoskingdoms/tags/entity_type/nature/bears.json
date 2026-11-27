@@ -1,0 +1,30 @@
+{
+ "values": [
+  "minecraft:polar_bear",
+  "jaymoskingdoms:grizzly",
+  {
+   "id": "naturalist:bear",
+   "required": false
+  },
+  {
+   "id": "naturalist:black_bear",
+   "required": false
+  },
+  {
+   "id": "bearminimum:black_bear",
+   "required": false
+  },
+  {
+   "id": "bearminimum:brown_bear",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:blackbear",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:grizzly_bear",
+   "required": false
+  }
+ ]
+}

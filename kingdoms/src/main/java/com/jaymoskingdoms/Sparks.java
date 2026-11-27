@@ -91,7 +91,7 @@ public final class Sparks {
 			Start.CAPTIVE, Start.GREENSKIN, Start.UNARMED)) {
 			THEME.put(s, 1);
 		}
-		for (Start s : List.of(Start.SWORN, Start.LAB, Start.ANDROID, Start.MOON_CURSED)) {
+		for (Start s : List.of(Start.SWORN, Start.LAB, Start.ANDROID, Start.MOON_CURSED, Start.BITTEN)) {
 			THEME.put(s, 3);
 		}
 	}

@@ -1,0 +1,14 @@
+{
+  "dimx": 2,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/factory/factory_tank_water00",
+      "jaymospowers:maw/factory/factory_tank_water01"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_tank_water10",
+      "jaymospowers:maw/factory/factory_tank_water11"
+    ]
+  ]
+}

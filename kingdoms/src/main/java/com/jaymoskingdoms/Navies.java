@@ -508,7 +508,8 @@ final class Navies {
 		Faction best = null;
 		double bestD = MERCHANT_RANGE * MERCHANT_RANGE;
 		for (Faction other : Factions.all(server)) {
-			if (other.id() == f.id() || !other.type().isRealm() || other.fallen() || harbour(server, other.id()) == null
+			// (village mods patch 7) a raft town out at sea is a port of call too (TidalTowns)
+			if (other.id() == f.id() || !other.type().isRealm() && !TidalTowns.is(server, other) || other.fallen() || harbour(server, other.id()) == null
 				|| Relations.atWar(f, other)) {
 				continue;
 			}

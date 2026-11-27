@@ -31,6 +31,8 @@ import net.minecraft.world.phys.Vec3;
 public final class Scarecrows {
 	/** How far a scarecrow with a pumpkin guards (blocks), and ticks between its looks. */
 	public static final double RANGE = 8.0;
+	/** How far a scarecrow with a pumpkin keeps crows off (blocks): a bird is wary of a man on a post from much further than a rabbit is. */
+	public static final double CROW_RANGE = 16.0;
 	public static final int LOOK_EVERY = 20;
 	/** How far a scared animal runs from the scarecrow (blocks). */
 	static final int FLEE = 10;
@@ -59,6 +61,15 @@ public final class Scarecrows {
 
 	/** Whether a scarecrow (or another guard) keeps crop eaters off {@code pos} (the crop). */
 	public static boolean guarded(Level level, BlockPos pos) {
+		return guarded(level, pos, RANGE);
+	}
+
+	/** Whether a scarecrow keeps crows off {@code pos} (the crop), {@link #CROW_RANGE} round it. Kingdoms' field crows read it by reflection. */
+	public static boolean guardedFromCrows(Level level, BlockPos pos) {
+		return guarded(level, pos, CROW_RANGE);
+	}
+
+	private static boolean guarded(Level level, BlockPos pos, double range) {
 		Set<BlockPos> watches = WATCHES.get(level.dimension());
 		if (watches != null) {
 			List<BlockPos> gone = new ArrayList<>();
@@ -67,7 +78,7 @@ public final class Scarecrows {
 				BlockState state = level.getBlockState(watch);
 				if (!state.is(FarmWater.SCARECROW) || !state.getValue(ScarecrowBlock.PUMPKIN)) {
 					gone.add(watch);
-				} else if (watch.distSqr(pos) <= RANGE * RANGE) {
+				} else if (watch.distSqr(pos) <= range * range) {
 					near = true;
 				}
 			}

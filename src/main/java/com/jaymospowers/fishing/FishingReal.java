@@ -67,7 +67,7 @@ public final class FishingReal {
     /** Base ticks a hooked fish must wait before it can be caught (gives the player time to react). */
     private static final int MIN_FIGHT_TICKS = 60;
     /** Progress a fresh fight starts with, so the fish cannot get away on the first tick. */
-    private static final float START_PROGRESS = 0.3F;
+    static final float START_PROGRESS = 0.3F;
     /** Max fight duration before the line breaks from exhaustion (ticks). Shorter for a shark. */
     private static final int MAX_FIGHT_TICKS = 1800;
     private static final int MAX_FIGHT_TICKS_SHARK = 900;
@@ -102,12 +102,6 @@ public final class FishingReal {
     /** How hard a hooked shark and a hooked tuna pull the player toward them while they reel (blocks per tick). */
     public static final double PULL_PLAYER = 0.04;
     public static final double PULL_PLAYER_TUNA = 0.02;
-    /** Keep the fish within this many blocks of the hook, tugging it back on the line. */
-    private static final double KEEP_NEAR_DIST = 3.0;
-    /** How hard the line pulls the fish back toward the hook. */
-    private static final double KEEP_NEAR_PULL = 0.12;
-    /** How much the line lifts the fish up toward the surface. */
-    private static final double KEEP_NEAR_LIFT = 0.05;
     // ---- (Andy, 2026-11-23, a fishing gif: "thats what i want our fishing to be like") moods, energy and line ----
     /** The first ticks of a fight the fish is still taking the lure, and the share of the line in at which it's landing. */
     static final int TAKING_TICKS = 25;
@@ -120,6 +114,29 @@ public final class FishingReal {
     static final float TIRED_REEL = 1.6F;
     /** Metres of line on the spool: plain, braided, weighted; the sea rod's reel holds this many times more. */
     static final float LINE_M = 26.0F, LINE_M_BRAIDED = 40.0F, LINE_M_WEIGHTED = 30.0F, LINE_SEA_ROD = 1.5F;
+    // ---- (Reference Mods patch 12: Better Fishing's and Enchanted Fishing Line's ideas, our own code) ----
+    /** (F2) A light hook slips out once the line's this slack (tension) for this long (ticks), unless it's nearly landed. */
+    static final float SLACK_TENSION = 0.08F;
+    static final int LIGHT_SLIP_TICKS = 30;
+    /**
+     * (F5) How cleanly a fish was landed, in stars (3 at best, 1 at worst): one off for a light hook, one for taking the line
+     * past this share of its breaking point, one for letting it run out past this share of the spool.
+     */
+    static final float CLEAN_STRAIN = 0.85F, CLEAN_LINE_OUT = 0.85F;
+    /**
+     * (F6) A line drawn tight through a tree's leaves or branches snags there: held past this share of its breaking point
+     * for this long (ticks) while snagged, it breaks. Checked this often.
+     */
+    static final float SNAG_STRAIN = 0.55F;
+    static final int SNAG_TICKS = 20, SNAG_CHECK_EVERY = 5;
+    /** What a fight has seen so far, for the hook's hold, the leap, the snag and how clean the landing was. Server side. */
+    private static final class Feel {
+        boolean solid = true;
+        int slack, leapReel, snag;
+        boolean snagged;
+        float maxStrain, minProgress = 1.0F;
+    }
+    private static final Map<UUID, Feel> FEEL = new HashMap<>();
 
     private FishingReal() {
     }
@@ -134,6 +151,7 @@ public final class FishingReal {
         Skipjack.init();
         // (0.21.64) Track B: rods, baits, lures and the rest of the tackle box
         Tackle.init();
+        LooseMaggots.init();
         FishingGear.init();
         Crates.init();
         FishTackle.init();
@@ -147,6 +165,9 @@ public final class FishingReal {
         CatchRelease.init();
         FishLog.init();
         Fishermen.init();
+        // the salmon run (Andy's nature picks): autumn upriver, the beds, the spent, spring's young
+        SalmonRun.init();
+        SpringShallows.init();
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(server -> Tackle.kitchen());
         FishingPayloads.register();
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -207,6 +228,7 @@ public final class FishingReal {
         }
 
         boolean reeling = REELING.remove(player.getUUID()) != null;
+        Feel feel = FEEL.computeIfAbsent(player.getUUID(), id -> new Feel());
         float tension = state.tension();
         float progress = state.progress();
         boolean metalRod = isMetalRod(player);
@@ -243,12 +265,40 @@ public final class FishingReal {
         }
         // (2026-11-23) it tires: always a little, more while it fights, more while it's held hard
         energy = Math.max(0.0F, energy - ENERGY_BASE - (run != 0 || thrash ? ENERGY_FIGHTING : 0.0F)
-                - (tension > breakLimit * 0.5F ? ENERGY_HELD : 0.0F));
+                - (tension > breakLimit * 0.5F ? ENERGY_HELD : 0.0F)
+                // (F4) the rod pulled the other way to a run turns the fish and tires it faster
+                - (run != 0 && FishRun.against(player) ? FishRun.ENERGY_AGAINST : 0.0F));
+
+        // (F3) a big fish in the air on a leap: reel through it and the line snaps
+        feel.leapReel = reeling && FishRun.bigLeap(player, now) ? feel.leapReel + 1 : 0;
+        if (feel.leapReel > FishRun.LEAP_GRACE) {
+            snap(player, "message.jaymospowers.fishing.leap_snapped");
+            return;
+        }
 
         // (Track A) the rod's drag lets line slip past its setting instead of the line taking the strain
         float[] line = {progress};
         tension = FishRun.slip(player, state, tension, breakLimit, line, now);
         progress = Math.max(0.0F, line[0]);
+
+        // (F2) a light hook works loose on a slack line
+        feel.slack = tension < SLACK_TENSION && progress < LANDING_AT ? feel.slack + 1 : 0;
+        if (!feel.solid && feel.slack >= LIGHT_SLIP_TICKS) {
+            endFight(player, false);
+            player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.hook_slipped").withStyle(net.minecraft.ChatFormatting.RED));
+            return;
+        }
+        // (F6) a tight line through a tree snags there, and breaks if it's held hard
+        if (now % SNAG_CHECK_EVERY == 0L) {
+            feel.snagged = snagged(player, hook);
+        }
+        feel.snag = feel.snagged && tension > breakLimit * SNAG_STRAIN ? feel.snag + 1 : 0;
+        if (feel.snag >= SNAG_TICKS) {
+            snap(player, "message.jaymospowers.fishing.line_snagged");
+            return;
+        }
+        feel.maxStrain = Math.max(feel.maxStrain, breakLimit <= 0.0F ? 0.0F : tension / breakLimit);
+        feel.minProgress = Math.min(feel.minProgress, progress);
 
         if (tension >= breakLimit) {
             endFight(player, false);
@@ -278,18 +328,48 @@ public final class FishingReal {
             return;
         }
 
-        // keep the fish near the hook/water, tugging against the line, so it is not dragged onto land
-        keepNear(player, fish, hook);
+        // (Andy, 2026-11-26) the fish fights where you can see it, at the end of the line, coming in as the line does
+        FishOnLine.tick(player, fish, state, progress, run, thrash, now);
         player.setAttached(FIGHTING, state.with(tension, progress, run, breakLimit, mood(state, now, run, thrash, progress, player), energy));
     }
 
-    /** (2026-11-23) What the fish is doing, for the readout: taking the lure, calm, running, leaping, thrashing, being landed. */
+    /** The line snaps (a twang), and the fish is gone with the hook; {@code why} says what did it. */
+    private static void snap(ServerPlayer player, String why) {
+        endFight(player, false);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                net.minecraft.sounds.SoundEvents.LEAD_BREAK, net.minecraft.sounds.SoundSource.PLAYERS, 0.9F, 1.3F);
+        player.sendOverlayMessage(Component.translatable(why).withStyle(net.minecraft.ChatFormatting.RED));
+    }
+
+    /** (F6) Whether {@code player}'s line, rod to hook, runs through a tree's leaves or branches. */
+    private static boolean snagged(ServerPlayer player, FishingHook hook) {
+        Vec3 from = player.getEyePosition();
+        Vec3 to = hook.position();
+        net.minecraft.world.phys.BlockHitResult hit = player.level().clip(new net.minecraft.world.level.ClipContext(from, to,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+        if (hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK) {
+            return false;
+        }
+        net.minecraft.world.level.block.state.BlockState st = player.level().getBlockState(hit.getBlockPos());
+        return st.is(net.minecraft.tags.BlockTags.LEAVES) || st.is(net.minecraft.tags.BlockTags.LOGS);
+    }
+
+    /** (F5) How cleanly the fight now ending went, in stars: 3 for a solid hook, a line never near breaking and never run far out. */
+    private static int clean(@Nullable Feel feel) {
+        if (feel == null) {
+            return 0;
+        }
+        int stars = 3 - (feel.solid ? 0 : 1) - (feel.maxStrain > CLEAN_STRAIN ? 1 : 0) - (feel.minProgress < 1.0F - CLEAN_LINE_OUT ? 1 : 0);
+        return Math.max(1, stars);
+    }
+
+    /** (2026-11-23) What the fish is doing, for the readout: taking the lure, calm, running, leaping, thrashing, diving, being landed. */
     private static int mood(FishFight state, long now, int run, boolean thrash, float progress, ServerPlayer player) {
         if (thrash) {
             return FishFight.THRASHING;
         }
         if (run != 0) {
-            return FishRun.jumping(player, now) ? FishFight.JUMPING : FishFight.RUNNING;
+            return FishRun.jumping(player, now) ? FishFight.JUMPING : FishRun.diving(player) ? FishFight.DIVING : FishFight.RUNNING;
         }
         if (now - state.startTime() < TAKING_TICKS) {
             return FishFight.TAKING;
@@ -342,8 +422,19 @@ public final class FishingReal {
         return kind == FISH_SHARK || sp != null && sp.sharkish() && sp.big();
     }
 
-    /** Start a fight: hook a live fish on the player's line. Called by {@link FishBite#strike} when the player strikes. */
+    /** Start a fight with the hook set solid (a rod pod's rod, which struck itself). */
     public static void startFight(ServerPlayer player, int fishKind, LivingEntity fish, FishingHook hook) {
+        startFight(player, fishKind, fish, hook, true);
+    }
+
+    /**
+     * Start a fight: hook a live fish on the player's line. Called by {@link FishBite#strike} when the player strikes;
+     * {@code solid} if they struck fast enough to set the hook (F2).
+     */
+    public static void startFight(ServerPlayer player, int fishKind, LivingEntity fish, FishingHook hook, boolean solid) {
+        Feel feel = new Feel();
+        feel.solid = solid;
+        FEEL.put(player.getUUID(), feel);
         // (Track C) every species fights its own way: a bream barely, a pike in hard runs, a catfish like a dragged log
         Species sp = Species.of(fishKind);
         float strength = sp == null ? STRENGTH_TROPICAL : sp.strength;
@@ -379,6 +470,7 @@ public final class FishingReal {
         player.setAttached(FIGHTING, new FishFight(fishKind, strength, START_PROGRESS, player.level().getGameTime(), lineMetres(player), kg));
         HOOKED.put(player.getUUID(), fish);
         HOOKS.put(player.getUUID(), hook);
+        FishOnLine.start(player, fish, hook);
         WEIGHTS.put(player.getUUID(), kg);
         // (0.21.61, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime")
         com.jaymospowers.compat.KingdomsCompat.fished(player, hook.blockPosition());
@@ -403,11 +495,13 @@ public final class FishingReal {
         LivingEntity fish = HOOKED.remove(player.getUUID());
         FishingHook hook = HOOKS.remove(player.getUUID());
         Item bait = BAIT_USED.remove(player.getUUID());
+        Feel feel = FEEL.remove(player.getUUID());
+        FishOnLine.end(player);
         if (fish != null) {
             if (caught) {
                 // (0.21.62) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
                 float kg = weighed != null ? weighed : FishCatch.roll(kindFought, player.getRandom());
-                landed(player, kindFought, fish, kg, bait);
+                landed(player, kindFought, fish, kg, bait, clean(feel));
                 // a landed fish is gone from the water
                 fish.discard();
             } else if (fish instanceof net.minecraft.world.entity.Mob mob) {
@@ -435,7 +529,7 @@ public final class FishingReal {
      * can go back), a big shark's jaw, another mod's fish as its own drops; then write it in the journal, crow over a
      * personal best, tell the water a legend is gone, and count it for any contest.
      */
-    static void landed(ServerPlayer player, int kind, LivingEntity fish, float kg, @Nullable Item bait) {
+    static void landed(ServerPlayer player, int kind, LivingEntity fish, float kg, @Nullable Item bait, int clean) {
         net.minecraft.server.level.ServerLevel level = (net.minecraft.server.level.ServerLevel) player.level();
         Species sp = Species.of(kind);
         String legend = fish instanceof WildFish wild && wild.legend() ? wild.legendName() : "";
@@ -474,7 +568,7 @@ public final class FishingReal {
                         ? "message.jaymospowers.fishing.shark_landed" : "message.jaymospowers.fishing.caught_weighed",
                 name, String.format(java.util.Locale.ROOT, "%.1f", kg)).withStyle(net.minecraft.ChatFormatting.GREEN));
         if (sp != null) {
-            boolean best = FishLog.landed(player, sp, kg, bait, level, fish.blockPosition(), legend);
+            boolean best = FishLog.landed(player, sp, kg, bait, level, fish.blockPosition(), legend, clean);
             if (best) {
                 // (Track D) a personal best: a fanfare, and the journal keeps it through death
                 level.playSound(null, player.getX(), player.getY(), player.getZ(),
@@ -486,24 +580,6 @@ public final class FishingReal {
         }
         if (!legend.isEmpty()) {
             FishLegends.landed(level, (WildFish) fish, player);
-        }
-    }
-
-    /** Keep the hooked fish near the hook/water, tugging against the line, so it is not dragged onto land. */
-    private static void keepNear(ServerPlayer player, LivingEntity fish, FishingHook hook) {
-        double dx = hook.getX() - fish.getX();
-        double dz = hook.getZ() - fish.getZ();
-        double dist = Math.sqrt(dx * dx + dz * dz);
-        if (fish instanceof net.minecraft.world.entity.Mob mob && mob.isNoAi()) {
-            // a shark held without its AI is drawn back by hand
-            if (dist > KEEP_NEAR_DIST) {
-                fish.setPos(fish.getX() + dx / dist * KEEP_NEAR_PULL, fish.getY(), fish.getZ() + dz / dist * KEEP_NEAR_PULL);
-            }
-            return;
-        }
-        if (dist > KEEP_NEAR_DIST) {
-            double pull = KEEP_NEAR_PULL;
-            fish.setDeltaMovement(fish.getDeltaMovement().add(dx / dist * pull, KEEP_NEAR_LIFT, dz / dist * pull));
         }
     }
 

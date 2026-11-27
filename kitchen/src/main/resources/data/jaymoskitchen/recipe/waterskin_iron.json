@@ -7,7 +7,7 @@
     " i "
   ],
   "key": {
-    "s": "minecraft:string",
+    "s": "#c:strings",
     "i": "minecraft:iron_ingot"
   },
   "result": {

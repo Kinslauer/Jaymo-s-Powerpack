@@ -3,6 +3,7 @@
   "values": [
     "jaymoskingdoms:form_sheath_draw",
     "jaymoskingdoms:form_crescent_sweep",
+    "jaymoskingdoms:form_cross_slash",
     "jaymoskingdoms:form_rain_of_cuts",
     "jaymoskingdoms:form_wheel_cut",
     "jaymoskingdoms:form_figure_eight",
@@ -32,12 +33,28 @@
     "jaymoskingdoms:move_spikes",
     "jaymoskingdoms:move_consume",
     "jaymoskingdoms:move_shroud",
+    "jaymoskingdoms:move_lash",
+    "jaymoskingdoms:move_rupture",
+    "jaymoskingdoms:move_nightstep",
+    "jaymoskingdoms:move_onslaught",
     "jaymoskingdoms:night_dash",
     "jaymoskingdoms:night_pound",
     "jaymoskingdoms:night_gaze",
     "jaymoskingdoms:night_feed",
     "jaymoskingdoms:sorc_bulwark",
     "jaymoskingdoms:sorc_tide_pearl",
-    "jaymoskingdoms:sorc_harrying_gale"
+    "jaymoskingdoms:sorc_harrying_gale",
+    "jaymoskingdoms:night_bat",
+    "jaymoskingdoms:night_colony",
+    "jaymoskingdoms:night_mist",
+    "jaymoskingdoms:night_stare",
+    "jaymoskingdoms:night_rake",
+    "jaymoskingdoms:night_rend",
+    "jaymoskingdoms:night_pounce",
+    "jaymoskingdoms:night_roar",
+    "jaymoskingdoms:night_true_shape",
+    "jaymoskingdoms:night_barrier",
+    "jaymoskingdoms:night_batstep",
+    "jaymoskingdoms:night_flechettes"
   ]
 }

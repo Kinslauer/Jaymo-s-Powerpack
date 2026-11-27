@@ -1,0 +1,14 @@
+{
+  "dimx": 2,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_watertank00",
+      "jaymospowers:maw/scattered/scattered_watertank01"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_watertank10",
+      "jaymospowers:maw/scattered/scattered_watertank11"
+    ]
+  ]
+}

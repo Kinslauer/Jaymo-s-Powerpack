@@ -105,7 +105,9 @@ public final class RangedTactics {
 
 	/** What a shooter does about failing. */
 	enum Plan {
-		NONE, STRAFE, SEEK_SIGHT, CLOSE_IN, BACK_OFF, FLANK, COVER, TAKE_COVER
+		NONE, STRAFE, SEEK_SIGHT, CLOSE_IN, BACK_OFF, FLANK, COVER, TAKE_COVER,
+		/** Back to the distance its weapon likes, and out to pick up a weapon it threw ({@link WeaponSense}). */
+		BAND, FETCH
 	}
 
 	/** One shooter's record: failures, where it is in the plans, and the plan it is following. */
@@ -196,6 +198,11 @@ public final class RangedTactics {
 		} else if ((entity instanceof AbstractSkeleton || entity instanceof Pillager) && GIVEN.add((Mob)entity)) {
 			// (the game's own bowmen and crossbowmen; our folk and the Hornkin add the goal themselves)
 			((MobAccessor)entity).jaymoskingdoms$goals().addGoal(0, new RepositionGoal((Mob)entity));
+			if (entity instanceof Pillager) {
+				((MobAccessor)entity).jaymoskingdoms$goals().addGoal(0, new WeaponSense.SenseGoal((Mob)entity));
+				// (its backup weapon, fought with as a vindicator fights: Sidearms)
+				((MobAccessor)entity).jaymoskingdoms$goals().addGoal(3, new Sidearms.BackupMelee((Pillager)entity));
+			}
 		}
 	}
 
@@ -285,7 +292,7 @@ public final class RangedTactics {
 		return true;
 	}
 
-	private static boolean friendly(Mob shooter, LivingEntity victim) {
+	static boolean friendly(Mob shooter, LivingEntity victim) {
 		if (shooter instanceof Folk s && victim instanceof Folk v) {
 			return s.sameSide(v);
 		}
@@ -293,6 +300,7 @@ public final class RangedTactics {
 	}
 
 	private static void tick(MinecraftServer server) {
+		Boomerangs.tick();
 		if (SHOTS.isEmpty()) {
 			return;
 		}
@@ -396,7 +404,8 @@ public final class RangedTactics {
 	// ---- the plans -----------------------------------------------------------------------------------------------------
 
 	private static void choose(ServerLevel level, Mob shooter, LivingEntity target, State s, long now) {
-		boolean sees = shooter.getSensing().hasLineOfSight(target);
+		// (a clear line to where it aims: a shoulder showing round a wall is noticed, not shot at, so it goes to find a better line)
+		boolean sees = NpcEyes.clearShot(shooter, target);
 		double gap = shooter.distanceTo(target);
 		// what to try, in order: each failure after the last plan moves one down the list
 		List<Plan> order = new ArrayList<>();
@@ -526,7 +535,7 @@ public final class RangedTactics {
 	}
 
 	/** Standing room (air to stand in, a floor under) near {@code at}, within a few blocks of {@code y}. */
-	private static @Nullable BlockPos ground(ServerLevel level, Vec3 at, int y) {
+	static @Nullable BlockPos ground(ServerLevel level, Vec3 at, int y) {
 		BlockPos column = BlockPos.containing(at.x, y, at.z);
 		for (int dy : new int[] {0, 1, -1, 2, -2, 3, -3}) {
 			BlockPos feet = column.offset(0, dy, 0);
@@ -539,7 +548,7 @@ public final class RangedTactics {
 	}
 
 	/** Whether someone standing at {@code p} would have a clear line to {@code target}. */
-	private static boolean clear(ServerLevel level, Mob shooter, Vec3 p, LivingEntity target) {
+	static boolean clear(ServerLevel level, Mob shooter, Vec3 p, LivingEntity target) {
 		Vec3 eye = p.add(0.0, shooter.getEyeHeight(), 0.0);
 		return level.clip(new ClipContext(eye, target.getEyePosition(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter)).getType() == HitResult.Type.MISS;
 	}
@@ -550,6 +559,37 @@ public final class RangedTactics {
 	static boolean active(Mob mob) {
 		State s = STATES.get(mob);
 		return s != null && s.plan != Plan.NONE;
+	}
+
+	/** Sends {@code mob} to {@code spot} on {@code plan} ({@link Plan#BAND} or {@link Plan#FETCH}), for a while; false if it is on another plan already. */
+	static boolean go(Mob mob, Plan plan, Vec3 spot) {
+		State s = state(mob);
+		if (s.plan != Plan.NONE) {
+			return false;
+		}
+		long now = mob.level().getGameTime();
+		s.plan = plan;
+		s.dest = spot;
+		s.planStarted = now;
+		s.planEnds = now + PLAN_TICKS;
+		s.holding = false;
+		s.holdUntil = 0L;
+		return true;
+	}
+
+	/** The plan {@code mob} is on now. */
+	static Plan planOf(Mob mob) {
+		State s = STATES.get(mob);
+		return s == null ? Plan.NONE : s.plan;
+	}
+
+	/** Calls {@code mob} off its plan (a fetch the foe has made too dangerous). */
+	static void cancel(Mob mob) {
+		State s = STATES.get(mob);
+		if (s != null && s.plan != Plan.NONE) {
+			finish(mob, s);
+			mob.getNavigation().stop();
+		}
 	}
 
 	/** It has put its bow away for a while and fights hand to hand ({@code Folk#shooting}). */
@@ -574,7 +614,7 @@ public final class RangedTactics {
 		if (s.ducking) {
 			s.ducking = false;
 			mob.setShiftKeyDown(false);
-			LivingEntity target = mob.getTarget();
+			LivingEntity target = Comrades.target(mob);
 			if (target != null && mob.level() instanceof ServerLevel level) {
 				Lean.lean(mob, Cover.corner(level, mob, target, mob.position()));
 			}
@@ -589,7 +629,8 @@ public final class RangedTactics {
 			return false;
 		}
 		long now = mob.level().getGameTime();
-		LivingEntity target = mob.getTarget();
+		// (its goals' target, or an MCA villager's brain's)
+		LivingEntity target = Comrades.target(mob);
 		if (target == null || !target.isAlive() || now >= s.planEnds || mob.isPassenger() || Downed.isDowned(mob)) {
 			finish(mob, s);
 			return false;
@@ -597,7 +638,7 @@ public final class RangedTactics {
 		mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
 		Vec3 d = s.dest;
 		boolean there = mob.distanceToSqr(d.x, d.y, d.z) < 2.25 || mob.tickCount % 10 == 0 && mob.getNavigation().isDone() && now - s.planStarted > 10;
-		boolean sees = mob.getSensing().hasLineOfSight(target);
+		boolean sees = NpcEyes.clearShot(mob, target);
 		if (s.plan == Plan.COVER || s.plan == Plan.TAKE_COVER) {
 			if (there && !s.holding) {
 				s.holding = true;
@@ -633,6 +674,7 @@ public final class RangedTactics {
 	 * brain this tick, the shooter being on the move.
 	 */
 	public static boolean brainStep(Mob mob) {
+		WeaponSense.step(mob);
 		if (!active(mob)) {
 			return false;
 		}

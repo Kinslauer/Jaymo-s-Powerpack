@@ -1,6 +1,5 @@
 package com.jaymoskitchen.climate;
 
-import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,7 +51,7 @@ public class HearthEntity extends BlockEntity {
 	void open(net.minecraft.server.level.ServerPlayer player) {
 		boolean canFeed = false;
 		for (int i = 0; i < player.getInventory().getContainerSize() && !canFeed; i++) {
-			canFeed = Warmth.burnTicks(player.getInventory().getItem(i), cold()) > 0;
+			canFeed = burnOf(player.getInventory().getItem(i)) > 0;
 		}
 		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new com.jaymoskitchen.net.Payloads.OpenHearth(worldPosition, fuel,
 			MAX_FUEL, cold(), getBlockState().getValue(HearthBlock.LIT), cells(), canFeed));
@@ -62,8 +61,10 @@ public class HearthEntity extends BlockEntity {
 	boolean feedFrom(net.minecraft.server.level.ServerPlayer player) {
 		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
 			net.minecraft.world.item.ItemStack stack = player.getInventory().getItem(i);
-			int burn = Warmth.burnTicks(stack, cold());
-			if (burn > 0 && feed(burn)) {
+			int burn = burnOf(stack);
+			boolean ice = regulator() && Warmth.regulatorIce(stack) > 0;
+			// the button feeds a climate stove what it is doing now (ice cooling, fuel warming), unless it is empty
+			if (burn > 0 && (!regulator() || fuel <= 0 || ice == cold()) && load(burn, regulator() ? ice : cold(), player)) {
 				if (!player.getAbilities().instabuild) {
 					stack.shrink(1);
 				}
@@ -74,7 +75,43 @@ public class HearthEntity extends BlockEntity {
 	}
 
 	boolean cold() {
-		return getBlockState().getBlock() instanceof HearthBlock hearth && hearth.cold;
+		return HearthBlock.cooling(getBlockState());
+	}
+
+	private boolean regulator() {
+		return getBlockState().getBlock() instanceof RegulatorBlock;
+	}
+
+	/** How long {@code stack} keeps this one going: what it burns, or (a climate stove) what it burns or cools with. */
+	int burnOf(net.minecraft.world.item.ItemStack stack) {
+		if (regulator()) {
+			int ice = Warmth.regulatorIce(stack);
+			return ice > 0 ? ice : Warmth.burnTicks(stack, false);
+		}
+		return Warmth.burnTicks(stack, cold());
+	}
+
+	/**
+	 * Loads {@code ticks} of fuel ({@code cold}: ice) into this one. A climate stove does one thing at a time, and the last
+	 * thing loaded decides, but only once it is empty: while the other kind still burns, loading is refused (with a line on
+	 * screen to {@code by}). False if it is refused or full of the same kind.
+	 */
+	boolean load(int ticks, boolean cold, net.minecraft.server.level.@org.jspecify.annotations.Nullable ServerPlayer by) {
+		if (regulator() && cold != cold()) {
+			if (fuel > 0) {
+				// still holding the other kind: it must run out (or be burnt down) before it turns round
+				if (by != null) {
+					by.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(cold() ? "message.jaymoskitchen.regulator.still_cold"
+						: "message.jaymoskitchen.regulator.still_burning"));
+				}
+				return false;
+			}
+			if (level instanceof ServerLevel server) {
+				server.setBlock(worldPosition, getBlockState().setValue(RegulatorBlock.COLD, cold), Block.UPDATE_ALL);
+				Warmth.clear(server, worldPosition);
+			}
+		}
+		return feed(ticks);
 	}
 
 	/** Adds {@code ticks} of fuel; false if it's already full. */
@@ -118,34 +155,11 @@ public class HearthEntity extends BlockEntity {
 
 	/** Walks the room and hands it to {@link Warmth}. */
 	void scan(ServerLevel level) {
-		LongOpenHashSet room = new LongOpenHashSet();
-		LongOpenHashSet seen = new LongOpenHashSet();
-		LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
-		seen.add(worldPosition.asLong());
+		java.util.List<BlockPos> seeds = new java.util.ArrayList<>(6);
 		for (Direction d : Direction.values()) {
-			long next = worldPosition.relative(d).asLong();
-			seen.add(next);
-			queue.enqueue(next);
+			seeds.add(worldPosition.relative(d));
 		}
-		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
-		while (!queue.isEmpty() && room.size() < MAX_CELLS) {
-			long packed = queue.dequeueLong();
-			at.set(packed);
-			if (at.distManhattan(worldPosition) > REACH * 2 || Math.abs(at.getX() - worldPosition.getX()) > REACH
-				|| Math.abs(at.getY() - worldPosition.getY()) > REACH || Math.abs(at.getZ() - worldPosition.getZ()) > REACH) {
-				continue;
-			}
-			if (!com.jaymoskitchen.Loaded.made(level, at) || !open(level, at, level.getBlockState(at)) || level.canSeeSky(at)) {
-				continue;
-			}
-			room.add(packed);
-			for (Direction d : Direction.values()) {
-				long next = BlockPos.offset(packed, d);
-				if (seen.add(next)) {
-					queue.enqueue(next);
-				}
-			}
-		}
+		LongOpenHashSet room = Warmth.fill(level, worldPosition, seeds, false, new Warmth.Walk(REACH, REACH, REACH * 2, MAX_CELLS, true), null);
 		Warmth.set(level, worldPosition, cold(), room);
 	}
 

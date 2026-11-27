@@ -12,7 +12,10 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -51,6 +54,11 @@ public final class DragonStorm {
 	 * {@code callLightning} whether a real bolt may be called down in a thunderstorm (the wild one's follows mobGriefing).
 	 */
 	public static void breathe(ServerLevel level, LivingEntity dragon, Vec3 mouth, Vec3 aim, int tick, boolean callLightning) {
+		breathe(level, dragon, mouth, aim, tick, callLightning, false);
+	}
+
+	/** As above; {@code fuseSand} whether a bolt that strikes the ground fuses the sand there to glass (after Dragonforge). */
+	public static void breathe(ServerLevel level, LivingEntity dragon, Vec3 mouth, Vec3 aim, int tick, boolean callLightning, boolean fuseSand) {
 		RandomSource random = level.getRandom();
 		for (int i = 0; i < MOUTH_SPARKS; i++) {
 			Vec3 d = DragonBreath.spread(aim, random, 0.3);
@@ -67,6 +75,9 @@ public final class DragonStorm {
 			BlockHitResult hit = level.clip(new ClipContext(mouth, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, dragon));
 			if (hit.getType() == HitResult.Type.BLOCK) {
 				end = hit.getLocation();
+				if (fuseSand) {
+					fuse(level, hit.getBlockPos(), random);
+				}
 			}
 			arc(level, mouth, end, random);
 			level.playSound(null, mouth.x, mouth.y, mouth.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 0.8F, 1.6F + random.nextFloat() * 0.3F);
@@ -90,6 +101,9 @@ public final class DragonStorm {
 			at = nextAfter(level, dragon, struck, at);
 		}
 		Vec3 where = first.position();
+		if (fuseSand && first.onGround()) {
+			fuse(level, first.blockPosition().below(), random);
+		}
 		// the crack of thunder, once a bolt
 		level.playSound(null, where.x, where.y, where.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.0F, 1.1F + random.nextFloat() * 0.3F);
 		if (callLightning && level.isThundering() && random.nextFloat() < STRIKE_CHANCE && level.canSeeSky(first.blockPosition())) {
@@ -97,6 +111,15 @@ public final class DragonStorm {
 			if (bolt != null) {
 				bolt.snapTo(where.x, where.y, where.z);
 				level.addFreshEntity(bolt);
+			}
+		}
+	}
+
+	/** A bolt's heat fuses the sand round {@code pos} (most of it) into glass. */
+	static void fuse(ServerLevel level, BlockPos pos, RandomSource random) {
+		for (BlockPos at : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
+			if (level.getBlockState(at).is(BlockTags.SAND) && random.nextFloat() < 0.6F) {
+				level.setBlockAndUpdate(at, Blocks.GLASS.defaultBlockState());
 			}
 		}
 	}

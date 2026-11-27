@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [
     "AbridgedBridgeMixin",
+    "BankGuardMixin",
     "BiomeFreezeMixin",
     "BiomeSourceMixin",
     "CanyonCarverMixin",
@@ -21,6 +22,8 @@
     "SpringFeatureMixin",
     "StructureManagerAccessor",
     "StructureMixin",
+    "StructureWatchMixin",
+    "FeatureWatchMixin",
     "SurfaceSystemAccessor",
     "TreeFeatureMixin",
     "WorldCarverMixin"

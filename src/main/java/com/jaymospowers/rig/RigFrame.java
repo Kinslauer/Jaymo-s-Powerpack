@@ -14,6 +14,10 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Shade:</b> dark and quiet, thin plates. Mobs notice you late ({@link #detect}); quick, but it takes
  * more to the chest.</li>
  * <li><b>Siege:</b> thick plates and a shoulder gun (more, harder missiles from the launcher). Slow in the air.</li>
+ * <li><b>Hail</b> and <b>Tinker</b> (Andy: "make 2 new suits, one based off white, one based off the gunmetal"): the
+ * standard frame in another suit, white plate as the Frostborn build them, or the Mad Tinkerer's gunmetal copy. Looks
+ * only; every number is the standard's. Their textures are other artists' armour laid onto the plates
+ * ({@code tools/open_art/rig_suits.py}).</li>
  * </ul>
  * Every number is per frame, in the constructor's order: armour points and toughness (whole suit; fewer worn pieces,
  * a share), ground speed (a share of walking speed), air speed (a share of hover and flight speed), hover drain,
@@ -23,7 +27,9 @@ public enum RigFrame {
 	STANDARD(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0, 1.0, 1.0, 1.0),
 	SCRAP(1.0, 0.0, -0.06, 0.85, 1.4, 0.85, 0, 1.0, 0.5, 0.5),
 	SHADE(-2.0, 0.0, 0.04, 1.1, 0.9, 1.0, 0, 0.45, 1.25, 1.0),
-	SIEGE(4.0, 2.0, -0.05, 0.7, 1.2, 1.0, 2, 1.0, 1.5, 1.75);
+	SIEGE(4.0, 2.0, -0.05, 0.7, 1.2, 1.0, 2, 1.0, 1.5, 1.75),
+	HAIL(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0, 1.0, 1.0, 1.0),
+	TINKER(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0, 1.0, 1.0, 1.0);
 
 	/** A Shade suit sneaking is harder to see still (a share of {@link #detect}). */
 	public static final double SNEAK_SHARE = 0.6;

@@ -30,6 +30,12 @@ abstract class McaTalkHoldMixin {
 	/** Someone busy (a fight, someone else's talk, the downed, the dead) says so instead, and the menu stays shut ({@link TalkBusy}). */
 	@Inject(method = "interactAt", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$busyFirst(Player player, Vec3 pos, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+		// Andy (2026-11-26): no "accidental talk activation while trying to fight". A weapon in hand doesn't open the talk
+		// menu (both sides, so the weapon's own use goes ahead); everything else a click does with it held still works
+		if (TalkBusy.armed(player)) {
+			cir.setReturnValue(InteractionResult.PASS);
+			return;
+		}
 		if (player instanceof ServerPlayer sp && TalkBusy.refuse(sp, this.entity)) {
 			cir.setReturnValue(InteractionResult.SUCCESS);
 		}

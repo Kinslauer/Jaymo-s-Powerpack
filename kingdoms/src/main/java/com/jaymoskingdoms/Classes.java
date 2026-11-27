@@ -92,6 +92,10 @@ public final class Classes {
 	/** Enderscape's stronghold library (optional; matched by id, never linked): its strongholds replace the vanilla ones. */
 	private static final ResourceKey<LootTable> ENDERSCAPE_LIBRARY = ResourceKey.create(Registries.LOOT_TABLE,
 		Identifier.fromNamespaceAndPath("enderscape", "stronghold/chest/library"));
+	/** Stellarity's stronghold libraries, the halls' and the portal room's (optional; by id): its strongholds are the pack's. */
+	private static final ResourceKey<LootTable> STELLARITY_LIBRARY = ResourceKey.create(Registries.LOOT_TABLE,
+		Identifier.fromNamespaceAndPath("stellarity", "stronghold/library")), STELLARITY_PORTAL_LIBRARY = ResourceKey.create(Registries.LOOT_TABLE,
+		Identifier.fromNamespaceAndPath("stellarity", "stronghold/portal_room/library"));
 	/** The chance a rare chest holds a wizard's staff (a Mage's "find one"); a slain court wizard drops his this often. */
 	static final float STAFF_LOOT_CHANCE = 0.1F, STAFF_DROP_CHANCE = 0.5F;
 
@@ -110,7 +114,7 @@ public final class Classes {
 		CLERIC("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "truth"),
 		DRUID, MONK, PALADIN("mercy", "justice", "honour"), RANGER("undead", "raiders", "beasts", "spiders", "greenskins", "monsters"),
 		WARLOCK("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth", "reaper"),
-		TINKERER;
+		TINKERER, ARTIFICER;
 
 		public final List<String> options;
 
@@ -291,6 +295,7 @@ public final class Classes {
 		Rangers.register();
 		Warlocks.register();
 		Tinkerers.register();
+		Artificers.register();
 		ClassTeachers.register();
 		Rests.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
@@ -301,6 +306,7 @@ public final class Classes {
 			Vows.clear();
 			Rangers.clear();
 			Tinkerers.clear();
+			Artificers.clear();
 			ClassTeachers.clear();
 			SecondClass.clear();
 			Feats.clear();
@@ -312,7 +318,7 @@ public final class Classes {
 		});
 		// a writ, or a wizard's staff, in the rarest chests
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
-			if (table.unwrapKey().filter(k -> k.equals(BuiltInLootTables.STRONGHOLD_LIBRARY) || k.equals(ENDERSCAPE_LIBRARY) || k.equals(BuiltInLootTables.ANCIENT_CITY)
+			if (table.unwrapKey().filter(k -> k.equals(BuiltInLootTables.STRONGHOLD_LIBRARY) || k.equals(ENDERSCAPE_LIBRARY) || k.equals(STELLARITY_LIBRARY) || k.equals(STELLARITY_PORTAL_LIBRARY) || k.equals(BuiltInLootTables.ANCIENT_CITY)
 				|| k.equals(BuiltInLootTables.WOODLAND_MANSION)).isPresent()) {
 				if (context.getRandom().nextFloat() < WRIT_LOOT_CHANCE) {
 					drops.add(new ItemStack(WRIT));
@@ -594,6 +600,7 @@ public final class Classes {
 			case MONK -> Monks.begin(player);
 			case DRUID -> Druids.begin(player);
 			case TINKERER -> Tinkerers.begin(player);
+			case ARTIFICER -> Artificers.begin(player);
 			default -> {
 			}
 		}
@@ -665,6 +672,8 @@ public final class Classes {
 				new ItemStack(Items.BOOK), new ItemStack(Items.AMETHYST_SHARD));
 			case TINKERER -> List.of(any(1, "jaymospowers:tool_station", "minecraft:crafting_table"), any(1, "jaymospowers:iron_dagger", "minecraft:iron_pickaxe"),
 				new ItemStack(Items.GOLDEN_BOOTS), new ItemStack(Items.SHIELD), new ItemStack(Items.REDSTONE));
+			case ARTIFICER -> List.of(any(1, "jaymospowers:iron_dagger", "minecraft:iron_sword"), new ItemStack(Items.AMETHYST_SHARD, 8), new ItemStack(Items.GLASS_BOTTLE, 6),
+				new ItemStack(Items.BLAZE_POWDER, 2), new ItemStack(Items.FEATHER, 4), new ItemStack(Items.LEATHER_CHESTPLATE));
 			case BRUTE -> List.of(any(1, "jaymospowers:iron_flanged_mace", "minecraft:iron_axe"), new ItemStack(Items.SHIELD),
 				RpgKit.or("rogues:berserker_armor_chest", "minecraft:chainmail_chestplate"));
 			// Andy (2026-11-15): "Marksmen should get a flintlock not a musket" (WeaponMod's flintlock pistol; it fires the
@@ -672,7 +681,8 @@ public final class Classes {
 			case MARKSMAN -> List.of(any(1, "weaponmod:flintlock", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"),
 				any(1, "archers:rapid_crossbow"), new ItemStack(Items.ARROW, 16), RpgKit.or("archers:archer_armor_chest", "minecraft:leather_chestplate"));
 			case SORCERER -> List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.LEATHER_CHESTPLATE), new ItemStack(Items.LEATHER_LEGGINGS));
-			case RIDER -> List.of(any(1, "jaymospowers:iron_lance", "minecraft:iron_sword"), new ItemStack(Items.SADDLE), new ItemStack(Items.LEATHER_CHESTPLATE),
+			// Andy (2026-11-26): riders start with a spear, not a lance
+			case RIDER -> List.of(any(1, "minecraft:iron_spear", "minecraft:iron_sword"), new ItemStack(Items.LEATHER_CHESTPLATE),
 				new ItemStack(Items.LEATHER_BOOTS), new ItemStack(Items.WHEAT, 8));
 		};
 	}

@@ -133,6 +133,10 @@ def wrapped_noise(rng, cells=4):
     return out
 
 
+# the coloured aerclouds' alpha, light to dark (about half see-through)
+CLOUD_ALPHA = [124, 113, 102]
+
+
 def cloud(name, colors, alphas):
     rng = seeded(name)
     n = wrapped_noise(rng, 4)
@@ -574,9 +578,12 @@ def make_blocks():
                                     ramp("a8870f", "c29c16"), hx("fff6c0"))
     t["zanite_block"] = bordered("zanite_block", ramp("c9a2f8", "b88af0"), ramp("9a5fe0", "8c50d2", "a875ea", "7d44c4"),
                                  ramp("5b2f9a", "6a39ae"), hx("e0c8ff"))
-    t["cold_aercloud"] = cloud("cold_aercloud", ramp("ffffff", "eef3fa", "dde6f2"), [225, 205, 185])
-    t["blue_aercloud"] = cloud("blue_aercloud", ramp("c6e4ff", "a8d3fb", "8dc2f2"), [225, 205, 185])
-    t["golden_aercloud"] = cloud("golden_aercloud", ramp("fff3b8", "ffe58c", "f6d266"), [225, 205, 185])
+    # (Patch 9) see-through, so a pod's pilot sees the isles and the sky below through the cloud they climb through
+    # (Andy: the clouds "should be transparent"): the cold cloud and the cloudbank faint, the coloured ones half see-through
+    t["cold_aercloud"] = cloud("cold_aercloud", ramp("ffffff", "eef3fa", "dde6f2"), [90, 78, 69])
+    t["cloudbank"] = cloud("cold_aercloud", ramp("ffffff", "eef3fa", "dde6f2"), [74, 63, 53])
+    t["blue_aercloud"] = cloud("blue_aercloud", ramp("c6e4ff", "a8d3fb", "8dc2f2"), CLOUD_ALPHA)
+    t["golden_aercloud"] = cloud("golden_aercloud", ramp("fff3b8", "ffe58c", "f6d266"), CLOUD_ALPHA)
     t["skyroot_log"] = bark("skyroot_log", GREY_GREEN_BARK)
     t["skyroot_log_top"] = log_top("skyroot_log_top", GREY_GREEN_BARK, SKYROOT_RING)
     t["stripped_skyroot_log"] = bark("stripped_skyroot_log", STRIPPED)
@@ -819,8 +826,11 @@ def loot():
     for b in ["holystone", "mossy_holystone", "holystone_bricks", "aether_dirt", "quicksoil", "icestone", "gravitite_ore", "enchanted_gravitite",
               "ambrosium_block", "zanite_block", "skyroot_log", "skyroot_wood", "stripped_skyroot_log", "stripped_skyroot_wood",
               "skyroot_planks", "skyroot_sapling", "golden_oak_sapling", "white_flower", "purple_flower", "ambrosium_torch",
-              "berry_bush_stem"] + CLOUDS:
+              "berry_bush_stem"]:
         tables[b] = self_table(b)
+    # (Andy: "break it and it disappears like leaves") a cloud drops nothing, Silk Touch or not; bottling gathers cloud
+    for b in CLOUDS + ["cloudbank"]:
+        tables[b] = table(b, [])
     tables["aether_grass_block"] = silk_else("aether_grass_block", jp("aether_dirt"))
     tables["enchanted_aether_grass_block"] = silk_else("enchanted_aether_grass_block", jp("aether_dirt"))
     tables["quicksoil_glass"] = table("quicksoil_glass", [{"rolls": 1, "condition": SILK, "entries": [item_entry(jp("quicksoil_glass"))]}])
@@ -1272,7 +1282,7 @@ def puffy(name, tint=None):
 
 def cloud_front(name, base, arrow):
     """The purple aercloud's fling face: its cloud with an arrow in it."""
-    im = cloud(name, base, [225, 205, 185])
+    im = cloud(name, base, CLOUD_ALPHA)
     px = im.load()
     for x, y in [(7, 3), (8, 3), (6, 4), (7, 4), (8, 4), (9, 4), (5, 5), (6, 5), (7, 5), (8, 5), (9, 5), (10, 5), (7, 6), (8, 6), (7, 7), (8, 7),
                  (7, 8), (8, 8), (7, 9), (8, 9), (7, 10), (8, 10), (7, 11), (8, 11)]:
@@ -1457,10 +1467,10 @@ def n1_make_blocks():
                                        ramp("8a520a", "a0620d"), hx("ffe9a0"))
     t["gravitite_block"] = bordered("gravitite_block", ramp("f7a8e0", "ea82ca"), ramp("b8409a", "a8358a", "c84daa", "982c7c"),
                                     ramp("70154f", "82205f"), hx("ffc4ee"))
-    t["green_aercloud"] = cloud("green_aercloud", ramp("c9f5c3", "a6e89e", "86d67e"), [225, 205, 185])
-    t["purple_aercloud"] = cloud("purple_aercloud", ramp("e2c9ff", "cba6f2", "b387e0"), [225, 205, 185])
+    t["green_aercloud"] = cloud("green_aercloud", ramp("c9f5c3", "a6e89e", "86d67e"), CLOUD_ALPHA)
+    t["purple_aercloud"] = cloud("purple_aercloud", ramp("e2c9ff", "cba6f2", "b387e0"), CLOUD_ALPHA)
     t["purple_aercloud_front"] = cloud_front("purple_aercloud_front", ramp("e2c9ff", "cba6f2", "b387e0"), hx("6f3db8"))
-    t["storm_aercloud"] = cloud("storm_aercloud", ramp("7c8290", "666c7a", "525866"), [235, 220, 205])
+    t["storm_aercloud"] = cloud("storm_aercloud", ramp("7c8290", "666c7a", "525866"), [129, 121, 113])
     for dye, rgb in DYES:
         if dye == "white":
             t["cloudwool"] = puffy("cloudwool")
@@ -1821,12 +1831,13 @@ N1_ORES = {  # ore block -> (what it drops, bonus modifiers) when not mined with
     "undershale_zanite_ore": jp("zanite_gemstone"), "undershale_arkenium_ore": jp("inert_arkenium"), "undershale_glint_ore": jp("glint_gemstone")}
 N1_SILK_ONLY = ["scatterglass", "scatterglass_pane", "quicksoil_glass_pane", "arctic_ice", "fragile_arctic_ice", "arctic_packed_ice"]
 N1_SOIL_DROPS_DIRT = ["aether_dirt_path", "aether_farmland"]
+N1_CLOUDS = ["green_aercloud", "purple_aercloud", "storm_aercloud"]  # drop nothing, like the first three
 
 
 def n1_loot():
     out = os.path.join(DATA, "loot_table", "blocks")
     tables = {}
-    special = set(N1_ORES) | set(N1_SILK_ONLY) | set(N1_SOIL_DROPS_DIRT) | {"crude_scatterglass", "arctic_snow", "corrobonite_cluster"}
+    special = set(N1_ORES) | set(N1_SILK_ONLY) | set(N1_SOIL_DROPS_DIRT) | set(N1_CLOUDS) | {"crude_scatterglass", "arctic_snow", "corrobonite_cluster"}
     shaped_slabs = ["%s_slab" % f[0] for f in N1_FAMILIES]
     for b in N1_BLOCKS:
         if b in special or b in shaped_slabs:
@@ -1834,6 +1845,8 @@ def n1_loot():
         tables[b] = self_table(b)
     for b, drop in N1_ORES.items():
         tables[b] = silk_else(b, drop, ORE_BONUS)
+    for b in N1_CLOUDS:
+        tables[b] = table(b, [])
     for b in N1_SILK_ONLY:
         tables[b] = table(b, [{"rolls": 1, "condition": SILK, "entries": [item_entry(jp(b))]}])
     for b in N1_SOIL_DROPS_DIRT:
@@ -1915,7 +1928,7 @@ def n1_recipes():
     r["glint_coin_from_gemstone"] = shapeless([jp("glint_gemstone")], jp("glint_coin"), 4)
     r["glint_gemstone_from_coins"] = shapeless([jp("glint_coin")] * 4, jp("glint_gemstone"), 1)
     # cloudwool
-    r["cloudwool"] = shaped({"#": jp("cold_aercloud")}, ["##", "##"], jp("cloudwool"), 2, "wool")
+    r["cloudwool"] = shaped({"#": jp("bottle_of_cloud")}, ["##", "##"], jp("cloudwool"), 2, "wool")
     r["cloudwool_carpet"] = shaped({"#": jp("cloudwool")}, ["##"], jp("cloudwool_carpet"), 3, "carpet")
     for dye in N1_DYED:
         r[dye + "_cloudwool"] = shapeless([jp("cloudwool"), mc(dye + "_dye")], jp(dye + "_cloudwool"), 1, "wool", "building")

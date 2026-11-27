@@ -53,6 +53,8 @@ public class Tarantula extends Monster implements WildLook {
 	/** The stinging hairs: how often (ticks), how far (blocks), how long they blind and sicken (ticks). */
 	static final int FLICK_TICKS = 160, HAIR_TICKS = 60;
 	static final double FLICK_RANGE = 12.0;
+	/** In daylight, the chance a tick (1 in this) it gives up its target, as the game's spiders do. */
+	static final int DAYLIGHT_FORGET = 100;
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(Tarantula.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> CLIMBING = SynchedEntityData.defineId(Tarantula.class, EntityDataSerializers.BOOLEAN);
 	private int flickIn = FLICK_TICKS / 2;
@@ -75,9 +77,11 @@ public class Tarantula extends Monster implements WildLook {
 		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+		// like the game's spiders, it only hunts in the dark; in daylight it only fights back (HurtByTargetGoal)
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true, (target, at) -> this.dark()));
 		// (0.7.217) villagers too, for less ({@link com.jaymoskingdoms.VillagerHunters#VILLAGER_DAMAGE})
-		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.npc.villager.AbstractVillager.class, true));
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.npc.villager.AbstractVillager.class, true,
+			(target, at) -> this.dark()));
 	}
 
 	@Override
@@ -105,9 +109,19 @@ public class Tarantula extends Monster implements WildLook {
 		}
 	}
 
+	/** Whether it's dark enough here to hunt (the game's own spider rule, {@link SpiderMinds#DARK}). */
+	boolean dark() {
+		return this.getLightLevelDependentMagicValue() < SpiderMinds.DARK;
+	}
+
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		// the game's spider temper: in daylight it may lose interest any moment, but not in one who hurt it
+		if (this.getTarget() != null && this.getTarget() != this.getLastHurtByMob() && !this.dark()
+			&& this.random.nextInt(DAYLIGHT_FORGET) == 0) {
+			this.setTarget(null);
+		}
 		LivingEntity target = this.getTarget();
 		if (--this.flickIn > 0 || target == null || level.getDifficulty() == Difficulty.PEACEFUL) {
 			return;

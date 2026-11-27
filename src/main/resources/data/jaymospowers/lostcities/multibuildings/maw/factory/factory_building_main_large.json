@@ -1,0 +1,41 @@
+{
+  "dimx": 5,
+  "dimz": 5,
+  "buildings": [
+    [
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_tower",
+      "jaymospowers:maw/factory/factory_building_main"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_tower",
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_chimney",
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_building_main"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_tank_long",
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_tank_long",
+      "jaymospowers:maw/factory/factory_building_main"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_chimney",
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_chimney",
+      "jaymospowers:maw/factory/factory_building_main"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_tower",
+      "jaymospowers:maw/factory/factory_building_main",
+      "jaymospowers:maw/factory/factory_tower",
+      "jaymospowers:maw/factory/factory_tank_long"
+    ]
+  ]
+}

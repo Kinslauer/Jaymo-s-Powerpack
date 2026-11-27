@@ -17,8 +17,12 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ZFighterInputClient {
 	private static final String KEY_NAME = "key.jaymospowers.web_symbiote";
+	/** Hold Sneak+X at least this many ticks to raise Overburn; quicker tap cycles Limit Break. */
+	private static final int OVERBURN_HOLD_TICKS = 7;
 
 	private static @Nullable KeyMapping key;
+	private static int sneakHoldTicks;
+	private static boolean overburnHolding;
 
 	private ZFighterInputClient() {
 	}
@@ -44,22 +48,53 @@ public final class ZFighterInputClient {
 		return mapping == null ? "X" : mapping.getTranslatedKeyMessage().getString();
 	}
 
+	private static void releaseOverburn() {
+		if (overburnHolding) {
+			overburnHolding = false;
+			ClientPlayNetworking.send(new ZFighterNet.OverburnHold(false));
+		}
+		sneakHoldTicks = 0;
+	}
+
 	private static void input(Minecraft minecraft) {
 		KeyMapping mapping = key(minecraft);
 		LocalPlayer player = minecraft.player;
 		if (mapping == null || player == null || !Powers.has(player, ZFighterPower.INSTANCE) || WebSymbiote.isBonded(player)) {
+			if (overburnHolding && player != null) {
+				releaseOverburn();
+			} else {
+				overburnHolding = false;
+				sneakHoldTicks = 0;
+			}
 			return;
 		}
 		boolean pressed = false;
 		while (mapping.consumeClick()) {
 			pressed = true;
 		}
-		if (!pressed || minecraft.gui.screen() != null || player.isSpectator()) {
+		if (minecraft.gui.screen() != null || player.isSpectator()) {
+			releaseOverburn();
 			return;
 		}
-		if (player.isShiftKeyDown()) {
+		boolean down = mapping.isDown();
+		if (down && player.isShiftKeyDown()) {
+			sneakHoldTicks++;
+			if (sneakHoldTicks >= OVERBURN_HOLD_TICKS && !overburnHolding) {
+				overburnHolding = true;
+				ClientPlayNetworking.send(new ZFighterNet.OverburnHold(true));
+			}
+			return;
+		}
+		if (overburnHolding) {
+			releaseOverburn();
+			return;
+		}
+		if (sneakHoldTicks > 0) {
+			sneakHoldTicks = 0;
 			ClientPlayNetworking.send(new ZFighterNet.Train(ZFighterNet.CYCLE_LIMIT, 0));
-		} else {
+			return;
+		}
+		if (pressed && !player.isShiftKeyDown()) {
 			minecraft.gui.setScreen(new ZFighterTrainingScreen());
 		}
 	}

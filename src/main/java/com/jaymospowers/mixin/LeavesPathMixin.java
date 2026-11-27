@@ -13,13 +13,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Leaves are soft ({@link Leaves}), so mobs path through them as through open air: they wade through hedges and walk
  * out of bushes, and never plan a walk across the top of leaves they'd sink into. (Vanilla calls leaves a wall to go
- * around and a floor to stand on, so a mob that sank in found every way out blocked.)
+ * around and a floor to stand on, so a mob that sank in found every way out blocked.) Soft clouds ({@link Leaves#soft})
+ * are the same, so no mob plans a walk onto a cloud it would fall through.
  */
 @Mixin(WalkNodeEvaluator.class)
 abstract class LeavesPathMixin {
 	@Inject(method = "getPathTypeFromState", at = @At("HEAD"), cancellable = true)
 	private static void jaymospowers$softLeaves(BlockGetter level, BlockPos pos, CallbackInfoReturnable<PathType> cir) {
-		if (Leaves.is(level.getBlockState(pos))) {
+		if (Leaves.soft(level.getBlockState(pos))) {
 			cir.setReturnValue(PathType.OPEN);
 		}
 	}

@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.zfighter.mixin;
 
+import com.jaymospowers.client.power.zfighter.ZFighterBeams;
 import com.jaymospowers.client.power.zfighter.ZFighterKiSenseClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -13,7 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 abstract class ZFighterKiSenseGlowMixin {
 	@Inject(method = "shouldEntityAppearGlowing", at = @At("RETURN"), cancellable = true)
 	private void jaymospowers$kiSense(Entity entity, CallbackInfoReturnable<Boolean> cir) {
-		if (!cir.getReturnValueZ() && (ZFighterKiSenseClient.color(entity) != 0 || com.jaymospowers.client.power.zfighter.ZFighterPartnerClient.color(entity) != 0)) {
+		if (!cir.getReturnValueZ() && (ZFighterBeams.outlineColor(entity) != 0 || ZFighterKiSenseClient.color(entity) != 0
+			|| com.jaymospowers.client.power.zfighter.ZFighterPartnerClient.color(entity) != 0)) {
 			cir.setReturnValue(true);
 		}
 	}

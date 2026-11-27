@@ -35,6 +35,7 @@ final class HeraldryClient {
 
 	static void register() {
 		MenuScreens.register(Harness.MENU, HarnessScreen::new);
+		MenuScreens.register(Harness.LOOT_MENU, DownedHarnessScreen::new);
 		HarnessTab.init();
 		visor = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.visor", InputConstants.KEY_HOME, ClassKeys.category()));
 		harness = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.harness", InputConstants.UNKNOWN.getValue(), ClassKeys.category()));

@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_quickening_thorn": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "jaymoskingdoms:quickening_thorn"
+          }
+        ]
+      }
+    },
+    "has_restoring_thorn": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "jaymoskingdoms:restoring_thorn"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": "jaymoskingdoms:frenzy_thorn"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_quickening_thorn",
+      "has_restoring_thorn",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "jaymoskingdoms:frenzy_thorn"
+    ]
+  }
+}

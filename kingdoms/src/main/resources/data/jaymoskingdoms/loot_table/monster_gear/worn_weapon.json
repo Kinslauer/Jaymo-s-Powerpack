@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:equipment",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:tag",
+          "expand": true,
+          "items": "#jaymoskingdoms:monster_gear/worn_weapons"
+        }
+      ]
+    }
+  ]
+}

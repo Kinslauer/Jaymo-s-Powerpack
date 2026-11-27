@@ -63,7 +63,8 @@ public final class WebStunts {
 	/** Whether this is a trick or strike that pays: the ones in the air, not the landings. */
 	private static boolean pays(int kind) {
 		return kind == WebPose.FRONT_FLIP || kind == WebPose.CORKSCREW || kind == WebPose.CARTWHEEL || kind == WebPose.TWIRL
-			|| kind == WebPose.GIANT || kind == WebPose.BACK_FLIP || kind >= WebPose.RISING_BLOW && kind <= WebPose.SPIN_STRIKE;
+			|| kind == WebPose.GIANT || kind == WebPose.BACK_FLIP || kind >= WebPose.RISING_BLOW && kind <= WebPose.SPIN_STRIKE
+			|| kind >= WebPose.FIRST_EXTRA_TRICK && kind <= WebPose.LAST_EXTRA_TRICK;
 	}
 
 	/** A trick or a strike was accepted: it counts toward the chain, and pays. */

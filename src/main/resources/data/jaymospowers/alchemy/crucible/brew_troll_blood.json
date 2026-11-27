@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "life": 10,
+    "earth": 6,
+    "beast": 5,
+    "rot": 3
+  },
+  "result": {
+    "item": "jaymospowers:brew_troll_blood",
+    "count": 1
+  },
+  "research": "formula_troll_blood"
+}

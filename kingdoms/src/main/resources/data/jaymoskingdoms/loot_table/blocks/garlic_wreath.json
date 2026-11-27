@@ -1,0 +1,75 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskingdoms:garlic_wreath",
+        "state": {
+          "age": "0"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:garlic_wreath",
+          "modifier": [
+            {
+              "type": "minecraft:set_damage",
+              "damage": 0.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskingdoms:garlic_wreath",
+        "state": {
+          "age": "1"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:garlic_wreath",
+          "modifier": [
+            {
+              "type": "minecraft:set_damage",
+              "damage": 0.333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskingdoms:garlic_wreath",
+        "state": {
+          "age": "2"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:garlic_wreath",
+          "modifier": [
+            {
+              "type": "minecraft:set_damage",
+              "damage": 0.667
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskingdoms:blocks/garlic_wreath"
+}

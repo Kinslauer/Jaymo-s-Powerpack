@@ -31,6 +31,8 @@
   "journal.jaymoskingdoms.forecast.objective": "Find shelter, or get clear.",
   "journal.jaymoskingdoms.sub.quests": "Quests carried: %s",
   "journal.jaymoskingdoms.sub.map": "The land about you, %s blocks across",
+  "journal.jaymoskingdoms.sub.map_xaero": "The land about you",
+  "journal.jaymoskingdoms.world_map": "World map",
   "journal.jaymoskingdoms.sub.reputation": "Settlements that know you: %s",
   "journal.jaymoskingdoms.order.title": "%s: %s",
   "journal.jaymoskingdoms.order.by": "Your employer, %s",

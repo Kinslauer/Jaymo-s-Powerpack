@@ -75,7 +75,8 @@ public final class RunPose {
 			return;
 		}
 		boolean slide = Slide.sliding(player);
-		state.setData(SLIDE, slide ? Boolean.TRUE : null);
+		boolean palSlide = slide && CoreMotionClient.playing(player, "slide");
+		state.setData(SLIDE, slide && !palSlide ? Boolean.TRUE : null);
 		// (0.15.122) not your own body in first person (First-person Model): leaning from the feet, its back and
 		// shoulders swung up in front of the camera
 		boolean lean = !slide && FastRun.active(player) && !player.isFallFlying() && !player.isSwimming()
@@ -90,8 +91,9 @@ public final class RunPose {
 	 */
 	public static void extractAvatar(Avatar entity, AvatarRenderState state, float partialTicks) {
 		boolean slide = entity instanceof Player player && Slide.sliding(player);
-		PoseBlend.Track track = SLIDE_BLEND.track(entity.getId(), slide);
-		if (slide) {
+		boolean palSlide = slide && CoreMotionClient.playing((Player) entity, "slide");
+		PoseBlend.Track track = SLIDE_BLEND.track(entity.getId(), slide && !palSlide);
+		if (slide && !palSlide) {
 			if (Slide.belly((Player) entity)) {
 				BELLY.add(entity.getId());
 			} else {
@@ -101,7 +103,7 @@ public final class RunPose {
 			BELLY.remove(entity.getId());
 		}
 		// while easing out too, unless it's become a real crawl (a low ceiling), which vanilla tilts as usual
-		if (track == null || !slide && entity.isVisuallySwimming()) {
+		if (!palSlide && (track == null || !slide && entity.isVisuallySwimming())) {
 			return;
 		}
 		state.isVisuallySwimming = false;
@@ -217,11 +219,16 @@ public final class RunPose {
 			}
 			return;
 		}
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, runKnee(state, h.rightLeg));
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, runKnee(state, h.leftLeg));
+	}
+
+	/** The running knee's bend for {@code leg} (radians), 0 when not running; BodyWeight lays its own on top of it. */
+	public static float runKnee(AvatarRenderState state, net.minecraft.client.model.geom.ModelPart leg) {
 		float run = Mth.clamp((state.walkAnimationSpeed - RUN_FROM) / (RUN_FULL - RUN_FROM), 0.0F, 1.0F);
 		if (run <= 0.0F || state.isCrouching || state.isVisuallySwimming || state.isPassenger || state.isFallFlying) {
-			return;
+			return 0.0F;
 		}
-		com.jaymospowers.client.KneeBend.bend(h.rightLeg, (RUN_KNEE + RUN_KNEE_BACK * Math.max(0.0F, h.rightLeg.xRot)) * run);
-		com.jaymospowers.client.KneeBend.bend(h.leftLeg, (RUN_KNEE + RUN_KNEE_BACK * Math.max(0.0F, h.leftLeg.xRot)) * run);
+		return (RUN_KNEE + RUN_KNEE_BACK * Math.max(0.0F, leg.xRot)) * run;
 	}
 }

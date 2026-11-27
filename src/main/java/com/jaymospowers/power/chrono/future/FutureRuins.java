@@ -173,6 +173,9 @@ public final class FutureRuins {
 			chunk.fillBiomesFromNoise((qx, qy, qz) -> ruins);
 			level.getChunkSource().chunkMap.resendBiomesForChunks(List.of(chunk));
 		}
+		if (fresh) {
+			FutureCars.park(level, chunk, random);
+		}
 		chunk.setAttached(RUINED, true);
 		chunk.setAttached(MOSSED, true);
 		chunk.markUnsaved();

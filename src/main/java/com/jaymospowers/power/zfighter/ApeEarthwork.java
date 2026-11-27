@@ -100,6 +100,7 @@ public final class ApeEarthwork {
 			return;
 		}
 		ZFighterPower.cooldown(player, slot, line ? LINE_COOLDOWN : RING_COOLDOWN);
+		ApeMoves.groundSlamPose(player);
 		ServerLevel level = player.level();
 		Vec3 look = player.getLookAngle().multiply(1.0, 0.0, 1.0);
 		Vec3 dir = look.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : look.normalize();

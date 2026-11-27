@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:gunpowder",
+    "minecraft:amethyst_shard",
+    "minecraft:ender_pearl"
+  ],
+  "result": {
+    "id": "jaymospowers:bomb_snuffer",
+    "count": 1
+  }
+}

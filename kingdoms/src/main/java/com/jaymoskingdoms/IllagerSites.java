@@ -45,8 +45,11 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.allay.Allay;
+import net.minecraft.world.entity.monster.illager.AbstractIllager;
+import net.minecraft.world.entity.monster.illager.Vindicator;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.raid.Raider;
+import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -119,7 +122,7 @@ final class IllagerSites {
 	/** The most people a place takes on (its posts beyond this stay empty), and at least this many in a hold. */
 	static final int MOST_CREW = 40, LEAST_CREW = 2;
 	/** Places that take on more than {@link #MOST_CREW} (Andy: the citadel "back to 60"). */
-	static final Map<String, Integer> MOST_CREW_AT = Map.of("ocean_citadel", 60, "illager_arena", 60);
+	static final Map<String, Integer> MOST_CREW_AT = Map.of("ocean_citadel", 60, "illager_arena", 60, SeaSites.LONG_SHIP, 8);
 	/** Illager Arena's own desert arena (in the pack beside ours): its plan path, and its structure. */
 	static final String ILLAGER_ARENA = "illager_arena";
 	static final Identifier ILLAGER_ARENA_ID = Identifier.fromNamespaceAndPath("illager_arena", "illager_arena");
@@ -209,7 +212,8 @@ final class IllagerSites {
 		Map.entry("tower_ruin", new Plan("abandoned", WorldTiers.Tier.BORDERLANDS, Mode.EMPTY, false, 0)),
 		Map.entry("ruined_church", new Plan("abandoned", WorldTiers.Tier.BORDERLANDS, Mode.EMPTY, false, 0)),
 		// Moog's Ocean Structures' boats (SeaSites): built by that mod, peopled here
-		Map.entry(SeaSites.LONG_SHIP, new Plan("barbarians", WorldTiers.Tier.BORDERLANDS, Mode.GARRISON, false, 5)),
+		// (Andy 2026-11-26: the long ship is the pillagers', "cannons and all"; she came with Moog's pillager crew already)
+		Map.entry(SeaSites.LONG_SHIP, new Plan("illagers", WorldTiers.Tier.BORDERLANDS, Mode.GARRISON, false, 5)),
 		Map.entry(SeaSites.HAULER_SHIP, new Plan("sea_folk", WorldTiers.Tier.HEARTH, Mode.PEACE, false, 3)),
 		Map.entry(SeaSites.SMALL_SHIP, new Plan("sea_folk", WorldTiers.Tier.HEARTH, Mode.PEACE, false, 2)),
 		Map.entry(SeaSites.TRAVEL_SHIP, new Plan("sea_folk", WorldTiers.Tier.HEARTH, Mode.PEACE, false, 5)),
@@ -291,6 +295,8 @@ final class IllagerSites {
 			for (Entity e : arrived) {
 				if (e.isAlive() && e.level() instanceof ServerLevel level && theArenaMods(e) && inIllagerArena(level, e.blockPosition())) {
 					e.discard();
+				} else if (e.isAlive() && e.level() instanceof ServerLevel level && level == Factions.level(level.getServer())) {
+					shipHand(level, e);
 				}
 			}
 		});
@@ -555,16 +561,18 @@ final class IllagerSites {
 		if (boat) {
 			// Moog's boats come without posts: their people stand about the deck
 			for (BlockPos at : SeaSites.deck(level, box, random)) {
+				// (every other one a crossbowman's: a long ship's pillagers come as both)
+				kinds.append(posts.size() % 2 == 0 ? 'R' : 'M');
 				posts.add(at);
-				kinds.append('M');
 			}
 			if (posts.isEmpty()) {
 				// (sunk, or not a deck anyone can stand on: left alone, and not looked at again)
 				put(server, ref, new Site(path, center, box, "abandoned", -1, -1, 0, List.of(), "", now, Production.day(server)));
 				return;
 			}
-			if (SeaSites.sails(path)) {
-				SeaSites.helm(level, box);
+			if (SeaSites.rigged(path)) {
+				// (rigged when she was made; this only does it if she wasn't)
+				SeaSites.rig(level, ref, path, box);
 			}
 		}
 		// who moves in
@@ -597,7 +605,9 @@ final class IllagerSites {
 				} else {
 					Faction camp = found(level, path, dweller, plan, box, seat, random);
 					faction = camp.id();
-					crew = man(level, camp, dweller, path, posts, kinds, seat, plan, random);
+					// (a long ship's own pillagers, aboard since Moog's mod made her, are the camp's first hands)
+					List<Mob> aboard = boat && dweller.equals("illagers") ? wildIllagers(level, AABB.of(box).inflate(1.0)) : List.of();
+					crew = man(level, camp, dweller, path, posts, kinds, seat, plan, random, aboard);
 					if (plan.captives()) {
 						captives(level, posts, kinds, seat, random);
 					}
@@ -607,11 +617,18 @@ final class IllagerSites {
 		List<Long> packed = posts.stream().map(BlockPos::asLong).toList();
 		put(server, ref, new Site(path, seat, box, dweller, faction, realm == null ? -1 : realm.id(), crew, packed, kinds.toString(), now, Production.day(server)));
 		JaymosKingdoms.LOGGER.info("{} moved into the {} at {} ({} of them)", dweller, path, center, crew);
+		if (path.equals(SeaSites.LONG_SHIP) && dweller.equals("illagers") && faction >= 0) {
+			// her pillagers aboard, she puts to sea (PillagerShips)
+			Faction camp = Factions.get(server, faction);
+			if (camp != null) {
+				PillagerShips.putToSea(level, camp, ref, box);
+			}
+		}
 	}
 
 	/** A small ship made a realm's smack ({@link SeaSites#smack}) and her site put down as done, unless nothing came of it yet. */
 	private static void smack(ServerLevel level, long ref, String path, BoundingBox box, long now) {
-		String what = SeaSites.smack(level, box);
+		String what = SeaSites.smack(level, ref, box);
 		if (what != null) {
 			MinecraftServer server = level.getServer();
 			put(server, ref, new Site(path, box.getCenter(), box, what, -1, -1, 0, List.of(), "", now, Production.day(server)));
@@ -767,9 +784,22 @@ final class IllagerSites {
 
 	/** Its leader and its people, at the old posts; returns how many hands it keeps. */
 	private static int man(ServerLevel level, Faction camp, String dweller, String path, List<BlockPos> posts, CharSequence kinds, BlockPos seat,
-		Plan plan, RandomSource random) {
-		crown(level, camp, dweller, seat);
+		Plan plan, RandomSource random, List<Mob> aboard) {
+		Mob captain = aboard.stream().filter(IllagerSites::shipCaptain).findFirst().orElse(null);
+		if (captain != null) {
+			// Moog's ship captain is her warlord
+			Illagers.adopt(level, camp, captain, Illagers.WARLORD, seat);
+			Factions.update(level.getServer(), camp.id(), f -> f.withLeader(Optional.of(captain.getUUID())));
+		} else {
+			crown(level, camp, dweller, seat);
+		}
 		int hands = 0, most = MOST_CREW_AT.getOrDefault(path, MOST_CREW);
+		for (Mob m : aboard) {
+			if (m != captain) {
+				Illagers.adopt(level, Factions.get(level.getServer(), camp.id()), m, Illagers.roleOf(m), m.blockPosition());
+				hands++;
+			}
+		}
 		for (int i = 0; i < posts.size() && hands < most; i++) {
 			char k = kinds.charAt(i);
 			if (k == 'P' || k == 'W' || k == 'A' || posts.get(i).equals(seat) && k != 'R') {
@@ -798,6 +828,40 @@ final class IllagerSites {
 			}
 		}
 		return hands;
+	}
+
+	/** The illagers in {@code box} that belong to no camp (the crews Moog's mod puts aboard its long ships), the reaped aside. */
+	private static List<Mob> wildIllagers(ServerLevel level, AABB box) {
+		return level.getEntitiesOfClass(Mob.class, box, m -> m.isAlive() && m instanceof AbstractIllager && Illagers.tag(m) == null
+			&& !(m instanceof com.jaymoskingdoms.reaped.Reaped));
+	}
+
+	/** Moog's long ship captain: the vindicator with the Jolly Roger (a banner) on his head. */
+	private static boolean shipCaptain(Mob m) {
+		return m instanceof Vindicator && m.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem;
+	}
+
+	/**
+	 * One of a long ship's own pillagers (Moog's crew) loaded after her camp moved in: he's the camp's too, as those aboard
+	 * when it did are. True if he was taken on.
+	 */
+	private static boolean shipHand(ServerLevel level, Entity e) {
+		if (!(e instanceof Mob m) || !(e instanceof AbstractIllager) || Illagers.tag(m) != null || m instanceof com.jaymoskingdoms.reaped.Reaped) {
+			return false;
+		}
+		MinecraftServer server = level.getServer();
+		for (Site s : byCamp(server).values()) {
+			if (!s.path().equals(SeaSites.LONG_SHIP) || !AABB.of(s.box()).inflate(1.0).contains(m.position())) {
+				continue;
+			}
+			Faction camp = Factions.get(server, s.faction());
+			if (camp == null || camp.fallen() || !IllagerCamps.KIND.equals(Camps.kind(server, camp.id()))) {
+				return false;
+			}
+			Illagers.adopt(level, camp, m, Illagers.roleOf(m), m.blockPosition());
+			return true;
+		}
+		return false;
 	}
 
 	/** Seats {@code camp}'s leader at {@code seat}. */
@@ -880,6 +944,10 @@ final class IllagerSites {
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.MAINHAND}) {
 			mob.setDropChance(slot, 0.0F);
 		}
+		if (masked) {
+			// (fighting AI patch 7, st-dodge) a bandit's shield on his back, and maybe a second blade (DualBlades)
+			DualBlades.arm(mob, false);
+		}
 	}
 
 	/** Prisoners where the place penned someone (or its thralls stood), else a few about the seat. */
@@ -907,7 +975,9 @@ final class IllagerSites {
 			return Illagers.tag(e) == null;
 		}
 		if (e instanceof Allay allay) {
-			return !allay.entityTags().contains(CAGED_TAG) && !allay.getBrain().hasMemoryValue(MemoryModuleType.LIKED_PLAYER);
+			Set<String> tags = allay.entityTags();
+			return !tags.contains(CAGED_TAG) && !tags.contains(Allays.FREED_TAG) && !tags.contains(Allays.HAVEN_TAG)
+				&& !allay.getBrain().hasMemoryValue(MemoryModuleType.LIKED_PLAYER);
 		}
 		return e instanceof Villager v && !v.hasAttached(Captives.CAPTIVE) && !v.isPersistenceRequired();
 	}
@@ -991,7 +1061,7 @@ final class IllagerSites {
 		"orcs", new String[][] {{"Ash", "Slag", "Cinder", "Iron", "Soot", "Ember"}, {"maw", "forge", "pit", "works", "fang"}},
 		"goblins", new String[][] {{"Copper", "Rust", "Mole", "Deep", "Grub", "Tin"}, {"diggers", "burrow", "shaft", "warren", "delvers"}});
 
-	private static String name(MinecraftServer server, String dweller, RandomSource random) {
+	static String name(MinecraftServer server, String dweller, RandomSource random) {
 		if ("illagers".equals(dweller)) {
 			return IllagerHolds.freshName(server, random);
 		}
@@ -1015,7 +1085,8 @@ final class IllagerSites {
 	static void campTick(ServerLevel level, Faction camp, Camps.CampData data) {
 		MinecraftServer server = level.getServer();
 		Site s = site(server, camp.id());
-		if (s == null) {
+		if (s == null || PillagerShips.atSea(server, camp.id())) {
+			// (a long ship's camp gone to sea in her: its warlord is aboard, not where she lay)
 			return;
 		}
 		boolean present = camp.leader().isPresent() && level.getEntity(camp.leader().get()) != null;
@@ -1033,7 +1104,8 @@ final class IllagerSites {
 		MinecraftServer server = level.getServer();
 		Site s = site(server, camp.id());
 		Camps.updateData(server, camp.id(), d -> d.withGrown(d.grown() + days));
-		if (s == null) {
+		if (s == null || PillagerShips.atSea(server, camp.id())) {
+			// (a long ship at sea makes up no hands where she lay)
 			return;
 		}
 		if (Storage.loaded(level, camp)) {

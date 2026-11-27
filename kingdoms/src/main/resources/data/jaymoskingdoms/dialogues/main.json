@@ -74,6 +74,14 @@
       ]
     },
     {
+      "name": "jaymoskingdoms_ask_drink",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
       "name": "jaymoskingdoms_gift",
       "results": [
         {
@@ -138,6 +146,14 @@
       ]
     },
     {
+      "name": "jaymoskingdoms_bargain",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
       "name": "jaymoskingdoms_accuse",
       "results": [
         {
@@ -163,6 +179,22 @@
     },
     {
       "name": "jaymoskingdoms_enchanted_tack",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_newborn",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_banking",
       "results": [
         {
           "actions": {}

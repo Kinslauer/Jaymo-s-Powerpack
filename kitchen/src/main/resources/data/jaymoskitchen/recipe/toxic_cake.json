@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": "minecraft:milk_bucket",
+    "S": "minecraft:sugar",
+    "E": "minecraft:egg",
+    "W": "minecraft:wheat",
+    "P": "#jaymoskitchen:sweet_poisons"
+  },
+  "pattern": [
+    "MMM",
+    "SES",
+    "WPW"
+  ],
+  "result": {
+    "id": "jaymoskitchen:toxic_cake"
+  }
+}

@@ -1,5 +1,6 @@
 package com.jaymospowers.core;
 
+import com.jaymospowers.aether.AercloudBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -35,6 +36,9 @@ import net.minecraft.world.phys.shapes.EntityCollisionContext;
  * bushes and low canopies instead of being stuck in them, and never try to walk on top of leaves. Spiders cling
  * inside leaves instead of sinking, and lurk in them ({@link LeafSpiders}).
  *
+ * <p>Clouds are soft the same way ({@link #soft}, {@link AercloudBlock}): you sink through them, climb them with Jump,
+ * and a hard hit bursts them.
+ *
  * <p>Both sides run the same rules (the collision shape and the drag), so movement stays in step; the rustle and the
  * shaken-loose leaves are drawn on each client ({@code client/LeafRustle}).
  */
@@ -53,6 +57,8 @@ public final class Leaves {
 	public static final double CRASH_SPEED = 0.6;
 	/** Leaf debris thrown up by each leaves block that snaps. */
 	public static final int CRASH_DEBRIS = 24;
+	/** Puffs of cloud thrown out by each cloud block a hard hit bursts. */
+	public static final int CLOUD_BURST = 10;
 
 	/** Something an entity remembers: the last tick leaves dragged on it (one drag a tick, however many it touches). */
 	public interface Dragged {
@@ -77,6 +83,14 @@ public final class Leaves {
 	/** Any leaves, modded ones too (checked on every collision, so a class check rather than a tag lookup). */
 	public static boolean is(BlockState state) {
 		return state.getBlock() instanceof LeavesBlock;
+	}
+
+	/**
+	 * Leaves, or a cloud that is soft like them ({@link AercloudBlock}: every aercloud and the Cloud Sea's cloudbank, not a
+	 * puff of bottled cloud). What mobs path through as open air, and what a hard hit bursts.
+	 */
+	public static boolean soft(BlockState state) {
+		return is(state) || state.getBlock() instanceof AercloudBlock cloud && cloud.soft();
 	}
 
 	/** Whether this collision is an entity that goes through leaves (not a projectile, falling block, or no entity at all). */
@@ -138,15 +152,21 @@ public final class Leaves {
 		entity.fallDistance *= CUSHION;
 	}
 
-	/** The leaves snap: broken (dropping what leaves drop), with a crack of twigs and a burst of leaf debris. */
+	/**
+	 * The leaves snap: broken (dropping what leaves drop), with a crack of twigs and a burst of leaf debris. A soft cloud
+	 * bursts instead: a soft whump and a puff of cloud, and it is gone (clouds drop nothing).
+	 */
 	private static void crash(ServerLevel level, BlockPos pos, Entity entity) {
 		BlockState state = level.getBlockState(pos);
-		if (!is(state)) {
-			return;
+		if (is(state)) {
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+				CRASH_DEBRIS, 0.4, 0.4, 0.4, 0.15);
+			level.playSound(null, pos, SoundEvents.BAMBOO_WOOD_BREAK, SoundSource.BLOCKS, 0.9F, 0.7F + level.getRandom().nextFloat() * 0.3F);
+			level.destroyBlock(pos, true, entity);
+		} else if (soft(state)) {
+			level.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, CLOUD_BURST, 0.4, 0.4, 0.4, 0.05);
+			level.playSound(null, pos, SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 0.8F, 0.6F + level.getRandom().nextFloat() * 0.3F);
+			level.destroyBlock(pos, false, entity);
 		}
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-			CRASH_DEBRIS, 0.4, 0.4, 0.4, 0.15);
-		level.playSound(null, pos, SoundEvents.BAMBOO_WOOD_BREAK, SoundSource.BLOCKS, 0.9F, 0.7F + level.getRandom().nextFloat() * 0.3F);
-		level.destroyBlock(pos, true, entity);
 	}
 }

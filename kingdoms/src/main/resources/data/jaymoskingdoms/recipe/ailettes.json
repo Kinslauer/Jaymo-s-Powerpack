@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "ingredients": [
+    "#minecraft:planks",
+    "#minecraft:planks",
+    "minecraft:leather",
+    "minecraft:string",
+    "#minecraft:wool"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:ailettes"
+  }
+}

@@ -93,7 +93,7 @@ public final class WebExecutions {
 	static final int DRAG_FROM_TICK = 10, DRAG_TO_TICK = 24;
 
 	/** Which form a move belongs to. */
-	public enum Pool { THIN, HEAVY, TENDRIL_THIN, TENDRIL_HEAVY }
+	public enum Pool { THIN, HEAVY, TENDRIL_THIN, TENDRIL_HEAVY, RUPTURE }
 
 	/** How a blow lands: what it sounds and looks like. */
 	public enum Strike { SNAP, PUNCH, CRUSH, SLAM, TEAR, BITE, PIERCE, QUAKE, THROW }
@@ -144,7 +144,10 @@ public final class WebExecutions {
 		/** Impale and Slam: a tendril through the chest, lifted on it, and slammed down into the ground. */
 		IMPALE_SLAM(Pool.TENDRIL_HEAVY, 46, new int[] {14, 36}, Strike.SLAM, 14, 26, 1.8, 32),
 		/** Wrap and Crush: tendrils wind round the whole body, squeeze twice, and crush it. */
-		WRAP_CRUSH(Pool.TENDRIL_HEAVY, 60, new int[] {18, 36, 52}, Strike.CRUSH, 18, 26, 0.9, 56);
+		WRAP_CRUSH(Pool.TENDRIL_HEAVY, 60, new int[] {18, 36, 52}, Strike.CRUSH, 18, 26, 0.9, 56),
+		// ---- the red one's pounce (WebRupture; never in a form's pool) ---------------------------------------------------
+		/** Rupture: pinned under the pounce, stabbed again and again by two tendrils, the last stab the kill. */
+		RUPTURE_STAB(Pool.RUPTURE, 62, new int[] {14, 20, 26, 32, 38, 52}, Strike.PIERCE);
 
 		public final Pool pool;
 		public final int length;
@@ -283,6 +286,7 @@ public final class WebExecutions {
 				case HEAVY -> heavy;
 				case TENDRIL_THIN -> tendrils && !heavy;
 				case TENDRIL_HEAVY -> tendrils && heavy;
+				case RUPTURE -> false;
 			};
 			if (in) {
 				out.add(move);
@@ -305,10 +309,15 @@ public final class WebExecutions {
 
 	/** Use held long enough on {@code body} ({@link Finishers}): the move begins. */
 	public static void begin(ServerLevel level, ServerPlayer player, LivingEntity body) {
+		begin(level, player, body, null);
+	}
+
+	/** As {@link #begin(ServerLevel, ServerPlayer, LivingEntity)}, but playing {@code forced} (the red one's pounce) when it isn't null. */
+	static void begin(ServerLevel level, ServerPlayer player, LivingEntity body, @Nullable Move forced) {
 		if (busy(player) || !applies(player)) {
 			return;
 		}
-		Move move = pick(player);
+		Move move = forced != null ? forced : pick(player);
 		player.setAttached(EXECUTING, new Execution(move.ordinal(), level.getGameTime(), body.getId()));
 		PLAYING.put(player.getUUID(), new Playing(player, body, Downed.isDowned(body), body.position(), body.yBodyRot));
 		TARGETED.put(body.getUUID(), player.getUUID());
@@ -327,12 +336,13 @@ public final class WebExecutions {
 		// what's heard as it begins: the suit's goo shifting, and the tendrils clicking out for theirs
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F,
 			heavy(player) ? 0.45F : 0.7F);
-		if (move.pool == Pool.TENDRIL_THIN || move.pool == Pool.TENDRIL_HEAVY) {
+		if (move.pool == Pool.TENDRIL_THIN || move.pool == Pool.TENDRIL_HEAVY || move.pool == Pool.RUPTURE) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.9F, 0.7F);
 		}
 		WebSymbiote.narrate(player, switch (move.pool) {
 			case THIN -> "execute_thin";
 			case HEAVY -> "execute_heavy";
+			case RUPTURE -> "execute_rupture";
 			default -> "execute_tendril";
 		});
 	}

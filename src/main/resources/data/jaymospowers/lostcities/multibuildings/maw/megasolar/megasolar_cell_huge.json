@@ -1,0 +1,54 @@
+{
+  "dimx": 6,
+  "dimz": 6,
+  "buildings": [
+    [
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell"
+    ],
+    [
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell"
+    ],
+    [
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell"
+    ],
+    [
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell"
+    ],
+    [
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell"
+    ],
+    [
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell",
+      "jaymospowers:maw/megasolar/megasolar_cell"
+    ]
+  ]
+}

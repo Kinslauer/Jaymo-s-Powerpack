@@ -43,6 +43,9 @@ public abstract class FishingHookRendererMixin {
         if (tip != null) {
             state.lineOriginOffset = tip.subtract(hook.getPosition(partialTicks).add(0.0D, 0.25D, 0.0D));
         }
+        // (F6) the line hangs like rope: sags when slack, lies over what it crosses, straight when a fish pulls
+        ((HookBaitState) state).jaymospowers$setLine(state.lineOriginOffset == null ? null
+                : com.jaymospowers.client.fishing.HangingLine.points(hook, state.lineOriginOffset, partialTicks));
         ItemStackRenderState bead = ((HookBaitState) state).jaymospowers$bead();
         Item beadItem = hook.getPlayerOwner() == null ? null
                 : FishTackle.bead(FishTackle.fit(HookBait.rod(hook.getPlayerOwner())));
@@ -59,6 +62,42 @@ public abstract class FishingHookRendererMixin {
             return;
         }
         Minecraft.getInstance().getItemModelResolver().updateForNonLiving(bait, new ItemStack(item), ItemDisplayContext.GROUND, hook);
+    }
+
+    /** (F6) The line drawn through the hanging line's points instead of vanilla's fixed curve. */
+    @org.spongepowered.asm.mixin.injection.Redirect(method = "submit(Lnet/minecraft/client/renderer/entity/state/FishingHookRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitCustomGeometry(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;)V",
+                    ordinal = 1))
+    private void jaymospowers$hangingLine(SubmitNodeCollector collector, PoseStack poseStack, net.minecraft.client.renderer.rendertype.RenderType type,
+            SubmitNodeCollector.CustomGeometryRenderer vanilla, FishingHookRenderState state, PoseStack sameStack, SubmitNodeCollector sameCollector,
+            CameraRenderState camera) {
+        float[] line = ((HookBaitState) state).jaymospowers$line();
+        if (!com.jaymospowers.client.fishing.HangingLine.drawn(line)) {
+            collector.submitCustomGeometry(poseStack, type, vanilla);
+            return;
+        }
+        float width = Minecraft.getInstance().gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth;
+        collector.submitCustomGeometry(poseStack, type, (pose, consumer) -> {
+            for (int i = 0; i < com.jaymospowers.client.fishing.HangingLine.SEGMENTS; i++) {
+                jaymospowers$vertex(consumer, pose, line, i, i + 1, width);
+                jaymospowers$vertex(consumer, pose, line, i + 1, i, width);
+            }
+        });
+    }
+
+    /** One end of a piece of line, at point {@code a}, its normal toward point {@code b} (as vanilla's stringVertex). */
+    private static void jaymospowers$vertex(com.mojang.blaze3d.vertex.VertexConsumer consumer, PoseStack.Pose pose, float[] line, int a, int b,
+            float width) {
+        float x = line[a * 3], y = line[a * 3 + 1], z = line[a * 3 + 2];
+        float nx = line[b * 3] - x, ny = line[b * 3 + 1] - y, nz = line[b * 3 + 2] - z;
+        float n = net.minecraft.util.Mth.sqrt(nx * nx + ny * ny + nz * nz);
+        if (n < 1.0E-5F) {
+            nx = 0.0F;
+            ny = 1.0F;
+            nz = 0.0F;
+            n = 1.0F;
+        }
+        consumer.addVertex(pose, x, y, z).setColor(0xFF000000).setNormal(pose, nx / n, ny / n, nz / n).setLineWidth(width);
     }
 
     @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/FishingHookRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",

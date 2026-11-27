@@ -1,5 +1,6 @@
 package com.jaymospowers.client.rig;
 
+import com.jaymospowers.client.KneeBend;
 import com.jaymospowers.client.power.wind.WindPose;
 import static com.jaymospowers.client.rig.RigBeats.BACK;
 import static com.jaymospowers.client.rig.RigBeats.IN;
@@ -90,10 +91,19 @@ public final class RigPose {
 	/** The one-knee landing: ticks to drop, when it rises, how far the body drops (model pixels), the lean, the head, the legs, the planted fist and the flung arm. */
 	static final float KNEE_DOWN = 3.0F, KNEE_UP_AT = 17.0F, KNEE_DROP = 6.0F, KNEE_LEAN = 0.55F, KNEE_HEAD = 0.25F;
 	static final float KNEE_FRONT = -1.2F, KNEE_BACK = 1.1F, KNEE_FIST = -0.5F, KNEE_FLUNG = 0.7F, KNEE_FLUNG_OUT = 0.4F;
-	/** A Rig leg's kick: ticks to raise, when it lowers, and the leg's swing. */
-		static final float KICK_RAISE = 2.0F, KICK_LOWER_AT = 7.0F, KICK_LEG = -1.35F;
-		/** The kick's wind-up (the leg drawn back) and the chest leaning away from it; the landing's nod as the head catches up. */
-		static final float KICK_CHAMBER = 0.45F, KICK_LEAN = 0.18F, KNEE_NOD = 0.2F;
+	/** The landing's nod as the head catches up. */
+	static final float KNEE_NOD = 0.2F;
+	/**
+	 * A Rig leg's side kick (Andy: "animated like a taekwondo side kick with a chamber turn and flick"): the chambered
+	 * thigh (forward, out) and the knee folded under it; the flicked leg (forward, out: level with the hip); the hips' turn
+	 * side-on (degrees); the lean away over the standing leg (radians); the standing knee's give.
+	 */
+	static final float SIDE_CHAMBER_X = -1.5F, SIDE_CHAMBER_Z = 0.6F, SIDE_KNEE = 2.0F, SIDE_FLICK_X = -0.15F, SIDE_FLICK_Z = 1.4F;
+	static final float SIDE_TURN = 90.0F, SIDE_LEAN = 0.3F, STAND_KNEE = 0.35F;
+	/** The combo roundhouse: the flicked shin (forward, out), the lean away, and the hips' extra turn side-on at the strike (degrees). */
+	static final float ROUND_FLICK_X = -0.25F, ROUND_FLICK_Z = 1.5F, ROUND_LEAN = 0.4F, ROUND_TURN = 90.0F;
+	/** The kicks' arms: the kicking side's dropped along the leg (forward, out), the other a guard by the chin (forward, in). */
+	static final float KICK_ARM_X = -0.4F, KICK_ARM_OUT = 0.55F, GUARD_ARM_X = -1.8F, GUARD_ARM_IN = 0.25F;
 		/** (0.12.x) Banking: max roll angle (radians), how fast it eases in/out. */
 		static final float BANK_MAX_ROLL = 0.6F, BANK_EASE = 0.15F;
 		/** Take-off: the crouch's drop and lean, the knees, the arms swept back; then the arch as the thrusters fire, the arms thrown out, and the head. */
@@ -112,6 +122,8 @@ public final class RigPose {
 	/** Barrage: the deep brace's drop and lean, the fists planted low and wide, the feet apart, the head up to watch them go; each missile's thump. */
 	static final float BARRAGE_DROP = 2.4F, BARRAGE_LEAN = 0.3F, BARRAGE_ARM_BACK = 0.2F, BARRAGE_ARM_OUT = 0.5F, BARRAGE_SPREAD = 0.2F, BARRAGE_CHIN = 0.3F,
 		BARRAGE_THUMP = 0.5F, BARRAGE_POD_DOWN_AT = 28.0F;
+	/** The suit-ups: the slam's crouch (drop, lean), the fists' reach down, the arms thrown wide as it finishes. */
+	static final float SUITUP_SLAM_DROP = 3.0F, SUITUP_SLAM_LEAN = 0.5F, SUITUP_FIST_X = -0.1F, SUITUP_OPEN = 1.5F;
 	/** Walking at this share of full pace or more, a move leaves the legs to the walk. */
 	static final float STILL_PACE = 0.35F;
 
@@ -207,6 +219,13 @@ public final class RigPose {
 			int kickSide = Prosthetics.hasRig(player, Dismember.RIGHT_LEG) || !Prosthetics.hasRig(player, Dismember.LEFT_LEG) ? 1 : -1;
 			state.setData(KEY, kind == 0 && hover <= 0.001F && flight <= 0.001F && Math.abs(bank) < 0.001F ? null
 				: new Pose(kind, t, hover, flight, bank, now, recoil, still, palmSide, kickSide));
+			if (kind == RigMoves.KICK || kind == RigMoves.ROUNDHOUSE) {
+				// the kick turns the whole body (side-on, and the roundhouse all the way round), the head kept on the look
+				Kick k = kick(kind, t);
+				float s = kickSide < 0 ? -1.0F : 1.0F;
+				state.bodyRot += s * k.bodyTurn();
+				state.yRot += s * k.headTurn();
+			}
 		}
 
 	/** The hover pose's amount, easing toward {@code on} as time passes. */
@@ -318,17 +337,18 @@ public final class RigPose {
 				set(h.rightArm, KNEE_FIST, 0.0F, 0.1F, amount);
 				set(h.leftArm, KNEE_FLUNG, 0.0F, -KNEE_FLUNG_OUT, amount);
 			}
-			case RigMoves.KICK -> {
-				// wind-up: the leg chambers back and the chest leans away; release: it snaps out past the line; settle
-				float chamber = RigBeats.at(t, 0.0F, 0.0F, LINEAR, KICK_RAISE, 1.0F, OUT, KICK_RAISE + 1.0F, 0.0F, IN);
-				float out = RigBeats.at(t, KICK_RAISE, 0.0F, LINEAR, KICK_RAISE + 2.0F, 1.0F, BACK, KICK_LOWER_AT, 1.0F, LINEAR, RigMoves.KICK_TICKS, 0.0F, SINE);
-				float amount = Math.max(chamber, Math.min(out, 1.0F));
-				crouch(h, 0.0F, -KICK_LEAN * amount);
-				ModelPart kicker = pose.kickSide() < 0 ? h.leftLeg : h.rightLeg, standing = pose.kickSide() < 0 ? h.rightLeg : h.leftLeg;
-				set(kicker, Mth.lerp(chamber, 0.0F, KICK_CHAMBER) + KICK_LEG * out, 0.0F, 0.0F, amount);
-				set(standing, 0.25F, 0.0F, 0.0F, amount);
-				set(h.rightArm, 0.5F, 0.0F, 0.5F, amount);
-				set(h.leftArm, 0.5F, 0.0F, -0.5F, amount);
+			case RigMoves.KICK, RigMoves.ROUNDHOUSE -> {
+				// the leg chambered, then flicked out level with the hip, the body leaning away over the standing leg, the
+				// arms balancing it; the hips' turn is the whole body's (extract), the knees fold in bendLimbs
+				Kick k = kick(pose.kind(), t);
+				float s = pose.kickSide() < 0 ? -1.0F : 1.0F;
+				ModelPart kicker = s < 0 ? h.leftLeg : h.rightLeg, standing = s < 0 ? h.rightLeg : h.leftLeg;
+				ModelPart kickArm = s < 0 ? h.leftArm : h.rightArm, guardArm = s < 0 ? h.rightArm : h.leftArm;
+				set(kicker, k.legX(), 0.0F, s * k.legZ(), k.amount());
+				set(standing, 0.12F, 0.0F, 0.0F, k.amount());
+				set(kickArm, KICK_ARM_X, 0.0F, s * KICK_ARM_OUT, k.guard());
+				set(guardArm, GUARD_ARM_X, 0.0F, s * GUARD_ARM_IN, k.guard());
+				tilt(h, s * k.lean());
 			}
 			case RigMoves.TAKEOFF -> {
 				// wind-up: a deep crouch, arms swept back; release: the body snaps straight as the thrusters fire, arms thrown
@@ -358,6 +378,66 @@ public final class RigPose {
 				set(h.leftArm, CALL_ARM_FORWARD, 0.0F, -CALL_ARM_OUT, amount);
 				spread(h, CALL_SPREAD * amount * still);
 				h.head.xRot -= CALL_CHIN * amount;
+			}
+			case RigMoves.SUITUP_SLAM -> {
+				// down into a crouch, fists to the ground, the plates thudding on one by one; then up out of it, arms flung wide
+				float down = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 4.0F, 1.0F, OUT, 14.0F, 1.0F, LINEAR, 18.0F, 0.0F, SINE);
+				float open = RigBeats.at(t, 13.0F, 0.0F, LINEAR, 17.0F, 1.0F, BACK, RigMoves.SUITUP_SLAM_TICKS, 0.0F, SINE);
+				float thud = 0.5F * Mth.abs(Mth.sin(t * 1.3F)) * down * (1.0F - open);
+				crouch(h, SUITUP_SLAM_DROP * down + thud, SUITUP_SLAM_LEAN * down);
+				set(h.rightArm, SUITUP_FIST_X, 0.0F, 0.3F, down);
+				set(h.leftArm, SUITUP_FIST_X, 0.0F, -0.3F, down);
+				spread(h, 0.2F * down * still);
+				h.head.xRot += 0.35F * down - 0.5F * open;
+				set(h.rightArm, 0.2F, 0.0F, SUITUP_OPEN, open);
+				set(h.leftArm, 0.2F, 0.0F, -SUITUP_OPEN, open);
+			}
+			case RigMoves.SUITUP_STEP -> {
+				// arms held out wide while the shell stands open round you; then drawn in across the chest as it folds shut;
+				// then the arms fall and the chin comes up
+				float wide = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 6.0F, 1.0F, OUT, 24.0F, 1.0F, LINEAR, 30.0F, 0.0F, SINE);
+				float fold = RigBeats.at(t, 24.0F, 0.0F, LINEAR, 32.0F, 1.0F, OUT, 38.0F, 1.0F, LINEAR, RigMoves.SUITUP_STEP_TICKS, 0.0F, SINE);
+				set(h.rightArm, -0.2F, 0.0F, 1.25F, wide);
+				set(h.leftArm, -0.2F, 0.0F, -1.25F, wide);
+				spread(h, 0.1F * wide * still);
+				set(h.rightArm, -1.3F, -0.8F, 0.1F, fold);
+				set(h.leftArm, -1.3F, 0.8F, -0.1F, fold);
+				h.head.xRot += 0.2F * fold - 0.15F * wide;
+				brace(front, rear, side, 0.25F * Math.min(1.0F, wide + fold) * still);
+			}
+			case RigMoves.SUITUP_FLIGHT -> {
+				// laid out like a dive, fists thrown out ahead, legs trailing; at the lock the arms snap back and out
+				float dive = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 4.0F, 1.0F, OUT, 16.0F, 1.0F, LINEAR, 20.0F, 0.0F, BACK);
+				float lock = RigBeats.at(t, 15.0F, 0.0F, LINEAR, 19.0F, 1.0F, BACK, RigMoves.SUITUP_FLIGHT_TICKS, 0.0F, SINE);
+				crouch(h, 0.0F, 0.55F * dive);
+				set(h.rightArm, -3.0F, 0.0F, 0.12F, dive);
+				set(h.leftArm, -3.0F, 0.0F, -0.12F, dive);
+				set(h.rightLeg, 0.45F, 0.0F, 0.05F, dive);
+				set(h.leftLeg, 0.45F, 0.0F, -0.05F, dive);
+				h.head.xRot -= 0.5F * dive;
+				set(h.rightArm, 0.15F, 0.0F, 0.9F, lock);
+				set(h.leftArm, 0.15F, 0.0F, -0.9F, lock);
+				h.head.xRot += 0.2F * lock;
+			}
+			case RigMoves.SUITUP_FALL -> {
+				// a skydiver's spread: arms up and out, legs apart, head back, the wind working them; the plates lock on round it
+				float catchIn = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 6.0F, 1.0F, OUT, RigMoves.SUITUP_FALL_TICKS, 1.0F, LINEAR);
+				float flutter = Mth.sin(pose.time() * 0.9F) * 0.12F;
+				set(h.rightArm, -2.5F + flutter, 0.0F, 0.95F, catchIn);
+				set(h.leftArm, -2.5F - flutter, 0.0F, -0.95F, catchIn);
+				set(h.rightLeg, 0.2F + flutter, 0.0F, 0.5F, catchIn);
+				set(h.leftLeg, 0.2F - flutter, 0.0F, -0.5F, catchIn);
+				h.head.xRot -= 0.45F * catchIn;
+			}
+			case RigMoves.SUITUP_BRAKE -> {
+				// the thrusters roar: arms down and out, palms to the ground, legs together and hanging, the chin up
+				float amount = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 4.0F, 1.0F, BACK, RigMoves.SUITUP_BRAKE_TICKS, 1.0F, LINEAR);
+				float sway = Mth.sin(pose.time() * 0.3F) * 0.05F;
+				set(h.rightArm, 0.1F + sway, 0.0F, 0.7F, amount);
+				set(h.leftArm, 0.1F - sway, 0.0F, -0.7F, amount);
+				set(h.rightLeg, 0.08F, 0.0F, 0.06F, amount);
+				set(h.leftLeg, -0.03F, 0.0F, -0.06F, amount);
+				h.head.xRot -= 0.18F * amount;
 			}
 			case RigMoves.TABLE -> {
 				// the forearm brought up across the chest and a look down at it
@@ -406,6 +486,73 @@ public final class RigPose {
 				RigFormsClient.applyForm(model, pose.kind(), t, recoil, still);
 			default -> {
 			}
+		}
+	}
+
+	/**
+	 * A kick's frame: the kicking leg's swing (forward, out), how much of it shows, the kicking knee's fold and the standing
+	 * knee's give, the lean away, the arms' share, the whole body's turn and the head's turn back toward the look (degrees,
+	 * for the right leg: the left leg's are mirrored).
+	 */
+	record Kick(float legX, float legZ, float amount, float knee, float standKnee, float lean, float guard, float bodyTurn, float headTurn) {
+	}
+
+	/** The side kick's or the roundhouse's frame {@code t} ticks in. */
+	static Kick kick(int kind, float t) {
+		boolean round = kind == RigMoves.ROUNDHOUSE;
+		float fire = round ? RigMoves.ROUNDHOUSE_FIRE : RigMoves.KICK_FIRE, end = round ? RigMoves.ROUNDHOUSE_TICKS : RigMoves.KICK_TICKS;
+		// chamber: up fast and held through the turn, gone as the leg flicks out; it comes back as the leg is drawn in, then down
+		float chamberUp = round ? 3.0F : fire - 1.0F;
+		float chamber = RigBeats.at(t, 0.0F, 0.0F, LINEAR, chamberUp, 1.0F, OUT, fire - 1.0F, 1.0F, LINEAR, fire + 1.0F, 0.0F, IN, fire + 2.5F, 0.0F,
+			LINEAR, fire + 4.5F, 0.9F, SINE, end - 1.0F, 0.0F, SINE);
+		// the flick: snapped out past the line and back, held a beat, drawn in
+		float flick = RigBeats.at(t, fire - 0.5F, 0.0F, LINEAR, fire + 1.0F, 1.0F, BACK, fire + 2.5F, 1.0F, LINEAR, fire + 4.5F, 0.0F, SINE);
+		float sum = chamber + flick;
+		float amount = Math.min(1.0F, sum);
+		float legX = sum < 1.0E-4F ? 0.0F : (SIDE_CHAMBER_X * chamber + (round ? ROUND_FLICK_X : SIDE_FLICK_X) * flick) / sum;
+		float legZ = sum < 1.0E-4F ? 0.0F : (SIDE_CHAMBER_Z * chamber + (round ? ROUND_FLICK_Z : SIDE_FLICK_Z) * flick) / sum;
+		float lean = (round ? ROUND_LEAN : SIDE_LEAN) * flick + 0.08F * chamber;
+		float guard = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 2.0F, 1.0F, OUT, end - 3.0F, 1.0F, LINEAR, end, 0.0F, SINE);
+		// side-on: the hips turned half over in the chamber and the rest with the flick, back square as the foot comes down
+		float side = RigBeats.at(t, 0.0F, 0.0F, LINEAR, fire - 1.0F, 0.5F, SINE, fire + 0.5F, 1.0F, BACK, fire + 3.0F, 1.0F, LINEAR, end - 1.0F, 0.0F, SINE);
+		float turn = (round ? ROUND_TURN : SIDE_TURN) * side;
+		float body = -(turn + (round ? 360.0F * roundhouseSpin(t) : 0.0F));
+		return new Kick(legX, legZ, amount, SIDE_KNEE * chamber, STAND_KNEE * amount, lean, guard, body, turn);
+	}
+
+	/** How far round the roundhouse's whole turn is {@code t} ticks in (0-1, one full turn by the strike): the body's, and your camera's. */
+	public static float roundhouseSpin(float t) {
+		return RigBeats.at(t, 1.0F, 0.0F, LINEAR, RigMoves.ROUNDHOUSE_FIRE + 0.5F, 1.0F, SINE);
+	}
+
+	/** Last thing before the model is drawn: a kick's knees folded (put back straight by {@code KneeBend.restore}). */
+	public static void bendLimbs(Model<?> model, Object state) {
+		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> h)) {
+			return;
+		}
+		Pose pose = avatar.getData(KEY);
+		if (pose == null || pose.kind() != RigMoves.KICK && pose.kind() != RigMoves.ROUNDHOUSE) {
+			return;
+		}
+		Kick k = kick(pose.kind(), pose.t());
+		boolean left = pose.kickSide() < 0;
+		KneeBend.bend(left ? h.leftLeg : h.rightLeg, k.knee());
+		KneeBend.bend(left ? h.rightLeg : h.leftLeg, k.standKnee());
+	}
+
+	/**
+	 * The upper body tipped sideways about the hips by {@code a} radians (+ toward the model's +X, its left): the chest,
+	 * the head and the arms swung over together, the legs left where they stand.
+	 */
+	private static void tilt(HumanoidModel<?> h, float a) {
+		if (Math.abs(a) < 1.0E-4F) {
+			return;
+		}
+		float dx = LEG_LENGTH * Mth.sin(a), dy = LEG_LENGTH * (1.0F - Mth.cos(a));
+		for (ModelPart part : new ModelPart[] {h.body, h.head, h.rightArm, h.leftArm}) {
+			part.x += dx;
+			part.y += dy;
+			part.zRot += part == h.head ? a * 0.5F : a;
 		}
 	}
 

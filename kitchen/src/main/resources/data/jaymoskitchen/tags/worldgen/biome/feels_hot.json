@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:lakeside_desert",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:demon_gloam",
+      "required": false
+    }
+  ]
+}

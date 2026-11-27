@@ -46,7 +46,7 @@ loom {
 // The rest of the modpack, with each mod's CurseForge [project id, file id] for the CurseForge import zip.
 // Keep the versions in step with the CurseForge files (Cloth Config's newest Fabric file there is 26.3.159).
 def packMods = [
-	[dep: "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}", cf: [306612, 9254134]],
+	[dep: "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}", cf: [306612, 9417647]],
 	[dep: "maven.modrinth:balm:26.3.0.3+fabric-26.3", cf: [531761, 9035245]],
 	[dep: "maven.modrinth:cooking-for-blockheads:26.3.0.2+fabric-26.3", cf: [231484, 9035244]],
 	// Balkon's WeaponMod: Legacy (MIT): the Pocket Arsenal pulls its weapons from the registry, so no compile dependency
@@ -137,10 +137,10 @@ def packMods = [
 	// haven: Havens.ctov). Jaymo's Kingdoms reads its trade buildings in the game (ctov:village/<land>/jobsite/<trade>)
 	// for a town's butcher, fishery, hunting lodge, smithy and mason (CtovHalls). The 26.2 Fabric build (4.1.1, says
 	// minecraft >=26.1, no mixins, almost all data); needs Lithostitched (above). Server-side worldgen.
-	// Taken out 2026-11-04 (0.20.32): CTOV 4.1.1 is a 26.2 build, and on 26.3 its structures fail to load (vanilla
+	// Taken out 2026-11-04 (0.20.32): CTOV 4.1.1 is a 26.2 build, and on 26.3 its structures failed to load (vanilla
 	// no longer has minecraft:simple_state_provider / weighted_state_provider, and Lithostitched 2.0.6 has no
-	// lithostitched:limited), so the server refused to start. Put the line back once CTOV has a 26.3 build.
-	// [dep: "maven.modrinth:ct-overhaul-village:DpxVZVuT", cf: [623908, 9435529]],
+	// lithostitched:limited), so the server refused to start. Back with the 26.3 build (4.2.2a, Modrinth Vcv7z4RB, in
+	// packModsNoCf below): its data uses only minecraft:simple / minecraft:weighted, which 26.3 has, and no lithostitched:limited.
 	// William Wythers' Overhauled Overworld (CC BY-NC-ND 4.0; shipped unchanged, downloaded by id) and its library Cristel
 	// Lib (same licence): every vanilla biome redecorated (trees, foliage, rocks, sub-biomes) under its vanilla id, so
 	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
@@ -239,7 +239,8 @@ def packMods = [
 	[dep: "maven.modrinth:shoulder-surfing-reloaded:sEg9bfXx", cf: [243190, 9013849]],
 	// Forge Config API Port (MPL-2.0, Fuzs): config library that TaCZ: Refabricated needs (packModsOverride).
 	[dep: "maven.modrinth:forge-config-api-port:JpKvrr9J", cf: [547434, 8938808]],
-	// Horseman 1.7.5 (MIT, by mortuusars; shipped unchanged): riding fixes for every horse-like mount. Right-click a
+	// Horseman 1.7.5 (MIT, by mortuusars; shipped unchanged; kept beside Icy's Better Horses, which does some of the same: its
+	// fade-out when you look down and its stay-near-home; Horseman's fence hitching, boats, shears and mining speed are not in it): riding fixes for every horse-like mount. Right-click a
 	// fence from the saddle to hitch (a lead slot in the horse's inventory), a little more step height, no stair
 	// jitter, less speed lost stepping down and in the air, fewer snags on leaves, full mining speed in the saddle,
 	// horses in boats, saddled horses keep within 16 blocks of where you left them, shears take a pack animal's chest
@@ -334,14 +335,20 @@ def packMods = [
 	// (man, woman, kid, titan, demon, radio..., J toggles it), and Kingdoms' VoiceMasks turns it for a werewolf, a Great
 	// Ape, a goblin disguise or a full mask through its API. 1.2.5, the newest Fabric 26.3 file on CurseForge.
 	[dep: "maven.modrinth:simple-voice-voice-changer:acFxvUQp", cf: [1658503, 9030770], dev: false],
-	// Enderscape (code MIT, art all rights reserved, by Penumbra; downloaded by id, never copied or edited): the End
-	// reworked with new biomes (Celestial Grove, Veiled Woodlands, Corrupt Barrens, Magnia Fields, the void skies), plants, mobs,
-	// blocks, items, music and sky. Its built-in data packs, on by default, swap the vanilla End cities and overworld
-	// strongholds for its own (our relics, writs and quests look in those too: EnderscapeLoot, Kingdoms' Classes and
-	// QuestBoard). Only End chunks generated after it's added get the new terrain. Client and server; needs
-	// Lithostitched (MIT, by Apollo; worldgen library) and YACL 3.9.5+ (packMods). Kept out of the dev game (100 MB jar).
+	// Enderscape (code MIT, art all rights reserved, by Penumbra; downloaded by id, never copied or edited): new End
+	// biomes (Celestial Grove, Veiled Woodlands, Corrupt Barrens, Magnia Fields, the void skies), plants, mobs, blocks,
+	// items, music and sky. Andy (2026-11-19): "ship stellarity as the end and enderscape underneath": its biomes fill the
+	// Beneath, the band under the Nether (data/jaymospowers/dimension/the_beneath.json, its terrain's noise and sky copied
+	// under MIT), and its own End terrain, End city and stronghold packs are switched off for new worlds while Stellarity
+	// is there (core/EnderscapePreset). Client and server; needs Lithostitched (MIT, by Apollo; worldgen library) and
+	// YACL 3.9.5+ (packMods). Kept out of the dev game (100 MB jar).
 	[dep: "maven.modrinth:enderscape:1VZBnRYm", cf: [536638, 9177560], dev: false],
 	[dep: "maven.modrinth:lithostitched:pZgI6b2t", cf: [936015, 9154966], dev: false],
+	// Stellarity (custom licence, by kohara: unmodified copies may ship in packs, modified ones need kohara's permission;
+	// downloaded by id, never copied or edited): the End, reworked as a data pack in a jar (its own End terrain, biomes,
+	// End cities, strongholds, the Empress of Light). Our relics and class writs look in its stronghold and End city chests
+	// too (compat/StellarityLoot, Kingdoms' Classes). 6.0.1, Modrinth version WBiwFsvZ. Kept out of the dev game.
+	[dep: "maven.modrinth:stellarity:WBiwFsvZ", cf: [883166, 9141734], dev: false],
 	// Last World Panorama (by slovuka; Modrinth says all rights reserved, the jar carries CC0; downloaded by id): the
 	// title screen's panorama is shot from where you last stood, retaken each time you leave a world or server.
 	// Client-only (Fabric skips it on the server).
@@ -435,8 +442,7 @@ def packMods = [
 	[dep: "maven.modrinth:simply-tents:wvIeMmbl", cf: [1152882, 8937407]],
 	// Critter Armory (all rights reserved; linked, never edited): armour for wolves, cats and other pets. 0.6.5.
 	[dep: "maven.modrinth:critter-armory:Qcu5lZ5g", cf: [1198794, 8914440]],
-	// Kaffee's Dual Ride (GPL-3.0): a second player can ride behind you on a horse. 1.2.0.
-	[dep: "maven.modrinth:kaffees_dual_ride:T14PXNLz", cf: [683156, 9183919]],
+	// (Kaffee's Dual Ride left: Icy's Better Horses, below in packModsNoCf, takes a second rider behind the owner itself.)
 	// The Graveyard (GPL-3.0, by finallion; github.com/finallion/The_Graveyard; shipped unchanged): graveyards, crypts,
 	// a haunted house, overrun villages, its own undead and the Corrupted Champion. Client and server. 4.0.0 for 26.3.
 	// Needs GeckoLib (above) and VillagersTradingPlus (GPL-3.0, same author; a JSON villager-trade library). 1.1.0.
@@ -468,13 +474,28 @@ def packMods = [
 	// From Andy's Vanilla+ list (2026-11-19 pick list), shipped unchanged:
 	// Shared Advancements (MIT, server side): advancements count for your team or every player.
 	[dep: "maven.modrinth:shared-advancements:cbhS9PTE", cf: [831959, 8942452]],
-	// Horse Expert (MPL-2.0, Fuzs; needs Puzzles Lib and Forge Config API Port above): a horse's real speed, jump and health.
-	[dep: "maven.modrinth:horse-expert:qUjLS9C5", cf: [666942, 9088683]],
+	// (Horse Expert left: Icy's Better Horses' upgraded saddle and horse screen show a horse's speed, jump, health and bond.)
 	// Incendium (Stardust Labs licence, packs allowed): Nether biomes, structures, weapons and mobs, beside our demon-realm biomes.
+	// Our demon-realm biomes stay in its written-out Nether list (ZFighterNetherList), and its Forbidden Castle also rises in the
+	// Gloam, where the demon start puts you in its throne hall (ZFighterStarts.demon). 5.5.4+26.3.
+	[dep: "maven.modrinth:incendium:D4vWUd23", cf: [591388, 9147441]],
 	// qraftyfied: STRUCTURES (CC BY-NC 4.0, free pack): built structures to explore across the Overworld.
 	[dep: "maven.modrinth:qraftyfied:cpRes8NL", cf: [1005868, 8916149]],
 	// VillagersTradingPlus (GPL-3.0): the trading library VillagersPlus needs (packModsNoCf).
 	[dep: "maven.modrinth:villagerstradingplus:uut3GStm", cf: [1635301, 9346754]],
+	// Psithurism 1.4.0 (by the MModding Team; code PolyForm Shield 1.0.0, art all rights reserved, shipped as the untouched
+	// jar with credit, never edited or taken apart; curseforge.com/minecraft/mc-mods/psithurism): Japanese deco blocks (paper
+	// walls, tatami, dark cherry wood, lanterns, futons) and onsen water. Jaymo's Kingdoms' PsithurismCompat builds Blossom
+	// houses from its paper walls, tatami and dark cherry and sets onsen pools by the Blossom villages, by registry id only
+	// (never a compile dependency). Needs MModding Library (below). Not loaded in the dev game.
+	[dep: "curse.maven:psithurism-1533119:9374201", cf: [1533119, 9374201], dev: false],
+	// MModding Library 0.9.2-alpha (MModding Team; same licence; curseforge.com/minecraft/mc-mods/mmodding-library): Psithurism's library.
+	[dep: "curse.maven:mmodding-library-694928:9374057", cf: [694928, 9374057], dev: false],
+	// Hot Air Balloons 0.0.30 (by Profet; all rights reserved, shipped as the untouched jar with credit and a link, never
+	// edited: curseforge.com/minecraft/mc-mods/hot-air-balloons): balloons you craft, dye, fuel and ride, drifting on wind at
+	// every height. Our own rough/HotAirBalloon is a separate balloon of ours with its own wind (also used by airships and ferries).
+	// Fantasy Mounts is NOT shipped: its author has not agreed yet (docs/FaeWoods-Plan.md, Andy's answer 3).
+	[dep: "curse.maven:hot-air-balloons-1776121:9405501", cf: [1776121, 9405501], dev: false],
 ]
 // on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest
 // can't list them: the CurseForge import zip carries the jars themselves (overrides/mods), and they're in modpack/mods
@@ -482,6 +503,27 @@ def packMods = [
 // registries, for Luna Slimes, 2026-11-20). Once CurseForge has the matching file, add its [project id, file id] and
 // move the line into packMods.
 def packModsNoCf = [
+	// ChoiceTheorem's Overhauled Village 4.2.2a, its 26.3 Fabric build (see the note in packMods above; needs Lithostitched).
+	// CurseForge project 623908; its file id for 4.2.2a to look up from the home PC (cloud can't reach CurseForge).
+	[dep: "maven.modrinth:ct-overhaul-village:Vcv7z4RB", cf: null],
+	// Tidal Towns 2.0 (all rights reserved, by joshieman; packs welcome, shipped unchanged with credit and a link:
+	// modrinth.com/datapack/tidal-towns): driftwood raft villages out on the deep ocean. Jaymo's Kingdoms makes each a
+	// Tideborn haven moored to the sea's trade (TidalTowns). Data only (structures), server-side worldgen. No CurseForge id looked up.
+	[dep: "maven.modrinth:tidal-towns:ahvrY85Y", cf: null],
+	// Icy's Better Horses 2.1.8 (Bare Minimum License, Icywhenhot; the official jar, shipped unchanged: its models, textures and
+	// sounds may be used only as part of it, and it may not be reposted on its own, so it travels only inside the pack,
+	// credited, with its licence in licenses/LICENSE_icys_better_horses): fifteen horse breeds with their own coats, biomes
+	// and abilities, bond and ownership, a whistle and command wheel, tack and gear, carts, combat and a handbook. It replaces
+	// Jaymo's Kingdoms' own breeds, gaits, bond, tack, revival and horse renderer for ordinary horses (equestrian/Equestrian#ICY),
+	// and Kaffee's Dual Ride, Horse Expert and Ultimate Horseshoes left the pack for it. Andy, 2026-11-24: "icy has far better
+	// models and implementations". Needs GeckoLib and Fabric API (above) and Modonomicon (below). Modrinth XlUm5I57; CurseForge
+	// [project id, file id] to look up from the home PC (cloud can't reach it).
+	[dep: "maven.modrinth:icys-better-horses:AvgqdGip", cf: null],
+	// (Tectonic 3.0.32 left after its trial: Andy, 2026-11-25, "the generation is impressive but i dont want it if it breaks
+	// caves and the heatmap". Jaymo's Kingdoms' own continents' shape and climate map are back in its data, always on.)
+	// Modonomicon 26.3-2.23.1 (MIT code, CC BY 4.0 art; klikli-dev): the book library Icy's Better Horses' Stable Handbook is
+	// written in. Shipped unchanged. Modrinth 692GClaE.
+	[dep: "maven.modrinth:modonomicon:z8ESky23", cf: null],
 	// Runes (all rights reserved, Zsolt Molnar; shipped unchanged): the rune reagents Wizards' spells use up, and its
 	// Rune Crafting Altar. No CurseForge page found.
 	[dep: "maven.modrinth:runes:PwSpmtFJ", cf: null],
@@ -653,15 +695,14 @@ def packModsNoCf = [
 	// and server. 1.10-mc26.3-fabric for 26.3.
 	[dep: "maven.modrinth:luna-slimes:z3yWfsEY", cf: null],
 	// --- Sensible MC picks: mounts and travel ---
-	// Ultimate Horseshoes (LGPL-3.0-only, Nanaky): horseshoes as horse gear. Client and server. 26.3 for 26.3.
-	[dep: "maven.modrinth:ultimate_horseshoes:CmIcH7gj", cf: null],
+	// (Ultimate Horseshoes left: Icy's Better Horses has its own horseshoe gear, for fall damage and frost.)
 	// Seaworthy Boats (all rights reserved, Serilum; shipped unchanged): boats reinforced into tougher tiers at a
 	// shipyard. Needs Collective. Client and server. 26.3.0-2.0-fabric+forge+neo for 26.3.
 	[dep: "maven.modrinth:seaworthy-boats:29sIHp7D", cf: null],
 	// Stretchy Leash (MIT, Estecka): leashes snap less, and make a sound when they do. Server-side. 3.0.0+26.1.2 for 26.3.
 	[dep: "maven.modrinth:stretchy-leash:yewvryEP", cf: null],
 	// Craftable Horse Armor (Craemon's datapack licence, Craemon; shipped unchanged): horse armour can be crafted. Server-
-	// side (clients may have it). 1.1.0+mod for 26.3.
+	// side (clients may have it). 1.1.0+mod for 26.3. Kept beside Icy's Better Horses: it has no horse armour recipes.
 	[dep: "maven.modrinth:craft-horse-armor:AJkpa6SJ", cf: null],
 	// --- Sensible MC picks: villages ---
 	// Shifting Wares (EUPL-1.2, Estecka): villagers now and then reroll their trades. Server-side. 4.0.0+26.3 for 26.3.
@@ -744,10 +785,41 @@ def packModsNoCf = [
 	[dep: "maven.modrinth:vanilla-fireflies:f9FE4diA", cf: null],
 	// Vanilla Constructs (all rights reserved; shipped unchanged from Modrinth): 100+ small vanilla-style features.
 	[dep: "maven.modrinth:vanilla-constructs:il0WctcM", cf: null],
+	// (Andy's CC0 picks, 2026-11-26.) The mods below are CC0 (public domain): no credit owed, shipped unchanged.
+	// Vectorientation (CC0, Tectato): falling blocks turn to face where they fly, with squash and stretch by speed, so
+	// loose logs, sand and cave rubble tumble. Client-only. 1.1 for 26.3.
+	[dep: "maven.modrinth:vectorientation:RleTmgVs", cf: null],
+	// Quick Leaf Decay (CC0, wb1016): leaves cut off from their logs decay in seconds, checking diagonals too, so a felled
+	// tree (FallingTree, LooseWood) leaves no floating leaves behind. 1.0.0 for 26.3.
+	[dep: "maven.modrinth:quickleafdecay:NRd8xgUY", cf: null],
+	// Collapsing Caves (CC0 in its metadata; its author: "use it in modpacks, no credit needed"): cave-ins of varying size
+	// while mining, with a short warning first. 1.7 for 26.3.
+	[dep: "maven.modrinth:collapsing-caves:n2jAyNkE", cf: null],
+	// Dibs! (CC0, armaninyow): right-click an unemployed villager holding a workstation item, or any villager holding a
+	// bed, and that block is theirs for good; nobody else takes it. Its locate key (V, an ability key) is unbound
+	// (client/KeyConflicts). Needs YACL (packMods). 4.2.0 for 26.3.
+	[dep: "maven.modrinth:dibs:fnPV24fz", cf: null],
+	// Leashes (CC0, TreeOfSelf): 25-block leads strong enough to pull a mob in flight, and leads on villagers, fish, bats
+	// and the rest. Server-side. Works beside Stretchy Leash (both chain their changes onto the same leash checks).
+	// 1.4.0+26.3.
+	[dep: "maven.modrinth:leashes:juXFEalK", cf: null],
+	// Smooth Sail (CC0, armaninyow): boat steering ramps up over a second instead of snapping. Client-only. 2.2.0 for 26.3.
+	[dep: "maven.modrinth:smooth-sail:sY8WzbqM", cf: null],
+	// Ladder Sense (CC0, atperry7): climbing speed follows your gaze, faster looking up, a slide looking down. 1.3.0 for 26.3.
+	[dep: "maven.modrinth:ladder-sense:pILYuRKa", cf: null],
+	// Talek's Better Forest (its LICENSE file is CC0, its metadata says MIT; free either way, shipped unchanged with its
+	// own licence file inside): structure-built trees instead of vanilla's generated ones. New chunks only. 1.3.5 for 26.3.
+	[dep: "maven.modrinth:taleks-better-forest:UGEQIFPX", cf: null],
 ]
 // on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
 // the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).
 def packModsOverride = [
+	// Alex's Caves Continued 1.1.3 (Codx.io's port of Alexthe668's Alex's Caves; LGPL-3.0 in its jar, shipped unchanged;
+	// needs CodxLib, above, 1.3.6 or later, and Fabric API): six rare cave biomes under the Overworld, reshaped to our world
+	// by compat/AlexsCavesCompat (the Magnetic Caves in the Aether's magnetic stone) and Kingdoms' AlexsCavesCompat (the
+	// biomes mostly under Mohknee and the sea round it). Andy, 2026-11-24. Also on CurseForge (project 1645389): move it to
+	// packMods once its 26.3 Fabric file id there is known.
+	[dep: "maven.modrinth:alexs-caves-continued:dq5bmMF9"],
 	// TaCZ: Refabricated, unofficial 26.3 port (Modrinth "tacz-refabricated-unofficial-port"; GPL-3.0 code, art
 	// CC BY-NC-ND 4.0, so shipped as the untouched jar with credit, never edited or taken apart): Timeless and Classics
 	// Zero's modern guns with attachments, scopes, a Gun Smith Table and ammo. The official TaCZ is Forge 1.20.1 and its
@@ -914,10 +986,6 @@ def packResourcePacks = [
 	// (Havens patch 8) Better Horses (by CanineGray; CC BY-NC 4.0, shipped unchanged, credit to its author): redrawn
 	// donkeys and mules through Entity Model Features. Same story as Fresh Animations: fetched from Modrinth by
 	// client/PackResourcePacks until its CurseForge file id is added here, [cf: [<project>, <file>], file: "Better Horses v4.3 1.21.11.zip"].
-	// (0.19.65) Excalibur (by Maffhew; CC BY-NC-ND 3.0, shipped unchanged, link to its page on the pack's page) and
-	// "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; modpacks may include it): fetched from Modrinth by
-	// client/PackResourcePacks for now, like Fresh Animations, but never switched on: optional, /excalibur on (0.19.72,
-	// docs/Excalibur-Style.md). Add their CurseForge ids here once known.
 ]
 // shader packs, client-only: the CurseForge import downloads them into shaderpacks/ by id, and Jaymo's Powers chooses
 // and switches on Complementary Unbound in Iris once per install (client/ShaderPreset).
@@ -942,7 +1010,8 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it), Combat Roll (0.15.16: it left the pack in 0.15.5 for our own feathers and
-// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar); CTOV (0.20.32, a 26.2 build that stops a 26.3 server loading);
+// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar);
+// (CTOV left this list when its 26.3 build came into the pack);
 // (AmbientSounds and CreativeCore left for ImmersiveFX: Resurrected, then came back when it went: Andy, 2026-11-12);
 // ImmersiveVFX (its test ended: Andy, 2026-11-11, "revert the immersive vfx changes"; Iris and Complementary are back);
 // ImmersiveFX: Resurrected (Andy, 2026-11-12: with Sound Physics Remastered both filtered every sound and everyone lagged,
@@ -950,8 +1019,9 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // Streams Reflowing (Dynamic Waters took its place); Grassier Grass and Punchy! with Punchy! Moves (Andy, 2026-11-16: "i
 // think the new grass and punchy are lagging the game"; punchy_expressions comes inside Punchy! Moves);
 // Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list);
-// VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list)
-def removedIdsFromProfile = ["citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
+// VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list); Tectonic (its trial ended: Andy,
+// 2026-11-25, it broke the caves and the climate map)
+def removedIdsFromProfile = ["tectonic", "horseexpert", "kaffees_dual_ride", "ultimate_horseshoes", "citadel", "distanthorizons", "camerautils", "combat_roll", "immersivevfx", "immersivefx", "streamsreflowing",
 	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions",
 	"vanilla-outsider-better-dogs", "dasik-library", "scalablelux"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
@@ -1022,6 +1092,8 @@ dependencies {
 	compileOnly "maven.modrinth:jade:71CTWqdE"
 	// (RPG Series) compiled against to wear spell books, scrolls and quivers in bauble slots; touched only via compat/SpellEngineCompat
 	compileOnly "maven.modrinth:spell-engine:kgVsejrW"
+	// Alex's Caves Continued (packModsOverride): compat/AlexsCavesCompat builds its cave stone rules once our blocks exist
+	compileOnly "maven.modrinth:alexs-caves-continued:dq5bmMF9"
 	// (0.20.52) compiled against to keep the Aether out of its chunk culling from under the clouds; touched only via
 	// client/aether/SodiumVeil and client/mixin/sodium (an optional mixin config)
 	compileOnly "maven.modrinth:sodium:bAZQdGpg"
@@ -1087,7 +1159,7 @@ tasks.register("checkPackMods") {
 		def present = [minecraft: version(mcVersion), java: version("25"), fabricloader: version(loaderVersion)]
 		def mods = []
 		def read
-		read = { String owner, InputStream jar ->
+		read = { String owner, InputStream jar, boolean nested ->
 			def entries = [:]
 			new java.util.zip.ZipInputStream(jar).withCloseable { zip ->
 				for (def e = zip.nextEntry; e != null; e = zip.nextEntry) {
@@ -1106,38 +1178,56 @@ tasks.register("checkPackMods") {
 				present[meta.id as String] = v
 			}
 			(meta.provides ?: []).each { present[it as String] = v }
-			mods << [owner, meta.id as String, meta.depends ?: [:], meta.breaks ?: [:]]
-			(meta.jars ?: []).each { nested ->
-				def bytes = entries[nested.file as String]
+			mods << [owner, meta.id as String, meta.depends ?: [:], meta.breaks ?: [:], nested]
+			(meta.jars ?: []).each { inner ->
+				def bytes = entries[inner.file as String]
 				if (bytes != null) {
-					read(owner, new ByteArrayInputStream(bytes as byte[]))
+					read(owner, new ByteArrayInputStream(bytes as byte[]), true)
 				}
 			}
 		}
-		jars.files.each { f -> f.withInputStream { read(f.name, it) } }
+		jars.files.each { f -> f.withInputStream { read(f.name, it, false) } }
 		own.each { f ->
 			def meta = slurper.parse(f)
 			present[meta.id as String] = version("999.0.0")
-			mods << [f.path, meta.id as String, meta.depends ?: [:], [:]]
+			mods << [f.path, meta.id as String, meta.depends ?: [:], [:], false]
 		}
 		def matches = { spec, v -> (spec instanceof List ? spec : [spec]).any { parsePredicate.invoke(null, it as String).test(v) } }
-		def problems = []
-		mods.each { owner, id, depends, breaks ->
+		def problemsOf = { owner, id, depends, breaks ->
+			def found = []
 			depends.each { dep, spec ->
 				def have = present[dep]
 				if (have == null) {
-					problems << "$id ($owner) needs $dep $spec, which isn't in the pack"
+					found << "$id ($owner) needs $dep $spec, which isn't in the pack"
 				} else if (!matches(spec, have)) {
-					problems << "$id ($owner) needs $dep $spec; the pack has ${have.friendlyString}"
+					found << "$id ($owner) needs $dep $spec; the pack has ${have.friendlyString}"
 				}
 			}
 			breaks.each { dep, spec ->
 				def have = present[dep]
 				if (have != null && matches(spec, have)) {
-					problems << "$id ($owner) breaks with $dep $spec, and the pack has ${have.friendlyString}"
+					found << "$id ($owner) breaks with $dep $spec, and the pack has ${have.friendlyString}"
 				}
 			}
+			found
 		}
+		// Fabric Loader force-loads only top-level jars: a mod nested inside one (jar-in-jar) whose own needs aren't met is
+		// left out quietly (MModding Library's integration modules for mods the pack doesn't have). Drop those, then check
+		// again, so a mod that needed a dropped one is still caught.
+		def dropped = true
+		while (dropped) {
+			dropped = false
+			mods.findAll { it[4] && !problemsOf(it[0], it[1], it[2], it[3]).isEmpty() }.each { m ->
+				mods.remove(m)
+				if (!mods.any { it[1] == m[1] }) {
+					present.remove(m[1])
+				}
+				logger.lifecycle("checkPackMods: ${m[1]} (inside ${m[0]}) would be left out by Fabric Loader: its needs aren't in the pack")
+				dropped = true
+			}
+		}
+		def problems = []
+		mods.each { owner, id, depends, breaks, nested -> problems.addAll(problemsOf(owner, id, depends, breaks)) }
 		if (!problems.isEmpty()) {
 			throw new GradleException("These pack mods would stop the game or the server starting:\n  " + problems.unique().join("\n  "))
 		}
@@ -1147,6 +1237,7 @@ tasks.register("checkPackMods") {
 tasks.register("curseforgeManifest") {
 	def out = layout.buildDirectory.file("modpack/manifest.json")
 	outputs.file out
+	inputs.property "version", version // else Gradle reuses an old manifest and the CurseForge tile shows an old version
 	doLast {
 		def manifest = [
 			minecraft      : [version: project.minecraft_version, modLoaders: [[id: "fabric-${project.loader_version}", primary: true]]],

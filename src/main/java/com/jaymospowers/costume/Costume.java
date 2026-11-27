@@ -113,6 +113,7 @@ public final class Costume {
 		SecretIdentity.init();
 		CorpseCostume.init();
 		HoodedCloak.init();
+		NightCloak.init();
 		Rally.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(TABLE);
@@ -232,7 +233,19 @@ public final class Costume {
 			player.sendOverlayMessage(Component.translatable(worn == null ? "message.jaymospowers.costume.none" : "message.jaymospowers.costume.no_mask"));
 			return;
 		}
+		if (!unmasked(player) && symbioteShape(player) && com.jaymospowers.power.web.WebSymbiote.suitShown(player)
+			&& com.jaymospowers.power.web.WebSymbiote.fightsMask(player)) {
+			// (Andy, 2026-11-25) a symbiote in a host without the Web fights them for the mask, every time
+			return;
+		}
 		MaskMotion.begin(player, () -> flipMask(player));
+	}
+
+	/** The worn costume's head piece comes off if it's on (a won fight with a symbiote's suit that wears its shape). */
+	public static void maskOff(ServerPlayer player) {
+		if (!unmasked(player)) {
+			flipMask(player);
+		}
 	}
 
 	/** The worn costume's head piece, off or back on (the hands are at the face). */
@@ -330,6 +343,7 @@ public final class Costume {
 		}
 		SecretIdentity.update(player);
 		rustle(player);
+		com.jaymospowers.power.web.WebSuitUp.costume(player);
 		if (symbioteShape(player)) {
 			// the symbiote has it now: worn when its suit is called
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.7F);

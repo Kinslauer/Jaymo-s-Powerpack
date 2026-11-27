@@ -27,7 +27,7 @@ public final class Darkvision {
 		Heritage.Kind.HOLLOW, Heritage.Kind.GOBLIN, Heritage.Kind.ORC);
 	/** And the looks of other bloods that do: the moon elves, and the beast folk with a cat's, a lizard's or a spider's eyes. */
 	static final Set<HeritageVariants.Variant> LOOKS = EnumSet.of(HeritageVariants.Variant.MOONELF, HeritageVariants.Variant.FELINE,
-		HeritageVariants.Variant.SERPEN, HeritageVariants.Variant.ARACHNID);
+		HeritageVariants.Variant.SERPEN, HeritageVariants.Variant.SCALEBOUND, HeritageVariants.Variant.ARACHNID);
 
 	private Darkvision() {
 	}

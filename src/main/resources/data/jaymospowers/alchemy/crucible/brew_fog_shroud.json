@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "spirit": 8,
+    "water": 6,
+    "air": 4,
+    "shadow": 4
+  },
+  "result": {
+    "item": "jaymospowers:brew_fog_shroud",
+    "count": 1
+  },
+  "research": "formula_fog_shroud"
+}

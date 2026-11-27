@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:holy_symbol",
+    "jaymoskingdoms:vow_book",
+    {
+      "id": "#minecraft:swords",
+      "required": false
+    },
+    "#jaymoskingdoms:bludgeons",
+    {
+      "id": "minecraft:shield",
+      "required": false
+    },
+    "jaymoskingdoms:paladin_helmet",
+    "jaymoskingdoms:paladin_chestplate",
+    "jaymoskingdoms:paladin_leggings",
+    "jaymoskingdoms:paladin_boots",
+    "jaymoskingdoms:reverent_helmet",
+    "jaymoskingdoms:reverent_chestplate",
+    "jaymoskingdoms:reverent_leggings",
+    "jaymoskingdoms:reverent_boots",
+    "jaymoskingdoms:templar_helmet",
+    "jaymoskingdoms:templar_chestplate",
+    "jaymoskingdoms:templar_leggings",
+    "jaymoskingdoms:templar_boots",
+    "jaymoskingdoms:templar_steel_helmet",
+    "jaymoskingdoms:templar_steel_chestplate",
+    "jaymoskingdoms:templar_steel_leggings",
+    "jaymoskingdoms:templar_steel_boots"
+  ]
+}

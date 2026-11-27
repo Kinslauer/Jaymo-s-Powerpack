@@ -172,7 +172,7 @@ final class SkillScreen extends Screen {
 			node = com.jaymoskingdoms.ClassTrees.node(target.substring("classtree.jaymoskingdoms.".length()));
 		}
 		if (perk != null) {
-			SkillWeb.Spot spot = com.jaymoskingdoms.TreeLocks.hidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
+			SkillWeb.Spot spot = com.jaymoskingdoms.TreeLocks.webHidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
 			if (spot != null) {
 				page0();
 				selected = perk;
@@ -515,13 +515,13 @@ final class SkillScreen extends Screen {
 	/** Where {@code perk} sits on the web, or null if it isn't drawn: the Night page, before you're turned (Andy's skill-tree locks). */
 	private SkillWeb.@Nullable Spot spot(Skills.Perk perk) {
 		var player = this.minecraft == null ? null : this.minecraft.player;
-		return player != null && com.jaymoskingdoms.TreeLocks.hidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
+		return player != null && com.jaymoskingdoms.TreeLocks.webHidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
 	}
 
 	/** Whether {@code branch} isn't drawn (its gate and its name): the Night page, before you're turned. */
 	private boolean hiddenBranch(SkillWeb.Branch branch) {
 		var player = this.minecraft == null ? null : this.minecraft.player;
-		return branch == SkillWeb.Branch.NIGHT && player != null && com.jaymoskingdoms.TreeLocks.hidden(player, Skills.Perk.LIFELEECH);
+		return branch == SkillWeb.Branch.NIGHT && player != null && com.jaymoskingdoms.TreeLocks.webHidden(player, Skills.Perk.LIFELEECH);
 	}
 
 	/** Whether {@code perk} can be learnt (or raised) right now. */
@@ -1050,6 +1050,10 @@ final class SkillScreen extends Screen {
 				? Component.translatable("gui.jaymoskingdoms.skills.blood.none")
 				: Component.translatable("gui.jaymoskingdoms.skills.blood.yours", Component.translatable("kit.jaymoskingdoms.move." + kit.move().key()),
 					Component.translatable("kit.jaymoskingdoms.move." + kit.move().key() + ".desc"))).withColor(Ui.GOLD));
+			if (com.jaymoskingdoms.Heritage.is(player, com.jaymoskingdoms.Heritage.Kind.VERDANT)) {
+				// (Andy, 2026-11-23) and a Verdant's push-button regrowth
+				text.add(Component.translatable("gui.jaymoskingdoms.skills.blood.verdant").withColor(Ui.GOLD));
+			}
 		}
 		Component cost = Component.translatable("gui.jaymoskingdoms.skills.cost", perk.cost);
 		if (perk.minLevel > 0) {
@@ -1266,6 +1270,13 @@ final class SkillScreen extends Screen {
 			name = Component.translatable("stat.jaymoskingdoms." + hovered.key()).append("  " + value + "/" + Stats.MAX);
 			text.add(Component.translatable("stat.jaymoskingdoms." + hovered.key() + ".desc").withColor(Ui.TEXT));
 			text.add(Stats.now(hovered, value).copy().withColor(accent));
+			if (hovered == Stats.Stat.GRIT) {
+				// the whole toughness: the base, Grit and worn armour's, and what it does
+				double toughness = com.jaymoskingdoms.Toughness.of(player);
+				text.add(Component.translatable("gui.jaymoskingdoms.stats.toughness", Math.round(toughness), Math.round(com.jaymoskingdoms.Toughness.gear(player)),
+					Math.round(com.jaymoskingdoms.Toughness.shrug(toughness) * 100.0),
+					String.format(java.util.Locale.ROOT, "%.1f", com.jaymoskingdoms.Toughness.poise(toughness))).withColor(accent));
+			}
 			if (hovered == Stats.Stat.ARCANA) {
 				// (0.7.212) the mana itself: how much now, the most, how fast it comes back
 				text.add(Component.translatable("gui.jaymoskingdoms.stats.mana", Math.round(com.jaymoskingdoms.Mana.current(player)),

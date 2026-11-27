@@ -42,6 +42,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -462,6 +463,8 @@ public final class Handshakes {
 			Speech.say(level, villager, Component.translatable("handshake.jaymoskingdoms.refused"), Speech.WHITE, 12.0);
 			level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 1.0F);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.refused").withStyle(ChatFormatting.GRAY), true);
+			// (refusal hints) and why: a grudge, a dislike, a bad mood, a sour temper, too few hearts, or only bad luck
+			RefusalHints.hint(player, villager, RefusalHints.handRefused(player, villager));
 			return;
 		}
 		shake(player, villager, now, false);
@@ -796,6 +799,12 @@ public final class Handshakes {
 			// (one whose back is turned on you: their menu closes as it opens, McaCompat#shunOpening)
 			return false;
 		}
+		if (Recollections.dealtWith(villager, player) || !greets(villager)) {
+			// (Andy, 2026-11-26) something has passed between you already (you fed them, traded, struck them...): no
+			// greeting now, their menu opens as it is. Nor do any but rulers, court wizards and grown folk with a trade greet you.
+			greeted(player, villager);
+			return false;
+		}
 		if (Rulers.is(villager) && !Introductions.knows(player, villager)) {
 			// (0.7.504) a ruler you've not met: you bow, and their menu opens after
 			greeted(player, villager);
@@ -815,6 +824,19 @@ public final class Handshakes {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.offered", villager.getType().getDescription())
 			.withStyle(ChatFormatting.GRAY), true);
 		return true;
+	}
+
+	/**
+	 * {@code villager} is one who greets you at a first meeting (a wave or a handshake, a bow for a ruler). Andy
+	 * (2026-11-26): "that scene should also only happen for kings, court wizards or npcs with jobs. nitwits and children
+	 * shouldnt get it either."
+	 */
+	static boolean greets(Villager villager) {
+		if (Rulers.is(villager) || CourtWizards.is(villager)) {
+			return true;
+		}
+		var job = villager.getVillagerData().profession();
+		return McaCompat.adult(villager) && !job.is(VillagerProfession.NONE) && !job.is(VillagerProfession.NITWIT);
 	}
 
 	/** (0.7.289) {@code villager} has greeted {@code player} already. */
@@ -909,7 +931,11 @@ public final class Handshakes {
 		}
 		villager.getLookControl().setLookAt(player);
 		// (the cold word once; a hand held out again after it annoys them: Introductions#refusal)
-		Component words = offered ? Introductions.refusal(player, villager, () -> Introductions.waryLine(villager, player))
+		Component words = offered ? Introductions.refusal(player, villager, () -> {
+				// (refusal hints) the first no to your hand says why they mind you
+				RefusalHints.hintWary(player, villager);
+				return Introductions.waryLine(villager, player);
+			})
 			: Introductions.waryOpening(player, villager);
 		Speech.say(level, villager, words, Speech.WHITE, 12.0);
 		if (Introductions.shuns(player, villager)) {

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:cooking_pot",
+    "jaymoskitchen:folk_fat",
+    "jaymoskitchen:folk_fat"
+  ],
+  "result": {
+    "id": "jaymoskitchen:folk_grease",
+    "count": 2
+  }
+}

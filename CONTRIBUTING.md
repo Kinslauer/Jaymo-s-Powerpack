@@ -27,7 +27,8 @@ it apply to you and where your power lives. If you work with an AI assistant, po
 5. To try it: `gradlew.bat runClient` starts a dev client with the mod. In game, `/power set @s wind` gives you the
    power; `docs/wind.md` has test steps for every move. `/powerdebug wind ...` has Wind's test commands (`WindDebug`).
 
-You can skip the parts of `CLAUDE.md` and the handbook about the Obsidian vault, agent notes in `E:/Jaymo Vault Live`,
+You can skip the `vault-notes` and `pr-auto-fix` skills and the parts of the handbook about the Obsidian vault,
+agent notes in `E:/Jaymo Vault Live`,
 Hermes, pbdr and the Steam Deck. Those are Andy's own machines and bots.
 
 ## Where Wind lives

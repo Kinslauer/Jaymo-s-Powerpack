@@ -1,0 +1,20 @@
+{
+  "dimx": 2,
+  "dimz": 5,
+  "buildings": [
+    [
+      "jaymospowers:maw/quarry/quarry_mega_machine00",
+      "jaymospowers:maw/quarry/quarry_mega_machine01",
+      "jaymospowers:maw/quarry/quarry_mega_machine02",
+      "jaymospowers:maw/quarry/quarry_mega_machine03",
+      "jaymospowers:maw/quarry/quarry_mega_machine04"
+    ],
+    [
+      "jaymospowers:maw/quarry/quarry_mega_machine10",
+      "jaymospowers:maw/quarry/quarry_mega_machine11",
+      "jaymospowers:maw/quarry/quarry_mega_machine12",
+      "jaymospowers:maw/quarry/quarry_mega_machine13",
+      "jaymospowers:maw/quarry/quarry_mega_machine14"
+    ]
+  ]
+}

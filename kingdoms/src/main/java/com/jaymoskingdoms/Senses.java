@@ -70,7 +70,7 @@ import org.jspecify.annotations.Nullable;
  * only hears ({@link #HUMANOID_BEHIND}); and a mob busy with something else, eating above all, notices half as far ({@link #DISTRACTED}).</li>
  * <li><b>Losing track</b> ({@link WatchGoal}, {@link SearchGoal}): a mob that has not had line of sight to its player target
  * for {@link #LOSE_TRACK_TICKS} drops them, walks to where they were last seen and looks around for
- * {@link #LOOK_TICKS}. Bosses never lose track, and the kingdoms' own folk are exempt. State lives in {@link #TRACKS}, one per mob (not an attachment: Fabric would copy it onto a converted mob). Spiders keep their own memory ({@code wild.SpiderMinds}).</li>
+ * {@link #LOOK_TICKS}. Bosses never lose track; the kingdoms' own folk and MCA's villagers do ({@link NpcEyes}). State lives in {@link #TRACKS}, one per mob (not an attachment: Fabric would copy it onto a converted mob). Spiders keep their own memory ({@code wild.SpiderMinds}).</li>
  * <li><b>Hearing</b> ({@link #hear}, from {@link Hearing}): a faint sound at the edge of hearing makes a mob stop and turn
  * its head toward it for {@link #HEED_TICKS} ({@link HeedGoal}); a second near it, {@link #HEED_SECOND} or more after the
  * first and within {@link #HEED_MEMORY}, brings it over,
@@ -199,8 +199,14 @@ public final class Senses {
 		int walkLeft, lookLeft;
 		/** (0.7.155) How loud what it is searching for was where it stood ({@link Awareness}); a fainter lure doesn't turn it. */
 		double lure;
-		/** Whether it drops a foe it can't see (a camp's outlaws keep after theirs). */
-		boolean losesTrack = true;
+		/** (ey-behind) Ticks left turning toward a blow from a foe it hadn't seen, where it came from, and who struck. */
+		int turnLeft;
+		@Nullable Vec3 turnAt;
+		@Nullable UUID turnWho;
+		/** (ey-share) The foe a friend told it of, where it was, and until when (game time). Never passed on. */
+		@Nullable UUID toldWho;
+		@Nullable Vec3 toldAt;
+		long toldUntil;
 		/** Heeding a faint sound: where, ticks left looking, until when a second there brings it, whose. */
 		@Nullable Vec3 heedAt;
 		int heedLeft;
@@ -290,16 +296,19 @@ public final class Senses {
 		PayloadTypeRegistry.clientboundPlay().register(Gauge.TYPE, Gauge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Meter.TYPE, Meter.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Suspicion.TYPE, Suspicion.CODEC);
+		NpcEyes.register();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			boolean folk = entity instanceof Folk;
-			if (entity instanceof Mob mob && (minded(mob) && !(mob instanceof Spider) || folk) && !TRACKS.containsKey(mob)) {
+			// (ey-memory) the folk and MCA's villagers lose track of a foe they can't see like the monsters do; a boss still never does
+			boolean people = (folk || McaCompat.isMca(entity)) && entity instanceof Mob p && !boss(p);
+			if (entity instanceof Mob mob && (minded(mob) && !(mob instanceof Spider) || people) && !TRACKS.containsKey(mob)) {
 				Track track = new Track();
-				// (the folk hear and search, Hearing: only its outlaws are ever lured; none of them gives up a foe)
-				track.losesTrack = !folk;
 				TRACKS.put(mob, track);
 				var goals = ((MobAccessor) mob).jaymoskingdoms$goals();
 				// no flags: counts beside everything else; the search and the heeding want the legs and the eyes
 				goals.addGoal(0, new WatchGoal(mob, track));
+				// (ey-behind) first of all: a blow from behind stops it and turns it round
+				goals.addGoal(0, new TurnGoal(mob, track));
 				goals.addGoal(folk ? 2 : 1, new SearchGoal(mob, track));
 				goals.addGoal(folk ? 2 : 1, new HeedGoal(mob, track));
 			}
@@ -360,7 +369,7 @@ public final class Senses {
 
 	/** Whether {@code looker} is after {@code player} and has them in sight (it keeps seeing them at full range). */
 	private static boolean locked(Mob looker, ServerPlayer player) {
-		return looker.getTarget() == player && looker.hasLineOfSight(player);
+		return foeOf(looker) == player && looker.hasLineOfSight(player);
 	}
 
 	/** {@code player} is in front of {@code looker}, inside its view cone (a boss's is wider). */
@@ -368,6 +377,10 @@ public final class Senses {
 		Vec3 to = player.getEyePosition().subtract(looker.getEyePosition());
 		double len = to.length();
 		if (len < 1.0E-4) {
+			return true;
+		}
+		if (NpcEyes.atFeet(looker, player)) {
+			// (ey-feet) something small at its feet, in front of it, is in view though far below its look
 			return true;
 		}
 		Vec3 view = looker.getViewVector(1.0F);
@@ -395,7 +408,11 @@ public final class Senses {
 	 * creative or spectator player, or anything that isn't a hostile or neutral mob. A boss's never drops below {@link #BOSS_SIGHT_MIN}.
 	 */
 	public static double factor(LivingEntity self, ServerLevel level, Entity looking) {
-		if (!(self instanceof ServerPlayer player) || !(looking instanceof Mob looker) || touched(player) || locked(looker, player)) {
+		if (looking instanceof Mob seer && !(self instanceof Player)) {
+			// (ey-npc) when NPCs fight NPCs the same cone, light, sneaking and distance rules apply
+			return NpcEyes.factor(self, level, seer);
+		}
+		if (!(self instanceof ServerPlayer player) || !(looking instanceof Mob looker) || touched(player) || locked(looker, player) || knows(looker, player)) {
 			return 1.0;
 		}
 		if (!sighted(looker)) {
@@ -410,7 +427,7 @@ public final class Senses {
 	 * Close enough ({@link #BEHIND_CLOSE}) to be noticed outside the view cone: only walking up, not sneaking (Andy: "while
 	 * not sneaking, if you sneak you can get right up for the takedown").
 	 */
-	static boolean close(LivingEntity looker, ServerPlayer player) {
+	static boolean close(LivingEntity looker, LivingEntity player) {
 		return player.distanceTo(looker) <= BEHIND_CLOSE && !player.isShiftKeyDown();
 	}
 
@@ -424,8 +441,8 @@ public final class Senses {
 	 * supper, a villager at a meal; a scavenger at a body is Jaymo's Kitchen's own, {@code ScavengerSightMixin}), robbing or carrying off the dead, grabbing loot, or fighting
 	 * someone other than {@code player}.
 	 */
-	static boolean distracted(Mob mob, ServerPlayer player) {
-		LivingEntity target = mob.getTarget();
+	static boolean distracted(Mob mob, LivingEntity player) {
+		LivingEntity target = foeOf(mob);
 		return target != null && target != player && target.isAlive()
 			|| CampSuppers.eating(mob) || mob instanceof net.minecraft.world.entity.npc.villager.Villager v && Meals.eating(v)
 			|| Scavengers.busy(mob) || Looters.busy(mob) || Bearers.busy(mob) || Undertakers.busy(mob);
@@ -461,7 +478,7 @@ public final class Senses {
 	}
 
 	/** {@link #factor} for a player and a mob it applies to. */
-	private static double sight(ServerPlayer player, ServerLevel level, Mob looker) {
+	static double sight(ServerPlayer player, ServerLevel level, Mob looker) {
 		BlockPos eyes = BlockPos.containing(player.getEyePosition());
 		// (NightLights) the world's people see by the moon, by what you carry and by their own light
 		double light = (NightLights.npc(looker) ? NightLights.light(level, looker, player, player.distanceTo(looker)) : level.getMaxLocalRawBrightness(eyes)) / 15.0;
@@ -511,6 +528,8 @@ public final class Senses {
 		f *= Stench.factor(player, looker);
 		// a Ranger moves quietly through the country (Rangers)
 		f *= Rangers.quiet(player);
+		// a ranger's leaf cloak in the woods (LeafCloak)
+		f *= LeafCloak.sight(player);
 		// a Skulker is hard to see in the dim and when sneaking, a shadow Monk too
 		f *= FeatsBody.sight(player, light) * Paths.sight(player, light);
 		// morning mist (Mist): a mob sees less far through it, so a player in it is noticed at half the range at its thickest
@@ -558,45 +577,43 @@ public final class Senses {
 
 		@Override
 		public void tick() {
-			LivingEntity target = this.mob.getTarget();
+			LivingEntity target = foeOf(this.mob);
 			if (target != null) {
 				this.track.heedLeft = 0;
 				this.track.returning = false;
 			} else if (this.track.heedLeft > 0) {
 				this.track.heedLeft--;
 			}
-			if (!this.track.losesTrack) {
-				// (a camp's outlaw: it hears and searches, but keeps after its foe)
-				if (target != null) {
-					this.track.searching = false;
-				} else if (this.track.searching || this.track.returning) {
-					search();
-				}
-				return;
+			if (this.track.turnLeft > 0 && --this.track.turnLeft == 0) {
+				endTurn();
 			}
-			if (target instanceof ServerPlayer player && !touched(player)) {
+			if (target != null && !(target instanceof ServerPlayer p && touched(p))) {
 				this.track.searching = false;
 				this.track.lure = 0.0;
-				if (this.track.who == null || !this.track.who.equals(player.getUUID())) {
+				if (this.track.who == null || !this.track.who.equals(target.getUUID())) {
 					// (a new target: where it is now counts as seen, whether or not the mob has a clear line to it yet)
-					this.track.who = player.getUUID();
-					this.track.seen = player.position();
+					this.track.who = target.getUUID();
+					this.track.seen = target.position();
 					this.track.blind = 0;
 				}
-				Awareness.called(this.mob, player);
+				if (target instanceof ServerPlayer player) {
+					Awareness.called(this.mob, player);
+				}
 				if (this.mob.tickCount % 2 != 0) {
 					return;
 				}
-				if (this.mob.hasLineOfSight(player)) {
+				if (this.mob.hasLineOfSight(target)) {
 					this.track.blind = 0;
-					this.track.who = player.getUUID();
-					this.track.seen = player.position();
+					this.track.who = target.getUUID();
+					this.track.seen = target.position();
+					// (ey-share) it sees its foe: it tells its friends
+					NpcEyes.share(this.mob, target);
 					return;
 				}
 				this.track.blind += 2;
-				int limit = LOSE_TRACK_TICKS / (Skills.rank(player, Skills.Perk.SLIP_THE_NET) > 0 ? SLIP_THE_NET_DIVISOR : 1);
-				if (this.track.blind >= limit && this.track.seen != null && this.track.who != null && this.track.who.equals(player.getUUID())) {
-					lose(player);
+				int limit = LOSE_TRACK_TICKS / (target instanceof ServerPlayer player && Skills.rank(player, Skills.Perk.SLIP_THE_NET) > 0 ? SLIP_THE_NET_DIVISOR : 1);
+				if (this.track.blind >= limit && this.track.seen != null && this.track.who != null && this.track.who.equals(target.getUUID())) {
+					lose(this.mob, this.track, target);
 				}
 				return;
 			}
@@ -609,23 +626,14 @@ public final class Senses {
 			}
 		}
 
-		/** Drops {@code player}; the mob goes to where it last saw them. */
-		private void lose(ServerPlayer player) {
-			this.mob.setTarget(null);
-			if (this.mob instanceof NeutralMob neutral) {
-				neutral.stopBeingAngry();
+		/** The turn to a blow from behind is over: a foe it still can't see isn't gone for. */
+		private void endTurn() {
+			UUID who = this.track.turnWho;
+			this.track.turnWho = null;
+			LivingEntity foe = foeOf(this.mob);
+			if (who != null && foe != null && who.equals(foe.getUUID()) && !this.mob.hasLineOfSight(foe)) {
+				lose(this.mob, this.track, foe);
 			}
-			this.mob.setLastHurtByMob(null);
-			this.mob.getNavigation().stop();
-			this.track.blind = 0;
-			this.track.searching = true;
-			this.track.started = false;
-			this.track.spot = this.track.seen;
-			this.track.walkLeft = WALK_TICKS;
-			this.track.lookLeft = -1;
-			this.track.lure = LOST_LURE;
-			this.track.home = null;
-			this.track.returning = false;
 		}
 
 		/** The walk and the looking round count down here, so that a goal that outranks the search can't make it last for ever. */
@@ -647,9 +655,10 @@ public final class Senses {
 				this.track.searching = false;
 				this.track.spot = null;
 				this.track.lure = 0.0;
-				// (Hearing) drawn off by a sound, it goes back to where it was
-				Vec3 home = this.track.home;
+				// (Hearing) drawn off by a sound, it goes back to where it was; one that lost its foe, back to its leader or its post
+				Vec3 home = this.track.home != null ? this.track.home : back(this.mob);
 				if (home != null && this.mob.position().distanceToSqr(home) > RETURN_MIN * RETURN_MIN) {
+					this.track.home = home;
 					this.track.returning = true;
 					this.track.walkLeft = WALK_TICKS;
 				} else {
@@ -657,6 +666,93 @@ public final class Senses {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Drops {@code foe}; {@code mob} goes to where it last saw them (and back to its leader or its post after, {@link #back}). A guard
+	 * at a post and a companion told to wait don't leave their place: they turn and look there instead. A guard making an arrest
+	 * keeps after the crook and is never called off it ({@link Arrests}).
+	 */
+	static void lose(Mob mob, Track track, LivingEntity foe) {
+		if (Arrests.busy(mob)) {
+			return;
+		}
+		Comrades.stand(mob);
+		if (mob instanceof NeutralMob neutral) {
+			neutral.stopBeingAngry();
+		}
+		mob.setLastHurtByMob(null);
+		mob.getNavigation().stop();
+		track.blind = 0;
+		if (keepsPlace(mob)) {
+			long now = mob.level().getGameTime();
+			track.searching = false;
+			track.spot = null;
+			track.home = null;
+			track.returning = false;
+			if (track.seen != null) {
+				track.heedAt = track.seen;
+				track.heedWho = foe instanceof Player ? foe.getUUID() : null;
+				track.heedSince = now;
+				track.heedLeft = HEED_TICKS;
+				track.heedUntil = now + HEED_MEMORY;
+			}
+			return;
+		}
+		track.searching = true;
+		track.started = false;
+		track.spot = track.seen;
+		track.walkLeft = WALK_TICKS;
+		track.lookLeft = -1;
+		track.lure = LOST_LURE;
+		track.home = null;
+		track.returning = false;
+	}
+
+	/** {@code mob} keeps its place: a companion told to wait ({@link Followers#STAND}), or a guard at a post (the hall, the gate, the wall). */
+	static boolean keepsPlace(Mob mob) {
+		if (standing(mob)) {
+			return true;
+		}
+		if (!(mob.level() instanceof ServerLevel level) || !(mob instanceof Worker w) || !(mob instanceof net.minecraft.world.entity.PathfinderMob body)) {
+			return false;
+		}
+		if (mob instanceof Folk folk && WallArchers.posted(level, folk)) {
+			return true;
+		}
+		// (a villager wall archer or gunner is held within a block of his post)
+		return HallWatch.post(level, body, w) != null || !(mob instanceof Folk) && w.role() == Folk.ARCHER && mob.hasHome() && mob.getHomeRadius() <= 1;
+	}
+
+	/** A companion told to wait ({@link Followers#STAND}). */
+	static boolean standing(Mob mob) {
+		return mob instanceof net.minecraft.world.entity.npc.villager.Villager v && v.getAttached(Followers.ORDER) instanceof Followers.Order order
+			&& order.kind() == Followers.STAND;
+	}
+
+	/** Where {@code mob} goes back to after searching for a foe it lost: its leader, if it follows one; else its post, if it has strayed from it; else nowhere. */
+	static @Nullable Vec3 back(Mob mob) {
+		if (mob instanceof net.minecraft.world.entity.npc.villager.Villager v && v.getAttached(Followers.ORDER) instanceof Followers.Order order
+			&& (order.kind() == Followers.FOLLOW || order.kind() == Followers.FIGHT) && mob.level().getPlayerByUUID(order.by()) instanceof Player leader) {
+			return leader.position();
+		}
+		return mob.hasHome() && !mob.isWithinHome() ? Vec3.atBottomCenterOf(mob.getHomePosition()) : null;
+	}
+
+	/** Whoever {@code mob} is set on (its goals' target, or its brain's attack target), or null. */
+	static @Nullable LivingEntity foeOf(Mob mob) {
+		return Comrades.target(mob);
+	}
+
+	/** {@code mob} was told where {@code foe} is by a friend who saw them, and still knows ({@link NpcEyes#SHARE_TICKS}). */
+	static boolean knows(Mob mob, Entity foe) {
+		Track t = TRACKS.get(mob);
+		return t != null && t.toldWho != null && t.toldWho.equals(foe.getUUID()) && mob.level().getGameTime() < t.toldUntil;
+	}
+
+	/** {@code mob}'s memory of the hunt, if it keeps one. */
+	static @Nullable Track track(Mob mob) {
+		return TRACKS.get(mob);
 	}
 
 	/** Walks to where the target was last seen, then looks about. */
@@ -672,7 +768,9 @@ public final class Senses {
 
 		@Override
 		public boolean canUse() {
-			return (this.track.searching && this.track.spot != null || this.track.returning && this.track.home != null) && this.mob.getTarget() == null;
+			// (never during an arrest, nor for a companion told to wait: it starts nothing)
+			return (this.track.searching && this.track.spot != null || this.track.returning && this.track.home != null) && foeOf(this.mob) == null
+				&& !Arrests.busy(this.mob) && !standing(this.mob);
 		}
 
 		@Override
@@ -736,7 +834,7 @@ public final class Senses {
 
 		@Override
 		public boolean canUse() {
-			return this.track.heedLeft > 0 && this.track.heedAt != null && !this.track.searching && this.mob.getTarget() == null;
+			return this.track.heedLeft > 0 && this.track.heedAt != null && !this.track.searching && foeOf(this.mob) == null;
 		}
 
 		@Override
@@ -763,13 +861,62 @@ public final class Senses {
 	}
 
 	/**
+	 * (ey-behind) Stops and turns toward where a blow from a foe it hadn't seen came from ({@link NpcEyes#struck}), for up to
+	 * {@link NpcEyes#TURN_TICKS}; it goes for the foe only once it sees them.
+	 */
+	static final class TurnGoal extends Goal {
+		private final Mob mob;
+		private final Track track;
+
+		TurnGoal(Mob mob, Track track) {
+			this.mob = mob;
+			this.track = track;
+			setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			// (a guard making an arrest doesn't stop chasing or beating the crook to turn: Arrests)
+			return this.track.turnLeft > 0 && this.track.turnAt != null && this.mob.isAlive() && !Downed.isDowned(this.mob) && !Arrests.busy(this.mob)
+				&& !BreakOff.away(this.mob);
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return canUse();
+		}
+
+		@Override
+		public void start() {
+			this.mob.getNavigation().stop();
+		}
+
+		@Override
+		public void tick() {
+			Vec3 at = this.track.turnAt;
+			if (at == null) {
+				return;
+			}
+			this.mob.getNavigation().stop();
+			this.mob.getLookControl().setLookAt(at.x, at.y, at.z);
+			this.mob.setYBodyRot(Mth.rotLerp(NpcEyes.TURN_BODY, this.mob.yBodyRot, this.mob.getYHeadRot()));
+			// (it sees them now: the turn is done)
+			if (this.track.turnWho != null && this.mob.level() instanceof ServerLevel level && level.getEntity(this.track.turnWho) instanceof LivingEntity striker
+				&& this.mob.hasLineOfSight(striker) && inCone(this.mob, striker)) {
+				this.track.turnLeft = 1;
+				this.track.turnWho = null;
+			}
+		}
+	}
+
+	/**
 	 * {@code mob} heard something at {@code spot} ({@link Hearing}) as loud as {@code loudness}. A {@code faint} one (at the
 	 * edge of its hearing) only makes it stop and look, unless it heard another near there a moment ago; anything else
 	 * draws it there ({@link #lure}). Returns {@link #UNHEARD}, {@link #HEEDED} or {@link #LURED}.
 	 */
 	static int hear(Mob mob, Vec3 spot, @Nullable UUID who, double loudness, boolean faint) {
 		Track t = TRACKS.get(mob);
-		if (t == null || !mob.isAlive() || mob.getTarget() != null) {
+		if (t == null || !mob.isAlive() || foeOf(mob) != null) {
 			return UNHEARD;
 		}
 		long now = mob.level().getGameTime();
@@ -805,7 +952,7 @@ public final class Senses {
 	 */
 	static boolean lure(Mob mob, Vec3 spot, @Nullable UUID who, double loudness) {
 		Track t = TRACKS.get(mob);
-		if (t == null || !mob.isAlive() || mob.getTarget() != null || t.searching && t.lure > loudness) {
+		if (t == null || !mob.isAlive() || foeOf(mob) != null || t.searching && t.lure > loudness) {
 			return false;
 		}
 		if (!t.searching && !t.returning) {
@@ -857,7 +1004,7 @@ public final class Senses {
 		if (!touched(player) && player.isAlive() && player.level() instanceof ServerLevel level) {
 			boolean feels = feelsStalkers(player);
 			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(GAUGE_RANGE),
-				m -> m.isAlive() && (sensing(m) || com.jaymoskingdoms.wild.WolfStalkers.after(m, player)))) {
+				m -> m.isAlive() && (sensing(m) || com.jaymoskingdoms.wild.WolfStalkers.after(m, player) || GuardWatch.watching(m)))) {
 				if (mob.getTarget() == player) {
 					state = SPOTTED;
 					break;
@@ -874,18 +1021,27 @@ public final class Senses {
 					// (stopped to listen for you: the eye half fills)
 					state = NOTICING;
 					fill = Math.max(fill, FILL_STEPS / 2);
-				} else if (mob instanceof Enemy) {
-					if (state <= NOTICING) {
-						int f = noticing(level, mob, player);
-						if (f > 0) {
-							state = NOTICING;
-							fill = Math.max(fill, f);
-						}
+				} else {
+					// (ThinkFirst) it has picked you out and is making up its mind: the eye fills over that second; (GuardWatch) a
+					// guard's suspicion of you fills it the same way
+					double thinking = Math.max(ThinkFirst.share(mob, player), GuardWatch.of(mob, player.getUUID()));
+					if (thinking > 0.0 && state <= NOTICING) {
+						state = NOTICING;
+						fill = Math.max(fill, Math.max(1, (int) Math.round(thinking * FILL_STEPS)));
 					}
-					if (sneaking && past < 2 && mob.getTarget() == null) {
-						double d = mob.distanceTo(player);
-						if (d < SNEAK_PAST_RANGE && mob.hasLineOfSight(player)) {
-							past = Math.max(past, d < SNEAK_PAST_CLOSE ? 2 : 1);
+					if (mob instanceof Enemy) {
+						if (state <= NOTICING) {
+							int f = noticing(level, mob, player);
+							if (f > 0) {
+								state = NOTICING;
+								fill = Math.max(fill, f);
+							}
+						}
+						if (sneaking && past < 2 && mob.getTarget() == null) {
+							double d = mob.distanceTo(player);
+							if (d < SNEAK_PAST_RANGE && mob.hasLineOfSight(player)) {
+								past = Math.max(past, d < SNEAK_PAST_CLOSE ? 2 : 1);
+							}
 						}
 					}
 				}

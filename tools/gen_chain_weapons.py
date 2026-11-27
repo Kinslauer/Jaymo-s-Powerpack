@@ -221,15 +221,35 @@ def ring(prefix, x0, y0, x1, y1, z0, z1, t, patches):
         element(prefix + "_right", [x1 - t, y0 + t, z0], [x1, y1 - t, z1], "rope_up", patches)]
 
 
+def hoop(prefix, x0, y0, x1, y1, z0, z1, t, c, patches):
+    """A round hoop of rope in the x-y plane, t thick: four straight runs and four turned 45 degrees across the corners,
+    which are cut back c (an octagon, as near round as a model's boxes come)."""
+    k = t / (2 * math.sqrt(2))
+    half = c * math.sqrt(2) / 2 + t * 0.3
+    els = [
+        element(prefix + "_bottom", [x0 + c, y0, z0], [x1 - c, y0 + t, z1], "rope", patches),
+        element(prefix + "_top", [x0 + c, y1 - t, z0], [x1 - c, y1, z1], "rope", patches),
+        element(prefix + "_left", [x0, y0 + c, z0], [x0 + t, y1 - c, z1], "rope_up", patches),
+        element(prefix + "_right", [x1 - t, y0 + c, z0], [x1, y1 - c, z1], "rope_up", patches)]
+    # (each corner run: its middle on the rope's middle line across the corner, turned along it)
+    for name, cx, cy, angle in (("bl", x0 + c / 2 + k, y0 + c / 2 + k, -45), ("tl", x0 + c / 2 + k, y1 - c / 2 - k, 45),
+                                ("tr", x1 - c / 2 - k, y1 - c / 2 - k, -45), ("br", x1 - c / 2 - k, y0 + c / 2 + k, 45)):
+        cx, cy = round(cx, 4), round(cy, 4)
+        els.append(element(prefix + "_" + name, [round(cx - half, 4), round(cy - t / 2, 4), z0], [round(cx + half, 4), round(cy + t / 2, 4), z1],
+                           "rope", patches, {"angle": angle, "axis": "z", "origin": [cx, cy, (z0 + z1) / 2]}))
+    return els
+
+
 def lasso():
     p = LASSO_PATCHES
-    # the coil, gripped by its bottom turn; the rope leaves the top of it: COIL_TIP in client/forms/LassoRope
-    coil = (ring("coil_a", 3.5, 1, 12.5, 10, 6.6, 7.6, 1, p) + ring("coil_b", 4, 1.5, 12, 9.5, 7.6, 8.6, 1, p)
-            + ring("coil_c", 3.5, 1, 12.5, 10, 8.6, 9.6, 1, p)
+    # the coil, gripped by its bottom turn; the rope leaves the top of it: COIL_TIP in client/forms/LassoRope. Its turns
+    # are round (hoops), the middle one a little smaller and each set a touch askew, as a hand-wound coil lies
+    coil = (hoop("coil_a", 3.5, 1, 12.5, 10, 6.6, 7.6, 1, 2.5, p) + hoop("coil_b", 4.25, 1.5, 11.75, 9.5, 7.6, 8.6, 1, 2.0, p)
+            + hoop("coil_c", 3.75, 0.75, 12.75, 10, 8.6, 9.6, 1, 2.5, p)
             + [element("keeper", [6.75, 0.5, 6.25], [9.25, 2.5, 9.95], "leather", p),
                element("lead", [7.5, 10, 7.6], [8.5, 11.5, 8.6], "rope_up", p)])
     # the loop, hanging by its honda knot from the top middle of the box (8, 16, 8)
-    loop = ring("loop", 3, 3, 13, 14.5, 7.5, 8.5, 1, p) + [element("honda", [7, 14, 7], [9, 16, 9], "knot", p)]
+    loop = hoop("loop", 3, 3, 13, 14.5, 7.5, 8.5, 1, 3.0, p) + [element("honda", [7, 14, 7], [9, 16, 9], "knot", p)]
     whole = coil + [element("tail", [8.5, 10.5, 7.6], [15, 11.5, 8.6], "rope", p)] + shifted(loop, 9, -7, "end_")
     img = lasso_texture()
     path = os.path.join(LASSO_ASSETS, "textures", "item", "lasso_model.png")

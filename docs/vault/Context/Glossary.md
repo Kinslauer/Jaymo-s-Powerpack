@@ -16,7 +16,7 @@ PR, like any reference note), and only from something Andy actually said or conf
 | "continue" (on a job split into patches) | Build the next patch of it. |
 | "the origin folder" | `E:\Origins Mod`: the main checkout of the repo plus his local files. |
 | "the vault" | `docs/vault` in Obsidian, with the live folder `E:/Jaymo Vault Live` showing as `Live/`. |
-| "the board", "Kanban" | `Live/Kanban.md` (read-only, rebuilt on every sync). |
+| "the board", "Kanban" | `Live/Kanban.md` (read-only, rebuilt on every sync). Always shown with its five lanes: see [[How agents use this vault]]. |
 | "the reviewer" | Claude Code on Andy's PC running `/loop 15m /vault-review`. |
 | "the coordinator" | The Claude project chat Andy talks to; it posts Inbox tasks and hands PRs to him. |
 | Odysseus | The cloud Claude (Claude Code threads and the coordinator). Shown as 💻 Odysseus on the board. |

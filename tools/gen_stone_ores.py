@@ -49,12 +49,15 @@ ORES = {
 OVERRIDDEN = ["ore_coal", "ore_coal_buried", "ore_lapis", "ore_lapis_buried", "ore_redstone", "ore_emerald"]
 # a pixel is ore if it differs from the stone it sits in by more than this (summed over red, green, blue)
 ORE_PIXEL = 12
-# the puff's texture keeps this share of the cloud's opacity
-PUFF_ALPHA = 0.7
+# the puff's texture keeps this share of the cold cloud's opacity (over 1: the cold cloud was made fainter, the puff was not)
+PUFF_ALPHA = 1.17
 
 LANG_ORES = {}
 LANG_BOTTLE = {
     "item.jaymospowers.bottle_of_cloud": "Bottle of Cloud",
+    "item.jaymospowers.bottle_of_blue_cloud": "Bottle of Blue Cloud",
+    "item.jaymospowers.bottle_of_golden_cloud": "Bottle of Golden Cloud",
+    "item.jaymospowers.bottle_of_purple_cloud": "Bottle of Purple Cloud",
     "block.jaymospowers.cloud_puff": "Puff of Cloud",
 }
 
@@ -216,13 +219,22 @@ PALETTE = {
 }
 
 
-def bottle_icon():
+# the coloured bottles: the cloud inside (light "w", shade "c") in its aercloud's colours
+BOTTLE_TINTS = {
+    "bottle_of_blue_cloud": {"w": (198, 228, 255, 255), "c": (141, 194, 242, 255)},
+    "bottle_of_golden_cloud": {"w": (255, 243, 184, 255), "c": (246, 210, 102, 255)},
+    "bottle_of_purple_cloud": {"w": (226, 201, 255, 255), "c": (179, 135, 224, 255)},
+}
+
+
+def bottle_icon(tint=None):
+    palette = dict(PALETTE, **(tint or {}))
     im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y, row in enumerate(BOTTLE):
         assert len(row) == 16, (y, row)
         for x, ch in enumerate(row):
             if ch != ".":
-                im.putpixel((x, y), PALETTE[ch])
+                im.putpixel((x, y), palette[ch])
     return im
 
 
@@ -242,6 +254,11 @@ def cloud_assets():
     write(os.path.join(ASSETS, "models", "item", "bottle_of_cloud.json"), {
         "parent": "minecraft:item/generated", "textures": {"layer0": NS + ":item/bottle_of_cloud"}})
     write(os.path.join(ASSETS, "items", "bottle_of_cloud.json"), {"model": {"type": "minecraft:model", "model": NS + ":item/bottle_of_cloud"}})
+    for bid, tint in BOTTLE_TINTS.items():
+        png(os.path.join(ASSETS, "textures", "item", bid + ".png"), bottle_icon(tint))
+        write(os.path.join(ASSETS, "models", "item", bid + ".json"), {
+            "parent": "minecraft:item/generated", "textures": {"layer0": NS + ":item/" + bid}})
+        write(os.path.join(ASSETS, "items", bid + ".json"), {"model": {"type": "minecraft:model", "model": NS + ":item/" + bid}})
     write(os.path.join(ASSETS, "lang", "parts", "cloud_bottle.json"), LANG_BOTTLE)
 
 

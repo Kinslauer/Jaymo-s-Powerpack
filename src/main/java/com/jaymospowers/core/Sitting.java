@@ -64,7 +64,11 @@ import org.jspecify.annotations.Nullable;
  * styles, all but the brace for the ground, which still comes before landing). The one you land on is kept
  * ({@link #FALL_POSE}, saved with the player and seen by everyone) and every fall after uses it in place of the random
  * pick, until you choose another. After the last pose the key goes back to random falls, then round again.</li>
- * <li><b>Getting up:</b> press Sneak, move, jump, or get hurt; breaking the seat drops you off it.</li>
+ * <li><b>Sat still</b> (Andy: "sitting should stop you from moving so you can ride other physics objects, like the
+ * gravity earthboard"): the walking keys do nothing while you sit, and being carried or pushed no longer gets you up.
+ * Sit on an earthboard (lying where it was dropped, or flown by someone else: the Sit key with your feet on or over it)
+ * and you ride it as its passenger, where you sat, wherever its rider flies it ({@link BlockCluster#SEAT}).</li>
+ * <li><b>Getting up:</b> press Sneak, jump (not on a board), or get hurt; breaking the seat drops you off it.</li>
  * <li><b>By the fire:</b> sitting within {@link #FIRE_RANGE} of a lit campfire heals {@link #FIRE_HEAL} every
  * {@link #FIRE_HEAL_EVERY} ticks and (with Jaymo's Kitchen) warms you by {@link #FIRE_WARMTH} more.</li>
  * </ul>
@@ -77,6 +81,8 @@ public final class Sitting {
 	public static final TagKey<Block> SEATS = TagKey.create(Registries.BLOCK, JaymosPowers.id("seats"));
 	/** How far a seat may be from your eyes for the Sit key or a right-click (blocks). */
 	static final double REACH = 3.0;
+	/** How far round a player to look for an earthboard to sit on (blocks; a board is centred on its blocks, which reach out). */
+	static final double BOARD_SEARCH = 4.0;
 	/** How high you sit on a stair or a slab, and on a tagged seat with no top at its middle (blocks above the block). */
 	static final double SEAT_HEIGHT = 0.5;
 	/** Sitting by a lit campfire: how near (blocks), how much it heals, how often (ticks), how much warmer (body heat). */
@@ -204,6 +210,29 @@ public final class Sitting {
 		return true;
 	}
 
+	/** An earthboard under this player's feet (lying, or flown by someone else) to sit on and ride, or null. Its rider never sits on it. */
+	static @Nullable BlockCluster boardUnder(ServerPlayer player) {
+		if (player.hasAttached(com.jaymospowers.power.gravity.GravityPower.ROCK_FLIGHT)) {
+			return null;
+		}
+		Vec3 feet = player.position();
+		for (BlockCluster board : player.level().getEntitiesOfClass(BlockCluster.class, player.getBoundingBox().inflate(BOARD_SEARCH),
+			c -> c.under(feet))) {
+			return board;
+		}
+		return null;
+	}
+
+	/** Onto this earthboard as its passenger, where the player is over it ({@link BlockCluster#seatFor}). True if they got on. */
+	static boolean ride(ServerPlayer player, BlockCluster board) {
+		player.setAttached(BlockCluster.SEAT, board.seatFor(player.position()));
+		if (!player.startRiding(board, true, true)) {
+			player.removeAttached(BlockCluster.SEAT);
+			return false;
+		}
+		return true;
+	}
+
 	/** The Sit key: the next pose while sat; otherwise the seat under you or the one you look at, else the ground. */
 	private static void key(ServerPlayer player) {
 		if (Downed.isDowned(player)) {
@@ -226,6 +255,10 @@ public final class Sitting {
 			}
 			return;
 		}
+		BlockCluster board = boardUnder(player);
+		if (board != null && Meditate.sitOnBoard(player, board)) {
+			return;
+		}
 		if (!Meditate.canSit(player)) {
 			return;
 		}
@@ -245,6 +278,11 @@ public final class Sitting {
 	 * comes random again (nothing chosen: each fall picks its own), then round to the first.
 	 */
 	private static void fallKey(ServerPlayer player, int shown) {
+		if (Meditate.sitting(player) || boardUnder(player) != null) {
+			// over a flown earthboard (or already sat on one, off the ground): the Sit key sits, not the fall
+			key(player);
+			return;
+		}
 		if (player.onGround() || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isInWater()
 			|| player.getAbilities().flying || player.isFallFlying()) {
 			return;

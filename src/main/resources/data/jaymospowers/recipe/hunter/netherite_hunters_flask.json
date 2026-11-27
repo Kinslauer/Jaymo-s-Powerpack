@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": "minecraft:netherite_upgrade_smithing_template",
+  "base": "jaymospowers:hunters_flask",
+  "addition": "#minecraft:netherite_tool_materials",
+  "result": {
+    "id": "jaymospowers:netherite_hunters_flask"
+  }
+}

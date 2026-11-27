@@ -107,6 +107,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	/** An archer's reach, and how often they loose (ticks). */
 	static final double ARCHER_RANGE = 28.0;
 	static final int ARCHER_INTERVAL = 30;
+	/** (sh-shooter) An archer counts as drawing on its foe for this long (ticks) before its arrow looses. */
+	static final int ARCHER_DRAW = 12;
 	/** How far from the capital they wander. */
 	static final int HOME_RADIUS = 24;
 	/** The king's second wind: at this share of his health he rallies (strength, resistance, his guards called in). */
@@ -314,8 +316,17 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		ItemStack hand = this.getMainHandItem();
 		// (0.7.184) after enough failed shots it puts the bow away and fights hand to hand for a while
 		// (out of arrows it draws its blade too: MobAmmo)
-		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand) && !RangedTactics.melee(this)
+		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand) && !RangedTactics.melee(this) && !WeaponSense.swapping(this)
 			&& (this.level().isClientSide() || MobAmmo.has(this, MobAmmo.Kind.ARROWS));
+	}
+
+	/** (sh-shooter) When its next arrow looses (game time), while it shoots ({@link Shoot}); 0 when it isn't shooting. */
+	private long loosesAt;
+
+	/** (sh-shooter) An archer (not a caster) about to loose at {@code at}: its foe, its next arrow within {@link #ARCHER_DRAW}. */
+	public boolean drawing(LivingEntity at) {
+		long now = this.level().getGameTime();
+		return this.loosesAt >= now && this.loosesAt - now <= ARCHER_DRAW && this.getTarget() == at && !Sorcery.isCaster(this.role()) && this.shooting();
 	}
 
 	/** An archer (or a goblin slinger, or a caster): it keeps its post and shoots. */
@@ -382,7 +393,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	/** A builder's tool, or a farmer's, miner's or woodcutter's (back in hand when he isn't carrying). */
 	@Override
 	public ItemStack tool() {
-		return Worker.toolFor(this.role(), this.style() == FactionType.BARBARIAN);
+		return Worker.toolFor(this.role(), this.style() == FactionType.BARBARIAN, ToolGrades.of(this, this.factionId()));
 	}
 
 	/** What it's carrying (the load in its hands, not a copy), or empty. */
@@ -455,8 +466,19 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
+		// out of fire and lava, to water, out of the water after a fight, a web cut, a creeper struck first (DangerSense)
+		this.goalSelector.addGoal(-2, new DangerSense.DangerGoal(this));
 		// (0.7.184) a shooter whose shots keep failing moves (RangedTactics)
 		this.goalSelector.addGoal(0, new RangedTactics.RepositionGoal(this));
+		// weapon sense: blade when rushed, the weapon's distance band, strafing and leaning, going for what was thrown
+		this.goalSelector.addGoal(0, new WeaponSense.SenseGoal(this));
+		// band styles: heavy blows and leaps, a shield wall's advance, a skilled archer's second arrow (BandStyles)
+		this.goalSelector.addGoal(0, new BandStyles.StyleGoal(this));
+		// badly hurt it breaks off, mends with what it carries and comes back; friends cover it (BreakOff)
+		this.goalSelector.addGoal(BreakOff.MendGoal.PRIORITY, new BreakOff.MendGoal(this));
+		// no way to a shooter: to cover a while (Hiding); no way to its foe: a way round (Detours)
+		this.goalSelector.addGoal(1, new Hiding.HideGoal(this));
+		this.goalSelector.addGoal(1, new Detours.DetourGoal(this));
 		this.goalSelector.addGoal(1, new Shoot(this));
 		// (0.7.85) disarmed, it goes for a weapon before anything else (Rearm)
 		this.goalSelector.addGoal(1, new Rearm.Fetch(this));
@@ -502,6 +524,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+		// (and while it's away, nothing sets it on a foe again)
+		this.targetSelector.addGoal(0, new BreakOff.HoldGoal(this));
 		// whoever strikes one of them: only their own side (their faction and its allies) answers the call
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this, Folk.class) {
 			@Override
@@ -523,7 +547,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 					|| Sieges.foe(this, player) == Boolean.TRUE)));
 		// and monsters on their land
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,
-			(target, level) -> this.combatant() && (target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper) && !PatronChampions.outsideTown(target)
+			(target, level) -> this.combatant() && !CampBeasts.spares(this, target) && (target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper) && !PatronChampions.outsideTown(target)
 				// (0.6.11) and whatever the symbiote has got into (Oddities)
 				|| Oddities.hunted(target)
 				// (0.7.0) and a vampire that's shown itself tonight (Vampires)
@@ -877,9 +901,13 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		double zd = target.getZ() - this.getZ();
 		double distance = Math.sqrt(xd * xd + zd * zd);
 		if (this.level() instanceof ServerLevel level) {
-			net.minecraft.world.entity.projectile.Projectile.spawnProjectileUsingShoot(arrow, level, arrowStack, xd, yd + distance * 0.2F, zd, 1.6F, 4.0F);
+			boolean crossbow = bow.is(Items.CROSSBOW);
+			// (a crossbow's bolt flies faster and truer than a bow's arrow: an orc ranger's close weapon)
+			net.minecraft.world.entity.projectile.Projectile.spawnProjectileUsingShoot(arrow, level, arrowStack, xd, yd + distance * (crossbow ? 0.08F : 0.2F), zd, crossbow ? 2.6F : 1.6F, crossbow ? 1.0F : 4.0F);
 		}
-		this.playSound(net.minecraft.sounds.SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+		this.playSound(bow.is(Items.CROSSBOW) ? net.minecraft.sounds.SoundEvents.CROSSBOW_SHOOT : net.minecraft.sounds.SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+		// (st-archers) a skilled archer's second arrow follows (BandStyles)
+		BandStyles.loosed(this, target);
 	}
 
 	/** An archer at its post: it stays put, faces its target, and looses an arrow every so often while it can see it. */
@@ -903,7 +931,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				// (0.5.64) a gunner fires his cannon (Cannon.tick); only a foe too close for it gets his arrows
 				return false;
 			}
-			return this.archer.shooting() && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
+			return this.archer.shooting() && !WeaponSense.swapping(this.archer) && target != null && target.isAlive() && !Downed.isDowned(target)
+				&& this.archer.distanceTo(target) <= ARCHER_RANGE;
 		}
 
 		@Override
@@ -926,10 +955,17 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				// (0.7.184) ready to shoot with nothing to shoot at: that is a failure too
 				RangedTactics.blocked(this.archer, target);
 			}
-			if (--this.cooldown <= 0 && sees) {
+			// (sh-busy) no shot with the shield up: a crossbowman reloads behind it and lowers it to fire (MobShields)
+			if (--this.cooldown <= 0 && sees && !MobShields.holdsFire(this.archer, true)) {
 				this.cooldown = Sorcery.isCaster(this.archer.role()) ? Sorcery.CAST_TICKS : ARCHER_INTERVAL;
 				this.archer.performRangedAttack(target, 1.0F);
 			}
+			this.archer.loosesAt = this.archer.level().getGameTime() + Math.max(0, this.cooldown);
+		}
+
+		@Override
+		public void stop() {
+			this.archer.loosesAt = 0L;
 		}
 	}
 

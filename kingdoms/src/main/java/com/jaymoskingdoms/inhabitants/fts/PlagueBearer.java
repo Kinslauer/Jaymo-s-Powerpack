@@ -110,6 +110,11 @@ public class PlagueBearer extends Monster implements GeoEntity {
 	/** The camp keeping him; -1 for an exile. */
 	private int camp = -1;
 
+	/** The camp keeping it; -1 for none. */
+	public int camp() {
+		return this.camp;
+	}
+
 	public PlagueBearer(EntityType<? extends PlagueBearer> type, Level level) {
 		super(type, level);
 		this.xpReward = 10;

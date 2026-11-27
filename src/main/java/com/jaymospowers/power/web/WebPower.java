@@ -326,6 +326,7 @@ public final class WebPower implements Power {
 		WebWhip.register();
 		WebSlam.register();
 		WebBrute.register();
+		WebBruteArts.register();
 		WebWallRun.register();
 		WebParkour.register();
 		WebStrain.register();
@@ -333,10 +334,21 @@ public final class WebPower implements Power {
 		Webbed.register();
 		WebHitches.register();
 		WebBridges.register();
+		WebLineRide.register();
 		WebTendrils.register();
 		WebSymbioteCollect.register();
 		WebSymbioteMind.register();
+		WebSymbioteMemory.register();
 		WebSymbioteBody.register();
+		WebSymbioteArm.register();
+		WebSymbioteChests.register();
+		WebSymbioteMolt.register();
+		WebSymbioteStride.register();
+		WebSymbioteBloom.register();
+		WebStamina.register();
+		WebSymbioteSettings.register();
+		WebSymbioteWords.register();
+		WebArmSwap.register();
 		WebSymbioteLife.register();
 		WebStrength.register();
 		WebShooters.register();
@@ -360,10 +372,12 @@ public final class WebPower implements Power {
 		WebSymbioteBlob.init();
 		WebBehemoth.register();
 		WebInhabit.register();
+		WebRedHunt.register();
 		WebAscension.register();
 		WebDarkSense.register();
 		WebShield.register();
 		WebBlossom.register();
+		WebAttacks.register();
 		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Rope.TYPE, (payload, ctx) -> {
@@ -386,6 +400,11 @@ public final class WebPower implements Power {
 		WebSymbioteTalk.register();
 		WebMeeting.register();
 		WebFury.register();
+		WebCarapace.register();
+		WebAegis.register();
+		WebRupture.register();
+		WebOnslaught.register();
+		WebSlamReflex.register();
 		WebGoo.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.WingsBrake.TYPE, (payload, ctx) -> INSTANCE.onWingsBrake(ctx.player(), payload.on()));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
@@ -450,16 +469,19 @@ public final class WebPower implements Power {
 	/** (0.15.31) Downed: what was running ends. */
 	@Override
 	public void onDowned(ServerPlayer player) {
+		WebBruteArts.forget(player);
 		// the lines and ropes are let go, the wings fold, whatever the tendrils hold is dropped (the symbiote acts on its own)
 		player.removeAttached(LINE);
 		player.removeAttached(ROPE);
 		player.removeAttached(TETHER);
 		player.removeAttached(WINGS);
 		WebTendrils.releaseAll(player, false);
+		WebAttacks.forget(player);
 	}
 
 	@Override
 	public void onLost(ServerPlayer player) {
+		WebBruteArts.forget(player);
 		AttributeInstance gravity = player.getAttribute(Attributes.GRAVITY);
 		if (gravity != null) {
 			gravity.removeModifier(FLOAT_ID);
@@ -485,6 +507,7 @@ public final class WebPower implements Power {
 		WebSkim.forget(player);
 		WebAirStrikes.forget(player);
 		WebBlossom.forget(player);
+		WebAttacks.forget(player);
 	}
 
 	/** Bonded to a symbiote, the badge says so (and something worse once ascended too). */
@@ -524,8 +547,15 @@ public final class WebPower implements Power {
 		if (WebSymbioteBody.onUltimate(player, down)) {
 			return;
 		}
+		if (down && mastered(player) && !player.isShiftKeyDown() && player.getLastClientInput().backward()) {
+			// Back + Jump + C: Web Storm, the dome that draws them in; Back + C with a foe locked on: the Hunting Dive.
+			// Each takes the key only when it starts; otherwise C does what it always did
+			if (player.getLastClientInput().jump() && WebStorm.use(player) || WebHunt.begin(player)) {
+				return;
+			}
+		}
 		if (down && player.isShiftKeyDown() && mastered(player)) {
-			// Sneak + C: Web Blossom
+			// Sneak + C: Web Blossom, as it always was
 			WebBlossom.use(player);
 			return;
 		}
@@ -617,12 +647,12 @@ public final class WebPower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
-		return inGrace(player) || WebSymbiote.allowsFloating(player) || WebParkour.clinging(player) || WebSkim.skimming(player);
+		return inGrace(player) || WebSymbiote.allowsFloating(player) || WebParkour.clinging(player) || WebSkim.skimming(player) || WebLineRide.riding(player);
 	}
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
-		return inGrace(player) || WebSkim.skimming(player) || WebAirStrikes.diving(player) || WebSymbioteWings.out(player);
+		return inGrace(player) || WebSkim.skimming(player) || WebAirStrikes.diving(player) || WebAttacks.moving(player) || WebSymbioteWings.out(player) || WebLineRide.riding(player);
 	}
 
 	@Override
@@ -638,6 +668,7 @@ public final class WebPower implements Power {
 		WebImpacts.tick(player);
 		WebWhip.tick(player);
 		WebBlossom.tick(player);
+		WebAttacks.tick(player);
 		WebSlam.tick(player);
 		WebBrute.tick(player);
 		WebMorph.tick(player);
@@ -677,8 +708,8 @@ public final class WebPower implements Power {
 		} else if (!coiling && player.getAttached(CHARGING) != null) {
 			player.removeAttached(CHARGING);
 		}
-		if (state.chargeHold) {
-			// the symbiote braces for the landing
+		if (state.chargeHold && !WebSymbiote.bulked(player)) {
+			// the thin suit braces for the landing
 			player.resetFallDistance();
 			if (player.tickCount % 3 == 0) {
 				player.level().sendParticles(WebSymbiote.dust(1.0F), player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.3, 0.05, 0.3, 0.0);
@@ -1096,6 +1127,10 @@ public final class WebPower implements Power {
 				Entity target = player.level().getEntity(state.tetherId);
 				boolean tap = player.level().getGameTime() - state.tetherSince < YANK_TAP_TICKS;
 				releaseTether(player, state);
+				if (tap && target instanceof LivingEntity tapped && WebRisingKick.applies(player, tapped)) {
+					// a tap on a foe already wrapped in web: both webs pull it in and the rising drop kick follows
+					WebRisingKick.start(player, tapped);
+				}
 				if (!tap && target != null && target.isAlive()) {
 					// (a tap only pulls it in: nothing is kept, or tied off)
 					Vec3 eye = player.getEyePosition();
@@ -1322,11 +1357,20 @@ public final class WebPower implements Power {
 			WebShooters.fire(player, WebNet.MAIN, false);
 			return;
 		}
+		if (WebDiveSlam.start(player) || WebZipStrike.start(player)) {
+			// Sneak + Zip looking down in the air is the dive slam; Zip at a webbed foe is the zip strike
+			player.setAttached(COOLDOWNS, new WebCooldowns(now + WebSymbiote.zipCooldown(player), cooldowns.shot(), cooldowns.yank()));
+			thwip(player);
+			return;
+		}
 		Vec3 eye = player.getEyePosition();
 		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(ZIP_RANGE * WebSymbiote.reachScale(player)
 			* WebShooters.rangeScale(player, WebNet.MAIN))));
 		if (hit.getType() == HitResult.Type.MISS) {
 			fwip(player);
+			return;
+		}
+		if (!WebStamina.pay(player, WebStamina.ZIP)) {
 			return;
 		}
 		pullToBlock(player, hit);
@@ -1583,6 +1627,9 @@ public final class WebPower implements Power {
 			}
 			return;
 		}
+		if (!WebStamina.pay(player, WebStamina.YANK)) {
+			return;
+		}
 		// (0.21.23) a Yank mid-fight keeps the streak going
 		com.jaymospowers.combat.HitStreak.kept(player);
 		// a rider is plucked off their mount
@@ -1592,6 +1639,12 @@ public final class WebPower implements Power {
 			player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), now + yankCooldown(player)));
 			thwip(player);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
+			return;
+		}
+		if (player.isShiftKeyDown() && target instanceof LivingEntity victim && WebPin.pin(player, victim)) {
+			// Sneak + Yank: yanked sideways onto the nearest wall, or whipped down onto the ground
+			player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), now + yankCooldown(player)));
+			thwip(player);
 			return;
 		}
 		Vec3 center = target.getBoundingBox().getCenter();
@@ -1615,6 +1668,10 @@ public final class WebPower implements Power {
 			}
 			// the web catches it and pulls it in; let go at once (a tap) and that's all, keep holding and it's on a lead
 			pullIn(target, player);
+			if (target instanceof LivingEntity living) {
+				// yanked from mid-air: up to you instead, into your air combo
+				com.jaymospowers.mortal.AirCombo.pullUp(player, living, true);
+			}
 			// the heavier it is, the harder it hauls back on you
 			WebHeft.recoil(player, target, load);
 			State state = state(player);

@@ -1,6 +1,11 @@
 {
   "replace": false,
   "values": [
+    "minecraft:totem_of_undying",
+    {
+      "id": "jaymoskingdoms:crude_totem",
+      "required": false
+    },
     "jaymospowers:rabbit_foot_charm",
     "jaymospowers:bottled_fairy",
     {
@@ -20,6 +25,7 @@
     "jaymospowers:chorus_totem",
     "jaymospowers:crystal_heart",
     "jaymospowers:ticking_charm",
-    "jaymospowers:clinging_coil"
+    "jaymospowers:clinging_coil",
+    "jaymospowers:toxin_gauge"
   ]
 }

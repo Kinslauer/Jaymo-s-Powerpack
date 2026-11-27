@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class ZFighterHands {
 	/** Held poses. */
-	public static final int NONE = 0, CUP = 1, POINT = 2, PALMS = 3, VOLLEY = 4, ART = 5;
+	public static final int NONE = 0, CUP = 1, POINT = 2, PALMS = 3, VOLLEY = 4, ART = 5, BROW = 6;
 	/** Which hand a throw is from (the right, the left, both). */
 	public static final int RIGHT = 0, LEFT = 1, BOTH = 2;
 	/** Throws: a tapped blast (drawn back, then thrown), a barrage jab, both hands pushed out (a bomb, an NPC's wave). */
@@ -114,7 +114,9 @@ public final class ZFighterHands {
 	/** Every tick, after the wave and barrage: what a player's hands are holding. */
 	static void sync(ServerPlayer player, ZFighterPower.Live live) {
 		int pose = NONE;
-		if (live.waveFrom >= 0) {
+		if (ZFighterInstantStep.posing(player)) {
+			pose = BROW;
+		} else if (live.waveFrom >= 0) {
 			int type = ZFighterTraining.of(player).charged();
 			if (ZFighterArts.charged(type)) {
 				pose = ART;

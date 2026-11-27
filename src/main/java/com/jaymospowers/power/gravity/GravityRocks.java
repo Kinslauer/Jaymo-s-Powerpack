@@ -176,13 +176,21 @@ public final class GravityRocks {
 		});
 	}
 
+	/**
+	 * What gathers and flies as a rock: a rock ({@link FirstTools#rock}), or scrap metal (nuggets, netherite scrap), which
+	 * hits harder ({@link GravityMetal#heft}).
+	 */
+	static boolean stone(ItemStack stack) {
+		return FirstTools.rock(stack) || GravityMetal.scrap(stack);
+	}
+
 	/** Rocks in {@code player}'s inventory (every slot, both hands too). */
 	static int count(Player player) {
 		int rocks = 0;
 		var inventory = player.getInventory();
 		for (int i = 0; i < inventory.getContainerSize(); i++) {
 			ItemStack stack = inventory.getItem(i);
-			if (FirstTools.rock(stack)) {
+			if (stone(stack)) {
 				rocks += stack.getCount();
 			}
 		}
@@ -197,7 +205,7 @@ public final class GravityRocks {
 		int most = 0;
 		for (int i = 0; i < inventory.getContainerSize(); i++) {
 			ItemStack stack = inventory.getItem(i);
-			if (FirstTools.rock(stack)) {
+			if (stone(stack)) {
 				int n = counts.merge(stack.getItem(), stack.getCount(), Integer::sum);
 				if (n > most) {
 					most = n;
@@ -322,7 +330,7 @@ public final class GravityRocks {
 		boolean creative = player.getAbilities().instabuild;
 		for (int i = 0; i < inventory.getContainerSize() && count > 0; i++) {
 			ItemStack stack = inventory.getItem(i);
-			if (FirstTools.rock(stack)) {
+			if (stone(stack)) {
 				int n = Math.min(count, stack.getCount());
 				taken.add(stack.copyWithCount(n));
 				if (!creative) {
@@ -393,7 +401,7 @@ public final class GravityRocks {
 				if (near instanceof Player other && (other.isCreative() || !owner.canHarmPlayer(other))) {
 					continue;
 				}
-				float damage = BURST_PER_ROCK * thrown.count() * (near == struck ? 1.0F : 0.5F);
+				float damage = BURST_PER_ROCK * thrown.count() * GravityMetal.heft(thrown.item()) * (near == struck ? 1.0F : 0.5F);
 				hit(owner, level, near, damage, true);
 				Vec3 push = near.position().subtract(at).multiply(1.0, 0.0, 1.0);
 				if (push.lengthSqr() > 1.0E-4) {
@@ -410,7 +418,8 @@ public final class GravityRocks {
 				}
 				net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
 				if (shatters(state) && level.mayInteract(owner, pos) && owner.mayBuild()) {
-					level.destroyBlock(pos.immutable(), true, owner);
+					boolean returns = com.jaymospowers.core.TerrainReturn.record(level, pos);
+					level.destroyBlock(pos.immutable(), !returns, owner);
 				}
 			}
 		}
@@ -446,7 +455,7 @@ public final class GravityRocks {
 					continue;
 				}
 				flying.struck().add(foe.getId());
-				hit(owner, level, foe, PULSE_PER_ROCK * thrown.count(), true);
+				hit(owner, level, foe, PULSE_PER_ROCK * thrown.count() * GravityMetal.heft(thrown.item()), true);
 				Vec3 push = new Vec3(dx, 0.0, dz);
 				if (push.lengthSqr() > 1.0E-4) {
 					foe.push(push.normalize().scale(PULSE_PUSH).add(0.0, 0.25, 0.0));
@@ -542,7 +551,7 @@ public final class GravityRocks {
 		}
 		if (rocks.target() >= 0 && now == rocks.from() + BALL_FLIGHT && level.getEntity(rocks.target()) instanceof LivingEntity target
 			&& inRange(player, target)) {
-			hit(player, level, target, DAMAGE_PER_ROCK * rocks.count(), false);
+			hit(player, level, target, DAMAGE_PER_ROCK * rocks.count() * GravityMetal.heft(rocks.item()), false);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.MACE_SMASH_GROUND, SoundSource.PLAYERS, 0.9F, 0.8F);
 			puff(level, rocks, target.position().add(0.0, target.getBbHeight() * 0.5, 0.0), 10 + rocks.count() / 2);
 		}
@@ -557,7 +566,7 @@ public final class GravityRocks {
 			return;
 		}
 		if (level.getEntity(rocks.target()) instanceof LivingEntity target && inRange(player, target)) {
-			hit(player, level, target, DAMAGE_PER_ROCK, true);
+			hit(player, level, target, DAMAGE_PER_ROCK * GravityMetal.heft(rocks.item()), true);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.STONE_HIT, SoundSource.PLAYERS, 0.8F,
 				0.9F + level.getRandom().nextFloat() * 0.4F);
 			puff(level, rocks, target.position().add(0.0, target.getBbHeight() * 0.6, 0.0), 3);
@@ -584,7 +593,7 @@ public final class GravityRocks {
 				continue;
 			}
 			grazed.put(foe.getId(), now);
-			hit(player, level, foe, DAMAGE_PER_ROCK, true);
+			hit(player, level, foe, DAMAGE_PER_ROCK * GravityMetal.heft(rocks.item()), true);
 			level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.STONE_HIT, SoundSource.PLAYERS, 0.7F, 1.2F);
 			puff(level, rocks, foe.position().add(0.0, foe.getBbHeight() * 0.5, 0.0), 3);
 		}

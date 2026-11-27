@@ -52,6 +52,12 @@ final class Oddities {
 	/** Powers' tag prefix, and the kinds it marks. */
 	static final String PREFIX = "jaymospowers_odd:";
 	static final String METEOR = "meteor", STAR = "star", SYMBIOTE = "symbiote", SHADE = "shade", POWER = "power/";
+	/**
+	 * Powers' marks beside {@link #SYMBIOTE} on a player in the red or the white suit: the people tell them from the black
+	 * one, and the white puts them in mind of the quiet warrior of the old songs (Andy, 2026-11-25). Their lines are
+	 * {@code symbiote_red} and {@code symbiote_white} where the black one's are {@code symbiote}.
+	 */
+	static final String SYMBIOTE_RED = "symbiote_red", SYMBIOTE_WHITE = "symbiote_white";
 	/** (0.7.76) A villager raised by Darktide as itself, back at its life. */
 	static final String RISEN = "risen";
 	/** The symbiote without a host (an entity type, not a tag). */
@@ -88,7 +94,7 @@ final class Oddities {
 					continue;
 				}
 				REMARKED.put(player.getUUID(), now + KNOWN_TALK_GAP);
-				say(level, p, p.isBaby() ? "child" : "known." + kind, Speech.WHITE, now);
+				say(level, p, p.isBaby() ? "child" : "known." + strain(player, kind), Speech.WHITE, now);
 				return;
 			}
 		}
@@ -391,11 +397,19 @@ final class Oddities {
 			Speech.say(level, v, Component.translatable(line("talk.jaymoskingdoms.odd.fear.host", level.getRandom()), monster.getDisplayName()), Speech.RED, 24.0);
 			SPOKE.put(v.getUUID(), now + TALK_GAP);
 		} else {
-			say(level, v, "fear." + kind, Speech.RED, now);
+			say(level, v, "fear." + strain(monster, kind), Speech.RED, now);
 		}
 		if (!Aliens.ALIEN.equals(kind)) {
-			news(new News(SYMBIOTE.equals(kind) || "host".equals(kind) ? SYMBIOTE : kind, monster.blockPosition(), now, null));
+			news(new News(SYMBIOTE.equals(kind) || "host".equals(kind) ? strain(monster, SYMBIOTE) : kind, monster.blockPosition(), now, null));
 		}
+	}
+
+	/** {@code kind}, or for a symbiote the red or the white one's lines where Powers marks it so ({@link #SYMBIOTE_RED}). */
+	static String strain(Entity e, String kind) {
+		if (!SYMBIOTE.equals(kind)) {
+			return kind;
+		}
+		return has(e, SYMBIOTE_RED) ? SYMBIOTE_RED : has(e, SYMBIOTE_WHITE) ? SYMBIOTE_WHITE : SYMBIOTE;
 	}
 
 	// ---- talk ----------------------------------------------------------------------------------------------------------

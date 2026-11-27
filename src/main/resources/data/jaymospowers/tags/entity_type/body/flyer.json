@@ -18,6 +18,7 @@
 		{
 			"id": "cubeanimals:toucan",
 			"required": false
-		}
+		},
+		{"id": "jaymoskingdoms:deep_gloomwing", "required": false}
 	]
 }

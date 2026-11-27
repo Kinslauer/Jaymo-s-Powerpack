@@ -18,24 +18,32 @@ public final class TreeLocks {
 		SHIELD_MOVES = "shield_moves", SWAT = "swat", TWO_BLADES = "two_blades", THROWER = "thrower", SWEEP_KICK = "sweep_kick",
 		AIR_COMBO = "air_combo", BATTLE_RHYTHM = "battle_rhythm",
 		SECOND_WIND = "second_wind", BATTLE_CRY = "battle_cry", BOXING = "boxing", HAUL_BOUND = "haul_bound", MEDITATE = "meditate",
-		BLOOD = "blood", ANGLER = "angler", ALCHEMIST = "alchemist";
+		ANGLER = "angler", ALCHEMIST = "alchemist", COYOTE_TIME = "coyote_time";
+	/**
+	 * Blood Awakening, learned (Andy, 2026-11-23): a blood's own moves are everyone's from the start, and the perk upgrades
+	 * them. Every wait on one is this share as long (Kingdoms' {@code TreeLocks.AWAKENED_WAIT}).
+	 */
+	public static final float AWAKENED_WAIT = 0.5F;
 
-	private static final Method HAS, REFUSE;
+	private static final Method HAS, REFUSE, AWAKENED;
 
 	static {
-		Method has = null, refuse = null;
+		Method has = null, refuse = null, awakened = null;
 		if (FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
 			try {
 				Class<?> locks = Class.forName("com.jaymoskingdoms.TreeLocks");
 				has = locks.getMethod("has", Player.class, String.class);
 				refuse = locks.getMethod("refuse", Player.class, String.class);
+				awakened = locks.getMethod("awakened", Player.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				has = null;
 				refuse = null;
+				awakened = null;
 			}
 		}
 		HAS = has;
 		REFUSE = refuse;
+		AWAKENED = awakened;
 	}
 
 	private TreeLocks() {
@@ -63,6 +71,23 @@ public final class TreeLocks {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			// nothing to tell
 		}
+	}
+
+	/** Whether {@code player} has learned Blood Awakening (false without Kingdoms). */
+	public static boolean awakened(Player player) {
+		if (AWAKENED == null) {
+			return false;
+		}
+		try {
+			return (boolean)AWAKENED.invoke(null, player);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** {@code ticks} as {@code player} waits them on a blood's move: {@link #AWAKENED_WAIT} of it once they're {@link #awakened}. */
+	public static int wait(Player player, int ticks) {
+		return awakened(player) ? Math.max(1, Math.round(ticks * AWAKENED_WAIT)) : ticks;
 	}
 
 	/** {@link #has}, and if not, {@link #refuse}: whether {@code player} may go on. */

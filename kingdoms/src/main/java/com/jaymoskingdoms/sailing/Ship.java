@@ -73,8 +73,8 @@ import org.jspecify.annotations.Nullable;
  * entity's position is that column's middle at the keel.
  */
 public final class Ship extends Entity {
-	/** The most blocks one ship may hold ((0.7.112) 5000, was 3000: room for Jaki's galleon), and its longest side. */
-	static final int MOST_BLOCKS = 5000, LONGEST = 64;
+	/** The most blocks one ship may hold, and its longest side: room for Jaki's galleon and Moog's long ship (about 6,000 blocks, 83 long). */
+	static final int MOST_BLOCKS = 7000, LONGEST = 96;
 	/** Top speed (blocks/tick): per block of waterline, per (square root of) sail, its paddling speed with no sails, and the most. */
 	static final double PER_LENGTH = 0.04, PER_SAIL = 0.1, PADDLE = 0.05, FASTEST = 0.8;
 	/** How quickly it gathers or loses way (a share of the gap a tick), and its sails set or furled (a share a tick). */
@@ -141,6 +141,8 @@ public final class Ship extends Entity {
 	 * (blocks a tick, at a fresh wind), and how fast a balloon lets down till she lies on the ground or the water (blocks a tick).
 	 */
 	static final double DRIFT_SEA = 0.02, DRIFT_AIR = 0.05, LET_DOWN = 0.008;
+	/** How hard the wind at her height (layers and gusts, {@link Winds#aloft}) pushes a balloon ship that is under way (blocks a tick, at a fresh wind). */
+	static final double LAYER_PUSH = 0.012;
 
 	/** One block of the ship, in its own frame. */
 	public record Piece(int state, int x, int y, int z) {
@@ -169,6 +171,19 @@ public final class Ship extends Entity {
 			ByteBufCodecs.COMPOUND_TAG, Shown::tag, Shown::new);
 	}
 
+	/**
+	 * How deep she sits (blocks from her bottom) when the world made her solid below her deck, as Moog's boats are: the
+	 * lines she was laid on, which she keeps ({@link Hull}). Kept and sent to everyone; none for a ship anyone built.
+	 */
+	public static final AttachmentType<Float> LINES = AttachmentRegistry.create(JaymosKingdoms.id("ship_lines"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.FLOAT).syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
+	/**
+	 * On the level: the helms (packed, as text) of boats the world made, and of ships with {@link #LINES} anchored there,
+	 * each with her lines ({@link #AS_SHE_LIES}: taken from where she lies when she casts off).
+	 */
+	static final AttachmentType<Map<String, Float>> LAID = AttachmentRegistry.create(JaymosKingdoms.id("laid_lines"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.unboundedMap(com.mojang.serialization.Codec.STRING, com.mojang.serialization.Codec.FLOAT)));
+	public static final float AS_SHE_LIES = -1.0F;
 	public static final AttachmentType<List<Shown>> SHOWN = AttachmentRegistry.create(JaymosKingdoms.id("ship_shown"),
 		builder -> builder.syncWith(Shown.STREAM_CODEC.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.all()));
 	/** (0.7.42) The most crew aboard one ship. */
@@ -225,6 +240,7 @@ public final class Ship extends Entity {
 
 	private @Nullable Hull hull;
 	private @Nullable List<Piece> hullOf;
+	private float hullLines = Float.NaN;
 	/** Server: how far its sails are set (0 furled to 1 full), its way (blocks/tick) and its turn (degrees/tick). */
 	private double sail, speed;
 	private static final EntityDataAccessor<Float> SET = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.FLOAT);
@@ -301,9 +317,12 @@ public final class Ship extends Entity {
 		if (pieces == null || pieces.isEmpty()) {
 			return null;
 		}
-		if (this.hull == null || this.hullOf != pieces) {
-			this.hull = new Hull(pieces);
+		Float laid = this.getAttached(LINES);
+		float lines = laid == null ? Float.NaN : laid;
+		if (this.hull == null || this.hullOf != pieces || Float.compare(this.hullLines, lines) != 0) {
+			this.hull = new Hull(pieces, lines);
 			this.hullOf = pieces;
+			this.hullLines = lines;
 		}
 		return this.hull;
 	}
@@ -366,6 +385,25 @@ public final class Ship extends Entity {
 	}
 
 	// ---- casting off ----
+
+	/** The boat whose helm is at {@code helm} was laid on {@code lines} (blocks from her bottom; {@link #AS_SHE_LIES}: as she lies). */
+	public static void laidOn(ServerLevel level, BlockPos helm, float lines) {
+		Map<String, Float> all = new HashMap<>(level.getAttachedOrElse(LAID, Map.of()));
+		all.put(Long.toString(helm.asLong()), lines);
+		level.setAttached(LAID, Map.copyOf(all));
+	}
+
+	/** The lines of the boat whose helm is at {@code helm}, now she casts off (forgotten there), or null if she has none. */
+	private static @Nullable Float takeLaid(ServerLevel level, BlockPos helm) {
+		Map<String, Float> all = level.getAttachedOrElse(LAID, Map.of());
+		Float lines = all.get(Long.toString(helm.asLong()));
+		if (lines != null) {
+			Map<String, Float> rest = new HashMap<>(all);
+			rest.remove(Long.toString(helm.asLong()));
+			level.setAttached(LAID, Map.copyOf(rest));
+		}
+		return lines;
+	}
 
 	/**
 	 * {@code player} casts off the hull whose helm is at {@code helm}: every block joined to it leaves the world and sails
@@ -515,6 +553,11 @@ public final class Ship extends Entity {
 		if (!afloat || !hull.floats) {
 			// she hangs where she was moored
 			ship.aloft = origin.getY() + keel;
+		}
+		// a boat the world made keeps the lines she was laid on (and a ship of hers anchored, hers)
+		Float laid = afloat ? takeLaid(level, helm) : null;
+		if (laid != null) {
+			ship.setAttached(LINES, laid < 0.0F ? sea + 0.9F - y0 : laid);
 		}
 		ship.setAttached(PIECES, hull.pieces);
 		ship.hull();
@@ -765,9 +808,14 @@ public final class Ship extends Entity {
 			gather = HELD_GATHER;
 			this.towed = Vec3.ZERO;
 		}
+		if (flying && !drifting && this.riding <= 0 && this.heldFast <= 0) {
+			// under way in the air, she is still pushed by the wind of her height, gusts and all
+			this.towed = this.towed.add(Winds.aloft(level, from.x, from.y, from.z).scale(LAYER_PUSH * Winds.strength(level, from.x, from.z)));
+		}
 		if (drifting && this.riding <= 0 && this.heldFast <= 0) {
-			// nobody at her wheel: she drifts on the wind, and a balloon lets down slowly till she lies on the ground
-			this.towed = this.towed.add(Winds.way().scale((flying ? DRIFT_AIR : DRIFT_SEA) * Winds.strength(level, from.x, from.z)));
+			// nobody at her wheel: she drifts on the wind (a balloon, on the wind of her height), and lets down slowly till she lies on the ground
+			Vec3 way = flying ? Winds.aloft(level, from.x, from.y, from.z) : Winds.way();
+			this.towed = this.towed.add(way.scale((flying ? DRIFT_AIR : DRIFT_SEA) * Winds.strength(level, from.x, from.z)));
 			if (flying) {
 				this.aloft = Math.max(level.getMinY() + SKY_HEADROOM, this.aloft - LET_DOWN);
 			}
@@ -1253,6 +1301,10 @@ public final class Ship extends Entity {
 		}
 		if (water > 0 && h.helm >= 0) {
 			Flooding.remember(level, where.get(h.helm));
+		}
+		Float lines = this.getAttached(LINES);
+		if (lines != null && h.helm >= 0) {
+			laidOn(level, where.get(h.helm), lines);
 		}
 		// her berths are beds in the world again (Berths)
 		Map<Long, BlockPos> beds = new HashMap<>();

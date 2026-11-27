@@ -49,6 +49,8 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 	static final float MAX_PIXELS = 9.0F;
 	/** Tries for a box that is solid (no side under a pixel: not a flat hair or whisker plane) before taking any. */
 	static final int TRIES = 6;
+	/** A flattened piece is drawn this much wider and thinner. */
+	static final float FLAT_WIDE = 1.5F, FLAT_THIN = 0.3F;
 	/** How deep it has sunk at the end (blocks, for a man's size). */
 	static final float SINK_DEPTH = 0.25F;
 
@@ -59,7 +61,9 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 	 * crushed head's ({@code Gibs#skullCrushed}).
 	 */
 	static final String[][] GORE_BONES = {{}, {"organ", "heart", "liver", "lung", "kidney"}, {"guts", "guts_rope", "guts_loop", "guts_skein"},
-		{"ribs"}, {"spine"}, {"bone"}, {"tatters"}, {"brain"}, {"skull", "jaw"}};
+		{"ribs"}, {"spine"}, {"bone"}, {"tatters"}, {"brain"}, {"skull", "jaw"},
+		// ice shards are the bone shard in pale blue; a sweet is a bone, spine, rib, jaw or skull in a candy colour
+		{"bone"}, {"bone", "spine", "ribs", "jaw", "skull"}};
 	/**
 	 * Where clothes lie on a skin laid out as a player's (64x64; x, y, width, height): the front and back of the trunk,
 	 * an arm and a leg of each side. A scrap is a {@link #PATCH}-pixel square of one of them (smaller on a limb).
@@ -118,6 +122,8 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 		int tint = -1;
 		/** The viewer has blood turned off: not drawn. */
 		boolean hidden;
+		/** Squashed flat by a falling block: drawn wide and thin. */
+		boolean flat;
 	}
 
 	public GibRenderer(EntityRendererProvider.Context context) {
@@ -139,7 +145,9 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 		state.sunk = gib.sunk(partialTicks);
 		state.piece = this.pieces.computeIfAbsent(gib, g -> piece(g, partialTicks));
 		state.tint = tint(gib);
-		state.hidden = bloodOff();
+		// ice and sweets aren't gore: they're drawn whatever the blood setting says
+		state.hidden = (bloodOff() || StreamerSafe.on()) && !gib.clean();
+		state.flat = gib.flat();
 		this.shadowRadius = state.hidden ? 0.0F : 0.12F * state.size * (1.0F - state.sunk);
 	}
 
@@ -200,7 +208,7 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 		poseStack.rotateDegrees(Axis.YP, -state.yaw);
 		// tumbling end over end; at rest (a half turn) it lies as it fell
 		poseStack.rotateDegrees(Axis.ZP, state.spin);
-		poseStack.scale(-scale, -scale, scale);
+		poseStack.scale(-scale * (state.flat ? FLAT_WIDE : 1.0F), -scale * (state.flat ? FLAT_THIN : 1.0F), scale * (state.flat ? FLAT_WIDE : 1.0F));
 		poseStack.translate(-piece.x(), -piece.y(), -piece.z());
 		collector.submitModelPart(piece.part(), poseStack, RenderTypes.entityCutout(piece.texture()), state.lightCoords,
 			OverlayTexture.NO_OVERLAY, piece.uv(), state.tint);
@@ -269,6 +277,9 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 	/** A soft piece's tint: its body's blood, brightened (gut paler and pinker); none for bone, cloth and chunks. */
 	private static int tint(Gib gib) {
 		int piece = gib.piece();
+		if (gib.clean()) {
+			return 0xFF000000 | gib.tint();
+		}
 		if (piece != Gib.ORGAN && piece != Gib.GUTS) {
 			return -1;
 		}

@@ -118,6 +118,8 @@ public final class FarWorlds {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> ROCKS.values().forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(FIELD_ANVIL));
 
+		// the Pale Moon's craters (worldgen/placed_feature/moon_craters.json)
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("moon_craters"), MoonCraterFeature.CODEC);
 		ServerChunkEvents.CHUNK_LOAD.register(FarWorlds::chunkLoaded);
 		AttackBlockCallback.EVENT.register(FarWorlds::tapped);
 		PlayerBlockBreakEvents.BEFORE.register(FarWorlds::beforeBreak);

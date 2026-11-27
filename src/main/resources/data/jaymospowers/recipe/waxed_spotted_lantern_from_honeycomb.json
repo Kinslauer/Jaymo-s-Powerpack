@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "waxed_spotted_lantern",
+  "ingredients": [
+    "jaymospowers:spotted_lantern",
+    "minecraft:honeycomb"
+  ],
+  "result": {
+    "id": "jaymospowers:waxed_spotted_lantern",
+    "count": 1
+  }
+}

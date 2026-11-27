@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:soul_sand"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:soul_jar",
+    "count": 1
+  }
+}

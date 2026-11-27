@@ -44,14 +44,21 @@ public final class Commissions {
 	/**
 	 * One plan given: the design's building id, who gave it (and their name, for the list), and how many of that
 	 * building the settlement had (built or under way) when it was given: it's done once more than that are finished.
+	 * (Village mods patch 5) {@code gift}: the town's own gift of a house to {@code by} ({@link GiftHouses}), handed over
+	 * when it's finished instead of a thank-you.
 	 */
-	public record Commission(String design, UUID by, String byName, int baseline) {
+	public record Commission(String design, UUID by, String byName, int baseline, boolean gift) {
 		public static final Codec<Commission> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("design").forGetter(Commission::design),
 				UUIDUtil.CODEC.fieldOf("by").forGetter(Commission::by),
 				Codec.STRING.optionalFieldOf("by_name", "").forGetter(Commission::byName),
-				Codec.INT.optionalFieldOf("baseline", 0).forGetter(Commission::baseline))
+				Codec.INT.optionalFieldOf("baseline", 0).forGetter(Commission::baseline),
+				Codec.BOOL.optionalFieldOf("gift", false).forGetter(Commission::gift))
 			.apply(i, Commission::new));
+
+		public Commission(String design, UUID by, String byName, int baseline) {
+			this(design, by, byName, baseline, false);
+		}
 	}
 
 	/** Faction id → the plans it was given, oldest first. Kept on the Overworld. */
@@ -153,6 +160,24 @@ public final class Commissions {
 		return true;
 	}
 
+	/**
+	 * (Village mods patch 5) {@code f} builds {@code player} a house of their own, out of its own stores, as it would a plan
+	 * given ({@link GiftHouses}). False if its list is full or its builders build no houses.
+	 */
+	static boolean gift(MinecraftServer server, Faction f, ServerPlayer player, String entryId) {
+		if (catalogueEntry(f, entryId) == null) {
+			return false;
+		}
+		List<Commission> list = new ArrayList<>(of(server, f.id()));
+		if (list.size() >= MAX_WAITING) {
+			return false;
+		}
+		int baseline = Works.of(server, f.id()).count(entryId) + (int)list.stream().filter(c -> c.design().equals(entryId)).count();
+		list.add(new Commission(entryId, player.getUUID(), player.getGameProfile().name(), baseline, true));
+		put(server, f.id(), list);
+		return true;
+	}
+
 	/** Thanks whoever gave a plan that's now finished, and forgets it. */
 	private static void finish(MinecraftServer server) {
 		Map<String, List<Commission>> all = server.overworld().getAttached(COMMISSIONS);
@@ -175,6 +200,11 @@ public final class Commissions {
 					continue;
 				}
 				changed = true;
+				if (c.gift()) {
+					// (Village mods patch 5) the town's gift: theirs now, told when they're next about
+					GiftHouses.built(server, f, c.by(), works, c.design());
+					continue;
+				}
 				ServerPlayer by = server.getPlayerList().getPlayer(c.by());
 				if (by != null) {
 					Reputation.change(by, f, REWARD);
@@ -229,7 +259,7 @@ public final class Commissions {
 		}
 		List<Commission> list = new ArrayList<>(of(server, f.id()));
 		String id = Designs.PREFIX + name;
-		if (!player.isCreative() && list.stream().filter(c -> c.by().equals(player.getUUID())).count() >= MAX_PER_PLAYER) {
+		if (!player.isCreative() && list.stream().filter(c -> !c.gift() && c.by().equals(player.getUUID())).count() >= MAX_PER_PLAYER) {
 			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.commission.yours_waiting", f.name()).withStyle(ChatFormatting.RED));
 			return false;
 		}

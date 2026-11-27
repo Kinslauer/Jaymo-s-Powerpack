@@ -358,7 +358,11 @@ public final class Farmers {
 		BlockPos home = field(farmer);
 		int r = reach(level, farmer, job);
 		List<Animal> kind = level.getEntitiesOfClass(Animal.class, new AABB(home).inflate(r, 3, r), a -> a.isAlive() && a.getClass() == beast.getClass());
-		if (kind.stream().filter(a -> !a.isBaby()).count() > HERD_KEEP) {
+		if (kind.stream().filter(a -> !a.isBaby()).count() > HERD_KEEP && KitchenCompat.wantsCarcass(level, beast.blockPosition())) {
+			// slaughtered for the butcher: a clean kill, its carcass left for them to fetch, hang and work on their hook
+			level.playSound(null, beast.blockPosition(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.8F, 1.0F);
+			beast.hurtServer(level, level.damageSources().generic(), beast.getMaxHealth() * 4.0F);
+		} else if (kind.stream().filter(a -> !a.isBaby()).count() > HERD_KEEP) {
 			// butchered: its meat (and a sheep's wool, a chicken's feathers) into his arms
 			Item meat = beast instanceof AbstractCow ? Items.BEEF : beast instanceof Pig ? Items.PORKCHOP : beast instanceof Sheep ? Items.MUTTON : Items.CHICKEN;
 			bag(farmer, job, new ItemStack(meat, 1 + level.getRandom().nextInt(3)));

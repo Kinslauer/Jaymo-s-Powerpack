@@ -12,8 +12,7 @@ variant/<key>_glow.png     the marks' emissive twin (lit as the Tideborn's are)
 variant/<key>_eyes.png     the stock eye spots in the look's eye colour (VariantLooks has the same colours)
 variant/<key>_fins.png     the Tideborn's own fins in the look's colours (+ _fins_glow), for the looks that keep them
 
-The sources stay ungraded; the optional Excalibur look grades them into its own pack (python -I
-tools/excalibur_style/grade.py). Nothing is copied; all pixel art is drawn here.
+Nothing is copied; all pixel art is drawn here.
 Run from the project root:  python -I tools/gen_tideborn_sea.py
 """
 import math

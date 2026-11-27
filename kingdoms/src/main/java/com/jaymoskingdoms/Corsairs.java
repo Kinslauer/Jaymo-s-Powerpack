@@ -236,6 +236,8 @@ final class Corsairs implements Ship.Captaincy {
 		if (now % 2 == 0) {
 			this.gunnery(level, ship, crew, foe, now);
 		}
+		// her stores: a day's food a day for each hand, hunger when it's gone (Provisions)
+		Provisions.tick(level, ship, crew, now);
 		this.deckwork(level, ship, crew, foe, now);
 		if (crew.side == Crew.Side.WHALER) {
 			Whalers.helm(level, ship, crew);
@@ -381,6 +383,14 @@ final class Corsairs implements Ship.Captaincy {
 			Ship admiral = Navies.admiral(level, crew.faction);
 			want = d < STATION_CLOSE && admiral != null ? admiral.getYRot() : Fleet.bearing(ship, station.x, station.z);
 			sail = d < STATION_CLOSE ? PATROL_SAIL * 0.8 : d < 40.0 ? PATROL_SAIL : CHASE_SAIL;
+		} else if (Provisions.heaveTo(ship, crew)) {
+			// her stores low (or a fish on a line over her side): she lies hove to while her hands fish (Provisions)
+			crew.mode = "fish";
+			crew.wantYaw = ship.getYRot();
+			crew.wantSail = 0.0;
+			crew.row = false;
+			crew.astern = false;
+			return;
 		} else {
 			crew.mode = "patrol";
 			double range = crew.side == Crew.Side.NAVY ? NAVY_PATROL : PATROL;
@@ -714,7 +724,7 @@ final class Corsairs implements Ship.Captaincy {
 				continue;
 			}
 			// (0.7.490) a ship to fight first, else the shore her cove is raiding
-			Vec3 dir = foe != null ? this.lay(level, ship, gun, foe) : this.layAt(level, ship, gun, crew.shore, Vec3.ZERO);
+			Vec3 dir = foe != null ? lay(level, ship, gun, foe) : layAt(level, ship, gun, crew.shore, Vec3.ZERO);
 			if (dir != null && ship.fireGunAlong(level, gun, dir, gunner)) {
 				crew.lastFired = (int)now;
 				if (gunner instanceof net.minecraft.world.entity.Mob m) {
@@ -726,19 +736,19 @@ final class Corsairs implements Ship.Captaincy {
 	}
 
 	/** How the gun at {@code gun} is laid on {@code foe} (her hull, led as she sails), or null if it doesn't bear. */
-	private @Nullable Vec3 lay(ServerLevel level, Ship ship, long gun, Ship foe) {
+	static @Nullable Vec3 lay(ServerLevel level, Ship ship, long gun, Ship foe) {
 		Hull h = foe.hull();
 		if (h == null) {
 			return null;
 		}
-		return this.layAt(level, ship, gun, new Vec3(foe.getX(), foe.getY() + h.minY + Math.max(1.0, h.draft + 0.6), foe.getZ()), foe.drift());
+		return layAt(level, ship, gun, new Vec3(foe.getX(), foe.getY() + h.minY + Math.max(1.0, h.draft + 0.6), foe.getZ()), foe.drift());
 	}
 
 	/**
 	 * (0.7.490) How the gun at {@code gun} is laid on the point {@code aim} (a target moving {@code drift} a tick, led), or null
 	 * if it doesn't bear. The shot it holds sets how fast and how far it flies.
 	 */
-	private @Nullable Vec3 layAt(ServerLevel level, Ship ship, long gun, Vec3 aim, Vec3 drift) {
+	private static @Nullable Vec3 layAt(ServerLevel level, Ship ship, long gun, Vec3 aim, Vec3 drift) {
 		double[] way = ship.gunWay(gun);
 		ShotKind kind = ship.gunKind(gun);
 		if (way == null || kind == null) {
@@ -824,6 +834,10 @@ final class Corsairs implements Ship.Captaincy {
 		ServerPlayer boarder = boarder(level, ship, crew);
 		// (0.7.246) the downed aboard are got up: a hand runs to each
 		Crewmen.care(level, ship, crew, deck, aboard, foe != null);
+		if ((foe != null || boarder != null) && (now + ship.getId()) % 10 == 0) {
+			// a fight: lines in
+			Provisions.lines(ship);
+		}
 		RandomSource random = level.getRandom();
 		java.util.Set<UUID> here = new java.util.HashSet<>();
 		for (LivingEntity hand : aboard) {
@@ -882,6 +896,9 @@ final class Corsairs implements Ship.Captaincy {
 				if (hand instanceof net.minecraft.world.entity.Mob m && m.getTarget() == null) {
 					m.setTarget(boarder);
 				}
+			} else if (foe == null && boarder == null && !monkey && Provisions.fish(level, ship, crew, deck, hand, seat, walk, now)) {
+				// a hand fishing over her side for her stores (or going to her rail to)
+				continue;
 			} else {
 				// a hand: somewhere a few steps off that nobody else is standing at or making for
 				to = this.stroll(crew, deck, aboard, seat, random);

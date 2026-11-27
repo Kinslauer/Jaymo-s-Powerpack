@@ -1,0 +1,54 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:tool_station",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:tool_forge",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:part_builder",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:crafting_station",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:rig_forge",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:star_forge",
+      "required": false
+    },
+    "jaymoskingdoms:immovable_rod",
+    "jaymoskingdoms:climbing_rope",
+    "jaymoskingdoms:endless_jug",
+    "jaymoskingdoms:floating_light",
+    "jaymoskingdoms:smoke_bottle",
+    "jaymoskingdoms:beam_lens",
+    "jaymoskingdoms:bellows_cannon",
+    "jaymoskingdoms:blink_coil",
+    "jaymoskingdoms:chain_hook",
+    "jaymoskingdoms:climbing_claws",
+    "jaymoskingdoms:flame_spitter",
+    "jaymoskingdoms:frost_projector",
+    "jaymoskingdoms:grapple_spinner",
+    "jaymoskingdoms:growth_band",
+    "jaymoskingdoms:gust_bellows",
+    "jaymoskingdoms:hissing_charge",
+    "jaymoskingdoms:jaw_rake",
+    "jaymoskingdoms:ki_blaster",
+    "jaymoskingdoms:lift_rig",
+    "jaymoskingdoms:parry_gauntlet",
+    "jaymoskingdoms:potion_sling",
+    "jaymoskingdoms:rewind_watch",
+    "jaymoskingdoms:smother_pump",
+    "jaymoskingdoms:sonic_horn",
+    "jaymoskingdoms:fire_cannon"
+  ]
+}

@@ -72,6 +72,14 @@ public class SeveredPart extends Entity {
 	private static final EntityDataAccessor<Float> HEIGHT = SynchedEntityData.defineId(SeveredPart.class, EntityDataSerializers.FLOAT);
 	/** (0.15.148) Nailed to a wall by the arrow that took it off (Jaymo's Kingdoms' Archer): it hangs there until picked up. */
 	private static final EntityDataAccessor<Boolean> PINNED = SynchedEntityData.defineId(SeveredPart.class, EntityDataSerializers.BOOLEAN);
+	/**
+	 * Off a body lying dead (Jaymo's Kitchen): how that body looked when it came off, its {@code dressed()} and its
+	 * {@code wear()} (rot, bare bone, char, grey), so the part is drawn as the body is; -1 for a part off the living.
+	 */
+	private static final EntityDataAccessor<Integer> DRESSED = SynchedEntityData.defineId(SeveredPart.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Integer> WEAR = SynchedEntityData.defineId(SeveredPart.class, EntityDataSerializers.INT);
+	/** Looking for room for a part that would start inside the ground: this far up at a time, at most this far (blocks). */
+	static final double FREE_STEP = 0.05, FREE_MOST = 1.0;
 	/** (0.15.148) Where the next head to come off goes instead of flying: nailed at this spot, facing this way (see {@link Dismember#beheadPinned}). */
 	static @org.jspecify.annotations.Nullable Vec3 pinNextAt;
 	static float pinNextYaw;
@@ -146,6 +154,18 @@ public class SeveredPart extends Entity {
 			severed.entityData.set(PINNED, true);
 			severed.setNoGravity(true);
 			pinNextAt = null;
+		} else {
+			severed.free();
+		}
+		// the blood and dirt on the body are on the part too (BloodCoatLayer draws them)
+		com.jaymospowers.core.blood.Bloodied.Coat coat = com.jaymospowers.core.blood.Bloodied.coat(body);
+		if (coat != null && coat.amount() > 0) {
+			severed.setAttached(com.jaymospowers.core.blood.Bloodied.CORPSE_BLOOD,
+				new com.jaymospowers.core.blood.Bloodied.Blood(coat.amount(), coat.color(), coat.laid() > 0 ? coat.laid() : level.getGameTime()));
+		}
+		com.jaymospowers.core.wet.ArmourGrime.Grime grime = com.jaymospowers.core.wet.ArmourGrime.body(body);
+		if (grime != null) {
+			severed.setAttached(com.jaymospowers.core.wet.ArmourGrime.BODY, grime);
 		}
 		if (body instanceof ServerPlayer player) {
 			severed.entityData.set(OWNER, player.getUUID().toString());
@@ -201,8 +221,47 @@ public class SeveredPart extends Entity {
 		severed.entityData.set(HEIGHT, height);
 		severed.entityData.set(LOOK, look.length() > MAX_LOOK ? "{}" : look);
 		severed.blood = blood;
+		severed.free();
 		level.addFreshEntity(severed);
 		return severed;
+	}
+
+	/**
+	 * Off a body lying dead ({@link #drop}): drawn as that body looks, {@code dressed} and {@code wear} as Jaymo's Kitchen
+	 * keeps them, with its blood ({@code null} if it had none).
+	 */
+	public void lookedAs(int dressed, int wear, com.jaymospowers.core.blood.Bloodied.@org.jspecify.annotations.Nullable Blood corpseBlood) {
+		this.entityData.set(DRESSED, dressed);
+		this.entityData.set(WEAR, wear);
+		if (corpseBlood != null) {
+			this.setAttached(com.jaymospowers.core.blood.Bloodied.CORPSE_BLOOD, corpseBlood);
+		}
+	}
+
+	/** The dead body's {@code dressed()} it came off, or -1 for a part off the living. */
+	public int dressed() {
+		return this.entityData.get(DRESSED);
+	}
+
+	/** The dead body's {@code wear()} it came off (0 for a part off the living). */
+	public int wear() {
+		return this.entityData.get(WEAR);
+	}
+
+	/**
+	 * Andy: limbs off dead zombies were "constantly floating or not rendered". A part starting inside the ground (a dead
+	 * body's hand lies against it, often a little into it) went on through it, since what it starts inside doesn't stop it,
+	 * and lay buried, only its outline showing. It starts in the first room above, a little at a time.
+	 */
+	private void free() {
+		for (double up = 0.0; up <= FREE_MOST; up += FREE_STEP) {
+			if (this.level().noCollision(this, this.getBoundingBox().move(0.0, up, 0.0))) {
+				if (up > 0.0) {
+					this.setPos(this.getX(), this.getY() + up, this.getZ());
+				}
+				return;
+			}
+		}
 	}
 
 	/** How {@code body} looks, as saved data (without its gear and the things that don't show). */
@@ -444,6 +503,21 @@ public class SeveredPart extends Entity {
 	}
 
 	/**
+	 * Whether it's litter a town's sexton may bury (Jaymo's Kingdoms, by name): lying loose (not carried, not in a bird's
+	 * talons, not a kept trophy on a hook or a wall), and not a dead player's head they're still looking out of.
+	 */
+	public boolean litter() {
+		if (this.isRemoved() || this.trophy || this.isPassenger() || Carry.carrierOf(this) != null) {
+			return false;
+		}
+		if (part() == Dismember.HEAD && this.level().getServer() != null) {
+			Optional<UUID> owner = owner();
+			return !(owner.isPresent() && this.level().getServer().getPlayerList().getPlayer(owner.get()) instanceof ServerPlayer player && !player.isAlive());
+		}
+		return true;
+	}
+
+	/**
 	 * {@code eater} bites into it: it's tugged toward the jaws, blood flies, and it's chewed. True when that was the last
 	 * of it: it's gone, and sometimes a bone is left on the ground.
 	 */
@@ -564,6 +638,8 @@ public class SeveredPart extends Entity {
 		builder.define(PART, Dismember.HEAD);
 		builder.define(HEIGHT, 1.8F);
 		builder.define(PINNED, false);
+		builder.define(DRESSED, -1);
+		builder.define(WEAR, 0);
 	}
 
 	@Override
@@ -576,6 +652,8 @@ public class SeveredPart extends Entity {
 		this.trophy = input.getBooleanOr("Trophy", false);
 		this.blood = input.getIntOr("Blood", 0x7A0000);
 		this.entityData.set(PINNED, input.getBooleanOr("Pinned", false));
+		this.entityData.set(DRESSED, input.getIntOr("Dressed", -1));
+		this.entityData.set(WEAR, input.getIntOr("Wear", 0));
 		this.setNoGravity(pinned());
 	}
 
@@ -591,5 +669,7 @@ public class SeveredPart extends Entity {
 			output.putBoolean("Trophy", true);
 		}
 		output.putBoolean("Pinned", pinned());
+		output.putInt("Dressed", dressed());
+		output.putInt("Wear", wear());
 	}
 }

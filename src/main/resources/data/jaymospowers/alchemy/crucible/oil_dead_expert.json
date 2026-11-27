@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:dead_grease",
+  "essences": {
+    "death": 13,
+    "shadow": 7,
+    "metal": 4
+  },
+  "result": {
+    "item": "jaymospowers:oil_dead",
+    "count": 1,
+    "grade": "expert"
+  },
+  "research": "hunters_oils"
+}

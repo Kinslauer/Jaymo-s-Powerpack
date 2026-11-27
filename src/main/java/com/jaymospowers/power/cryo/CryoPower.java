@@ -201,6 +201,12 @@ public final class CryoPower implements Power {
 			on ? 1.4F : 0.8F);
 	}
 
+	/** The Blizzard is one press: it can be held charged and loosed on release (UltimateHold). */
+	@Override
+	public boolean ultimateHeld(Player player) {
+		return true;
+	}
+
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
 		if (down) {

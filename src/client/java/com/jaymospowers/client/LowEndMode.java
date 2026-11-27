@@ -45,13 +45,22 @@ public final class LowEndMode {
 
 	/**
 	 * AMD's built-in Radeons, which the game's own guess (it knows Intel's) calls OTHER under OpenGL: "AMD Radeon(TM)
-	 * Graphics", "Radeon Vega 8 Graphics", "Radeon 780M".
+	 * Graphics", "Radeon Vega 8 Graphics", "Radeon 780M", and the Steam Deck's "AMD Custom GPU 0932 (radeonsi, vangogh, ...)"
+	 * (0405 on the first Deck; Mesa names its chip vangogh).
 	 */
-	static final Pattern AMD_BUILT_IN = Pattern.compile("radeon(\\(tm\\))? (vega \\d+ )?graphics|radeon \\d{3}m\\b");
+	static final Pattern AMD_BUILT_IN = Pattern.compile(
+		"radeon(\\(tm\\))? (vega \\d+ )?graphics|radeon \\d{3}m\\b|amd custom gpu \\d{4}|\\bvangogh\\b");
 
 	private static final String FILE = "jaymospowers-low-end.properties";
 	/** Bump to check every install again (for a new rule in a later pack version). */
-	private static final String CHECKED = "checked-v1";
+	private static final String CHECKED = "checked-v2";
+	/**
+	 * (v2, the Steam Deck rule) Checks before this one. An install one of them already found weak isn't switched on
+	 * again: it had its turn, and if low-end mode is off there now, its player chose that with /lowend off.
+	 */
+	private static final String[] EARLIER_CHECKS = {"checked-v1"};
+	/** Set once Cutout Leaves has been switched back on for this install ({@link #leavesOnce}). */
+	private static final String LEAVES_CHECKED = "leaves-v1";
 
 	private static boolean on;
 	/** Why it switched itself on this launch, said once in chat on joining a world. */
@@ -104,11 +113,34 @@ public final class LowEndMode {
 		return Command.SINGLE_SUCCESS;
 	}
 
+	/** True when this install has never launched with the pack: no low-end file yet ({@link NewPlayerDefaults}). */
+	static boolean newInstall() {
+		return !Files.exists(path());
+	}
+
+	/** Switches low-end mode on for a new install ({@link NewPlayerDefaults}); /lowend off puts its starting settings back. */
+	static void switchOnForNewPlayer(Minecraft client) {
+		Properties state = load();
+		if (!Boolean.parseBoolean(state.getProperty("on", "false"))) {
+			switchOn(client, state);
+			save(state);
+		}
+	}
+
 	private static void checkOnce(Minecraft client) {
 		Properties state = load();
 		on = Boolean.parseBoolean(state.getProperty("on", "false"));
+		leavesOnce(client, state);
 		if (state.containsKey(CHECKED)) {
 			return;
+		}
+		for (String earlier : EARLIER_CHECKS) {
+			String found = state.getProperty(earlier);
+			if (found != null && !found.equals("fine")) {
+				state.setProperty(CHECKED, found);
+				save(state);
+				return;
+			}
 		}
 		String why = weakness();
 		state.setProperty(CHECKED, why == null ? "fine" : why);
@@ -117,6 +149,28 @@ public final class LowEndMode {
 			announce = why;
 			JaymosPowers.LOGGER.info("Low-end mode switched on: {}", why);
 		}
+		save(state);
+	}
+
+	/**
+	 * Once per install, Cutout Leaves goes back on where the Fast preset (or low-end mode) had turned it off, so leaves
+	 * aren't drawn solid (FastLeavesMixin keeps it on from now on). A Fast preset is applied again, which now includes
+	 * it and changes nothing else; a Custom one only gets the leaves switched on. Turning it off later is the player's choice.
+	 */
+	private static void leavesOnce(Minecraft client, Properties state) {
+		if (state.containsKey(LEAVES_CHECKED)) {
+			return;
+		}
+		Options options = client.options;
+		if (!options.cutoutLeaves().get()) {
+			if (options.graphicsPreset().get() == GraphicsPreset.FAST) {
+				options.applyGraphicsPreset(GraphicsPreset.FAST);
+			} else {
+				options.cutoutLeaves().set(true);
+			}
+			options.save();
+		}
+		state.setProperty(LEAVES_CHECKED, "true");
 		save(state);
 	}
 

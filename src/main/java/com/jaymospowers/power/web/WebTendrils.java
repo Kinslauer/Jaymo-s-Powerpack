@@ -276,14 +276,14 @@ public final class WebTendrils {
 				return;
 			}
 			if (payload.entityId() == GRAB_BLOCK) {
-				if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator()) {
+				if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator() && WebStamina.pay(player, WebStamina.GRAB)) {
 					rip(player, hand);
 				}
 			} else if (payload.entityId() < 0) {
 				release(player, hand, true);
 			} else if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator()) {
 				Entity target = player.level().getEntity(payload.entityId());
-				if (target != null && target.distanceTo(player) <= GRAB_RANGE + 2.5) {
+				if (target != null && target.distanceTo(player) <= GRAB_RANGE + 2.5 && grabbable(player, target) && WebStamina.pay(player, WebStamina.GRAB)) {
 					grab(player, hand, target, -1L);
 				}
 			}
@@ -761,6 +761,30 @@ public final class WebTendrils {
 		ServerLevel level = player.level();
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 1.0F, 0.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.8F, 0.7F);
+		if (target instanceof LivingEntity living) {
+			// grabbed from mid-air, it's hauled up into your air combo (hit it out of the grip)
+			com.jaymospowers.mortal.AirCombo.pullUp(player, living, false);
+		}
+	}
+
+	/** Whether one of {@code player}'s tendrils holds {@code target}. */
+	public static boolean holds(Player player, Entity target) {
+		Grips grips = player.getAttached(GRIPS);
+		return grips != null && (grips.right() == target.getId() || grips.left() == target.getId());
+	}
+
+	/** If one of {@code player}'s tendrils holds {@code target}, it lets go (dropped, not thrown): the air combo's blow takes it. */
+	public static void letGoOf(ServerPlayer player, Entity target) {
+		Grips grips = player.getAttached(GRIPS);
+		if (grips == null) {
+			return;
+		}
+		if (grips.right() == target.getId()) {
+			letGo(player, WebNet.MAIN, null);
+		}
+		if (grips.left() == target.getId()) {
+			letGo(player, WebNet.OFF, null);
+		}
 	}
 
 	/** That tendril has reached what it holds (or holds nothing). */

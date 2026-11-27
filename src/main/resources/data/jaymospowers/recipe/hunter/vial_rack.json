@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "CCC",
+    "B B",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "B": "minecraft:glass_bottle"
+  },
+  "result": {
+    "id": "jaymospowers:vial_rack",
+    "count": 1
+  }
+}

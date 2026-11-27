@@ -69,7 +69,14 @@ public class InscriptionTableBlock extends Block implements EntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-		if (!(level.getBlockEntity(pos) instanceof InscriptionTableEntity table) || table.gear().isEmpty() && table.gem().isEmpty()) {
+		if (!(level.getBlockEntity(pos) instanceof InscriptionTableEntity table)) {
+			return InteractionResult.PASS;
+		}
+		if (table.gear().isEmpty() && table.gem().isEmpty()) {
+			if (!level.isClientSide() && com.jaymospowers.core.StationHints.idle(player)) {
+				// nothing on it and nothing it takes in hand
+				com.jaymospowers.core.StationHints.tell(player, player.getMainHandItem().isEmpty() ? "inscription.empty" : "inscription.takes");
+			}
 			return InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {

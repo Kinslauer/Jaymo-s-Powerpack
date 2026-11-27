@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:copper_block",
+    "minecraft:glass_bottle",
+    "minecraft:coal"
+  ],
+  "result": {
+    "id": "jaymospowers:pod_module_extra_tank",
+    "count": 1
+  }
+}

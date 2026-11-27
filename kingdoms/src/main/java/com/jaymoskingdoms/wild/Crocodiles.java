@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Enemy;
 
 /**
@@ -23,13 +24,14 @@ import net.minecraft.world.entity.monster.Enemy;
  * leaves you be unless you walk right up to it. Nothing about the crocodile itself is changed, only how far it looks.
  * It takes monsters too (Andy, 2026-11-22: "crocodiles in the overworld should also be hostile to other hostile
  * mobs"): a crocodile with nothing in its jaws goes for the nearest monster it can see within that same reach, so a
- * zombie that wades into its river is food like anything else.
+ * zombie that wades into its river is food like anything else. It takes big beasts too, the bigger the likelier
+ * ({@link #takePrey}), and Naturalist's alligator hunts the same way ({@link DeathRoll#JAWS}).
  */
 public final class Crocodiles {
-	/** Cube Animals' crocodile. */
-	static final Identifier CROCODILE = Identifier.fromNamespaceAndPath("cubeanimals", "crocodile");
 	/** Blocks of notice added in water or at night (its own 6 becomes 16). */
 	static final double HUNT_RANGE = 10.0;
+	/** Blocks added to the distance when weighing prey by size (the bigger, the more a far beast is worth the swim). */
+	static final double PREY_BIAS = 4.0;
 	/** How often it's checked (ticks). */
 	static final int CHECK_TICKS = 20;
 
@@ -40,8 +42,9 @@ public final class Crocodiles {
 	}
 
 	public static void register() {
+		DeathRoll.register();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof Mob mob && CROCODILE.equals(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()))) {
+			if (entity instanceof Mob mob && DeathRoll.jaws(mob)) {
 				CROCODILES.add(mob);
 			}
 		});
@@ -54,23 +57,47 @@ public final class Crocodiles {
 				if (croc.isAlive()) {
 					hunt(croc, !croc.isBaby() && (croc.isInWater() || croc.level().isDarkOutside()));
 					if (!croc.isBaby() && croc.getTarget() == null) {
-						takeMonster(croc);
+						takePrey(croc);
+						if (croc.getTarget() == null && croc.level() instanceof net.minecraft.server.level.ServerLevel level) {
+							// (nothing in sight: it goes where the fish crowd, or where the herds come down to drink and cross)
+							FishEaters.shoals(level, croc);
+							HerdWays.crocodile(level, croc);
+						}
+					}
+					if (!croc.isBaby()) {
+						// (the villagers who see it keep clear, warn the rest and call the guards)
+						com.jaymoskingdoms.CrocWatch.seen(croc);
 					}
 				}
 			}
 		});
 	}
 
-	/** Sets the crocodile on the nearest monster in sight within its notice range (not another crocodile). */
-	private static void takeMonster(Mob croc) {
+	/**
+	 * Sets the crocodile on prey in sight within its notice range: a monster, or (Andy, 2026-11-25: "go after bigger
+	 * prey") a wild beast, the bigger the likelier ({@link #PREY_BIAS}: a cow or a deer before a chicken, a near one before
+	 * a far one). Never another crocodile or alligator, or a beast too big for its jaws ({@link DeathRoll.Jaws#mostPrey});
+	 * pets are taken like any beast (Andy: "they will NOT leave pets alone. nothing is safe"). An alligator goes for beasts
+	 * only from the water. In the water both take fish too (Andy: "you should be able to see them hunting fish"), when
+	 * nothing bigger is about. A fed one takes up nothing (Jaymo's Kitchen's scavengers).
+	 */
+	private static void takePrey(Mob croc) {
 		double reach = croc.getAttributeValue(Attributes.FOLLOW_RANGE);
+		DeathRoll.Jaws jaws = DeathRoll.jawsOf(croc);
+		double most = DeathRoll.bulk(croc) * jaws.mostPrey();
+		boolean beasts = !jaws.fromWater() || croc.isInWater();
 		LivingEntity prey = null;
-		double best = reach * reach;
+		double best = 0.0;
 		for (LivingEntity e : croc.level().getEntitiesOfClass(LivingEntity.class, croc.getBoundingBox().inflate(reach),
-				e -> e instanceof Enemy && e.isAlive() && e.getType() != croc.getType())) {
-			double d = e.distanceToSqr(croc);
-			if (d < best && croc.hasLineOfSight(e)) {
-				best = d;
+				e -> e.isAlive() && !DeathRoll.jaws(e) && (e instanceof Enemy || beasts && e instanceof Animal animal
+					&& DeathRoll.bulk(animal) <= most || croc.isInWater() && e instanceof net.minecraft.world.entity.animal.fish.AbstractFish))) {
+			double d = Math.sqrt(e.distanceToSqr(croc));
+			if (d > reach) {
+				continue;
+			}
+			double score = (e instanceof Enemy ? DeathRoll.bulk(croc) : DeathRoll.bulk(e)) / (d + PREY_BIAS);
+			if (score > best && croc.hasLineOfSight(e)) {
+				best = score;
 				prey = e;
 			}
 		}

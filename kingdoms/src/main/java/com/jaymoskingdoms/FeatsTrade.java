@@ -42,6 +42,14 @@ public final class FeatsTrade {
 		KitchenCompat.registerChef();
 	}
 
+	/** Everybody's Friend: a reputation gain with a settlement that does not know you yet (under {@code STRANGER}) comes {@code FRIEND_WARMER} times over. */
+	static final int STRANGER = 100;
+	static final float FRIEND_WARMER = 1.5F;
+
+	static int friendly(ServerPlayer player, int stored, int by) {
+		return by > 0 && stored < STRANGER && Feats.has(player, Feat.EVERYBODYS_FRIEND) ? Math.round(by * FRIEND_WARMER) : by;
+	}
+
 	/** A feat was just taken: the ones with something to give at once. */
 	static void taken(ServerPlayer player, Feat feat) {
 		if (feat != Feat.LINGUIST) {

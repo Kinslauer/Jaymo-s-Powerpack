@@ -242,6 +242,10 @@ final class Couriers {
 		Faction f = Factions.around(level.getServer(), level, v.blockPosition(), REALM_RANGE);
 		if (f == null || Reputation.get(sender, f.id()) < LEAST_REP) {
 			say(level, v, "refuse");
+			if (f != null) {
+				// (refusal hints) your name in their realm
+				RefusalHints.hint(sender, v, RefusalHints.Cause.REPUTE, Component.literal(f.name()));
+			}
 			return;
 		}
 		UUID to = Post.resolve(level.getServer(), letter.to());

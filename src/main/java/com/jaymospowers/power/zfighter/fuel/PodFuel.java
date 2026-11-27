@@ -51,12 +51,14 @@ public final class PodFuel {
 	public static final int MAX_GRADE = 3;
 	/** What one of each fuel puts in the tank (fuel units, out of {@code ZFighterSpace.MAX_FUEL}). */
 	public static final int COAL_BLOCK = 9, BLAZE_ROD = 3, BLAZE_POWDER = 2, COAL = 1, POD_SPIRIT_WORTH = 2, EMBER_WORTH = 4;
+	/** A fuel can (the Fuel Works' coal, tinned): worth this much fuel, grade 1 like the coal it was. Blaze powder stays the rich fuel. */
+	public static final int FUEL_CAN_WORTH = 4;
 	/** The Cinder Ember: the chance a block broken beside lava on Cinder gives one. */
 	public static final float EMBER_CHANCE = 0.08F;
 	/** The research that teaches the Fuel Still. */
 	public static final String STILL_RESEARCH = "fuel_still";
 
-	public static Item POD_SPIRIT, CINDER_EMBER;
+	public static Item POD_SPIRIT, CINDER_EMBER, FUEL_CAN;
 
 	private PodFuel() {
 	}
@@ -64,9 +66,11 @@ public final class PodFuel {
 	public static void init() {
 		POD_SPIRIT = register("pod_spirit", Rarity.UNCOMMON);
 		CINDER_EMBER = register("cinder_ember", Rarity.RARE);
+		FUEL_CAN = register("fuel_can", Rarity.COMMON);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(POD_SPIRIT);
 			output.accept(CINDER_EMBER);
+			output.accept(FUEL_CAN);
 		});
 		Research.register(new Research.Entry(STILL_RESEARCH, Research.Category.CRUCIBLE, () -> POD_SPIRIT,
 			EssenceList.of(Essence.FIRE, 10, Essence.SPIRIT, 6), List.of("alembic"), 0, 2, 2));
@@ -105,7 +109,7 @@ public final class PodFuel {
 
 	/** The grade of one {@code stack} as fuel: 1 to 3, or 0 when it isn't fuel. */
 	public static int grade(ItemStack stack) {
-		if (stack.is(Items.COAL_BLOCK) || stack.is(Items.COAL) || stack.is(Items.CHARCOAL)) {
+		if (stack.is(Items.COAL_BLOCK) || stack.is(Items.COAL) || stack.is(Items.CHARCOAL) || stack.is(FUEL_CAN)) {
 			return 1;
 		}
 		if (stack.is(Items.BLAZE_ROD) || stack.is(Items.BLAZE_POWDER) || stack.is(POD_SPIRIT)) {
@@ -127,6 +131,9 @@ public final class PodFuel {
 		}
 		if (stack.is(POD_SPIRIT)) {
 			return POD_SPIRIT_WORTH;
+		}
+		if (stack.is(FUEL_CAN)) {
+			return FUEL_CAN_WORTH;
 		}
 		if (stack.is(CINDER_EMBER)) {
 			return EMBER_WORTH;

@@ -3,6 +3,8 @@ package com.jaymoskingdoms.disasters;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import java.util.ArrayList;
+import java.util.List;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -30,6 +32,7 @@ import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRuleCategory;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.6.12) Natural disasters, stage 1: storm fronts ({@link Storms}) and tornadoes ({@link Tornadoes}), the instruments
@@ -222,6 +225,13 @@ public final class Disasters {
 			c.getSource().sendFailure(Component.translatable("disaster.jaymoskingdoms.overworld"));
 			return 0;
 		}
+		tornadoAt(level, p, size);
+		c.getSource().sendSuccess(() -> Component.translatable("disaster.jaymoskingdoms.formed"), true);
+		return 1;
+	}
+
+	/** A tornado of {@code size} 60 blocks ahead of {@code p}, under a supercell coming their way (a dust devil has none). */
+	private static void tornadoAt(ServerLevel level, ServerPlayer p, int size) {
 		Vec3 look = p.getLookAngle().multiply(1.0, 0.0, 1.0);
 		look = look.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : look.normalize();
 		Vec3 at = p.position().add(look.scale(60.0));
@@ -235,7 +245,32 @@ public final class Disasters {
 			storm.vz = -look.z * speed;
 		}
 		Tornadoes.spawn(level, size, storm, at.x, at.z, level.getRandom());
-		c.getSource().sendSuccess(() -> Component.translatable("disaster.jaymoskingdoms.formed"), true);
-		return 1;
+	}
+
+	/**
+	 * Andy (2026-11-24): a patron's colossus hunting someone "should also summon a random natural disaster as it chases, like
+	 * tornado earthquake or tsunami" ({@link com.jaymoskingdoms.colossus.Colossi}). One of those three, by chance, on
+	 * {@code target} in the Overworld: a tornado ahead of them, a quake under them, or a wave on the nearest shore (only
+	 * with a sea in reach). Which one came ("tornado", "quake", "tsunami"), or null if none could.
+	 */
+	public static @Nullable String wrath(ServerPlayer target) {
+		if (!(target.level() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
+			return null;
+		}
+		List<String> kinds = new ArrayList<>(List.of("tornado", "quake"));
+		if (Tsunamis.coastNear(level, target.blockPosition()) != null) {
+			kinds.add("tsunami");
+		}
+		java.util.Collections.shuffle(kinds, new java.util.Random(level.getRandom().nextLong()));
+		for (String kind : kinds) {
+			if (kind.equals("tornado")) {
+				tornadoAt(level, target, Tornado.TORNADO);
+				return kind;
+			}
+			if (Calamities.start(level, target, kind, level.getRandom())) {
+				return kind;
+			}
+		}
+		return null;
 	}
 }

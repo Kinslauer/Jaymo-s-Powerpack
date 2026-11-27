@@ -4,6 +4,7 @@ import com.jaymoskingdoms.BuriedRooms;
 import com.jaymoskingdoms.Foundations;
 import com.jaymoskingdoms.GolemLairs;
 import com.jaymoskingdoms.Hearths;
+import com.jaymoskingdoms.Overgrowth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * After a structure's pieces are placed in a chunk, rooms left full of earth are dug out ({@link BuriedRooms}), the gaps under any that float are filled ({@link Foundations}), and a
  * village's fires get stone hearths and chimneys ({@link Hearths}), and (0.7.333) dungeons may get a rogue clockwork golem
- * ({@link GolemLairs}).
+ * ({@link GolemLairs}), and a village's rooms are cleared of the leaves and cobwebs in folk's way ({@link Overgrowth#tidy}).
  */
 @Mixin(StructureStart.class)
 abstract class StructureStartMixin {
@@ -31,5 +32,6 @@ abstract class StructureStartMixin {
 		Foundations.fill(level, self.getStructure(), self.getPieces(), chunkBB);
 		Hearths.build(level, self.getStructure(), self.getPieces(), chunkBB);
 		GolemLairs.place(level, self, chunkBB);
+		Overgrowth.tidy(level, self.getStructure(), self.getPieces(), chunkBB);
 	}
 }

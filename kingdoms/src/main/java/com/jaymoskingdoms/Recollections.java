@@ -7,10 +7,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -125,6 +127,11 @@ public final class Recollections {
 		SAW_DEATHLESS(0, 90, true, true, "You saw %1$s, one of the Pallid, lie dead and get up again where they fell (%3$s times that day).",
 			"%3$s saw %1$s, one of the Pallid, lie dead and get up again."),
 		/** {@link BlightSpread}: cured them of the Hollow's blight before it turned them. */
+		/** {@link BloodAsk}: a vampire asked to drink, and they let them; or they would not. */
+		LET_DRINK(2, 60, true, false, "%1$s asked to drink your blood, and you let them.", ""),
+		REFUSED_DRINK(-2, 60, true, false, "%1$s asked to drink your blood, and you refused.", ""),
+		/** {@link Takers}: followed them through the night, and was seen. */
+		TAILED(-2, 30, true, false, "You followed %1$s through the night and %1$s saw you do it.", ""),
 		CURED_BLIGHT(6, 240, true, true, "%1$s cured you of the Hollow's blight when it would have made you one of the dead.",
 			"%1$s cured %3$s of the Hollow's blight before it turned them.");
 
@@ -173,6 +180,19 @@ public final class Recollections {
 	static final float SHARE_CHANCE = 0.35F;
 	/** (0.7.380) How long what last happened between you stays what they talk of first (ticks: ten minutes). */
 	static final long FRESH_TICKS = 12000L;
+	/**
+	 * Andy (2026-11-26): "she didnt leave your sight so saying she remembers doesnt make sense." Something that passed
+	 * between you this long ago or less (ticks: three minutes), with them still in sight of you and this near (blocks), is
+	 * still going on: they carry on from it ({@code recall.jaymoskingdoms.just.*}) instead of recalling it.
+	 */
+	static final long JUST_TICKS = 20L * 60L * 3L;
+	static final double JUST_RANGE = 16.0;
+	/** Kinds with lines of their own for carrying on; any other uses the warm, cold or plain ones by how it sways them. */
+	static final Set<Kind> JUST_OWN = EnumSet.of(Kind.GIFT, Kind.FED, Kind.KIND, Kind.PLAYED, Kind.HUGGED,
+		Kind.KISSED, Kind.REBUFFED, Kind.RUDE, Kind.LIED, Kind.THREATENED, Kind.STRUCK, Kind.ROBBED, Kind.SAVED, Kind.MENDED,
+		Kind.FREED, Kind.CARRIED, Kind.GOT_UP, Kind.TENDED, Kind.SHIELDED, Kind.QUEST_DONE, Kind.LETTER, Kind.BRIBED);
+	/** Lines for carrying on, per kind and for the warm, cold and plain ones. */
+	static final int JUST_REMARKS = 2;
 	/** The chance, in an MCA chat, that they bring up something they remember and haven't yet said. */
 	public static final float CHAT_REMARK_CHANCE = 0.5F;
 	/** Ways a villager has of refusing to chat with someone they bear too much ill will. */
@@ -576,7 +596,38 @@ public final class Recollections {
 			return null;
 		}
 		markTold(who, player, last);
-		return line(last, nameTo(player, who), random);
+		return say(who, player, last, random);
+	}
+
+	/**
+	 * {@code who} has had something to do with {@code player} themselves (not only heard of them), however long ago. Andy
+	 * (2026-11-26): "if you interact with an npc before greeting and introductions it should skip the wave".
+	 */
+	public static boolean dealtWith(LivingEntity who, ServerPlayer player) {
+		for (Recollection r : of(who, player)) {
+			if (!r.heard()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** {@code r} only just happened, and {@code player} hasn't left {@code who}'s sight since ({@link #JUST_TICKS}). */
+	private static boolean justNow(LivingEntity who, ServerPlayer player, Recollection r) {
+		return !r.heard() && r.at() > 0L && who.level().getGameTime() - r.at() <= JUST_TICKS && who.level() == player.level()
+			&& who.distanceTo(player) <= JUST_RANGE && who.hasLineOfSight(player);
+	}
+
+	/** {@code r} in {@code who}'s words to {@code player}: carried on from if it only just happened, else recalled. */
+	private static Component say(LivingEntity who, ServerPlayer player, Recollection r, RandomSource random) {
+		Component name = nameTo(player, who);
+		if (!justNow(who, player, r)) {
+			return line(r, name, random);
+		}
+		Kind k = r.type();
+		String set = k == Kind.FED && HandedFood.eating(who) ? "fed_eating"
+			: k != null && JUST_OWN.contains(k) ? k.key() : r.sway() > 0 ? "warm" : r.sway() < 0 ? "cold" : "plain";
+		return Component.translatable("recall.jaymoskingdoms.just." + set + "." + random.nextInt(JUST_REMARKS), name, r.detail(), r.count());
 	}
 
 	/** {@code who} has something about {@code player} they've not yet said. */
@@ -591,7 +642,22 @@ public final class Recollections {
 			return null;
 		}
 		markTold(who, player, r);
-		return line(r, nameTo(player, who), random);
+		return say(who, player, r, random);
+	}
+
+	/**
+	 * (Refusal hints) The worst {@code who} holds against {@code player}, in the words they'd bring it up with: what they
+	 * say when that is why they won't ({@link RefusalHints}). Null if they hold nothing against them.
+	 */
+	static @Nullable Component worstLine(LivingEntity who, ServerPlayer player, RandomSource random) {
+		Recollection worst = null;
+		for (Recollection r : of(who, player)) {
+			Kind k = r.type();
+			if (k != null && k.remark && r.sway() < 0 && (worst == null || r.sway() < worst.sway())) {
+				worst = r;
+			}
+		}
+		return worst == null ? null : line(worst, nameTo(player, who), random);
 	}
 
 	private static Component line(Recollection r, Component name, RandomSource random) {

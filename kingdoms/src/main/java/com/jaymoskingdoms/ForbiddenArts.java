@@ -24,7 +24,7 @@ public final class ForbiddenArts {
 	static final int DEATH_CORRUPTION = 1, BLOOD_CORRUPTION = 2, RAISING_CORRUPTION = 2;
 
 	/** The forbidden spells a scroll or a staff can hold. */
-	static final List<String> DEATH_SPELLS = List.of("raising", "draining", "blight", "whispers", "speak_with_dead", "deaths_door", "dominion");
+	static final List<String> DEATH_SPELLS = List.of("raising", "draining", "blight", "whispers", "speak_with_dead", "deaths_door", "dominion", "reap_a_soul");
 	static final List<String> BLOOD_SPELLS = List.of("hemorrhage", "blood_grip", "frenzy");
 	/** Forbidden, and neither death's nor blood's: the flame that does not go out ({@link ElementSpells}). */
 	static final List<String> FLAME_SPELLS = List.of("black_flame");
@@ -74,6 +74,6 @@ public final class ForbiddenArts {
 	/** (0.7.465) {@code player}'s spirit stops a forbidden cast before it's made (the Grue is near): true if it did, and the cast mustn't happen. */
 	static boolean stayed(Player player) {
 		// (or a pact that forbids it, the Lantern Warden's: refused, unless it's broken on purpose, {@link Vows})
-		return player instanceof ServerPlayer sp && (!Vows.allows(sp, "dark_arts") || com.jaymoskingdoms.spirits.Grue.stayHand(sp));
+		return player instanceof ServerPlayer sp && (PowersCompat.snuffed(sp) || !Vows.allows(sp, "dark_arts") || com.jaymoskingdoms.spirits.Grue.stayHand(sp));
 	}
 }

@@ -32,7 +32,7 @@ final class StoryHoldScreen extends Screen {
 	 * continue saying what it does now". So under the title a hint ({@code gui.jaymoskingdoms.story.hint.<1..HINTS>}) shows
 	 * for HINT_MS each, from a random one on. Widest a hint may run.
 	 */
-	private static final int HINTS = 207, HINT_W = 320;
+	private static final int HINTS = 296, HINT_W = 320;
 	private static final long HINT_MS = 7000L;
 	/** Andy: "load screen hints should animate a wipe in and out". Each wipe (left to right) takes this long (ms). */
 	private static final long WIPE_MS = 450L;
@@ -218,6 +218,11 @@ final class StoryHoldScreen extends Screen {
 	}
 
 	private static void narrate() {
+		// (squelched, nothing is read; let speak again, the title is read from the top)
+		if (NarratorSetting.squelched()) {
+			hush(Minecraft.getInstance());
+			return;
+		}
 		// (0.7.400) Andy: "all the narrator should say here is your story is being written." So only the title is read,
 		// once, and not what the hold is for. (0.7.360) the life story's narrator never reads over this one.
 		if (read.isEmpty()) {
@@ -245,6 +250,12 @@ final class StoryHoldScreen extends Screen {
 
 	static boolean holding() {
 		return !holding.isEmpty() || landing;
+	}
+
+	/** Andy: "can you make a button in the story to squelch the narrator?" In the top right corner, as on the life story. */
+	@Override
+	protected void init() {
+		addRenderableWidget(NarratorSetting.button(this.width - 4 - NarratorSetting.SIZE, 4));
 	}
 
 	@Override

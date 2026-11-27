@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * throat in one hand ({@link #GRABBING}, synced: the client's {@code BloodGrabPose}) and holds it up in front of them, its
  * feet off the ground, while they walk ({@link #place}). Held, it can't fight back (its AI waits) and is drunk from
  * every {@link #DRAIN_EVERY} ticks, twice the bite's pace, so it dies twice as fast. Letting go of use while it still lives
- * throws it hard the way they look ({@link #THROW_SPEED}); a vampire well fed ({@link #NOURISHED_FOOD}) throws it through
+ * throws it hard the way they look ({@link #THROW_SPEED}); a vampire well fed ({@link VampireBlood#nourished}) throws it through
  * whatever is softer than stone ({@link #breakable}) for the first {@link #BREAK_RANGE} blocks of its flight. It dies in the
  * hold, the vampire is hurt off it or downed, or it's torn away, and it's simply dropped.
  * <p>
@@ -88,8 +88,7 @@ public final class BloodGrab {
 	static final int CARRY_SLOWNESS = 0;
 	/** The throw: speed along the look (blocks a tick) and lift. */
 	static final double THROW_SPEED = 1.7, THROW_LIFT = 0.3;
-	/** Food level from which a vampire is fed enough to throw through what's softer than stone, and how far that lasts (blocks). */
-	static final int NOURISHED_FOOD = 16;
+	/** How far a nourished vampire ({@link VampireBlood#NOURISHED} mB; a dhampir, sixteen food points) throws a body through what's softer than stone (blocks). */
 	static final double BREAK_RANGE = 6.0;
 	/** A thrown body is watched this long (ticks); it's hurt this much for slamming into something at speed (at least this fast, b/t). */
 	static final int THROWN_TICKS = 30;
@@ -176,9 +175,9 @@ public final class BloodGrab {
 		return HOLDS.containsKey(player.getUUID());
 	}
 
-	/** Prey a hand can hold up: the bite's people and the Nether's piglins and Hornkin, never a player; (0.7.625) downed ones too, but not one being carried. */
+	/** Prey a hand can hold up: the bite's people and the Nether's piglins and Hornkin, never a player; (0.7.625) downed ones too, but not one being carried, nor one in a hunter's coat or a garlic wreath. */
 	static boolean prey(LivingEntity e) {
-		return !(e instanceof net.minecraft.world.entity.player.Player) && (Vampires.person(e) || Vampires.netherPrey(e)) && !e.isPassenger();
+		return !(e instanceof net.minecraft.world.entity.player.Player) && (Vampires.person(e) || Vampires.netherPrey(e)) && !e.isPassenger() && !HunterKit.refusesGrab(e);
 	}
 
 	static void start(ServerPlayer player, int id) {
@@ -240,6 +239,11 @@ public final class BloodGrab {
 			// (a grab asks in start; a bite here)
 			return false;
 		}
+		if (Servants.calm(player, target)) {
+			// one held by the stare is drunk from calmly: no grab, no blow, and it never turns them (Night's Blood: servants)
+			VampirePlayers.drink(level, player, target, true, false);
+			return true;
+		}
 		if (prey(target) && !isHeld(target)) {
 			start(player, target.getId());
 			return holding(player);
@@ -254,7 +258,8 @@ public final class BloodGrab {
 
 	/** Who Feed would take: any it can, the one in the crosshair first, else the nearest within {@link #FEED_CONE} of the look. */
 	static boolean feedable(ServerPlayer player, LivingEntity e) {
-		return e != player && e.isAlive() && !e.isSpectator() && (prey(e) || SleepingPrey.prey(e) || Vampires.person(e) || Vampires.netherPrey(e));
+		return e != player && e.isAlive() && !e.isSpectator() && (prey(e) || SleepingPrey.prey(e) || Vampires.person(e) || Vampires.netherPrey(e)
+			|| Servants.calm(player, e));
 	}
 
 	static @Nullable LivingEntity feedTarget(ServerPlayer player) {
@@ -297,6 +302,7 @@ public final class BloodGrab {
 	static void release(ServerPlayer player, boolean toss) {
 		Hold hold = HOLDS.remove(player.getUUID());
 		player.removeAttached(GRABBING);
+		BloodBottling.endHold(player);
 		if (hold == null) {
 			return;
 		}
@@ -313,7 +319,7 @@ public final class BloodGrab {
 		Vec3 look = player.getLookAngle();
 		target.setDeltaMovement(look.scale(THROW_SPEED).add(0.0, THROW_LIFT, 0.0));
 		target.needsSync = true;
-		boolean breaks = player.getFoodData().getFoodLevel() >= NOURISHED_FOOD;
+		boolean breaks = VampireBlood.nourished(player);
 		THROWS.put(target.getUUID(), new Throw(target, player, target.position(), level.getGameTime(), breaks));
 		if (breaks) {
 			// clear its first tick's path now, before it moves into it
@@ -335,6 +341,7 @@ public final class BloodGrab {
 				it.remove();
 				if (player != null) {
 					player.removeAttached(GRABBING);
+					BloodBottling.endHold(player);
 				}
 				if (target instanceof Mob mob) {
 					mob.setNoAi(hold.hadNoAi);

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:honey_fungus"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/honey_fungus"
+}

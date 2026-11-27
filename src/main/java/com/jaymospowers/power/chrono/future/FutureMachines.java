@@ -71,6 +71,7 @@ public final class FutureMachines {
 	static void check(ServerLevel level, ServerPlayer player) {
 		RandomSource random = level.getRandom();
 		FutureOmens.check(level, player);
+		FutureRigs.check(level, player);
 		if (random.nextInt(PATROL_CHANCE) == 0
 			&& level.getEntitiesOfClass(FutureAndroid.class, player.getBoundingBox().inflate(NEAR), FutureAndroid::isAlive).size() < ANDROID_CAP) {
 			BlockPos at = spot(level, player, random);

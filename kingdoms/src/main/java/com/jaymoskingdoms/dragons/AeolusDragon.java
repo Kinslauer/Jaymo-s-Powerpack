@@ -186,7 +186,7 @@ public class AeolusDragon extends WindDragon {
 			case FIRE -> DragonBreath.breathe(level, this, mouth, aim, now, griefing);
 			case FROST -> DragonFrost.breathe(level, this, mouth, aim, now, griefing);
 			case ACID -> this.acid.breathe(level, this, mouth, aim, now);
-			default -> DragonStorm.breathe(level, this, mouth, aim, now, griefing && level.isThundering());
+			default -> DragonStorm.breathe(level, this, mouth, aim, now, griefing && level.isThundering(), griefing);
 		}
 	}
 

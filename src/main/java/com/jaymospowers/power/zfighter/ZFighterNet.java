@@ -285,13 +285,55 @@ public final class ZFighterNet {
 		}
 	}
 
+	/** Server -> client: entity ids currently caught inside your held beam (outlined red on the firer's screen). */
+	public record BeamTargets(int[] ids) implements CustomPacketPayload {
+		public static final Type<BeamTargets> TYPE = new Type<>(JaymosPowers.id("zfighter_beam_targets"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, BeamTargets> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				int count = Math.min(p.ids.length, 64);
+				buf.writeVarInt(count);
+				for (int i = 0; i < count; i++) {
+					buf.writeVarInt(p.ids[i]);
+				}
+			},
+			buf -> {
+				int count = Math.min(buf.readVarInt(), 64);
+				int[] ids = new int[count];
+				for (int i = 0; i < count; i++) {
+					ids[i] = buf.readVarInt();
+				}
+				return new BeamTargets(ids);
+			});
+
+		@Override
+		public Type<BeamTargets> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client -> server: Sneak+X held to raise Overburn stages (true) or released (false). */
+	public record OverburnHold(boolean down) implements CustomPacketPayload {
+		public static final Type<OverburnHold> TYPE = new Type<>(JaymosPowers.id("zfighter_overburn_hold"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, OverburnHold> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBoolean(p.down),
+			buf -> new OverburnHold(buf.readBoolean()));
+
+		@Override
+		public Type<OverburnHold> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(KiOrbs.TYPE, KiOrbs.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ApeStep.TYPE, ApeStep.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(HandThrow.TYPE, HandThrow.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(BeamTargets.TYPE, BeamTargets.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenWish.TYPE, OpenWish.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wish.TYPE, Wish.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Wish.TYPE, (payload, ctx) -> ZFighterWishes.wish(ctx.player(), payload.wish()));
+		PayloadTypeRegistry.serverboundPlay().register(OverburnHold.TYPE, OverburnHold.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(OverburnHold.TYPE, (payload, ctx) -> ZFighterOverburn.hold(ctx.player(), payload.down()));
 		PayloadTypeRegistry.clientboundPlay().register(BeamFx.TYPE, BeamFx.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(BeamHead.TYPE, BeamHead.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SpiritFx.TYPE, SpiritFx.CODEC);

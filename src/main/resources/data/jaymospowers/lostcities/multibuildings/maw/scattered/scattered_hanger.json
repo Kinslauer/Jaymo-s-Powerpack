@@ -1,0 +1,56 @@
+{
+  "dimx": 5,
+  "dimz": 8,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_hanger00",
+      "jaymospowers:maw/scattered/scattered_hanger01",
+      "jaymospowers:maw/scattered/scattered_hanger02",
+      "jaymospowers:maw/scattered/scattered_hanger03",
+      "jaymospowers:maw/scattered/scattered_hanger04",
+      "jaymospowers:maw/scattered/scattered_hanger05",
+      "jaymospowers:maw/scattered/scattered_hanger06",
+      "jaymospowers:maw/scattered/scattered_hanger07"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_hanger10",
+      "jaymospowers:maw/scattered/scattered_hanger11",
+      "jaymospowers:maw/scattered/scattered_hanger12",
+      "jaymospowers:maw/scattered/scattered_hanger13",
+      "jaymospowers:maw/scattered/scattered_hanger14",
+      "jaymospowers:maw/scattered/scattered_hanger15",
+      "jaymospowers:maw/scattered/scattered_hanger16",
+      "jaymospowers:maw/scattered/scattered_hanger17"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_hanger20",
+      "jaymospowers:maw/scattered/scattered_hanger21",
+      "jaymospowers:maw/scattered/scattered_hanger22",
+      "jaymospowers:maw/scattered/scattered_hanger23",
+      "jaymospowers:maw/scattered/scattered_hanger24",
+      "jaymospowers:maw/scattered/scattered_hanger25",
+      "jaymospowers:maw/scattered/scattered_hanger26",
+      "jaymospowers:maw/scattered/scattered_hanger27"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_hanger30",
+      "jaymospowers:maw/scattered/scattered_hanger31",
+      "jaymospowers:maw/scattered/scattered_hanger32",
+      "jaymospowers:maw/scattered/scattered_hanger33",
+      "jaymospowers:maw/scattered/scattered_hanger34",
+      "jaymospowers:maw/scattered/scattered_hanger35",
+      "jaymospowers:maw/scattered/scattered_hanger36",
+      "jaymospowers:maw/scattered/scattered_hanger37"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_hanger40",
+      "jaymospowers:maw/scattered/scattered_hanger41",
+      "jaymospowers:maw/scattered/scattered_hanger42",
+      "jaymospowers:maw/scattered/scattered_hanger43",
+      "jaymospowers:maw/scattered/scattered_hanger44",
+      "jaymospowers:maw/scattered/scattered_hanger45",
+      "jaymospowers:maw/scattered/scattered_hanger46",
+      "jaymospowers:maw/scattered/scattered_hanger47"
+    ]
+  ]
+}

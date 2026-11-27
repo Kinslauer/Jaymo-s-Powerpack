@@ -3,6 +3,7 @@ package com.jaymospowers.client;
 import com.jaymoskitchen.horse.CartEntity;
 import com.jaymospowers.core.MountClimb;
 import com.jaymospowers.core.MountClimb.Kind;
+import com.jaymospowers.power.zfighter.pod.PodEntity;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,11 +94,11 @@ public final class SeatSteps {
 				continue;
 			}
 			if (was != null && was.vehicle == -1 && !MountClimbPose.playing(id) && !who.isSpectator() && was.at.distanceTo(who.position()) <= REACH) {
-				Kind on = steps != null ? steps : onHorse(who, vehicle, was.at);
+				Kind on = vehicle instanceof PodEntity ? intoPod(vehicle, was.at) : steps != null ? steps : onHorse(who, vehicle, was.at);
 				MountClimbPose.play(who, on, vehicle.getId(), was.at, was.yaw);
 			}
 			LAST.put(id, new Last(vehicle.getId(), who.position(), MountClimbPose.yawOf(vehicle), vehicle.position(),
-				steps == null ? null : steps == Kind.STEP_IN ? Kind.STEP_OUT : Kind.STEP_DOWN));
+				steps == null || vehicle instanceof PodEntity ? null : steps == Kind.STEP_IN ? Kind.STEP_OUT : Kind.STEP_DOWN));
 		}
 		LAST.keySet().retainAll(seen);
 	}
@@ -124,6 +125,16 @@ public final class SeatSteps {
 	}
 
 	/**
+	 * Andy (2026-11-25): into a space pod's cockpit "it can even use the horse mounting": a foot up on the hull and a leg
+	 * swung over into the seat, from whichever side they stood (from behind, over its left side), while the canopy is
+	 * tilted up (PodEntity.canopyOpen). Out again the way off a horse.
+	 */
+	private static Kind intoPod(Entity pod, Vec3 from) {
+		Kind side = MountClimb.side(from, pod);
+		return side == Kind.ON_BACK ? Kind.ON_LEFT : side;
+	}
+
+	/**
 	 * Whether {@code who} is one of the folk who climb on their own: a mob of Kingdoms' or MCA's, other than an animal
 	 * (Kingdoms' horses ride in carts too, and mustn't be carried up like a person).
 	 */
@@ -132,8 +143,11 @@ public final class SeatSteps {
 			&& FOLK_TYPES.computeIfAbsent(who.getType(), type -> FOLK.contains(BuiltInRegistries.ENTITY_TYPE.getKey(type).getNamespace()));
 	}
 
-	/** The step into {@code vehicle}: up into a cart or coach, into a boat; null for a seat without one (minecarts, pods, balloons...). */
+	/** The step into {@code vehicle}: up into a cart or coach, into a boat, over into a space pod; null for a seat without one (minecarts, balloons...). */
 	static @Nullable Kind stepsInto(Entity vehicle) {
+		if (vehicle instanceof PodEntity) {
+			return Kind.ON_LEFT;
+		}
 		if (vehicle instanceof AbstractBoat) {
 			return Kind.STEP_IN;
 		}

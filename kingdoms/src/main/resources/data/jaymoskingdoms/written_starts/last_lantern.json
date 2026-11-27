@@ -1,0 +1,9 @@
+{
+  "title": "The Last Lantern, a Hearthkeeper's shelter",
+  "structure": "jaymoskingdoms:written_starts/last_lantern",
+  "ground": 4,
+  "weight": 1,
+  "tale": "the_last_lantern",
+  "bare": true,
+  "shared": false
+}

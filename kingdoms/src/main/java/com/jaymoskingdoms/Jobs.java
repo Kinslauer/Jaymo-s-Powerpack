@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
  * (0.5.5) A settlement's villagers at work. One without a trade is sent to a free job site in one of the settlement's
  * own buildings (its smithy, mason's yard, farm, stall, stable...), and takes that trade. By day, one at its job site
  * is seen working there (its trade's sound, smoke from a forge) and turns what's in the storehouse into goods: smiths
- * smelt the miners' raw ore with coal, the butcher cooks the farmer's meat, the mason cuts spare cobblestone into
+ * forge the town's working tools ({@link ToolGrades}), make a steel realm's steel ({@link SteelRealms}) and smelt the miners' raw ore with coal, the butcher cooks the farmer's meat, the mason cuts spare cobblestone into
  * bricks, the fletcher makes arrows, the fisherman fishes the water by their barrel (none near, no fish), and a farmer hands over the harvest it doesn't need.
  */
 final class Jobs {
@@ -45,8 +45,8 @@ final class Jobs {
 	static final double AT_SITE = 3.0;
 	/** How far a villager without a trade is sent for a job site. */
 	static final int SITE_RANGE = 96;
-	/** A batch: raw ore smelted (with one coal), meat cooked, cobblestone cut, fish caught. */
-	static final int SMELT = 8, COOK = 8, CUT = 8, FISH = 2;
+	/** A batch: raw ore smelted (with one coal), meat cooked, cobblestone cut (a fisherman lands his fish one at a time: Anglers). */
+	static final int SMELT = 8, COOK = 8, CUT = 8;
 	/** A fisherman fishes open water this near them (blocks across). */
 	static final int FISH_WATER = 10;
 	/** The mason cuts only cobblestone over this (the builders' share is kept). */
@@ -179,6 +179,14 @@ final class Jobs {
 			return true;
 		}
 		if (trade.is(VillagerProfession.ARMORER) || trade.is(VillagerProfession.TOOLSMITH) || trade.is(VillagerProfession.WEAPONSMITH)) {
+			// the town's working tools forged first, as the stores run short of them (ToolGrades)
+			if (ToolGrades.forge(level, f, v)) {
+				return true;
+			}
+			// a steel realm's iron made steel (SteelRealms)
+			if (SteelRealms.smelt(level, f, v)) {
+				return true;
+			}
 			// raw ore smelted, a coal a batch
 			for (Item[] smelt : SMELTS) {
 				if (Storage.count(level, f, smelt[0]) == 0) {
@@ -215,18 +223,17 @@ final class Jobs {
 		}
 		if (trade.is(VillagerProfession.FISHERMAN)) {
 			// (Andy, 2026-11-19: no food out of nowhere) only with open water by their barrel to fish: they cast into it and
-			// land what bites; a barrel with no water near catches nothing
+			// (Andy, 2026-11-26: "all npcs should have to fight fish and be seen doing so") fight what bites, in view
+			// (Anglers); what they land goes into the stores, a fish that tears free doesn't. A barrel with no water near catches nothing
+			if (Anglers.angling(v)) {
+				return true;
+			}
 			BlockPos water = water(level, v.blockPosition());
 			if (water == null) {
 				return false;
 			}
-			v.getLookControl().setLookAt(water.getX() + 0.5, water.getY() + 0.9, water.getZ() + 0.5);
-			v.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-			level.playSound(null, water, net.minecraft.sounds.SoundEvents.FISHING_BOBBER_SPLASH, net.minecraft.sounds.SoundSource.NEUTRAL, 0.6F, 1.0F);
-			level.sendParticles(ParticleTypes.SPLASH, water.getX() + 0.5, water.getY() + 1.0, water.getZ() + 0.5, 12, 0.3, 0.05, 0.3, 0.1);
-			level.sendParticles(ParticleTypes.FISHING, water.getX() + 0.5, water.getY() + 1.0, water.getZ() + 0.5, 6, 0.3, 0.0, 0.3, 0.05);
-			Storage.put(level, f, level.getRandom().nextInt(3) == 0 ? Items.SALMON : Items.COD, 1 + level.getRandom().nextInt(FISH));
-			return true;
+			net.minecraft.world.phys.Vec3 spot = new net.minecraft.world.phys.Vec3(water.getX() + 0.5, water.getY() + 0.9, water.getZ() + 0.5);
+			return Anglers.cast(level, v, spot, fish -> Storage.put(level, f, fish));
 		}
 		if (trade.is(VillagerProfession.FARMER)) {
 			// the harvest it carries, but for what it keeps to sow and bake

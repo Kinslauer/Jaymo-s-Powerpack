@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/umbrella/umbrella_cloth",
+    "layer1": "jaymospowers:item/umbrella/umbrella_band",
+    "layer2": "jaymospowers:item/umbrella/umbrella_handle"
+  }
+}

@@ -25,7 +25,10 @@ abstract class IncomingSwingMixin {
 		}
 		int upswing = packet.upswingTicks();
 		double range = packet.weaponRange();
+		String animation = packet.animationName();
 		server.execute(() -> {
+			// the line this swing will cut across a body
+			com.jaymospowers.core.wounds.SwingCuts.note(player, animation, player.level().getGameTime());
 			IncomingBlows.swing(player, upswing, range);
 			Exertion.swung(player, true);
 		});

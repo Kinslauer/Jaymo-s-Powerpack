@@ -731,7 +731,14 @@ public final class Crooks {
 		}
 		// a mugging is never unseen: the victim knows who it was
 		List<LivingEntity> seen = witnesses(level, crook, mark);
-		caught(level, crook, f, seen.isEmpty() || mark instanceof Player ? mark : seen.get(0), "mugged", NOTE_MUG);
+		// (what they'll tell you if you ask what's wrong: Outcry)
+		Outcry.mugged(mark, crook);
+		for (LivingEntity w : seen) {
+			Outcry.saw(w, "mugged", crook);
+		}
+		LivingEntity crier = seen.isEmpty() || mark instanceof Player ? mark : seen.get(0);
+		// (the victim cries out as the one robbed, never "they're beating someone")
+		caught(level, crook, f, crier, crier == mark ? "mugged_self" : "mugged", "mugged", NOTE_MUG);
 		return false;
 	}
 
@@ -886,12 +893,21 @@ public final class Crooks {
 	 * on (the bounty board hears of it), the guards and golems about are set on them, and they run.
 	 */
 	private static void caught(ServerLevel level, Villager crook, Faction f, LivingEntity witness, String cry, int note) {
+		caught(level, crook, f, witness, cry, cry, note);
+	}
+
+	/** As above, the witness crying out with the {@code cry} lines about {@code crime}. */
+	private static void caught(ServerLevel level, Villager crook, Faction f, LivingEntity witness, String cry, String crime, int note) {
 		RandomSource random = level.getRandom();
 		if (!(witness instanceof Player)) {
 			Speech.say(level, witness, line("cry." + cry, random), Speech.RED, Approaches.SPEECH_RANGE);
+			if (!"mugged_self".equals(cry)) {
+				// (what they'll tell you if you ask what's wrong: Outcry)
+				Outcry.saw(witness, crime, crook);
+			}
 		}
 		known(level, crook, f.id(), note);
-		if (Arrests.arrest(level, crook, f, cry)) {
+		if (Arrests.arrest(level, crook, f, crime)) {
 			// (0.7.126) a realm's guards take them alive, for the ruler to judge; they run for it meanwhile
 			run(level, crook, witness.position());
 			return;

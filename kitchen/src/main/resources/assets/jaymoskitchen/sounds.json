@@ -46,5 +46,19 @@
       "jaymoskitchen:entity/rat/die1"
     ],
     "subtitle": "subtitles.jaymoskitchen.entity.rat.death"
+  },
+  "block.cultivation_log.inoculate": {
+    "sounds": [
+      "jaymoskitchen:block/cultivation_log/inoculate1",
+      "jaymoskitchen:block/cultivation_log/inoculate2"
+    ],
+    "subtitle": "subtitles.jaymoskitchen.block.cultivation_log.inoculate"
+  },
+  "block.cultivation_log.harvest": {
+    "sounds": [
+      "jaymoskitchen:block/cultivation_log/harvest1",
+      "jaymoskitchen:block/cultivation_log/harvest2"
+    ],
+    "subtitle": "subtitles.jaymoskitchen.block.cultivation_log.harvest"
   }
 }

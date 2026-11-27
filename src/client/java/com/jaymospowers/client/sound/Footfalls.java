@@ -37,7 +37,10 @@ import org.jspecify.annotations.Nullable;
  * set worn, the louder. (This replaces Ambience's old clink, which was one equip sound for everything.)</li>
  * <li><b>Water.</b> Wading sloshes, swimming strokes, and dropping in fast is a proper dive.</li>
  * <li><b>Beds.</b> A rustle as anyone lies down and as they get up (sleep or Kingdoms' bed rest), and now and then as a
- * sleeper turns over, more often while the night runs by as a timelapse.</li>
+ * sleeper turns over, more often while the night runs by as a timelapse. And sleepers in a bed snore (Snoring Sound's
+ * idea, CC0; its recordings' source is unknown, so ours are made by tools/gen_immersive_sounds.py): a slow breath in with
+ * the rattle in it and a breath out, every few seconds, each sleeper in their own voice (from who they are, so the same
+ * snore every night), a child's higher. A timelapse night packs them closer.</li>
  * </ul>
  * All of it plays on this side only, through {@link ImmersiveSounds#play}, within its reach and channel room.
  */
@@ -60,6 +63,11 @@ public final class Footfalls {
 	/** Beds: volumes, and the chance a tick a sleeper turns over (a timelapse night: the faster one). */
 	static final float BED_VOLUME = 0.3F, TURN_VOLUME = 0.18F;
 	static final float TURN_CHANCE = 1.0F / 900.0F, TURN_CHANCE_FAST = 1.0F / 120.0F;
+	/** Snores: the volume, ticks between them (least and spread; a timelapse night: this share of it), and the pitch range a grown sleeper's voice falls in, a child's. */
+	static final float SNORE_VOLUME = 0.35F;
+	static final int SNORE_EVERY = 70, SNORE_SPREAD = 80;
+	static final float SNORE_FAST = 0.4F;
+	static final float SNORE_LOW = 0.8F, SNORE_HIGH = 1.2F, SNORE_CHILD = 1.7F;
 	/** Moving and sleeping bodies are listened to this near (blocks). */
 	static final double NEAR = 16.0;
 
@@ -67,6 +75,7 @@ public final class Footfalls {
 		boolean ground = true, wet, sleeping;
 		double lastVy, waded, swum;
 		int steps;
+		long nextSnore;
 	}
 
 	private static final Map<Entity, Body> BODIES = new WeakHashMap<>();
@@ -115,6 +124,29 @@ public final class Footfalls {
 			}
 		}
 		return best;
+	}
+
+	/** A sleeper in a bed snores now and then, in their own voice. */
+	private static void snore(ClientLevel level, LivingEntity entity, Body body, boolean justLay, RandomSource random) {
+		if (entity.getSleepingPos().isEmpty()) {
+			return;
+		}
+		long now = ImmersiveSounds.tick();
+		int gap = SNORE_EVERY + random.nextInt(SNORE_SPREAD);
+		if (fastNight) {
+			gap = Math.max(10, (int) (gap * SNORE_FAST));
+		}
+		if (justLay) {
+			body.nextSnore = now + gap;
+			return;
+		}
+		if (now < body.nextSnore) {
+			return;
+		}
+		body.nextSnore = now + gap;
+		float voice = SNORE_LOW + (SNORE_HIGH - SNORE_LOW) * ((entity.getUUID().getLeastSignificantBits() >>> 40) & 0xFFFF) / 65535.0F;
+		float pitch = (entity.isBaby() ? SNORE_CHILD : voice) * (0.97F + random.nextFloat() * 0.06F);
+		ImmersiveSounds.play(level, entity.getX(), entity.getY() + 0.4, entity.getZ(), "bed.snore", entity.getSoundSource(), SNORE_VOLUME, pitch);
 	}
 
 	/** Two legs, about a person's size: the bodies whose feet we layer (a horse or a spider keeps its own steps). */
@@ -208,6 +240,7 @@ public final class Footfalls {
 			ImmersiveSounds.play(level, x, y + 0.3, z, "bed.turn", source, TURN_VOLUME, pitch);
 		}
 		if (sleeping) {
+			snore(level, entity, body, sleeping != body.sleeping, random);
 			return;
 		}
 		double horizontal = Math.sqrt(moved.x * moved.x + moved.z * moved.z);

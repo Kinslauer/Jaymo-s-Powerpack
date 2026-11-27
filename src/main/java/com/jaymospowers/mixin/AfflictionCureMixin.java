@@ -19,7 +19,9 @@ abstract class AfflictionCureMixin {
 	@Inject(method = "finishUsingItem", at = @At("HEAD"))
 	private void jaymospowers$cures(Level level, LivingEntity entity, CallbackInfoReturnable<ItemStack> cir) {
 		if (entity instanceof ServerPlayer player) {
-			Afflictions.consumed(player, ((ItemStack)(Object)this).copy());
+			ItemStack eaten = ((ItemStack)(Object)this).copy();
+			Afflictions.consumed(player, eaten);
+			com.jaymospowers.alchemy.toxic.Toxicity.consumed(player, eaten);
 		}
 	}
 }

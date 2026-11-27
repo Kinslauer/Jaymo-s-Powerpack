@@ -52,6 +52,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.ragdoll.MobRagdolls.register();
 		// Ragdollified plays a dying body's fall (the corpse lies down where it lands)
 		com.jaymoskitchen.compat.RagdollifiedCompat.register();
+		// (the shulker bowl first: the End dishes served in it leave one behind)
+		com.jaymoskitchen.delight.EnderDelight.registerBowl();
 		ModItems.register();
 		// (0.5.29) Pmeh grows wild only in jungles and savannas (no more from tall grass)
 		com.jaymoskitchen.herb.PmehFarming.register();
@@ -62,12 +64,15 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.corpse.Reanimation.register();
 		com.jaymoskitchen.archery.StuckArrows.register();
 		Corpses.register();
+		com.jaymoskitchen.corpse.GoreRules.register();
 		// (0.5.18) spiders crushed flat leave loose legs, not a corpse
 		com.jaymoskitchen.corpse.SpiderCrush.register();
 		// (0.5.21) bodies blown apart by blasts leave flying chunks, not a corpse
 		com.jaymoskitchen.corpse.Gibs.register();
 		com.jaymoskitchen.corpse.Butchers.register();
 		com.jaymoskitchen.corpse.Scavengers.register();
+		// zombies bend down over the body they gnaw (GnawPose)
+		com.jaymoskitchen.corpse.Gnawing.register();
 		PlayerCorpses.register();
 		Saddlebags.register();
 		// echoes for the layered sounds
@@ -80,6 +85,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.cooking.spit.SpitBlock.register();
 		// (0.5.28) Farmer's Delight's pot and pan over a fire, cutting board, feasts, Comfort, cabbages and rice
 		com.jaymoskitchen.delight.Delight.register();
+		com.jaymoskitchen.delight.EnderDelight.register();
 		// (0.5.33) Farmer's Delight's skillet, stove, cabinets, crates, baskets, canvas, tatami, safety net and canvas signs
 		com.jaymoskitchen.delight.DelightHome.register();
 		com.jaymoskitchen.delight.HomeComfort.register();
@@ -87,6 +93,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.delight.DelightDishes.register();
 		// (0.5.33) Farmer's Delight's tomatoes, onions, rope, wild crops, rich soil, compost, mushroom colonies, villages
 		com.jaymoskitchen.delight.DelightFarm.register();
+		// the forager: wild mushrooms, truffles, mycelial soil, cultivation logs and the knife; the Harvest Hive and Bee Jar
+		com.jaymoskitchen.forage.Forage.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
 		com.jaymoskitchen.cooking.ExplodingPot.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();
@@ -99,6 +107,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.tanning.Hides.register();
 		// (0.5.51) meat hooks, blood grates and bottled blood (corpse/Hanging does the butchering)
 		com.jaymoskitchen.butchery.Butchery.register();
+		// poisoned sweets: the toxic cake, chocolates and the gift box
+		com.jaymoskitchen.cooking.PoisonedSweets.register();
 		// (Butchery picks) the mincer and mince, the butcher's display, head mounts, the barrel of bones
 		com.jaymoskitchen.butchery.ButcherShop.register();
 		com.jaymoskitchen.butchery.Skeletons.register();
@@ -108,12 +118,15 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.farm.TiredSoil.register();
 		// (GT New Horizons picks) slow herds and crowded pens; before Familiarity, so a milked cow gives no extra bucket
 		com.jaymoskitchen.farm.Herds.register();
+		// (Raw Milk's idea) milk is raw till it's heated
+		com.jaymoskitchen.farm.RawMilk.register();
 		com.jaymoskitchen.farmwater.FarmWater.register();
 		com.jaymoskitchen.farm.Familiarity.register();
 		// (GT New Horizons picks) farmland only near water, seeds scratched from dry grass
 		com.jaymoskitchen.farm.DryFields.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
+		com.jaymoskitchen.stomach.Bites.register();
 		// (GT New Horizons picks) a heart for a varied diet, its food journal (its attachment is class-loaded here), the lunch box
 		com.jaymoskitchen.stomach.Variety.register();
 		com.jaymoskitchen.stomach.LunchBox.register();

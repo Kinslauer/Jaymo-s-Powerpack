@@ -1,0 +1,8 @@
+{
+  "title": "A Hearthkeeper's way-hut",
+  "structure": "jaymoskingdoms:written_starts/way_hut",
+  "ground": 3,
+  "weight": 1,
+  "tale": "the_way_hut",
+  "bare": false
+}

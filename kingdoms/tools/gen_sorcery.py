@@ -38,6 +38,16 @@ BONE = (226, 218, 192)
 GOLD = (226, 180, 60)
 
 
+# The Reason look (docs/Vanilla-Style.md): with this set, a flat area is one shade and a fur or beard falls in three tones
+# (steps of 14), not a per-pixel jitter of a few dozen near twins; the roll is still taken, so the drawing is the same.
+CLEAN = True
+
+
+def jit(rnd, lo, hi, step=14):
+    n = rnd.randint(lo, hi)
+    return int(round(n / float(step))) * step if CLEAN else n
+
+
 def clamp(c):
     return tuple(max(0, min(255, int(v))) for v in c)
 
@@ -58,7 +68,7 @@ def paint(img, rect, base, spread, rnd):
     x0, y0, w, h = rect
     for y in range(y0, y0 + h):
         for x in range(x0, x0 + w):
-            px(img, x, y, shade(base, rnd.randint(-spread, spread)))
+            px(img, x, y, shade(base, jit(rnd, -spread, spread, 999)))
 
 
 def box(img, b, base, spread, rnd):
@@ -145,7 +155,7 @@ def necromancer(i, skin=None, cloth=(34, 28, 40), hood=(28, 24, 34), lining=(90,
     for side in SIDES:
         rx, ry, rw, rh = BODY[side]
         for x in range(rx, rx + rw):
-            px(img, x, ry + 7, shade(BONE, rnd.randint(-20, 0)))
+            px(img, x, ry + 7, shade(BONE, jit(rnd, -20, 0)))
     # the skull: 3x3, two sockets
     for dx in range(3):
         for dy in range(3):
@@ -189,7 +199,7 @@ def shaman(dye, paint_colour, skin=None, fur=(96, 74, 52), seed=None, out=None):
     # the headdress (hat layer): a wolf's skull over the brow, feathers up the back
     hx, hy, hw, hh = HAT["front"]
     for x in range(hx, hx + hw):
-        px(img, x, hy, shade(BONE, rnd.randint(-15, 5)))
+        px(img, x, hy, shade(BONE, jit(rnd, -15, 5)))
         px(img, x, hy + 1, shade(BONE, -10))
     px(img, hx + 2, hy + 1, (25, 20, 18))
     px(img, hx + 5, hy + 1, (25, 20, 18))
@@ -259,7 +269,7 @@ def wizard(dye, colour, skin=None, trim=GOLD, beard=True, hat=True, seed=None, o
         for x in range(fx, fx + fw):
             if y == fy + 5 and 2 <= x - fx <= 5:
                 continue
-            px(img, x, y, shade(grey, rnd.randint(-25, 10)))
+            px(img, x, y, shade(grey, jit(rnd, -25, 10)))
     for name in ("right", "left"):
         rx, ry, rw, rh = HEAD[name]
         paint(img, (rx, ry + 5, rw, 3), grey, 14, rnd)
@@ -366,9 +376,9 @@ def scroll(name, seal, glow):
             u, v = x - y, x + y - 15
             if abs(v) <= 3 and abs(u) <= 11:
                 if abs(u) >= 9:
-                    px(img, x, y, shade(parch, -25 - 10 * abs(v) + rnd.randint(-6, 6)))
+                    px(img, x, y, shade(parch, -25 - 10 * abs(v) + jit(rnd, -6, 6)))
                 else:
-                    px(img, x, y, shade(parch, rnd.randint(-10, 6) - 3 * abs(v)))
+                    px(img, x, y, shade(parch, jit(rnd, -10, 6) - 3 * abs(v)))
     # the rune
     for (x, y) in ((7, 7), (8, 8), (8, 6), (6, 8), (9, 9)):
         px(img, x, y, glow)

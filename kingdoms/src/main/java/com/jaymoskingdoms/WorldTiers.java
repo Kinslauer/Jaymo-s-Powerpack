@@ -346,10 +346,13 @@ public final class WorldTiers {
 	 * A hit on {@code player} as it lands ({@code HearthHitMixin}, before armour): in Hearth no more than
 	 * {@link #HEARTH_MOST_HIT} of their full health. Falls, fire, drowning, hunger and the like aren't hits; nor is anything
 	 * that ignores invulnerability (the void, /kill), and the downed are past it (a finishing blow is a finishing blow).
+	 * Nor is Jaymo's Powers' finishing step ({@link Toughness#WOUNDS}): when a blow blacks out the head or the torso, Wounds
+	 * ends the body through it, carrying the striker as its source. Capped, it cost 4 health instead of downing (Andy,
+	 * 2026-11-25: "fix"); the blow that blacked them out was capped already.
 	 */
 	public static float hearthHit(Player player, net.minecraft.world.damagesource.DamageSource source, float amount) {
 		if (amount <= 0.0F || of(player) != Tier.HEARTH || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)
-			|| Downed.isDowned(player) || source.getEntity() == null && source.getDirectEntity() == null
+			|| source.is(Toughness.WOUNDS) || Downed.isDowned(player) || source.getEntity() == null && source.getDirectEntity() == null
 			&& !source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) {
 			return amount;
 		}

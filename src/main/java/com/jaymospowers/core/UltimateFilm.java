@@ -57,6 +57,19 @@ public final class UltimateFilm {
 	/** The first meeting with the symbiote ({@code WebMeeting}): a two-shot on the host and the figure facing them, then over the host's shoulder on it, then wide again; always on one side of the line between them. {@code at} is the figure's feet. */
 	public static final int MEETING = 12;
 	/**
+	 * Chrono's run down the wormhole ({@code ChronoWormhole}): the camera rides behind the runner down a tunnel of streaking
+	 * light toward a glowing sphere, with lightning trailing off them. Drawn by {@code ChronoWormholeArt}.
+	 */
+	public static final int WORMHOLE = 13;
+	/**
+	 * Chrono dragging a foe through time ({@code ChronoWormhole#drag}): the tunnel, then out over the sea and round the world
+	 * (a flat-colour stand-in until an art thread supplies the picture), then back to the live world for the uppercut and slam.
+	 * {@link Play#target} is the foe.
+	 */
+	public static final int DRAG = 14;
+	/** Low orbit round the big suit as its fury builds. */
+	public static final int BRUTE_NOVA = 15;
+	/**
 	 * (0.20.9) {@code MORPH}: letterboxed, it zooms on each changing part of {@code caster} in turn (the {@link Play#parts} list, in
 	 * order), holds while that part grows from the base alien into the Ultimate, then pulls back to the whole new body.
 	 * {@link Play#first} is the long exaggerated cut.

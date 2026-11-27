@@ -2766,3 +2766,268 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
   fire, or warmer clothes.", "The cold's biting into me!", "Phew... I'm sweating.", "I'm overheating. Need shade, or
   water.", "Heatstroke... my head's swimming." (lang `message.jaymoskitchen.body_heat.*`).
 - Built; not played.
+
+## 0.6.80 (2026-11-24): zombies kneel and gnaw on bodies, chunks flying, the body jerking with each bite (#2093)
+
+- **Gnawing pose** (Andy: "zombies should also bend over and down to gnaw on bodies in a new gruesome animation, chunks flying everywhere and the body they are eating reacting to the movement"): a zombie (husk, drowned, zombie villager, anything drawn with a humanoid body) feeding on a body now goes down on its knees over it, bent double at the waist, head down at the meat and both hands on the body. Each bite it dives in, then rips back, head jerking up and worrying side to side, hands dragging up what they hold. With a limb torn off it sits back and gnaws it in its hand, head bobbing. It eases down and back up over a few ticks. Baby zombies kneel the same way at their own size.
+- **Chunks**: every scavenger bite (zombies, wolves, bears, werewolves) throws one or two small lumps of flesh up and back the way the jaws ripped, a scrap of clothing now and then; a limb coming off throws more, and a bone. Small and gone in 3 to 6 seconds, not a blast's mess (Gibs.bitten). Blood stays the toned-down flecks.
+- **The body reacts**: each bite tugs the body toward the eater, the bitten side lifting (its ragdoll is struck there; Flop draws the jolt); harder when a part comes away (CorpseEntity.tug).
+- Baby zombies now feed on bodies too.
+- **Cubs fed first** (Andy: "cubs should first, escorted by their parent, and guarded while they fill their stomachs"): a wolf pup, bear cub or fox kit eats from a body only with a grown one of its kind within 12 blocks, and only the body that one leads it to (the parent walks at their pace). At the body the parent doesn't eat while any of its cubs is still hungry: it stands guard, growls at anyone, any monster or other scavenger that comes within 8 blocks of the body, and goes for it within 4. A fox (skittish) bolts with its kits instead. Cubs fill up after one piece; then the parent eats. Guarded cubs aren't driven off the body by monsters or bigger beasts.
+- Synced to everyone by a non-saved attachment, Gnawing.GNAWING (DOWN/BITE/CHEW), set by Scavengers' GnawGoal and by Jaymo's Powers' eaters of the downed. Client: GnawPose (LivingEntityRendererMixin, ModelFeatureRendererMixin).
+- Built; not played.
+
+## 0.6.81 (2026-11-24): Butchers work the town's carcasses on the meat hook through the day (#2090)
+
+- Andy: "Butcher at the hook on their own": in working hours a butcher with a free meat hook within 14 blocks of their
+  workstation fetches a carcass lying within 20 blocks of the hook (a passive animal's, fresh, loose, and never a
+  player's kill), carries it over, hangs it, and works it with the hook's own steps: bled into the grate, head off,
+  skinned, gutted, three cuts. About ten steps fill a working day, with the blade worked between them, a cleaver or a
+  skinning knife in hand for each step.
+- What comes off goes to the town's stores (Jaymo's Kingdoms, `Butchers.setStock`), else a chest within 4 blocks of the
+  hook, else at the butcher's feet. A carcass they can't get to (fenced in) is left alone.
+- `Hanging.dressStep` runs the hook's steps for a villager (no tool wear, no messages; a player's blessings and perks
+  aren't added). `CorpseEntity.killedByPlayer()`, `Butchers.butchering` and `Butchers.wantsCarcass` are new for other mods.
+- Built in CI; not played.
+
+## 0.6.82 (2026-11-24): Vanilla+ picks: Ocean's, Nether's and Ender's Delight (#2102)
+
+- **11 new dishes** after Ocean's, Nether's and Ender's Delight: honey fried kelp, braised sea pickle, kelp-encrusted cod, stuffed cod, seagrass salad, fugu roll, magma gelatin, warped moldy meat, strange eclair, chanterelle stew and drift jelly pudding (`Dish`, with new `Step` ingredients). The strange eclair, chanterelle stew and pudding use Enderscape's fruit, mushrooms and jelly and only load with it.
+- **Ender's Delight ported** (MIT, by Ax3dGaming; `delight/EnderDelight`), chorus included (Andy's "Port all of it, chorus too"):
+  - **End plants** growing wild on the End's stone and on Enderscape's in the Beneath, and on farmland: void pepper (creeps over end stone, sets a pepper when it stops; picking it starts it creeping again; it won't crowd past 12 bushes in a small space), ethereal saffron, the amberveil mushroom and chorusflame (grows in three sizes).
+  - **Knife cuts**: an enderman, endermite or shulker killed with a knife drops an enderman sight, mite crust or shulker mollusk. On the cutting board an ender pearl gives 2 ender shards, an enderman sight 2 sight fragments, a mollusk 2 shulker filets.
+  - **Shulker bowls** (8 from a shell). The End stews, curries and the cereal are served in one and give it back; a hot one gives Comfort like a wooden bowl.
+  - **15 dishes**: chorus juice, chorus stew, crispy skewer, crawling sandwich, twisted cereal, endermite stew, pearl pasta, ender paella, uncanny cookies, amberveil stew, amberveiled curry, chicken curry, steak fries, veil of flames risotto, and the chorus pie (four slices). Plus the **stuffed shulker** feast, cooked in a shulker shell, four servings taken with a shulker bowl. A Perfect cook gives Ender's Delight's good effects; its Nausea stays only on the raw bites.
+  - **Ender Phasing**: a blow carries you a few blocks aside (at most every half second), and water and rain hurt you while it lasts.
+  - **End stone stove** (works as the stove), **chorus crate**, and Ender's Delight's **end house**: an empty cook's house out on the End's highlands and midlands, its stove still lit.
+- Ocean's, Nether's and Ender's Delight art is used under MIT (`textures/item/CREDITS-delight.txt`). Chanterelle stew and drift jelly pudding have our own.
+- Built; not played.
+
+## 0.6.83 (2026-11-24): thirst lasts twice as long (#2119)
+
+- **Thirst** drains half as fast: a point of water every 150 s at rest (was 75 s), and jumping, sprinting, mining and attacking cost half the water they did (8 exhaustion to a point, was 4). Heat, swimming and the Nether still speed it up by the same shares. (`Thirst.DRAIN`, `Thirst.EXHAUSTION_POINT`)
+- Not built or played; only two constants changed.
+
+## 0.6.84 (2026-11-25): New art for the waterskins: a leather bag, a round iron canteen, a glass flask of dragon's breath (#2124)
+
+- **Leather Waterskin**: a soft, lumpy hide bag with a cork, stitched down the middle and tied at the neck with string.
+- **Iron Canteen**: a round, flat metal canteen with a pressed ring, a screw cap and a string strap over the top.
+- **Dragon Canteen**: a two-bulb glass flask of glowing pink dragon's breath, with a purpur stopper, the same string tied
+  round its waist and a wisp of breath at the top.
+- The old three were one bag in three colours; now each reads by its shape alone, even at inventory size. Textures
+  only (`textures/item/waterskin_{leather,iron,dragon}.png`), same names, no code changes.
+- Picked by an independent judge from four sets (three Claude artists, one Codex), then touched up. Not checked in game.
+
+## 0.6.85 (2026-11-25): End plants no longer break End worldgen (#2130)
+
+- **Fix**: the four End plants (voidpepper, ethereal saffron, amberveil, chorusflame) now generate in the last decoration step instead of the vegetal one. Where Enderscape and Stellarity biomes share one End, Enderscape adds its own plants to the same biomes later, and the clash made the server log "Feature order cycle found" and fail to generate End chunks.
+- Not tested in game (CI build only).
+
+## 0.6.86 (2026-11-25): Visceral gore: corpses that wear, rot, freeze, feed and get gutted (#2133)
+
+- **Corpse wear**: bodies char in fire, rot to bone over days, stiffen, sink in water, and freeze into statues that shatter. Endermen fade away and slimes melt into goo. Skeletons shed loose bones, and a corpse can be strung up to a fence with a lead.
+- **Piñata**: bodies that burst apart in Alex's Caves' Candy Cavity burst into sweets. Gamerule `jaymoskitchen:pinata` makes this happen everywhere.
+- **Crushing**: falling weight crushes bodies flat. Spider legs bounce.
+- **Ragdoll budget**: past `jaymoskitchen:ragdoll_cap` (24), the farthest ragdolls go still.
+- **Feeding**: zombies that eat from a corpse stop hunting for a while unless hurt, and the body goes to bone where they bite.
+- **Gutting**: hold use with a sword, dagger or knife on an animal carcass to open it stroke by stroke. Each stroke shows the cut, then the ribs, and lays the insides beside the body. Gutting from the hook uses the same strokes.
+- **Yield**: lost limbs, bare bone and rot cut a carcass's meat and hide. A burned body gives cooked meat and no hide.
+- **Gear**: worn and held gear stays in the ash when a body burns, except in lava. A mob's body that loses its head or legs drops what it wore there.
+- Classes: Decay, Wear, Passing, Goo, Strung, GoreRules, RagdollBudget, StreamerSafe, Gutting, Yield, ScavengerFedMixin.
+- Built and compiled; not played.
+
+## 0.6.87 (2026-11-25): Corpse search hint only when there's something to search (#2137)
+
+- A body now tells clients what a tap on it will do (`CorpseEntity#tapDoes`, synced every 5 ticks and whenever the loot screen closes): open the loot screen, give up a bone (a picked-clean skeleton) or nothing. Jaymo's Powers' context hints read it through the object share (`Corpses.SHARE_TAP`), so the "search the body" line goes away once a body has nothing left, instead of players tapping on and on at it.
+- A tap on a body with anything on it still always opens the loot screen; whether it still wears gear is read once per look, not on every check.
+- Built; not played.
+
+## 0.6.88 (2026-11-25): a corpse's part off tells how the body looks (#2163)
+
+- A part coming off a body lying dead (`CorpseEntity.shed`) also hands the hook the body's `dressed()` and `wear()`, so Jaymo's Powers draws the severed limb rotted, charred or skinned as the body is.
+- Built; not played.
+
+## 0.6.89 (2026-11-25): carts have weight (drive model after the Cars mod) (#2179)
+
+- **Pulled carts roll on a pole, not a rigid bar**: `CartPhysics` (new), the drive model of Cars: Drive, Drift & Force Feedback (MIT, by Pokato; licence in `licenses/cars/`) rewritten for a cart. The pole is a spring with a pull limit, so a cart gathers speed slowly and coasts; its heading turns at a limited rate that falls with speed (no instant turns); side-slip is scrubbed by a saturating tyre curve scaled by the block's slipperiness, so on ice it slides on and hardly turns; a smoothed slope reading slows it uphill and speeds it downhill; and a horse (not a player) that hauls it feels a small pull back. A hard leash keeps it from falling far behind. Tuning is in `static final` constants at the top of `CartPhysics`. `CartEntity.follow` uses it.
+- No cars are added (that is a later patch).
+- Built; not played or tuned in game.
+
+## 0.6.90 (2026-11-25): the forager's kitchen and the Harvest Hive (#2179)
+
+- **Wild mushrooms** (from Spore & Stem, Apache-2.0, 3D models and art; licence in `licenses/spore-and-stem`): morel, chanterelle, deathcap (poison), frostcap, emberstool and puffball, all in `c:mushrooms`, compostable and pottable. They grow sparsely in the biomes Spore & Stem uses (morels in forests, chanterelles in taigas and birch woods, deathcaps in dark forests, frostcaps in the snow, puffballs on plains, emberstools in deep caves and the Nether's crimson forest and basalt deltas), and Truffle Soil lies in pockets under woods (breaking it gives 1 to 2 truffles).
+- **Seasons**: the mushrooms keep the year (the `jaymoskitchen:seasons/*` block tags). Morels fruit in spring, chanterelles in the last third of summer and in autumn, frostcaps from autumn through winter; autumn is the big flush, when every fruiting mushroom spreads faster; a winter in the open rots the ones that are out of season. Caves, roofs and Mycelial Soil keep no season.
+- **Mycelial Soil** (dirt, bone meal, 2 mushrooms makes 2): any mushroom stands on it in any light and it slowly spreads the one on top. **Cultivation Log** (3 logs over thread, soil, thread makes 2): use a mushroom on it, four stages (twice as fast on Mycelial Soil, half as fast under open daytime sky), a ripe log gives 2 to 3 and goes back to its first flush; morel, chanterelle, frostcap and emberstool, and Jaymo's Kingdoms' glowcap, bouncecap and inkcap if installed (found by id and the item tags `jaymoskitchen:glowcaps`, `bouncecaps`, `inkcaps`). **Foraging Knife** mines mushrooms fast, takes two from each, and scrapes **Mycelial Thread** off mycelium and Mycelial Soil (bare mycelium is spoiled now and then).
+- **Dishes** in the cooking minigame: roasted morel, chanterelle toast, glowcap soup, bouncecap jelly, frostcap tea, ember skewer, truffle stew and forager's stew (any three good mushrooms), with Spore & Stem's effects as the Perfect cook's buffs. The glowcap and bouncecap dishes show only when Kingdoms' mushrooms exist. No spore-rot cure parts (the rot comes later).
+- **Psithurism** (`OptionalItems.PSITHURISM`): its rice joins the rice group, and soybeans and fugu are cooking ingredients in three dishes: soy rice bowl, seared fugu, fugu rice stew.
+- **Harvest Hive** (planks, honeycomb, a barrel): put up to three vanilla bees in it with a **Bee Jar** (use the jar on a bee to catch it, on the hive to let it in; on any other block it lets the bee go). By day and not in rain a bee flies out to a ripe crop within 10 blocks, picks it, plants it again and carries the harvest home into the hive's nine slots (right-click to open, hoppers can pull). With no flowers in range the bees work at a third of the pace, a trip home may pollinate a nearby flower (so a worked hive makes its own flowers), and a kept hive fills with honey (bottle or shears at the top level). Our own code and art.
+- Classes: `forage/Forage` (registry), `ForageMushroomBlock`, `MycelialSoilBlock`, `CultivationLogBlock`, `CultivationFungus`, `ForagingKnifeItem`, `ForageWorld`, `HarvestHiveBlock`, `HarvestHiveEntity`, `HiveWorker` (the bee's job and goal), `BeeJarItem`, `JarredBeeItem`; new `Step` and `Dish` entries; tools `port_spore_and_stem.py` and `gen_forage.py`.
+- Compiled; not played.
+
+## 0.6.91 (2026-11-25): giant carcasses (#2179)
+
+- Giants (ogres, the Bogre, trolls, the minotaur, the Aether's giants) and the Deep beasts are big carcasses: a 2x2 butcher table, or cut up where they lie with a butchering tool, piece by piece from what they dropped. Cut to the bone, they leave extra bones (`jaymoskitchen:giant_carcasses`).
+- Frostborn Siege Rigs and Tinkerer's Colossi are heavy corpses (machine scrap).
+- Built; not played.
+
+## 0.6.92 (2026-11-25): the wicked harvest - rotten pumpkins, Spark of the Harvest, woken scarecrows (#2179)
+
+- **Rotten pumpkins**: a pumpkin that grows beside a stem now and then turns rotten (6%, 20% in late autumn). `RottenPumpkins`, `RottenPumpkinMixin`.
+- **Crow range**: `Scarecrows.guardedFromCrows` keeps crows off within 16 blocks (the old 8-block guard is unchanged); Kingdoms' field crows ask it by id.
+- **Woken scarecrows**: a Spark of the Harvest used on a scarecrow with a pumpkin wakes it. It reaps ripe crops within 6 blocks, replants them, never tramples farmland, and carries the harvest to a chest you choose (empty hand, then click the chest). It works only while mended with straw: a hay block gives 64, wheat 6. A well-kept one sometimes brings in an extra crop. Nobody is punished for not having one. `Farmhand`, `FarmhandEntity`, `ScarecrowBlock`.
+- Art from Seasonal: The Wicked Harvest (MIT, Lazurium), licence in `licenses/seasonal/`.
+- Compiled; not played.
+
+## 0.6.93 (2026-11-25): Truffle soil no longer stops the server starting (#2181)
+
+The truffle soil worldgen feature named its block the old way, so 26.3 refused to load it and the server crashed on start. It now uses the 26.3 form.
+
+## 0.6.94 (2026-11-26): body heat fixes: hot springs warm, rain counted once, cloth doesn't bake like metal (#2184)
+
+- **Hot springs warm you**: in water over a magma block (the hot springs Powers digs in snowy, taiga and mountain lands) the water's wet no longer chills you and holds you at least comfortably warm (`BodyHeat.HOT_SPRING` 20). Before, a soak in a snowy hot spring froze you in about 20 seconds. You still come out wet.
+- **Rain counted once**: rain took the sun away, soaked you (the wet meter, -25) and also had its own -15, so a summer shower at night on the plains reached Freezing. The extra -15 is gone; falling snow keeps its -20.
+- **Rain where you are**: the sun's warmth and the sea damp went by rain anywhere in the world, so a desert under a clear sky lost its sun whenever it rained elsewhere. Both now go by what falls at your head.
+- **Cloth doesn't bake like metal**: armour in the sun on a warm land added heat for every armour point, leather and wool included (on top of leather's stuffiness). Now only the points of pieces that aren't warm or cool clothing count (`BodyHeat.metalArmour`).
+- **North cold not counted twice**: with Jaymo's Kingdoms the overworld's lands already follow its climate map (cold north, hot south), so `Warmth.north`'s extra cold to the north of the world spawn (and warmth to its south) is only added when Kingdoms isn't there.
+- **Worn pieces from other mods**: `BodyHeat.addWorn(warm, pieces)` lets a mod count warm or cool pieces worn outside the armour slots (Kingdoms' harness).
+- Built; not played.
+
+## 0.6.95 (2026-11-26): How body heat feels (#2190)
+
+Body heat reads the world more fairly. Frostbite and heatstroke now give you 25 seconds of warning before the first hurt, and the count starts over once you're out of them. Heatstroke no longer makes you sick: your steps slow the longer it lasts (up to about 15 percent), Weakness stays, and the red edges of the screen shimmer like heat haze. Once you're out of the cold or heat that was hurting you, your body comes back to comfortable twice as fast. Being on fire heats you hard. A brand-new character gets ten minutes of grace the first time they wake, shown as a small Fresh Start icon; later deaths and wake-ups don't renew it, and a final Reincarnate gives it again.
+A fire's warmth now fills the room it's in and spreads through open air and doorways, never through stone, the same way a hearth's does. What gives off heat is a set of block tags (heat_sources/molten, flame, soul, stove and warm: our bonfire and firepit, stoves, firebox, boilers, forges, smelteries, braziers and the vanilla fires), and ice, packed ice, blue ice and snow chill the hot air near them (chill_sources). Holding a lit torch or lantern takes a little of the cold off, and holding ice or a snowball takes a little of the heat. Below about y -32 the rock grows warmer the deeper you go, and thin-air cold starts at the treeline (about y 120) instead of the sea. Swamps, bogs and marshes count as damp air, and biome feel tags (feels_hot, feels_warm, feels_cool and the rest) let a land say how it feels when its own temperature reads wrong: Verdant World's lakeside desert and wind valley, the Aether's contaminated jungle, and the Nether's demon gloam and pale grove. Riding a warm-blooded beast in the cold warms you a little, and the rickshaw and carriage canopies keep the sun off (see Kingdoms).
+
+## 0.6.96 (2026-11-26): Seasons shape the weather, the hot lands and the farm (#2190)
+
+The year now sets the weather. Winter goes four times as long between thunderstorms and they are short when they come; spring and summer storm often and long; autumn rains often and for a long while. It works on the world's own weather clock, so a storm a power or a rite calls up is left as it was cast, and Kingdoms' storm cells still run beside it.
+Jungles and savannas keep a wet season (summer and autumn) and a dry season (winter and spring) instead of being always summer. In the wet season rain comes often and lasts; in the dry it stays away for long stretches. Cocoa, melons, pitcher plants, torchflowers and rice grow in the wet season there and wait through the dry. You thirst about two fifths faster in the dry season there, and fire catches nearby wood and leaves more readily; with Forest Fire, its wildfires find the air drier and run further. Frost never kills a crop in the hot lands.
+Snow and ice melt slowly on the first days of spring and a little faster every day, and fast by summer. Hovering a seed or a sapling now shows which seasons it grows in, and, for the tropical ones, that they need the wet season in jungles and savannas.
+A new block, the Season Dial (copper, a clock and redstone), shows the season on its face and gives it to redstone for farms and greenhouses. Use it to turn its setting: it counts the seasons (1 for spring up to 4 for winter), or gives a full signal in just spring, summer, autumn or winter. A comparator reads it too.
+
+## 0.6.97 (2026-11-26): Food, drink and house blocks for the climate (#2190)
+
+A cup of any of the vintner's juices (grape, apple, black) cools you for a minute, like a cold waterskin drink. A new dish, Ice Cream (sweet milk, sugar and two pieces of ice or snow, crushed on a cutting board), cools you harder for four minutes in the heat. Roast meat torn fresh off the spit warms you for three minutes after, as a hot meal does, and so do hot pies and slices (eaten from the whole pie or cut and carried), roasts and hot drinks: the item tag `jaymoskitchen:hot_foods` lists them, and `jaymoskitchen:cool_foods` lists the cold ones, so other packs can add theirs. Snow blocks and packed ice do as well as ice in any dish that asks for ice (the `cooking/frozen` tag).
+Use an empty wooden bowl on still water to scoop a Bowl of Water. It's unclean like a pond bottle (it may turn your stomach) until you boil it over a lit fire, when it is a Bowl of Clean Water, which also cools you a little. Drinking one gives the bowl back, and they stack four high.
+A new Rain Barrel fills with clean rain, a level at a time, while rain falls on its open top (where the rain falls, not just anywhere the weather says it rains). Use a glass bottle, a waterskin of any tier or an empty bowl on it to draw clean water; a comparator reads how full it is. Kingdoms' village builders set one beside every house they put up.
+Butchering a big animal properly (on the block, on the hook, or by a town butcher) sometimes gives Sinew. It is in the `c:strings` tag and crafts into string one for one, and the Kitchen's own recipes that want string (waterskins, quiver, saddlebag, fish trap, lunch box, tallow candle, a vine's netting) take any string.
+A new Climate Stove (a hearth, an icebox, iron and copper) does both jobs in one block. Load it with fuel (coal, charcoal, logs, planks, sticks) and it warms the closed room round it as a hearth does; load it with ice, packed ice, blue ice or a snow block and it cools the room as an icebox does. It does one thing at a time: the last thing loaded decides, but only once it has run empty (loading the other kind while it still burns is refused with a line on screen). The Add fuel button feeds it what it is doing now. Use it with fuel or ice to load it, or with an empty hand for the hearth's screen. A new Air Gauge (copper, a glass pane, a thermometer and redstone) hangs on a wall and gives redstone a signal of 0 to 15 by how cold or hot the air is where it hangs, from freezing to overheating; use it to set it stronger the hotter or stronger the colder. A comparator reads it too.
+The Dragon Waterskin survives fire and lava when dropped, as netherite does. An icebox, or a climate stove loaded with ice, no longer boils water held to it (only a lit hearth does).
+- Classes: `climate/Warmth` (`consumed`, the fresh mark, `roomAt`, the regulator), `climate/WaterBowls`, `climate/RainBarrelBlock`, `climate/GaugeBlock`, `climate/AirGauge`, `climate/RegulatorBlock` (with `HearthEntity`), `climate/HouseBlocks`, `corpse/Sinew`, the `ICE_CREAM` dish.
+- Built; not played.
+
+## 0.6.98 (2026-11-26): Clothes and charms: trims, dragon-hide lining (#2190)
+
+- **Armour trims**: a copper trim holds warmth (each trimmed piece counts as a quarter of a warm piece), a quartz trim stays cool (a quarter of a cool piece).
+- **Dragon-hide lining** (`Lining.TEMPERED`): sewn only by a master tailor (a shepherd traded up to the top level) for 12 emeralds. It counts as a full warm and a full cool piece, and the wearer's body heat never goes past chilly or warm; if already past, it comes back 10 a second. Dragon hide comes from the `jaymoskitchen:dragon_hide` item tag (Powers' dragon hide).
+- Built; not played. The master tailor gate reads the villager's trade level, so a tailor that never levels (some MCA villagers) can't sew it.
+
+## 0.6.99 (2026-11-26): Thirst.parch: a salty meal's thirst (#2190)
+
+- A small public hook, `Thirst.parch(player, points)`, takes water off without telling the drink listeners (Kingdoms' salted food uses it by reflection, so salted meat and salty dishes leave you thirsty).
+- Built; not played.
+
+## 0.7.0 (2026-11-26): a fallen person's harness is on the loot screen (#2188)
+
+- Andy: "the downed loot screen should have a harness section". A body's loot screen (a tap on a fallen person, which is where everyone downed ends up once they're finished) now has a **Harness** block to the right of the pockets for a mob's body that wore any of Jaymo's Kingdoms' harness (shirt, hose, hood, cloak, padding, mail, plate): one slot a place, take only, shift-click works, your inventory centred under the wider screen. A body that wore none has the plain screen.
+- The harness is read out of the body's own look (`CorpseHarness`, at `fabric:attachments` → `jaymoskingdoms:harness`, where Fabric saves a mob's attachments, so Kitchen still needs no Kingdoms) and written back there on every take, as its gear is: the body is drawn without what's been taken, a second person looking sees the same, and a body that rises as a zombie after has only what was left. Damageable pieces are worn down the first time the body is searched, with its gear.
+- A tap opens the screen for a body with only harness on it (before, it searched and found nothing). Robbers (`hasValuables`) still look at gear and pockets only. A player's body keeps its harness in its own slots, as before.
+- Not done: harness doesn't come off with a lost arm or leg on a mob's body (a player's does). Someone still alive and down has their own harness screen (Kingdoms' body menu: Take their harness); their weapons and pockets keep the body menu's rows.
+- Built; not played, and the Java is compiled only by CI.
+
+## 0.7.1 (2026-11-26): Eaten bodies leave their remains; zombies go for brains, deer for limbs; only hordes and blood moons finish a body (#2197)
+
+- Andy (2026-11-25, clip of baby zombies eating a guard): "when he was fully eaten he dropped nothing. i'd like to change that so anything the monster couldnt eat is dropped, and a realistic amount of entrails should drop, that npc died and there was one intestine and no bones", and "this small zombie was ravenous, it should only be this aggressive when hungry".
+- **Who eats what first** (`CorpseEntity.nextPart`, `CorpseEntity.GUTS`): Andy, zombies "should also prioritize brains, then guts/entrails" and "focus on the head and body, then move on", while deer and the other scavengers "will moreso go for limbs and then body and move, most leaving the head alone". A monster tears off the head, then opens the belly and pulls the guts out; any other scavenger takes the arms and legs, then the guts. Pulling the guts out (`Gibs.gutsPulled`) drops the organs, gut ropes and gut piles it didn't finish round the body, and the body is drawn gutted. Before, every scavenger took the limbs in any order, then the head.
+- **Deer scavenge** (tags `scavengers`, `skittish_scavengers`: Naturalist's deer, Cube Animals' red, roe and reindeer): as real deer gnaw carcasses now and then, they come to bodies, bolting as foxes and vultures do. A skittish scavenger now gives way to any hunter that comes to the body and drives nothing off itself.
+- **Most bodies are left half eaten** (`Scavengers.finishes`, `CorpseEntity.pickedOver`): Andy, "the only time someone should be completely devoured is during an encounter with a horde (as they all will want a bite) and during blood moons". Once an eater has had its share (a monster the head and guts, anything else the limbs and guts), it leaves the body lying with what it wore, unless 4 or more scavengers are within 8 blocks of it or the eater is ravenous; those go on to the rest and then tear the trunk open.
+- **Ravenous under a blood moon** (`Scavengers.ravenous`, `compat/MoonCompat`): during Jaymo's Kingdoms' Blood Moon or Super Blood Moon a monster is never fed or full, so it hunts on and eats until the body is gone. Without Kingdoms there is no blood moon.
+- **What a finished body leaves** (`Gibs.eaten`, `Gibs.bonesLeft`): the ribcage, the spine, a skull (a person's body), 2-3 bone shards, 1-2 organs and two ropes of gut, 2-3 gut piles round it (intestines and offal in turn), the tatters of its clothes, and 3-5 bones as items (was a rib, a spine, a bone or two, one gut rope and one pile, and 1-2 bones). A bigger body leaves more, a smaller one fewer. Its gear and pockets drop as before; monsters that can pick up loot still take them up and wear armour that's better than theirs (Andy: "thats fine ... they should equip armor too").
+- **Fed monsters stop hunting** (`Scavengers.fedPace`): a monster that has swallowed a part lately or is full no longer takes up prey (full now counts too, not only the two minutes after a part), drops whoever it was after unless they hurt it in the last 10 seconds, and ambles at 70% of its speed. Hungry, it hunts as hard as ever. Wild scavengers only stop taking up prey, as before.
+- Built with Gradle; not played.
+
+## 0.7.2 (2026-11-26): Scavengers take longer over a body (#2200)
+
+- Andy (2026-11-25): "it should take longer for them to finish eating across the board, even longer for passive scavengers, and the hostile ones are faster. make it about double and modify from there."
+- **Slower meals** (`Scavengers.pace`, `HOSTILE_PACE`, `WILD_PACE`): a monster now takes 1.6 times the bites to tear a part off and 1.6 times as long to chew it (a man's limb about 15 seconds, was about 9); any other scavenger (wolves, bears, vultures, deer) 2.4 times (about 22 seconds a part).
+- **Crocodiles scavenge** (tag `scavengers`: Cube Animals' crocodile, alongside Naturalist's alligator): they eat the bodies they drag into the water (Jaymo's Kingdoms' death roll).
+- Built with Gradle; not played.
+
+## 0.7.3 (2026-11-26): CC0 picks: organs, soap, raw milk, cook-fire comfort, ice chests, 60-bite hunger, climate-paced crops (#2212)
+
+- Finer hunger: the hunger bar now goes down a third of a point at a time instead of a whole one, at the same pace overall. The top shank shows how much of it is gone. Once a bite is gone you can eat again, and food that would overfill the bar fills the bitten point first, so nothing is wasted. The bar still counts whole points, so AppleSkin, thirst, sprinting and the stomach read it as before.
+- Cake is a dessert: you can eat a slice off a placed cake even on a full bar.
+- **Organs, soap, raw milk, cooking-fire comfort, ice chests**
+- **Animals have real insides** (`butchery/Organs`, after Chest Cavity, CC0; its organ art, our own code): gutting a carcass with a blade, or a butcher dressing one on the hook or for the spit, now brings out the organs that animal really has along with its gut pile, a piece at a time. A cow, sheep, goat, llama or camel gives a heart, a liver, two kidneys, two lungs and two lots of tripe (a four-chambered stomach); a horse, pig, hoglin, wolf, bear, panda or strider one tripe; a fox, cat, rabbit or armadillo a heart, liver and two kidneys; a chicken its heart, liver and gizzard (tripe); a turtle its heart, liver and lungs. Spiders, cave spiders, creepers and ghasts can be gutted too (a blade or a skinning knife): two silk glands from a spider, a silk and a venom gland from a cave spider, the powder gland from a creeper, two gas bladders from a ghast. People are never gutted. Other mobs go by their size.
+- **What organs are for**: hearts, livers, kidneys and tripe are food. Raw they count as raw meat (its sickness and its week to keep); cooked on a campfire, in a furnace or a smoker they're a good meal. A lung cooks into cooked offal. Lungs and livers bait a hook or a fish trap like offal. A butcher (from apprentice) buys 4 hearts or 4 livers for an emerald; a cleric (from journeyman) buys 2 venom glands for an emerald and a gas bladder for 2. An apothecary reads each organ for its essences. A silk gland crafts into 3 string, a powder gland into 2 gunpowder.
+- **Soap, made the old way** (`tanning/Soapmaking`, after Soapistry, CC0; its soap, lye and ash art): burn leaves in a furnace or on a campfire (or crumble charcoal: 2 ash) for **Wood Ash**; craft a water bucket with 3 ash for 2 **Lye**; then hold tallow in one hand and lye in the other and use them on a water cauldron over a fire: they boil down into 2 bars of **Soap** for a level of water (a cooking pot, tallow and lye in the crafting grid works too). A bar lasts 32 uses. Soap is the best scrub there is (see Jaymo's Powers). Used on a block it washes a step of green off weathered copper, and the slime off a sticky piston (you get the slime ball back).
+- **Milk is raw until it's heated** (`farm/RawMilk`, after Raw Milk, CC0): every bucket and bottle of milk, from a bucket, a clay bucket, a milk jar or a familiar cow, is raw, and its tooltip says so. Drunk raw it still clears what ails you, but about one time in three it turns your stomach (Hunger for 30 seconds, sometimes Nausea too). To pasteurise it, use the bucket or bottle on anything that boils water (a lit campfire, firepit, hearth, or a pot or pan on heat) or on a water cauldron over a fire, or cook it in a furnace or smoker; the tooltip then says Pasteurised. Every recipe and dish takes either kind; a bottle poured from a raw bucket is raw.
+- **A fire with supper on it is a comfort** (`cooking/CookfireComfort`, after Soothing Campfires, CC0): while food is cooking on a lit campfire, or on a spit over a fire, players and villagers within 5 blocks get a gentle Regeneration that keeps going as long as the food cooks; a signal fire (hay under it) reaches 10 blocks. A stronger or longer Regeneration you already have is left alone. An empty fire doesn't do it (sitting by one still heals, from Comfortable Campfires, and resting by one from Jaymo's Powers).
+- **Ice chests** (`fresh/Freshness`, after Expired Food's cold items, the idea only): a chest or barrel with a block of ice, packed ice, blue ice or snow in among the food keeps it as a cold cellar does (it ages at half the speed), anywhere, even in a lit room.
+- Built with Gradle; not played.
+- **Crops grow by the climate**
+- **Crops grow best in their own climate** (`ClimateGrowth`, after Climate Based Growth by me.user, CC0): each crop has the warmth it likes and how far from it it will still grow. In its own climate it grows as before, or a little faster; the further off, the slower, down to half speed. Wheat and carrots take almost anywhere; sugar cane, cactus, melons, cocoa, rice and Kitchen's tomatoes like it warm; cabbages and onions like it cooler. Saplings go by their tree's land too (spruce and sweet berries the cold, jungle and acacia the heat). Warmth is the land's climate where Kingdoms is there (the same heat map the land's biomes were picked by), the biome's otherwise, less in the cold seasons, and less high up the mountains.
+- **Looking after a crop helps it stand the wrong weather**: watered farmland and fertile or rich farmland let a crop stand a wider range of warmth. Under a greenhouse roof, or in a room a hearth warms or an icebox cools, the warmth is drawn toward what the crop likes; any solid roof helps a little. No crop is left unable to grow in the temperate starting lands.
+- Built with Gradle; not played.
+- Built (all three mods build); not played. Mixins checked against the 26.3 sources only.
+
+## 0.7.4 (2026-11-26): Cut parts off a body with a blade or an axe (#2215)
+
+Andy: "there should be a way to dismember them from the inventory screen so you can take the limb if it doesnt drop", then "it needs a blade, or an axe to butcher the same way we do animals, but only for gear not meat". A person's body (or one built like a person) can have its head, arms and legs cut off: hold use on it with a blade or an axe, and a bar fills the way a big carcass is cut up; the part comes off (a severed part with Jaymo's Powers) with whatever was worn on it. No meat comes of it.
+- The loot screen has a cut-off button above the hands: pick a part there, and the next cut takes it off. With nothing picked, a blade or axe held on the body cuts off a part with gear bolted to it, and otherwise does what it always did.
+- Gear bolted onto a body (Jaymo's Powers says which: the Rig on the future's troopers and androids) can't be taken from its slot. Its slot is washed red, its tooltip says which part it comes off with, and a click on it picks that part. A piece bolted to the torso never comes off.
+- A machine's body wearing bolted gear (an android in its Rig plate) opens the loot screen on a tap too, instead of coming apart when searched.
+- `CorpseEntity#setAttachedGear` (a reflection hook, plain types), `attachedParts`, `canCutOff`, `pickCut`, `cutApart`; parts lost any way drop their bolted gear with them. `CorpseLootMenu` buttons (`CUT`, `CUT_GEAR`), `CorpseLootScreen` button and part list, lang part `corpse_cut_off.json`.
+- Built; not played. Player bodies can't be cut apart this way.
+
+## 0.7.5 (2026-11-27): tiny bodies picked up like items (#2266)
+
+- Andy (clip of a dead fly with a lift prompt): "Things this small should be picked up as items, there shouldnt be a lift prompt for something so light you could grab in hand like any other item".
+- A fish, or any body under half a block both ways (a fly, a cricket, a mouse, a mole, a maggot, a chick), goes straight into your pack on a click of an empty hand, sneaking or not, tapped or held: no drag, no lift, no bar. Caught as it falls, it's pocketed too. Arrows still in it come out first, one a click.
+- What you get: a fish or critter with something in it gives that (a cod gives its raw cod); an animal's carcass, or a body with nothing in it, goes in whole as its Corpse item ("Fly Corpse"), to put down again, crack open with a rock, roast or butcher. A full pack drops it at your feet.
+- Rabbits, frogs, chickens and snakes are still taken up by the neck; players', machines', zombies' and skeletons' bodies never count.
+- `CorpseEntity.handSized` / `pickUp`; shared to Powers' hints as `jaymoskitchen:corpse_hand_sized` (`Corpses.SHARE_HAND_SIZED`).
+- Built; not played.
+
+## 0.7.6 (2026-11-27): Stations say what's missing (#2269)
+
+- An empty cutting board says to lay food on it and cut with a knife; the mincer says it takes raw meat.
+- Built (compileJava); not played.
+
+## 0.7.7 (2026-11-27): Hunter's Road 6, part B: monster organs carved with a skinning knife (#2289)
+
+- **Monster organs** (`butchery/MonsterOrgans`, `Organs`): six new organs (mire gall, grave tongue, pack marrow, wight sac, imp gizzard, troll liver) that a skinning knife carves from a grown monster's body, the way a spider's silk is taken. Which monster gives which organ is a data table (`data/<ns>/monster_organs/*.json`, `entity` and `organ`); a baby gives nothing, and nothing is ever added to a loot table. The troll is in the table now (troll liver); the hag, gnawer leader, fog-wight and imp warrior are filled in by their own patches adding a file each.
+- Each organ has essences, so the Scrying Lens reads them; Jaymo's Powers' monster brews are made from them.
+- Built; not played.
+
+## 0.7.8 (2026-11-27): Hunter's Road 7A: monster fat and grease (#2290)
+
+- A grown monster of the four kinds the oils bite (the dead, beasts, brutes, people) gives 1 to 2 lumps of its kind's fat when gutted with a knife; villagers and players give none (`jaymoskitchen:no_fat`).
+- Fat renders to grease on a campfire, in a furnace or in a cooking pot; Jaymo's Powers' crucible turns grease into blade oils. Items `dead_fat`, `beast_fat`, `brute_fat`, `folk_fat` and the four greases (`MonsterFat`).
+- Built; not played.
+
+## 0.7.9 (2026-11-27): Hunter's Road 7b: scalpel, parts of poisoned beasts, poisoned sweets (#2290)
+
+- **Scalpel**: cuts one part from a body that died poisoned: a venom fang (wolf), green spit (llama), poison sac (squid), brittle bone (bogged, always poisoned) or poison jelly (slime). Carved, never dropped; one cut a body; babies have none. Which beast gives which part is data (`poisoned_parts`).
+- **Poisoned sweets**: a toxic cake (placed, or thrown and spent), milk, mint and dark chocolates, and a gift box.
+- Classes: `corpse/PoisonedParts`, `cooking/PoisonedSweets`.
+- Built; not played.
+
+## 0.7.10 (2026-11-27): Night's Blood 3 - a bottle remembers whose blood it is (#2291)
+
+- **Bottle of blood**: a bottle filled from someone (Jaymo's Kingdoms' vampires) is named "Blood of <name>", remembers who they were, the taste of their people's blood and whether they were a king or lord, and shows the taste under its name. Grate bottles are as before.
+- **Hooks for Kingdoms**: `Butchery.addOnDrinkBottle` (a hook that is given the bottle drunk), `Butchery.filledBottle`, `BloodBottleItem.donor/donorId/taste/great`, and `WinterCold.addColdProof` (more than one reason the cold can't touch someone).
+- Built; not played.
+
+## 0.7.11 (2026-11-27): Rotting bodies bare bone in patches, not checks (#2294)
+
+- Andy's clip: a rotting black bear's body looked broken, bone-white squares all over black fur and its legs striped
+  like a ladder. Rot and bared bone (`Dressed.weather`) were painted in hard 3-pixel squares picked at random across
+  the skin. They now come through in soft, ragged-edged patches (a smooth noise about 6 pixels across), each level of
+  rot baring about its share, with a rim of raw dried flesh round the bone and a little grain in it. Same for a body
+  a scavenger has eaten down to the bone.
+- Built; not played.
+
+## 0.7.12 (2026-11-27): Air combo throws mobs as ragdolls (#2300)
+
+- `MobRagdolls.thrown(mob, vx, vy, vz)`: Jaymo's Powers' air combo knocks a mob limp (or takes one already limp) and throws the body at that speed, not cut to the knockback caps (a throw on purpose, as players' `LivingRagdolls.knock`), with a flick at the head (`THROWN_TUMBLE` 0.2) so it turns over in the air; its limp time starts again so it doesn't get up in mid-air. Does nothing with Ragdollified Reactions loaded.
+- Built; not played.

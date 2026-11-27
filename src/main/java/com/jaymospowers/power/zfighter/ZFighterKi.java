@@ -1054,6 +1054,7 @@ public final class ZFighterKi {
 			return;
 		}
 		live.waveFrom = player.level().getGameTime();
+		ZFighterWaveBeam.setStage(player, ZFighterWaveBeam.STAGE_GATHER);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0F, 1.8F);
 	}
 
@@ -1080,6 +1081,7 @@ public final class ZFighterKi {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		float charge = charge(player, live, now);
+		ZFighterWaveBeam.setStage(player, charge >= 1.0F ? ZFighterWaveBeam.STAGE_HOLD : ZFighterWaveBeam.STAGE_GATHER);
 		int type = ZFighterTraining.of(player).charged();
 		if (ZFighterArts.charged(type)) {
 			// (0.17.46) the drill beam, triangle cannon and nova sphere gather their own way
@@ -1127,17 +1129,23 @@ public final class ZFighterKi {
 		boolean bomb = type == ZFighterTraining.KI_BOMB;
 		boolean art = ZFighterArts.charged(type);
 		if (art && ZFighterArts.blocker(player, live, type) != null) {
+			ZFighterWaveBeam.setStage(player, ZFighterWaveBeam.STAGE_NONE);
 			return false;
 		}
 		float cost = art ? Mth.lerp(charge, ZFighterArts.min(player, type), ZFighterArts.max(player, type))
 			: bomb ? Mth.lerp(charge, BOMB_MIN_KI, BOMB_MAX_KI) : Mth.lerp(charge, WAVE_MIN_KI, WAVE_MAX_KI) * signature(live).ki();
 		if (!ZFighterPower.spend(player, live, cost)) {
+			ZFighterWaveBeam.setStage(player, ZFighterWaveBeam.STAGE_NONE);
 			return false;
 		}
 		if (art) {
 			ZFighterArts.release(player, live, type, charge);
+			if (!ZFighterWaveBeam.out(player)) {
+				ZFighterWaveBeam.setStage(player, ZFighterWaveBeam.STAGE_NONE);
+			}
 		} else if (bomb) {
 			fireBomb(player, live, charge);
+			ZFighterWaveBeam.setStage(player, ZFighterWaveBeam.STAGE_NONE);
 		} else {
 			fireWave(player, live, charge);
 		}

@@ -1,0 +1,43 @@
+{
+ "values": [
+  "minecraft:wolf",
+  "jaymoskingdoms:feral_wolf",
+  "jaymoskingdoms:coyote",
+  {
+   "id": "naturalist:lion",
+   "required": false
+  },
+  {
+   "id": "naturalist:tiger",
+   "required": false
+  },
+  {
+   "id": "naturalist:hyena",
+   "required": false
+  },
+  {
+   "id": "naturalist:coyote",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:tiger",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:lynx",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:snowleopard",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:caracal",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:tiger",
+   "required": false
+  }
+ ]
+}

@@ -24,6 +24,21 @@
     "jaymospowers:costume/wandering_trader/pattern_mask_skull",
     "jaymospowers:costume/wandering_trader/pattern_mask_visored",
     "jaymospowers:costume/wandering_trader/pattern_cape_scalloped",
-    "jaymospowers:costume/wandering_trader/pattern_cape_trailing"
+    "jaymospowers:costume/wandering_trader/pattern_cape_trailing",
+    "jaymospowers:hunter/wandering_trader/formula_slow_mending",
+    "jaymospowers:hunter/wandering_trader/formula_grey_sight",
+    "jaymospowers:hunter/wandering_trader/formula_savagery",
+    "jaymospowers:hunter/wandering_trader/formula_keen_edge",
+    "jaymospowers:hunter/wandering_trader/formula_deep_breath",
+    "jaymospowers:hunter/wandering_trader/formula_thorned_blood",
+    "jaymospowers:hunter/wandering_trader/formula_thin_venom",
+    "jaymospowers:hunter/wandering_trader/formula_plenty",
+    "jaymospowers:hunter/wandering_trader/formula_cleanser",
+    "jaymospowers:hunter/wandering_trader/formula_marsh_fury",
+    "jaymospowers:hunter/wandering_trader/formula_grave_hunger",
+    "jaymospowers:hunter/wandering_trader/formula_pack_marrow",
+    "jaymospowers:hunter/wandering_trader/formula_fog_shroud",
+    "jaymospowers:hunter/wandering_trader/formula_imp_gallop",
+    "jaymospowers:hunter/wandering_trader/formula_troll_blood"
   ]
 }

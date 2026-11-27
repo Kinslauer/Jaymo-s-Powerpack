@@ -1,6 +1,7 @@
 package com.jaymospowers.client.fx;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.fx.effekseer.SpectacleClient;
 import com.jaymospowers.core.fx.MagicFx;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -79,10 +80,23 @@ public final class MagicFxClient {
 	static final Identifier STROKE_TEXTURE = JaymosPowers.id("textures/fx/stroke.png");
 	static final Identifier POOL_TEXTURE = JaymosPowers.id("textures/fx/pool.png");
 	static final Identifier RIPPLE_TEXTURE = JaymosPowers.id("textures/fx/ripple.png");
+	/**
+	 * A bolt: a new path every {@code BOLT_REFORK} ticks; a step of the channel is about {@code BOLT_STEP} blocks and
+	 * wanders {@code BOLT_JAG} of a step sideways; the core's share of its width; forks off the channel (fewest, most), how
+	 * far one runs (share of the bolt), and how thin; the flash (share of its life) when it first strikes, and how wide.
+	 */
+	static final int BOLT_REFORK = 2, BOLT_FORKS_MIN = 2, BOLT_FORKS_MAX = 5;
+	static final float BOLT_STEP = 0.55F, BOLT_JAG = 0.75F, BOLT_CORE = 0.3F, BOLT_FORK_REACH = 0.32F, BOLT_FORK_WIDTH = 0.5F;
+	static final float BOLT_FLASH = 0.18F, BOLT_FLASH_WIDTH = 2.2F;
+	static final int BOLT_GLOW_ALPHA = 0x90;
+	/** A scorch: lifted this far off its face; the glow's share of its life and of its size; how much of its life it takes to fade. */
+	static final float SCORCH_LIFT = 0.012F, SCORCH_GLOW_LIFE = 0.35F, SCORCH_GLOW_SIZE = 0.75F, SCORCH_FADE = 0.3F;
+	static final int SCORCH_ALPHA = 0xE6;
+	static final Identifier SCORCH_TEXTURE = JaymosPowers.id("textures/fx/scorch.png");
 	/** Spheres are this many faces round and down (a blast's shell is thin and brief, so fewer). */
 	static final int LON = 16, LAT = 10;
 	/** The most shapes alive at once: past it the oldest go. */
-	static final int MAX_SHAPES = 256;
+	static final int MAX_SHAPES = 512;
 
 	private static final class Live {
 		final MagicFx.Shape shape;
@@ -108,6 +122,7 @@ public final class MagicFxClient {
 		ParticleProviderRegistry.getInstance().register(MagicFx.RUNE, sprites -> (options, level, x, y, z, xd, yd, zd, random) ->
 			new Rune(level, x, y, z, xd, yd, zd, options.color(), options.size(), sprites));
 		ClientPlayNetworking.registerGlobalReceiver(MagicFx.Shape.TYPE, (shape, context) -> add(shape));
+		SpectacleClient.init(MagicFxClient::add);
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (minecraft.level == null) {
 				SHAPES.clear();
@@ -168,6 +183,20 @@ public final class MagicFxClient {
 	public static void stroke(Vec3 from, Vec3 to, float width, int color, int ticks) {
 		Vec3 d = to.subtract(from);
 		add(new MagicFx.Shape(MagicFx.STROKE, from.x, from.y, from.z, (float)d.x, (float)d.y, (float)d.z, width, color & 0xFFFFFF, Math.max(2, ticks)));
+	}
+
+	/** A bolt from {@code from} to {@code to}, made here: see {@link MagicFx#bolt}. */
+	public static void bolt(Vec3 from, Vec3 to, float width, int color, int ticks) {
+		Vec3 d = to.subtract(from);
+		add(new MagicFx.Shape(MagicFx.BOLT, from.x, from.y, from.z, (float)d.x, (float)d.y, (float)d.z, width, color & 0xFFFFFF, Math.max(2, ticks),
+			RandomSource.create().nextInt(1 << 20), 0.0F, 0.0F));
+	}
+
+	/** A scorch at {@code at} on the face {@code normal} points out of, made here: see {@link MagicFx#scorch}. */
+	public static void scorch(Vec3 at, Vec3 normal, float radius, int color, int cool, int ticks) {
+		Vec3 n = normal.lengthSqr() < 1.0E-6 ? new Vec3(0.0, 1.0, 0.0) : normal.normalize();
+		add(new MagicFx.Shape(MagicFx.SCORCH, at.x, at.y, at.z, (float)n.x, (float)n.y, (float)n.z, radius, color & 0xFFFFFF, Math.max(2, ticks),
+			cool & 0xFFFFFF, RandomSource.create().nextFloat() * Mth.TWO_PI, 0.0F));
 	}
 
 	/** How high a wave {@code width} across stands at its full height. */
@@ -248,6 +277,10 @@ public final class MagicFxClient {
 				case MagicFx.WAVE -> drawWave(collector, poseStack, at, new Vec3(s.dx(), 0.0, s.dz()), s.size(), s.color(), time, life);
 				case MagicFx.STROKE -> drawStroke(collector, poseStack, at, at.add(s.dx(), s.dy(), s.dz()), new Vec3(s.bx(), s.by(), s.bz()), s.size(),
 					s.color(), life);
+				case MagicFx.BOLT -> drawBolt(collector, poseStack, at, at.add(s.dx(), s.dy(), s.dz()), s.size(), s.color(), (int)s.bx(),
+					live.age / BOLT_REFORK, life);
+				case MagicFx.SCORCH -> drawScorch(collector, poseStack, at, new Vec3(s.dx(), s.dy(), s.dz()), s.size(), s.color(), (int)s.bx(), s.by(),
+					life);
 				case MagicFx.POOL -> {
 					float age = live.age + partial;
 					float open = Mth.clamp(age / Math.max(1.0F, s.dx()), 0.0F, 1.0F);
@@ -431,6 +464,122 @@ public final class MagicFxClient {
 		float fade = 1.0F - life;
 		drawOrb(collector, poseStack, a, r * BEAM_END, color, time, fade);
 		drawOrb(collector, poseStack, b, r * BEAM_END * 1.2F, color, time + 20.0F, fade);
+	}
+
+	/**
+	 * One bolt, camera-relative: a jagged channel from {@code a} to {@code b} with forks running off it, a white-hot
+	 * core in a glow {@code width} across. The path is grown from {@code seed} and {@code phase} (it jumps to a new one
+	 * each phase); it flashes wide as it strikes, then thins, and near its end it flickers out.
+	 */
+	public static void drawBolt(SubmitNodeCollector collector, PoseStack poseStack, Vec3 a, Vec3 b, float width, int color, int seed, int phase,
+		float life) {
+		double length = a.distanceTo(b);
+		if (length < 1.0E-3 || width <= 0.004F) {
+			return;
+		}
+		RandomSource random = RandomSource.create(seed * 31L + phase * 7919L);
+		// past half its life it flickers: some paths are dark
+		if (life > 0.5F && random.nextInt(3) == 0) {
+			return;
+		}
+		float flash = life < BOLT_FLASH ? 1.0F + (BOLT_FLASH_WIDTH - 1.0F) * (1.0F - life / BOLT_FLASH) : 1.0F;
+		float w = width * (1.0F - life * 0.6F);
+		boolean dark = MagicFx.dark(color);
+		int core = 0xFF000000 | (dark ? mix(color, 0x000000, 0.3F) : mix(color, 0xFFFFFF, 0.8F));
+		int glow = (int)(BOLT_GLOW_ALPHA * (1.0F - life * 0.7F)) << 24 | (color & 0xFFFFFF);
+		List<Vec3> main = new ArrayList<>();
+		boltPath(main, a, b, random, 1.0F);
+		List<List<Vec3>> forks = new ArrayList<>();
+		int count = BOLT_FORKS_MIN + random.nextInt(BOLT_FORKS_MAX - BOLT_FORKS_MIN + 1);
+		for (int i = 0; i < count && main.size() > 3; i++) {
+			int at = 1 + random.nextInt(Math.max(1, main.size() * 3 / 4));
+			Vec3 start = main.get(Math.min(at, main.size() - 2));
+			Vec3 on = b.subtract(start);
+			if (on.lengthSqr() < 1.0E-4) {
+				continue;
+			}
+			Vec3 kick = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
+			Vec3 way = on.normalize().add(kick.scale(0.9)).normalize();
+			List<Vec3> fork = new ArrayList<>();
+			boltPath(fork, start, start.add(way.scale(length * BOLT_FORK_REACH * (0.4 + random.nextDouble() * 0.6))), random, 1.3F);
+			forks.add(fork);
+		}
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, false), (pose, buffer) -> {
+			chain(buffer, pose, main, w * BOLT_CORE, core);
+			for (List<Vec3> fork : forks) {
+				chain(buffer, pose, fork, w * BOLT_CORE * BOLT_FORK_WIDTH, core);
+			}
+		});
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true), (pose, buffer) -> {
+			chain(buffer, pose, main, w * flash, glow);
+			for (List<Vec3> fork : forks) {
+				chain(buffer, pose, fork, w * flash * BOLT_FORK_WIDTH, glow);
+			}
+		});
+	}
+
+	/** A jagged path from {@code a} to {@code b}: steps of about {@link #BOLT_STEP}, each wandering sideways, pinned at both ends. */
+	private static void boltPath(List<Vec3> out, Vec3 a, Vec3 b, RandomSource random, float jag) {
+		Vec3 d = b.subtract(a);
+		double length = d.length();
+		int steps = Math.max(2, Mth.ceil(length / BOLT_STEP));
+		Vec3 dir = d.scale(1.0 / length);
+		Vec3 u = (Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)) : dir.cross(new Vec3(1.0, 0.0, 0.0))).normalize();
+		Vec3 v = dir.cross(u).normalize();
+		double step = length / steps;
+		double ou = 0.0, ov = 0.0;
+		out.add(a);
+		for (int i = 1; i < steps; i++) {
+			double t = i / (double)steps;
+			ou += random.nextGaussian() * step * BOLT_JAG * jag;
+			ov += random.nextGaussian() * step * BOLT_JAG * jag;
+			// pulled back toward the line so it reaches its end, the pull strongest near the ends
+			double pin = Math.sin(Math.PI * t);
+			out.add(a.add(d.scale(t)).add(u.scale(ou * pin)).add(v.scale(ov * pin)));
+			ou *= 0.85;
+			ov *= 0.85;
+		}
+		out.add(b);
+	}
+
+	/** Tubes along a path, each one link of it. */
+	private static void chain(VertexConsumer buffer, PoseStack.Pose pose, List<Vec3> path, float radius, int color) {
+		if (radius <= 0.002F) {
+			return;
+		}
+		for (int i = 0; i + 1 < path.size(); i++) {
+			tube(buffer, pose, path.get(i), path.get(i + 1), radius, color, 0.0F, 0.1F);
+		}
+	}
+
+	/**
+	 * One scorch, camera-relative: the ragged mark lying across the face {@code normal} points out of, {@code radius}
+	 * to the middle of its sides, turned {@code angle}. It glows {@code color} at first and cools to {@code cool},
+	 * then fades over the last of its life.
+	 */
+	public static void drawScorch(SubmitNodeCollector collector, PoseStack poseStack, Vec3 at, Vec3 normal, float radius, int color, int cool,
+		float angle, float life) {
+		if (radius <= 0.01F) {
+			return;
+		}
+		Vec3 n = normal.lengthSqr() < 1.0E-6 ? new Vec3(0.0, 1.0, 0.0) : normal.normalize();
+		Vec3 u = (Math.abs(n.y) < 0.95 ? n.cross(new Vec3(0.0, 1.0, 0.0)) : new Vec3(1.0, 0.0, 0.0)).normalize();
+		Vec3 w = u.cross(n).normalize();
+		Vec3 c = at.add(n.scale(SCORCH_LIFT));
+		float open = Math.min(1.0F, life * 12.0F);
+		float fade = life > 1.0F - SCORCH_FADE ? (1.0F - life) / SCORCH_FADE : 1.0F;
+		float heat = Mth.clamp(1.0F - life / SCORCH_GLOW_LIFE, 0.0F, 1.0F);
+		// the mark, its colour going from the glow to the cool as the heat leaves it
+		int mark = (int)(SCORCH_ALPHA * fade * open) << 24 | mix(cool, color, heat * heat);
+		float r = radius * (0.6F + 0.4F * open);
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(SCORCH_TEXTURE, true), (pose, buffer) -> flat(buffer, pose, c, u, w, r, angle, mark));
+		if (heat > 0.01F) {
+			// and the heat itself, bright at the heart while it lasts
+			int glow = (int)(0xFF * heat) << 24 | (MagicFx.dark(color) ? color : mix(color, 0xFFFFFF, 0.5F * heat));
+			Vec3 hot = c.add(n.scale(0.004));
+			collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(SCORCH_TEXTURE, true),
+				(pose, buffer) -> flat(buffer, pose, hot, u, w, r * SCORCH_GLOW_SIZE * (0.7F + 0.3F * heat), -angle * 0.7F, glow));
+		}
 	}
 
 	/** One blast: the shell runs out to {@code radius} fast and slows, thinning as it goes; the heart flares and is gone. */

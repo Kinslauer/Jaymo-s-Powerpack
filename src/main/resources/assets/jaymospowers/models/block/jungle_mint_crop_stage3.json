@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/crop",
+  "textures": {
+    "crop": "jaymospowers:block/herbs/jungle_mint_stage3"
+  }
+}

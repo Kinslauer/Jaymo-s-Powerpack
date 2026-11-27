@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Casebook;
 import com.jaymoskingdoms.Journal;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -17,6 +18,8 @@ import net.minecraft.network.chat.Component;
  */
 public final class JournalClient {
 	private static KeyMapping journalKey;
+	/** The casebook page as the server last sent it ({@link Casebook}). */
+	static Casebook.Page casebook = Casebook.Page.EMPTY;
 
 	private JournalClient() {
 	}
@@ -24,6 +27,7 @@ public final class JournalClient {
 	static void register() {
 		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("journal"));
 		journalKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.journal", InputConstants.KEY_M, category));
+		ClientPlayNetworking.registerGlobalReceiver(Casebook.Sync.TYPE, (payload, context) -> casebook = payload.page());
 		ClientPlayNetworking.registerGlobalReceiver(Journal.Book.TYPE, (payload, context) -> context.client().gui.setScreen(new JournalScreen(payload, journalKey)));
 		ClientTickEvents.END_CLIENT_TICK.register(JournalClient::tick);
 	}

@@ -1,0 +1,11 @@
+{
+	"replace": false,
+	"values": [
+		"jaymospowers:symbiote_skin",
+		{"id": "#c:foods/raw_meat", "required": false},
+		{"id": "#c:foods/organ", "required": false},
+		{"id": "#c:foods/organs", "required": false},
+		{"id": "#c:organs", "required": false},
+		{"id": "#c:raw_meats", "required": false}
+	]
+}

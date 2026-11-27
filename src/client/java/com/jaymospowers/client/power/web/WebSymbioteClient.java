@@ -3,6 +3,8 @@ package com.jaymospowers.client.power.web;
 import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.power.web.WebNet;
+import com.jaymospowers.power.web.WebPose;
+import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.web.WebSymbioteState;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -296,6 +298,14 @@ public final class WebSymbioteClient {
 	static final double TAKEOVER_STOP = 1.5;
 	/** Held still while the tendrils rip: horizontal speed kept per tick. */
 	static final double RIP_HOLD = 0.5;
+	/**
+	 * A waypoint more than {@code GAP_SPAN} blocks across from the one before it is a gap the server planned a jump over:
+	 * it bounds there at once ({@link #startBound}). The red one's pounce takes in a prey this close in height
+	 * ({@code POUNCE_MAX_DY} blocks).
+	 */
+	static final double GAP_SPAN = 1.5, POUNCE_MAX_DY = 1.5;
+	/** When a gap's bound may next be tried (player tick), and when the red one last pounced. */
+	private static int gapRetryAt, pounceAt = -1000;
 	/** The straight-line fallback: how far ahead it looks for a way (blocks), and the turns it tries, nearest first (degrees). */
 	private static final double TAKEOVER_LOOK = 0.7;
 	private static final float[] TAKEOVER_DETOURS = {0.0F, 30.0F, -30.0F, 60.0F, -60.0F, 90.0F, -90.0F, 125.0F, -125.0F};
@@ -395,7 +405,11 @@ public final class WebSymbioteClient {
 
 	static void init() {
 		WebTendrilBundle.init();
+		WebSymbioteFidget.init();
 		WebSymbioteBodyClient.init();
+		WebSymbioteHud.init();
+		WebShaderMarks.init();
+		WebArmScreen.installButton();
 		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.web_symbiote", InputConstants.KEY_X, JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			// worked out once a tick, not once per entity per frame
@@ -556,6 +570,8 @@ public final class WebSymbioteClient {
 		peelTicks = 0;
 		escapeCoil = -1;
 		rescueTicks = -1;
+		gapRetryAt = 0;
+		pounceAt = -1000;
 		clearPath();
 		THREATS.clear();
 	}
@@ -603,6 +619,7 @@ public final class WebSymbioteClient {
 		state.setData(MEAL_REACH, meal == null ? null : meal.reach());
 		state.setData(EATING, meal == null ? null : Math.max(0.0F, entity.level().getGameTime() - meal.start() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		state.setData(MEAL_BIG, meal != null && meal.big());
+		state.setData(WebBloom.OPEN, WebBloom.open(entity));
 		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.BULK)) {
 			// no cape poking out through the suit, and the armour engulfed by it (an elytra still spreads from it)
 			state.showCape = false;
@@ -945,7 +962,7 @@ public final class WebSymbioteClient {
 	 * press at once), anyone else's as the server syncs it.
 	 */
 	public static float struggleShare(Player player) {
-		if (player == Minecraft.getInstance().player && (takeoverTicks > 0 || peelTicks > 0)) {
+		if (player == Minecraft.getInstance().player && player.getAttached(WebSymbiote.RHYTHM) == null && (takeoverTicks > 0 || peelTicks > 0)) {
 			int needed = neededNow(player);
 			return needed > 0 ? Mth.clamp(struggleMeter / needed, 0.0F, 1.0F) : 0.0F;
 		}
@@ -955,12 +972,13 @@ public final class WebSymbioteClient {
 
 	/** The movement keys during a takeover: each new press is a struggle. */
 	public static void struggleKeys(Input keys) {
+		boolean sneak = keys.shift() && !heldKeys.shift();
 		boolean pressed = keys.forward() && !heldKeys.forward() || keys.backward() && !heldKeys.backward() || keys.left() && !heldKeys.left()
 			|| keys.right() && !heldKeys.right() || keys.jump() && !heldKeys.jump() || keys.shift() && !heldKeys.shift()
 			|| keys.sprint() && !heldKeys.sprint();
 		heldKeys = keys;
 		if (pressed) {
-			struggle();
+			struggle(sneak);
 		}
 	}
 
@@ -977,18 +995,26 @@ public final class WebSymbioteClient {
 
 	/** One press against its hold (at most one a tick reaches the server; see WebSymbiote.breakFreeNeeded). */
 	public static void struggle() {
+		struggle(false);
+	}
+
+	private static void struggle(boolean sneak) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null || !inputLocked() || player.tickCount == struggleTick) {
 			return;
 		}
+		Long rhythm = player.getAttached(WebSymbiote.RHYTHM);
+		if (rhythm != null && !sneak) {
+			return;
+		}
 		struggleTick = player.tickCount;
-		if (neededNow(player) > 0) {
+		if (rhythm == null && neededNow(player) > 0) {
 			struggleMeter += 1.0F;
 			// every heave against it jolts your view, harder the further out of it you've torn
 			com.jaymospowers.client.ScreenShake.add(STRUGGLE_SHAKE + STRUGGLE_SHAKE_PER * struggleShare(player));
 		}
 		if (ClientPlayNetworking.canSend(WebNet.Struggle.TYPE)) {
-			ClientPlayNetworking.send(new WebNet.Struggle());
+			ClientPlayNetworking.send(new WebNet.Struggle(sneak));
 		}
 	}
 
@@ -1139,11 +1165,13 @@ public final class WebSymbioteClient {
 				wet[i] = water;
 				prev = at;
 			}
-			double min = stuck ? BOUND_STUCK_RANGE : BOUND_MIN_RANGE;
 			for (int j = n - 1; j >= pathIndex && plan == null; j--) {
 				Vec3 at = pathNodes.get(j);
 				double d = at.subtract(player.position()).horizontalDistance();
-				if (d < min || d > BOUND_MAX_RANGE || !away && !far && walk[j] < d * BOUND_SHORTCUT && !wet[j]) {
+				// (a waypoint across a gap is always one to bound for, from close by: no walking round it)
+				boolean gap = gapAt(player, j);
+				double min = stuck || gap ? BOUND_STUCK_RANGE : BOUND_MIN_RANGE;
+				if (d < min || d > BOUND_MAX_RANGE || !away && !far && !gap && walk[j] < d * BOUND_SHORTCUT && !wet[j]) {
 					continue;
 				}
 				if (far && chased.position().distanceTo(at) < TAKEOVER_STOP) {
@@ -1166,15 +1194,60 @@ public final class WebSymbioteClient {
 				stuckSince = player.tickCount;
 			} else {
 				boundReadyAt = player.tickCount + BOUND_RETRY;
+				gapRetryAt = boundReadyAt;
 			}
 			return false;
 		}
+		beginBound(player, plan);
+		return true;
+	}
+
+	/** Coils for {@code plan}: the crouch shown to everyone, held still but for a little give. */
+	private static void beginBound(LocalPlayer player, Bound plan) {
 		bound = plan;
 		boundCoil = 0;
 		if (ClientPlayNetworking.canSend(WebNet.ChargeHold.TYPE)) {
 			ClientPlayNetworking.send(new WebNet.ChargeHold(true));
 		}
 		holdCoiled(player);
+	}
+
+	/** Waypoint {@code j} is more than {@code GAP_SPAN} blocks across from the one before it (or from you), level or lower: a gap the server planned a jump over. */
+	private static boolean gapAt(LocalPlayer player, int j) {
+		if (j < 0 || j >= pathNodes.size()) {
+			return false;
+		}
+		Vec3 at = pathNodes.get(j);
+		Vec3 before = j > 0 ? pathNodes.get(j - 1) : player.position();
+		return at.subtract(before).horizontalDistance() > GAP_SPAN && at.y <= before.y + 1.0;
+	}
+
+	/**
+	 * The red one's pounce (see {@code WebRedHunt}): the last stretch at its prey in one bound, {@code LUNGE_MIN} to
+	 * {@code LUNGE_MAX} blocks out, about level with it and in sight, every {@code LUNGE_EVERY} ticks at most, landing
+	 * {@link #TAKEOVER_STOP} short of its feet. The coil, the sounds and the screen kick are the bound's. True if it began.
+	 */
+	private static boolean pounce(LocalPlayer player, Entity target, boolean away) {
+		if (away || target == player || !player.onGround() || player.isInWater() || leapCoil >= 0 || boundCoil >= 0 || boundFlight >= 0
+			|| player.tickCount - pounceAt < com.jaymospowers.power.web.WebRedHunt.LUNGE_EVERY
+			|| com.jaymospowers.power.web.WebSymbioteStrains.of(player) != com.jaymospowers.power.web.WebSymbioteStrain.RED) {
+			return false;
+		}
+		Vec3 to = target.position().subtract(player.position());
+		double d = to.horizontalDistance();
+		if (d < com.jaymospowers.power.web.WebRedHunt.LUNGE_MIN || d > com.jaymospowers.power.web.WebRedHunt.LUNGE_MAX
+			|| Math.abs(to.y) > POUNCE_MAX_DY || !player.hasLineOfSight(target)) {
+			return false;
+		}
+		Vec3 stop = target.position().subtract(new Vec3(to.x, 0.0, to.z).scale(TAKEOVER_STOP / d));
+		Bound plan = planBound(player, new Vec3(stop.x, target.getY(), stop.z));
+		if (plan == null) {
+			// (no clear arc from here: it looks again in a moment)
+			pounceAt = player.tickCount - com.jaymospowers.power.web.WebRedHunt.LUNGE_EVERY + BOUND_RETRY;
+			return false;
+		}
+		pounceAt = player.tickCount;
+		beginBound(player, plan);
 		return true;
 	}
 
@@ -1438,7 +1511,8 @@ public final class WebSymbioteClient {
 			resyncPath(player);
 		}
 		// no headway for a while (and not where it wants to be, or busy): it leaps for it
-		boolean settled = boundCoil >= 0 || boundFlight >= 0 || leapCoil >= 0 || target == player || pathMode == WebNet.TakeoverPath.RIP
+		boolean countering = player.getAttached(com.jaymospowers.power.web.WebCounter.ACTIVE) != null;
+		boolean settled = boundCoil >= 0 || boundFlight >= 0 || leapCoil >= 0 || target == player || pathMode == WebNet.TakeoverPath.RIP || countering
 			|| !takeoverFlee && target.position().subtract(player.position()).horizontalDistance() < BOUND_STUCK_NEAR
 			// (0.15.69) near but up a ledge or behind a wall isn't there: that's stuck too
 			&& Math.abs(target.getY() - player.getY()) < BOUND_STUCK_NEAR_Y && player.hasLineOfSight(target);
@@ -1458,9 +1532,19 @@ public final class WebSymbioteClient {
 		} else if (pathMode == WebNet.TakeoverPath.RIP) {
 			endBound();
 			holdForRip(player);
+		} else if (countering) {
+			// a counter's running (the tendrils seize, haul, strike): still, eyes on it, so it doesn't fight the counter's own shove
+			endBound();
+			sprint(player, false);
+			turnToward(player, target.getBoundingBox().getCenter().subtract(player.getEyePosition()), TAKEOVER_TURN, true);
+		} else if (boundCoil < 0 && boundFlight < 0 && leapCoil < 0 && com.jaymospowers.client.TakeoverDodge.dodge(player)) {
+			// a shot at it: it sidesteps (the fighting AI's eye for arrows in flight)
 		} else if (tickBound(player, target)) {
 			// coiled, or in the air
-		} else if (pathMode == WebNet.TakeoverPath.PATH && player.tickCount >= boundReadyAt && startBound(player, away, false)) {
+		} else if (pounce(player, target, away)) {
+			// the red one's last stretch, in one bound
+		} else if (pathMode == WebNet.TakeoverPath.PATH && (player.tickCount >= boundReadyAt || player.tickCount >= gapRetryAt && gapAt(player, pathIndex))
+			&& startBound(player, away, false)) {
 			// off on a bound along the way
 		} else if (stuck && startBound(player, true, true)) {
 			// stuck: a leap for it
@@ -1850,9 +1934,22 @@ public final class WebSymbioteClient {
 			return;
 		}
 		AABB box = player.getBoundingBox();
-		boolean wall = !player.level().noCollision(player, box.inflate(0.12, -0.1, 0.12));
-		boolean ceiling = !player.onGround() && !player.level().noCollision(player, box.move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05));
+		// (too tired to hold on, WebStamina: no wall or ceiling to cling to until it has rested)
+		boolean tired = com.jaymospowers.power.web.WebStamina.tired(player);
+		boolean wall = !tired && !player.level().noCollision(player, box.inflate(0.12, -0.1, 0.12));
+		boolean ceiling = !tired && !player.onGround() && !player.level().noCollision(player, box.move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05));
 		Input input = player.input.keyPresses;
+		WebPose brute = player.getAttached(WebPower.POSE);
+		boolean serverPose = brute != null && (brute.kind() == WebPose.BRUTE_AIR || brute.kind() == WebPose.BRUTE_NOVA
+			|| brute.kind() >= WebPose.BRUTE_WALL_GRAB && brute.kind() <= WebPose.BRUTE_WALL_LEDGE);
+		if (WebSymbiote.bulked(player) && com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE)
+			&& !player.isInWater() && player.getAttached(WebSymbiote.WALL) == null
+			&& (serverPose || wall && !ceiling && input.jump())) {
+			wallClinging = false;
+			ceilingClinging = false;
+			letGoOfWall();
+			return;
+		}
 		Vec3 move = inputDirection(player, input);
 		boolean sneakPressed = input.shift() && !sneakWas;
 		sneakWas = input.shift();

@@ -45,33 +45,31 @@ import org.jspecify.annotations.Nullable;
  * starving and binds you when you're badly hurt, from the same pack. After a fight it picks up the arrows lying about
  * and hands them to you if you shoot. It wears the better thing you hand it (use a weapon or a piece of armour on it),
  * gives you back what it had, and says so; a worse one it gives back.</li>
- * <li><b>Foe.</b> A band member badly hurt in a fight falls back out of reach and drinks the one draught it carries
- * ({@link #DRAUGHT}), once a day.</li>
+ * <li><b>Foe.</b> A band member (a grown fighter, never a child or a townsman with nothing to fight with) carries one real healing draught in its pack (a villager's or pillager's inventory, a
+ * folk's belt pouch), put there the first time it's seen and again once a day while it's out of a fight if it has none
+ * ({@link #DRAUGHT}). {@link BreakOff} drinks it when the member falls back badly hurt; once drunk it's gone until the
+ * next day's restock, and it can be looted like anything else it carries.</li>
  * </ul>
  */
 public final class PackUse {
 	/** Looked at this often (ticks); badly hurt below this share of health; starving below this food. */
 	static final int EVERY = 20;
-	static final float HURT = 0.5F, FOE_HURT = 0.35F;
+	static final float HURT = 0.5F;
 	static final int STARVING = 6;
 	/** A companion tends itself or you at most this often (ticks); arrows are picked up this near (blocks). */
 	static final long TEND_GAP = 600L;
 	static final double ARROWS_NEAR = 8.0;
-	/** A foe's draught: health it gives back (share of max), how far it falls back (blocks), how long before it drinks (ticks). */
-	static final float DRAUGHT_HEAL = 0.4F;
-	static final double FALL_BACK = 8.0;
-	static final int FALL_BACK_TICKS = 40;
+	/** Band members this near a player are given their draught (blocks). */
+	static final double DRAUGHT_NEAR = 32.0;
 	/** Bandages, cheapest first, and what each binds (health). */
 	static final String[] BANDAGES = {"jaymospowers:grass_bandage", "jaymospowers:rag", "jaymospowers:linen_bandage"};
 	static final float[] BANDAGE_HEAL = {3.0F, 4.0F, 6.0F};
 
-	/** On a band member: the day it last drank its draught. Saved. */
+	/** On a band member: the day its draught was last put in its pack. Saved. */
 	static final AttachmentType<Long> DRAUGHT = AttachmentRegistry.create(JaymosKingdoms.id("band_draught"),
 		builder -> builder.persistent(Codec.LONG));
 
 	private static final Map<UUID, Long> TENDED = new HashMap<>();
-	/** Foes falling back to drink: when they drink. */
-	private static final Map<Mob, Long> FALLING_BACK = new java.util.IdentityHashMap<>();
 
 	private PackUse() {
 	}
@@ -80,7 +78,6 @@ public final class PackUse {
 		ServerTickEvents.END_SERVER_TICK.register(PackUse::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			TENDED.clear();
-			FALLING_BACK.clear();
 		});
 		UseEntityCallback.EVENT.register(PackUse::hand);
 	}
@@ -101,19 +98,6 @@ public final class PackUse {
 			}
 			foes(player, now);
 		}
-		FALLING_BACK.entrySet().removeIf(e -> {
-			Mob m = e.getKey();
-			if (!m.isAlive() || Downed.isDowned(m)) {
-				return true;
-			}
-			if (now < e.getValue()) {
-				return false;
-			}
-			m.heal(m.getMaxHealth() * DRAUGHT_HEAL);
-			m.playSound(SoundEvents.GENERIC_DRINK.value(), 0.8F, 1.0F);
-			Callouts.say(m, "pack.drink", null, false);
-			return true;
-		});
 	}
 
 	/** A companion out of a fight sees to itself, then to you, then picks up arrows. */
@@ -251,23 +235,39 @@ public final class PackUse {
 		}
 	}
 
-	/** Band members badly hurt in a fight fall back and drink their draught (once a day). */
+	/**
+	 * Band members near {@code player} who carry no healing draught are given one, into their own pack: the first time they're
+	 * seen, then once a day while out of a fight. A member with no pack (or a full one) gets none.
+	 */
 	private static void foes(ServerPlayer player, long now) {
 		long day = player.level().getOverworldClockTime() / 24000L;
-		for (Mob m : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(32.0), m -> m.isAlive() && !Downed.isDowned(m)
-			&& Comrades.target(m) != null && m.getHealth() < m.getMaxHealth() * FOE_HURT && FoeLore.keeps(Comrades.side(m)) && !FALLING_BACK.containsKey(m)
-			&& m.getAttachedOrElse(DRAUGHT, -1L) != day)) {
-			LivingEntity foe = Comrades.target(m);
-			m.setAttached(DRAUGHT, day);
-			net.minecraft.world.phys.Vec3 away = m.position().subtract(foe.position());
-			if (away.lengthSqr() > 1.0E-4) {
-				net.minecraft.world.phys.Vec3 to = m.position().add(away.normalize().scale(FALL_BACK));
-				Comrades.stand(m);
-				m.getNavigation().moveTo(to.x, to.y, to.z, 1.2);
+		for (Mob m : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(DRAUGHT_NEAR), m -> m.isAlive()
+			&& !Downed.isDowned(m) && Temperaments.humanoid(m) && NpcEyes.fighter(m) && FoeLore.keeps(Comrades.side(m))
+			&& (!m.hasAttached(DRAUGHT) || m.getAttached(DRAUGHT) != day && Comrades.target(m) == null))) {
+			SimpleContainer pack = m instanceof net.minecraft.world.entity.npc.InventoryCarrier carrier ? carrier.getInventory() : BeltPouch.open(m);
+			if (pack == null) {
+				continue;
 			}
-			FALLING_BACK.put(m, now + FALL_BACK_TICKS);
-			Callouts.say(m, "pack.fallback", foe, false);
+			if (!carriesDraught(pack)) {
+				ItemStack draught = net.minecraft.world.item.alchemy.PotionContents.createItemStack(Items.POTION, net.minecraft.world.item.alchemy.Potions.HEALING);
+				if (!pack.canAddItem(draught)) {
+					continue;
+				}
+				pack.addItem(draught);
+			}
+			m.setAttached(DRAUGHT, day);
 		}
+	}
+
+	private static boolean carriesDraught(SimpleContainer pack) {
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			ItemStack s = pack.getItem(i);
+			net.minecraft.world.item.alchemy.PotionContents contents = s.get(DataComponents.POTION_CONTENTS);
+			if (s.is(Items.POTION) && contents != null && contents.is(net.minecraft.world.item.alchemy.Potions.HEALING)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// ---- handing them gear ---------------------------------------------------------------------------------------------

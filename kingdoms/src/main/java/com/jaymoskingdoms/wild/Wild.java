@@ -71,6 +71,9 @@ public final class Wild {
 		MooseHerds.register();
 		FedPredators.register();
 		Crocodiles.register();
+		// (the wild's ways with each other, the year and the land: Andy's nature picks)
+		Nature.register();
+		Anacondas.register();
 	}
 
 	private static <T extends Entity> EntityType<T> type(String name, EntityType.Builder<T> builder) {

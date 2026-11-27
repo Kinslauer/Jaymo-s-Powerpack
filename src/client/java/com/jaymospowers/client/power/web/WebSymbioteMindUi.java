@@ -29,6 +29,9 @@ final class WebSymbioteMindUi {
 	/** The text colour of each mood on the Status page. */
 	static final int[] TEXT = {0xFF7CFFE8, 0xFFFFE27C, 0xFFFF6A6A, 0xFF9CB4FF};
 	/** The faint steady edge each mood keeps even when it isn't speaking (0-1 of a line's strength); content keeps none. */
+	/** Jealousy's red pull at the edge. */
+	private static final int FLARE_VIGNETTE = 0x4A0808;
+	private static final float FLARE_EDGE = 0.7F;
 	private static final float[] EDGE = {0.0F, 0.14F, 0.22F, 0.12F};
 
 	private WebSymbioteMindUi() {
@@ -43,20 +46,39 @@ final class WebSymbioteMindUi {
 		return WebSymbioteMind.mood(player);
 	}
 
+	/** Jealous right now (the mind's flare, set by the server): the edge is pulled red. */
+	private static boolean flaring() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (player == null || !WebSymbiote.isBonded(player)) {
+			return false;
+		}
+		WebSymbioteMind.Mind mind = player.getAttached(WebSymbioteMind.MIND);
+		return mind != null && player.level().getGameTime() < mind.flareUntil();
+	}
+
 	/** The screen edge's vignette colour: {@code base} unless it has a mood. */
 	static int vignette(int base) {
+		if (flaring()) {
+			return FLARE_VIGNETTE;
+		}
 		WebSymbioteMind.Mood mood = mood();
 		return mood == null ? base : VIGNETTE[mood.ordinal()];
 	}
 
 	/** A tendril glow colour ({@code urgent}: the bright end): {@code base} unless it has a mood. */
 	static int glow(int base, boolean urgent) {
+		if (flaring()) {
+			return urgent ? 0xFF3A3A : 0xB02020;
+		}
 		WebSymbioteMind.Mood mood = mood();
 		return mood == null ? base : (urgent ? GLOW_URGENT : GLOW_FAINT)[mood.ordinal()];
 	}
 
 	/** How strongly its mood keeps the edge lit between lines (0 for none). */
 	static float edge() {
+		if (flaring()) {
+			return FLARE_EDGE;
+		}
 		WebSymbioteMind.Mood mood = mood();
 		return mood == null ? 0.0F : EDGE[mood.ordinal()];
 	}

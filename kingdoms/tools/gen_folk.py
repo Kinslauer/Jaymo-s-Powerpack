@@ -34,12 +34,19 @@ ARMS = [faces(40, 16, 4, 12, 4), faces(32, 48, 4, 12, 4)]
 LEGS = [faces(0, 16, 4, 12, 4), faces(16, 48, 4, 12, 4)]
 
 
+# The Reason look (docs/Vanilla-Style.md): faces of cloth, skin, hair and fur are one flat shade each, without the per-pixel
+# jitter that made the sheets look script-made; the drawn parts (faces, trim, folds, fur stripes) stay.
+CLEAN = True
+
+
 def noisy(img, rect, base, spread=10, seed=0):
     rnd = random.Random(seed)
     x0, y0, w, h = rect
     for y in range(y0, y0 + h):
         for x in range(x0, x0 + w):
             n = rnd.randint(-spread, spread)
+            if CLEAN:
+                n = 0
             img.putpixel((x, y), tuple(max(0, min(255, c + n)) for c in base) + (255,))
 
 
@@ -324,7 +331,7 @@ def barbarian_builder(role):
         for x in range(rx, rx + rw):
             depth = 3 + rnd.randint(0, 1)
             for y in range(ry, ry + depth):
-                img.putpixel((x, y), shade(fur, rnd.randint(-18, 18)) + (255,))
+                img.putpixel((x, y), shade(fur, rnd.choice((-14, 0, 14)) if CLEAN else rnd.randint(-18, 18)) + (255,))
     noisy(img, BODY["top"], fur, spread=18, seed=302)
     for arm in ARMS:
         fill_box(img, arm, skin, 310)

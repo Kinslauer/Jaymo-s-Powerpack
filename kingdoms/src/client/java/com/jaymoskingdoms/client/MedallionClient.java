@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.MedallionBoard;
+import com.jaymoskingdoms.client.mixin.MedallionKeyMappingAccessor;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -77,6 +78,32 @@ public final class MedallionClient {
 		return code >= 84 && code <= 99 || code == 103 || code == 133 || code >= 176 && code <= 221;
 	}
 
+	/**
+	 * Whether {@code mapping}, bound to {@code bound}, is silenced by the board: the board is up, the key is on the numpad, and
+	 * the mapping isn't one of the marks or the medallion key itself. It then reads as not held and its presses are thrown away ({@code MedallionNumpadMixin}).
+	 */
+	public static boolean silenced(KeyMapping mapping, InputConstants.Key bound) {
+		if (!up || bound == null || mapping == key || !holdsPad(bound)) {
+			return false;
+		}
+		for (KeyMapping mark : MARKS) {
+			if (mark == mapping) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** While the board is up, throws away the presses waiting on the numpad's other bindings, so none fire once it is lowered. */
+	private static void silencePad() {
+		for (KeyMapping mapping : MedallionKeyMappingAccessor.jaymoskingdoms$all().values()) {
+			MedallionKeyMappingAccessor m = (MedallionKeyMappingAccessor) mapping;
+			if (m.jaymoskingdoms$clicks() > 0 && silenced(mapping, m.jaymoskingdoms$key())) {
+				m.jaymoskingdoms$setClicks(0);
+			}
+		}
+	}
+
 	static void register() {
 		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.medallion", InputConstants.KEY_Y, ClassKeys.category()));
 		int[] pad = {InputConstants.KEY_NUMPAD1, InputConstants.KEY_NUMPAD2, InputConstants.KEY_NUMPAD3, InputConstants.KEY_NUMPAD4, InputConstants.KEY_NUMPAD5,
@@ -99,6 +126,9 @@ public final class MedallionClient {
 			}
 			while (key.consumeClick()) {
 				ClientPlayNetworking.send(new MedallionBoard.Raise(!up));
+			}
+			if (up) {
+				silencePad();
 			}
 			for (int i = 0; i < 9; i++) {
 				boolean clicked = false;

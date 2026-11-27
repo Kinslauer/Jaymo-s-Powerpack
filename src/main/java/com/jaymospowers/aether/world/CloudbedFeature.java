@@ -2,6 +2,8 @@ package com.jaymospowers.aether.world;
 
 import com.jaymospowers.aether.AetherBlocks;
 import com.jaymospowers.aether.AetherFeatures;
+import com.jaymospowers.noise.FastNoiseLite;
+import com.jaymospowers.noise.Noises;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -14,7 +16,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 /**
  * The cloudbed: a sea of cold aercloud far below the islands, in the bottom 14 blocks of the world (below the line where
  * the Wind power carries a faller home, so it is something to look down on, not something to land on). The cloud's shape
- * is smooth value noise from the world seed, so it is one continuous bank across chunk borders; each chunk draws its own
+ * is FastNoiseLite noise from the world seed ({@link #noise}), so it is one continuous bank across chunk borders; each chunk draws its own
  * 16 by 16 columns, once, when its decoration runs.
  */
 public record CloudbedFeature() implements Feature {
@@ -64,30 +66,25 @@ public record CloudbedFeature() implements Feature {
 		return placed;
 	}
 
-	/** Smooth value noise in 0..1: a hashed value at each lattice corner, blended with a smoothstep. */
-	private static double noise(long seed, double x, double z, int salt) {
-		int ix = Mth.floor(x);
-		int iz = Mth.floor(z);
-		double fx = smooth(x - ix);
-		double fz = smooth(z - iz);
-		double a = corner(seed, ix, iz, salt);
-		double b = corner(seed, ix + 1, iz, salt);
-		double c = corner(seed, ix, iz + 1, salt);
-		double d = corner(seed, ix + 1, iz + 1, salt);
-		return Mth.lerp(fz, Mth.lerp(fx, a, b), Mth.lerp(fx, c, d));
+	/**
+	 * Cloud noise in 0..1 at (x, z), already divided by the wave length: FastNoiseLite's OpenSimplex2, its coordinates
+	 * pushed about by a domain warp so the bank's edges curl and finger out (the old value noise sat on a square grid,
+	 * which showed as blocky lumps in the cloud's depth). {@link #BIAS} keeps about as much sky covered as before.
+	 */
+	static double noise(long seed, double x, double z, int salt) {
+		FastNoiseLite noise = CLOUD.at(seed, salt);
+		FastNoiseLite.Vector2 at = new FastNoiseLite.Vector2(x, z);
+		noise.DomainWarp(at);
+		return Mth.clamp(0.5 + BIAS + 0.5 * noise.GetNoise(at.x, at.y), 0.0, 1.0);
 	}
 
-	private static double smooth(double t) {
-		return t * t * (3.0 - 2.0 * t);
-	}
-
-	private static double corner(long seed, int x, int z, int salt) {
-		long h = seed ^ (x * 0x9E3779B97F4A7C15L) ^ (z * 0xC2B2AE3D27D4EB4FL) ^ (salt * 0x165667B19E3779F9L);
-		h ^= h >>> 33;
-		h *= 0xFF51AFD7ED558CCDL;
-		h ^= h >>> 33;
-		h *= 0xC4CEB9FE1A85EC53L;
-		h ^= h >>> 33;
-		return (h >>> 11) * 0x1.0p-53;
-	}
+	/** Lifts the noise a little so the cloud covers about as much as the value noise did (73% of the sky). */
+	static final double BIAS = 0.03;
+	/** Half a wave per unit, and a warp of 0.6 of a unit: wide enough to bend the bank's edges, not to tear it apart. */
+	private static final Noises.Seeded CLOUD = new Noises.Seeded(0xC10DL, noise -> {
+		noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+		noise.SetFrequency(0.5F);
+		noise.SetDomainWarpType(FastNoiseLite.DomainWarpType.OpenSimplex2);
+		noise.SetDomainWarpAmp(0.6F);
+	});
 }

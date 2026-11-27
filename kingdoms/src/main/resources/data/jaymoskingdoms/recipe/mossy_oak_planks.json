@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:oak_planks",
+    "minecraft:vine"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:mossy_oak_planks"
+  }
+}

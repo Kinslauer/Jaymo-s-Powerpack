@@ -6,6 +6,7 @@ import com.jaymospowers.alchemy.Knowledge;
 import com.jaymospowers.alchemy.codex.Codex;
 import com.jaymospowers.alchemy.codex.Lens;
 import com.jaymospowers.alchemy.codex.LensItem;
+import com.jaymospowers.alchemy.hunter.Leans;
 import com.jaymospowers.client.UiStyle;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,14 @@ final class LensHud {
 			String text = Knowledge.hasSeen(player, row.getKey()) ? Component.translatable(row.getKey().key()).getString() + " " + row.getValue() : "?";
 			width = Math.max(width, Math.min(MAX_W, font.width(text) + ICON + 14));
 		}
-		int lines = Math.max(1, rows.size());
+		// a poison's lean shows only once the player has learned it
+		Leans.Lean lean = now.essences().get(Essence.VENOM) > 0 ? Leans.of(now.essences()) : null;
+		Component leanText = lean != null && Leans.knows(player, lean)
+			? Component.translatable("gui.jaymospowers.lens.lean", Component.translatable(lean.key())) : null;
+		if (leanText != null) {
+			width = Math.max(width, Math.min(MAX_W, font.width(leanText.getString()) + 12));
+		}
+		int lines = Math.max(1, rows.size()) + (leanText != null ? 1 : 0);
 		int height = 6 + 10 + 4 + lines * ROW;
 		// (HUD rework) right of the crosshair, in the inspect column (under a combo count, over the scouter)
 		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.INSPECT, "jaymospowers:lens", 20, width, height);
@@ -94,6 +102,9 @@ final class LensHud {
 				graphics.text(font, "?", x + 5 + (ICON - font.width("?")) / 2, ry + 1, UiStyle.HINT);
 			}
 			ry += ROW;
+		}
+		if (leanText != null) {
+			UiStyle.line(graphics, font, leanText, x + 6, ry + 1, width - 10, UiStyle.HINT);
 		}
 	}
 }

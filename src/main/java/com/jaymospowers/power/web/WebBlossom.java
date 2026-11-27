@@ -121,7 +121,7 @@ public final class WebBlossom {
 		return ids;
 	}
 
-	private static boolean fight(ServerPlayer player, LivingEntity e) {
+	public static boolean fight(ServerPlayer player, LivingEntity e) {
 		if (e == player || !e.isAlive() || e.isSpectator() || e == player.getVehicle()) {
 			return false;
 		}

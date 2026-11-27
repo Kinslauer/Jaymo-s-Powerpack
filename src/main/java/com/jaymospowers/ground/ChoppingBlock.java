@@ -72,6 +72,10 @@ public class ChoppingBlock extends Block implements EntityBlock {
 			}
 			return InteractionResult.SUCCESS;
 		}
+		if (!level.isClientSide() && com.jaymospowers.core.StationHints.idle(player)) {
+			// nothing on it: say what goes on it and what chops it
+			com.jaymospowers.core.StationHints.tell(player, "chopping_block.empty");
+		}
 		return InteractionResult.PASS;
 	}
 }

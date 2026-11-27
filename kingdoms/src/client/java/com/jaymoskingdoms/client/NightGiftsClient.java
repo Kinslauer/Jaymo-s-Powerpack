@@ -29,8 +29,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.7.66) The client half of {@link NightGifts}: the two keys ({@code O}: Blood Dash or Leap; {@code P}: Groundpound or
- * Howl), the kin-sense compass at the top of the screen, people a groundpound or howl showed glowing through walls,
+ * (0.7.66) The client half of {@link NightGifts}: the two keys ({@code O}: a werewolf's Leap; {@code P}: its Howl; a vampire's moves
+ * are all on the skill bar now, so the keys send nothing for one), the kin-sense compass at the top of the screen, people a groundpound or howl showed glowing through walls,
  * and a vampire's bat wings, spread when it glides without an elytra.
  */
 public final class NightGiftsClient {
@@ -59,8 +59,7 @@ public final class NightGiftsClient {
 		pound = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.night_pound", InputConstants.KEY_P, category));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (dash.consumeClick()) {
-				// sneak and O: a full vampire's shapes of the night (NightForms), else the Blood Dash or Leap
-				send(minecraft, minecraft.player != null && minecraft.player.isShiftKeyDown() && com.jaymoskingdoms.nightforms.NightForms.vampire(minecraft.player) ? NightGifts.SHAPES : 0);
+				send(minecraft, 0);
 			}
 			while (pound.consumeClick()) {
 				send(minecraft, 1);
@@ -101,9 +100,10 @@ public final class NightGiftsClient {
 		});
 	}
 
+	/** A werewolf's O or P; a vampire's moves are on the skill bar, so these keys are theirs no more. */
 	private static void send(Minecraft minecraft, int which) {
-		if (minecraft.player != null && minecraft.gui.screen() == null && NightGifts.gift(minecraft.player) != null
-			&& ClientPlayNetworking.canSend(NightGifts.Move.TYPE)) {
+		NightGifts.Gift gift = minecraft.player == null ? null : NightGifts.gift(minecraft.player);
+		if (gift != null && gift.wolf() && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(NightGifts.Move.TYPE)) {
 			ClientPlayNetworking.send(new NightGifts.Move(which));
 		}
 	}

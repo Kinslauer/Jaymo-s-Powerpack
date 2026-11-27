@@ -184,6 +184,11 @@ public final class Comrades {
 		if (e instanceof Player p) {
 			return "p:" + p.getUUID();
 		}
+		// a vampire's thrall fights on their side (Night's Blood: servants)
+		String servant = Servants.side(e);
+		if (servant != null) {
+			return servant;
+		}
 		// turned for a while (docs/Pawn-Plan.md H1), or one of a masterless bandit's band (H3)
 		String turned = Possession.side(e);
 		if (turned != null) {
@@ -209,6 +214,11 @@ public final class Comrades {
 		}
 		if (e instanceof Worker w && w.factionId() >= 0) {
 			return "f:" + w.factionId();
+		}
+		int hired = CampBeasts.hiredCamp(e);
+		if (hired >= 0) {
+			// a sellsword or creature a camp keeps fights on its side
+			return "f:" + hired;
 		}
 		Illagers.Tag tag = Illagers.tag(e);
 		if (tag != null) {
@@ -406,6 +416,12 @@ public final class Comrades {
 			if (time - e.getValue() < WON_AFTER) {
 				continue;
 			}
+			Mob away = FOUGHT.get(e.getKey());
+			if (away != null && BreakOff.away(away)) {
+				// (falling back or mending: still in the fight, not the one to say it's won)
+				e.setValue(time);
+				continue;
+			}
 			Mob m = FOUGHT.remove(e.getKey());
 			it.remove();
 			HURT_SAID.remove(e.getKey());
@@ -425,6 +441,10 @@ public final class Comrades {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, m.getBoundingBox().inflate(FIGHT_RANGE),
 			e -> e != m && e.isAlive() && !(e instanceof ArmorStand))) {
 			if (Downed.isDowned(e) || e instanceof Player p && (p.isCreative() || p.isSpectator())) {
+				continue;
+			}
+			if (Captives.bound(e) || e.isInvulnerable()) {
+				// a captive in chains, or anything no blow can hurt: a band would only stand round it swinging for ever
 				continue;
 			}
 			String theirs = side(e);
@@ -461,6 +481,11 @@ public final class Comrades {
 		boolean close = stance != null && stance.kind() == QuickOrders.COME && leader != null;
 		LivingEntity current = target(m);
 		if (close && current != null && current.distanceToSqr(leader) > CLOSE_DROP * CLOSE_DROP) {
+			stand(m);
+			current = null;
+		}
+		if (current != null && Captives.bound(current)) {
+			// a captive in chains is nobody's foe: let go of them
 			stand(m);
 			current = null;
 		}
@@ -532,7 +557,7 @@ public final class Comrades {
 
 	/** Left to what they're doing. */
 	static boolean busy(Mob m) {
-		if (FieldMedics.busy(m) || Downed.helping(m) || Arrests.busy(m) || Grapples.busy(m) || Grapples.held(m) || Scavengers.busy(m) || Loans.working(m) || Hunters.busy(m)) {
+		if (BreakOff.away(m) || FieldMedics.busy(m) || Downed.helping(m) || Arrests.busy(m) || Grapples.busy(m) || Grapples.held(m) || Scavengers.busy(m) || Loans.working(m) || Hunters.busy(m)) {
 			return true;
 		}
 		Followers.Order order = m instanceof Villager v ? v.getAttached(Followers.ORDER) : null;

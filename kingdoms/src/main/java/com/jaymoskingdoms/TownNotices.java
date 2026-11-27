@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -14,16 +17,21 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -49,8 +57,14 @@ final class TownNotices {
 	static final float CHANCE = 0.35F;
 	/** A town notice comes down after this long (ticks). */
 	static final long LIFE = 24000L * 2;
-	/** What an errand pays: emeralds, MCA hearts with the poster, reputation with the village. */
+	/** What an errand pays: MCA hearts with the poster, reputation with the village. */
 	static final int HEARTS = 4, REPUTATION = 6;
+	/**
+	 * (village mods 4, fair pay) An errand pays what it asks for is worth ({@link Economy#worth}) and this share over, for the
+	 * fetching; and this much (milli) for the trouble, and up to this much more besides.
+	 */
+	static final float ERRAND_SHARE = 1.5F;
+	static final int ERRAND_LABOUR = 1000, ERRAND_JITTER = 1000;
 	/** (0.7.220) The chance a notice is Help wanted, when the poster's town is short of hands. */
 	static final float HELP_CHANCE = 0.3F;
 	/** (0.7.385, Off-World Orders) The chance a notice asks for a far world's goods ({@link OffWorldGoods}), once a player has the tier for it. */
@@ -147,12 +161,75 @@ final class TownNotices {
 			N.news("swamp.hut"),
 			N.news("swamp.boot")));
 
+	/** (village mods 4) A land's own notices, posted on top of the poster's villager type's where the poster lives in it. */
+	private record Land(java.util.function.Predicate<Holder<Biome>> in, List<N> notices) {
+	}
+
+	private static final List<Land> LANDS = List.of(
+		new Land(b -> b.is(BiomeTags.IS_BEACH) || b.is(BiomeTags.IS_OCEAN), List.of(
+			N.gather("land.shore.kelp", "minecraft:dried_kelp", 16, 32, 0),
+			N.gather("land.shore.cod", "minecraft:cod", 4, 8, 0),
+			N.news("land.shore.wreck"))),
+		new Land(b -> b.is(BiomeTags.IS_RIVER), List.of(
+			N.gather("land.river.clay", "minecraft:clay_ball", 8, 16, 0),
+			N.gather("land.river.salmon", "minecraft:salmon", 3, 6, 0))),
+		new Land(b -> b.is(BiomeTags.IS_MOUNTAIN), List.of(
+			N.gather("land.mountain.iron", "minecraft:raw_iron", 4, 8, 0),
+			N.news("land.mountain.echo"))),
+		new Land(b -> b.is(BiomeTags.IS_BADLANDS), List.of(
+			N.gather("land.badlands.gold", "minecraft:gold_nugget", 9, 18, 0),
+			N.gather("land.badlands.clay", "minecraft:terracotta", 16, 32, 0),
+			N.news("land.badlands.mine"))),
+		new Land(b -> b.is(BiomeTags.IS_FOREST), List.of(
+			N.gather("land.forest.mushrooms", "minecraft:brown_mushroom", 6, 12, 0),
+			N.gather("land.forest.honey", "minecraft:honeycomb", 3, 6, 0))),
+		new Land(b -> b.is(BiomeTags.IS_JUNGLE), List.of(
+			N.gather("land.jungle.bamboo", "minecraft:bamboo", 16, 32, 0))),
+		new Land(b -> b.is(Biomes.CHERRY_GROVE), List.of(
+			N.gather("land.cherry.petals", "minecraft:pink_petals", 8, 16, 0),
+			N.gather("land.cherry.honey", "minecraft:honey_bottle", 2, 4, 0),
+			N.news("land.cherry.blossom"))),
+		new Land(b -> b.is(Biomes.MANGROVE_SWAMP), List.of(
+			N.gather("land.mangrove.mud", "minecraft:mud", 16, 32, 0),
+			N.news("land.mangrove.roots"))),
+		new Land(b -> b.is(Biomes.MUSHROOM_FIELDS), List.of(
+			N.lead("land.mushroom.mooshroom", "minecraft:mooshroom", 1, 1, 0),
+			N.gather("land.mushroom.red", "minecraft:red_mushroom", 8, 16, 0))),
+		new Land(b -> b.is(Biomes.PALE_GARDEN), List.of(
+			N.gather("land.pale.resin", "minecraft:resin_clump", 4, 8, 0),
+			N.news("land.pale.quiet"))));
+
 	private TownNotices() {
 	}
 
 	static void register() {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("town_notice"));
 		ITEM = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).stacksTo(1)));
+		Decrees.register();
+	}
+
+	/** The notices {@code poster} may post: their villager type's (any other reads as plains), and those of the land they live in. */
+	private static List<N> lists(LivingEntity poster) {
+		String type = poster instanceof Villager v ? v.getVillagerData().type().unwrapKey().map(k -> k.identifier().getPath()).orElse("plains") : "plains";
+		List<N> out = new ArrayList<>(NOTICES.getOrDefault(type, NOTICES.get("plains")));
+		Holder<Biome> biome = poster.level().getBiome(poster.blockPosition());
+		for (Land land : LANDS) {
+			if (land.in().test(biome)) {
+				out.addAll(land.notices());
+			}
+		}
+		return out;
+	}
+
+	/** (village mods 4) The goods {@code poster}'s town might want besides, for a mixed ask: some of each of its errands' goods, as {@code id*n}. */
+	static List<String> goodsPool(LivingEntity poster) {
+		List<String> out = new ArrayList<>();
+		for (N n : lists(poster)) {
+			if (n.errand() && n.kind() == Quest.GATHER) {
+				out.add(n.target() + "*" + Math.max(1, Math.round(n.min() * BoardTerms.ALSO_SHARE)));
+			}
+		}
+		return out;
 	}
 
 	// ---- the key ---------------------------------------------------------------------------------------------------------
@@ -196,7 +273,20 @@ final class TownNotices {
 				}
 			}
 		}
+		for (Land land : LANDS) {
+			for (N n : land.notices()) {
+				if (n.key().equals(p[1])) {
+					return n;
+				}
+			}
+		}
 		return null;
+	}
+
+	/** (village mods 4) The paper {@code key}'s notice is on: board work's by its stars ({@link BoardTerms#paper}), anything else plain. */
+	static String paper(String key) {
+		String[] p = parts(key);
+		return p.length >= 2 && BoardWork.kind(p[1]) != null ? BoardTerms.paper(BoardWork.stars(p[1])) : "plain";
 	}
 
 	/** It's been up longer than {@link #LIFE} (or it isn't one we know). */
@@ -232,15 +322,17 @@ final class TownNotices {
 				return "town|tale." + tale + "|" + poster.getStringUUID() + "|" + now;
 			}
 		}
-		if (random.nextFloat() < BoardWork.CHANCE && poster.level() instanceof ServerLevel world) {
+		// (village mods 4) the decrees on this board steer what goes up on it
+		java.util.Set<String> decrees = poster.level() instanceof ServerLevel sl ? Decrees.on(sl, BlockPos.of(board)) : java.util.Set.of();
+		float workChance = BoardWork.CHANCE + Decrees.WORK_CHANCE * decrees.stream().filter(k -> !k.equals("farmers")).count();
+		if (random.nextFloat() < workChance && poster.level() instanceof ServerLevel world) {
 			// paid work of the newer kinds, rated in stars
-			String work = BoardWork.pick(world, poster, up, now, random);
+			String work = BoardWork.pick(world, poster, up, now, random, decrees);
 			if (work != null) {
-				return work;
+				return BoardTerms.dated(work, BoardWork.stars(parts(work)[1]), random);
 			}
 		}
-		String type = poster.getVillagerData().type().unwrapKey().map(k -> k.identifier().getPath()).orElse("plains");
-		List<N> list = NOTICES.getOrDefault(type, NOTICES.get("plains"));
+		List<N> list = lists(poster);
 		if (random.nextFloat() < FAR_CHANCE && poster.level() instanceof ServerLevel far && OffWorldGoods.anyoneAsked(far.getServer())
 			&& up.stream().noneMatch(k -> is(k) && parts(k)[1].startsWith("far."))) {
 			List<OffWorldGoods.Good> goods = OffWorldGoods.available();
@@ -270,8 +362,26 @@ final class TownNotices {
 		if (free.isEmpty()) {
 			return null;
 		}
-		N n = free.get(random.nextInt(free.size()));
-		return "town|" + n.key() + "|" + (n.errand() ? poster.getStringUUID() : "-") + "|" + now;
+		// (errands of a decree's trade are likelier while it's up)
+		int total = 0;
+		for (N n : free) {
+			total += weight(n, decrees);
+		}
+		int roll = random.nextInt(total);
+		N n = free.get(free.size() - 1);
+		for (N each : free) {
+			roll -= weight(each, decrees);
+			if (roll < 0) {
+				n = each;
+				break;
+			}
+		}
+		String key = "town|" + n.key() + "|" + (n.errand() ? poster.getStringUUID() : "-") + "|" + now;
+		return n.errand() ? BoardTerms.dated(key, 1, random) : key;
+	}
+
+	private static int weight(N n, java.util.Set<String> decrees) {
+		return n.errand() ? Decrees.weight(decrees, Decrees.ofGoods(n.target(), n.kind() == Quest.LEAD)) : 1;
 	}
 
 	private static Component title(N n) {
@@ -298,8 +408,10 @@ final class TownNotices {
 		if (n == null) {
 			return stack;
 		}
+		String paper = paper(key);
 		stack.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.town_notice.of", title(n))
-			.withStyle(style -> style.withItalic(false).withColor(ChatFormatting.WHITE)));
+			.withStyle(style -> style.withItalic(false).withColor(BoardTerms.colour(paper))));
+		stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(), List.of(paper), List.of()));
 		Post.Posted news = n.key().startsWith("tidings.") ? Post.posted(level.getServer(), n.key().substring(8)) : null;
 		Component words = n.errand() ? Component.translatable("quest.jaymoskingdoms.town.errand_lore")
 			: n.help() ? Component.translatable("quest.jaymoskingdoms.town.help.lore")
@@ -317,6 +429,9 @@ final class TownNotices {
 			if (!hand.isEmpty()) {
 				lines.add(Component.translatable("quest.jaymoskingdoms.town.tale.hand", hand));
 			}
+		}
+		if (BoardTerms.days(key) > 0) {
+			lines.add(BoardTerms.deadlineLine(BoardTerms.days(key)));
 		}
 		stack.set(DataComponents.LORE, new ItemLore(lines.stream()
 			.map(line -> (Component) line.copy().withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY))).toList()));
@@ -379,7 +494,7 @@ final class TownNotices {
 			return wanted != null && Careers.hire(level, player, f, wanted, giver);
 		}
 		if (n.work()) {
-			return BoardWork.take(level, player, giver, f, n.key());
+			return BoardWork.take(level, player, giver, f, key);
 		}
 		if (n.tale() != null) {
 			// (the tale is theirs, and the paper with it; one they've had already, or that isn't for them, is only a copy of the
@@ -395,13 +510,37 @@ final class TownNotices {
 			return theirs;
 		}
 		RandomSource random = level.getRandom();
+		// (after many errands, this may be the rare one: the way into a ruin, in the giver's book)
+		Boolean rare = ErrandBooks.rare(level, player, giver, f, random);
+		if (rare != null) {
+			return rare;
+		}
 		String job = giver instanceof Villager v
 			? BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath() : "";
 		int count = Mth.nextInt(random, n.min(), n.max());
+		// (village mods 4) a second ask maybe, and pay to match what it all is worth, part of it in goods if it asks two things
+		MinecraftServer server = level.getServer();
+		String also = BoardTerms.also(goodsPool(giver), n.target(), random);
+		long asked = (n.kind() == Quest.LEAD ? Economy.beastWorth(n.target()) : Economy.worth(server, n.target())) * count
+			+ BoardTerms.alsoWorth(server, also);
+		long milli = Math.round(asked * ERRAND_SHARE) + ERRAND_LABOUR + random.nextInt(ERRAND_JITTER);
+		if (n.key().startsWith("far.")) {
+			// (a far world's goods are priced by whoever asks for them: never under that)
+			milli = Math.max(milli, Money.worth(n.emeralds()));
+		}
+		String goods = also == null ? null : BoardTerms.goods(server, milli);
+		if (goods != null) {
+			milli -= BoardTerms.alsoWorth(server, goods);
+		}
 		Quest q = new Quest(UUID.randomUUID().toString(), n.kind(), "town." + n.key(),
 			new Quest.Giver(giver.getUUID(), giver.getName().getString(), f.id(), false, job),
 			new Quest.Objective(n.target(), count, 0, Optional.empty(), Optional.empty(), "", f.name(), false),
-			new Quest.Reward(n.emeralds() + random.nextInt(3), List.of(), Optional.empty(), Optional.empty(), HEARTS, REPUTATION, 0), 0L);
-		return Quests.takeFromBoard(level, player, q);
+			Economy.pay(milli, goods == null ? List.of() : List.of(goods), HEARTS, REPUTATION), 0L);
+		if (!Quests.takeFromBoard(level, player, q)) {
+			return false;
+		}
+		BoardTerms.taken(level, player, q, key, "plain", also);
+		ErrandBooks.give(player, q, giver, f, false);
+		return true;
 	}
 }

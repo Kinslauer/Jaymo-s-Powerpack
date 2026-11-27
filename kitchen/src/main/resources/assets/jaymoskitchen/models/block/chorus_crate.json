@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "jaymoskitchen:block/chorus_crate_side",
+    "bottom": "jaymoskitchen:block/chorus_crate_bottom",
+    "top": "jaymoskitchen:block/chorus_crate_top"
+  }
+}

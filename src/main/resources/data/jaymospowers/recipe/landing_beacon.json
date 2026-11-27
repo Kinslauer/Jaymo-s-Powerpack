@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "minecraft:glowstone_dust",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "jaymospowers:landing_beacon",
+    "count": 1
+  }
+}

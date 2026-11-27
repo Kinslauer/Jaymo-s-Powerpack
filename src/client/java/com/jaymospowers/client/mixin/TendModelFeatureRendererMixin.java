@@ -25,6 +25,8 @@ abstract class TendModelFeatureRendererMixin {
 	private void jaymospowers$bendKnee(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		// (0.19.45) your own body in first person: the top of the torso off, before anything bends what's left
 		com.jaymospowers.client.FirstPersonTrim.apply(submit.model(), submit.state());
+		// a Rig leg's side kick or roundhouse: the chamber's knee (first, so the kick's bends win)
+		com.jaymospowers.client.rig.RigPose.bendLimbs(submit.model(), submit.state());
 		com.jaymospowers.client.CrouchPose.bendKnee(submit.model(), submit.state());
 		// (0.21.28) and every other kneel's knees (tending, drinking, finishers, executions, Gravity's crush)
 		com.jaymospowers.client.KneelLegs.bend(submit.model(), submit.state());
@@ -37,6 +39,8 @@ abstract class TendModelFeatureRendererMixin {
 		// and a wall runner's knees and elbows, along the wall and up it
 		com.jaymospowers.client.power.web.WebWallRunPose.bendLimbs(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.UpRunPose.bendLimbs(submit.model(), submit.state());
+		// and a ladder climber's knees
+		com.jaymospowers.client.body.BodyAnim.bendLimbs(submit.model(), submit.state());
 		// and a boxer's elbows
 		com.jaymospowers.client.boxing.BoxingPoses.bendLimbs(submit.model(), submit.state());
 		// and the elbows of a Better Combat swing (the longsword trial's)
@@ -48,6 +52,8 @@ abstract class TendModelFeatureRendererMixin {
 		// and a bar swing's and a balance's (track 4)
 		com.jaymospowers.client.freerun.BarHangPose.bendLimbs(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.BalancePose.bendLimbs(submit.model(), submit.state());
+		// and the walk's knees giving under the weight, a landing's squash and a jump's tuck (the run's bend under them)
+		com.jaymospowers.client.moving.BodyWeight.bendLimbs(submit.model(), submit.state());
 		// and running knees, slides, long jumps, safety taps and sky dives (track 5)
 		com.jaymospowers.client.freerun.RunPose.bendLimbs(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.moves.RunMovesPose.bendLimbs(submit.model(), submit.state());

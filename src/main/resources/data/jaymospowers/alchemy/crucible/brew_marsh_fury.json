@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "venom": 8,
+    "rot": 6,
+    "beast": 4,
+    "war": 4
+  },
+  "result": {
+    "item": "jaymospowers:brew_marsh_fury",
+    "count": 1
+  },
+  "research": "formula_marsh_fury"
+}

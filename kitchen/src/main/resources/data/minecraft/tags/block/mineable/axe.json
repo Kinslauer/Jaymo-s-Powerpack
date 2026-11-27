@@ -22,6 +22,10 @@
     "jaymoskitchen:machine_filler",
     "jaymoskitchen:icebox",
     "jaymoskitchen:brewing_keg",
-    "jaymoskitchen:sushi_mat"
+    "jaymoskitchen:sushi_mat",
+    "jaymoskitchen:chorus_crate",
+    "jaymoskitchen:cultivation_log",
+    "jaymoskitchen:harvest_hive",
+    "jaymoskitchen:rain_barrel"
   ]
 }

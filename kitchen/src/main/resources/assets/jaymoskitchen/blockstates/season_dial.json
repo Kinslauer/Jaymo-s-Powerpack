@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "season=0,mode=0": {
+      "model": "jaymoskitchen:block/season_dial_spring_0"
+    },
+    "season=0,mode=1": {
+      "model": "jaymoskitchen:block/season_dial_spring_1"
+    },
+    "season=0,mode=2": {
+      "model": "jaymoskitchen:block/season_dial_spring_2"
+    },
+    "season=0,mode=3": {
+      "model": "jaymoskitchen:block/season_dial_spring_3"
+    },
+    "season=0,mode=4": {
+      "model": "jaymoskitchen:block/season_dial_spring_4"
+    },
+    "season=1,mode=0": {
+      "model": "jaymoskitchen:block/season_dial_summer_0"
+    },
+    "season=1,mode=1": {
+      "model": "jaymoskitchen:block/season_dial_summer_1"
+    },
+    "season=1,mode=2": {
+      "model": "jaymoskitchen:block/season_dial_summer_2"
+    },
+    "season=1,mode=3": {
+      "model": "jaymoskitchen:block/season_dial_summer_3"
+    },
+    "season=1,mode=4": {
+      "model": "jaymoskitchen:block/season_dial_summer_4"
+    },
+    "season=2,mode=0": {
+      "model": "jaymoskitchen:block/season_dial_autumn_0"
+    },
+    "season=2,mode=1": {
+      "model": "jaymoskitchen:block/season_dial_autumn_1"
+    },
+    "season=2,mode=2": {
+      "model": "jaymoskitchen:block/season_dial_autumn_2"
+    },
+    "season=2,mode=3": {
+      "model": "jaymoskitchen:block/season_dial_autumn_3"
+    },
+    "season=2,mode=4": {
+      "model": "jaymoskitchen:block/season_dial_autumn_4"
+    },
+    "season=3,mode=0": {
+      "model": "jaymoskitchen:block/season_dial_winter_0"
+    },
+    "season=3,mode=1": {
+      "model": "jaymoskitchen:block/season_dial_winter_1"
+    },
+    "season=3,mode=2": {
+      "model": "jaymoskitchen:block/season_dial_winter_2"
+    },
+    "season=3,mode=3": {
+      "model": "jaymoskitchen:block/season_dial_winter_3"
+    },
+    "season=3,mode=4": {
+      "model": "jaymoskitchen:block/season_dial_winter_4"
+    }
+  }
+}

@@ -21,7 +21,9 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.7.332) The Mask. A vampire by day who stands still (no movement key for {@link #STILL_TICKS}) raises a mask: to
  * everyone else they look like anyone, without the ashen face ({@link #MASK}, synced to all; {@code VampireLooks}
- * checks it). It costs fever, {@link #COST} a second ({@link BloodFever#stoke}; a dhampir pays nothing). It drops when
+ * checks it). It costs fever, {@link #COST} a second ({@link BloodFever#stoke}; a dhampir pays nothing), and blood: {@link #RAISE_MB}
+ * mB to raise it and {@link #KEEP_MB} mB a second to keep it up ({@link VampireBlood}); with none to spare it will not rise, and it
+ * drops when the blood runs out. It drops when
  * they move on (faster than {@link #MOVING} blocks a tick), take damage, or night falls; feeding drops it and blocks it
  * for {@link #FED_BLOCK} ticks.
  */
@@ -30,6 +32,8 @@ public final class VampireMask {
 	static final int STILL_TICKS = 60;
 	/** The fever it costs each second it's up. */
 	static final float COST = 0.5F;
+	/** The blood it costs to raise (mB), and to keep up each second; and how long (ticks) a vampire with none to spare waits before it tries again. */
+	static final int RAISE_MB = 100, KEEP_MB = 3, DRY_WAIT = 200;
 	/** Faster than this (blocks a tick, along the ground) is moving on. */
 	static final double MOVING = 0.12;
 	/** Feeding blocks it this long (ticks). */
@@ -115,6 +119,10 @@ public final class VampireMask {
 					drop(player, false);
 				} else if ((now + player.getId()) % 20 == 5) {
 					BloodFever.stoke(player, COST);
+					if (VampireBlood.full(player) && VampireBlood.drain(player, KEEP_MB) < KEEP_MB) {
+						drop(player, false);
+						BLOCKED.put(player.getUUID(), now + DRY_WAIT);
+					}
 				}
 				continue;
 			}
@@ -123,6 +131,11 @@ public final class VampireMask {
 				continue;
 			}
 			if (++s.ticks >= STILL_TICKS) {
+				if (!VampireBlood.pay(player, RAISE_MB)) {
+					s.ticks = 0;
+					BLOCKED.put(player.getUUID(), now + DRY_WAIT);
+					continue;
+				}
 				player.setAttached(MASK, true);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mask.up").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 			}

@@ -1,0 +1,59 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "allowFillers": false,
+  "minfloors": 14,
+  "maxcellars": 0,
+  "parts": [
+    {
+      "floor": 0,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_building_body11_0"
+    },
+    {
+      "floor": 1,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_building_body11_1"
+    },
+    {
+      "floor": 2,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_building_body11_2"
+    },
+    {
+      "floor": 3,
+      "top": false,
+      "part": "jaymospowers:maw/base/base_building_body11_3"
+    },
+    {
+      "range": "4,12",
+      "top": false,
+      "part": "jaymospowers:maw/base/base_building_body11_4"
+    },
+    {
+      "range": "4,12",
+      "top": false,
+      "part": "jaymospowers:maw/base/base_building_body11_5"
+    },
+    {
+      "range": "4,12",
+      "top": false,
+      "part": "jaymospowers:maw/base/base_building_body11_6"
+    },
+    {
+      "range": "4,12",
+      "top": false,
+      "part": "jaymospowers:maw/base/base_building_body11_7"
+    },
+    {
+      "range": "13,100",
+      "top": false,
+      "part": "jaymospowers:maw/base/base_building_body11_8"
+    },
+    {
+      "top": true,
+      "part": "jaymospowers:maw/base/base_building_body11_9"
+    }
+  ]
+}

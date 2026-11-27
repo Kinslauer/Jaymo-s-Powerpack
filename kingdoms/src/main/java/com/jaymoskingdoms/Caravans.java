@@ -332,7 +332,10 @@ final class Caravans {
 		Ledger l = ledger(server);
 		int id = l.nextId();
 		boolean mounted = f.type().isRealm() && Wealth.atLeast(server, f, Wealth.Tier.PROSPEROUS);
-		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, HAVEN_GUARDS + carts.size() / CARTS_PER_GUARD, mounted, now, now + STOP_TICKS / 2, TradeRoutes.CART, false, -1, false);
+		// (village mods patch 7) a raft town's output goes by skiff from its mooring (TidalTowns)
+		boolean raft = TidalTowns.is(server, f);
+		Caravan c = new Caravan(id, f.id(), to.id(), false, raft ? TradeRoutes.quay(server, f) : start(f), carts, HAVEN_GUARDS + carts.size() / CARTS_PER_GUARD, mounted && !raft, now,
+			now + STOP_TICKS / 2, raft ? TradeRoutes.BOAT : TradeRoutes.CART, false, -1, false);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());

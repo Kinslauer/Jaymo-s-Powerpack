@@ -380,6 +380,10 @@ public final class Bouts {
 			Schools.addStanding(player, mine, run.tavern ? TAVERN_STANDING : FINAL_STANDING);
 		}
 		Reputation.change(player, f, run.tavern ? TAVERN_REP : FINAL_REP);
+		if (!run.tavern) {
+			// the festival bout won: the realm's sky is lit for its champion
+			com.jaymoskingdoms.Celebrations.hold(level, f, com.jaymoskingdoms.Celebrations.TOURNEY_TICKS);
+		}
 		if (net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, BoutNet.Bracket.TYPE)) {
 			// the bracket, all won
 			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new BoutNet.Bracket(Component.literal(f.name()), player.getDisplayName(), run.names,

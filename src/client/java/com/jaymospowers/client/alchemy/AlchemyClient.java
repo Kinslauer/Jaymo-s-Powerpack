@@ -14,5 +14,8 @@ public final class AlchemyClient {
 		BrewingClient.init(); // (0.20.13)
 		SkinLayer.init();
 		MettleJump.init();
+		ToxicityClient.init();
+		DarkSightClient.init();
+		OilClient.init();
 	}
 }

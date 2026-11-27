@@ -33,7 +33,8 @@ MEMORY_LINE = 300      # an index line longer than this belongs in a topic file
 NOT_PLAYED_DAYS = 30   # how far back the Dashboard looks for merged, unplayed work
 NOT_PLAYED_MAX = 60    # at most this many lines (newest first)
 MODLOGS = (("Powers", "MODLOG.md"), ("Kingdoms", "kingdoms/MODLOG.md"), ("Kitchen", "kitchen/MODLOG.md"))
-NOT_PLAYED = re.compile(r"not (been )?played|haven'?t been played|hasn'?t been played|not playtested|unplaytested", re.I)
+NOT_PLAYED = re.compile(r"not (been )?played|haven'?t been played|hasn'?t been played|not playtested|unplaytested"
+                        r"|not (been )?(seen|tested|tried) in game|not built or played", re.I)
 ENTRY = re.compile(r"^## (\S+) \((\d{4}-\d{2}-\d{2})\): (.+?)(?: \(#(\d+)\))?\s*$")
 LINK = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
 MEMORY_PATHS = ("/tmp/claude/memory/team/silo/MEMORY.md",)  # the cloud project memory; VAULT_MEMORY_INDEX overrides
@@ -486,7 +487,8 @@ def steps(live, vs, agent, name):
         "your branch, `status: running` and the files you'll edit under `owns:`. Don't edit a file another running "
         "agent owns (`python tools/vault_sync.py --status`).",
         "3. Files to own: " + (", ".join(owns) if owns else "none suggested: list the ones you edit as you go."),
-        "4. Read CLAUDE.md first (lore first, change notes, no versions/MODLOGs/codemap). If the task was sent back, "
+        "4. Read AGENTS.md first; for anything new players meet, load the new-gameplay skill (lore first); change notes "
+        "per changes/README.md, no versions/MODLOGs/codemap. If the task was sent back, "
         "fix every numbered point in the newest review note.",
         "5. Check, don't assume: prove each part is done with a real check (build, grep, a test), never invent a class, "
         "number or file you haven't seen, and search before saying something doesn't exist. Go through the task's "

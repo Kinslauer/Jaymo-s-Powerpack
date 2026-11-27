@@ -46,6 +46,12 @@ public final class TreeLocks {
 	static final float REMARK_CHANCE = 0.5F;
 	/** Remark lines (talk.jaymoskingdoms.tree_lock.remark.N). */
 	static final int REMARK_LINES = 8;
+	/**
+	 * Blood Awakening, learned (Andy, 2026-11-23: everyone starts with their blood's move, the node upgrades it): every wait
+	 * on a blood's move is this share as long (cooldowns, a hold's charge-up, taking a foe in), and what a heritage-key move
+	 * gives (its buffs, snares and slows) lasts this many times as long.
+	 */
+	public static final float AWAKENED_WAIT = 0.5F, AWAKENED_LONGER = 1.5F;
 
 	/** Each locked ability: the perk (and rank) that opens it, and the classes that have it free. */
 	public enum Lock {
@@ -53,6 +59,7 @@ public final class TreeLocks {
 		SLIDE(Perk.SLIDE, 1),
 		LONG_JUMP(Perk.LONG_JUMP, 1),
 		CHARGE_JUMP(Perk.CHARGE_JUMP, 1),
+		COYOTE_TIME(Perk.COYOTE_TIME, 1),
 		UP_RUN(Perk.WALL_RUNNER, 1),
 		TRICK_JUMP(Perk.FREERUNNER, 1),
 		SWIM_BURST(Perk.STRONG_SWIMMER, 1),
@@ -87,8 +94,7 @@ public final class TreeLocks {
 		// riding
 		WHISTLE(Perk.HORSEMAN, 1, PlayerClass.RIDER),
 		TRICKS(Perk.HORSEMAN, 2, PlayerClass.RIDER),
-		// bloods and the night
-		BLOOD(Perk.BLOOD_AWAKENING, 1),
+		// the night (a blood's own moves are everyone's from the start now: Blood Awakening upgrades them, see awakened)
 		LIFELEECH(Perk.LIFELEECH, 1),
 		NIGHT_SENSE(Perk.NIGHT_SENSE, 1),
 		NIGHT_POUND(Perk.NIGHT_POUND, 1),
@@ -199,6 +205,10 @@ public final class TreeLocks {
 		if (player.isCreative() || player.isSpectator()) {
 			return true;
 		}
+		if (BloodPage.governs(player, lock)) {
+			// a full vampire's Lifeleech, Night Sense, Groundpound and Bat Wings are the Blood page's: learned and slotted
+			return BloodPage.slotted(player, lock);
+		}
 		if (!lock.free.isEmpty()) {
 			for (PlayerClass cls : Classes.both(player)) {
 				if (lock.free.contains(cls)) {
@@ -207,6 +217,19 @@ public final class TreeLocks {
 			}
 		}
 		return Skills.of(player).rank(lock.perk) >= lock.rank;
+	}
+
+	/**
+	 * Whether {@code player} has learned Blood Awakening: their blood's moves are upgraded ({@link #AWAKENED_WAIT},
+	 * {@link #AWAKENED_LONGER}), and a Verdant grows a lost limb back on the heritage key. Jaymo's Powers asks by reflection.
+	 */
+	public static boolean awakened(Player player) {
+		return Skills.of(player).rank(Perk.BLOOD_AWAKENING) >= 1;
+	}
+
+	/** {@code ticks} as {@code player} waits them on a blood's move: {@link #AWAKENED_WAIT} of it once they're {@link #awakened}. */
+	public static int wait(Player player, int ticks) {
+		return awakened(player) ? Math.max(1, Math.round(ticks * AWAKENED_WAIT)) : ticks;
 	}
 
 	/** {@link #has(Player, Lock)} by name, for Jaymo's Powers (by reflection); an unknown name is never locked. */
@@ -301,6 +324,18 @@ public final class TreeLocks {
 		}
 		NightGifts.Gift g = NightGifts.gift(player);
 		return g == null || !g.blood() && !g.wolf() || perk == Perk.BAT_WINGS && !g.blood();
+	}
+
+	/**
+	 * Whether {@code perk} is left off the skill web for {@code player}: what {@link #hidden} hides, and the whole Night page for
+	 * a vampire or a dhampir, whose page is the Blood page ({@link BloodPage}).
+	 */
+	public static boolean webHidden(Player player, Perk perk) {
+		if (hidden(player, perk)) {
+			return true;
+		}
+		NightGifts.Gift g = NightGifts.gift(player);
+		return perk.pillar == Skills.Pillar.STEALTH && perk.tier >= 20 && g != null && g.blood();
 	}
 
 	static void forget(UUID id) {

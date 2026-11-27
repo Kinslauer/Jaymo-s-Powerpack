@@ -40,6 +40,8 @@ public final class PodWrecks {
 	static final int WORN_EVERY = 2;
 	/** The iron nuggets that all-sets-held scrap is worth. */
 	static final int PLAIN_SCRAP = 6;
+	/** The sockets a wreck's keel has when it is salvaged whole. */
+	static final int WRECK_SOCKETS = 4;
 	/** The tag a wreck's pod carries, with its deck's number after it. */
 	static final String TAG_PREFIX = "jaymospowers.wreck_deck.";
 	/** The most wreck decks there are to remember (the Maw builds {@code MawWorld.WRECKS}). */
@@ -99,6 +101,7 @@ public final class PodWrecks {
 		}
 		PodEntity pod = PodEntity.spawn(level, at, false, 0);
 		pod.setParts(filled, damaged);
+		pod.setSockets(WRECK_SOCKETS);
 		pod.setYRot(yaw);
 		pod.addTag(TAG_PREFIX + deck);
 		return pod;

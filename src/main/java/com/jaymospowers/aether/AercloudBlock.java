@@ -1,5 +1,7 @@
 package com.jaymospowers.aether;
 
+import com.jaymospowers.core.Leaves;
+import com.jaymospowers.power.zfighter.pod.PodEntity;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.DamageTypeTags;
@@ -21,10 +23,18 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * Cold and golden aerclouds: a soft cloud you walk into. Only a hair-thin plate at the bottom is solid, so you sink into
- * it and stand in it; inside, your fall is cut to almost nothing and forgotten (no fall damage on any aercloud), and
- * you can jump out. Falling fast (past {@link #FAST_FALL} blocks) you meet a 0.9-tall box instead and land on top.
- * Stacked clouds are one solid block. {@link BlueAercloudBlock} bounces.
+ * Cold and golden aerclouds (and every other aercloud and the Cloud Sea's cloudbank, which build on this): a cloud is soft
+ * the way leaves are ({@link Leaves}, Andy: "i should fall through and punch through them like leaves"). Nothing in it is
+ * solid to anything that moves: players, mobs, items, arrows and falling blocks all go into it and through it. Inside, it
+ * drags on you like a canopy, so you sink slowly and your fall is cushioned; hold Jump to climb up through it; hit it hard
+ * (a fall past your safe distance, or flying in fast) and the clouds you hit burst apart. Landing in a cloud never hurts.
+ * Mobs path through clouds as through open air ({@code LeavesPathMixin}) and never plan a walk on top of one. Broken, a
+ * cloud just goes: it drops nothing, Silk Touch or not (bottling one, {@code cloudbottle/CloudBottle}, is how cloud is
+ * gathered). {@link BlueAercloudBlock} still bounces, green shoves and purple flings.
+ *
+ * <p>A puff of bottled cloud ({@code cloudbottle/CloudPuffBlock}) is the one firm cloud ({@link #soft} false): a single
+ * layer is a hair-thin plate you sink into and stand in, a fall faster than {@link #FAST_FALL} blocks meets a 0.9-tall box,
+ * and stacked puffs are one solid block, because a puff is laid to stand on or to catch a faller.
  */
 public class AercloudBlock extends TransparentBlock {
 	// ---- tuning ----
@@ -53,6 +63,11 @@ public class AercloudBlock extends TransparentBlock {
 		return SHADE;
 	}
 
+	/** Whether entities go through this cloud like leaves (every cloud but a puff of bottled cloud, which is laid to stand on). */
+	public boolean soft() {
+		return true;
+	}
+
 	/** The plate (a blue cloud gives another). */
 	protected VoxelShape plate(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		return PLATE;
@@ -60,7 +75,16 @@ public class AercloudBlock extends TransparentBlock {
 
 	@Override
 	protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		if (context instanceof EntityCollisionContext podContext && podContext.getEntity() instanceof PodEntity) {
+			// (Patch 9, tr_cockpit) a space pod climbs straight through every cloud, a firm puff too
+			return Shapes.empty();
+		}
 		VoxelShape plate = this.plate(state, level, pos, context);
+		if (this.soft()) {
+			// soft as leaves: nothing that moves bumps into a cloud; checks with no entity (placement, support) see only the
+			// hair-thin plate, never a full block, so nothing counts a cloud as ground to stand or build on
+			return context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null ? Shapes.empty() : plate;
+		}
 		if (!plate.isEmpty() && level.getBlockState(pos.above()).getBlock() instanceof AercloudBlock) {
 			return Shapes.block();
 		}
@@ -75,11 +99,18 @@ public class AercloudBlock extends TransparentBlock {
 
 	@Override
 	protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
-		this.settle(entity);
+		this.settle(level, pos, entity);
 	}
 
-	/** In the cloud: the fall forgotten and almost stopped, and able to jump out. */
-	protected void settle(Entity entity) {
+	/**
+	 * In the cloud. A soft cloud drags on you like leaves ({@link Leaves#inside}: sink slowly, the fall cushioned, Jump climbs,
+	 * a hard hit bursts it). A puff: the fall forgotten and almost stopped, and able to jump out.
+	 */
+	protected void settle(Level level, BlockPos pos, Entity entity) {
+		if (this.soft()) {
+			Leaves.inside(level, pos, entity);
+			return;
+		}
 		entity.fallDistance = 0;
 		Vec3 v = entity.getDeltaMovement();
 		if (v.y < 0.0 && !(entity instanceof Projectile)) {

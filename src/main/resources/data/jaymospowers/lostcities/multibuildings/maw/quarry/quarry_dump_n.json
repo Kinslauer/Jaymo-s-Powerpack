@@ -1,0 +1,10 @@
+{
+  "dimx": 1,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/quarry/quarry_dump_n00",
+      "jaymospowers:maw/quarry/quarry_dump_n01"
+    ]
+  ]
+}

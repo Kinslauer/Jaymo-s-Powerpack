@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "jaymoskingdoms:spore_heart",
+    "minecraft:diamond_sword",
+    "jaymoskingdoms:lumen_spores",
+    "jaymoskingdoms:lumen_spores",
+    "jaymoskingdoms:mycoleather",
+    "jaymoskingdoms:mycoleather"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:bloomreaver",
+    "count": 1
+  }
+}

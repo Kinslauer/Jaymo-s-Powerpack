@@ -1,0 +1,9 @@
+{
+  "type": "jaymoskingdoms:huge_bouncecap",
+  "height": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 1,
+    "max_inclusive": 2
+  },
+  "radius": 2
+}

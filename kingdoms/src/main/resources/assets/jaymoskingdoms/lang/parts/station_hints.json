@@ -1,0 +1,10 @@
+{
+  "message.jaymoskingdoms.station.field_forge": "Raising a field forge takes a %s smith (/job).",
+  "message.jaymoskingdoms.station.research_shelves": "Research at a lectern needs %s bookshelves within 5 blocks (%s here).",
+  "message.jaymoskingdoms.station.tryworks_empty": "Load the tryworks with whale blubber, %s at a time.",
+  "message.jaymoskingdoms.station.tryworks_load": "The tryworks takes whale blubber %s at a time.",
+  "message.jaymoskingdoms.station.tryworks_full": "The tryworks pots are full of blubber.",
+  "message.jaymoskingdoms.station.tryworks_unlit": "Light the fire under the pots with flint and steel or a fire charge.",
+  "message.jaymoskingdoms.station.tryworks_boiling": "The blubber is boiling down. Come back with glass bottles for the oil.",
+  "message.jaymoskingdoms.station.tryworks_oil": "Fill glass bottles with the oil."
+}

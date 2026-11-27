@@ -48,13 +48,13 @@ import org.jspecify.annotations.Nullable;
  * starts and dry where it ends, painted in fast and then fading. Takes the place of the vanilla sweep.</li>
  * <li>{@link #pool}: power lying on the ground. A flat sheet with slow ripples running out over it.</li>
  * </ul>
- * The shapes (beam, blast, ring, orb, sigil, wave, stroke, pool) go out as one {@link Shape} packet each and are drawn by
+ * The shapes (beam, blast, ring, orb, sigil, wave, stroke, pool, bolt, scorch) go out as one {@link Shape} packet each and are drawn by
  * {@code client/fx/MagicFxClient}; motes, miasma, sparks and runes are particles ({@link Wisp}), so they drop in wherever a dust did.
  * Kingdoms reaches all of this through its own {@code Fx} class (it never compiles against this mod).
  */
 public final class MagicFx {
 	/** The shapes a {@link Shape} packet can carry. */
-	public static final int BEAM = 0, BLAST = 1, RING = 2, ORB = 3, SIGIL = 4, WAVE = 5, STROKE = 6, POOL = 7;
+	public static final int BEAM = 0, BLAST = 1, RING = 2, ORB = 3, SIGIL = 4, WAVE = 5, STROKE = 6, POOL = 7, BOLT = 8, SCORCH = 9;
 	/** Players further than this (blocks) aren't sent a shape. */
 	static final double RANGE = 96.0;
 	/** How long a blast and a ring last (ticks) when the caller doesn't say. */
@@ -162,12 +162,49 @@ public final class MagicFx {
 		}
 	}
 
+	/** A client-side effect with a regular shape to draw when the native renderer is unavailable. */
+	public record Spectacle(String id, float scale, Shape fallback) implements CustomPacketPayload {
+		public static final Type<Spectacle> TYPE = new Type<>(JaymosPowers.id("magic_fx_spectacle"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Spectacle> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeUtf(p.id, 128);
+				buf.writeFloat(p.scale);
+				Shape.CODEC.encode(buf, p.fallback);
+			},
+			buf -> new Spectacle(buf.readUtf(128), buf.readFloat(), Shape.CODEC.decode(buf)));
+
+		@Override
+		public Type<Spectacle> type() {
+			return TYPE;
+		}
+	}
+
+	/** Plays an Effekseer effect at a point, with a blast as its fallback. Reserved for ultimates and big moves. */
+	public static void spectacle(ServerLevel level, Vec3 at, String id, float scale, int color, int ticks) {
+		spectacle(level, at, id, scale, color, ticks, BLAST, Vec3.ZERO, scale);
+	}
+
+	/** Plays an effect with a particular MagicFx fallback. Reach and fallback size describe the fallback shape. */
+	public static void spectacle(ServerLevel level, Vec3 at, String id, float scale, int color, int ticks,
+		int fallbackKind, Vec3 reach, float fallbackSize) {
+		Shape fallback = new Shape(fallbackKind, at.x, at.y, at.z, (float)reach.x, (float)reach.y, (float)reach.z,
+			fallbackSize, color & 0xFFFFFF, Math.max(1, ticks),
+			fallbackKind == BOLT ? level.getRandom().nextInt(1 << 20) : 0.0F, 0.0F, 0.0F);
+		Spectacle effect = new Spectacle(id, scale, fallback);
+		for (ServerPlayer player : level.players()) {
+			if (player.distanceToSqr(at) <= RANGE * RANGE) {
+				ServerPlayNetworking.send(player, ServerPlayNetworking.canSend(player, Spectacle.TYPE) ? effect : fallback);
+			}
+		}
+	}
+
 	private MagicFx() {
 	}
 
 	/** Loads the class (the particle types) and registers the packet. */
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Shape.TYPE, Shape.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Spectacle.TYPE, Spectacle.CODEC);
 	}
 
 	/** A mote: loose power in the air. Drops in wherever a redstone dust of this colour and size was. */
@@ -323,6 +360,28 @@ public final class MagicFx {
 	/** A pool that takes {@code open} ticks to reach its size. */
 	public static void pool(ServerLevel level, Vec3 at, float radius, int color, int ticks, int open) {
 		send(level, at, new Shape(POOL, at.x, at.y, at.z, Math.max(1, open), 0.0F, 0.0F, radius, color & 0xFFFFFF, Math.max(2, ticks)));
+	}
+
+	/**
+	 * A bolt of lightning from {@code from} to {@code to}: a jagged channel with forks running off it, a white-hot core
+	 * in a glow {@code width} across, that finds a new path every few ticks for its {@code ticks}. Any crackle, arc or
+	 * strike between two points (a straight beam is steady power; a bolt is power that jumps).
+	 */
+	public static void bolt(ServerLevel level, Vec3 from, Vec3 to, float width, int color, int ticks) {
+		Vec3 d = to.subtract(from);
+		send(level, from.lerp(to, 0.5), new Shape(BOLT, from.x, from.y, from.z, (float)d.x, (float)d.y, (float)d.z, width, color & 0xFFFFFF,
+			Math.max(2, ticks), level.getRandom().nextInt(1 << 20), 0.0F, 0.0F));
+	}
+
+	/**
+	 * A mark left on a surface at {@code at}, lying across the face whose outward side is {@code normal} (null: the
+	 * ground): a ragged burn {@code radius} out, glowing {@code color} at first and cooling to {@code cool} as it lies
+	 * there for {@code ticks}, then fading. A scorch (glow to char), a frost burn (white to rime), a seared shadow.
+	 */
+	public static void scorch(ServerLevel level, Vec3 at, @Nullable Vec3 normal, float radius, int color, int cool, int ticks) {
+		Vec3 n = normal == null || normal.lengthSqr() < 1.0E-6 ? new Vec3(0.0, 1.0, 0.0) : normal.normalize();
+		send(level, at, new Shape(SCORCH, at.x, at.y, at.z, (float)n.x, (float)n.y, (float)n.z, radius, color & 0xFFFFFF, Math.max(2, ticks),
+			cool & 0xFFFFFF, level.getRandom().nextFloat() * Mth.TWO_PI, 0.0F));
 	}
 
 	/**

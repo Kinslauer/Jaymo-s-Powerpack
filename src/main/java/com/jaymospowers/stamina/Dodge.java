@@ -77,18 +77,33 @@ public final class Dodge {
 	public static final int ROLL_TICKS = 5;
 	/**
 	 * Andy: "holding the button should make you cover a bit more ground, then gradually transition to prone". The Dodge
-	 * key still held this many ticks into a ground roll makes it the long roll: the tumble slows to last
+	 * key held into a roll ({@link #ROLL_HOLD_TICKS}, {@link #LANDING_HOLD_TICKS}) makes it the long roll: the tumble lasts
 	 * {@link #LONG_ROLL_TICKS} in all, carried along the ground at {@link #LONG_SPEED_START} easing to {@link #LONG_SPEED_END}
-	 * (blocks/tick), and if the key is still held as it ends you go on down into prone ({@code DodgeClient}).
+	 * (blocks/tick), and if the key is still held as it ends you crouch, then go on down into prone ({@code DodgeClient}).
 	 */
-	public static final int HOLD_TICKS = 4, LONG_ROLL_TICKS = 9;
+	public static final int LONG_ROLL_TICKS = 9;
 	public static final double LONG_SPEED_START = 0.24, LONG_SPEED_END = 0.08;
+	/**
+	 * Andy (2026-11-25): "extend the required hold time for alt to go prone ... maybe make it more akin to arc raiders,
+	 * where they tap for a dodge and hold for a roll". The three lengths of one press of the Dodge key, counted from the
+	 * press (ticks; 20 a second):
+	 * <ul>
+	 * <li>let go before {@link #ROLL_HOLD_TICKS}: a tap, the upright dodge (the dash);</li>
+	 * <li>still held at {@link #ROLL_HOLD_TICKS}: the dash goes on into the long roll, and let go any time after that you
+	 * come up on your feet;</li>
+	 * <li>still held as the roll ends you come up into a crouch and stay in it while the key is held; still held at
+	 * {@link #PRONE_HOLD_TICKS} you go on down into prone. Let go in the crouch and you stand.</li>
+	 * </ul>
+	 * A landing roll is a roll from the start: held {@link #LANDING_HOLD_TICKS} into it, it goes long, then the same
+	 * crouch and prone (counted from the press in the air).
+	 */
+	public static final int ROLL_HOLD_TICKS = 5, PRONE_HOLD_TICKS = 26, LANDING_HOLD_TICKS = 3;
 	/**
 	 * Andy (2026-11-23): "pressing the alt key and a direction should make you do a short dash, saving the hold for our
 	 * current combat roll, and releasing it before the end to stay on your feet, holding longer retains the prone", so a
 	 * heavy (red-glint) blow can be slipped and answered on your feet. A tap on the ground is the dash: a skim along the
 	 * ground at {@link #DASH_SPEED} with {@link #DASH_UP} lift, upright, with the dodge's evasion window and cost. Still
-	 * held {@link #HOLD_TICKS} into it, the dash goes on into the long roll ({@link #LONG_ROLL_TICKS}).
+	 * held {@link #ROLL_HOLD_TICKS} into it, the dash goes on into the long roll ({@link #LONG_ROLL_TICKS}).
 	 */
 	public static final double DASH_SPEED = 0.7, DASH_UP = 0.08;
 	/** How long a dash counts as one (ticks): the server turns it into a roll only this soon after it began. */
@@ -124,7 +139,7 @@ public final class Dodge {
 		}
 	}
 
-	/** Client → server: the Dodge key is still held {@link #HOLD_TICKS} in: a dash goes on into the long roll, a landing roll goes long. */
+	/** Client → server: the Dodge key is still held {@link #ROLL_HOLD_TICKS} in: a dash goes on into the long roll ({@link #LANDING_HOLD_TICKS}: a landing roll goes long). */
 	public record Extend() implements CustomPacketPayload {
 		public static final Type<Extend> TYPE = new Type<>(JaymosPowers.id("dodge_extend"));
 		public static final StreamCodec<ByteBuf, Extend> CODEC = StreamCodec.unit(new Extend());
@@ -137,10 +152,11 @@ public final class Dodge {
 
 	/**
 	 * A dodge's roll: when it started, which way it went (a unit vector on the ground), whether it's the flip in the air,
-	 * whether the key was held into it so it's the long roll ({@link #LONG_ROLL_TICKS}), and whether it's the upright dash
-	 * (no tumble, the body stays standing: nothing drawn, not low).
+	 * whether the key was held into it so it's the long roll ({@link #LONG_ROLL_TICKS}), whether it's the upright dash
+	 * (no tumble, the body stays standing: nothing drawn, not low), and whether it's a long roll a held dash went on
+	 * into ({@code fromDash}: long from its first tick, and drawn coming out of the dash's stance, {@code DodgeRollPose}).
 	 */
-	public record Rolling(long start, float x, float z, boolean flip, boolean extended, boolean dash) {
+	public record Rolling(long start, float x, float z, boolean flip, boolean extended, boolean dash, boolean fromDash) {
 		public static final StreamCodec<ByteBuf, Rolling> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Rolling::start,
 			ByteBufCodecs.FLOAT, Rolling::x,
@@ -148,10 +164,11 @@ public final class Dodge {
 			ByteBufCodecs.BOOL, Rolling::flip,
 			ByteBufCodecs.BOOL, Rolling::extended,
 			ByteBufCodecs.BOOL, Rolling::dash,
+			ByteBufCodecs.BOOL, Rolling::fromDash,
 			Rolling::new);
 
 		public Rolling(long start, float x, float z, boolean flip) {
-			this(start, x, z, flip, false, false);
+			this(start, x, z, flip, false, false, false);
 		}
 
 		/** How long this one's turn takes (ticks). */
@@ -161,13 +178,17 @@ public final class Dodge {
 	}
 
 	/**
-	 * How far through its one tumble a ground roll is drawn (0 to 1), {@code elapsed} ticks in. A long roll goes as a short
-	 * one does for its first {@link #HOLD_TICKS} (it's only known to be long then), then turns slower to end at
-	 * {@link #LONG_ROLL_TICKS}, so nothing jumps when it becomes long.
+	 * How far through its one tumble a ground roll is drawn (0 to 1), {@code elapsed} ticks in. A roll a held dash went on
+	 * into ({@code fromDash}) is long from its first tick, so it turns evenly over {@link #LONG_ROLL_TICKS}. A landing roll
+	 * made long goes as a short one does for its first {@link #LANDING_HOLD_TICKS} (it's only known to be long then), then
+	 * turns slower to end at {@link #LONG_ROLL_TICKS}, so nothing jumps when it becomes long.
 	 */
-	public static float rollShare(float elapsed, boolean extended) {
-		if (extended && elapsed > HOLD_TICKS) {
-			elapsed = HOLD_TICKS + (elapsed - HOLD_TICKS) * (ROLL_TICKS - HOLD_TICKS) / (float)(LONG_ROLL_TICKS - HOLD_TICKS);
+	public static float rollShare(float elapsed, boolean extended, boolean fromDash) {
+		if (extended && fromDash) {
+			return elapsed / LONG_ROLL_TICKS;
+		}
+		if (extended && elapsed > LANDING_HOLD_TICKS) {
+			elapsed = LANDING_HOLD_TICKS + (elapsed - LANDING_HOLD_TICKS) * (ROLL_TICKS - LANDING_HOLD_TICKS) / (float)(LONG_ROLL_TICKS - LANDING_HOLD_TICKS);
 		}
 		return elapsed / ROLL_TICKS;
 	}
@@ -337,12 +358,12 @@ public final class Dodge {
 		}
 		if (rolling.dash()) {
 			if (now - rolling.start() < DASH_TICKS) {
-				player.setAttached(ROLLING, new Rolling(now, rolling.x(), rolling.z(), false, true, false));
+				player.setAttached(ROLLING, new Rolling(now, rolling.x(), rolling.z(), false, true, false, true));
 			}
 			return;
 		}
 		if (now - rolling.start() < LONG_ROLL_TICKS) {
-			player.setAttached(ROLLING, new Rolling(rolling.start(), rolling.x(), rolling.z(), false, true, false));
+			player.setAttached(ROLLING, new Rolling(rolling.start(), rolling.x(), rolling.z(), false, true, false, false));
 		}
 	}
 
@@ -362,7 +383,7 @@ public final class Dodge {
 		Vec3 dir = new Vec3(start.x(), 0.0, start.z());
 		dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()).reverse() : dir.normalize();
 		BACKWARD.put(player.getUUID(), dir.dot(Vec3.directionFromRotation(0.0F, player.getYRot())) < BACKWARD_COS);
-		player.setAttached(ROLLING, new Rolling(now, (float)dir.x, (float)dir.z, false, false, start.dash()));
+		player.setAttached(ROLLING, new Rolling(now, (float)dir.x, (float)dir.z, false, false, start.dash(), false));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.7F, 1.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WOOL_STEP, SoundSource.PLAYERS, 0.6F, 0.8F);
 		level.sendParticles(ParticleTypes.POOF, player.getX(), player.getY() + 0.1, player.getZ(), 4, 0.25, 0.02, 0.25, 0.02);

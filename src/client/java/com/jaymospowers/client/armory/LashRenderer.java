@@ -147,6 +147,8 @@ public final class LashRenderer {
 				if (Lash.isChainAxe(stack)) {
 					lines.add(Component.translatable("item.jaymospowers.chain_axe.chop").withStyle(ChatFormatting.GRAY));
 					lines.add(Component.translatable("item.jaymospowers.chain_axe.buried").withStyle(ChatFormatting.GRAY));
+					lines.add(Component.translatable("item.jaymospowers.chain_axe.pull").withStyle(ChatFormatting.GRAY));
+					lines.add(Component.translatable("item.jaymospowers.chain_axe.cyclone").withStyle(ChatFormatting.GRAY));
 				}
 			}
 		});
@@ -498,6 +500,20 @@ public final class LashRenderer {
 				double turn = state != null && state.phase() == Lash.WHIRL ? Lash.spinAngle(time - state.since()) : 0.0;
 				if (Lash.isChainAxe(player.getMainHandItem())) {
 					axeHead(context, level, last, last.subtract(before), light[line.length - 1]);
+					if (state != null && state.phase() == Lash.CYCLONE) {
+						// second spinning chained blade 180 degrees opposite for the full cyclone around you
+						Vec3 mirrorTip = Lash.cyclonePoint(player, Math.max(0.0, time - state.since()), partialTick, Math.PI);
+						Vec3[] mirror = new Vec3[CHAIN_POINTS];
+						int[] mLight = new int[CHAIN_POINTS];
+						for (int i = 0; i < CHAIN_POINTS; i++) {
+							Vec3 pt = handle.lerp(mirrorTip, i / (double)(CHAIN_POINTS - 1));
+							mLight[i] = lightAt(level, pt);
+							mirror[i] = pt.subtract(camera);
+						}
+						chain(context, mirror, mLight);
+						axeHead(context, level, mirror[CHAIN_POINTS - 1], mirror[CHAIN_POINTS - 1].subtract(mirror[CHAIN_POINTS - 2]),
+							mLight[CHAIN_POINTS - 1]);
+					}
 				} else {
 					ball(context, last, last.subtract(before), turn, material(player), light[line.length - 1]);
 				}

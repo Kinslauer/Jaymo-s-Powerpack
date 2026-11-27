@@ -42,6 +42,11 @@ public class RigItem extends Item {
 					: Component.translatable("tooltip.jaymospowers.rig.level", level, xp, Rig.LEVEL_XP[level]).withStyle(ChatFormatting.AQUA));
 			}
 		}
+		if (RigOcto.is(stack)) {
+			// the Octo Core: the four arms on its spine
+			builder.accept(Component.translatable("tooltip.jaymospowers.rig.octo.arms").withStyle(ChatFormatting.GRAY));
+			builder.accept(Component.translatable("tooltip.jaymospowers.rig.octo.menu").withStyle(ChatFormatting.DARK_AQUA));
+		}
 		if (this.piece == Rig.Piece.ARMS) {
 			builder.accept(Component.translatable("tooltip.jaymospowers.rig.arms.slot").withStyle(ChatFormatting.DARK_GRAY));
 		}

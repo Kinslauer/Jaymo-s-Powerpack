@@ -17,7 +17,9 @@ import org.jspecify.annotations.Nullable;
 public final class Research {
 	/** The Codex's tabs, in order. */
 	public enum Category {
-		BASICS, CRUCIBLE, INFUSION, BLIGHT, ARTIFICE, ENCHANTING
+		BASICS, CRUCIBLE, INFUSION, BLIGHT, ARTIFICE, ENCHANTING,
+		/** Formulas read from a bought or found formula (Hunter's Road): never paid for with insight, shown once known. */
+		FORMULAS
 	}
 
 	/**

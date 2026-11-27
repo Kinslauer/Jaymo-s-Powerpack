@@ -1,0 +1,41 @@
+{
+  "dimx": 5,
+  "dimz": 5,
+  "buildings": [
+    [
+      "jaymospowers:maw/factory/factory_process_plant00",
+      "jaymospowers:maw/factory/factory_process_plant01",
+      "jaymospowers:maw/factory/factory_process_plant02",
+      "jaymospowers:maw/factory/factory_process_plant03",
+      "jaymospowers:maw/factory/factory_process_plant04"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_process_plant10",
+      "jaymospowers:maw/factory/factory_process_plant11",
+      "jaymospowers:maw/factory/factory_process_plant12",
+      "jaymospowers:maw/factory/factory_process_plant13",
+      "jaymospowers:maw/factory/factory_process_plant14"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_process_plant20",
+      "jaymospowers:maw/factory/factory_process_plant21",
+      "jaymospowers:maw/factory/factory_process_plant22",
+      "jaymospowers:maw/factory/factory_process_plant23",
+      "jaymospowers:maw/factory/factory_process_plant24"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_process_plant30",
+      "jaymospowers:maw/factory/factory_process_plant31",
+      "jaymospowers:maw/factory/factory_process_plant32",
+      "jaymospowers:maw/factory/factory_process_plant33",
+      "jaymospowers:maw/factory/factory_process_plant34"
+    ],
+    [
+      "jaymospowers:maw/factory/factory_process_plant40",
+      "jaymospowers:maw/factory/factory_process_plant41",
+      "jaymospowers:maw/factory/factory_process_plant42",
+      "jaymospowers:maw/factory/factory_process_plant43",
+      "jaymospowers:maw/factory/factory_process_plant44"
+    ]
+  ]
+}

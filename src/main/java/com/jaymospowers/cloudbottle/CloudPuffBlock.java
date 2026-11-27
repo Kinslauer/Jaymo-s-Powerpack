@@ -11,10 +11,11 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * A puff of bottled cloud: soft like Cloudbank (you sink into a single layer and stand in it, a fall onto it is cut and
- * forgotten, daylight passes), but it thins away by itself. Each block of a puff has its own scheduled tick, {@link #LIFE}
- * ticks (about 20 seconds) give or take {@link #SPREAD}, so a puff frays out rather than vanishing all at once. The scheduled
- * tick is saved with the chunk, so a puff left behind by a restart still goes. It drops nothing.
+ * A puff of bottled cloud: lets daylight through like Cloudbank, but unlike every other cloud it holds you up (you sink into a
+ * single layer and stand in it, a fall onto it is cut and forgotten, two deep is solid), and it thins away by itself. Each
+ * block of a puff has its own scheduled tick, {@link #LIFE} ticks (about 20 seconds) give or take {@link #SPREAD}, so a puff
+ * frays out rather than vanishing all at once. The scheduled tick is saved with the chunk, so a puff left behind by a restart
+ * still goes. It drops nothing.
  */
 public class CloudPuffBlock extends CloudbankBlock {
 	// ---- tuning ----
@@ -23,6 +24,12 @@ public class CloudPuffBlock extends CloudbankBlock {
 
 	public CloudPuffBlock(BlockBehaviour.Properties properties) {
 		super(properties);
+	}
+
+	/** The one firm cloud: a puff is laid to stand on or to catch a faller, so it is not soft like leaves. */
+	@Override
+	public boolean soft() {
+		return false;
 	}
 
 	@Override

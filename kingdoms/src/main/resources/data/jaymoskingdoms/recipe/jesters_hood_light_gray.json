@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "ingredients": [
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "minecraft:string",
+    "minecraft:gold_nugget",
+    "minecraft:gold_nugget",
+    "minecraft:light_gray_dye"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:jesters_hood",
+    "components": {
+      "jaymoskingdoms:second_colour": 11250603
+    }
+  }
+}

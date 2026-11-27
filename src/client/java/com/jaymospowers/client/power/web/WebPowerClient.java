@@ -32,6 +32,7 @@ public final class WebPowerClient implements PowerClient {
 	public final WebSwing swing = new WebSwing();
 	private final WebWallRunClient wallRun = new WebWallRunClient();
 	private final WebParkourClient parkour = new WebParkourClient();
+	private final WebDiveRoll diveRoll = new WebDiveRoll();
 	/** What the swing key would stick to right now, for the reticle (refreshed every other tick). */
 	private WebAnchors.@Nullable Anchor preview;
 
@@ -47,6 +48,9 @@ public final class WebPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		WebCutClient.register();
+		WebBruteClient.register();
+		WebSuitMovesClient.register();
+		WebZipMarker.init();
 		WebGooClient.init();
 		// a Verdant or Frost-born with the suit: the plain left click is the weapon arm's, sneak + left hold the race's
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.powerWants(com.jaymospowers.power.web.WebMorph::usable);
@@ -256,7 +260,7 @@ public final class WebPowerClient implements PowerClient {
 	 */
 	public static boolean parkourBusy() {
 		return INSTANCE.parkour.active() || INSTANCE.wallRun.running() || INSTANCE.swing.attached() || INSTANCE.swing.pull != null
-			|| INSTANCE.swing.wingsTicks != 0;
+			|| INSTANCE.swing.wingsTicks != 0 || INSTANCE.swing.lineRide.active();
 	}
 
 	static boolean isActive(@Nullable LocalPlayer player) {
@@ -284,6 +288,8 @@ public final class WebPowerClient implements PowerClient {
 		swing.reset();
 		wallRun.reset();
 		parkour.reset();
+		diveRoll.reset();
+		WebZipMarker.clear();
 		preview = null;
 		WebSymbioteClient.reset();
 	}
@@ -504,8 +510,13 @@ public final class WebPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		swing.tick(minecraft, player);
+		// riding a webline, and bending it to fling off (WebLineRideClient)
+		swing.lineRide.tick(minecraft, player, swing);
 		wallRun.tick(player, swing);
 		parkour.tick(player, swing, wallRun);
+		// barrel rolls in a dive after a release (WebDiveRoll), and the ring where a zip would land (WebZipMarker)
+		diveRoll.tick(minecraft, player, swing);
+		WebZipMarker.tick(player, swing);
 		grabAim = com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player) ? grabTarget(player) : null;
 		webAim = grabAim != null || com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player) || player.isSpectator()
 			|| !JaymosPowersClient.isUnlocked(PowerKey.ABILITY_1) || swing.pull != null ? null : WebAnchors.entityTarget(player);

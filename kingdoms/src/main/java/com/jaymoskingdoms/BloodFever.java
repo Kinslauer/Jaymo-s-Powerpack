@@ -230,7 +230,7 @@ public final class BloodFever {
 			}
 			float was = fever(player);
 			float rise = RISE * (night ? NIGHT_RISE : 1.0F) * (VampirePlayers.starving(player) ? STARVING_RISE : 1.0F)
-				* Mth.lerp(surrender(player) / 100.0F, RISE_RESTRAINED, RISE_SURRENDERED);
+				* Mth.lerp(surrender(player) / 100.0F, RISE_RESTRAINED, RISE_SURRENDERED) * (NewMoon.on(player) ? NewMoon.FEVER_RISE : 1.0F);
 			if (!Seizures.held(player) && bleeding(player)) {
 				rise += SCENT;
 			}
@@ -318,6 +318,8 @@ public final class BloodFever {
 				}
 			}
 		}
+		// (Night's Blood) hunters coming for their lair beat through it too
+		seen = Math.max(seen, LairHunts.dread(player));
 		setHeartbeat(player, seen);
 		if (seenPlayer != null) {
 			BloodTemptation.seen(player, seenPlayer, fever(player));

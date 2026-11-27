@@ -1,0 +1,39 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/umbrella/paper_parasol_open",
+      "tints": [
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 0,
+          "default": -858428
+        },
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 1,
+          "default": -1
+        }
+      ]
+    },
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/umbrella/paper_parasol_closed",
+      "tints": [
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 0,
+          "default": -858428
+        },
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 1,
+          "default": -1
+        }
+      ]
+    }
+  }
+}

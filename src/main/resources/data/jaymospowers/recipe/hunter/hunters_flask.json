@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " L ",
+    "CBC",
+    " C "
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "C": "minecraft:copper_ingot",
+    "B": "minecraft:glass_bottle"
+  },
+  "result": {
+    "id": "jaymospowers:hunters_flask",
+    "count": 1
+  }
+}

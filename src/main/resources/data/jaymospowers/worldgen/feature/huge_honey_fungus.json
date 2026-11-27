@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:huge_brown_mushroom",
+  "can_place_on": {
+    "type": "minecraft:matching_block_tag",
+    "tag": "minecraft:huge_brown_mushroom_can_place_on"
+  },
+  "cap_provider": {
+    "id": "jaymospowers:honey_fungus_cap",
+    "properties": {
+      "down": "false",
+      "east": "true",
+      "north": "true",
+      "south": "true",
+      "up": "true",
+      "west": "true"
+    }
+  },
+  "stem_provider": {
+    "id": "jaymospowers:honey_fungus_stem",
+    "properties": {
+      "down": "false",
+      "east": "true",
+      "north": "true",
+      "south": "true",
+      "up": "false",
+      "west": "true"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:folk_grease",
+  "essences": {
+    "life": 8,
+    "metal": 6,
+    "earth": 4
+  },
+  "result": {
+    "item": "jaymospowers:oil_mending",
+    "count": 1,
+    "grade": "fine"
+  },
+  "research": "hunters_oils"
+}

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "F": "minecraft:emerald",
+    "P": "minecraft:cherry_planks",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "  F",
+    " P ",
+    "S  "
+  ],
+  "result": {
+    "id": "jaymoskingdoms:emerald_wand",
+    "components": {
+      "minecraft:custom_data": {
+        "jaymoskingdoms_wand_wood": "cherry"
+      }
+    }
+  }
+}

@@ -48,7 +48,11 @@ public final class ShackleTether {
 		float partialTick = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		CameraRenderState cameraState = context.levelState().cameraRenderState;
 		Vec3 camera = cameraState.pos;
-		for (Player player : level.players()) {
+		for (net.minecraft.world.entity.Entity entity : level.entitiesForRendering()) {
+			// (a hogtied villager tied off on a post wears its rope too, CaptiveLeads)
+			if (!(entity instanceof net.minecraft.world.entity.LivingEntity player)) {
+				continue;
+			}
 			Shackles.Tether tether = player.getAttached(Shackles.TETHER);
 			if (tether == null || player.isSpectator() || player.position().distanceToSqr(camera) > 64.0 * 64.0) {
 				continue;

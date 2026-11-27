@@ -1,0 +1,549 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot"
+      }
+    },
+    {
+      "when": {
+        "oil": "dead",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_dead_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "dead",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_dead_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "dead",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_dead_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "dead",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_dead_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "beasts",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_beasts_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "beasts",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_beasts_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "beasts",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_beasts_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "beasts",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_beasts_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "brutes",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_brutes_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "brutes",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_brutes_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "brutes",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_brutes_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "brutes",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_brutes_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "people",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_people_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "people",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_people_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "people",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_people_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "people",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_people_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "poison",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_poison_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "poison",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_poison_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "poison",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_poison_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "poison",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_poison_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "haze",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_haze_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "haze",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_haze_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "haze",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_haze_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "haze",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_haze_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "mark",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_mark_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "mark",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_mark_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "mark",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_mark_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "mark",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_mark_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "toxin",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_toxin_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "toxin",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_toxin_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "toxin",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_toxin_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "toxin",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_toxin_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "smoke",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_smoke_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "smoke",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_smoke_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "smoke",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_smoke_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "smoke",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_smoke_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "acid",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_acid_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "acid",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_acid_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "acid",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_acid_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "acid",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_acid_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "fire",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_fire_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "fire",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_fire_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "fire",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_fire_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "fire",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_fire_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "mending",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_mending_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "mending",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_mending_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "mending",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_mending_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "mending",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_mending_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "fire_ward",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_fire_ward_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "fire_ward",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_fire_ward_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "fire_ward",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_fire_ward_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "fire_ward",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_fire_ward_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "healing",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_healing_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "healing",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_healing_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "healing",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_healing_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "healing",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_healing_4"
+      }
+    },
+    {
+      "when": {
+        "oil": "cursed",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_cursed_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "cursed",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_cursed_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "cursed",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_cursed_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "cursed",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_cursed_4"
+      }
+    }
+  ]
+}

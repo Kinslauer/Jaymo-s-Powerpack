@@ -123,25 +123,47 @@ public final class Cover {
 	public static @Nullable BlockPos spot(ServerLevel level, LivingEntity shooter, LivingEntity foe, double reach, int tries) {
 		var random = shooter.getRandom();
 		for (int i = 0; i < tries; i++) {
-			double angle = random.nextDouble() * Math.PI * 2.0, d = 2.0 + random.nextDouble() * (reach - 2.0);
-			BlockPos column = BlockPos.containing(shooter.getX() + Math.cos(angle) * d, shooter.getY(), shooter.getZ() + Math.sin(angle) * d);
-			BlockPos feet = null;
-			for (int dy : new int[] {0, 1, -1}) {
-				BlockPos p = column.offset(0, dy, 0);
-				if (level.getBlockState(p).getCollisionShape(level, p).isEmpty() && level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty()
-					&& !level.getBlockState(p.below()).getCollisionShape(level, p.below()).isEmpty() && level.getFluidState(p).isEmpty()) {
-					feet = p;
-					break;
-				}
-			}
-			if (feet == null) {
-				continue;
-			}
-			if (shelters(level, shooter, foe, Vec3.atBottomCenterOf(feet))) {
+			BlockPos feet = feet(level, shooter, random.nextDouble() * Math.PI * 2.0, 2.0 + random.nextDouble() * (reach - 2.0));
+			if (feet != null && shelters(level, shooter, foe, Vec3.atBottomCenterOf(feet))) {
 				return feet;
 			}
 		}
 		return null;
+	}
+
+	/** Somewhere to stand {@code d} blocks from {@code body} at {@code angle} (on its level, or a block up or down), or null. */
+	private static @Nullable BlockPos feet(ServerLevel level, LivingEntity body, double angle, double d) {
+		BlockPos column = BlockPos.containing(body.getX() + Math.cos(angle) * d, body.getY(), body.getZ() + Math.sin(angle) * d);
+		for (int dy : new int[] {0, 1, -1}) {
+			BlockPos p = column.offset(0, dy, 0);
+			if (level.getBlockState(p).getCollisionShape(level, p).isEmpty() && level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty()
+				&& !level.getBlockState(p.below()).getCollisionShape(level, p.below()).isEmpty() && level.getFluidState(p).isEmpty()) {
+				return p;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * A place for {@code body} (a fighter with no way to its shooter) to hide from {@code shooter} (the fighting AI's cover from
+	 * shooters, {@link Hiding}): a spot within {@code reach} blocks of it where, standing, something stops the line from the
+	 * shooter's eyes to its head and to its middle ({@link #hides}). Null if none is found in {@code tries}.
+	 */
+	public static @Nullable BlockPos hideSpot(ServerLevel level, LivingEntity body, LivingEntity shooter, double reach, int tries) {
+		var random = body.getRandom();
+		for (int i = 0; i < tries; i++) {
+			BlockPos feet = feet(level, body, random.nextDouble() * Math.PI * 2.0, 1.5 + random.nextDouble() * (reach - 1.5));
+			if (feet != null && hides(level, body, shooter, Vec3.atBottomCenterOf(feet))) {
+				return feet;
+			}
+		}
+		return null;
+	}
+
+	/** Whether standing at {@code base}, {@code body} is out of {@code shooter}'s sight: its head and its middle are both behind something. */
+	public static boolean hides(ServerLevel level, LivingEntity body, LivingEntity shooter, Vec3 base) {
+		Vec3 eye = shooter.getEyePosition();
+		return blocked(level, body, eye, base.add(0.0, body.getEyeHeight(), 0.0)) && blocked(level, body, eye, base.add(0.0, body.getBbHeight() * 0.5, 0.0));
 	}
 
 	/**
@@ -167,6 +189,11 @@ public final class Cover {
 	 * clears the wall, with room for the head out there. The foe more than five blocks off.
 	 */
 	public static int corner(ServerLevel level, LivingEntity shooter, LivingEntity foe, Vec3 base) {
+		return corner(level, shooter, foe, base, 0);
+	}
+
+	/** {@link #corner}, trying the side {@code prefer} (-1, 1; 0 either) first: a shooter already leaning one way keeps to it while it works. */
+	public static int corner(ServerLevel level, LivingEntity shooter, LivingEntity foe, Vec3 base, int prefer) {
 		if (base.distanceTo(foe.position()) <= 5.0) {
 			return 0;
 		}
@@ -175,7 +202,7 @@ public final class Cover {
 			return 0;
 		}
 		double yaw = Math.toDegrees(Math.atan2(target.z - eye.z, target.x - eye.x)) - 90.0;
-		int first = shooter.getRandom().nextBoolean() ? 1 : -1;
+		int first = prefer != 0 ? Integer.signum(prefer) : shooter.getRandom().nextBoolean() ? 1 : -1;
 		for (int side : new int[] {first, -first}) {
 			Vec3 out = eye.add(Lean.offset(yaw, side * Lean.REACH));
 			if (!blocked(level, shooter, eye, out) && !blocked(level, shooter, out, target)) {

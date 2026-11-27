@@ -64,6 +64,9 @@ public final class Rig {
 	static final float TOUGHNESS = 1.0F;
 
 	public static final ResourceKey<EquipmentAsset> ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("rig"));
+	/** The Hail and Tinker suits as armour layers (armour stands, troopers, androids): the white and gunmetal plate. */
+	public static final ResourceKey<EquipmentAsset> HAIL_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("rig_hail")),
+		TINKER_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("rig_tinker"));
 	/** Rig Salvage and Fallen Rig Scrap: what the Forge builds from, and repairs the pieces at an anvil. */
 	public static final TagKey<Item> SALVAGE_TAG = TagKey.create(Registries.ITEM, JaymosPowers.id("rig_salvage"));
 
@@ -79,6 +82,11 @@ public final class Rig {
 	public static DataComponentType<String> FRAME;
 	/** On every Rig piece: the trim's paint (rgb), picked at the Forge; none is unpainted. The plates' paint is the dyed colour. */
 	public static DataComponentType<Integer> TRIM;
+	/**
+	 * On every Rig piece: the second colour (the under-suit and the second plates: biceps, belt, thighs, boots) and the
+	 * lights' colour (rgb), picked at the Forge; none keeps the frame's own.
+	 */
+	public static DataComponentType<Integer> UNDER, LIGHTS;
 	/** On every Rig piece: the finish over its plates ({@link RigFinish}); none is plain. */
 	public static DataComponentType<Integer> FINISH;
 
@@ -176,6 +184,10 @@ public final class Rig {
 			DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 		TRIM = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_trim"),
 			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		UNDER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_under"),
+			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		LIGHTS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_lights"),
+			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 		FINISH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_finish"),
 			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 
@@ -209,6 +221,7 @@ public final class Rig {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			output.accept(HELM);
 			output.accept(CORE);
+			output.accept(RigOcto.creativeStack());
 			output.accept(ARMS);
 			output.accept(THRUSTERS);
 		});
@@ -231,6 +244,7 @@ public final class Rig {
 		RigCall.init();
 		RigFinish.init();
 		RigSentry.init();
+		RigSuitUp.init();
 		RigLimbs.init();
 		RigPicks.init();
 		RigTalk.init();
@@ -260,6 +274,7 @@ public final class Rig {
 				RigTakeover.tick(player);
 			}
 			RigCall.tick(player);
+			RigSuitUp.tick(player);
 			RigHelm.tick(player);
 			RigPassives.tick(player, any && !player.isSpectator());
 			RigActives.tick(player, any && !player.isSpectator());
@@ -300,6 +315,47 @@ public final class Rig {
 	public static ItemStack core(Player player) {
 		ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
 		return CORE != null && chest.is(CORE) ? chest : ItemStack.EMPTY;
+	}
+
+	/**
+	 * The Rig on the future's troopers and androids is bolted onto them (Andy: "they dont drop because they are attached
+	 * to the user. they must be ripped off like other limbs"): what part of the body a piece of it comes away with, as
+	 * Dismember's part bits (the Helm the head, the Arms either arm, the Thrusters either leg), 0 for the Core (on the
+	 * torso, it never comes off), -1 for anything else or anyone else's.
+	 */
+	public static int boltedOn(net.minecraft.world.entity.EntityType<?> type, ItemStack stack) {
+		if (type != com.jaymospowers.power.chrono.future.FutureMachines.TROOPER && type != com.jaymospowers.power.chrono.future.FutureMachines.ANDROID
+			|| HELM == null) {
+			return -1;
+		}
+		if (stack.is(HELM)) {
+			return com.jaymospowers.core.Dismember.HEAD;
+		}
+		if (stack.is(CORE)) {
+			return 0;
+		}
+		if (stack.is(ARMS)) {
+			return com.jaymospowers.core.Dismember.RIGHT_ARM | com.jaymospowers.core.Dismember.LEFT_ARM;
+		}
+		if (stack.is(THRUSTERS)) {
+			return com.jaymospowers.core.Dismember.RIGHT_LEG | com.jaymospowers.core.Dismember.LEFT_LEG;
+		}
+		return -1;
+	}
+
+	/**
+	 * Stamps a piece (or Rig limb) with its frame, and gives Hail and Tinker pieces their own armour layer so an armour
+	 * stand or a mob wearing one shows that suit (a player's worn suit is drawn from the frame itself).
+	 */
+	public static void stamp(ItemStack stack, RigFrame frame) {
+		stack.set(FRAME, frame.id());
+		net.minecraft.world.item.equipment.Equippable worn = stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+		ResourceKey<EquipmentAsset> asset = frame == RigFrame.HAIL ? HAIL_ASSET : frame == RigFrame.TINKER ? TINKER_ASSET : ASSET;
+		if (worn != null && worn.assetId().isPresent() && !worn.assetId().get().equals(asset)) {
+			stack.set(net.minecraft.core.component.DataComponents.EQUIPPABLE, new net.minecraft.world.item.equipment.Equippable(worn.slot(),
+				worn.equipSound(), java.util.Optional.of(asset), worn.cameraOverlay(), worn.allowedEntities(), worn.dispensable(),
+				worn.swappable(), worn.damageOnHurt(), worn.equipOnInteract(), worn.canBeSheared(), worn.shearingSound()));
+		}
 	}
 
 	/** (0.11.87) A Core's Mind level (1..{@link #MAX_LEVEL}; 0 for an empty stack). */
@@ -402,7 +458,8 @@ public final class Rig {
 
 	/** Whether this player is hovering on their thrusters (server): they mustn't be kicked for floating. */
 	public static boolean hovering(Player player) {
-		return RigActives.hovering(player);
+		// the Octo Core's lower arms gripping a wall count too
+		return RigActives.hovering(player) || RigOcto.clinging(player) || RigOcto.carried(player);
 	}
 
 	/** (0.11.87) Whether this player is in the Rig's full flight (server). */

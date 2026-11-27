@@ -67,7 +67,11 @@ final class Buildings {
 			// (0.7.483) earlier now, with the healer's infirmary: every town keeps a butcher and a healer ({@link TownTrades})
 			hall(type, "butcher", JobHalls::butcher, 1, 10);
 			realm(type, "infirmary", JobHalls::infirmary, 1, 12);
+			// the herbalist's stall: where a town's herbalist keeps their table ({@link Herbalists})
+			hall(type, "herbalist_stall", JobHalls::herbalistStall, 1, 14);
 			realm(type, "market", Buildings::market, 1, 24);
+			// a counting house, once the realm has the trade for it ({@link Banks#mayBuild}, {@link Planner#eligible})
+			realm(type, Banks.ID, Banks::draw, 1, Banks.FROM_SIZE);
 			hall(type, "fishery", JobHalls::fishery, 1, 26);
 			realm(type, "stable", Buildings::stable, 1, 28);
 			hall(type, "hunting_lodge", JobHalls::huntingLodge, 1, 30);
@@ -109,6 +113,8 @@ final class Buildings {
 		VpBuildings.register();
 		// the buildings only the masons' pattern books have: the chapel, the windmill and the barn ({@link Library})
 		Library.registerOwn();
+		// a working windmill, raised only where a plains town has none ({@link TownNeeds})
+		TownNeeds.registerCatalogue();
 		// the song stone, where a capital's firsts are cut ({@link Firsts})
 		realm(FactionType.KINGDOM, "song_stone", Buildings::songStone, 1, 18);
 		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})
@@ -123,6 +129,7 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "fire_pit", Buildings::firePit, 1, 10);
 		hall(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 6);
 		realm(FactionType.VILLAGE, "infirmary", JobHalls::infirmary, 1, 8);
+		hall(FactionType.VILLAGE, "herbalist_stall", JobHalls::herbalistStall, 1, 10);
 		hall(FactionType.VILLAGE, "hunting_lodge", JobHalls::huntingLodge, 1, 14);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);
@@ -1500,6 +1507,8 @@ final class Buildings {
 		final boolean dry;
 		/** (0.7.441) the haven it's built for: "" none, "mixed", or a blood's key ({@link HavenBuildings}) */
 		String haven = "";
+		/** the fungal wood (a glow-wood's id) this Sylvan house is built from, or "" for plain timber ({@link GlowWoodHavens}) */
+		String fungus = "";
 		final int salt;
 		private final List<String> colours;
 		private final RandomSource r;
@@ -1597,6 +1606,7 @@ final class Buildings {
 			}
 			Kit kit = of(level, faction, land, village, colour, materials, details);
 			kit.haven = Havens.of(level.getServer(), faction);
+			kit.fungus = GlowWoodHavens.houseWood(faction, materials);
 			return kit;
 		}
 

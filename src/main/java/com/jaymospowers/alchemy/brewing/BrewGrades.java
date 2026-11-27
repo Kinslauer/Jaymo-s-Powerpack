@@ -51,7 +51,7 @@ public final class BrewGrades {
 
 	/** A bottled potion (drinking, splash or lingering) that has effects. */
 	public static boolean isBrew(ItemStack stack) {
-		return (stack.is(Items.POTION) || stack.is(Items.SPLASH_POTION) || stack.is(Items.LINGERING_POTION))
+		return stack.getItem() instanceof com.jaymospowers.alchemy.hunter.DraughtItem item && item.draught().distillable() ||  (stack.is(Items.POTION) || stack.is(Items.SPLASH_POTION) || stack.is(Items.LINGERING_POTION))
 			&& stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).hasEffects();
 	}
 

@@ -68,6 +68,8 @@ final class GravityRockFlight {
 			}
 		}
 		slab.script(true, true);
+		// (the heading it's boarded at: it's drawn turned from there, and anyone sat on it goes round with it)
+		slab.setAttached(BlockCluster.BOARD_HEADING, player.yBodyRot);
 		player.setAttached(GravityPower.ROCK_FLIGHT, slab.getId());
 		// up off the ground with it
 		ServerPlayNetworking.send(player, new com.jaymospowers.power.web.WebNet.Nudge(new Vec3(0.0, 0.55, 0.0)));
@@ -181,6 +183,7 @@ final class GravityRockFlight {
 		}
 		if (player.level().getEntity(id) instanceof BlockCluster cluster) {
 			cluster.script(false, true);
+			cluster.removeAttached(BlockCluster.BOARD_HEADING);
 			cluster.setAttached(BlockCluster.BOARD, true);
 			cluster.refreshBox();
 			cluster.linger(BOARD_LINGER, false);

@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.power.web.WebNet;
+import com.jaymospowers.power.web.WebSymbiote;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -244,8 +245,11 @@ final class WebSymbioteDread {
 		}
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
-		if (strength <= 0.0F) {
-			tendrils(graphics, width, height, now, urgency, life);
+		if (strength <= 0.0F || WebSymbioteSettingsClient.edgeOff()) {
+			// (the edge membrane switched off in the Settings screen: no vignette, the tendrils stay)
+			if (life > 0.0F) {
+				tendrils(graphics, width, height, now, urgency, life);
+			}
 			return;
 		}
 		int dark = (int)(255 * DARKEN * shade);
@@ -253,7 +257,15 @@ final class WebSymbioteDread {
 			graphics.fill(0, 0, width, height, dark << 24);
 		}
 		// a slow double beat, like something breathing on you
+		var player = Minecraft.getInstance().player;
+		Long rhythm = player == null ? null : player.getAttached(WebSymbiote.RHYTHM);
 		float beat = Mth.sin(now * PULSE_SPEED);
+		if (rhythm != null && player != null) {
+			long age = player.level().getGameTime() - rhythm;
+			float fraction = (Math.floorMod(age, WebSymbiote.BEAT_PERIOD) + (now - clock)) / WebSymbiote.BEAT_PERIOD;
+			beat = age >= 0 ? Math.abs(Mth.cos(fraction * Mth.PI)) : 0;
+			beat *= beat;
+		}
 		float pulse = 1.0F - PULSE_DEPTH + PULSE_DEPTH * beat * beat;
 		int alpha = (int)(VIGNETTE_ALPHA * strength * pulse);
 		int depth = Math.max(8, (int)(Math.min(width, height) * VIGNETTE_DEPTH * (0.9F + 0.1F * pulse)));

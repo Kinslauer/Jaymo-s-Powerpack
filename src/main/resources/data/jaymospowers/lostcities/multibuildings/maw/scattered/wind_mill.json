@@ -1,0 +1,11 @@
+{
+  "dimx": 1,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/wind_mill00",
+      "jaymospowers:maw/scattered/wind_mill01",
+      "jaymospowers:maw/scattered/wind_mill02"
+    ]
+  ]
+}

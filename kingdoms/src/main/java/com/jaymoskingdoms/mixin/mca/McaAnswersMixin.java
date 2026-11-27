@@ -98,6 +98,10 @@ abstract class McaAnswersMixin {
 			// (0.7.361) only one who's told you their tale, once you have Valor of your own
 			cir.getReturnValue().remove(com.jaymoskingdoms.ValorFolk.SPAR);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.BloodAsk.canAsk(player, villager)) {
+			// (Night's Blood) only a vampire, with a villager who knows or half-knows what they are
+			cir.getReturnValue().remove(com.jaymoskingdoms.BloodAsk.ANSWER);
+		}
 		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);
@@ -105,6 +109,14 @@ abstract class McaAnswersMixin {
 		if ("main".equals(name) && !com.jaymoskingdoms.equestrian.HorseRevival.canAsk(player, villager)) {
 			// (Andy, 2026-11-12) a wizard or a necromancer, while you hold a mane lock
 			cir.getReturnValue().remove(com.jaymoskingdoms.equestrian.HorseRevival.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.RubberNewborns.canAsk(villager)) {
+			// (Andy, 2026-11-24) only a newborn Rubber-folk asks to be shown the way
+			cir.getReturnValue().remove(com.jaymoskingdoms.RubberNewborns.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Banks.canAsk(villager)) {
+			// (Andy, 2026-11-23) a money-changer at a bank's counter
+			cir.getReturnValue().remove(com.jaymoskingdoms.Banks.ANSWER);
 		}
 		if ("main".equals(name) && !com.jaymoskingdoms.equestrian.HorseKit.canAsk(villager)) {
 			// (Andy, 2026-11-14) only a court wizard sells enchanted tack
@@ -117,6 +129,10 @@ abstract class McaAnswersMixin {
 		if ("main".equals(name) && !com.jaymoskingdoms.Mourning.canAsk(villager)) {
 			// (Andy, 2026-11-12) only one who buried a companion speaks of their old adventures
 			cir.getReturnValue().remove(com.jaymoskingdoms.Mourning.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.OldBlood.canAsk(player, villager)) {
+			// (Night's Blood) only the Elder, and only to one who has seen enough of the other side
+			cir.getReturnValue().remove(com.jaymoskingdoms.OldBlood.ANSWER);
 		}
 		if ("main".equals(name) && !com.jaymoskingdoms.Accusations.canAccuse(player, villager)) {
 			// (0.7.332) only a priest, with someone here to accuse
