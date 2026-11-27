@@ -1,0 +1,5 @@
+# Greetings fit the moment
+- **Carrying on, not recalling**: talk to someone again within three minutes of something passing between you (you fed them, gave a gift, struck them...) while they can still see you (16 blocks) and they carry on from it ("I'm still eating. Bless you again. What is it?") instead of a "remember when" line. 25 sets of lines (`recall.jaymoskingdoms.just.*`), 22 for their own kinds and warm, cold and plain ones for the rest. `Recollections.say/justNow`, used by `opening` and `remark`.
+- **No greeting after you've already dealt with them**: if anything has already passed between you and a villager (any memory of their own of you), using them opens their menu straight away. No hand out, wave, handshake or bow. `Recollections.dealtWith`, checked in `Handshakes.greet`.
+- **Who greets at all**: the first-meeting wave, handshake or bow is only for rulers, court wizards and grown villagers with a trade. Nitwits, the jobless and children's menus open as they are (`Handshakes.greets`).
+- Built (`compileClientJava`); not played. Villagers coming over to you on their own (ComingOver) are unchanged.
