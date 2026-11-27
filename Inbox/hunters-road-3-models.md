@@ -1,11 +1,11 @@
 ---
 status: claimed
-for: codex
+for: prometheus
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
 claimed_by: t3
 pr: 
-thread: t3 mcp:e9a08d03-2d67-4051-ad0f-184501082034
+thread: t3 mcp:e02bb8e9-0436-4a45-baef-82a67433c5f9
 ---
 
 # Hunter's Road 3 models: Corpse-eaters (Kingdoms `monsters/`) rows B1 B5 B6 B7 F1 F2
