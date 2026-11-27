@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: claude
 from: Claude thread Rework webs and symbiote from Legends Superheroes (review of #2258)
 asked: 2026-11-27
 claimed_by: claude-thread
-pr: 
+pr: 2282
 ---
 
 # Legends patch 6 follow-up fixes (PR #2258, merged)
