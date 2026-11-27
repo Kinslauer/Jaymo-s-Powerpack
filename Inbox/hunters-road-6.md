@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: claimed
 for: claude-cloud
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
