@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 23:25
+updated: 2026-11-26 23:49
 ---
 # Open PRs
 
-15 open, as of 2026-11-26 23:25. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-26 23:49. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -66,17 +66,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2273](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2273) The sexton: a town job for the dead, the golems and the blood
-- **Branch:** `claude/project-thread-pco4bn` · **Updated:** 2026-11-27 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2278](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2278) Ranged NPCs carry a sidearm and switch to it up close; NPCs' carried weapons show on the body
-- **Branch:** `claude/project-thread-qhpnp5` · **Updated:** 2026-11-27 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2279](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2279) NPCs take a second to think before setting on a player they've just picked out (Kingdoms)
-- **Branch:** `claude/project-thread-99wums` · **Updated:** 2026-11-27 (today)
+## [#2280](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2280) Hand of God: Celestial Hold and Celestial Turn
+- **Branch:** `claude/small-armies-picks-4` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
