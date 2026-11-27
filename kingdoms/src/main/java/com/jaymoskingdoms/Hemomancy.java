@@ -430,7 +430,8 @@ public final class Hemomancy {
 		boolean used = false;
 		if (VampirePlayers.vampire(player)) {
 			player.heal(BOTTLE_HEAL);
-			player.getFoodData().eat(BOTTLE_FOOD, 0.6F);
+			// (a full vampire's reserve takes the bottle's own 250 mB; a dhampir eats it as food)
+			VampireBlood.feedMb(player, VampireBlood.BOTTLE_MB, BOTTLE_FOOD, 0.6F);
 			// (0.7.635) and quenches their thirst
 			KitchenCompat.drink(player, VampirePlayers.BOTTLE_WATER);
 			BloodFever.bit(player);

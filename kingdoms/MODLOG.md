@@ -18199,3 +18199,26 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 ## 0.13.75 (2026-11-27): Cross Slash blade form (#2255)
 
 - Cross Slash: new Blade Weapon Form art (taught by the Blade school) that dashes through foes drawing a glowing X across each, bursting a moment later for bonus damage.
+
+## 0.13.76 (2026-11-27): Hunter's Road 1 - yellow tells (#2284)
+
+- Kingdoms mirrors Powers' new `UNBLOCKABLE_TAG` (`PowersCompat`, `MobCombat`), and adds a loading hint for the gold glint (hint 209).
+- Built; not played.
+
+## 0.13.77 (2026-11-27): Ragged edges for the steam valleys, ashlands, salt pans and steppe (#2286)
+
+- The four lands (`lands/Lands`) used to end in smooth round blobs where their simplex noise crossed its threshold. The
+  place the noise is read at is now pushed about by a FastNoiseLite domain warp (two layers, three wiggles a wave, up to
+  an eighth of a wave), so their edges wander in bays and spits. The lands still lie where they did, give or take a few
+  dozen blocks; only chunks generated from now on follow the new edges.
+- FastNoiseLite 1.1.1 (Jordan Peck, MIT) vendored as `noise/FastNoiseLite` (package line added, float positions switched
+  to double), licence in `licenses/fastnoiselite/`.
+- Built (Gradle compileJava); edge shapes checked by rendering the threshold to images. Not played in game.
+
+## 0.13.78 (2026-11-27): Night's Blood 1 - one body of blood (mB reserve, every move on the bar, chains) (#2285)
+
+- **Blood reserve**: a full vampire's hunger is now blood, from 0 to 2000 mB, shown as ten dark vials where the food bar was (`VampireBlood`, `VampireBloodHud`). The exact mB shows on hover in the inventory. Bites, the throat grab, lapping, sleeping prey and bottles fill it; a bottle is 250 mB. It drains slowly over time, faster in the open sun, and with exertion: sprinting, fighting, healing and the hunger near people cost 100 mB a food point. Under 200 mB the vampire is starving and stops healing. The vanilla food bar is kept full and ignored. Dhampirs keep the food bar and pay nothing for moves.
+- **Every move on the skill bar**: bat, colony, mist, stare, Rake, Rend, Pounce and the frenzy roar join Feed, Dash, Pound and Gaze, each with its own mB cost. For vampires, O, P, the shape menu and the Claw key are gone. Werewolves keep O, P and U.
+- **Chains** (`NightFlow`): dash into Pounce or Rake, a leap that lands into Feed, Groundpound into Rend, and the end of mist into a leap. A chained move costs half.
+- New H-menu Controls tab for vampires and dhampirs (`VampireControlsScreen`), and loading hints 210 and 211.
+- Built; not played.

@@ -88,6 +88,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Locked on (middle mouse) to the one swinging, both windows are longer ({@link #LOCK_PERFECT_BONUS},
  * {@link #LOCK_PARRY_BONUS}): watch your foe and the timing is easier.</li>
  * <li>A heavy blow (a fighter's, warned of by a red glint as it winds up: see Kingdoms' MobCombat) can't be parried.</li>
+ * <li>A yellow blow ({@link #UNBLOCKABLE_TAG}: a zombie's lunge, a spider's pounce) can't be blocked, only parried (the
+ * windows above) or dodged: a raised guard is knocked aside and the hit lands.</li>
  * <li>Mashing doesn't work: a raise within {@link #EAGER_TICKS} of the last one, when that one parried nothing, is only
  * a block. A parry clears it, so a combo can be parried blow by blow.</li>
  * </ul>
@@ -158,6 +160,17 @@ public final class Guard {
 	 * it on a fighter's heavy blows, the ones its red glint warns of).
 	 */
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+	/**
+	 * Andy (2026-11-26): "you should dodge or parry, but you cant block. so now there will be three teirs of attack, white,
+	 * yellow and red". An attacker carrying this tag while its blow lands can't be blocked: a raised guard or shield is
+	 * knocked aside ({@link #knockAside}) and the hit lands, unless it lands inside the parry window, which parries it as
+	 * ever (a perfect parry throws the attacker down). Rolling or stepping out of the way dodges it. Yellow glint
+	 * ({@link AttackTells#YELLOW_TELL_COLOR}); {@link #unblockable(LivingEntity, java.util.function.BooleanSupplier)} puts
+	 * it on for one blow.
+	 */
+	public static final String UNBLOCKABLE_TAG = "jaymospowers.unblockable";
+	/** How long (seconds) a raised guard or shield stays knocked aside after an unblockable blow lands on it. */
+	public static final float KNOCK_ASIDE_SECONDS = 1.5F;
 
 	/** (0.18.24) What a blow on a raised guard meets. */
 	public enum Timing {
@@ -501,6 +514,10 @@ public final class Guard {
 			return true;
 		}
 		ItemStack guard = player.getUseItem();
+		if (unblockable(source)) {
+			// a yellow blow passes the guard whole: it costs nothing to hold, and it is knocked aside as the blow lands
+			return false;
+		}
 		// (a boxer's block costs by the blow, not by its weight: Boxing.blockCost)
 		if (melee && weaponGuard(guard) && player.isBlocking() && !(com.jaymospowers.boxing.Boxing.boxing(player)
 			? com.jaymospowers.boxing.Boxing.spend(player, com.jaymospowers.boxing.Boxing.blockCost(player))
@@ -509,6 +526,50 @@ public final class Guard {
 			guardBreak(player, guard);
 		}
 		return false;
+	}
+
+	/** Whether {@code source} is a blow thrown with {@link #UNBLOCKABLE_TAG} on its attacker (or its projectile). */
+	public static boolean unblockable(DamageSource source) {
+		Entity attacker = source.getEntity();
+		Entity direct = source.getDirectEntity();
+		return attacker != null && attacker.entityTags().contains(UNBLOCKABLE_TAG)
+			|| direct != null && direct.entityTags().contains(UNBLOCKABLE_TAG);
+	}
+
+	/**
+	 * Runs {@code blow} (a call to {@code doHurtTarget}) with {@code attacker} tagged {@link #UNBLOCKABLE_TAG}: whatever it
+	 * lands on passes a guard. Public for the monsters that throw yellow blows.
+	 */
+	public static boolean unblockable(LivingEntity attacker, java.util.function.BooleanSupplier blow) {
+		boolean tagged = attacker.addTag(UNBLOCKABLE_TAG);
+		try {
+			return blow.getAsBoolean();
+		} finally {
+			if (tagged) {
+				attacker.removeTag(UNBLOCKABLE_TAG);
+			}
+		}
+	}
+
+	/**
+	 * An unblockable blow reached {@code victim}'s raised guard (from {@code LivingEntity.applyItemBlocking}, see
+	 * {@code UnblockableMixin}): the guard is knocked aside for {@link #KNOCK_ASIDE_SECONDS} and the blow lands whole.
+	 * True when {@code source} is such a blow.
+	 */
+	public static boolean knockAside(ServerLevel level, LivingEntity victim, DamageSource source) {
+		if (!unblockable(source)) {
+			return false;
+		}
+		ItemStack guard = victim.getItemBlockingWith();
+		if (guard != null && !guard.isEmpty()) {
+			BlocksAttacks blocks = guard.get(DataComponents.BLOCKS_ATTACKS);
+			if (blocks != null) {
+				blocks.disable(level, victim, KNOCK_ASIDE_SECONDS, guard);
+			}
+			victim.stopUsingItem();
+			level.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getEyeY() - 0.3, victim.getZ(), 6, 0.3, 0.2, 0.3, 0.15);
+		}
+		return true;
 	}
 
 	private static boolean inFront(ServerPlayer player, Vec3 from, double degrees) {

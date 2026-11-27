@@ -33,7 +33,9 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (0.7.632) Andy: "please place them on the bar" (a vampire's O and P). A vampire's or dhampir's Blood Dash, Groundpound
  * and Blood Gaze (the eye laser) are bar spells too ({@code jaymoskingdoms:night_<move>}, {@link NightGifts#move}), with
- * anything or nothing in hand. (0.7.634) And Feed ({@code night_feed}, {@link com.jaymoskingdoms.BloodGrab#feed}), the bite and
+ * anything or nothing in hand. (Night's Blood, patch 1) Every other move a vampire has is there too: the four shapes (bat, colony,
+ * mist, the stare) and the claw moves (Rake, Rend, Pounce, the frenzy roar), and their old keys are gone (O, P, sneak and O, the Claw key).
+ * (0.7.634) And Feed ({@code night_feed}, {@link com.jaymoskingdoms.BloodGrab#feed}), the bite and
  * the grab off right-click.
  * <p>
  * The Chain Axe ({@link Forms#lockOnly}) has no bar until you lock on, so right click stays its whirl and throw; the
@@ -53,7 +55,9 @@ public final class FormSkills {
 	/** (0.7.632) A vampire's moves on the bar: {@code jaymoskingdoms:night_<move>}, delivered by this; the moves, by NightGifts' index. */
 	static final String NIGHT_PREFIX = "night_";
 	static final Identifier NIGHT_HANDLER = JaymosKingdoms.id("night_move");
-	static final List<String> NIGHT_MOVES = List.of("dash", "pound", "gaze", "feed");
+	static final List<String> NIGHT_MOVES = List.of("dash", "pound", "gaze", "feed", "bat", "colony", "mist", "stare", "rake", "rend", "pounce", "roar");
+	/** (Blood) The moves only a full vampire has (a dhampir has no shapes): the indexes in {@link #NIGHT_MOVES} from this one to {@link #LAST_SHAPE}. */
+	static final int FIRST_SHAPE = 4, LAST_SHAPE = 7;
 	/** A Sorcerer's earth, water or air spell on the bar: {@code jaymoskingdoms:sorc_<spell>} ({@link com.jaymoskingdoms.SorceryPicks}), delivered by this. */
 	static final String SORC_PREFIX = "sorc_";
 	static final Identifier SORC_HANDLER = JaymosKingdoms.id("sorcerer_spell");
@@ -120,11 +124,14 @@ public final class FormSkills {
 			// the chain axe out and no lock: no bar at all, so right click stays its whirl and throw
 			return out;
 		}
-		// (0.7.632) a vampire's (or dhampir's) Blood Dash, Groundpound and eye laser, whatever's in hand
+		// (0.7.632) a vampire's (or dhampir's) moves, whatever's in hand; the shapes only for a full vampire
 		NightGifts.Gift gift = NightGifts.gift(player);
 		if (gift != null && gift.blood()) {
-			for (String move : NIGHT_MOVES) {
-				out.add(JaymosKingdoms.MOD_ID + ":" + NIGHT_PREFIX + move);
+			for (int i = 0; i < NIGHT_MOVES.size(); i++) {
+				if (gift.kind() == NightGifts.DHAMPIR && i >= FIRST_SHAPE && i <= LAST_SHAPE) {
+					continue;
+				}
+				out.add(JaymosKingdoms.MOD_ID + ":" + NIGHT_PREFIX + NIGHT_MOVES.get(i));
 			}
 		}
 		String sorc = com.jaymoskingdoms.SorceryPicks.barSpell(player);
