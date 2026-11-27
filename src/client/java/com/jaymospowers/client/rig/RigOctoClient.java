@@ -224,12 +224,19 @@ public final class RigOctoClient {
 		set(t, i, -0.15F + lift, 2.45F, 0.1F, reach, open);
 	}
 
-	/** Arm {@code i} part of the way ({@code k}) from {@code from}'s pose to {@code to}'s, into {@code t}. */
-	private static void blend(float[] t, int i, float[] from, float[] to, float k) {
+	/**
+	 * Where arm {@code i}'s claw tips are in pose {@code t} (body model space, pixels), so a move can carry the claw from
+	 * there to a point in a straight line rather than swinging the joints across.
+	 */
+	private static Vec3 tip(float[] t, int i) {
 		int o = i * VALUES;
-		for (int j = 0; j < VALUES; j++) {
-			t[o + j] = Mth.lerp(k, from[o + j], to[o + j]);
-		}
+		float reach = t[o + 3];
+		double ext = Math.max(1.0F, reach), shrink = Mth.clamp(reach, 0.2F, 1.0F);
+		double a = (UPPER + UPPER_ROD * (ext - 1.0)) * shrink, b = (FORE + FORE_ROD * (ext - 1.0) + CLAW_TIP) * shrink;
+		double pitch = t[o], yaw = t[o + 1], fore = pitch + t[o + 2];
+		return new Vec3(MOUNT[i][0] + Math.sin(yaw) * (Math.cos(pitch) * a + Math.cos(fore) * b),
+			MOUNT[i][1] - Math.sin(pitch) * a - Math.sin(fore) * b,
+			MOUNT[i][2] + Math.cos(yaw) * (Math.cos(pitch) * a + Math.cos(fore) * b));
 	}
 
 	/** A point in the world, in the body's model space (pixels: +X the wearer's left, +Y down from the neck, +Z back). */
@@ -347,9 +354,8 @@ public final class RigOctoClient {
 					anchor = new Anchor(move.start(), anchorAt(player, partial));
 					ANCHORS.put(player.getUUID(), anchor);
 				}
-				float[] bit = t.clone();
-				reach(bit, 0, model(player, partial, anchor.at()), 0.0F, EXT_FAR);
-				blend(t, 0, base, bit, Math.min(1.0F, k / 0.25F));
+				// shot straight out from where the claw was
+				reach(t, 0, tip(base, 0).lerp(model(player, partial, anchor.at()), Math.min(1.0F, k / 0.25F)), 0.0F, EXT_FAR);
 				placed = true;
 			}
 			case RigOcto.MOVE_LANCE -> forward(t, 0, 1.0F + bump(k) * 0.9F, 0.0F);
@@ -364,10 +370,9 @@ public final class RigOctoClient {
 			}
 			case RigOcto.MOVE_JAB, RigOcto.MOVE_CROSS -> {
 				// a telescoping punch out to the first thing down the look, and back: the right arm jabs, the left crosses
+				// (straight out from where the claw was, as a jab goes, not swung round)
 				int arm = kind == RigOcto.MOVE_JAB ? 0 : 1;
-				float[] out = t.clone();
-				reach(out, arm, model(player, partial, punchAt(player, partial)), 0.0F, EXT_FAR);
-				blend(t, arm, base, out, punch(k));
+				reach(t, arm, tip(base, arm).lerp(model(player, partial, punchAt(player, partial)), punch(k)), 0.0F, EXT_FAR);
 				// the other arm guards, drawn in close over the shoulder
 				forward(t, 1 - arm, 0.8F, 0.0F);
 				placed = true;
@@ -377,11 +382,9 @@ public final class RigOctoClient {
 				Vec3 eye = player.getEyePosition(partial), look = player.getViewVector(partial);
 				Vec3 focus = model(player, partial, eye.add(look.scale(1.6)).subtract(0.0, 0.3, 0.0));
 				float shake = k < 0.5F ? Mth.sin(now * 3.1F) * 0.35F : 0.0F;
-				float[] out = t.clone();
 				for (int i = 0; i < 4; i++) {
 					double sx = (i % 2 == 0 ? -1.2 : 1.2) + shake, sy = i < 2 ? -1.0 : 1.0;
-					reach(out, i, focus.add(sx, sy, 0.0), k < 0.5F ? 1.0F : 0.5F, EXT_FAR);
-					blend(t, i, base, out, Math.min(1.0F, k / 0.2F));
+					reach(t, i, tip(base, i).lerp(focus.add(sx, sy, 0.0), Math.min(1.0F, k / 0.2F)), k < 0.5F ? 1.0F : 0.5F, EXT_FAR);
 				}
 				placed = true;
 			}

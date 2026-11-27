@@ -142,6 +142,8 @@ public final class RigOcto {
 	public static final double COMBO_REACH = 7.0, JAB_KNOCK = 0.3, CROSS_KNOCK = 0.9, BLAST_RANGE = 24.0, BLAST_KNOCK = 1.6;
 	static final float JAB_DAMAGE = 6.0F, CROSS_DAMAGE = 9.0F, BLAST_DAMAGE = 14.0F, BLAST_SHAKE = 0.6F;
 	static final int CROSS_AT = 7, BLAST_AT = 15, BLAST_FIRE = 8, COMBO_COOLDOWN = 40;
+	/** Ticks from a jab or cross starting to its claw landing (a quarter of the punch: out fast, then held). */
+	static final int PUNCH_LAND = 2;
 	/** The Forge's price for the Octo Core in the standard frame: salvage points, iron, pistons. */
 	static final int OCTO_POINTS = 15, OCTO_IRON = 8, OCTO_PISTONS = 4;
 	public static final int FX = 0x5FE6FF;
@@ -861,13 +863,24 @@ public final class RigOcto {
 		});
 	}
 
-	/** One telescoping punch down the look: the first thing in reach takes it. */
+	/** One telescoping punch down the look: the arm sets off now and lands a moment later ({@link #land}). */
 	private static void punch(ServerPlayer player, int move, float damage, double knock, float pitch) {
 		RigMoves.start(player, move);
 		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PISTON_EXTEND, SoundSource.PLAYERS, 0.9F, pitch);
+		// the blow lands when the claw gets there, not as it sets off
+		RigActives.later(player, PUNCH_LAND, () -> {
+			if (out(player)) {
+				land(player, damage, knock, pitch);
+			}
+		});
+	}
+
+	/** A punch's claw arriving: the first thing in reach takes the blow. */
+	private static void land(ServerPlayer player, float damage, double knock, float pitch) {
+		ServerLevel level = player.level();
 		Entity aimed = aimed(player, COMBO_REACH, e -> e instanceof LivingEntity);
 		LivingEntity target = aimed instanceof LivingEntity l ? l : nearestInFront(player, COMBO_REACH * 0.5);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PISTON_EXTEND, SoundSource.PLAYERS, 0.9F, pitch);
 		if (target == null) {
 			return;
 		}
