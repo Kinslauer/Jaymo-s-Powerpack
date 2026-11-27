@@ -487,7 +487,15 @@ public final class WebBruteArts {
 		if (body.isRemoved()) {
 			return null;
 		}
-		ServerLevel level = player.level();
+		if (!(body.level() instanceof ServerLevel level)) {
+			body.discard();
+			return null;
+		}
+		// the owner changed dimension: the stone is in the old world, drop it
+		if (player.level() != level) {
+			body.discard();
+			return null;
+		}
 		Vec3 to = body.position().add(stone.velocity());
 		if (!level.hasChunkAt(BlockPos.containing(to))
 			|| !level.noCollision(body, AABB.ofSize(to.add(0, 0.35, 0), 0.38, 0.6, 0.38))) {
