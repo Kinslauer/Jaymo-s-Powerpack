@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:31). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,7 +15,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
-- [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · for any · open
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for any · open
 - [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for any · open
 - [ ] [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]] · for any · open
@@ -24,6 +23,7 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-k1|black-panther-k1]] · for any · open
 - [ ] [[Inbox/black-panther-p1|black-panther-p1]] · for any · open
 - [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · open
+- [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · for 🔥 Prometheus · open
 
 
 ## Being built
