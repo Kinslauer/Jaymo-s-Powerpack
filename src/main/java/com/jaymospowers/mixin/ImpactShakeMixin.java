@@ -18,6 +18,9 @@ abstract class ImpactShakeMixin {
 		Entity self = (Entity)(Object)this;
 		if (onGround && self.fallDistance > 0.0 && self instanceof LivingEntity living && !self.level().isClientSide()) {
 			Impacts.landed(living, self.fallDistance);
+			if (living instanceof net.minecraft.server.level.ServerPlayer player) {
+				com.jaymospowers.freerun.CoreMotion.landed(player, self.fallDistance);
+			}
 		}
 	}
 

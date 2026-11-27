@@ -60,7 +60,7 @@ public final class AirFlip {
 
 	/** Whether this player may flip in the air at all (both sides: the client reads the synced ranks). */
 	public static boolean allowed(Player player) {
-		return Powers.has(player, WebPower.INSTANCE) || Freerun.perk(player, Freerun.Perk.FREERUNNER) > 0;
+		return Powers.of(player) != null || Freerun.perk(player, Freerun.Perk.FREERUNNER) > 0;
 	}
 
 	private static void flip(ServerPlayer player, Flip flip) {
