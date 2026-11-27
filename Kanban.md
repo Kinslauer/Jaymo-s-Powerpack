@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:37). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:38). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
-- [ ] [[Inbox/hunters-road-2|hunters-road-2]] · ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · ☁️ Cloud · open
@@ -37,6 +36,7 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · ☁️ Cloud · #2284 · in-review
 - [ ] [[Inbox/nycto-1|nycto-1]] · ☁️ Cloud · #2285 · in-review
+- [ ] [[Inbox/hunters-road-2|hunters-road-2]] · ☁️ Cloud · #2287 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
