@@ -284,6 +284,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		ClericHeals.register();
 		SmithMending.register();
 		GuardMeals.register();
+		HandedFood.register();
 		GuardKicks.register();
 		AlarmBells.register();
 		com.jaymoskingdoms.deep.Deeps.register();

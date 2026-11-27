@@ -622,7 +622,8 @@ public final class Recollections {
 			return line(r, name, random);
 		}
 		Kind k = r.type();
-		String set = k != null && JUST_OWN.contains(k) ? k.key() : r.sway() > 0 ? "warm" : r.sway() < 0 ? "cold" : "plain";
+		String set = k == Kind.FED && HandedFood.eating(who) ? "fed_eating"
+			: k != null && JUST_OWN.contains(k) ? k.key() : r.sway() > 0 ? "warm" : r.sway() < 0 ? "cold" : "plain";
 		return Component.translatable("recall.jaymoskingdoms.just." + set + "." + random.nextInt(JUST_REMARKS), name, r.detail(), r.count());
 	}
 

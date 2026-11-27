@@ -160,8 +160,8 @@
   "recall.jaymoskingdoms.crime.burglary": "burglary",
   "recall.jaymoskingdoms.just.gift.0": "Thank you again for the %2$s, %1$s. Was there something else?",
   "recall.jaymoskingdoms.just.gift.1": "I'm still turning the %2$s over in my hands, %1$s. What is it?",
-  "recall.jaymoskingdoms.just.fed.0": "I'm still eating, %1$s. Bless you again. What is it?",
-  "recall.jaymoskingdoms.just.fed.1": "Thank you again for the food, %1$s. Did you want something?",
+  "recall.jaymoskingdoms.just.fed.0": "Thank you again for the food, %1$s. Did you want something?",
+  "recall.jaymoskingdoms.just.fed.1": "That was kind of you, %1$s. Truly. What is it?",
   "recall.jaymoskingdoms.just.kind.0": "Still here, %1$s? I don't mind. What is it?",
   "recall.jaymoskingdoms.just.kind.1": "You've a kind way about you, %1$s. What else?",
   "recall.jaymoskingdoms.just.played.0": "Again? Again, %1$s?",
@@ -207,5 +207,7 @@
   "recall.jaymoskingdoms.just.cold.0": "What now, %1$s?",
   "recall.jaymoskingdoms.just.cold.1": "You again already, %1$s? What is it?",
   "recall.jaymoskingdoms.just.plain.0": "Yes, %1$s? Something else?",
-  "recall.jaymoskingdoms.just.plain.1": "Mm? What is it, %1$s?"
+  "recall.jaymoskingdoms.just.plain.1": "Mm? What is it, %1$s?",
+  "recall.jaymoskingdoms.just.fed_eating.0": "Mm! Sorry, %1$s, mouth full. Bless you again. What is it?",
+  "recall.jaymoskingdoms.just.fed_eating.1": "I'm still eating, %1$s. Bless you again. What is it?"
 }
