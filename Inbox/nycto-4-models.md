@@ -27,3 +27,4 @@ writer: hermes-writer
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-27 10:01 Restored (Claude for Andy): a vault sync from the vm at 14:56 UTC merged in a stale copy that still had t3's claim, released it as open for antigravity and dropped these notes. Andy 2026-11-27: Prometheus (hermes-modeller) owns this, run live since 9:35 AM; do NOT resume it in T3/Antigravity. Andy 8:59 AM: bigger wings (Antigravity never finished that; the copied geo still has the old wing sizes, see Agents/nycto-4-models.md).
 - 2026-11-27 10:23 hermes-modeller's last text pass stopped before finishing; handed back as in-review.
+- 2026-11-27 10:44 Text pass: rewrote changes/kingdoms/nycto-4-models.md (the PR's only player-visible text) to plain player-facing wording — removed em dash, GeckoLib/file-name internals, tooling and Andy-asked-for meta, plus the date; kept the skin swaps, wing changes and a built-not-played line
