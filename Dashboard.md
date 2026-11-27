@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 01:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:02). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -31,23 +31,24 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/blood-awakening-per-blood-patch-1|blood-awakening-per-blood-patch-1]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/codex|codex]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hollow-captains-fix|hollow-captains-fix]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/legends-p3|legends-p3]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/legends-p3|legends-p3]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-6-stable-mine-farm|structures-6-stable-mine-farm]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-13 waiting for a bot, 3 being built, 10 in review: see [[Kanban]].
+13 waiting for a bot, 3 being built, 9 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2258 Legends Core animation library, landings by height, shared movement set and katana stance set (Powers, 2026-11-27)
 - [ ] #2254 swamp fire lag - fallen trees drawn lighter, windfall goes in a minute (Kingdoms, 2026-11-26)
 - [ ] #2253 NPC controls by the crosshair - downed and tied-up bodies (Powers, Kingdoms, 2026-11-26)
 - [ ] #2252 pull apart - wool, rocks, leather and more come apart in the inventory (Powers, 2026-11-26)
@@ -107,12 +108,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2177 The Last Lantern: a second hand-built start example (Kingdoms, 2026-11-25)
 - [ ] #2176 The numpad's other keys stay quiet while the cleric's medallion board is up (Kingdoms, 2026-11-25)
 - [ ] #2175 Swinging while locked on no longer crashes the game (Powers, 2026-11-25)
-- [ ] #2174 class items show up in JEI under the class's name (Kingdoms, 2026-11-25)
-- …and 620 older ones.
+- …and 621 older ones.
 
 ## Health
 
-29 problems in the notes: [[Health]].
+27 problems in the notes: [[Health]].
 
 ## Last week
 

@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: apollo
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
-claimed_by: hermes-a
+claimed_by: 
 pr: 
 claim_handbacks: 1
 ---
@@ -34,3 +34,5 @@ Not picked: clay soldiers, Clay Warfare colours/buffs/remote/book.
 - 2026-11-26 18:58 hermes-a's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-26 19:34 hermes-a's last run stopped before finishing; handed back as open.
 - 2026-11-26 20:22 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 21:00 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 21:32 hermes-a's claim had no sign of work for 30 min: handed back as open.
