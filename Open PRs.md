@@ -1,14 +1,14 @@
 ---
-updated: 2026-11-26 23:49
+updated: 2026-11-27 01:38
 ---
 # Open PRs
 
-13 open, as of 2026-11-26 23:49. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-27 01:38. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
-- **Branch:** `claude/structures-1-siege-camps` · **Updated:** 2026-11-26 (today)
-- **Checks:** ✅ 5 passed
+- **Branch:** `claude/structures-1-siege-camps` · **Updated:** 2026-11-27 (today)
+- **Checks:** ⏳ 1 of 5 running
 - **Agent:** no agent note
 
 ## [#2216](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2216) Structures 5: faction table and relations
@@ -17,7 +17,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** no agent note
 
 ## [#2217](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2217) Structures 6: stable, mine and farm (Kingdoms)
-- **Branch:** `claude/structures-6-stable-mine-farm` · **Updated:** 2026-11-26 (today)
+- **Branch:** `claude/structures-6-stable-mine-farm` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[structures-6-stable-mine-farm]]
 
