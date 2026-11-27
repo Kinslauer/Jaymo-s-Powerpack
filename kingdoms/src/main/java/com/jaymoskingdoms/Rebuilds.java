@@ -5,11 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -28,8 +25,6 @@ final class Rebuilds {
 	static final double RUINED_SHARE = 0.35;
 	/** How long a building lies in ruins before it's put up again (ticks: half a day). */
 	static final long REBUILD_AFTER = 12_000L;
-	/** Announced to players this close to the seat. */
-	static final double NEWS_RANGE = 160.0;
 
 	private static final Map<Integer, Integer> NEXT = new HashMap<>();
 
@@ -82,7 +77,7 @@ final class Rebuilds {
 		boolean ruined = made > 0 && gone >= made * RUINED_SHARE;
 		if (ruined && b.ruined() == 0L) {
 			replace(level, f, b, b.withRuined(now));
-			news(level, f, Component.translatable("message.jaymoskingdoms.build.ruined", f.name(), name(b.entry())));
+			TownCrier.town(level, f, "ruined", BuildNews.name(b.entry()));
 			JaymosKingdoms.LOGGER.info("{}'s {} at {} lies in ruins ({} of {} blocks gone)", f.name(), b.entry(), b.min(), gone, made);
 		} else if (!ruined && b.ruined() != 0L) {
 			replace(level, f, b, b.withRuined(0L));
@@ -97,7 +92,7 @@ final class Rebuilds {
 				return s.withBuilt(left).withProjects(projects);
 			});
 			Planner.forget(f.id());
-			news(level, f, Component.translatable("message.jaymoskingdoms.build.rebuilding", f.name(), name(b.entry())));
+			TownCrier.town(level, f, "rebuilding", BuildNews.name(b.entry()));
 			JaymosKingdoms.LOGGER.info("{} puts up its {} at {} again", f.name(), b.entry(), b.min());
 		}
 	}
@@ -108,18 +103,6 @@ final class Rebuilds {
 			list.replaceAll(x -> x.entry().equals(was.entry()) && x.min().equals(was.min()) ? now : x);
 			return s.withBuilt(list);
 		});
-	}
-
-	private static Component name(String entry) {
-		return Component.translatableWithFallback("building.jaymoskingdoms." + entry, entry);
-	}
-
-	private static void news(ServerLevel level, Faction f, Component message) {
-		for (ServerPlayer player : level.players()) {
-			if (player.distanceToSqr(f.seat().getX(), f.seat().getY(), f.seat().getZ()) <= NEWS_RANGE * NEWS_RANGE) {
-				player.sendSystemMessage(message.copy().withStyle(ChatFormatting.GRAY));
-			}
-		}
 	}
 
 	static void clear() {

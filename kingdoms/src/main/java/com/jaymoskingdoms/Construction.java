@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -16,7 +15,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -82,8 +80,6 @@ public final class Construction {
 	static final int FILL_MAX = 4, CLEAR_ABOVE = 2;
 	/** A builder hurt this recently is left to run (ticks). */
 	static final int FLEE_TICKS = 100;
-	/** Players this close to the seat hear a building finished. */
-	static final double ANNOUNCE_RANGE = 128.0;
 
 	/** A builder's phases. */
 	static final int IDLE = 0, FETCH = 1, LOAD = 2, HAUL = 3, WORK = 4, STAKE = 5;
@@ -762,7 +758,10 @@ public final class Construction {
 		}
 	}
 
-	/** The building's done: stakes pulled, recorded among the faction's buildings, the news told round the seat. */
+	/**
+	 * The building's done: stakes pulled, recorded among the faction's buildings (with when), a cheer. Nobody is told in chat
+	 * (Andy, 2026-11-27): the crier cries it, and folk near it say so to whoever walks by ({@link BuildNews}).
+	 */
 	private static void finish(ServerLevel level, Faction f, Works.Project p, Planner.Layout l) {
 		MinecraftServer server = level.getServer();
 		for (BlockPos stake : p.stakes()) {
@@ -778,7 +777,7 @@ public final class Construction {
 			List<Works.Built> built = new ArrayList<>(s.built());
 			// (0.5.7) with its full height, so beds and job sites upstairs count as its own
 			built.add(new Works.Built(p.entry(), l.min(), l.max().above(Math.max(0, l.height() - 1)), java.util.Optional.of(p.rotation()),
-				p.variant(), 0L));
+				p.variant(), 0L, level.getGameTime()));
 			List<Works.Plot> plots = new ArrayList<>(s.plots());
 			plots.replaceAll(plot -> plot.id() == p.plot() ? plot.withBuilding(plot.building(), true) : plot);
 			return s.withProjects(projects).withBuilt(built).withPlots(plots);
@@ -786,13 +785,7 @@ public final class Construction {
 		LAYOUTS.values().removeIf(x -> x == l);
 		Planner.forget(f.id());
 		level.playSound(null, l.center(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 1.0F, 1.0F);
-		Component news = Component.translatable("message.jaymoskingdoms.build.finished", f.name(),
-			Component.translatableWithFallback("building.jaymoskingdoms." + p.entry(), p.entry())).withStyle(ChatFormatting.GRAY);
-		for (ServerPlayer player : level.players()) {
-			if (player.distanceToSqr(f.seat().getX(), f.seat().getY(), f.seat().getZ()) <= ANNOUNCE_RANGE * ANNOUNCE_RANGE) {
-				player.sendSystemMessage(news);
-			}
-		}
+		BuildNews.finished(level, f, p.entry(), l.min(), l.max());
 		JaymosKingdoms.LOGGER.info("{} finished its {} at {}", f.name(), p.entry(), p.origin());
 		Gatherers.built(level, f, p.entry(), l.min(), l.max());
 		Homes.built(level, f, p.entry(), l.min(), l.max());

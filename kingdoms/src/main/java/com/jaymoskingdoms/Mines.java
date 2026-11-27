@@ -14,13 +14,11 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -72,8 +70,6 @@ public final class Mines {
 	static final double WALK_SPEED = 0.7;
 	/** Sleep's catch-up ({@link Nights}): a digger's ticks a block, on average (hauling included). */
 	static final int CATCH_UP_TICKS_PER_BLOCK = 45;
-	/** Players this close to the seat hear that the mine is done. */
-	static final double TELL_RANGE = 128.0;
 
 	static final int DIGGING = 0, CAVE = 1, DEEP = 2, FLOODED = 3, BLOCKED = 4;
 
@@ -765,7 +761,7 @@ public final class Mines {
 		}
 	}
 
-	/** Done: the news told round the seat, and miners taken on to work it. */
+	/** Done: the news cried by the seat, and miners taken on to work it. */
 	private static void finish(ServerLevel level, Faction f, Mine m, boolean quiet) {
 		String how = switch (m.state()) {
 			case CAVE -> "cave";
@@ -773,12 +769,8 @@ public final class Mines {
 			default -> "deep";
 		};
 		JaymosKingdoms.LOGGER.info("{}'s mine is dug ({} steps, {})", f.name(), m.step() + 1, how);
-		Component news = Component.translatable("message.jaymoskingdoms.mine.done." + how, f.name()).withStyle(ChatFormatting.GRAY);
-		for (ServerPlayer player : level.players()) {
-			if (player.distanceToSqr(f.seat().getX(), f.seat().getY(), f.seat().getZ()) <= TELL_RANGE * TELL_RANGE) {
-				player.sendSystemMessage(news);
-			}
-		}
+		// (not in chat, Andy 2026-11-27: the crier cries it)
+		TownCrier.town(level, f, "word", Component.translatable("message.jaymoskingdoms.mine.done." + how, f.name()));
 		Gatherers.hire(level, f, Folk.MINER, Gatherers.MINERS_PER_MINE - f.holdings().count(Folk.MINER));
 	}
 

@@ -60,5 +60,20 @@
   "directions.jaymoskingdoms.who.changer": "%s, the money changer",
   "directions.jaymoskingdoms.who.emeralds": "%s, who still clings to emeralds",
   "directions.jaymoskingdoms.none.changer": "No money changer here. You'll have to make do with the coin you've got.",
-  "directions.jaymoskingdoms.none.emeralds": "Emeralds? Nobody here is that backward. It's coin or nothing."
+  "directions.jaymoskingdoms.none.emeralds": "Emeralds? Nobody here is that backward. It's coin or nothing.",
+  "directions.jaymoskingdoms.news.none.0": "Nothing's been built here of late. Same old town.",
+  "directions.jaymoskingdoms.news.none.1": "New? Nothing. The builders have been idle.",
+  "directions.jaymoskingdoms.news.none.2": "Nothing new, I'm afraid. It's all as it was.",
+  "directions.jaymoskingdoms.news.built.0": "Have you seen the new %1$s? Finished %4$s, %2$s to the %3$s.",
+  "directions.jaymoskingdoms.news.built.1": "The builders put up a %1$s %4$s. It's %2$s to the %3$s.",
+  "directions.jaymoskingdoms.news.built.2": "There's the new %1$s, done %4$s. Head %3$s, %2$s or so.",
+  "directions.jaymoskingdoms.news.built.here.0": "The new %1$s, right there! They finished it %2$s.",
+  "directions.jaymoskingdoms.news.built.here.1": "You're standing by it: the new %1$s, done %2$s.",
+  "directions.jaymoskingdoms.news.built.here.2": "That %1$s there? Finished %2$s. Fine work, isn't it?",
+  "directions.jaymoskingdoms.news.building.0": "They're putting up a %1$s, %2$s to the %3$s. Not done yet.",
+  "directions.jaymoskingdoms.news.building.1": "The builders are at a %1$s now. Head %3$s, %2$s or so.",
+  "directions.jaymoskingdoms.news.building.2": "Nothing's finished lately, but there's a %1$s going up %2$s to the %3$s.",
+  "directions.jaymoskingdoms.news.building.here.0": "They're putting up a %1$s right there. See the stakes?",
+  "directions.jaymoskingdoms.news.building.here.1": "That's to be a %1$s, there. Not done yet.",
+  "directions.jaymoskingdoms.news.building.here.2": "Right there: a %1$s, going up as we speak."
 }
