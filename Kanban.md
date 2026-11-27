@@ -24,7 +24,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 💻 Odysseus · #2281 · claimed
 
 
@@ -40,6 +39,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · 💻 Odysseus · #2283 · in-review
+- [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · 💻 Odysseus · #2282 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
