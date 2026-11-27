@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: blocked
 for: prometheus
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27

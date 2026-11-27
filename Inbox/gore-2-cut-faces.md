@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: prometheus
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: Power-pack Supplement
-claimed_by: 
+claimed_by: hermes-modeller
 pr: 
 suggested_owns:
   - src/client/java/com/jaymospowers/client/Dismembered.java
