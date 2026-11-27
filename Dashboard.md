@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:48). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:58). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -48,11 +48,14 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2269 Tables say what's missing; /hints off (Powers, Kingdoms, Kitchen, 2026-11-27)
+- [ ] #2268 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
 - [ ] #2267 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
 - [ ] #2266 no lift prompt on tiny bodies (Powers, Kitchen, 2026-11-27)
 - [ ] #2265 Building news is found out, not told in chat (Kingdoms, 2026-11-27)
 - [ ] #2264 crows over a body no longer hang flapping in one spot in the sky (Kingdoms, 2026-11-27)
 - [ ] #2263 Arrows stuck in you are real arrows, not tools on your back (Powers, 2026-11-27)
+- [ ] #2262 Sunflare unmakes Kingdoms' shadows (Powers, Kingdoms, 2026-11-27)
 - [ ] #2261 Nothing drops on its own unless a player is near (Kingdoms, 2026-11-27)
 - [ ] #2260 New players start with low-end mode on and the vanilla texture look (Powers, 2026-11-27)
 - [ ] #2257 Chrono: the wormhole, time skip, blitz poses, a fighting afterimage, blur steps (Powers, 2026-11-27)
@@ -105,10 +108,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2190 Belt charms: hot-stone pouch, cold-clay flask, equinox charm (Powers, Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2188 most people wear harness: everyday shirts, hose, hoods and cloaks (Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2187 Mordhau harness 4: more harness at the smith's anvil (Powers, Kingdoms, 2026-11-26)
-- [ ] #2185 Mordhau harness 3: more harness at the smith's anvil (Powers, Kingdoms, 2026-11-26)
-- [ ] #2184 harness furs and turbans count for body heat; straw hats keep the sun off (Kingdoms, Kitchen, 2026-11-26)
-- [ ] #2183 Village mods 7-9: CTOV back, Tidal Towns, swamp goblins and their band, your own company (Kingdoms, 2026-11-26)
-- …and 569 older ones.
+- …and 572 older ones.
 
 ## Health
 
