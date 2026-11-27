@@ -367,7 +367,7 @@ final class MagicScreen extends Screen {
 		double step = 360.0 / Math.max(1, n);
 		int before = this.selected;
 		boolean onBox = this.whisper != null && this.whisper.visible && this.whisper.isMouseOver(mouseX, mouseY);
-		if (n == 0 || onBox || dx * dx + dy * dy < DEAD_ZONE * DEAD_ZONE || dx * dx + dy * dy > (outer() + 30) * (outer() + 30)) {
+		if (n == 0 || onBox || dx * dx + dy * dy < DEAD_ZONE * DEAD_ZONE || dx * dx + dy * dy > (outer() + 8) * (outer() + 8)) {
 			this.selected = -1;
 		} else {
 			double angle = Math.toDegrees(Math.atan2(dy, dx)) + 90.0;
