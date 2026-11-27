@@ -131,7 +131,9 @@ public final class WebUptilt {
 		}
 		// a web from the block over the foe, and another onto it: it is yanked up, and you with it
 		Webbed.wrap(target, YANK_WEB_TICKS);
-		WebHaul.push(target, new Vec3(0.0, YANK_BUMP, 0.0));
+		if (!com.jaymospowers.mortal.AirCombo.throwLimp(target, new Vec3(0.0, YANK_BUMP, 0.0))) {
+			WebHaul.push(target, new Vec3(0.0, YANK_BUMP, 0.0));
+		}
 		WebHaul.push(player, new Vec3(player.getDeltaMovement().x * 0.5, YANK_LIFT, player.getDeltaMovement().z * 0.5));
 		ARCS.put(player.getUUID(), new Arc(target.getId(), YANK, side, now, above, foe, Vec3.ZERO, Vec3.ZERO, toward, 0.0));
 		ARCS.get(player.getUUID()).kicked = true;
@@ -172,11 +174,10 @@ public final class WebUptilt {
 		player.resetFallDistance();
 		if (t == KICK_AT && !arc.kicked && foe != null && player.distanceTo(foe) < 6.0) {
 			arc.kicked = true;
-			if (arc.kind == PENDULUM) {
-				// through the bottom of the swing: kicked up and on ahead
-				WebHaul.push(foe, arc.toward.scale(PENDULUM_OUT).add(0.0, PENDULUM_BUMP, 0.0));
-			} else {
-				WebHaul.push(foe, new Vec3(0.0, SWING_UP_BUMP, 0.0));
+			// through the bottom of the swing: kicked up and on ahead (a mob limp, as its ragdoll: AirCombo)
+			Vec3 kick = arc.kind == PENDULUM ? arc.toward.scale(PENDULUM_OUT).add(0.0, PENDULUM_BUMP, 0.0) : new Vec3(0.0, SWING_UP_BUMP, 0.0);
+			if (!com.jaymospowers.mortal.AirCombo.throwLimp(foe, kick)) {
+				WebHaul.push(foe, kick);
 			}
 			hit(level, player, foe);
 		}

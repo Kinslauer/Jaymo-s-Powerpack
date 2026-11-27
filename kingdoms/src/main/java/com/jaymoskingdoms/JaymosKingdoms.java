@@ -798,6 +798,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Milestones.register();
 		GhostlyCrossbow.register();
 		Cavalry.register();
+		Hitching.register();
+		MakeWay.register();
 		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
 		com.jaymoskingdoms.equestrian.Equestrian.register();
 		com.jaymoskingdoms.equestrian.MythicMounts.register();
@@ -1151,6 +1153,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		OldBlood.register();
 		VampireTells.register();
 		Garlic.register();
+		GarlicWreath.register();
+		HunterKit.register();
 		// 0.7.185: losing yourself to the blood or the curse: the blood fever's urges, the wolf's hunts, and the holds that
 		// drive you (their attachments)
 		LOGGER.debug("takeover attachments: {} {} {} {} {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, BloodFever.HEARTBEAT, FeralCurse.FERAL,

@@ -217,9 +217,10 @@ final class Cavalry {
 			List<Worker> folk = Workers.near(level, round, x -> x.isAlive() && x.factionId() == f.id());
 			Castle.Keep keep = Factions.keep(server, f.id());
 			int wantGuards = tier == Wealth.Tier.WEALTHY ? GUARDS_WEALTHY : GUARDS_PROSPEROUS;
-			long riding = folk.stream().filter(x -> x.role() == Folk.GUARD && mounted(x.mob()) && !soldier(x)).count();
+			// (one whose horse is tied up while they're on foot is still one of its riders: Hitching)
+			long riding = folk.stream().filter(x -> x.role() == Folk.GUARD && (mounted(x.mob()) || Hitching.hasHorse(x.mob())) && !soldier(x)).count();
 			if (riding < wantGuards) {
-				List<PathfinderMob> walkers = new ArrayList<>(folk.stream().filter(x -> x.role() == Folk.GUARD && !mounted(x.mob()) && !x.mob().isPassenger()
+				List<PathfinderMob> walkers = new ArrayList<>(folk.stream().filter(x -> x.role() == Folk.GUARD && !mounted(x.mob()) && !x.mob().isPassenger() && !Hitching.hasHorse(x.mob())
 					&& Rulers.target(x.mob()) == null && !escorting(x) && !Downed.helping(x.mob()) && !soldier(x) && x.task().isEmpty() && level.canSeeSky(x.blockPosition())
 					&& !x.mob().isSleeping() && !Downed.isDowned(x.mob()) && (keep == null || !x.mob().getHomePosition().closerThan(keep.gate(), POST_ON_FOOT)
 						&& !x.mob().getHomePosition().closerThan(keep.throne(), POST_ON_FOOT))).map(Worker::mob).toList());
@@ -230,7 +231,7 @@ final class Cavalry {
 					PathfinderMob rider = walkers.getFirst();
 					// a horse whose rider fell first, else a new one bought
 					AbstractHorse spare = level.getEntitiesOfClass(AbstractHorse.class, rider.getBoundingBox().inflate(48.0),
-						h -> ours(h, f.id()) && !h.isVehicle() && !h.entityTags().contains(LENT) && h.isAlive() && !Downed.waiting(h)).stream().findFirst().orElse(null);
+						h -> ours(h, f.id()) && !h.isVehicle() && !h.entityTags().contains(LENT) && h.isAlive() && !Downed.waiting(h) && !Hitching.hitched(h)).stream().findFirst().orElse(null);
 					if (spare != null) {
 						Cavalry.teleport(rider, spare.getX(), spare.getY(), spare.getZ());
 						rider.startRiding(spare);
@@ -247,7 +248,7 @@ final class Cavalry {
 				}
 			}
 			if (tier == Wealth.Tier.WEALTHY) {
-				long archers = folk.stream().filter(x -> x.role() == Folk.ARCHER && mounted(x.mob())).count();
+				long archers = folk.stream().filter(x -> x.role() == Folk.ARCHER && (mounted(x.mob()) || Hitching.hasHorse(x.mob()))).count();
 				if (archers < ARCHERS_WEALTHY && buy(server, f)) {
 					mountedArcher(level, f);
 				}

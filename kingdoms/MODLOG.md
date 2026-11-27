@@ -18300,3 +18300,26 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **The steel blueprint** now sits in the smith's real pockets, not the villager's hidden inventory (`SteelRealms.keep` checks and gives through `NpcPockets.holds`/`give`). Since #2278 a lift reached that inventory only when the pockets were bare, and the body menu's search never showed it, so in practice only killing the smith got it. Now it can be lifted, shows on "Search them", drops with the pockets at death, and stays through the daily pocket roll like the house key (`NpcPockets.keeps`; kept things go first so a full roll never pushes them out). The old death drop from the villager inventory is gone.
 - Thessaly's unseen hand lifts only from a mark with something on them. The Rogue's casing "worth it" check now means "not picked bare".
 - Built; not played.
+
+## 0.13.88 (2026-11-27): mounted guards tie up their horses; villagers ask whoever's in the way to move (#2297)
+
+- **Riders get down** (Andy: a cavalryman sat on his horse in a house's doorway at night): a realm's mounted guard or archer gets down for the night, a guard's hours off, somewhere to go under a roof (bed, a shop, the tavern), or work done on foot (carrying the dead, tending the hurt, a meal, the fire, a routine). They lead the horse by a real lead to the nearest fence out in the open (within 14 blocks) and tie it there, or with no fence about leave it standing out in the open. Then they go about on foot like anyone (bed, Routines' shops and tavern, their day off). Once nothing keeps them on foot (back on duty, morning, the work done) they walk back, untie it and ride on. A rider who stands still a few seconds in or beside a doorway, or under a roof, gets down and takes the horse out the same way. A horse whose rider never comes back is untied after about five minutes and is the realm's spare again. Drivers, carters, caravans, war parties, border clashes, raiders, rulers' escorts and ship's crews never do this; nor does anyone fighting, afraid or out of their realm's land. Hitching (new); Cavalry counts a guard with a tied-up horse as mounted and never hands his horse to another.
+- **Make way**: a villager (or folk) whose walk has stalled looks at the next steps of its path; whoever stands on them is asked, in a speech bubble, to move ("Excuse me, coming through", "Move that horse, would you?", "Shoo!"). Someone on foot steps aside off the path for a few seconds and may say sorry; a realm's rider in a doorway or under a roof gets down and takes the horse out to a fence, any other rider moves aside; a loose animal is shooed aside. A player is only asked. Nobody asleep, down, fighting, at the fire, trading or talking with a player moves. MakeWay (new), from Unstick; Workers.step holds the brain while they lead, fetch or stand aside.
+- New loading hint (252).
+- Built; not played.
+
+## 0.13.89 (2026-11-27): Air combo perk text and hint for the enemy step and pull-ups (#2300)
+
+- The Air Combo perk's description names symbiote hosts, the slam sparing friends and villagers, mid-air Yank and tendril pull-ups and the enemy step; loading hint 253 explains the step.
+- A Sorcerer's second jump waits when the press is Powers' enemy step (`SorcererJumpClient`).
+- Built; not played.
+
+## 0.13.90 (2026-11-27): Night's Blood 7: hunters (garlic wreath, garlic draught, hunter's coat, priests' kit) (#2296)
+
+- **Garlic wreath** (`GarlicWreath`): worn in the amulet or head baubles slot, a vampire's bite slips off you (mob and player vampires) and a grab can't take hold; hung on a wall or a door as a block, no vampire passes within a block or so of it, even one that was invited (`OldRules`). Item and block wither in three days (item wear every minute; block dries a stage a day). A block taken down drops as worn as it was. Crafted from four garlic and four vines.
+- **Garlic draught** (`HunterKit`): awkward potion plus garlic (Kingdoms' garlic or Powers' wild garlic, item tag `jaymoskingdoms:garlic`), long with redstone, splash with gunpowder. While Sour Blood lasts, a vampire that bites you retches (nausea, slowness), lets go and gets nothing: no heal, no blood (mB), no feeding, no turning.
+- **Hunter's coat** (`HunterKit.COAT`): a chest piece that turns 60% of bites aside (6 wear each) and no grab takes hold of the wearer. Tailors (shepherds) sell it at level 3; also a grid recipe.
+- **The Lantern Warden's priests** sell the kit (coat, wreath and, with Powers, the hunter's oil) to anyone who has slain a vampire (`HunterKit.SLAYER`, set in `Vampires.died`); the offers are added or taken away each time a priest of a Lantern Warden realm is opened.
+- Garlic (either sort) now flinches a vampire as Kingdoms' garlic did; wild garlic counts.
+- Loading hints 260 to 264.
+- Built; not played. The coat's and wreath's pictures are placeholders recoloured or drawn by script (`tools/gen_ny7_kingdoms.py`).

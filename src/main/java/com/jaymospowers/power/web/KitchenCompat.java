@@ -751,6 +751,61 @@ public final class KitchenCompat {
 		}
 	}
 
+	private static java.lang.reflect.@Nullable Method mobThrown, mobLimp;
+	private static boolean mobLooked;
+
+	private static void lookMob() {
+		if (mobLooked) {
+			return;
+		}
+		mobLooked = true;
+		try {
+			Class<?> ragdolls = Class.forName("com.jaymoskitchen.ragdoll.MobRagdolls");
+			mobThrown = ragdolls.getMethod("thrown", net.minecraft.world.entity.Mob.class, double.class, double.class, double.class);
+			mobLimp = ragdolls.getMethod("isLimp", Entity.class);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			// a Kitchen without mob ragdolls, or without the air combo's throw
+			mobThrown = null;
+			mobLimp = null;
+		}
+	}
+
+	/**
+	 * The air combo's throw (AirCombo): {@code mob} goes limp into Kitchen's ragdoll (or already is) and its body is
+	 * thrown at this speed (b/t), not cut down as a blow's knockback is. False when it can't go limp (a boss, in water,
+	 * just up again, no such Kitchen): then nothing was done.
+	 */
+	public static boolean throwLimp(net.minecraft.world.entity.Mob mob, double vx, double vy, double vz) {
+		if (!LOADED) {
+			return false;
+		}
+		lookMob();
+		if (mobThrown == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(mobThrown.invoke(null, mob, vx, vy, vz));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** Whether {@code entity} is a mob lying limp in Kitchen's ragdoll (its body, not its own walking, moves it). */
+	public static boolean limpMob(Entity entity) {
+		if (!LOADED || !(entity instanceof net.minecraft.world.entity.Mob)) {
+			return false;
+		}
+		lookMob();
+		if (mobLimp == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(mobLimp.invoke(null, entity));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** Whether {@code entity} is a player lying limp in Kitchen's ragdoll (drawn by Kitchen, so our own poses keep off). */
 	public static boolean limp(Entity entity) {
 		if (!LOADED || !(entity instanceof Player)) {
