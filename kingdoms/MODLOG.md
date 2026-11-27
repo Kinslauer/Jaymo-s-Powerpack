@@ -18307,3 +18307,9 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Make way**: a villager (or folk) whose walk has stalled looks at the next steps of its path; whoever stands on them is asked, in a speech bubble, to move ("Excuse me, coming through", "Move that horse, would you?", "Shoo!"). Someone on foot steps aside off the path for a few seconds and may say sorry; a realm's rider in a doorway or under a roof gets down and takes the horse out to a fence, any other rider moves aside; a loose animal is shooed aside. A player is only asked. Nobody asleep, down, fighting, at the fire, trading or talking with a player moves. MakeWay (new), from Unstick; Workers.step holds the brain while they lead, fetch or stand aside.
 - New loading hint (252).
 - Built; not played.
+
+## 0.13.89 (2026-11-27): Air combo perk text and hint for the enemy step and pull-ups (#2300)
+
+- The Air Combo perk's description names symbiote hosts, the slam sparing friends and villagers, mid-air Yank and tendril pull-ups and the enemy step; loading hint 253 explains the step.
+- A Sorcerer's second jump waits when the press is Powers' enemy step (`SorcererJumpClient`).
+- Built; not played.
