@@ -131,7 +131,7 @@ public final class CoreMotion {
 		int tier = fall >= HERO_FALL ? 4 : fall >= HEAVY_FALL ? 3 : fall >= MEDIUM_FALL ? 2 : 1;
 		play(player, "animation.player.landingposev" + tier, 12);
 		if (tier == 4) {
-			// the damage rules come after this (LandingRoll): the cracks and dust wait a tick to hear what the landing was
+			// the damage rules come after this (LandingRoll): the cracks and dust wait out the roll window (LandingRoll) to hear what the landing was
 			LANDINGS.put(player.getUUID(), new Landing(player.level().getGameTime()));
 		}
 	}
@@ -175,7 +175,7 @@ public final class CoreMotion {
 			ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
 			if (player == null) {
 				it.remove();
-			} else if (player.level().getGameTime() > landing.at) {
+			} else if (player.level().getGameTime() > landing.at + LandingRoll.LATE_TICKS + LandingRoll.SLACK_TICKS) {
 				it.remove();
 				Long own = OWN_CRACKS.get(player.getUUID());
 				if (player.isAlive() && (own == null || own < landing.at - 1)) {
@@ -188,7 +188,7 @@ public final class CoreMotion {
 		}
 		if (!OWN_CRACKS.isEmpty()) {
 			long now = server.overworld().getGameTime();
-			OWN_CRACKS.values().removeIf(at -> now - at > 5);
+			OWN_CRACKS.values().removeIf(at -> now - at > 30);
 		}
 	}
 }

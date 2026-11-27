@@ -1,9 +1,13 @@
 package com.jaymospowers.client.freerun;
 
 import com.jaymospowers.client.JaymosPowersClient;
+import com.jaymospowers.aether.gear.ArmorAbilities;
+import com.jaymospowers.client.baubles.ArtifactBaublesClient;
 import com.jaymospowers.client.compat.CoreMotionPal;
 import com.jaymospowers.client.freerun.moves.CoyoteTimeClient;
 import com.jaymospowers.client.jump.PowerJumpClient;
+import com.jaymospowers.client.moving.LateJumps;
+import com.jaymospowers.freerun.moves.SkyDive;
 import com.jaymospowers.freerun.CoreMotion;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -60,11 +64,39 @@ public final class CoreMotionClient {
 			return;
 		}
 		air++;
-		if (!pressed || spent || air < AIR_TICKS || PowerJumpClient.busy(player) || CoyoteTimeClient.justTook(player)) {
+		if (!pressed || spent || air < AIR_TICKS || PowerJumpClient.busy(player) || CoyoteTimeClient.justTook(player) || otherJump(player)) {
 			return;
 		}
 		if (step(minecraft)) {
 			spent = true;
+		}
+	}
+
+	/** Another move already takes this press of Jump: the step only fires when nothing else did. */
+	private static boolean otherJump(LocalPlayer player) {
+		return !LateJumps.free(player) || ArtifactBaublesClient.cloudJump(player) || PowerJumpClient.takes(player)
+			|| ArmorAbilities.gravitite(player) || SkyDive.active(player) || sorcererJump(player)
+			|| player.fallDistance >= SkyDive.MIN_FALL && -player.getDeltaMovement().y >= SkyDive.MIN_SPEED && SkyDive.free(player);
+	}
+
+	private static java.lang.invoke.MethodHandle sorcerer;
+	private static boolean looked;
+
+	/** Kingdoms' sorcerer jump (looked up by name: Kingdoms is a separate mod). */
+	private static boolean sorcererJump(LocalPlayer player) {
+		if (!looked) {
+			looked = true;
+			try {
+				sorcerer = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymoskingdoms.SorcererJump"), "has",
+					java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				sorcerer = null;
+			}
+		}
+		try {
+			return sorcerer != null && (boolean)sorcerer.invoke(player);
+		} catch (Throwable e) {
+			return false;
 		}
 	}
 

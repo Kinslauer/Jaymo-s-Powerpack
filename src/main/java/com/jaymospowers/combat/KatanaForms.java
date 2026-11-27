@@ -87,7 +87,23 @@ public final class KatanaForms {
 				hit(player, victim, source, taken);
 			}
 		});
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((player, level, hand) -> {
+			used(player);
+			return net.minecraft.world.InteractionResult.PASS;
+		});
+		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+			used(player);
+			return net.minecraft.world.InteractionResult.PASS;
+		});
+		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			used(player);
+			return net.minecraft.world.InteractionResult.PASS;
+		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (!USED.isEmpty()) {
+				long time = server.overworld().getGameTime();
+				USED.values().removeIf(at -> time - at > 5);
+			}
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				Stance stance = player.getAttached(STANCE);
 				long now = player.level().getGameTime();
@@ -158,6 +174,12 @@ public final class KatanaForms {
 		}
 	}
 
+	private static void used(Player player) {
+		if (player instanceof ServerPlayer server) {
+			USED.put(server.getUUID(), server.level().getGameTime());
+		}
+	}
+
 	/** The reach a charged draw lends the next swing. */
 	private static void reach(ServerPlayer player, boolean on) {
 		net.minecraft.world.entity.ai.attributes.AttributeInstance range = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ENTITY_INTERACTION_RANGE);
@@ -172,8 +194,30 @@ public final class KatanaForms {
 		}
 	}
 
-	/** A swing of the katana (from {@code SwingNoteMixin}, or a hit that got here first): hit or miss, steps the combo and starts its clip. */
+	/** Game time of each player's last use of an item, block or creature (right click): its swing is not an attack. */
+	private static final java.util.Map<java.util.UUID, Long> USED = new java.util.HashMap<>();
+
+	/**
+	 * A main-hand swing (from {@code SwingNoteMixin}): an attack in the air or at a creature steps the combo, hit or miss.
+	 * A swing at a block (mining, or a click on one) or right after a use is not an attack, so a charged draw is never
+	 * spent on one.
+	 */
 	public static void swung(ServerPlayer player) {
+		if (player.getAttached(STANCE) == null) {
+			return;
+		}
+		Long used = USED.get(player.getUUID());
+		if (used != null && player.level().getGameTime() - used <= 1) {
+			return;
+		}
+		if (player.pick(player.blockInteractionRange(), 1.0F, false).getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+			return;
+		}
+		begin(player);
+	}
+
+	/** Steps the combo and starts its clip. */
+	private static void begin(ServerPlayer player) {
 		Stance stance = player.getAttached(STANCE);
 		long now = player.level().getGameTime();
 		if (stance == null || stance.blade != player.getMainHandItem() || stance.pressed >= 0
@@ -222,7 +266,7 @@ public final class KatanaForms {
 		long now = player.level().getGameTime();
 		if (stance.cutAt < now - 2 || stance.spent) {
 			// the hit came ahead of its swing packet (or no cut is running): the swing starts here
-			swung(player);
+			begin(player);
 		}
 		if (stance.cutAt < now - 2 || stance.spent) {
 			return;

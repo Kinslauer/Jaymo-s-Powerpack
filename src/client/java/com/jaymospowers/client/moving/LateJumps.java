@@ -70,7 +70,7 @@ public final class LateJumps {
 	}
 
 	/** Not swimming, climbing, riding, flying or in a move of their own. */
-	private static boolean free(LocalPlayer player) {
+	public static boolean free(LocalPlayer player) {
 		return !player.isPassenger() && !player.getAbilities().flying && !player.isInWater() && !player.isInLava()
 			&& !player.onClimbable() && !player.isFallFlying() && !player.isSpectator() && !player.isSleeping()
 			&& !FreerunClient.active() && !com.jaymospowers.client.power.web.WebSymbioteClient.inputLocked() && !com.jaymospowers.client.power.web.WebSymbioteClient.escaping();

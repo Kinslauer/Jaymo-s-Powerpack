@@ -85,6 +85,11 @@ public final class PowerJumpClient {
 		return PowerJump.kindOf(player) != PowerJump.NONE;
 	}
 
+	/** Whether a power's jump or the Draught of Mettle's takes a press of Jump in the air for {@code player}. */
+	public static boolean takes(LocalPlayer player) {
+		return kind(player) != PowerJump.NONE;
+	}
+
 	private static byte kind(LocalPlayer player) {
 		byte kind = PowerJump.kindOf(player);
 		if (kind == PowerJump.NONE) {
