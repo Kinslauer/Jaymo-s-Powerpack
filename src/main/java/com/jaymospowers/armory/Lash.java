@@ -290,7 +290,11 @@ public final class Lash {
 	static final double PULL_SPEED = 1.45, PULL_UP = 0.36, PULL_MAX = 2.4;
 	static final float PULL_SHARE = 0.35F;
 	static final int PULL_SLOW_TICKS = 30;
-	/** Spinning cyclone of chained blades all around you (Sneak+left-click with Chain Axe). */
+	/**
+	 * Spinning cyclone of chained blades all around you (Sneak+left-click with Chain Axe). {@code CYCLONE_COOLDOWN} is the
+	 * wait after the spin and return finish; {@link #cyclone} applies {@code CYCLONE_COOLDOWN + CYCLONE_TICKS + RETURN_TICKS}
+	 * on cast so the wait counts from the end of the spin.
+	 */
 	public static final int CYCLONE_TICKS = 36, CYCLONE_HIT_EVERY = 6, CYCLONE_COOLDOWN = 80;
 	public static final double CYCLONE_RADIUS = 3.6, CYCLONE_SPIN = 0.85;
 	static final float CYCLONE_SHARE = 0.42F, CYCLONE_EXHAUSTION = 0.03F;
@@ -420,7 +424,7 @@ public final class Lash {
 		boolean swipe;
 		/** The chain axe was ripped out of what it was buried in: a longer wait before it can be swung again. */
 		boolean ripped;
-		/** The chain axe started a spinning cyclone: {@link #CYCLONE_COOLDOWN} was applied on cast. */
+		/** The chain axe started a spinning cyclone: cooldown (spin, return and {@link #CYCLONE_COOLDOWN}) was applied on cast. */
 		boolean cyclone;
 
 		Run(ServerPlayer player) {
@@ -1917,7 +1921,11 @@ public final class Lash {
 		}
 	}
 
-	/** Sneak + charged left-click with the Chain Axe: launches a 360-degree spinning cyclone of chained blades around you. */
+	/**
+	 * Sneak + charged left-click with the Chain Axe: launches a 360-degree spinning cyclone of chained blades around you.
+	 * The item cooldown is applied on cast and includes {@link #CYCLONE_TICKS} and {@link #RETURN_TICKS} so
+	 * {@link #CYCLONE_COOLDOWN} counts from the end of the spin and return.
+	 */
 	private static void cyclone(ServerPlayer player, Vec3 head) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
@@ -1928,7 +1936,7 @@ public final class Lash {
 		run.cyclone = true;
 		RUNS.put(player.getUUID(), run);
 		player.setAttached(STATE, new State(FLAIL, CYCLONE, now, -1, head, Vec3.ZERO, Vec3.ZERO));
-		player.getCooldowns().addCooldown(held, CYCLONE_COOLDOWN);
+		player.getCooldowns().addCooldown(held, CYCLONE_COOLDOWN + CYCLONE_TICKS + RETURN_TICKS);
 		held.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
 		com.jaymospowers.core.fx.MagicFx.ring(level, player.position().add(0.0, 0.25, 0.0), (float)CYCLONE_RADIUS, CYCLONE_COLOR);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.0F, 1.3F);

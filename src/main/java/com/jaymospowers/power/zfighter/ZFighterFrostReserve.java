@@ -105,6 +105,15 @@ public final class ZFighterFrostReserve {
 		}
 	}
 
+	/** Side-effect-free check matching {@link #cover}: whether the reserve can cover {@code cost} right now. */
+	static boolean canCover(ServerPlayer player, ZFighterPower.Live live, float cost) {
+		float need = cost - live.ki;
+		if (need <= 0.0F) {
+			return true;
+		}
+		return reserve(player) >= need / EFFICIENCY;
+	}
+
 	/**
 	 * Part of {@link ZFighterPower#spend}: a technique costs {@code cost} and he has less. Draws the shortfall from the reserve
 	 * (topping his ki up to {@code cost}) if it is enough; otherwise draws nothing and returns false.

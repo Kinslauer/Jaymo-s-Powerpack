@@ -95,9 +95,7 @@ public final class ZFighterInstantStep {
 			return false;
 		}
 		float cost = STEP_KI * ZFighterAndroid.costFactor(player);
-		int lineage = ZFighterLineage.of(player);
-		if (!player.isCreative() && !live.raging() && live.ki < cost
-			&& lineage != ZFighterLineage.EARTHLING && lineage != ZFighterLineage.FROST) {
+		if (!player.isCreative() && !live.raging() && live.ki < cost && !ZFighterRaces.canCover(player, live, cost)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
 			return true;
 		}
