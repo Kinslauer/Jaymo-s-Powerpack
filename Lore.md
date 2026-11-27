@@ -383,6 +383,12 @@ What folk believe about the sky (village talk, not proven):
 
 **Husks in the sand (new).** (Hunter's Road thread; wave 1, PR #2284) In the deep desert, after dark, some of the husks are not walking at all. They lie buried in the sand, still as the dunes, and come up out of it in a spray of sand when someone passes near. When they lose whoever they were hunting they go back under, sand only, and wait. In the quiet days of the world there are none; they come with the dread.
 
+**Kinds of monster (new).** (Hunter's Road thread; wave 2, PR #2287) The old hunters sort what walks the dark into seven families. The dead, who were people and will not lie down. The corpse-eaters, who come where the dead were left. The brutes, great and slow: trolls, ogres, cyclops and giants. The beasts, hungry and honest. The spirits, wraiths and bog lights, more chill than body. The cursed, werewolves and vampires, who wear a person by day. And people, who are the most dangerous of all because they think.
+
+**Silver and steel (new).** (Hunter's Road thread; wave 2, PR #2287) Steel is for men and beasts; silver is for what was never right: the dead, the spirits, the cursed and whatever feeds on graves. A hunter carries both, one over each shoulder.
+
+**The greasy bestiary (new, added pages).** (Hunter's Road thread; wave 2, PR #2287) Its pages for the old families stay smudged until you meet one. Fight it and the page fills with how it fights; an herbalist or an elder, if you ask, will tell you what it fears.
+
 ## The Maw
 
 The Maw is what remains of the Warrior-born's homeworld, the world that was destroyed. The wrecks are not strangers' pods: they are what is left of a murdered planet and of the fleets that died with it.
@@ -595,6 +601,14 @@ Faith is kept strictly or loosely. Breaking a commandment costs favour. Blasphem
 **The store (new).** (Hunter's Road thread; Night's Blood 1, PR #2285) A vampire does not feel hunger as a gnawing; it feels the blood it carries, as a row of dark vials, ten of them, each a tenth of all it can hold, and it knows to the mouthful what is left. A bite fills them, a bottle, a lapped pool of what the dying spilt; each gift the blood gives, a shape, the stare, the mask, the leap, the claws, is paid for out of them, and a little goes with every hour, with every hard run and every fight, and more under the open sun. When only the last vial is left it is starving, and the body stops mending itself. Ordinary food is ash in its mouth and does nothing.
 
 **One body (new).** (Hunter's Road thread; Night's Blood 1, PR #2285) The blood does not keep its gifts in separate drawers. A vampire's moves are one motion: a dash thrown the way it looks can be turned in mid-air into the pounce or the claws, a leap that comes down on its prey is already drinking, a throw that sends men reeling can be followed to the nearest of them and torn, and mist that ends does not stop but is flung out as a leap. Run one move into the next and the second costs half.
+
+**Gifts must be held (new).** (Hunter's Road thread; Night's Blood 2, PR #2288) The blood knows far more than a vampire can carry at once. A fledgling learns a few of its gifts and keeps three of them close; the rest lie quiet in it, learned but unused, until it chooses to set one in place of another. Only what it keeps close answers when it calls.
+
+**Ages (new).** (Hunter's Road thread; Night's Blood 2, PR #2288) A vampire's blood ages as the nights pile up on it, as the new moons pass over it, and as it drinks from the great ones of the land: a king, a lord, a champion, a thing with a boss's bar. A fledgling becomes grown, and a grown one old, and each age gives it more to learn and a little more strength in the dark. Giving in to the thirst is a faster road, and a darker one, and it does not stop an age from coming.
+
+**Pacts (new).** (Hunter's Road thread; Night's Blood 2, PR #2288) Every room for another gift past the third is bought with something the blood gives up. There are five old bargains. In the first the blood goes drowned: water and rain drag at it. In the second it is kindling: fire, torches and the noon sun hurt it more. In the third it has a fine palate: only a person's blood feeds it, and a bottle gives half. In the fourth it is unquiet: beasts flee it and will not be tamed or bred by it, and traders ask more. In the fifth it runs thin: it mends nothing while less than half a store is left. A bargain is struck, and given back, only at a shrine.
+
+**The shrine (new).** (Hunter's Road thread; Night's Blood 2, PR #2288) A shrine is a coffin dressed at its head: lit candles, a skull and a bottle of blood set on the wall. Before one, a vampire may learn a gift, set it in place or take it out, and strike or give back a bargain. Anywhere else it only knows what it has. The crypt a new vampire wakes in has one already set.
 
 **The Nightfall plague.** Things that drink blood come out of the dark and leave the plague behind them. There is the **Night Bleeder** in its cloak, which when brought down becomes a **Blightwing**, a big bald bat in the rags of that cloak, and there are the vampire bats that follow it. A pale miasma spreads and closes in. The old cure is garlic over every door, and leeches draw the bad blood out.
 
