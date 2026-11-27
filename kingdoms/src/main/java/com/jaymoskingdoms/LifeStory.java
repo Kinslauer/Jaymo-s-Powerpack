@@ -3794,6 +3794,8 @@ public final class LifeStory {
 		Captains.forgetPlayer(player.level().getServer(), player);
 		// our own villagers and folk forget them too: whatever they remembered, suspected or swore against the old life
 		Recollections.bornAnew(player);
+		// and their animals: tamed beasts go wild, their horses are no one's and trust them no more
+		ForgottenLives.bornAnew(player);
 		McaCompat.newDestiny(player);
 		// a brand-new character: Kitchen's first-wake grace from the cold and heat is theirs again
 		KitchenCompat.newCharacter(player);

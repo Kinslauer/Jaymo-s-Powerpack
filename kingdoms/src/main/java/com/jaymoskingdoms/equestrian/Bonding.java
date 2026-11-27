@@ -4,6 +4,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -319,6 +320,85 @@ public final class Bonding {
 		}
 		// a horse of Icy's Better Horses is owned by its own record too
 		return Equestrian.ICY && IcysHorses.owner(horse, player.getUUID());
+	}
+
+	/**
+	 * Andy: "reincarnating didnt seem to forget my bonded horses". {@code player}'s life is over and the horse forgets
+	 * them: its trust in them goes (what it has learnt stays its own), and if it was theirs it is no one's again, untamed,
+	 * no longer following, sent home or ordered about, and off their roster (Icy's Better Horses' owner and bond too, and
+	 * a Horseman horn's binding). True if it knew them at all.
+	 */
+	public static boolean forgetLife(AbstractHorse horse, UUID player) {
+		EntityReference<LivingEntity> owner = horse.getOwnerReference();
+		boolean theirs = owner != null && owner.getUUID().equals(player) || Equestrian.ICY && IcysHorses.owner(horse, player);
+		boolean knew = theirs;
+		Bond b = horse.getAttached(BOND);
+		if (b != null && b.knows(player)) {
+			horse.setAttached(BOND, b.without(player));
+			knew = true;
+		}
+		if (theirs) {
+			Herd h = horse.getAttached(Herding.HERD);
+			if (h != null && (h.orderOf() != Herd.Order.NONE || h.home().isPresent())) {
+				horse.setAttached(Herding.HERD, h.withOrder(Herd.Order.NONE, Optional.empty()).withHome(Optional.empty()));
+			}
+			if (Equestrian.ICY) {
+				IcysHorses.disown(horse, player);
+			}
+			horse.ejectPassengers();
+			horse.setOwner(null);
+			horse.setTamed(false);
+			if (horse.level() instanceof ServerLevel level) {
+				Herding.forget(level.getServer(), horse.getUUID());
+			}
+		}
+		if (Horseman.unbind(horse, player)) {
+			knew = true;
+		}
+		return knew;
+	}
+
+	/** What is kept of {@code player}'s horses away from any loaded horse (the roster; Icy's tracker), once their life is over. */
+	public static void forgetLifeEverywhere(net.minecraft.server.MinecraftServer server, UUID player) {
+		Herding.forgetOwner(server, player);
+		if (Equestrian.ICY) {
+			IcysHorses.forgetOwner(player);
+		}
+	}
+
+	/** Horseman's copper horn binds a horse to a player (reflection: Kingdoms doesn't build against Horseman). */
+	private static final class Horseman {
+		private static final boolean LOADED = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("horseman");
+		private static java.lang.reflect.@Nullable Method get, set, boundTo;
+		private static boolean failed;
+
+		static boolean unbind(AbstractHorse horse, UUID player) {
+			if (!LOADED || failed) {
+				return false;
+			}
+			try {
+				if (get == null) {
+					Class<?> summonable = Class.forName("io.github.mortuusars.horseman.world.summoning.SummonableHorse");
+					Class<?> data = Class.forName("io.github.mortuusars.horseman.world.summoning.BoundData");
+					get = summonable.getMethod("getHorsemanBoundData");
+					set = summonable.getMethod("setHorsemanBoundData", data);
+					boundTo = data.getMethod("isBoundTo", UUID.class);
+				}
+				if (!get.getDeclaringClass().isInstance(horse)) {
+					return false;
+				}
+				Object bound = get.invoke(horse);
+				if (bound == null || !(Boolean)boundTo.invoke(bound, player)) {
+					return false;
+				}
+				set.invoke(horse, (Object)null);
+				return true;
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				failed = true;
+				JaymosKingdoms.LOGGER.warn("Couldn't reach Horseman's horse binding; reincarnation leaves it be", e);
+				return false;
+			}
+		}
 	}
 
 	/**

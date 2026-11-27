@@ -72,6 +72,16 @@ public record Bond(Map<UUID, Float> trust, float trail, float racing, float jump
 		return new Bond(map, trail, racing, jumping, war, hunger, thirst, hooves, shoes, shine, brushed, at);
 	}
 
+	/** The bond with {@code player} gone, as if the horse had never met them (what it has learnt and its needs stay its own). */
+	public Bond without(UUID player) {
+		if (!this.trust.containsKey(player)) {
+			return this;
+		}
+		Map<UUID, Float> map = new HashMap<>(this.trust);
+		map.remove(player);
+		return new Bond(map, trail, racing, jumping, war, hunger, thirst, hooves, shoes, shine, brushed, at);
+	}
+
 	public float xp(Discipline d) {
 		return switch (d) {
 			case TRAIL -> this.trail;
