@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: prometheus
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
 claimed_by: t3
-pr: 
+pr: 2325
 thread: t3 mcp:e9a08d03-2d67-4051-ad0f-184501082034
 ---
 
