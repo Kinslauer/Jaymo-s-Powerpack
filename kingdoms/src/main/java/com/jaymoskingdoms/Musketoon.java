@@ -122,7 +122,8 @@ public final class Musketoon {
 
 	/** Whether {@code mob} carries one. */
 	static boolean holds(LivingEntity mob) {
-		return mob.getMainHandItem().is(ITEM);
+		// (or slung at the belt while the sidearm is out: Sidearms)
+		return mob.getMainHandItem().is(ITEM) || Sidearms.belt(mob).is(ITEM);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -136,7 +137,7 @@ public final class Musketoon {
 				it.remove();
 				continue;
 			}
-			if (!(guard.level() instanceof ServerLevel level) || Downed.isDowned(guard)) {
+			if (!(guard.level() instanceof ServerLevel level) || Downed.isDowned(guard) || Sidearms.drawn(guard)) {
 				continue;
 			}
 			long now = level.getGameTime();

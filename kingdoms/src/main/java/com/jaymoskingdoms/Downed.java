@@ -283,7 +283,7 @@ public final class Downed {
 	 */
 	private static boolean armed(Mob body) {
 		return !body.getMainHandItem().isEmpty() || !body.getOffhandItem().isEmpty() || DualBlades.backGear(body.getItemBySlot(EquipmentSlot.BODY))
-			|| MobAmmo.quiver(body) > 0;
+			|| !Sidearms.belt(body).isEmpty() || MobAmmo.quiver(body) > 0;
 	}
 
 	/** Someone of the settlement is tending {@code body} just now ({@link FieldMedics} leaves them to it). */
@@ -556,7 +556,7 @@ public final class Downed {
 
 	/**
 	 * {@code player} takes the weapons out of a downed one's hands and off its back (a shield or a stowed blade,
-	 * {@link DualBlades#backGear}), and the arrows it carries (Andy, 2026-11-19: "you should be able to take their bows"), and a
+	 * {@link DualBlades#backGear}), the sidearm at its belt ({@link Sidearms}), and the arrows it carries (Andy, 2026-11-19: "you should be able to take their bows"), and a
 	 * folk's belt pouch ({@link BeltPouch}); nothing else.
 	 */
 	private static void disarm(Player player, Mob body) {
@@ -579,6 +579,13 @@ public final class Downed {
 			unpack(body, held);
 			if (!player.getInventory().add(held) && !held.isEmpty()) {
 				player.drop(held, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			took = true;
+		}
+		ItemStack belt = Sidearms.take(body);
+		if (!belt.isEmpty()) {
+			if (!player.getInventory().add(belt) && !belt.isEmpty()) {
+				player.drop(belt, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
 			took = true;
 		}

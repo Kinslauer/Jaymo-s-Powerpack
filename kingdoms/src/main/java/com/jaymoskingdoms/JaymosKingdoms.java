@@ -403,6 +403,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		GradedTrades.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground
 		Rearm.register();
+		// ranged NPCs' sidearms, and what they carry shown on their bodies
+		Sidearms.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
 		Casting.register();
