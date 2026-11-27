@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: prometheus
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
@@ -7,6 +7,7 @@ claimed_by: hermes-modeller
 pr: 2302
 thread: hermes-modeller
 claim_handbacks: 1
+writer: hermes-writer
 ---
 
 # Night's Blood 4 models: the true shape of the night
