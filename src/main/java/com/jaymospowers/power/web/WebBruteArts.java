@@ -489,12 +489,9 @@ public final class WebBruteArts {
 		if (body.isRemoved()) {
 			return null;
 		}
-		if (!(body.level() instanceof ServerLevel level)) {
-			body.discard();
-			return null;
-		}
-		// the owner changed dimension: the stone is in the old world, drop it
-		if (player.level() != level) {
+		ServerLevel level = player.level();
+		if (stone.level() != level) {
+			// the owner has left the world this stone was thrown in
 			body.discard();
 			return null;
 		}
