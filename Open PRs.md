@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 04:49
+updated: 2026-11-27 08:24
 ---
 # Open PRs
 
-14 open, as of 2026-11-27 04:49. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+12 open, as of 2026-11-27 08:24. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -22,7 +22,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[structures-6-stable-mine-farm]]
 
 ## [#2220](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2220) Realistic and pathable archery positions
-- **Branch:** `claude/realistic-pathable-archery` · **Updated:** 2026-11-26 (today)
+- **Branch:** `claude/realistic-pathable-archery` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[realistic-pathable-archery-positions]]
 
@@ -56,11 +56,6 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2255](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2255) Legends Patch 7: Z Fighter and weapon moves
-- **Branch:** `gemini/legends-p7-zfighter-weapon-moves` · **Updated:** 2026-11-27 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** [[legends-p7-zfighter-weapon-moves]]
-
 ## [#2259](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2259) Small Armies Picks: plan doc (4 rows)
 - **Branch:** `claude/small-armies-picks` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
@@ -70,8 +65,3 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/small-armies-picks-4` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
-
-## [#2281](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2281) Legends Patch 3: big symbiote, five review fixes
-- **Branch:** `hermes/legends-p3` · **Updated:** 2026-11-27 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** [[legends-p3-big-symbiote]]
