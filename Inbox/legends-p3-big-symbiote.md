@@ -1,9 +1,9 @@
 ---
 status: claimed
-for: bacchus
+for: claude
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
-claimed_by: hermes-b
+claimed_by: claude-thread
 pr: 2281
 writer: hermes-writer
 text_pass: 
