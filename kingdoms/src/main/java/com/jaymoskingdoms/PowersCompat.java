@@ -5161,6 +5161,66 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code ArmourGrime.washAll(LivingEntity, int)} and {@code SeveredPart} with its {@code litter()}. */
+	private static java.lang.invoke.@Nullable MethodHandle washAllOf, litterOf;
+	private static @Nullable Class<?> severedPart;
+	private static boolean lookedForSexton;
+
+	private static void lookForSexton() {
+		if (lookedForSexton) {
+			return;
+		}
+		lookedForSexton = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			washAllOf = lookup.findStatic(Class.forName("com.jaymospowers.core.wet.ArmourGrime"), "washAll",
+				java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' washing (older Powers?)", e);
+		}
+		try {
+			severedPart = Class.forName("com.jaymospowers.core.SeveredPart");
+			litterOf = lookup.findVirtual(severedPart, "litter", java.lang.invoke.MethodType.methodType(boolean.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' severed parts for sextons (older Powers?)", e);
+			severedPart = null;
+		}
+	}
+
+	/**
+	 * Washes {@code amount} of blood and grime off {@code body}: its coat, its own clothes and every piece it wears (Powers'
+	 * {@code ArmourGrime.washAll}), what it holds too ({@link #washBlood}), and any zombie's rotten blood. True if any was on it;
+	 * false without Powers.
+	 */
+	public static boolean washAll(LivingEntity body, int amount) {
+		lookForSexton();
+		boolean any = false;
+		try {
+			any = washAllOf != null && (boolean)washAllOf.invoke(body, amount);
+		} catch (Throwable e) {
+			// nothing to wash without Powers
+		}
+		any |= washBlood(body);
+		any |= washZombieBlood(body);
+		return any;
+	}
+
+	/** Whether {@code entity} is a severed head or limb lying loose for a sexton to bury (Powers' {@code SeveredPart.litter}). */
+	public static boolean litterPart(net.minecraft.world.entity.Entity entity) {
+		lookForSexton();
+		if (severedPart == null || litterOf == null || !severedPart.isInstance(entity)) {
+			return false;
+		}
+		try {
+			return (boolean)litterOf.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	private static @Nullable Class<?> throwingWeapon;
 	private static boolean lookedForThrowing;
 

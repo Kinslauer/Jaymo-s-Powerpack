@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -100,7 +101,10 @@ final class OwnWants {
 			Map.entry(VillagerProfession.MASON, List.of(new Want(Items.CALCITE, 8, 3, 10), new Want(Items.TUFF, 12, 2, 12),
 				new Want(Items.AMETHYST_SHARD, 4, 5, 8))),
 			Map.entry(VillagerProfession.SHEPHERD, List.of(new Want(Items.WHEAT, 16, 2, 16), new Want(Items.SHEARS, 1, 4, 4),
-				new Want(Items.COCOA_BEANS, 8, 3, 10))));
+				new Want(Items.COCOA_BEANS, 8, 3, 10))),
+			// (a sexton: candles for the graves, a sponge for the blood, and good iron for the golems)
+			Map.entry(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.SEXTON).orElseThrow(), List.of(new Want(Items.CANDLE, 6, 3, 10),
+				new Want(Items.SPONGE, 1, 6, 4), new Want(Items.IRON_INGOT, 4, 5, 8))));
 		byNature = Map.ofEntries(
 			Map.entry("greedy", List.of(new Want(Items.GOLD_NUGGET, 18, 3, 10), new Want(Items.RAW_GOLD, 2, 5, 8), new Want(Items.DIAMOND, 1, 14, 2))),
 			Map.entry("gloomy", List.of(new Want(Items.CANDLE, 4, 3, 10), new Want(Items.WITHER_ROSE, 1, 10, 2), new Want(Items.MUSIC_DISC_11, 1, 14, 1))),

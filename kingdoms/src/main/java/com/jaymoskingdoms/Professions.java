@@ -42,6 +42,8 @@ public final class Professions {
 	public static VillagerProfession TINKER, ENGINEER, AERONAUT;
 	/** (medieval picks) An old age's descendant keeping the ruin's stall ({@code oldage/RuinFolk}): never a player's pick. Trades old goods. */
 	public static VillagerProfession RUIN_KEEPER;
+	/** A town's sexton, at the lych lantern ({@link Sextons}): a real job site, so anyone without a trade may take it up; the town takes one on too. */
+	public static VillagerProfession SEXTON;
 
 	private Professions() {
 	}
@@ -74,6 +76,7 @@ public final class Professions {
 		ENGINEER = register("engineer", SoundEvents.VILLAGER_WORK_ARMORER);
 		AERONAUT = register("aeronaut", SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
 		RUIN_KEEPER = register("ruin_keeper", SoundEvents.VILLAGER_WORK_MASON);
+		SEXTON = Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, JaymosKingdoms.id("sexton"), Sextons.profession());
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {
@@ -138,6 +141,7 @@ public final class Professions {
 			case "jaymoskingdoms:tinker" -> "minecraft:toolsmith";
 			case "jaymoskingdoms:engineer" -> "minecraft:armorer";
 			case "jaymoskingdoms:aeronaut" -> "minecraft:cartographer";
+			case "jaymoskingdoms:sexton" -> "minecraft:leatherworker";
 			default -> null;
 		};
 	}
