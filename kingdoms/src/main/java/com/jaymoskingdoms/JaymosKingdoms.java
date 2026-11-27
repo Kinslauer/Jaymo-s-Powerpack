@@ -1146,6 +1146,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		VampireMask.register();
 		NewMoon.register();
 		CoffinRest.register();
+		Servants.register();
+		ThrallRide.register();
+		Fledglings.register();
 		LairHunts.register();
 		CoffinKit.register();
 		OldBlood.register();

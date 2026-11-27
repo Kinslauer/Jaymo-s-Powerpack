@@ -300,7 +300,8 @@ public final class BloodPage {
 			if (!(s.is(BlockTags.CANDLES) || s.is(BlockTags.SKULLS) || s.is(BlockTags.BEDS))) {
 				return InteractionResult.PASS;
 			}
-			if (shrineNear(server, hit.getBlockPos(), SHRINE_SPAN + 1) == null) {
+			// a coffin sneak-used with a thrall to ride lies the vampire down to ride it (ThrallRide); the candle and skull still open the page
+			if (shrineNear(server, hit.getBlockPos(), SHRINE_SPAN + 1) == null || s.is(BlockTags.BEDS) && ThrallRide.willRide(sp)) {
 				return InteractionResult.PASS;
 			}
 			ServerPlayNetworking.send(sp, new Open(true));

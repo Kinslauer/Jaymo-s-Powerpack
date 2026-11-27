@@ -184,6 +184,11 @@ public final class Comrades {
 		if (e instanceof Player p) {
 			return "p:" + p.getUUID();
 		}
+		// a vampire's thrall fights on their side (Night's Blood: servants)
+		String servant = Servants.side(e);
+		if (servant != null) {
+			return servant;
+		}
 		// turned for a while (docs/Pawn-Plan.md H1), or one of a masterless bandit's band (H3)
 		String turned = Possession.side(e);
 		if (turned != null) {

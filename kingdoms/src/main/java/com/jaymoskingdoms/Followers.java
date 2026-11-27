@@ -138,7 +138,9 @@ public final class Followers {
 			return false;
 		}
 		return McaBridge.involved(villager, player) || Loans.borrowedBy(villager, player) || RivalParties.hiredBy(villager, player)
-			|| player.getUUID().equals(McaCompat.following(villager)) || crewOf(villager, player) || Company.ownedBy(villager, player);
+			|| player.getUUID().equals(McaCompat.following(villager)) || crewOf(villager, player) || Company.ownedBy(villager, player)
+			// (Night's Blood) a vampire's thrall, and their fledgling by night
+			|| Servants.ownedBy(villager, player) || Fledglings.heeds(villager, player);
 	}
 
 	/** {@code v} is one of the hands of a ship {@code player} has the helm of (aboard her). */

@@ -77,7 +77,8 @@ public final class CoffinRest {
 				continue;
 			}
 			counted++;
-			if (p.isSleeping() && p.getSleepTimer() >= LIE_TICKS) {
+			// one riding a thrall by day looks out through its eyes and is not lying down to sleep the day away
+			if (p.isSleeping() && p.getSleepTimer() >= LIE_TICKS && !ThrallRide.riding(p)) {
 				lying++;
 				if (inCoffin(p)) {
 					coffin = true;

@@ -28,7 +28,8 @@ import org.jspecify.annotations.Nullable;
  * The stare. Once a vampire player has fixed their eyes (the stare on the skill bar, {@link NightForms}; it lasts {@link #ARM_TICKS}), holding
  * the gaze on a weak-willed person ({@link Will#weaker}: a villager, a folk, an illager, a skeleton or a zombie weaker than them)
  * for {@link #NEEDED} ticks makes it walk to them, and it stands by them while the gaze holds. Each second of it costs {@link #COST} mB
- * of blood. It ends when the gaze breaks, the gauge runs dry, or after {@link #HOLD_MAX} ticks.
+ * of blood. It ends when the gaze breaks, the gauge runs dry, or after {@link #HOLD_MAX} ticks. A tamed horse or wolf is held as easily
+ * as a villager (it has no will to weigh), and a drink from one held ({@link #holds}) binds a servant.
  */
 public final class NightGaze {
 	// ---- tuning ----
@@ -77,6 +78,15 @@ public final class NightGaze {
 		return ARMED.containsKey(player.getUUID());
 	}
 
+	/**
+	 * Whether {@code player}'s gaze holds {@code target} now: their eyes are fixed and have been on it long enough that it walks
+	 * to them ({@link #NEEDED}). A drink from one so held is the calm drink that binds a servant ({@link com.jaymoskingdoms.Servants}).
+	 */
+	public static boolean holds(ServerPlayer player, net.minecraft.world.entity.Entity target) {
+		Fix fix = FIXES.get(player.getUUID());
+		return fix != null && fix.mob == target.getId() && fix.held >= NEEDED && ARMED.containsKey(player.getUUID());
+	}
+
 	/** Their eyes soften, and whoever they held is let go. */
 	static void disarm(UUID id, @Nullable MinecraftServer server) {
 		ARMED.remove(id);
@@ -92,6 +102,11 @@ public final class NightGaze {
 	/** A person: not a beast. */
 	private static boolean humanoid(LivingEntity e) {
 		return e instanceof AbstractVillager || e instanceof Folk || e instanceof AbstractIllager || e instanceof AbstractSkeleton || e instanceof Zombie;
+	}
+
+	/** A tamed horse or wolf: it has no will to hold against the gaze ({@link com.jaymoskingdoms.Servants#beast}). */
+	private static boolean willing(LivingEntity e) {
+		return com.jaymoskingdoms.Servants.willing(e);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -156,7 +171,7 @@ public final class NightGaze {
 		Vec3 end = eye.add(p.getLookAngle().scale(RANGE));
 		Mob best = null;
 		double bestDistance = Double.MAX_VALUE;
-		for (Mob m : level.getEntitiesOfClass(Mob.class, new AABB(eye, end).inflate(1.0), m -> m.isAlive() && humanoid(m) && Will.weaker(p, m))) {
+		for (Mob m : level.getEntitiesOfClass(Mob.class, new AABB(eye, end).inflate(1.0), m -> m.isAlive() && (humanoid(m) && Will.weaker(p, m) || willing(m)))) {
 			Optional<Vec3> hit = m.getBoundingBox().inflate(0.3).clip(eye, end);
 			if (hit.isPresent()) {
 				double d = hit.get().distanceToSqr(eye);
