@@ -69,6 +69,8 @@ public final class Butchery {
 	 * thirst, a blood sorcerer's pool: Jaymo's Kingdoms) has it; nobody's, and it turns the stomach.
 	 */
 	private static final List<Predicate<ServerPlayer>> ON_DRINK = new ArrayList<>();
+	/** The same, for hooks that want the bottle drunk too (whose blood it is: {@link BloodBottleItem#donor}). */
+	private static final List<java.util.function.BiPredicate<ServerPlayer, ItemStack>> ON_DRINK_BOTTLE = new ArrayList<>();
 
 	private Butchery() {
 	}
@@ -168,6 +170,35 @@ public final class Butchery {
 	/** (For Jaymo's Kingdoms, by reflection.) A bottle of blood drunk by a player is theirs if {@code hook} says so. */
 	public static void addOnDrink(Predicate<ServerPlayer> hook) {
 		ON_DRINK.add(hook);
+	}
+
+	/**
+	 * (For Jaymo's Kingdoms, by reflection.) As {@link #addOnDrink}, but the hook is given the bottle being drunk, so it can
+	 * read whose blood it is and what it tastes of. Asked before the plain hooks.
+	 */
+	public static void addOnDrinkBottle(java.util.function.BiPredicate<ServerPlayer, ItemStack> hook) {
+		ON_DRINK_BOTTLE.add(hook);
+	}
+
+	/**
+	 * (For Jaymo's Kingdoms, by reflection; plain types only.) A bottle of blood filled from someone: named for them, and it
+	 * remembers their name, who they were, {@code taste} and whether they were {@code great} ({@link BloodBottleItem#filled}).
+	 */
+	public static ItemStack filledBottle(String name, java.util.@Nullable UUID id, String taste, boolean great) {
+		return BloodBottleItem.filled(name, id, taste, great);
+	}
+
+	static boolean drunkBySomeone(ServerPlayer player, ItemStack bottle) {
+		for (java.util.function.BiPredicate<ServerPlayer, ItemStack> hook : ON_DRINK_BOTTLE) {
+			try {
+				if (hook.test(player, bottle)) {
+					return true;
+				}
+			} catch (RuntimeException e) {
+				JaymosKitchen.LOGGER.warn("A blood bottle hook failed", e);
+			}
+		}
+		return drunkBySomeone(player);
 	}
 
 	static boolean drunkBySomeone(ServerPlayer player) {

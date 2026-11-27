@@ -127,6 +127,9 @@ public final class Recollections {
 		SAW_DEATHLESS(0, 90, true, true, "You saw %1$s, one of the Pallid, lie dead and get up again where they fell (%3$s times that day).",
 			"%3$s saw %1$s, one of the Pallid, lie dead and get up again."),
 		/** {@link BlightSpread}: cured them of the Hollow's blight before it turned them. */
+		/** {@link BloodAsk}: a vampire asked to drink, and they let them; or they would not. */
+		LET_DRINK(2, 60, true, false, "%1$s asked to drink your blood, and you let them.", ""),
+		REFUSED_DRINK(-2, 60, true, false, "%1$s asked to drink your blood, and you refused.", ""),
 		/** {@link Takers}: followed them through the night, and was seen. */
 		TAILED(-2, 30, true, false, "You followed %1$s through the night and %1$s saw you do it.", ""),
 		CURED_BLIGHT(6, 240, true, true, "%1$s cured you of the Hollow's blight when it would have made you one of the dead.",

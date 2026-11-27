@@ -1091,7 +1091,7 @@ public final class KitchenCompat {
 
 	// ---- (0.7.481) Kitchen 0.5.51's butchery: blood grates and bottled blood --------------------------------------------
 
-	private static @Nullable Method drawGrates, addOnDrink;
+	private static @Nullable Method drawGrates, addOnDrink, addOnDrinkBottle, filledBottle, bottleDonor, bottleDonorId, bottleTaste, bottleGreat;
 	private static boolean lookedForButchery;
 
 	private static void butchery() {
@@ -1109,7 +1109,98 @@ public final class KitchenCompat {
 			addOnDrink = butchery.getMethod("addOnDrink", java.util.function.Predicate.class);
 		} catch (ReflectiveOperationException | LinkageError e) {
 			JaymosKingdoms.LOGGER.debug("Jaymo's Kitchen has no blood grates (older Kitchen?)", e);
+			return;
 		}
+		// a bottle that remembers whose blood it is (an older Kitchen has none: its bottles stay plain)
+		try {
+			Class<?> butchery = Class.forName("com.jaymoskitchen.butchery.Butchery");
+			Class<?> bottle = Class.forName("com.jaymoskitchen.butchery.BloodBottleItem");
+			Class<?> stack = net.minecraft.world.item.ItemStack.class;
+			addOnDrinkBottle = butchery.getMethod("addOnDrinkBottle", java.util.function.BiPredicate.class);
+			filledBottle = butchery.getMethod("filledBottle", String.class, java.util.UUID.class, String.class, boolean.class);
+			bottleDonor = bottle.getMethod("donor", stack);
+			bottleDonorId = bottle.getMethod("donorId", stack);
+			bottleTaste = bottle.getMethod("taste", stack);
+			bottleGreat = bottle.getMethod("great", stack);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			addOnDrinkBottle = null;
+			filledBottle = null;
+			JaymosKingdoms.LOGGER.debug("Jaymo's Kitchen's bottles don't remember their donors (older Kitchen?)", e);
+		}
+	}
+
+	/** What a bottle of Kitchen's blood remembers: whose it is (name, who), its taste key ("" for none) and whether they were great. */
+	record BottleBlood(String donor, java.util.@Nullable UUID id, String taste, boolean great) {
+	}
+
+	/**
+	 * A bottle of {@code name}'s blood (Kitchen's blood bottle, filled from someone), or an empty stack when Kitchen is missing or
+	 * too old to have one.
+	 */
+	static net.minecraft.world.item.ItemStack filledBottle(String name, java.util.@Nullable UUID id, String taste, boolean great) {
+		butchery();
+		if (filledBottle == null) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+		try {
+			return (net.minecraft.world.item.ItemStack)filledBottle.invoke(null, name, id, taste, great);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+	}
+
+	/** What {@code stack} (a bottle of Kitchen's blood) remembers of its donor, or null for a bottle from a grate or anything else. */
+	static @Nullable BottleBlood bottleBlood(net.minecraft.world.item.ItemStack stack) {
+		butchery();
+		if (bottleDonor == null || bottleDonorId == null || bottleTaste == null || bottleGreat == null || stack.isEmpty()) {
+			return null;
+		}
+		try {
+			String donor = (String)bottleDonor.invoke(null, stack);
+			if (donor.isEmpty()) {
+				return null;
+			}
+			return new BottleBlood(donor, (java.util.UUID)bottleDonorId.invoke(null, stack), (String)bottleTaste.invoke(null, stack),
+				(boolean)bottleGreat.invoke(null, stack));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Whoever {@code hook} says has a use for a bottle of Kitchen's blood drinks it without retching; the hook is given the
+	 * bottle, so it can read whose blood it is. False (and nothing hooked) with a Kitchen that doesn't pass the bottle on.
+	 */
+	static boolean onBloodBottleDrunk(java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack> hook) {
+		butchery();
+		if (addOnDrinkBottle == null) {
+			return false;
+		}
+		try {
+			addOnDrinkBottle.invoke(null, hook);
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hook Kitchen's bottled blood: {}", e.toString());
+			return false;
+		}
+	}
+
+	/** One more reason the winter cold can't touch someone (Kitchen's {@code WinterCold.addColdProof}); nothing without a Kitchen that has it. */
+	static void addColdProof(java.util.function.Predicate<net.minecraft.world.entity.player.Player> proof) {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return;
+		}
+		try {
+			Class.forName("com.jaymoskitchen.season.WinterCold").getMethod("addColdProof", java.util.function.Predicate.class).invoke(null, proof);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Kitchen is too old for a Frostborn's blood to turn the cold: {}", e.toString());
+		}
+	}
+
+	/** Whether Kitchen is in (for a vampire's bottles to be filled). */
+	static boolean hasBottles() {
+		butchery();
+		return filledBottle != null;
 	}
 
 	/**

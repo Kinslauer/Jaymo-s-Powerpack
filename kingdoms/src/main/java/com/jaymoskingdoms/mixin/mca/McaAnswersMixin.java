@@ -98,6 +98,10 @@ abstract class McaAnswersMixin {
 			// (0.7.361) only one who's told you their tale, once you have Valor of your own
 			cir.getReturnValue().remove(com.jaymoskingdoms.ValorFolk.SPAR);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.BloodAsk.canAsk(player, villager)) {
+			// (Night's Blood) only a vampire, with a villager who knows or half-knows what they are
+			cir.getReturnValue().remove(com.jaymoskingdoms.BloodAsk.ANSWER);
+		}
 		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);
