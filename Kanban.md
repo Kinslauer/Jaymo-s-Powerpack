@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:43). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:48). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -24,12 +24,12 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-k1|black-panther-k1]] · for any · open
 - [ ] [[Inbox/black-panther-p1|black-panther-p1]] · for any · open
 - [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · open
-- [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for 🔥 Prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · 🔥 Prometheus · claimed
 
 
 ## In review
