@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,7 +28,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · claimed
-- [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · running
 
 
 ## In review
@@ -67,6 +66,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · for any · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
+- [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 
 
 ## Done
