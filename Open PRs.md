@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 22:34
+updated: 2026-11-26 22:45
 ---
 # Open PRs
 
-15 open, as of 2026-11-26 22:34. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+16 open, as of 2026-11-26 22:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -66,17 +66,22 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2262) Kingdoms: shadows see-through, sized, wispy, gone between strikes, unmade by the sun
+## [#2262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2262) Kingdoms: shadows see-through, sized, wispy, gone between strikes, unmade by sun and any light
 - **Branch:** `claude/project-thread-4rqrmh` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2263](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2263) Arrows stuck in you are real arrows, not tools on your back
-- **Branch:** `claude/project-thread-uzeu11` · **Updated:** 2026-11-27 (today)
-- **Checks:** ⏳ 1 of 5 running
+## [#2266](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2266) Tiny bodies picked up like items, no lift prompt
+- **Branch:** `claude/project-thread-0xyvor` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2264](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2264) Crows over a body no longer hang flapping in one spot in the sky
-- **Branch:** `claude/project-thread-jdtczd` · **Updated:** 2026-11-27 (today)
-- **Checks:** ⏳ 3 of 4 running
+## [#2267](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2267) Talk wheel: first spoke answers what the villager just said
+- **Branch:** `claude/project-thread-8cnrmc` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2268](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2268) A villager who cries out tells you why ("What happened?")
+- **Branch:** `claude/project-thread-l1v4sf` · **Updated:** 2026-11-27 (today)
+- **Checks:** no checks
 - **Agent:** no agent note
