@@ -205,6 +205,10 @@ public final class TreeLocks {
 		if (player.isCreative() || player.isSpectator()) {
 			return true;
 		}
+		if (BloodPage.governs(player, lock)) {
+			// a full vampire's Lifeleech, Night Sense, Groundpound and Bat Wings are the Blood page's: learned and slotted
+			return BloodPage.slotted(player, lock);
+		}
 		if (!lock.free.isEmpty()) {
 			for (PlayerClass cls : Classes.both(player)) {
 				if (lock.free.contains(cls)) {
@@ -320,6 +324,18 @@ public final class TreeLocks {
 		}
 		NightGifts.Gift g = NightGifts.gift(player);
 		return g == null || !g.blood() && !g.wolf() || perk == Perk.BAT_WINGS && !g.blood();
+	}
+
+	/**
+	 * Whether {@code perk} is left off the skill web for {@code player}: what {@link #hidden} hides, and the whole Night page for
+	 * a vampire or a dhampir, whose page is the Blood page ({@link BloodPage}).
+	 */
+	public static boolean webHidden(Player player, Perk perk) {
+		if (hidden(player, perk)) {
+			return true;
+		}
+		NightGifts.Gift g = NightGifts.gift(player);
+		return perk.pillar == Skills.Pillar.STEALTH && perk.tier >= 20 && g != null && g.blood();
 	}
 
 	static void forget(UUID id) {

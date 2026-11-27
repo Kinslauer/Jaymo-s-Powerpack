@@ -1117,6 +1117,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		VampirePlayers.register();
 		VampireBlood.register();
 		NightFlow.register();
+		BloodPage.register();
 		WerewolfPlayers.register();
 		Devouring.register();
 		// 0.7.66: the night's gifts for vampire and werewolf players (dash, groundpound, leap, howl, kin-sense, wings...;

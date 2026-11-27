@@ -567,6 +567,10 @@ public final class NightGifts {
 
 	/** A vampire's or dhampir's move off the skill bar. */
 	private static boolean vampireMove(ServerLevel level, ServerPlayer player, int which, long now) {
+		// a full vampire uses only the gifts they have learned and slotted (Feed is the body's own)
+		if (!BloodPage.moveOpen(player, which)) {
+			return false;
+		}
 		long[] ready = READY.computeIfAbsent(player.getUUID(), k -> new long[4]);
 		switch (which) {
 			case DASH -> {

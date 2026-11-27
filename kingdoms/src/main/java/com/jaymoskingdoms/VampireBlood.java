@@ -129,7 +129,7 @@ public final class VampireBlood {
 	/** A drink of {@code mb} (a bottle's, say): a full vampire's reserve gains it, a dhampir eats {@code food} instead. */
 	public static void feedMb(ServerPlayer player, int mb, int food, float saturation) {
 		if (full(player)) {
-			add(player, mb);
+			add(player, BloodPage.bottle(player, mb));
 		} else {
 			player.getFoodData().eat(food, saturation);
 		}
@@ -175,6 +175,7 @@ public final class VampireBlood {
 	/** A freshly turned vampire's reserve. */
 	static void wake(ServerPlayer player) {
 		player.setAttached(BLOOD, START);
+		BloodPage.wake(player);
 	}
 
 	private static void tick(MinecraftServer server) {

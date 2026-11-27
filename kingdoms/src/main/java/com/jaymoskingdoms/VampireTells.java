@@ -61,11 +61,12 @@ public final class VampireTells {
 				continue;
 			}
 			ServerLevel level = player.level();
-			for (Animal animal : level.getEntitiesOfClass(Animal.class, player.getBoundingBox().inflate(RANGE), Animal::isAlive)) {
-				if (animal instanceof OwnableEntity pet && pet.getOwner() == player) {
+			boolean unquiet = BloodPage.has(player, BloodPage.Pact.UNQUIET);
+			for (Animal animal : level.getEntitiesOfClass(Animal.class, player.getBoundingBox().inflate(BloodPage.shyRange(player, RANGE)), Animal::isAlive)) {
+				if (!unquiet && animal instanceof OwnableEntity pet && pet.getOwner() == player) {
 					continue;
 				}
-				if (animal instanceof Wolf wolf && wolf.isTame()) {
+				if (animal instanceof Wolf wolf && wolf.isTame() && !(unquiet && wolf.getOwner() == player)) {
 					growl(level, wolf, now);
 				} else if (!animal.isLeashed() && !animal.isVehicle() && !animal.isPassenger() && !animal.isSleeping()) {
 					Vec3 away = DefaultRandomPos.getPosAway(animal, FLEE_DISTANCE, FLEE_VERTICAL, player.position());
