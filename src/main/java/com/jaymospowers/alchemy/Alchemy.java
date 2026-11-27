@@ -65,6 +65,8 @@ public final class Alchemy {
 		com.jaymospowers.alchemy.cauldron.CauldronBrewing.init();
 		// (0.19.24) the bone-knitting elixir and the draught of vigour
 		com.jaymospowers.alchemy.healing.HealingBrews.init();
+		// Hunter's Road 7, part A: blade and effect oils, the oil pot, the sash, slicks, acid and the eight bombs
+		com.jaymospowers.alchemy.oil.Oils.init();
 		LabEscape.init();
 		com.jaymospowers.alchemy.picks.AlchemyPicks.init();
 		com.jaymospowers.alchemy.toxic.Toxicity.init();

@@ -67,6 +67,8 @@ final class Buildings {
 			// (0.7.483) earlier now, with the healer's infirmary: every town keeps a butcher and a healer ({@link TownTrades})
 			hall(type, "butcher", JobHalls::butcher, 1, 10);
 			realm(type, "infirmary", JobHalls::infirmary, 1, 12);
+			// the herbalist's stall: where a town's herbalist keeps their table ({@link Herbalists})
+			hall(type, "herbalist_stall", JobHalls::herbalistStall, 1, 14);
 			realm(type, "market", Buildings::market, 1, 24);
 			// a counting house, once the realm has the trade for it ({@link Banks#mayBuild}, {@link Planner#eligible})
 			realm(type, Banks.ID, Banks::draw, 1, Banks.FROM_SIZE);
@@ -127,6 +129,7 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "fire_pit", Buildings::firePit, 1, 10);
 		hall(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 6);
 		realm(FactionType.VILLAGE, "infirmary", JobHalls::infirmary, 1, 8);
+		hall(FactionType.VILLAGE, "herbalist_stall", JobHalls::herbalistStall, 1, 10);
 		hall(FactionType.VILLAGE, "hunting_lodge", JobHalls::huntingLodge, 1, 14);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);

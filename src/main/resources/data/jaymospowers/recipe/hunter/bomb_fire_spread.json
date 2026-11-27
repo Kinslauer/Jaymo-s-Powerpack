@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:gunpowder",
+    "minecraft:magma_cream"
+  ],
+  "result": {
+    "id": "jaymospowers:bomb_fire_spread",
+    "count": 1
+  }
+}

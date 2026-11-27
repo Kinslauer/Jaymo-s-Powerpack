@@ -4,6 +4,7 @@ import com.jaymoskitchen.HudBars;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.KitchenBlood;
 import com.jaymoskitchen.butchery.Butchery;
+import com.jaymoskitchen.butchery.MonsterFat;
 import com.jaymoskitchen.butchery.MonsterOrgans;
 import com.jaymoskitchen.butchery.Organs;
 import net.minecraft.core.BlockPos;
@@ -56,10 +57,16 @@ public final class Gutting {
 	 * the hunters carve, {@link MonsterOrgans}), lying loose.
 	 */
 	static boolean monster(CorpseEntity corpse) {
-		if (corpse.kind() != CorpseKind.OTHER || corpse.isMachine()) {
+		if (corpse.isMachine()) {
 			return false;
 		}
-		return Organs.gutsMonster(corpse.sourceType()) || MonsterOrgans.organOf(corpse.sourceType()) != null && corpse.grown();
+		// (Hunter's Road 7) a grown monster of the dead, the beasts, the brutes or the people gives its fat, lying where it fell
+		boolean fat = MonsterFat.of(corpse.sourceType()) != null && corpse.grown() && !Hanging.hangable(corpse)
+			&& (corpse.kind() == CorpseKind.OTHER || corpse.kind() == CorpseKind.ZOMBIE);
+		if (corpse.kind() != CorpseKind.OTHER) {
+			return fat;
+		}
+		return fat || Organs.gutsMonster(corpse.sourceType()) || MonsterOrgans.organOf(corpse.sourceType()) != null && corpse.grown();
 	}
 
 	/** Insides to take out of it: a small body one piece, most two, a big carcass four. */
@@ -142,6 +149,11 @@ public final class Gutting {
 			corpse.spawnAtLocation(level, new ItemStack(organ), 0.3F);
 		}
 		if (monster(corpse)) {
+			// (Hunter's Road 7) the fat comes out with the last piece
+			Item fat = MonsterFat.of(corpse.sourceType());
+			if (fat != null && corpse.grown() && n >= pieces(corpse) - 1) {
+				corpse.spawnAtLocation(level, new ItemStack(fat, 1 + level.getRandom().nextInt(2)), 0.3F);
+			}
 			return;
 		}
 		double side = corpse.getBbWidth() * 0.5 + BESIDE;
@@ -156,6 +168,11 @@ public final class Gutting {
 
 	/** The organs {@code corpse}'s kind of body holds. */
 	static java.util.List<Item> organs(CorpseEntity corpse) {
+		// (a monster carved only for its fat has no organs)
+		if (monster(corpse) && MonsterFat.of(corpse.sourceType()) != null && MonsterOrgans.organOf(corpse.sourceType()) == null
+			&& !Organs.gutsMonster(corpse.sourceType())) {
+			return java.util.List.of();
+		}
 		return Organs.of(corpse.sourceType(), corpse.oneHanded(), corpse.tooBigToLift());
 	}
 

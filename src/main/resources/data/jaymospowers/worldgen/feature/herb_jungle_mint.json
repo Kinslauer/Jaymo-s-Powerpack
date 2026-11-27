@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "id": "jaymospowers:jungle_mint_crop",
+    "properties": {
+      "age": "7",
+      "wild": "true"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:brute_grease",
+  "essences": {
+    "venom": 13,
+    "rot": 7,
+    "sulphur": 4
+  },
+  "result": {
+    "item": "jaymospowers:oil_toxin",
+    "count": 1,
+    "grade": "expert"
+  },
+  "research": "hunters_oils"
+}

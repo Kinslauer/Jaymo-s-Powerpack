@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:jungle_mint",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:rime_mint",
+      "required": false
+    }
+  ]
+}

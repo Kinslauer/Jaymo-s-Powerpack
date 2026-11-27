@@ -1,0 +1,21 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "jaymoskitchen"
+      ]
+    }
+  ],
+  "gives": {
+    "id": "minecraft:emerald",
+    "count": 2
+  },
+  "max_uses": 12,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "jaymoskitchen:poison_jelly",
+    "count": 3
+  },
+  "xp": 10
+}

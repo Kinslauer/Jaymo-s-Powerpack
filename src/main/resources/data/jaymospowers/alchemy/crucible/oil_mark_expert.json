@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:folk_grease",
+  "essences": {
+    "light": 11,
+    "mind": 9,
+    "spark": 4
+  },
+  "result": {
+    "item": "jaymospowers:oil_mark",
+    "count": 1,
+    "grade": "expert"
+  },
+  "research": "hunters_oils"
+}

@@ -1,0 +1,20 @@
+{
+  "values": [
+    {
+      "id": "jaymoskingdoms:herbalist/1/sell_feverfew",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/1/sell_valerian",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/1/sell_phials",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/1/buy_venom_fang",
+      "required": false
+    }
+  ]
+}

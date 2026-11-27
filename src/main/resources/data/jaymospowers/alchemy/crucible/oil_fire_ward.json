@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:beast_grease",
+  "essences": {
+    "frost": 5,
+    "water": 4,
+    "life": 2
+  },
+  "result": {
+    "item": "jaymospowers:oil_fire_ward",
+    "count": 1,
+    "grade": "plain"
+  },
+  "research": "hunters_oils"
+}

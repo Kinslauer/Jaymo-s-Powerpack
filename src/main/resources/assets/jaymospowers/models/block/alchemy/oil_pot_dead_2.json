@@ -1,0 +1,76 @@
+{
+  "textures": {
+    "particle": "jaymospowers:block/alchemy/oil_liquid_dead",
+    "o": "jaymospowers:block/alchemy/oil_liquid_dead"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        1,
+        4
+      ],
+      "to": [
+        12,
+        5,
+        12
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#o"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#o"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#o"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#o"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#o"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#o"
+        }
+      }
+    }
+  ]
+}

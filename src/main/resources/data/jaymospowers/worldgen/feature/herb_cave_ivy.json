@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:multiface_growth",
+  "block": "jaymospowers:cave_ivy",
+  "can_be_placed_on": [
+    "minecraft:stone",
+    "minecraft:andesite",
+    "minecraft:diorite",
+    "minecraft:granite",
+    "minecraft:tuff",
+    "minecraft:deepslate",
+    "minecraft:dripstone_block"
+  ],
+  "can_place_on_ceiling": true,
+  "can_place_on_wall": true,
+  "search_range": 20
+}
