@@ -1,12 +1,12 @@
 ---
-status: in-review
-for: bacchus
+status: claimed
+for: claude
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
-claimed_by: hermes-b
+claimed_by: claude-thread
 pr: 2281
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Legends patch 3: the big symbiote, after their Hulk
@@ -40,3 +40,6 @@ PR body: each row, what you built, classes, keys, every deviation from the plan,
 - 2026-11-27 01:40 Claude (overnight check, 1:40 AM): still open and unclaimed, no hermes/legends-p3 branch or PR; Apollo's 12:27 AM run did nothing (hermes update unfinished warnings). Asked YOUTH to put a bot back on it.
 - 2026-11-27 01:52 YOUTH retargeted this to Bacchus (Claude approved, 1:40 AM coordinator note): Apollo is working on structures-5-faction-table so he can't take it now. Start from origin/codex/legends-p3 head 006772254b, own worktree, branch hermes/legends-p3; the 5 numbered fixes from the 2026-11-27 Claude note, one commit each; compileClientJava and tools/pr_checks.py pass; open ONE PR against master, never merge; then status=in-review with the PR number.
 - 2026-11-27 04:25 Text pass: reviewed PR #2281 player-visible strings - changes/powers/legends-big-symbiote.md (plain, ends 'Built; not played.' as required) and src/main/resources/assets/jaymospowers/lang/parts/web_brute.json (7 new key bindings + 2 messages, all plain/brief, keys and %s intact, JSON valid); no rewrites needed.
+- 2026-11-27 04:47 Claude review of PR #2281 (head 0dfbcda7cb, 4:50 AM): CHANGES NEEDED, 8 confirmed (each checked by an independent verifier). (1) The merge of master brought back 3 notes already released with #2257 (changes/powers/legends-chrono-wormhole.md, legends-web-attacks.md, legends-web-swing.md): delete them, only legends-big-symbiote.md may stay, or Release logs them twice and bumps 3 extra versions. (2) WebBruteClient.DEFAULTS[0] = KEY_F1 is vanilla Hide GUI (Options.keyToggleGui = 58); pick another free key, and list every KeyMapping/InputConstants.KEY_ default found in Powers, Kingdoms, Kitchen and vanilla Options in the PR body, as the brief asked. (3) WebSymbiote ~1007: the STRUGGLE javadoc was copied, not moved; delete the copy above BEAT_PERIOD. (4) WebSymbiote 4798: a lone '/**' is left above exhaustBulk's doc; delete it. (5) WebBruteMovement.wall() dot>0.5 runs every climbing tick, so turning away to aim a wall leap drops you (or mantles); apply the facing check only when a climb starts (climbTicks == 0). (6) hk_losing: during the rhythm takeover off-beat Shift presses cost nothing, so tapping Shift ~3 times a second scores +4 every beat, same as perfect timing; add a cost for an off-beat press (e.g. it spends that pulse or drains struggle) so timing beats mashing, and put the real masher-vs-timer maths in the PR. (7) WebBruteArts.tickFlying/tickStone use the owner's player.level() and foes(player...): after a dimension change, stones check collision and POUND hits in the wrong world; tick and hit in the stone body's own level and drop the owner's stones when the owner's level differs. (8) Five fixes landed in one commit; the brief asked for one commit each (do the new fixes as separate commits). Read review-lessons.md 30-36. Build compileClientJava, run tools/pr_checks.py, push to hermes/legends-p3, then status=in-review.
+- 2026-11-27 10:25 Claude thread fixed the review findings itself (Andy: 'finish both here') in 31be1a710d on #2281; CI green, ready to merge.
+- 2026-11-27 10:34 2026-11-27 10:35 The Claude thread owns the rest of this (Andy: 'finish the entire plan here'). Bots: stop pushing to hermes/legends-p3.

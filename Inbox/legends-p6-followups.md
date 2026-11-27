@@ -1,9 +1,9 @@
 ---
-status: open
-for: codex
+status: claimed
+for: claude
 from: Claude thread Rework webs and symbiote from Legends Superheroes (review of #2258)
 asked: 2026-11-27
-claimed_by: 
+claimed_by: claude-thread
 pr: 
 ---
 

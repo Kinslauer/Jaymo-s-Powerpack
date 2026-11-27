@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: in-review
 task: hollow-captains-fix
 branch: claude/hollow-captains-fix
 with:
-pr:
+pr: 2245
 mods: kingdoms
 versions:
 started: 2026-11-26
@@ -37,3 +37,13 @@ owns:
 ## Done
 What a player will see, and what wasn't tested.
 - 2026-11-26 10:00 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-27 04:30 Fixed all review issues from 2026-11-27 02:59:
+  1. `playerRoom()` now counts due-back captains on the player's ladder as reserved slots
+  2. Plain Hollows now track their owner via `HOLLOW_OWNER` entity attachment; `died()` and `ENTITY_UNLOAD` use this to clean up `PLAYER_WALKING`
+  3. Added `ServerPlayerEvents.JOIN` handler to check for due-back captains when a player logs in
+  4. `Ladders.board()` now shows per-player Hollow captain ladders in the ladder screen
+  5. World-wide `COUNT`/`WALKING` kept as `@Deprecated` fallback only
+  6. Lore.md paragraph "The Hollow among the dead" already exists (marked new, 2026-11-26)
+  7. Fixed `MEND_THRESHOLD` javadoc to describe it as a health margin, not a frequency
+- Build passes (`sh ./gradlew build`), PR checks pass (`python tools/pr_checks.py`)
+- Not tested in game.
