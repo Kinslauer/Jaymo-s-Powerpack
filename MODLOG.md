@@ -9000,3 +9000,9 @@ Deviations from the plan:
   borne freely (100 points: +50 kg), read from Kingdoms' `Stats.carryKg` by reflection.
 - `PackWeight` (BASE_KG, BACKPACK_KG, BLOCK_KG, BLOCK_HARDNESS_KG, BLOCK_MOST_KG, new INSTANT_BLOCK_KG, endurance).
 - Built; not played.
+
+## 0.28.36 (2026-11-27): webbed tip card, captive escape hints carded (#2323)
+
+- **Webbed** tip card (BodyTips, once per player): the first time you're webbed up (as you wake in a spider's lair, or any web hold), a card says to tap the walking keys to tear it off a layer at a time, and that a blade cuts a layer and fire burns it all away.
+- `hint_keys.txt`: Kingdoms' nine new captive escape hints (`captive_tip.jaymoskingdoms.*`) come up as tip cards.
+- Built; not played.
