@@ -17,6 +17,6 @@ abstract class WebLivingEntityMixin {
 	private float jaymospowers$pinned(float damage, ServerLevel level, DamageSource source, float original) {
 		LivingEntity entity = (LivingEntity)(Object)this;
 		float amount = WebStrength.modifyDamage(entity, damage);
-		return source.is(DamageTypeTags.IS_FALL) ? amount : amount * WebBruteArts.damageScale(entity);
+		return source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) ? amount : amount * WebBruteArts.damageScale(entity);
 	}
 }

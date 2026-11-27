@@ -1004,13 +1004,10 @@ public final class WebSymbiote {
 		return until != null && player.level().getGameTime() < until;
 	}
 
-	/**
-	 * A takeover has you: present the whole time, holding how far your struggle bar is filled (0-1, in steps of
-	 * {@link #STRUGGLE_SYNC_STEP}). Synced to everyone: the suit visibly peels back off you as it fills (WebSuitGrowth).
-	 */
+	/** Ticks between the rhythm struggle's pulses; a press within {@code BEAT_WINDOW} of one is on the beat. */
 	public static final int BEAT_PERIOD = 16;
 	private static final int BEAT_WINDOW = 3;
-	private static final float BEAT_PRESS = 4.0F, BEAT_FADE = 0.035F;
+	private static final float BEAT_PRESS = 4.0F, BEAT_MISS = 3.0F, BEAT_FADE = 0.035F;
 	public static final AttachmentType<Long> RHYTHM = AttachmentRegistry.create(JaymosPowers.id("web_brute_rhythm"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
 
@@ -3524,7 +3521,13 @@ public final class WebSymbiote {
 		if (rhythm != null) {
 			long age = now - rhythm;
 			long pulse = Math.floorDiv(age + BEAT_WINDOW, BEAT_PERIOD);
-			if (!sneak || live.rhythmLevel != player.level() || !beat(age) || pulse == live.lastBeat) {
+			if (live.rhythmLevel != player.level()) {
+				return;
+			}
+			if (!sneak || !beat(age) || pulse == live.lastBeat) {
+				// a press off the beat (or a second one on the same beat) costs progress, so timing beats mashing
+				live.struggle = Math.max(0.0F, live.struggle - BEAT_MISS);
+				syncStruggle(player, live);
 				return;
 			}
 			live.lastBeat = pulse;
@@ -4795,7 +4798,6 @@ public final class WebSymbiote {
 		return false;
 	}
 
-	/**
 	/** Spending the big body leaves its bonded armour on. */
 	static void exhaustBulk(ServerPlayer player) {
 		Live live = live(player);

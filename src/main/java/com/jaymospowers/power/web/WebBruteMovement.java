@@ -79,7 +79,7 @@ public final class WebBruteMovement {
 				return;
 			}
 			Vec3 out = entity.position().subtract(player.position()).horizontal().normalize();
-			WebBruteArts.velocity(entity, entity.getDeltaMovement().add(out.scale(0.9)).add(0, 0.22, 0));
+			WebBruteArts.shove(entity, entity.getDeltaMovement().add(out.scale(0.9)).add(0, 0.22, 0));
 			if (WebPin.pinnable(player, entity) && !Tripped.sweep(entity, 18)) {
 				entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 18, 3));
 			}
@@ -208,7 +208,7 @@ public final class WebBruteMovement {
 			return false;
 		}
 		AABB box = player.getBoundingBox();
-		Vec3 out = wall(player, box);
+		Vec3 out = wall(player, box, motion.climbTicks > 0 ? motion.wall : null);
 		if (motion.climbTicks > 0 && input.shift()) {
 			motion.climbTicks = 0;
 			motion.wallGrace = now + 14;
@@ -267,7 +267,11 @@ public final class WebBruteMovement {
 		return true;
 	}
 
-	private static @Nullable Vec3 wall(ServerPlayer player, AABB box) {
+	/**
+	 * The wall within reach. Starting a climb needs you facing it; once climbing, the wall you are on is kept
+	 * whichever way you turn to aim the leap off it.
+	 */
+	private static @Nullable Vec3 wall(ServerPlayer player, AABB box, @Nullable Vec3 held) {
 		Vec3 facing = WebBruteArts.heading(player);
 		Vec3 best = null;
 		double score = Double.NEGATIVE_INFINITY;
@@ -279,6 +283,12 @@ public final class WebBruteMovement {
 				continue;
 			}
 			double dot = toward.dot(facing);
+			if (held != null) {
+				if (toward.dot(held) < -0.5) {
+					return held;
+				}
+				continue;
+			}
 			if (dot > 0.5 && dot > score) {
 				best = toward.scale(-1);
 				score = dot;
