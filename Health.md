@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 04:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 04:50). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
@@ -9,7 +9,7 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 
 - [[Inbox/structures-3-aqueduct-curse-design|structures-3-aqueduct-curse-design]]: `status: (none)` (known: blocked, changes, claimed, done, in-review, open, ready, sent, writing)
 - [[Agents/corpse-limbs-drag-arm-digger-pits|corpse-limbs-drag-arm-digger-pits]]: `status: stopped` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
-- [[Agents/legends-p3-morning|legends-p3-morning]]: `status: waiting` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
+- [[Agents/legends-p3-morning|legends-p3-morning]]: `status: changes` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 
 ## Stalled agent notes
 
