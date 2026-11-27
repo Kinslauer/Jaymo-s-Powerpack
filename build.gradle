@@ -56,6 +56,12 @@ def packMods = [
 	// Better Combat (animated weapon swings and combos; its fallback rules cover Balkon's weapons by name) and its library
 	[dep: "maven.modrinth:better-combat:8Vyq1h9a", cf: [639842, 8906536]],
 	[dep: "maven.modrinth:player-animation-library:xJ30QmpE", cf: [1283899, 9080979]],
+	// Combo Clash 1.0.4 (HanHoYoung; all rights reserved, custom licence: its unmodified jar may go in a free modpack whose
+	// page credits "Combo Clash" by HanHoYoung; never copied, changed or re-hosted, fetched by CurseForge from its own page).
+	// Andy (2026-11-27): "pretty much the EXACT combat system i am after": its combat mode (` key) gives the 4-hit M1
+	// strings, uppercuts, downslams, block, perfect block, dashes and the evasive. Our side, by reflection only:
+	// compat/ComboClashCompat and client/compat/ComboClashClient (our swings, Alt dodge and poses step aside in its mode).
+	[dep: "curse.maven:combo-clash-1823955:9844958", cf: [1823955, 9844958]],
 	// the extras from the friends' server (Modrinth version ids, matched by file hash)
 	[dep: "maven.modrinth:pantry-for-blockheads:JsGFynFi", cf: [1514716, 8893586]],
 	[dep: "maven.modrinth:natures-compass:pHan4UQ9", cf: [252848, 8916820]],

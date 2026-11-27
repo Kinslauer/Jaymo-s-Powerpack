@@ -36,8 +36,11 @@ final class KeyConflicts {
 	 * 2026-11-24); it comes off T (unbound, its settings are in Mod Menu).
 	 * v13: Dibs! (a CC0 pick) locates a bound villager's bed or workstation on V, the third ability key; it comes off V
 	 * (unbound, Controls can set it again).
+	 * v14: Combo Clash (shipped unchanged) puts its combat mode on G, the second ability key, so it goes on the grave key
+	 * (`, left of 1); its dash and evasive go from Q (drop) on to Left Alt, our dodge key, which steps aside in its combat
+	 * mode ({@code ComboClashClient}); its "Move HUD" key comes off H, the character menu (unbound, Controls can set it).
 	 */
-	private static final String MARKER = "jaymospowers-keys-v13";
+	private static final String MARKER = "jaymospowers-keys-v14";
 
 	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from} (or one of several, split by |). */
 	private record Move(String from, String to) {
@@ -65,7 +68,10 @@ final class KeyConflicts {
 		Map.entry("key.takeaseat.sit", new Move("key.keyboard.x", "key.keyboard.unknown")),
 		Map.entry("key.autohud.toggle-hud", new Move("key.keyboard.h", "key.keyboard.unknown")),
 		Map.entry("key.tacz.open_config.desc", new Move("key.keyboard.t", "key.keyboard.unknown")),
-		Map.entry("key.dibs.locate_owner", new Move("key.keyboard.v", "key.keyboard.unknown")));
+		Map.entry("key.dibs.locate_owner", new Move("key.keyboard.v", "key.keyboard.unknown")),
+		Map.entry("key.comboclash.toggle", new Move("key.keyboard.g", "key.keyboard.grave.accent")),
+		Map.entry("key.comboclash.dash", new Move("key.keyboard.q", "key.keyboard.left.alt")),
+		Map.entry("key.comboclash.hud", new Move("key.keyboard.h", "key.keyboard.unknown")));
 
 	/**
 	 * Bump to set JEI's hover keys again. v1 (0.11.15): showRecipe had come unbound in Andy's profile. v2 (0.11.31):
