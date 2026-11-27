@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 03:10
+updated: 2026-11-27 04:38
 ---
 # Open PRs
 
-13 open, as of 2026-11-27 03:10. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+14 open, as of 2026-11-27 04:38. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -27,13 +27,13 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[realistic-pathable-archery-positions]]
 
 ## [#2222](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2222) Court wizard creeper ward: prevents, rewinds, weakens and repels creepers over a kingdom's plot
-- **Branch:** `claude/court-wizard-creeper-ward` · **Updated:** 2026-11-26 (today)
+- **Branch:** `claude/court-wizard-creeper-ward` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
 ## [#2245](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2245) Hollow captains: 12 per player, own ladders, intersecting captains
-- **Branch:** `claude/hollow-captains-fix` · **Updated:** 2026-11-26 (today)
-- **Checks:** ✅ 5 passed
+- **Branch:** `claude/hollow-captains-fix` · **Updated:** 2026-11-27 (today)
+- **Checks:** ❌ failing: Build Kingdoms
 - **Agent:** no agent note
 
 ## [#2248](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2248) Let changelings mimic players' voices while stalking
@@ -70,3 +70,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/small-armies-picks-4` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
+
+## [#2281](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2281) Legends Patch 3: big symbiote, five review fixes
+- **Branch:** `hermes/legends-p3` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[legends-p3-big-symbiote]]
