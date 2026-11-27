@@ -12,6 +12,7 @@
   "gui.jaymoskingdoms.eyes.focus.target": "fighting %s",
   "gui.jaymoskingdoms.eyes.focus.walking": "walking to %s %s %s",
   "gui.jaymoskingdoms.eyes.thinking": "Thinking: picking what to do next",
+  "gui.jaymoskingdoms.eyes.sizing_up": "Thinking: sizing up %1$s (%2$s s left)",
   "gui.jaymoskingdoms.eyes.replanning": "Thinking: re-planning its path (%1$s new paths in %2$s s)",
   "gui.jaymoskingdoms.eyes.stuck": "Stuck: %s s without getting anywhere",
   "gui.jaymoskingdoms.eyes.stuck_climbing": "Stuck: %s s without getting anywhere, climbing",

@@ -1021,18 +1021,26 @@ public final class Senses {
 					// (stopped to listen for you: the eye half fills)
 					state = NOTICING;
 					fill = Math.max(fill, FILL_STEPS / 2);
-				} else if (mob instanceof Enemy) {
-					if (state <= NOTICING) {
-						int f = noticing(level, mob, player);
-						if (f > 0) {
-							state = NOTICING;
-							fill = Math.max(fill, f);
-						}
+				} else {
+					// (ThinkFirst) it has picked you out and is making up its mind: the eye fills over that second
+					double thinking = ThinkFirst.share(mob, player);
+					if (thinking > 0.0 && state <= NOTICING) {
+						state = NOTICING;
+						fill = Math.max(fill, Math.max(1, (int) Math.round(thinking * FILL_STEPS)));
 					}
-					if (sneaking && past < 2 && mob.getTarget() == null) {
-						double d = mob.distanceTo(player);
-						if (d < SNEAK_PAST_RANGE && mob.hasLineOfSight(player)) {
-							past = Math.max(past, d < SNEAK_PAST_CLOSE ? 2 : 1);
+					if (mob instanceof Enemy) {
+						if (state <= NOTICING) {
+							int f = noticing(level, mob, player);
+							if (f > 0) {
+								state = NOTICING;
+								fill = Math.max(fill, f);
+							}
+						}
+						if (sneaking && past < 2 && mob.getTarget() == null) {
+							double d = mob.distanceTo(player);
+							if (d < SNEAK_PAST_RANGE && mob.hasLineOfSight(player)) {
+								past = Math.max(past, d < SNEAK_PAST_CLOSE ? 2 : 1);
+							}
 						}
 					}
 				}
