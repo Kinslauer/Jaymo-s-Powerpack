@@ -79,6 +79,11 @@ public final class Leaves {
 		return state.getBlock() instanceof LeavesBlock;
 	}
 
+	/** Leaves, or an aercloud or cloudbank: soft as leaves too ({@link com.jaymospowers.aether.AercloudBlock}). */
+	public static boolean soft(BlockState state) {
+		return is(state) || state.getBlock() instanceof com.jaymospowers.aether.AercloudBlock;
+	}
+
 	/** Whether this collision is an entity that goes through leaves (not a projectile, falling block, or no entity at all). */
 	public static boolean passesThrough(CollisionContext context) {
 		if (!(context instanceof EntityCollisionContext entityContext)) {
@@ -138,15 +143,19 @@ public final class Leaves {
 		entity.fallDistance *= CUSHION;
 	}
 
-	/** The leaves snap: broken (dropping what leaves drop), with a crack of twigs and a burst of leaf debris. */
+	/**
+	 * The leaves snap: broken (dropping what leaves drop), with a crack of twigs and a burst of leaf debris. A cloud bursts
+	 * the same way, with a soft whump, and leaves nothing behind.
+	 */
 	private static void crash(ServerLevel level, BlockPos pos, Entity entity) {
 		BlockState state = level.getBlockState(pos);
-		if (!is(state)) {
+		if (!soft(state)) {
 			return;
 		}
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
 			CRASH_DEBRIS, 0.4, 0.4, 0.4, 0.15);
-		level.playSound(null, pos, SoundEvents.BAMBOO_WOOD_BREAK, SoundSource.BLOCKS, 0.9F, 0.7F + level.getRandom().nextFloat() * 0.3F);
+		level.playSound(null, pos, is(state) ? SoundEvents.BAMBOO_WOOD_BREAK : SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 0.9F,
+			0.7F + level.getRandom().nextFloat() * 0.3F);
 		level.destroyBlock(pos, true, entity);
 	}
 }

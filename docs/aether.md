@@ -49,10 +49,12 @@ tracks C/D (see the design notes).
 - **Enchanted Gravitite** (iron pickaxe, hardness 5.0; smelt gravitite ore): floats only while powered by redstone,
   and comes down as an item rather than a block.
 
-**Aerclouds** [AercloudBlock, BlueAercloudBlock] (translucent, wool sound, hardness 0.3; drop themselves)
-- **Cold** (white) and **Golden**: only a hair-thin plate is solid, so you sink into the cloud and stand in it. Inside,
-  your fall is forgotten and cut to 0.5% a tick, and there is never fall damage on any aercloud. Falling faster than
-  a 2.5-block fall they become a 0.9-tall box and you land on top. Stacked clouds are one solid block.
+**Aerclouds** [AercloudBlock, BlueAercloudBlock] (translucent and see-through from inside, wool sound, hardness 0.2;
+broken, they drop nothing)
+- **Cold** (white) and **Golden**: soft as leaves (`core/Leaves`). Players, mobs and animals sink slowly down through
+  them, wade through them and climb up through them holding Jump; a hard fall or a fast flight crashes through and the
+  cloud bursts into nothing. Inside, your fall is forgotten, and there is never fall damage on any aercloud. Arrows and
+  falling blocks still meet a hair-thin plate at the bottom (stacked clouds, a whole block). Mobs path through clouds.
 - **Blue** (sky blue): nothing to stand on; anything sinking into it is flung up at 2 blocks/tick with a splash and a
   boing, unless sneaking (then it is a cold cloud).
 
@@ -141,7 +143,7 @@ does.
 - **Storm Aercloud** [StormAercloudBlock]: dark grey, crackles; inside it you take 1 lightning damage every 40 ticks.
 
 **Building** [AetherBlocks.initBuilding]
-- **Cloudwool** (2 from 2x2 cold aercloud) and **Cloudwool Carpet**, in white and the 16 dyes (dye one piece of
+- **Cloudwool** (2 from 2x2 cold aercloud, which only creative can hand out now that clouds drop nothing) and **Cloudwool Carpet**, in white and the 16 dyes (dye one piece of
   cloudwool); they are in the vanilla `wool` and `wool_carpets` tags.
 - **Arkenium Lantern** (a lantern around an ambrosium torch, light 15), **Arkenium Chain**, **Arkenium Bars** (iron
   bars' shapes, from inert arkenium), all in the vanilla `lanterns`/`chains`/`bars` tags.
@@ -273,11 +275,11 @@ the Aether (`compat/OneDimensionDefaults`: high sky, Aether, Cloud Sea, Overworl
 ground, no mobs, no structures. New worlds only; a world keeps the stack it was made with.
 
 - **Cloudbank** (`CloudbankBlock`): a cold aercloud that daylight passes straight down through, so the sky under the
-  overcast stays bright. One layer you sink into and stand in; two deep is solid.
+  overcast stays bright. Soft as every aercloud: you sink down through it.
 - **Low banks**: loose clouds about 72 blocks up the band, over about a quarter of the sky.
 - **The overcast**: one bank about 184 blocks up (between 166 and 202), 6 to 22 thick, with wells through about 6% of
-  it. From underneath it is a ceiling (find a well, or dig); from on top it is a floor, and it catches most of what
-  falls off the Aether. Dropping on out of the band's floor gives Slow Falling as leaving the Aether did (`WindAether`).
+  it. From underneath you climb up through it holding Jump; from on top you sink slowly through it, and it breaks the
+  fall of whoever drops off the Aether. Dropping on out of the band's floor gives Slow Falling as leaving the Aether did (`WindAether`).
 - **Veils** (`client/aether/AetherVeil`): under the Overworld's clouds neither the Cloud Sea nor the Aether is drawn;
   above them the Cloud Sea is; the Aether only once the camera is above the overcast.
 - All of it is world generation data written by `tools/gen_cloud_sea.py` (heights, cover, thickness, wells at the top).

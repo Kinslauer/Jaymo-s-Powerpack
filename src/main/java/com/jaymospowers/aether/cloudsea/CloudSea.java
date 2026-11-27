@@ -13,8 +13,8 @@ import net.minecraft.world.level.Level;
  * <ul>
  * <li>Low down, loose banks of cloud drift about {@value #LOW_DECK} blocks up.</li>
  * <li>Near the top lies the overcast, about {@value #OVERCAST} blocks up: one bank from horizon to horizon with a few wide
- * wells through it. Cloudbank ({@link CloudbankBlock}) two deep is solid, so from underneath the overcast is a ceiling: you
- * find a well, or dig. From on top it is a floor that catches whoever falls off the Aether.</li>
+ * wells through it. Cloudbank ({@link CloudbankBlock}) is soft as leaves: from underneath you climb up through the overcast
+ * holding Jump, and from on top you sink slowly through it, so it breaks the fall of whoever drops off the Aether.</li>
  * <li>The Aether stays out of sight until you are over the overcast ({@code client/aether/AetherVeil}), and the Cloud Sea
  * itself until you are over the Overworld's own clouds.</li>
  * </ul>

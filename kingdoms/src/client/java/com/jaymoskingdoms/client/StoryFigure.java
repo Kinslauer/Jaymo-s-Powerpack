@@ -340,6 +340,17 @@ final class StoryFigure {
 		return job;
 	}
 
+	/** What the fair dresses the one it raised in (the last upbringing among {@code scenes}), or nothing. */
+	private static List<ItemStack> fairWear(List<String> scenes) {
+		List<ItemStack> wear = List.of();
+		for (String scene : scenes) {
+			if (scene.startsWith("raised.")) {
+				wear = com.jaymoskingdoms.HeraldryWear.fairWear(scene.substring("raised.".length()));
+			}
+		}
+		return wear;
+	}
+
 	/**
 	 * You in the box {@code x0,y0}-{@code x1,y1}, as heritage {@code kind}'s look {@code look} (null: as you are),
 	 * playing {@code scenes} ({@code question.answer} each, built up in order: {@link #compose}; {@code icon} the last
@@ -425,6 +436,19 @@ final class StoryFigure {
 			was[i] = target.getItemBySlot(slots[i]);
 			wear(target, slots[i], gear[i] == null ? ItemStack.EMPTY : new ItemStack(gear[i]));
 		}
+		// whoever the fair raised wears its dress over the trade's clothes, as the story will put it on them (HeraldryWear.fairWear)
+		List<ItemStack> fair = sc.bare() ? List.of() : fairWear(scenes);
+		List<ItemStack> harnessWas = fair.isEmpty() ? null : target.getAttached(com.jaymoskingdoms.Harness.WORN);
+		if (!fair.isEmpty()) {
+			List<ItemStack> lent = new java.util.ArrayList<>(com.jaymoskingdoms.Harness.worn(target));
+			for (ItemStack piece : fair) {
+				com.jaymoskingdoms.Harness.Slot place = com.jaymoskingdoms.Harness.slotOf(piece);
+				if (place != null) {
+					lent.set(place.ordinal(), piece);
+				}
+			}
+			target.setAttached(com.jaymoskingdoms.Harness.WORN, List.copyOf(lent));
+		}
 		// (0.7.364) a lost limb lent while drawn (Powers draws a body without its lost parts), and your own clothes taken off
 		// for a bare scene
 		AttachmentType<Integer> missingType = sc.missing() != 0 ? missingType() : null;
@@ -489,6 +513,9 @@ final class StoryFigure {
 			}
 			if (missingType != null) {
 				restore(target, missingType, missingWas);
+			}
+			if (!fair.isEmpty()) {
+				restore(target, com.jaymoskingdoms.Harness.WORN, harnessWas);
 			}
 			if (dress != null) {
 				dress.run();

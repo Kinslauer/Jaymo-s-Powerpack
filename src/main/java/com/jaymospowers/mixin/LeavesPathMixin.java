@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 abstract class LeavesPathMixin {
 	@Inject(method = "getPathTypeFromState", at = @At("HEAD"), cancellable = true)
 	private static void jaymospowers$softLeaves(BlockGetter level, BlockPos pos, CallbackInfoReturnable<PathType> cir) {
-		if (Leaves.is(level.getBlockState(pos))) {
+		if (Leaves.soft(level.getBlockState(pos))) {
 			cir.setReturnValue(PathType.OPEN);
 		}
 	}

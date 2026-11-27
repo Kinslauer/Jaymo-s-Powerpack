@@ -577,8 +577,8 @@ def make_blocks():
     # (Patch 9) see-through, so a pod's pilot sees the isles and the sky below through the cloud they climb through
     t["cold_aercloud"] = cloud("cold_aercloud", ramp("ffffff", "eef3fa", "dde6f2"), [150, 130, 115])
     t["cloudbank"] = cloud("cold_aercloud", ramp("ffffff", "eef3fa", "dde6f2"), [105, 90, 75])
-    t["blue_aercloud"] = cloud("blue_aercloud", ramp("c6e4ff", "a8d3fb", "8dc2f2"), [225, 205, 185])
-    t["golden_aercloud"] = cloud("golden_aercloud", ramp("fff3b8", "ffe58c", "f6d266"), [225, 205, 185])
+    t["blue_aercloud"] = cloud("blue_aercloud", ramp("c6e4ff", "a8d3fb", "8dc2f2"), [150, 130, 115])
+    t["golden_aercloud"] = cloud("golden_aercloud", ramp("fff3b8", "ffe58c", "f6d266"), [150, 130, 115])
     t["skyroot_log"] = bark("skyroot_log", GREY_GREEN_BARK)
     t["skyroot_log_top"] = log_top("skyroot_log_top", GREY_GREEN_BARK, SKYROOT_RING)
     t["stripped_skyroot_log"] = bark("stripped_skyroot_log", STRIPPED)
@@ -821,8 +821,11 @@ def loot():
     for b in ["holystone", "mossy_holystone", "holystone_bricks", "aether_dirt", "quicksoil", "icestone", "gravitite_ore", "enchanted_gravitite",
               "ambrosium_block", "zanite_block", "skyroot_log", "skyroot_wood", "stripped_skyroot_log", "stripped_skyroot_wood",
               "skyroot_planks", "skyroot_sapling", "golden_oak_sapling", "white_flower", "purple_flower", "ambrosium_torch",
-              "berry_bush_stem"] + CLOUDS:
+              "berry_bush_stem"]:
         tables[b] = self_table(b)
+    # clouds are soft as leaves: broken, they come apart into nothing (Andy: "you shouldnt be able to break the block and grab it at all")
+    for b in CLOUDS:
+        tables[b] = table(b, [])
     tables["aether_grass_block"] = silk_else("aether_grass_block", jp("aether_dirt"))
     tables["enchanted_aether_grass_block"] = silk_else("enchanted_aether_grass_block", jp("aether_dirt"))
     tables["quicksoil_glass"] = table("quicksoil_glass", [{"rolls": 1, "condition": SILK, "entries": [item_entry(jp("quicksoil_glass"))]}])
@@ -1274,7 +1277,7 @@ def puffy(name, tint=None):
 
 def cloud_front(name, base, arrow):
     """The purple aercloud's fling face: its cloud with an arrow in it."""
-    im = cloud(name, base, [225, 205, 185])
+    im = cloud(name, base, [150, 130, 115])
     px = im.load()
     for x, y in [(7, 3), (8, 3), (6, 4), (7, 4), (8, 4), (9, 4), (5, 5), (6, 5), (7, 5), (8, 5), (9, 5), (10, 5), (7, 6), (8, 6), (7, 7), (8, 7),
                  (7, 8), (8, 8), (7, 9), (8, 9), (7, 10), (8, 10), (7, 11), (8, 11)]:
@@ -1459,10 +1462,10 @@ def n1_make_blocks():
                                        ramp("8a520a", "a0620d"), hx("ffe9a0"))
     t["gravitite_block"] = bordered("gravitite_block", ramp("f7a8e0", "ea82ca"), ramp("b8409a", "a8358a", "c84daa", "982c7c"),
                                     ramp("70154f", "82205f"), hx("ffc4ee"))
-    t["green_aercloud"] = cloud("green_aercloud", ramp("c9f5c3", "a6e89e", "86d67e"), [225, 205, 185])
-    t["purple_aercloud"] = cloud("purple_aercloud", ramp("e2c9ff", "cba6f2", "b387e0"), [225, 205, 185])
+    t["green_aercloud"] = cloud("green_aercloud", ramp("c9f5c3", "a6e89e", "86d67e"), [150, 130, 115])
+    t["purple_aercloud"] = cloud("purple_aercloud", ramp("e2c9ff", "cba6f2", "b387e0"), [150, 130, 115])
     t["purple_aercloud_front"] = cloud_front("purple_aercloud_front", ramp("e2c9ff", "cba6f2", "b387e0"), hx("6f3db8"))
-    t["storm_aercloud"] = cloud("storm_aercloud", ramp("7c8290", "666c7a", "525866"), [235, 220, 205])
+    t["storm_aercloud"] = cloud("storm_aercloud", ramp("7c8290", "666c7a", "525866"), [175, 155, 140])
     for dye, rgb in DYES:
         if dye == "white":
             t["cloudwool"] = puffy("cloudwool")
@@ -1836,6 +1839,8 @@ def n1_loot():
         tables[b] = self_table(b)
     for b, drop in N1_ORES.items():
         tables[b] = silk_else(b, drop, ORE_BONUS)
+    for b in ("green_aercloud", "purple_aercloud", "storm_aercloud"):
+        tables[b] = table(b, [])
     for b in N1_SILK_ONLY:
         tables[b] = table(b, [{"rolls": 1, "condition": SILK, "entries": [item_entry(jp(b))]}])
     for b in N1_SOIL_DROPS_DIRT:
