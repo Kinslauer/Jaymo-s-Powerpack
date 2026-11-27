@@ -387,8 +387,8 @@ public final class WeaponSense {
 	 */
 	private static void pick(ServerLevel level, Mob mob, LivingEntity foe, State s, double d, long now) {
 		s.rushed = false;
-		if (mob instanceof Pillager) {
-			// (one weapon: the crossbow)
+		if (mob instanceof Pillager && !Sidearms.ready(mob) && !Sidearms.drawn(mob)) {
+			// (one weapon: the crossbow, unless it carries a backup at its belt: Sidearms)
 			return;
 		}
 		ItemStack main = mob.getMainHandItem();

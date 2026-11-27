@@ -405,6 +405,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rearm.register();
 		// ranged NPCs' sidearms, and what they carry shown on their bodies
 		Sidearms.register();
+		// NPCs' pockets: a search screen on the downed, dropped when they die
+		NpcPockets.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
 		Casting.register();

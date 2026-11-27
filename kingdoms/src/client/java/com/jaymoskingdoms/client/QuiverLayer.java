@@ -28,9 +28,9 @@ import org.jspecify.annotations.Nullable;
  * Andy: "skeletons should carry tattered quivers". Every bow skeleton (skeleton, stray, bogged, parched) wears a
  * {@link MobAmmo#TATTERED_QUIVER} slung across its back, arrows over the shoulder; how many it has left is
  * {@link MobAmmo}'s count.
- * <p>NPC archers too (Andy, 2026-11-27: "you should be able to see what npcs have equipped"): a guard, camp fighter or
- * villager with a bow or crossbow and arrows left ({@link Sidearms#QUIVER}, synced) wears one over the left shoulder, clear
- * of a bow slung across the right.
+ * <p>NPC archers too (Andy, 2026-11-27: "you should be able to see what npcs have equipped"; "we have actual quivers they can
+ * wear"): a guard, camp fighter or villager with a bow or crossbow and arrows left wears a real quiver, the one the server
+ * says ({@link Sidearms#QUIVER}, synced), over the left shoulder, clear of a bow slung across the right.
  */
 public final class QuiverLayer {
 	/** The skeletons that carry one (the wither skeleton fights with a sword). */
@@ -40,8 +40,8 @@ public final class QuiverLayer {
 	/** An NPC archer's: over the left shoulder (model pixels across, to the body's left), tipped out a little (degrees). */
 	static final float NPC_ACROSS = 2.0F, NPC_SLANT = 15.0F;
 
-	/** On an NPC archer's render state: it wears a quiver ({@link #extract}). */
-	static final RenderStateDataKey<Boolean> WORN = RenderStateDataKey.create(() -> "jaymoskingdoms:npc_quiver");
+	/** On an NPC archer's render state: the quiver it wears ({@link #extract}). */
+	static final RenderStateDataKey<ItemStack> WORN = RenderStateDataKey.create(() -> "jaymoskingdoms:npc_quiver");
 
 	/**
 	 * Jaymo's Powers (optional) draws a severed head or limb as the whole body with only that part showing, marking its
@@ -80,7 +80,8 @@ public final class QuiverLayer {
 
 	/** From the living renderer's extractRenderState: whether this NPC wears an archer's quiver. */
 	public static void extract(net.minecraft.world.entity.LivingEntity entity, net.minecraft.client.renderer.entity.state.LivingEntityRenderState state) {
-		state.setData(WORN, Boolean.TRUE.equals(entity.getAttached(Sidearms.QUIVER)) ? Boolean.TRUE : null);
+		ItemStack quiver = entity.getAttached(Sidearms.QUIVER);
+		state.setData(WORN, quiver == null || quiver.isEmpty() ? null : quiver);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -100,12 +101,13 @@ public final class QuiverLayer {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
-			boolean npc = !this.skeleton && state.getData(WORN) != null;
+			ItemStack worn = this.skeleton ? null : state.getData(WORN);
+			boolean npc = worn != null;
 			if (state.isInvisible || severedPart(state) || !this.skeleton && !npc) {
 				return;
 			}
 			Minecraft minecraft = Minecraft.getInstance();
-			minecraft.getItemModelResolver().updateForTopItem(this.quiver, new ItemStack(MobAmmo.TATTERED_QUIVER), ItemDisplayContext.FIXED,
+			minecraft.getItemModelResolver().updateForTopItem(this.quiver, npc ? worn : new ItemStack(MobAmmo.TATTERED_QUIVER), ItemDisplayContext.FIXED,
 				minecraft.level, null, 0);
 			HumanoidModel<S> model = this.getParentModel();
 			poseStack.pushPose();

@@ -11,7 +11,15 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.illager.Pillager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,21 +48,33 @@ import net.minecraft.world.item.ShieldItem;
  * gun goes onto the belt (slung) in its place, and comes back once the foe is clear or the fight is over. A gun is never used
  * as a club: a gunner out of shot fights with the sidearm too. A gun with a bayonet fixed keeps its bayonet. The swap trades
  * two stacks between the hand and the belt: nothing is made or lost, and never the very stack an MCA villager's pack holds.</li>
- * <li><b>Going down or dying</b> with the sidearm out, the bow or gun goes back to hand first ({@link #sheathe}); a player
- * taking a downed body's weapons takes the belt's too ({@code Downed}). The sidearm itself is never dropped on death.</li>
+ * <li><b>Going down or dying</b> with the sidearm out, the bow or gun goes back to hand first ({@link #sheathe}). The belt is
+ * on a downed body's search screen with its pockets, and drops with its gear when it dies, onto the body's loot screen
+ * ({@link NpcPockets}).</li>
+ * <li><b>Gunners</b> (Andy, 2026-11-27: "gunners should be able to pick up weapons they find and keep at least an extra sword in
+ * their inventory. they dont use shields"): a gunner's sidearm is a sword ({@link #GUNNER_IRON}); one without a sword at the
+ * belt (none given yet, his taken, only a dagger) walks to a blade lying near when no foe is close and takes it up
+ * ({@link #scavenge}: a sword before anything else), what was at the belt going into his pack or at his feet; and a shield in
+ * his hand goes into his pack (and isn't shown on him).</li>
+ * <li><b>Pillagers</b> (Andy: "they should carry backup weapons too, and use the vindicator's animations for melee"): an
+ * iron axe at the belt, drawn as any shooter's is, and fought with by {@link BackupMelee}, in the vindicator's attacking pose
+ * (the game draws an aggressive pillager without a crossbow that way).</li>
  * <li><b>On the body</b> ({@link #show}): what an NPC carries but doesn't hold (the belt's, then the weapons and a shield in an
  * MCA villager's pack) is handed to Jaymo's Powers, which hangs up to three of them in their places, as it does a player's
- * (a blade at the hip, a bow or gun on the back); and an archer with arrows wears a quiver ({@link #QUIVER},
- * {@code client/QuiverLayer}).</li>
+ * (a blade at the hip, a bow or gun on the back); and an archer with arrows wears a real quiver ({@link #QUIVER}: the
+ * Archers' quivers for a realm's, Jaymo's Kitchen's for anyone else; {@code client/QuiverLayer}).</li>
  * </ul>
  */
 public final class Sidearms {
 	/** The weapon at the belt: the sidearm, or (while the sidearm is out) the slung bow or gun. Saved; empty when none. */
 	public static final AttachmentType<ItemStack> BELT = AttachmentRegistry.create(JaymosKingdoms.id("sidearm"),
 		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC));
-	/** On an NPC archer with arrows left: true, synced to everyone (a quiver is drawn on its back). */
-	public static final AttachmentType<Boolean> QUIVER = AttachmentRegistry.create(JaymosKingdoms.id("quiver_shown"),
-		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** On an NPC archer with arrows left: the quiver it wears, synced to everyone (drawn on its back). Its look only. */
+	public static final AttachmentType<ItemStack> QUIVER = AttachmentRegistry.create(JaymosKingdoms.id("quiver_worn"),
+		builder -> builder.syncWith(ItemStack.OPTIONAL_STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** The quivers, first found worn: a realm's archers (big to small, by rank of kit), and anyone else's. */
+	static final String[] REALM_QUIVERS = {"archers:medium_quiver", "jaymoskitchen:quiver", "archers:small_quiver"};
+	static final String[] PLAIN_QUIVERS = {"jaymoskitchen:quiver", "archers:small_quiver"};
 	/** On one who has been given a sidearm (it's never given twice). */
 	static final String GIVEN_TAG = "jaymoskingdoms.sidearm";
 
@@ -66,6 +86,14 @@ public final class Sidearms {
 	static final String[] IRON = {"jaymospowers:iron_dagger", "rogues:iron_dagger", "minecraft:iron_sword"};
 	static final String[] STONE = {"jaymospowers:stone_dagger", "rogues:flint_dagger", "minecraft:stone_sword"};
 	static final String[] FLINT = {"rogues:flint_dagger", "jaymospowers:stone_dagger", "minecraft:stone_sword"};
+	/** A gunner's sword: iron in metal, else stone. */
+	static final String[] GUNNER_IRON = {"minecraft:iron_sword"}, GUNNER_STONE = {"minecraft:stone_sword"};
+	/** A pillager's backup weapon. */
+	static final String[] PILLAGER = {"minecraft:iron_axe"};
+	/** A gunner looks this far (blocks) for a blade lying about, takes it within reach, and only with no foe nearer than this. */
+	static final double SCAVENGE_RANGE = 12.0, SCAVENGE_REACH = 1.8, SCAVENGE_CALM = 16.0;
+	static final float SCAVENGE_SPEED = 0.7F;
+	static final double FOLK_SCAVENGE_SPEED = 1.1;
 	/** Armour or harness pieces whose ids name one of these are metal: one wearing any is given the iron dagger. */
 	static final String[] METAL = {"iron", "chain", "mail", "plate", "templar", "steel", "copper", "scale", "lamellar", "brigandine", "knight"};
 
@@ -189,7 +217,9 @@ public final class Sidearms {
 			return false;
 		}
 		boolean fighter;
-		if (mob instanceof Folk folk) {
+		if (mob instanceof Pillager) {
+			return true;
+		} else if (mob instanceof Folk folk) {
 			fighter = folk.combatant() && !Sorcery.isCaster(folk.role());
 		} else if (mob instanceof Villager v) {
 			fighter = Downed.isGuard(v) || Barbarians.isCampVillager(v) || v instanceof Worker w && Pirates.isPirate(w.role())
@@ -210,7 +240,9 @@ public final class Sidearms {
 	static ItemStack issue(Mob mob) {
 		boolean camp = Barbarians.isCampVillager(mob) || mob instanceof Worker w && Pirates.isPirate(w.role())
 			|| mob instanceof Folk f && f.role() != Folk.GUARD && f.role() != Folk.ARCHER;
-		for (String id : camp ? FLINT : metal(mob) ? IRON : STONE) {
+		String[] kit = mob instanceof Pillager ? PILLAGER : gunner(mob) ? (metal(mob) && !camp ? GUNNER_IRON : GUNNER_STONE)
+			: camp ? FLINT : metal(mob) ? IRON : STONE;
+		for (String id : kit) {
 			var item = RpgKit.item(id);
 			if (item.isPresent()) {
 				return new ItemStack(item.get());
@@ -269,7 +301,8 @@ public final class Sidearms {
 			carried.add(belt);
 		}
 		if (mob instanceof Villager v) {
-			boolean backShield = !mob.getItemBySlot(EquipmentSlot.BODY).isEmpty();
+			// (a gunner carries no shield, and a shield already on the back is drawn there)
+			boolean backShield = !mob.getItemBySlot(EquipmentSlot.BODY).isEmpty() || gunner(mob);
 			SimpleContainer pack = v.getInventory();
 			for (int i = 0; i < pack.getContainerSize(); i++) {
 				ItemStack stack = pack.getItem(i);
@@ -283,17 +316,141 @@ public final class Sidearms {
 		}
 		PowersCompat.carry(mob, carried);
 		boolean archer = MobAmmo.has(mob, MobAmmo.Kind.ARROWS) && (bow(main) || bow(off) || bow(belt(mob)) || packs(mob, Sidearms::bow));
-		if (archer != Boolean.TRUE.equals(mob.getAttached(QUIVER))) {
-			if (archer) {
-				mob.setAttached(QUIVER, true);
-			} else {
+		ItemStack quiver = archer ? quiver(mob) : ItemStack.EMPTY;
+		ItemStack worn = mob.getAttached(QUIVER);
+		if (quiver.isEmpty()) {
+			if (worn != null) {
 				mob.removeAttached(QUIVER);
 			}
+		} else if (worn == null || !worn.is(quiver.getItem())) {
+			mob.setAttached(QUIVER, quiver);
 		}
+	}
+
+	/** The real quiver {@code mob} wears: one of the Archers' for a realm's archer in metal, else Kitchen's; empty without either mod. */
+	private static ItemStack quiver(Mob mob) {
+		boolean realm = GuardKit.serves(mob) != null || Downed.isGuard(mob) && !Barbarians.isCampVillager(mob);
+		String[] ids = realm && metal(mob) ? REALM_QUIVERS : PLAIN_QUIVERS;
+		for (String id : ids) {
+			var item = RpgKit.item(id);
+			if (item.isPresent()) {
+				return new ItemStack(item.get());
+			}
+		}
+		return ItemStack.EMPTY;
 	}
 
 	private static boolean bow(ItemStack stack) {
 		return stack.getItem() instanceof BowItem || stack.getItem() instanceof CrossbowItem && !gun(stack);
+	}
+
+	// ---- gunners ----------------------------------------------------------------------------------------------------------
+
+	/** A gunner: an early gun, a musket, a musketoon in hand, or slung while the sidearm is out. */
+	static boolean gunner(LivingEntity mob) {
+		return EarlyGuns.gunner(mob) || Musketoon.holds(mob) || mob instanceof Folk f && Muskets.armed(f);
+	}
+
+	/** A sword, not a dagger or a knife (both are in the swords tag). */
+	static boolean sword(ItemStack stack) {
+		if (!stack.is(ItemTags.SWORDS)) {
+			return false;
+		}
+		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+		return !path.contains("dagger") && !path.contains("knife") && !path.contains("skewer");
+	}
+
+	/** A gunner uses no shield: one in his off hand goes into his pack, else at his feet. */
+	private static void unshield(ServerLevel level, Mob mob) {
+		ItemStack off = mob.getOffhandItem();
+		if (!off.has(DataComponents.BLOCKS_ATTACKS)) {
+			return;
+		}
+		mob.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+		if (!(mob instanceof Villager v && (packed(mob, off) || v.getInventory().addItem(off).isEmpty()))) {
+			mob.spawnAtLocation(level, off);
+		}
+	}
+
+	/**
+	 * A gunner without a sword at his belt, and no foe near, goes for the nearest blade lying in sight (a sword first) and
+	 * takes it up there; what was at his belt goes into his pack, or at his feet.
+	 */
+	private static void scavenge(ServerLevel level, Mob mob) {
+		if (drawn(mob) || sword(belt(mob)) || mob.isPassenger() || mob.hasAttached(Ranks.RANK)) {
+			return;
+		}
+		LivingEntity foe = Rulers.target(mob);
+		if (foe != null && foe.isAlive() && mob.distanceTo(foe) < SCAVENGE_CALM) {
+			return;
+		}
+		ItemEntity best = null;
+		double bestScore = Double.MAX_VALUE;
+		for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(SCAVENGE_RANGE))) {
+			ItemStack stack = item.getItem();
+			if (!item.isAlive() || !Rearm.isMelee(stack) || item.isInLava() || item.hasPickUpDelay()) {
+				continue;
+			}
+			// (a sword first; a dagger only for an empty belt)
+			if (!sword(stack) && !belt(mob).isEmpty()) {
+				continue;
+			}
+			double score = mob.distanceTo(item) - (sword(stack) ? 6.0 : 0.0);
+			if (score < bestScore && mob.getSensing().hasLineOfSight(item)) {
+				bestScore = score;
+				best = item;
+			}
+		}
+		if (best == null) {
+			return;
+		}
+		if (mob.distanceTo(best) > SCAVENGE_REACH) {
+			if (mob instanceof Villager) {
+				mob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(best, SCAVENGE_SPEED, 0));
+			} else {
+				mob.getNavigation().moveTo(best, FOLK_SCAVENGE_SPEED);
+			}
+			return;
+		}
+		ItemStack stack = best.getItem().copy();
+		ItemStack one = stack.split(1);
+		mob.take(best, 1);
+		if (stack.isEmpty()) {
+			best.discard();
+		} else {
+			best.setItem(stack);
+		}
+		ItemStack old = belt(mob);
+		setBelt(mob, one);
+		if (!old.isEmpty() && !(mob instanceof Villager v && v.getInventory().addItem(old).isEmpty())) {
+			mob.spawnAtLocation(level, old);
+		}
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.NEUTRAL, 0.4F, 1.0F);
+	}
+
+	// ---- pillagers --------------------------------------------------------------------------------------------------------
+
+	/**
+	 * A pillager with its backup weapon out fights with it: the game's melee goal, which marks it aggressive, so with no
+	 * crossbow in hand it is drawn in the vindicator's attacking pose and swing. Only while a blade or axe is in its hand.
+	 */
+	static final class BackupMelee extends MeleeAttackGoal {
+		private final Pillager pillager;
+
+		BackupMelee(Pillager pillager) {
+			super(pillager, 1.0, true);
+			this.pillager = pillager;
+		}
+
+		@Override
+		public boolean canUse() {
+			return Rearm.isMelee(this.pillager.getMainHandItem()) && super.canUse();
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return Rearm.isMelee(this.pillager.getMainHandItem()) && super.canContinueToUse();
+		}
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -303,7 +460,8 @@ public final class Sidearms {
 		for (ServerLevel level : server.getAllLevels()) {
 			Set<Mob> seen = new HashSet<>();
 			for (ServerPlayer player : level.players()) {
-				for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(NEAR), m -> m instanceof Villager || m instanceof Folk)) {
+				for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(NEAR),
+					m -> m instanceof Villager || m instanceof Folk || m instanceof Pillager)) {
 					if (!seen.add(mob) || !mob.isAlive()) {
 						continue;
 					}
@@ -311,6 +469,10 @@ public final class Sidearms {
 						sheathe(mob);
 					} else {
 						equip(mob);
+						if (gunner(mob)) {
+							unshield(level, mob);
+							scavenge(level, mob);
+						}
 					}
 					show(mob);
 				}

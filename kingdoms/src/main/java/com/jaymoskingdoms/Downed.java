@@ -283,7 +283,7 @@ public final class Downed {
 	 */
 	private static boolean armed(Mob body) {
 		return !body.getMainHandItem().isEmpty() || !body.getOffhandItem().isEmpty() || DualBlades.backGear(body.getItemBySlot(EquipmentSlot.BODY))
-			|| !Sidearms.belt(body).isEmpty() || MobAmmo.quiver(body) > 0;
+			|| MobAmmo.quiver(body) > 0 || !NpcPockets.has(body) && !Sidearms.belt(body).isEmpty();
 	}
 
 	/** Someone of the settlement is tending {@code body} just now ({@link FieldMedics} leaves them to it). */
@@ -556,7 +556,7 @@ public final class Downed {
 
 	/**
 	 * {@code player} takes the weapons out of a downed one's hands and off its back (a shield or a stowed blade,
-	 * {@link DualBlades#backGear}), the sidearm at its belt ({@link Sidearms}), and the arrows it carries (Andy, 2026-11-19: "you should be able to take their bows"), and a
+	 * {@link DualBlades#backGear}), and the arrows it carries (Andy, 2026-11-19: "you should be able to take their bows"), and a
 	 * folk's belt pouch ({@link BeltPouch}); nothing else.
 	 */
 	private static void disarm(Player player, Mob body) {
@@ -582,12 +582,15 @@ public final class Downed {
 			}
 			took = true;
 		}
-		ItemStack belt = Sidearms.take(body);
-		if (!belt.isEmpty()) {
-			if (!player.getInventory().add(belt) && !belt.isEmpty()) {
-				player.drop(belt, false, net.minecraft.util.Prediction.SERVER_ONLY);
+		// (a body with no pockets to search gives up its belt weapon here instead)
+		if (!NpcPockets.has(body)) {
+			ItemStack belted = Sidearms.take(body);
+			if (!belted.isEmpty()) {
+				if (!player.getInventory().add(belted) && !belted.isEmpty()) {
+					player.drop(belted, false, net.minecraft.util.Prediction.SERVER_ONLY);
+				}
+				took = true;
 			}
-			took = true;
 		}
 		for (ItemStack pouched : BeltPouch.take(body)) {
 			if (!player.getInventory().add(pouched) && !pouched.isEmpty()) {
