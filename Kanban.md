@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 08:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 08:59). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,8 +23,8 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-3|nycto-3]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/nycto-7|nycto-7]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · t3 · claimed
-- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · t3 · claimed
+- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · t3 · claimed
 
 
 ## In review
