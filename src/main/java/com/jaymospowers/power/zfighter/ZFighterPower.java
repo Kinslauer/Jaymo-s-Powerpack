@@ -618,6 +618,8 @@ public final class ZFighterPower implements Power {
 		ZFighterCombo.stop(player);
 		ZFighterInstantStep.forget(player);
 		ZFighterOverburn.clear(player);
+		ZFighterWaveBeam.forget(player);
+		ApeMoves.clear(player);
 		ZFighterLegendHeart.downed(player);
 	}
 
@@ -626,6 +628,10 @@ public final class ZFighterPower implements Power {
 		ZFighterLegendHeart.forget(player);
 		ZFighterInstantStep.forget(player);
 		ZFighterOverburn.clear(player);
+		ZFighterWaveBeam.forget(player);
+		ApeMoves.clear(player);
+		Live existing = LIVE.get(player.getUUID());
+		ZFighterLineage.endApe(player, existing != null ? existing : new Live());
 		Live live = LIVE.remove(player.getUUID());
 		if (live != null && live.flying) {
 			live.flying = false;
@@ -656,7 +662,6 @@ public final class ZFighterPower implements Power {
 		ZFighterCombo.drop(player);
 		player.removeAttached(ZFighterLineage.LINEAGE);
 		player.removeAttached(ZFighterLineage.TAIL_WRAPPED);
-		player.removeAttached(ZFighterLineage.GREAT_APE);
 		player.removeAttached(STATE);
 		player.removeAttached(FLIGHT);
 		player.removeAttached(CHARGE);
@@ -856,17 +861,24 @@ public final class ZFighterPower implements Power {
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		Live live = live(player);
-		if (key == PowerKey.ABILITY_3 && ZFighterWaveBeam.out(player)) {
-			// his beam is out: V extends sustain and pushes if it has locked in a clash
+		if (key == PowerKey.ABILITY_3) {
 			ZFighterWaveBeam.holdInput(player, down);
-			com.jaymospowers.core.BeamClash.input(player, down);
-			return;
+			if (ZFighterWaveBeam.out(player)) {
+				// his beam is out: V extends sustain and pushes if it has locked in a clash
+				com.jaymospowers.core.BeamClash.input(player, down);
+				return;
+			}
 		}
-		if (ZFighterLineage.ape(player)) {
-			// Great Ape move set: R roar, V mouth beam, G earth-splitter / Sneak+G boulder throw, B ring-breaker / Sneak+B or airborne B leap smash
+		if (ZFighterLineage.ape(player) && key == PowerKey.ABILITY_1 && down && player.isSprinting() && !player.isShiftKeyDown()) {
+			if (ApeMoves.roar(player, live)) {
+				sync(player, live, maxKi(player));
+				return;
+			}
+		}
+		if (ZFighterLineage.ape(player) && key != PowerKey.ABILITY_1) {
+			// Great Ape move set: Sprint+R roar (R charges ki), V mouth beam, G earth-splitter / Sneak+G boulder throw, B ring-breaker / Sneak+B or airborne B leap smash
 			if (down) {
 				switch (key) {
-					case ABILITY_1 -> ApeMoves.roar(player, live);
 					case ABILITY_2 -> {
 						if (player.isShiftKeyDown()) {
 							ApeMoves.boulderThrow(player, live);
@@ -886,8 +898,17 @@ public final class ZFighterPower implements Power {
 							ApeEarthwork.stomp(player, live, false);
 						}
 					}
+					default -> {
+					}
 				}
 			}
+			sync(player, live, maxKi(player));
+			return;
+		}
+		// Instant Step behind a sighted foe takes priority over Divine, Verdant and legend Sneak+B when Ki Sense is active
+		if (down && key == PowerKey.ABILITY_4 && player.isShiftKeyDown()
+			&& (!ZFighterTeleport.equipped(player) || live.lineage == ZFighterLineage.VERDANT)
+			&& ZFighterKiSense.isOn(player) && ZFighterInstantStep.tryStart(player, live, true)) {
 			sync(player, live, maxKi(player));
 			return;
 		}
@@ -1875,6 +1896,8 @@ public final class ZFighterPower implements Power {
 		LIVE.remove(player.getUUID());
 		ZFighterInstantStep.forget(player);
 		ZFighterOverburn.clear(player);
+		ZFighterWaveBeam.forget(player);
+		ApeMoves.clear(player);
 		ZFighterLegendHeart.forget(player);
 	}
 

@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -143,13 +144,20 @@ public final class ZFighterWaveBeam {
 	}
 
 	private static final Map<UUID, Wave> WAVES = new HashMap<>();
+	/** Last known V (ABILITY_3) held state per player, so beams fired on key-down seed sustain holding immediately. */
+	private static final Set<UUID> V_HELD = new HashSet<>();
 
 	private ZFighterWaveBeam() {
 	}
 
+	private static boolean liveForClash(@Nullable Wave wave) {
+		return wave != null && wave.stage != STAGE_END && !wave.burstDone;
+	}
+
 	static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterWaveBeam::tick);
-		BeamClash.register(new BeamClash.Beam(p -> BeamClash.KIND_KI, p -> WAVES.containsKey(p.getUUID()), CLASH_RANGE, ZFighterWaveBeam::stop,
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> V_HELD.remove(handler.player.getUUID()));
+		BeamClash.register(new BeamClash.Beam(p -> BeamClash.KIND_KI, p -> liveForClash(WAVES.get(p.getUUID())), CLASH_RANGE, ZFighterWaveBeam::stop,
 			new BeamClash.Shape() {
 				@Override
 				public Vec3 from(ServerPlayer player) {
@@ -166,7 +174,7 @@ public final class ZFighterWaveBeam {
 				@Override
 				public double reach(ServerPlayer player) {
 					Wave wave = WAVES.get(player.getUUID());
-					return wave == null ? 0.0 : wave.length;
+					return liveForClash(wave) ? wave.length : 0.0;
 				}
 
 				@Override
@@ -183,6 +191,11 @@ public final class ZFighterWaveBeam {
 
 	static void clear() {
 		WAVES.clear();
+		V_HELD.clear();
+	}
+
+	static void forget(ServerPlayer player) {
+		V_HELD.remove(player.getUUID());
 	}
 
 	/** Whether his beam is out (both sides: the pose, the slow, V held back). */
@@ -208,8 +221,13 @@ public final class ZFighterWaveBeam {
 		}
 	}
 
-	/** V held while the beam is firing extends the sustain stage. */
+	/** Tracks V's held state per player and extends sustain while a beam is active. */
 	static void holdInput(ServerPlayer player, boolean down) {
+		if (down) {
+			V_HELD.add(player.getUUID());
+		} else {
+			V_HELD.remove(player.getUUID());
+		}
 		Wave wave = WAVES.get(player.getUUID());
 		if (wave != null) {
 			wave.holding = down;
@@ -230,7 +248,9 @@ public final class ZFighterWaveBeam {
 			}
 			sendTargets(player, new int[0]);
 		}
-		WAVES.put(player.getUUID(), new Wave(player.level(), player.getUUID(), player.getId(), start, dir.normalize(), spec));
+		Wave wave = new Wave(player.level(), player.getUUID(), player.getId(), start, dir.normalize(), spec);
+		wave.holding = V_HELD.contains(player.getUUID());
+		WAVES.put(player.getUUID(), wave);
 		player.setAttached(FIRING, true);
 		setStage(player, STAGE_FIRE);
 		ZFighterPower.refresh(player, ZFighterPower.live(player));

@@ -9,7 +9,9 @@ import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -71,21 +73,37 @@ public final class ZFighterInstantStep {
 	 * Returns true if Instant Step claimed the key press.
 	 */
 	static boolean tryStart(ServerPlayer player, ZFighterPower.Live live) {
+		return tryStart(player, live, false);
+	}
+
+	/**
+	 * Starts Instant Step; when {@code behindOnly} is true, only claims the key if a foe is sighted to blink behind.
+	 */
+	static boolean tryStart(ServerPlayer player, ZFighterPower.Live live, boolean behindOnly) {
 		if (!ZFighterKiSense.learned(player) || ZFighterLineage.ape(player) || Powers.silenced(player)) {
 			return false;
 		}
 		if (PENDING.containsKey(player.getUUID())) {
 			return true;
 		}
-		if (!ZFighterPower.ready(player, ZFighterState.STEP) || !ZFighterHooks.flashStepStamina(player)) {
+		if (!ZFighterPower.ready(player, ZFighterState.STEP)) {
 			return false;
 		}
-		if (!player.isCreative() && !live.raging() && live.ki < STEP_KI) {
-			ZFighterPower.spend(player, live, STEP_KI);
+		boolean behind = behindOnly || player.isShiftKeyDown();
+		LivingEntity target = behind ? sightedFoe(player) : null;
+		if (behindOnly && target == null) {
+			return false;
+		}
+		float cost = STEP_KI * ZFighterAndroid.costFactor(player);
+		int lineage = ZFighterLineage.of(player);
+		if (!player.isCreative() && !live.raging() && live.ki < cost
+			&& lineage != ZFighterLineage.EARTHLING && lineage != ZFighterLineage.FROST) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
 			return true;
 		}
-		boolean behind = player.isShiftKeyDown();
-		LivingEntity target = behind ? sightedFoe(player) : null;
+		if (!ZFighterHooks.flashStepStamina(player)) {
+			return true;
+		}
 		long now = player.level().getGameTime();
 		PENDING.put(player.getUUID(), new Pending(now, behind, target == null ? -1 : target.getId()));
 		ZFighterHands.pose(player, ZFighterHands.BROW);

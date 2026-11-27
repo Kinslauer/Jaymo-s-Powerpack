@@ -44,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li><b>Swipes (left and right)</b>: quick left-click tap alternates wide left and right arm swipes that fling foes
  * sideways across the arc.</li>
- * <li><b>Roar</b> (R): rears back and looses a shockwave roar that staggers and throws back foes around him.</li>
+ * <li><b>Roar</b> (Sprint+R): rears back and looses a shockwave roar that staggers and throws back foes around him.</li>
  * <li><b>Ground slam pose</b>: plays a two-handed overhead slam on {@link ApeEarthwork} stomps.</li>
  * <li><b>Leap smash</b> (Sneak+B, or B while airborne): springs forward and high, then crashes down in a cratering
  * shockwave.</li>
@@ -70,6 +70,10 @@ public final class ApeMoves {
 	public static final int LEAP_LAND_TICKS = 14;
 	public static final int BOULDER_LIFT_TICKS = 14;
 	public static final int BOULDER_TICKS = 26;
+
+	// ---- gating ----
+	/** Minimum ape growth fraction before ape moves may start or resolve. */
+	static final float MIN_APE_SIZE = 0.5F;
 
 	// ---- swipes ----
 	/** Left-click released sooner than this (ticks) swipes instead of charging a smash. */
@@ -151,10 +155,16 @@ public final class ApeMoves {
 
 	/** Whether this ape can start a move now. */
 	static boolean able(ServerPlayer player, ZFighterPower.Live live) {
-		return Powers.has(player, ZFighterPower.INSTANCE) && ZFighterLineage.ape(player) && live.apeSize >= 0.5F
+		return Powers.has(player, ZFighterPower.INSTANCE) && ZFighterLineage.ape(player) && live.apeSize >= MIN_APE_SIZE
 			&& !ZFighterLineage.crippled(player) && !BlowClash.locked(player)
 			&& !player.hasAttached(ApeRage.FIT) && !player.hasAttached(ZFighterLineage.BERSERK)
 			&& !ApeGrab.grabbing(player) && !BOULDERS.containsKey(player.getUUID());
+	}
+
+	/** Whether this ape currently has an in-flight leap smash or hoisted boulder. */
+	static boolean busy(ServerPlayer player) {
+		UUID id = player.getUUID();
+		return LEAP_START.containsKey(id) || BOULDERS.containsKey(id);
 	}
 
 	/** How long a synced action pose lasts (ticks); LEAP_AIR lasts until landing. */
@@ -226,9 +236,9 @@ public final class ApeMoves {
 		return true;
 	}
 
-	// ---------------------------------------------------------------- roar (R)
+	// ---------------------------------------------------------------- roar (Sprint+R)
 
-	/** Deafening ape roar on R: shockwave ring, knockback, slow and weakness. */
+	/** Deafening ape roar on Sprint+R: shockwave ring, knockback, slow and weakness. */
 	static boolean roar(ServerPlayer player, ZFighterPower.Live live) {
 		if (!able(player, live)) {
 			return false;
@@ -375,6 +385,12 @@ public final class ApeMoves {
 	/** Called each tick from {@link ZFighterLineage#ape} while the Great Ape is active. */
 	static void tick(ServerPlayer player, ZFighterPower.Live live, ServerLevel level, long now) {
 		UUID id = player.getUUID();
+		if (live.apeSize < MIN_APE_SIZE) {
+			if (LEAP_START.containsKey(id) || BOULDERS.containsKey(id) || player.hasAttached(ACTION)) {
+				clear(player);
+			}
+			return;
+		}
 		// leap smash landing
 		Long leapAt = LEAP_START.get(id);
 		if (leapAt != null) {

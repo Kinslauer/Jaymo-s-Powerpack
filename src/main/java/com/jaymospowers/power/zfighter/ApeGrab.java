@@ -133,7 +133,7 @@ public final class ApeGrab {
 	 * the roar and the rearing back. False if there's nothing there to grab, or he's already grabbing.
 	 */
 	static boolean begin(LivingEntity ape, ZFighterPower.Live live, ServerLevel level, @Nullable LivingEntity target, long now) {
-		if (grabbing(ape) || ZFighterLineage.crippled(ape)) {
+		if (grabbing(ape) || ZFighterLineage.crippled(ape) || ape instanceof ServerPlayer sp && ApeMoves.busy(sp)) {
 			return false;
 		}
 		if (target == null) {
@@ -145,6 +145,9 @@ public final class ApeGrab {
 		boolean slab = target == null && !tree && ape instanceof ServerPlayer sp && TowerSlab.groundNear(level, sp, hand(ape, 0.0), CLIMB);
 		if (!tree && !slab && (target == null || !canGrab(ape, target))) {
 			return false;
+		}
+		if (ape instanceof ServerPlayer sp) {
+			ApeMoves.clear(sp);
 		}
 		ape.setAttached(GRAB, new Grab(now, -1));
 		live.grabTarget = target == null ? -1 : target.getId();

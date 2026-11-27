@@ -990,6 +990,7 @@ public final class ZFighterLineage {
 	private static void cripple(ServerPlayer player, ZFighterPower.Live live, long now) {
 		ServerLevel level = player.level();
 		boolean wild = wild(player);
+		ApeMoves.clear(player);
 		live.legHits = 0;
 		live.crippledUntil = now + (wild ? WILD_CRIPPLED_TICKS : CRIPPLED_TICKS);
 		live.crippleSafeUntil = live.crippledUntil + CRIPPLE_SAFE_TICKS;
