@@ -37,6 +37,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · ☁️ Cloud · #2284 · in-review
 - [ ] [[Inbox/nycto-1|nycto-1]] · ☁️ Cloud · #2285 · in-review
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · ☁️ Cloud · #2287 · in-review
+- [ ] [[Inbox/nycto-2|nycto-2]] · ☁️ Cloud · #2288 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -55,7 +56,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/nycto-2|nycto-2]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-3|nycto-3]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-4-models|nycto-4-models]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-4|nycto-4]] · ☁️ Cloud · blocked
