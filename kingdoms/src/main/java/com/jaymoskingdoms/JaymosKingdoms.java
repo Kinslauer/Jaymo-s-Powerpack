@@ -440,6 +440,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		VigilanteTrials.register();
 		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
+		GuardCries.register();
 		TownCrier.register();
 		BuildNews.register();
 		CrierGrudges.register();
