@@ -544,6 +544,11 @@ public final class WebBruteArts {
 	}
 
 	static void velocity(Entity entity, Vec3 motion) {
+		// bosses take the hits but are never dragged or shoved
+		if (entity instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon
+			|| entity instanceof net.minecraft.world.entity.boss.wither.WitherBoss) {
+			return;
+		}
 		entity.setDeltaMovement(motion);
 		entity.needsSync = true;
 		entity.syncVelocity = true;

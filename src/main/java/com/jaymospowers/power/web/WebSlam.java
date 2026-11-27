@@ -136,12 +136,15 @@ public final class WebSlam {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long since = player.getAttached(STANCE);
-		if (phase != 0 && phase != 1 && phase != 2 || phase != 0 && (WebBruteArts.busy(player)
-			|| WebBruteMovement.special(player) || !player.isAlive()
-			|| com.jaymospowers.core.wounds.Downed.isDowned(player))) {
+		if (phase != 0 && phase != 1 && phase != 2) {
 			return;
 		}
+		boolean blocked = phase != 0 && (WebBruteArts.busy(player) || WebBruteMovement.special(player)
+			|| !player.isAlive() || com.jaymospowers.core.wounds.Downed.isDowned(player));
 		if (phase == 1) {
+			if (blocked) {
+				return;
+			}
 			if (since == null && WebSymbiote.bulked(player) && !player.onGround() && now >= READY.getOrDefault(player.getUUID(), 0L)) {
 				player.setAttached(STANCE, now);
 				PEAK.put(player.getUUID(), player.getY());
@@ -154,7 +157,8 @@ public final class WebSlam {
 		}
 		player.removeAttached(STANCE);
 		Double peak = PEAK.remove(player.getUUID());
-		if (phase == 2 && player.onGround() && WebSymbiote.bulked(player) && now - since >= MIN_TICKS) {
+		// a landing while busy still drops the stance, it just doesn't slam
+		if (!blocked && phase == 2 && player.onGround() && WebSymbiote.bulked(player) && now - since >= MIN_TICKS) {
 			READY.put(player.getUUID(), now + COOLDOWN);
 			slam(player, peak == null ? 0.0F : (float)Math.max(0.0, peak - player.getY()));
 		}
