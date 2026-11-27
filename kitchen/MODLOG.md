@@ -2987,3 +2987,8 @@ Andy: "there should be a way to dismember them from the inventory screen so you 
 - Rabbits, frogs, chickens and snakes are still taken up by the neck; players', machines', zombies' and skeletons' bodies never count.
 - `CorpseEntity.handSized` / `pickUp`; shared to Powers' hints as `jaymoskitchen:corpse_hand_sized` (`Corpses.SHARE_HAND_SIZED`).
 - Built; not played.
+
+## 0.7.6 (2026-11-27): Stations say what's missing (#2269)
+
+- An empty cutting board says to lay food on it and cut with a knife; the mincer says it takes raw meat.
+- Built (compileJava); not played.

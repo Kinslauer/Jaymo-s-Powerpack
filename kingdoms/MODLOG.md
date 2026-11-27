@@ -18025,3 +18025,8 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - Which line it is comes from the key MCA picked for it (so the guard's creeper warning is told from the other night lines) and its words. Other features add their own kinds of line with `Replies.register` (a key test, a word test, their answer).
 - `Replies` (new), `TalkFirst` (the spoke), `McaDialogueBoxMixin` (hands it the line), `McaDialogueMixin` (the answer). Lang part `talk-replies.json`.
 - Built; not played.
+
+## 0.13.60 (2026-11-27): Stations say what's missing (#2269)
+
+- An empty lectern says how many bookshelves research wants round it (and how many there are). A hammer at a lit campfire without the smith's rank says a field forge takes a Journeyman smith. The tryworks says what its next step needs (blubber 2 at a time, full, light it, it's boiling, fill bottles). The perk-rank refusal now comes up as a tip card like the plain one.
+- Built (compileJava); not played.
