@@ -23,6 +23,14 @@ public final class Dialects {
 	 * (in the goblin dialect where it has one) and breaks it ({@link GoblinTalk}, client {@code GoblinTalkMixin}).
 	 */
 	public static final String BROKEN = "goblin_talk.jaymoskingdoms:";
+	/**
+	 * An old-tongued knight's line ({@link OldKnights}) goes as this before the line's own key ({@link #olden}); the client
+	 * finds the line (its hand-written {@code dialect.jaymoskingdoms.olden.<key>} where it has one) and puts it into the
+	 * old tongue ({@link OldenTalk}, client {@code GoblinTalkMixin}).
+	 */
+	public static final String OLDEN = "olden_talk.jaymoskingdoms:";
+	/** The old tongue's dialect name, under {@link #PREFIX}. */
+	static final String OLD = "olden";
 
 	private Dialects() {
 	}
@@ -122,6 +130,55 @@ public final class Dialects {
 		out.setStyle(words.getStyle());
 		for (Component sibling : words.getSiblings()) {
 			out.append(broken(sibling));
+		}
+		return out;
+	}
+
+	/** {@code e} speaks the old tongue (an old-tongued knight, {@link OldKnights}). */
+	public static boolean old(@Nullable Entity e) {
+		return e != null && !(e instanceof Player) && OldKnights.is(e);
+	}
+
+	/** A line already put into the old tongue. */
+	static boolean oldLine(Component words) {
+		return words.getContents() instanceof TranslatableContents t && t.getKey().startsWith(OLDEN);
+	}
+
+	/**
+	 * {@code speaker}'s words in their own way of speaking: a goblin's broken ({@link #broken}), an old-tongued knight's
+	 * in the old tongue ({@link #olden}), anyone else's as they are.
+	 */
+	public static Component voiced(@Nullable Entity speaker, Component words) {
+		if (goblin(speaker) || goblinLine(words)) {
+			return broken(words);
+		}
+		return old(speaker) ? olden(words) : words;
+	}
+
+	/**
+	 * {@code words} as an old-tongued knight says them: a line from the lang file goes as {@link #OLDEN} and its key, for
+	 * the client to put into the old tongue in its own language (its hand-written line if there is one); plain text is
+	 * put into it here. Names and things put into a line are left whole.
+	 */
+	public static Component olden(Component words) {
+		MutableComponent out;
+		if (words.getContents() instanceof TranslatableContents t) {
+			if (t.getKey().startsWith(OLDEN) || t.getKey().startsWith(BROKEN)) {
+				return words;
+			}
+			net.minecraft.locale.Language lang = net.minecraft.locale.Language.getInstance();
+			String dialect = PREFIX + OLD + "." + t.getKey();
+			String plain = t.getFallback() != null ? t.getFallback() : lang.has(dialect) ? lang.getOrDefault(dialect) : lang.getOrDefault(t.getKey());
+			boolean own = lang.has(dialect);
+			out = Component.translatableWithFallback(OLDEN + t.getKey(), plain.equals(t.getKey()) || own ? plain : OldenTalk.speak(plain), t.getArgs());
+		} else if (words.getContents() instanceof PlainTextContents p) {
+			out = Component.literal(OldenTalk.speak(p.text()));
+		} else {
+			return words;
+		}
+		out.setStyle(words.getStyle());
+		for (Component sibling : words.getSiblings()) {
+			out.append(olden(sibling));
 		}
 		return out;
 	}

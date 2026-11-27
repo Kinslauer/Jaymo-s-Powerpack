@@ -36,7 +36,7 @@ abstract class McaMessageMixin {
 			// (0.7.203) the line at the top of their talk menu, too
 			Entity speaker = jaymoskingdoms$talkingTo(player);
 			// (Andy, 2026-11-19) and a goblin's, in its broken English (Languages.heard, Dialects.broken)
-			if (speaker != null && (com.jaymoskingdoms.Dialects.goblin(speaker) || !Languages.understands(player, speaker))) {
+			if (speaker != null && (com.jaymoskingdoms.Dialects.goblin(speaker) || com.jaymoskingdoms.Dialects.old(speaker) || !Languages.understands(player, speaker))) {
 				ci.cancel();
 				jaymoskingdoms$garbling = true;
 				try {
@@ -62,7 +62,7 @@ abstract class McaMessageMixin {
 		if (speaker != null && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
 			com.jaymoskingdoms.Speech.overheard(level, speaker, player, message.message(), com.jaymoskingdoms.Speech.WHITE);
 		}
-		if (speaker == null || Languages.understands(player, speaker) && !com.jaymoskingdoms.Dialects.goblin(speaker)) {
+		if (speaker == null || Languages.understands(player, speaker) && !com.jaymoskingdoms.Dialects.goblin(speaker) && !com.jaymoskingdoms.Dialects.old(speaker)) {
 			if (message != original) {
 				ci.cancel();
 				jaymoskingdoms$garbling = true;

@@ -4,8 +4,10 @@ import com.jaymoskingdoms.monsters.Monsters;
 import com.jaymoskingdoms.nether.FortressKnight;
 import com.jaymoskingdoms.remnants.AetherGiant;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -55,20 +57,19 @@ public final class Quips {
 
 	static {
 		// knights and guards
-		odds("town_fool", 40);
 		odds("have_at_thee", 15);
 		odds("what_monster", 8);
 		odds("trickery", 20);
-		odds("cleave", 4);
+		odds("cleave", 2);
 		odds("unarmoured", 30);
-		odds("worse_shot", 6);
+		odds("worse_shot", 2);
 		odds("look_where", 10);
-		odds("fare_well", 5);
+		odds("fare_well", 3);
 		odds("hold_stranger", 25);
-		odds("squire_or_fool", 30);
+		odds("squire_or_fool", 8);
 		odds("pain", 6);
 		odds("fight_beside", 10);
-		odds("all_medieval", 3);
+		odds("all_medieval", 2);
 		odds("web", 6);
 		odds("justice", 15);
 		odds("horse_wit", 8);
@@ -96,8 +97,19 @@ public final class Quips {
 		// idle talk, rolled every sweep a player is near
 		odds("mirror", 900);
 		odds("no_fool", 900);
-		odds("robes", 60);
+		odds("robes", 3);
+		// the old-tongued knight's own (OldKnights), said to whoever pays him
+		odds("one_knight", 20);
+		odds("flee", 4);
+		odds("what_form", 3);
 	}
+
+	/**
+	 * Lines only an old-tongued knight says, to whoever pays him ({@link OldKnights}; Andy, 2026-11-27: "a few of these
+	 * gated to a companion"); the first meeting's "Town fool, come hence" is his pitch for hire, in lang part
+	 * {@code old-knights.json}.
+	 */
+	static final Set<String> GATED = Set.of("squire_or_fool", "worse_shot", "fare_well", "cleave", "all_medieval", "one_knight", "flee", "what_form");
 
 	private static void odds(String id, int oneIn) {
 		ODDS.put(id, oneIn);
@@ -134,6 +146,8 @@ public final class Quips {
 	private static final Map<Entity, Boolean> COUNTED = new WeakHashMap<>();
 	/** Per player: misses in a row with the bow. */
 	private static final Map<UUID, Integer> MISSED = new HashMap<>();
+	/** Per player: the lasting moments ({@link #moment}) true at their last sweep. */
+	private static final Map<UUID, Set<String>> HELD = new HashMap<>();
 	/** Per player: the guard they last walked off from, how often, since when. */
 	private static final Map<UUID, Leaving> LEFT = new HashMap<>();
 
@@ -165,6 +179,7 @@ public final class Quips {
 			COUNTED.clear();
 			MISSED.clear();
 			LEFT.clear();
+			HELD.clear();
 		});
 	}
 
@@ -231,6 +246,9 @@ public final class Quips {
 	}
 
 	private static boolean roll(Entity speaker, String id) {
+		if (GATED.contains(id) && !OldKnights.is(speaker)) {
+			return false;
+		}
 		Integer odds = ODDS.get(id);
 		return odds != null && (odds <= 1 || speaker.getRandom().nextInt(odds) == 0);
 	}
@@ -298,6 +316,8 @@ public final class Quips {
 		UUID id = player.getUUID();
 		boolean down = PowersCompat.downedState(player) > 0;
 		Seen before = SEEN.put(id, new Seen(player.position(), level, down));
+		Set<String> held = new HashSet<>(), was = HELD.getOrDefault(id, Set.of());
+		HELD.put(id, held);
 		List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(GREAT_RANGE),
 			e -> e != player && e.isAlive() && !(e instanceof ServerPlayer));
 		boolean onWall = PowersCompat.onWall(player);
@@ -309,17 +329,24 @@ public final class Quips {
 		int worn = worn(player);
 		int villagers = 0;
 		LivingEntity greatFoe = null;
+		Mob companion = null;
 		for (LivingEntity e : near) {
 			if (townsfolk(e)) {
 				villagers++;
 			} else if (greatFoe == null && great(e)) {
 				greatFoe = e;
 			}
+			if (companion == null && e instanceof Mob m && companion(m, player)) {
+				companion = m;
+			}
 		}
-		arrows(level, player, near);
+		arrows(level, player, near, companion);
+		if (companion != null) {
+			sir(level, player, companion, greatFoe, worn, rose, held, was);
+		}
 		for (LivingEntity e : near) {
 			double d = e.distanceTo(player);
-			if (d > RANGE && !(townsfolk(e) && greatFoe != null)) {
+			if (d > RANGE && !(townsfolk(e) && greatFoe != null) || e == companion) {
 				continue;
 			}
 			boolean sees = e instanceof Mob m ? m.getSensing().hasLineOfSight(player) : e.hasLineOfSight(player);
@@ -336,56 +363,45 @@ public final class Quips {
 						aloud(g, "have_at_thee");
 					}
 				}
-				if (foe == null && had != null && knight && worn == 0 && d < 10) {
-					quip(g, player, "fare_well");
-				}
 				if (foe != null && foe != player) {
 					if (knight && foe instanceof Monster && villagers >= 3 && d < 10 && player.getLastHurtByMob() != foe) {
-						quip(g, player, "fight_beside");
+						moment(g, player, "fight_beside", held, was);
 					}
 					if (fleeing(near, foe) >= 2) {
-						quip(g, player, "crowd");
+						moment(g, player, "crowd", held, was);
 					}
-				}
-				if (greatFoe != null && knight && d < 10) {
-					quip(g, player, "cleave");
 				}
 				if (!sees) {
 					continue;
 				}
 				if (onWall) {
-					quip(g, player, "what_monster");
+					moment(g, player, "what_monster", held, was);
 				}
 				if (player.isSprinting() && d < 1.6) {
-					quip(g, player, "look_where");
+					moment(g, player, "look_where", held, was);
 				}
 				if (Disguise.wearsDisguise(player) && d < 8) {
-					quip(g, player, "goblin_smell");
+					moment(g, player, "goblin_smell", held, was);
 				}
 				if (foe == null && d < 6) {
-					boolean known = Introductions.knows(player, g);
-					if (knight && armed(player) && !known && d < 5) {
-						quip(g, player, "town_fool");
-					} else if (!known && d < 4) {
-						quip(g, player, "hold_stranger");
+					if (!Introductions.knows(player, g) && d < 4) {
+						moment(g, player, "hold_stranger", held, was);
 					} else if (worn == 0) {
-						quip(g, player, "unarmoured");
-					} else if (knight && worn < 4) {
-						quip(g, player, "squire_or_fool");
+						moment(g, player, "unarmoured", held, was);
 					}
 				}
 				if (knight && g.getVehicle() instanceof AbstractHorse horse && horse.distanceTo(player) < 1.6) {
-					quip(g, player, "horse_wit");
+					moment(g, player, "horse_wit", held, was);
 				}
 				for (LivingEntity s : near) {
 					if (s instanceof Spider spider && spider.getTarget() == player && spider.distanceTo(player) < 10) {
-						quip(g, player, "web");
+						moment(g, player, "web", held, was);
 						break;
 					}
 				}
 			} else if (townsfolk(e)) {
 				if (greatFoe != null && greatFoe.distanceTo(e) < 24) {
-					quip(e, player, "upon_us");
+					moment(e, player, "upon_us", held, was);
 				}
 				if (d > RANGE) {
 					continue;
@@ -394,28 +410,92 @@ public final class Quips {
 					quip(e, player, "still_hero");
 				}
 				if (sees && onWall) {
-					quip(e, player, "thing_on_wall");
+					moment(e, player, "thing_on_wall", held, was);
 				}
 				if (sees && flying) {
-					quip(e, player, "stranger_day");
+					moment(e, player, "stranger_day", held, was);
 				}
 				if (jumped && sees) {
 					quip(e, player, "sorcery");
 				}
 				if (!Languages.understands(player, e) && monsterNear(near, e)) {
-					quip(e, player, "my_tone", true);
+					if (held.add("my_tone") && !was.contains("my_tone")) {
+						quip(e, player, "my_tone", true);
+					}
 				}
 				if (d < 6 && lampOver(level, e.blockPosition())) {
-					quip(e, player, "ceiling_torch");
+					moment(e, player, "ceiling_torch", held, was);
 				}
 				if (d < 8 && Hermits.is(e)) {
-					quip(e, player, "robes");
+					moment(e, player, "robes", held, was);
 				} else if (d < 8) {
+					// (idle talk: rolled every sweep, so its odds are long)
 					quip(e, player, e.getRandom().nextBoolean() ? "mirror" : "no_fool");
 				}
 			} else if (FortressKnight.is(e) && d < 12 && sees) {
-				quip(e, player, "back_lest");
+				moment(e, player, "back_lest", held, was);
 			}
+		}
+	}
+
+	/**
+	 * A moment that lasts (unarmoured near a guard, up on a wall): its line is rolled for once when it begins, not every
+	 * sweep it goes on. {@code held} gathers the moments true this sweep; {@code was}, last sweep's.
+	 */
+	private static void moment(Entity speaker, ServerPlayer player, String id, Set<String> held, Set<String> was) {
+		if (held.add(id) && !was.contains(id)) {
+			quip(speaker, player, id);
+		}
+	}
+
+	/** {@code m} is an old-tongued knight in {@code player}'s pay ({@link OldKnights}). */
+	static boolean companion(Mob m, ServerPlayer player) {
+		return OldKnights.is(m) && m.isAlive() && !Drifters.unhired(m) && Comrades.side(m).equals(Comrades.side(player));
+	}
+
+	/** {@code player}'s old-tongued knight, if one is near; null if not. */
+	static @Nullable Mob companionOf(ServerPlayer player) {
+		for (Mob m : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(GREAT_RANGE), m -> companion(m, player))) {
+			return m;
+		}
+		return null;
+	}
+
+	/** What {@code sir}, {@code player}'s old-tongued knight, has to say ({@link #GATED} and his own). */
+	private static void sir(ServerLevel level, ServerPlayer player, Mob sir, @Nullable LivingEntity greatFoe, int worn, boolean rose,
+		Set<String> held, Set<String> was) {
+		double d = sir.distanceTo(player);
+		LivingEntity foe = sir.getTarget();
+		LivingEntity had = FOE.put(sir, foe);
+		if (foe != null && had == null) {
+			aloud(sir, "have_at_thee");
+		}
+		if (foe == null && had != null && worn == 0) {
+			quip(sir, player, "fare_well");
+		}
+		if (greatFoe != null) {
+			moment(sir, player, "cleave", held, was);
+		}
+		if (rose && d < 16) {
+			quip(sir, player, "still_hero");
+		}
+		if (d > RANGE) {
+			return;
+		}
+		if (worn > 0 && worn < 4 && foe == null) {
+			moment(sir, player, "squire_or_fool", held, was);
+		}
+		if (worn == 4 && foe == null) {
+			moment(sir, player, "one_knight", held, was);
+		}
+		if (player.getHealth() < player.getMaxHealth() * 0.3F && player.getLastHurtByMob() != null) {
+			moment(sir, player, "flee", held, was);
+		}
+		if (PowersCompat.xenoForm(player)) {
+			moment(sir, player, "what_form", held, was);
+		}
+		if (PowersCompat.onWall(player)) {
+			moment(sir, player, "what_monster", held, was);
 		}
 	}
 
@@ -456,21 +536,15 @@ public final class Quips {
 		return false;
 	}
 
-	/** The player's arrows come to rest without hitting anything: misses in a row; enough, and a guard who saw says so. */
-	private static void arrows(ServerLevel level, ServerPlayer player, List<LivingEntity> near) {
+	/** The player's arrows come to rest without hitting anything: misses in a row; enough, and their old-tongued knight says so. */
+	private static void arrows(ServerLevel level, ServerPlayer player, List<LivingEntity> near, @Nullable Mob companion) {
 		for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(GREAT_RANGE),
 			a -> a.getOwner() == player && !COUNTED.containsKey(a) && a.tickCount > 2 && a.tickCount < 200 && a.getDeltaMovement().lengthSqr() < 1.0E-4)) {
 			COUNTED.put(arrow, Boolean.TRUE);
 			int missed = MISSED.merge(player.getUUID(), 1, Integer::sum);
-			if (missed >= MISSES) {
-				for (LivingEntity e : near) {
-					if (guard(e) && e.distanceTo(player) < RANGE && ((Mob) e).getSensing().hasLineOfSight(player)) {
-						if (quip(e, player, "worse_shot")) {
-							MISSED.put(player.getUUID(), 0);
-						}
-						break;
-					}
-				}
+			// (his line alone: Quips#GATED)
+			if (missed >= MISSES && companion != null && companion.distanceTo(player) < RANGE && quip(companion, player, "worse_shot")) {
+				MISSED.put(player.getUUID(), 0);
 			}
 		}
 	}
@@ -534,7 +608,8 @@ public final class Quips {
 		List<LivingEntity> near = dead.level().getEntitiesOfClass(LivingEntity.class, dead.getBoundingBox().inflate(GREAT_RANGE),
 			e -> e.isAlive() && e != dead);
 		for (LivingEntity e : near) {
-			if (knight(e) && aloud(e, "all_medieval")) {
+			// (his line alone: Quips#GATED)
+			if (OldKnights.is(e) && !(e instanceof Mob m && Drifters.unhired(m)) && aloud(e, "all_medieval")) {
 				break;
 			}
 		}

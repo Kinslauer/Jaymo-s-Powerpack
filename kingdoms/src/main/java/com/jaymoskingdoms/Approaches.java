@@ -1083,7 +1083,7 @@ public final class Approaches {
 	}
 
 	private static Component goblin(Approach a, Component words) {
-		return words != null && Dialects.goblin(a.mob) ? Dialects.broken(words) : words;
+		return words != null ? Dialects.voiced(a.mob, words) : null;
 	}
 
 	// ---- (0.6.2) begging their pardon --------------------------------------------------------------------------------
