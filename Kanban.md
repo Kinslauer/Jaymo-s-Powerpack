@@ -39,6 +39,7 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · 💻 Odysseus · #2283 · in-review
 - [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · 💻 Odysseus · #2282 · in-review
+- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 💻 Odysseus · #2281 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -65,7 +66,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · blocked
 - [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · #2255 · ready
-- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 💻 Odysseus · #2281 · ready
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 
