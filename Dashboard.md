@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:42). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 12:23). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -9,9 +9,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 2026-11-27 04:46 Text pass content is complete (reviewed captain-ground.json lang keys and changes/kingdoms/hollow-captains-fix.md; all player-facing, no rewri…
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
-- [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
-- [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
-- [[Inbox/hunters-road-5|hunters-road-5]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
+- [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gn…
+- [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gn…
+- [[Inbox/hunters-road-5|hunters-road-5]] · 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gn…
 - [[Inbox/hunters-road-7|hunters-road-7]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-8|hunters-road-8]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-9|hunters-road-9]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
@@ -38,7 +38,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-9 waiting for a bot, 2 being built, 13 in review: see [[Kanban]].
+9 waiting for a bot, 1 being built, 14 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
