@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:40). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 04:12). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,7 +28,6 @@ kanban-plugin: board
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · changes · fixing review notes
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · changes · fixing review notes
-- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 🍇 Bacchus · claimed
 
 
 ## In review
@@ -41,6 +40,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
+- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 🍇 Bacchus · #2281 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
