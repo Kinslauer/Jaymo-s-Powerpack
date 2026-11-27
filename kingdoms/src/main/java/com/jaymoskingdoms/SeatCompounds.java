@@ -206,6 +206,7 @@ public final class SeatCompounds {
 		for (StructurePiece piece : start.getPieces()) {
 			if (piece instanceof Clean) {
 				GrandSeats.empty(level, piece.getBoundingBox());
+				underpin(level, start, piece.getBoundingBox());
 			}
 		}
 		// an Epic town with its castle is a great town: a kingdom far from any realm, its throne in the castle (Andy, 2026-11-20);
@@ -232,6 +233,28 @@ public final class SeatCompounds {
 			JaymosKingdoms.LOGGER.info("The seat compound by {} is {}'s ({})", bell, founded.name(), founded.type());
 		}
 		return founded;
+	}
+
+	/**
+	 * Fills the gap under a castle that generated floating: in a compound laid while its {@link Clean} box still reached
+	 * below the castle, beard_box dug the ground out from under it. The castle's foot is the lowest of its pieces (those
+	 * standing inside {@code clean}); when that is above the box's floor, every column standing on the foot gets ground
+	 * down to the land ({@link GrandSeats#footing}). A compound laid since is on the ground already and left as it is.
+	 */
+	private static void underpin(ServerLevel level, StructureStart start, BoundingBox clean) {
+		int foot = Integer.MAX_VALUE;
+		for (StructurePiece piece : start.getPieces()) {
+			BoundingBox b = piece.getBoundingBox();
+			if (piece instanceof Clean || piece instanceof Piece || b.minX() < clean.minX() || b.minZ() < clean.minZ() || b.maxX() > clean.maxX()
+				|| b.maxZ() > clean.maxZ()) {
+				continue;
+			}
+			foot = Math.min(foot, b.minY());
+		}
+		if (foot == Integer.MAX_VALUE || foot <= clean.minY()) {
+			return;
+		}
+		GrandSeats.footing(level, new BoundingBox(clean.minX() + 2, foot, clean.minZ() + 2, clean.maxX() - 2, clean.maxY(), clean.maxZ() - 2), foot);
 	}
 
 	/** A compound laid before the Epic town came round the castle: our own drawn homes instead. */
@@ -390,8 +413,10 @@ public final class SeatCompounds {
 			if (maze != null) {
 				all.addPiece(maze);
 			}
-			// last, the castle cleared of its spawners and loot as each chunk of it is made
-			all.addPiece(new Clean(core.inflatedBy(2)));
+			// last, the castle cleared of its spawners and loot as each chunk of it is made. Its box is widened only
+			// sideways: beard_box levels the ground to every piece's foot, so a box reaching below the castle dug the
+			// land out from under it and left it floating (Andy's clip of Dragard)
+			all.addPiece(new Clean(core.inflatedBy(2, 0, 2)));
 			return Optional.of(new GenerationStub(first, Either.right(all)));
 		}
 
