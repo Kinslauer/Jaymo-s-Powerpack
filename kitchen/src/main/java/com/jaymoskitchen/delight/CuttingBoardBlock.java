@@ -96,7 +96,15 @@ public class CuttingBoardBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-		if (!(level.getBlockEntity(pos) instanceof CuttingBoardEntity board) || board.item().isEmpty()) {
+		if (!(level.getBlockEntity(pos) instanceof CuttingBoardEntity board)) {
+			return InteractionResult.PASS;
+		}
+		if (board.item().isEmpty()) {
+			ItemStack held = player.getMainHandItem();
+			if (!level.isClientSide() && (held.isEmpty() || held.is(Delight.KNIVES))) {
+				// an empty board: say what goes on it first
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.station.board_empty").withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
 			return InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {

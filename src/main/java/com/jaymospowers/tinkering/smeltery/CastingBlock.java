@@ -76,6 +76,9 @@ public class CastingBlock extends Block implements EntityBlock {
 				ItemStack taken = casting.take();
 				if (!taken.isEmpty()) {
 					player.getInventory().placeItemBackInInventory(taken, Prediction.SERVER_ONLY);
+				} else if (!casting.busy() && com.jaymospowers.core.StationHints.idle(player)) {
+					// nothing on it: say how it's used
+					com.jaymospowers.core.StationHints.tell(player, basin ? "casting.basin" : "casting.table");
 				}
 			}
 			return InteractionResult.SUCCESS;

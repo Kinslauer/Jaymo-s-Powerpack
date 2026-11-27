@@ -54,11 +54,15 @@ public final class TipCard {
 
 	public static void init() {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CHAT, JaymosPowers.id("tip_card"), TipCard::draw);
-		// Andy (2026-11-20): "Can you add a command to disable tips?" Also a button on the menu's Notices page
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> dispatcher.register(ClientCommands.literal("tips")
-			.executes(c -> said(c.getSource(), enabled()))
-			.then(ClientCommands.literal("on").executes(c -> said(c.getSource(), setEnabled(true))))
-			.then(ClientCommands.literal("off").executes(c -> said(c.getSource(), setEnabled(false))))));
+		// Andy (2026-11-20): "Can you add a command to disable tips?" Also a button on the menu's Notices page. Andy
+		// (2026-11-27): "add a command to turn hints off": /hints is the same switch, and off it also hides the hint boxes
+		// (ContextHints, MoveHints, the pull-apart explanation)
+		for (String name : new String[] {"hints", "tips"}) {
+			ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> dispatcher.register(ClientCommands.literal(name)
+				.executes(c -> said(c.getSource(), enabled()))
+				.then(ClientCommands.literal("on").executes(c -> said(c.getSource(), setEnabled(true))))
+				.then(ClientCommands.literal("off").executes(c -> said(c.getSource(), setEnabled(false))))));
+		}
 	}
 
 	private static int said(FabricClientCommandSource source, boolean on) {
@@ -66,7 +70,10 @@ public final class TipCard {
 		return Command.SINGLE_SUCCESS;
 	}
 
-	/** Whether tip cards are shown at all (they can be turned off: /tips, or the Notices page). Kept on this computer. */
+	/**
+	 * Whether hints are shown at all: tip cards and the hint boxes (they can be turned off: /hints or /tips, or the Notices
+	 * page). Kept on this computer.
+	 */
 	public static boolean enabled() {
 		return !"true".equals(ZFighterClientConfig.get(OFF, "false"));
 	}

@@ -97,7 +97,7 @@ public final class ContextHints {
 	private static void tick(Minecraft minecraft) {
 		lastFade = fade;
 		LocalPlayer player = minecraft.player;
-		List<String[]> now = player == null || minecraft.gui.screen() != null || !player.isAlive() || player.isSpectator()
+		List<String[]> now = player == null || !TipCard.enabled() || minecraft.gui.screen() != null || !player.isAlive() || player.isSpectator()
 			|| Finishers.busy(player) || !(minecraft.hitResult instanceof EntityHitResult hit) ? List.of() : lines(player, hit.getEntity());
 		StringBuilder sig = new StringBuilder();
 		for (String[] line : now) {

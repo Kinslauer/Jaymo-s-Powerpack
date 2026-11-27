@@ -1,0 +1,4 @@
+# Tables say what's missing; /hints off
+- **What's missing**: using a station that would do nothing now says why on the action bar (a tip card while hints are on): the inscription table (lay gear and a gem, carve with a chisel), the blast furnace and coke oven (not built yet, or what to load), the casting table and basin, the smithing anvil, the forge hearth (no fuel, not lit, full, or put metal in), the chopping block. Holding a block stays quiet, so building against a station doesn't nag. At most once a second (`core/StationHints`).
+- **/hints on|off**: one switch for every hint, kept on this computer; `/tips` still works and the Notices page button now reads "Hints". Off hides tip cards, first-time tips, the crosshair controls box (`ContextHints`), the move hints (`MoveHints`) and the pull-apart explanation. Lines saying what's missing still show over the hotbar, so a station never goes silent.
+- Built (compileJava + compileClientJava); not played.
