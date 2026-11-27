@@ -1192,3 +1192,8 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 
 - 2026-11-26 (Codex, Legends patch 6): Andy assigned legends-p6-core-animations to Codex. Keep the LGPL notice with Core files and use our own code, poses and names for ARR add-ons. One Powers PR from master with a change note and no version bump, then Claude reviews.
 - 2026-11-26 Andy approved Lore.md "Where the blood began" (Night's Blood vampire plan, Picklists/Nycto-Plan.md).
+
+### 2026-11-26: HD effects for big moves
+- **Decided:** Add HD Effekseer effects for ultimates first. Everyday effects use the existing MagicFx art. Big moves come later.
+- **Applies to:** Powers and the pack's client renderer.
+- **Agent:** [[Agents/effekseer-hd]]

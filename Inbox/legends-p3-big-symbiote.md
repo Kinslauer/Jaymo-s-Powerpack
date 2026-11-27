@@ -1,9 +1,9 @@
 ---
-status: open
-for: apollo
+status: claimed
+for: codex
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: legends-p3
 pr: 
 ---
 
