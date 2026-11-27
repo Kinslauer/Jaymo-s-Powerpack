@@ -138,6 +138,8 @@ public final class MobCombat {
 	static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
 	static final float TELL_SIZE = 1.2F;
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+	/** Powers' tag on an attacker whose blow a guard can't block, only parry or dodge ({@code Guard.UNBLOCKABLE_TAG}): the yellow tier. */
+	public static final String UNBLOCKABLE_TAG = "jaymospowers.unblockable";
 	/** The tag Jaymo's Powers reads while a weapon's own swing lands: the blow answers to the weapon's distance, as a player's does. */
 	public static final String WEAPON_SWING_TAG = "jaymospowers.weapon_swing";
 	/** (0.7.622) Powers' Crowds: a foe waiting its turn in a crowd. */
