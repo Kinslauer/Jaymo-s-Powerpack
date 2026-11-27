@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 10:24). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 10:27). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -45,7 +45,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-13 waiting for a bot, 2 being built, 9 in review: see [[Kanban]].
+12 waiting for a bot, 3 being built, 9 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -115,7 +115,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-29 problems in the notes: [[Health]].
+28 problems in the notes: [[Health]].
 
 ## Last week
 
