@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 02:55). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 02:56). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -37,10 +37,10 @@ kanban-plugin: board
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · in-review
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · 🍇 Bacchus · #2217 · in-review
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
