@@ -339,9 +339,13 @@ public final class CombatArts {
 			&& (e instanceof Enemy || e instanceof Mob mob && mob.getTarget() == player));
 	}
 
-	/** One of our own blows: counted as {@code player}'s, but not as a link in their chain, and through the hurt cooldown. */
+	/**
+	 * One of our own blows: counted as {@code player}'s, but not as a link in their chain, and through the hurt cooldown.
+	 * Locked on (Powers' lock-on), it lands only on the locked foe, unless a flail or the chain axe is in hand
+	 * ({@link #strikesOnly}).
+	 */
 	public static void strike(ServerLevel level, ServerPlayer player, LivingEntity target, float amount) {
-		if (amount <= 0.0F || !target.isAlive()) {
+		if (amount <= 0.0F || !target.isAlive() || !strikesOnly(player, target)) {
 			return;
 		}
 		striking = true;
@@ -351,6 +355,25 @@ public final class CombatArts {
 		} finally {
 			striking = false;
 		}
+	}
+
+	/**
+	 * Andy (2026-11-27): locked on, attacks hit only the locked foe, "with the exception of flails and chain axe, as they
+	 * swing in a wide area regardless". Whether {@code player}'s blow may land on {@code target}: not locked on, a flail or
+	 * the chain axe in hand, or {@code target} is the locked foe.
+	 */
+	public static boolean strikesOnly(ServerPlayer player, LivingEntity target) {
+		LivingEntity lock = PowersCompat.lockTarget(player);
+		return lock == null || target == lock || wide(player.getMainHandItem());
+	}
+
+	/** A flail (Balkon's, by id) or Powers' chain axe: they sweep wide whatever the lock. */
+	public static boolean wide(net.minecraft.world.item.ItemStack held) {
+		if (held.isEmpty()) {
+			return false;
+		}
+		net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(held.getItem());
+		return id.getNamespace().equals("weaponmod") && id.getPath().startsWith("flail") || id.toString().equals("jaymospowers:chain_axe");
 	}
 
 	// ---- active skills ---------------------------------------------------------------------------------------------

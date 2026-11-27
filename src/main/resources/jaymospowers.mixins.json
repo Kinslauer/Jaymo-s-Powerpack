@@ -41,6 +41,7 @@
 		"EdgeLivingMixin",
 		"SilverSearMixin",
 		"BlowsPlayerMixin",
+		"LockedSwingMixin",
 		"PlayerCritMixin",
 		"PlayerCritAttributesMixin",
 		"ArmourWearMobMixin",

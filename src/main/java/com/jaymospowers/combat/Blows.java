@@ -119,7 +119,7 @@ public final class Blows {
 	}
 
 	/** (a swing something cut short never ends: it is over with its tick all the same) */
-	private static boolean swinging(LivingEntity attacker) {
+	static boolean swinging(LivingEntity attacker) {
 		Long began = SWINGING.get(attacker);
 		return began != null && began == attacker.level().getGameTime();
 	}
