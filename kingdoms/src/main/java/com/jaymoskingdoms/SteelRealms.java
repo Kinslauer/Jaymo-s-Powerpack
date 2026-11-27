@@ -2,14 +2,12 @@ package com.jaymoskingdoms;
 
 import java.util.HashMap;
 import java.util.List;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ItemLore;
@@ -87,18 +85,9 @@ public final class SteelRealms {
 		BLUEPRINT = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).stacksTo(1).rarity(Rarity.RARE)));
 		net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents.modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.INGREDIENTS)
 			.register(output -> output.accept(BLUEPRINT));
+		// (the blueprint is kept in the smith's real pockets, NpcPockets: a pickpocket's lift, the body menu's search and
+		// the drop at death all go through them)
 		ServerTickEvents.END_SERVER_TICK.register(SteelRealms::keep);
-		// (the smith's body gives up what was in its pocket)
-		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (entity instanceof Villager v && entity.level() instanceof ServerLevel level) {
-				SimpleContainer bag = v.getInventory();
-				for (int i = 0; i < bag.getContainerSize(); i++) {
-					if (bag.getItem(i).is(BLUEPRINT)) {
-						v.spawnAtLocation(level, bag.removeItemNoUpdate(i));
-					}
-				}
-			}
-		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			SEEN.clear();
 			NEXT_COPY.clear();
@@ -170,11 +159,11 @@ public final class SteelRealms {
 			}
 			List<Villager> smiths = level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
 				v -> v.isAlive() && !v.isBaby() && smith(v));
-			if (smiths.isEmpty() || smiths.stream().anyMatch(v -> v.getInventory().hasAnyMatching(s -> s.is(BLUEPRINT)))
+			if (smiths.isEmpty() || smiths.stream().anyMatch(v -> NpcPockets.holds(level, v, s -> s.is(BLUEPRINT)))
 				|| now < NEXT_COPY.getOrDefault(f.id(), Long.MIN_VALUE)) {
 				continue;
 			}
-			if (smiths.get(0).getInventory().addItem(blueprint(f)).isEmpty()) {
+			if (NpcPockets.give(level, smiths.get(0), blueprint(f))) {
 				NEXT_COPY.put(f.id(), now + RECOPY);
 			}
 		}
