@@ -18252,3 +18252,43 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - The five poison vials are now made from Jaymo's Powers' pastes (pure toxin, toxic paste, poison paste) when Powers is loaded; the old vanilla recipes stay only when it is not.
 - Loading hints 218 to 223.
 - Built; not played.
+
+## 0.13.82 (2026-11-27): Hunter's Road 7A: snuffed and unhealing in Kingdoms, hints 224 to 229 (#2290)
+
+- Kingdoms reads Powers' `snuffed` and `unhealing` effects (`PowersCompat.snuffed/unhealed`): a snuffed caster cannot cast Mana spells, forbidden arts, night forms, blood leaps or the werewolf leap; an unhealing one cannot turn into a night form, a werewolf, or a vampire.
+- Loading hints 224 to 229 (`HINTS` is 229) tell of fat, oils, the pot, the slick, acid and the snuffer.
+- Built; not played.
+
+## 0.13.83 (2026-11-27): Hunter's Road 7b: the town herbalist, herbal tonics, ergot (#2290)
+
+- **Herbalist**: a town trade at an herbalist's table, with a stall building. Sells herbs, formulas, spirits and empty phials; buys the parts cut from poisoned beasts and monsters. The order herbalist (`HerbalistWares`) is unchanged.
+- **Herbal tonics**: at the table, a water bottle in one hand and a stack of one herb in the other makes a tonic (up to five herbs). It feeds a little, gives a good and a bad effect, each longer per herb.
+- **Ergot**: a new Poisons kind (vial of ergot: sickness, slowed hands, weakness).
+- Classes: `Herbalists`, `Poisons`, `Professions`, `JobHalls#herbalistStall`.
+- Built; not played. Trades with Powers or Kitchen items carry load conditions; the formula trades' item components were not checked in game.
+
+## 0.13.84 (2026-11-27): spectate viewcone label trimmed - no coordinates, no Running line (#2292)
+
+- **Spectate view label** (`NpcFocus`): the label over an NPC you spectate no longer shows coordinates or the "Running: ..." list of goals and behaviours. Path reads "Path: 4.7 m away, 10 steps left" (or "can't reach, ends X m short"), the walk target and a "walking" focus give only how far. Focus/Thinking/Stuck, Alert, Task, Activity, Target and suspicion lines stay; the path line drawing is unchanged.
+- Start the game with `-Djaymoskingdoms.eyesDetail=true` to get the coordinates and the Running line back for AI debugging.
+- Built; not played.
+
+## 0.13.85 (2026-11-27): Villagers going in at night aren't "Running scared" (#2293)
+
+- Andy's clip: a villager walking home at night showed "Running scared" with its activity "rest" and no foe anywhere. It
+  wasn't frightened: being out under the open sky at night (or in heavy rain) sends people in (`TakeCover`), and that
+  was handled as a fright (`Frights.shelter`), so Jade and the spectate label called it running scared, and it hurried.
+- Going in is now its own kind (`Frights.cover`): at night they walk in at an ordinary pace (in rain they still hurry),
+  don't yelp, and Jade says "Going home", "Resting at home" or "Sheltering" (`NpcTasks`). A monster that turns up while
+  they're going in frightens them at once, with the cry, and they run from it; before, being on their way in held off
+  the fright (and the cry) for up to 15 seconds. War alarms and twisters are real frights, as before.
+- Built; not played.
+
+## 0.13.86 (2026-11-27): Night's Blood 3 - blood worth drinking (#2291)
+
+- **Fill your own bottles**: a vampire holding someone by the throat with a glass bottle in the off hand fills it (the gulps go into the bottle, 250 mB to a bottle, not into the vampire; a Kitchen blood bottle named for the donor). A glass bottle used (main hand) on a person with an open cut is held under the wound and fills much slower. Drinking a bottle gives its mB.
+- **Every blood tastes of its people**: Frostborn (cold can't touch you), Emberborn (fire resistance), Tideborn (dolphin's grace), Stoneborn (knockback resistance, slower step), Verdant (half the mB), Divine-born (it burns, as holy dread), Nightborn (a long, deep fill: half again, a little a second). A king's or lord's blood gives double mB. Bottles carry the taste and greatness. A favourite blood can now be the blood's ask ("Drink the blood you favour"; kept by a bite or a bottle of theirs).
+- **Ask to drink**: new MCA talk option for vampires with a villager who knows or half-knows (Suspicion, Exposure). Paid in emeralds or in what they want (OwnWants), or as a friend's favour; no alarm, no struggle. A refusal is remembered (new memories let_drink / refused_drink), a timid or devout villager may report it.
+- **Read your prey**: blood vision's outline takes the colour of the creature's blood (as BleedOut picks it) and dims as its health runs low.
+- Classes: BloodTaste, BloodBottling, BloodAsk; KitchenCompat (bottle donors, cold-proof), Hemomancy#drankBottle, BloodRequests (FAVOURITE), BloodVision, PowersCompat#bloodColour. Needs the Kitchen change (bottle memory) from the same patch. Loading hints 250-251.
+- Built; not played. Not tested in game: every taste's effect, the wound catch, the talk option.

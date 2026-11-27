@@ -332,6 +332,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.BloodAsk.ANSWER.equals(answer)) {
+			// (Night's Blood) a vampire asks a villager who knows or half-knows what they are for a drink: paid, or refused
+			villager.sendChatMessage(com.jaymoskingdoms.BloodAsk.ask(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && GiftTales.ANSWER.equals(answer)) {
 			// (0.7.227) asked about the power you saw: what they say of it
 			villager.sendChatMessage(GiftTales.ask(player, villager), player);

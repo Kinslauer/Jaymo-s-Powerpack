@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:folk_grease",
+  "essences": {
+    "life": 11,
+    "mind": 7,
+    "metal": 4
+  },
+  "result": {
+    "item": "jaymospowers:oil_people",
+    "count": 1,
+    "grade": "expert"
+  },
+  "research": "hunters_oils"
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/cake_slice2",
+  "textures": {
+    "particle": "jaymoskitchen:block/toxic_cake_side",
+    "bottom": "jaymoskitchen:block/toxic_cake_bottom",
+    "top": "jaymoskitchen:block/toxic_cake_top",
+    "side": "jaymoskitchen:block/toxic_cake_side",
+    "inside": "jaymoskitchen:block/toxic_cake_inner"
+  }
+}

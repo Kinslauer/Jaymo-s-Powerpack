@@ -1083,6 +1083,10 @@ public final class Vampires {
 
 	/** {@code mob} becomes a vampire of {@code kind} (never fed). */
 	static void turn(ServerLevel level, PathfinderMob mob, Kind kind) {
+		// (Hunter's Road 7) under Powers' healing-stopper dust a body does not turn
+		if (PowersCompat.unhealed(mob)) {
+			return;
+		}
 		mob.removeAttached(BITTEN);
 		mob.setAttached(VAMPIRE, new Vampire(kind.id(), nightIndex(level.getOverworldClockTime()) - (kind == Kind.ABSTAINER ? 0 : 1), 0L));
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);

@@ -16,5 +16,6 @@ public final class AlchemyClient {
 		MettleJump.init();
 		ToxicityClient.init();
 		DarkSightClient.init();
+		OilClient.init();
 	}
 }

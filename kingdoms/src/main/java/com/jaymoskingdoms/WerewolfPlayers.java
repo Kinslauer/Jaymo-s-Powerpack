@@ -215,7 +215,10 @@ public final class WerewolfPlayers {
 			return;
 		}
 		begin(player, player.level().getServer().overworld().getGameTime(), true);
-		FORMS.get(player.getUUID()).wild = true;
+		Form started = FORMS.get(player.getUUID());
+		if (started != null) {
+			started.wild = true;
+		}
 	}
 
 	/** Whether {@code w} is a player's beast. */
@@ -367,6 +370,10 @@ public final class WerewolfPlayers {
 	}
 
 	private static void begin(ServerPlayer player, long now, boolean forced) {
+		// (Hunter's Road 7) under the healing-stopper dust the body will not turn
+		if (PowersCompat.unhealed(player)) {
+			return;
+		}
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}

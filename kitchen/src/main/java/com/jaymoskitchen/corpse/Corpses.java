@@ -603,8 +603,13 @@ public final class Corpses {
 				scale.add(entry);
 			}
 		}
+		boolean poisoned = PoisonedParts.diedPoisoned(mob);
 		for (String key : HEAVY_KEYS) {
 			tag.remove(key);
+		}
+		if (poisoned) {
+			// (a scalpel takes a part from a body that died poisoned: see PoisonedParts)
+			tag.putBoolean(PoisonedParts.POISONED_KEY, true);
 		}
 		if (!scale.isEmpty()) {
 			tag.put("attributes", scale);

@@ -118,6 +118,8 @@ public final class TownTrades {
 		out.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
 		// and a sexton, for the dead and what the fighting leaves (Sextons)
 		out.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.SEXTON).orElseThrow());
+		// and an herbalist, for the herbs and the tonics (Herbalists)
+		out.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.HERBALIST).orElseThrow());
 		if (watered(level, f.seat())) {
 			out.add(VillagerProfession.FISHERMAN);
 		}

@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.PowersCompat;
 import com.jaymoskingdoms.VampirePlayers;
 import com.jaymoskingdoms.Vampires;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -39,6 +40,9 @@ public final class BloodVision {
 	static final float EDGE = 0.45F, EDGE_BEAT = 0.25F, STARVING_EDGE = 0.65F;
 	/** Outline colours: blood at rest and at the top of a beat. */
 	static final int DIM = 0x7A0A0A, BRIGHT = 0xE01818;
+	/** Read your prey: how much of its blood's colour is left in the outline at the last of its health, how dark a blood may be (0-255) before it is lifted, and how much of the colour shows between beats. */
+	static final float LOW_DIM = 0.25F, BLOOD_REST = 0.55F;
+	static final int SEEN_FLOOR = 110;
 	/** How fast the sight fades in at dusk and out at dawn (per tick). */
 	static final float FADE = 0.02F;
 	/** A player in sight: the beat's period face to face (ticks), how much the edges darken at rest and at the top of a beat, and how fast it fades in and out (per tick). */
@@ -196,7 +200,30 @@ public final class BloodVision {
 			float t = ((Minecraft.getInstance().level.getGameTime() % 1000L) + partialTicks) / WOUNDED_PULSE;
 			return ARGB.opaque(ARGB.srgbLerp(0.5F + 0.5F * Mth.sin(t * Mth.TWO_PI), DIM, BRIGHT));
 		}
+		if (entity instanceof LivingEntity living && living != Minecraft.getInstance().player) {
+			int blood = PowersCompat.bloodColour(living);
+			if (blood >= 0) {
+				return readPrey(living, blood, partialTicks);
+			}
+		}
 		return color(partialTicks);
+	}
+
+	/**
+	 * Read your prey: the outline takes the colour of the creature's blood (as Powers' bleeding picks it), beating as the sight
+	 * does, and dims as its blood runs low (its health, from {@link #LOW_DIM} of the colour at the last of it to the whole at full).
+	 */
+	private static int readPrey(LivingEntity prey, int blood, float partialTicks) {
+		float k = beat(partialTicks) * Math.max(Mth.lerp(partialTicks, lastStrength, strength), Mth.lerp(partialTicks, lastSeen, seen));
+		float left = Mth.clamp(prey.getHealth() / Math.max(1.0F, prey.getMaxHealth()), 0.0F, 1.0F);
+		float full = Mth.lerp(left, LOW_DIM, 1.0F);
+		// a dark blood is lifted till it can be seen at all
+		int r = ARGB.red(blood), g = ARGB.green(blood), b = ARGB.blue(blood);
+		int most = Math.max(r, Math.max(g, b));
+		float lift = most < SEEN_FLOOR && most > 0 ? (float)SEEN_FLOOR / most : 1.0F;
+		int bright = ARGB.color(255, Math.min(255, (int)(r * lift * full)), Math.min(255, (int)(g * lift * full)), Math.min(255, (int)(b * lift * full)));
+		int rest = ARGB.srgbLerp(BLOOD_REST, 0x000000, bright);
+		return ARGB.opaque(ARGB.srgbLerp(k, rest, bright));
 	}
 
 	/** The outline colour of a sensed creature right now. */

@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:brute_grease",
+  "essences": {
+    "venom": 11,
+    "sulphur": 9,
+    "salt": 7
+  },
+  "result": {
+    "item": "jaymospowers:oil_acid",
+    "count": 1,
+    "grade": "expert"
+  },
+  "research": "hunters_oils"
+}

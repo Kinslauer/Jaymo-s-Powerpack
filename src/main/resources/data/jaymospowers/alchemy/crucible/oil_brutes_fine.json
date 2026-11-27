@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:brute_grease",
+  "essences": {
+    "war": 9,
+    "earth": 4,
+    "metal": 3
+  },
+  "result": {
+    "item": "jaymospowers:oil_brutes",
+    "count": 1,
+    "grade": "fine"
+  },
+  "research": "hunters_oils"
+}

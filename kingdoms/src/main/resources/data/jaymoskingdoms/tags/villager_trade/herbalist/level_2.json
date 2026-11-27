@@ -1,0 +1,24 @@
+{
+  "values": [
+    {
+      "id": "jaymoskingdoms:herbalist/2/sell_juniper",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/2/sell_spirits",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/2/buy_green_spit",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/2/buy_poison_sac",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/2/buy_venom_gland",
+      "required": false
+    }
+  ]
+}

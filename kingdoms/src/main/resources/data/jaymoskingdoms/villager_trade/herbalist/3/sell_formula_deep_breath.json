@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "jaymospowers"
+      ]
+    }
+  ],
+  "gives": {
+    "id": "jaymospowers:formula",
+    "components": {
+      "jaymospowers:formula": "deep_breath"
+    }
+  },
+  "max_uses": 4,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 6
+  },
+  "xp": 10
+}

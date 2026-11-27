@@ -746,6 +746,9 @@ public final class NightGifts {
 
 	/** {@code O}, a werewolf: Leap. */
 	private static boolean leap(ServerLevel level, ServerPlayer player, boolean beast) {
+		if (PowersCompat.snuffed(player)) {
+			return false;
+		}
 		if (!player.onGround() && !player.isInWater() && !player.onClimbable()) {
 			return false;
 		}

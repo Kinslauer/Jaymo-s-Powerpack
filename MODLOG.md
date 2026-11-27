@@ -8853,3 +8853,21 @@ Deviations from the plan:
 - Grey sight outlines the living in the dark for the drinker alone (`DarkSightClient`).
 - Reincarnate: the wipe already removes every Powers attachment, so part A's and B's state go with it (no change needed).
 - Built; not played.
+
+## 0.28.19 (2026-11-27): Hunter's Road 7A: oils, oil pot, sash, bombs, acid, slick (#2290)
+
+- **Oils**: 14 oil flasks (four blade oils by monster kind, seven effect oils, mending oil, fire-ward and healing splashes), made in the crucible from Kitchen grease behind the Hunter's Oils research. A blade carries one oil: +2/+4/+6 damage for 20/40/60 swings (blade oils), the effect oil's wound otherwise; used up on every swing, with a sheen on the held blade. Use a flask with a blade in the other hand, throw it with nothing there, or sneak-use it on the ground to spill a slick.
+- **Oil pot**: a placed pot that holds one oil, takes flasks, dips blades, fills bottles, sashes and bandoliers, and slowly refills itself.
+- **Oil sash and bandolier**: held items filled from a pot, thrown as bombs, each throw spends a charge (about 16 per pocket). `OilSashItem.endless` is the hook for the endless bandolier.
+- **Bombs**: eight bombs (burst, flash, firespread, poison cloud, volatile gas, freezing, magic snuffer, healing stopper), crafted and spent; a spent casing comes back (`Refills`). The snuffer stops teleporting, casting, Spell Engine spells, portals and mana powers for a while; the stopper stops healing, invisibility and turning (effects `snuffed`, `unhealing`).
+- **Acid**: acid thrown on ore dissolves the rock round it and leaves extra ore; the strongest eats soft blocks. `jaymospowers:acid_proof` protects blocks.
+- **Slick**: spilled oil slows walkers and bursts into flame near fire, torches, lit campfires and furnaces, burning projectiles.
+- Built and compiled; not played. Guardian and mob beams are not hooked by the snuffer. The `jaymoskingdoms:nest` entry of `burst_breaks` is a guess (optional).
+
+## 0.28.20 (2026-11-27): Hunter's Road 7b: herbs, the poison garden, grafting (#2290)
+
+- **Herbs**: feverfew and valerian (meadow crop flowers), juniper (taiga berry bush), cave ivy (cave walls and roofs), bracken (tall fern), cardinal flower (red swamp flower), earthball and honey fungus (grow huge), mandrake root (sniffer digging), ergot (wheat in rain). Each has essences, a worldgen placement and a reason it grows there.
+- **Poison garden**: jungle mint, nightshade, water hemlock, monkshood (blue frost flower) and bloodroot grow only on farmland worked with poison paste. Seeds come from grinding the plant in a mortar.
+- **Grafting**: five new strains (dusk hemlock, sunbane, warwort, rime mint, eddy bell). Grafting without knowing the leans kills the crop.
+- Classes: `alchemy/herbs/Garden`, `HerbCropBlock`, `PoisonedFarmlandBlock`, `JuniperBushBlock`, `Grafting`.
+- Built; not played.

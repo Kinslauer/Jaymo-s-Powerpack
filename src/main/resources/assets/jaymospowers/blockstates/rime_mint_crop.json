@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "age=0,wild=false": {
+      "model": "jaymospowers:block/rime_mint_crop_stage0"
+    },
+    "age=0,wild=true": {
+      "model": "jaymospowers:block/rime_mint_crop_stage3"
+    },
+    "age=1,wild=false": {
+      "model": "jaymospowers:block/rime_mint_crop_stage0"
+    },
+    "age=1,wild=true": {
+      "model": "jaymospowers:block/rime_mint_crop_stage3"
+    },
+    "age=2,wild=false": {
+      "model": "jaymospowers:block/rime_mint_crop_stage1"
+    },
+    "age=2,wild=true": {
+      "model": "jaymospowers:block/rime_mint_crop_stage3"
+    },
+    "age=3,wild=false": {
+      "model": "jaymospowers:block/rime_mint_crop_stage1"
+    },
+    "age=3,wild=true": {
+      "model": "jaymospowers:block/rime_mint_crop_stage3"
+    },
+    "age=4,wild=false": {
+      "model": "jaymospowers:block/rime_mint_crop_stage2"
+    },
+    "age=4,wild=true": {
+      "model": "jaymospowers:block/rime_mint_crop_stage3"
+    },
+    "age=5,wild=false": {
+      "model": "jaymospowers:block/rime_mint_crop_stage2"
+    },
+    "age=5,wild=true": {
+      "model": "jaymospowers:block/rime_mint_crop_stage3"
+    },
+    "age=6,wild=false": {
+      "model": "jaymospowers:block/rime_mint_crop_stage2"
+    },
+    "age=6,wild=true": {
+      "model": "jaymospowers:block/rime_mint_crop_stage3"
+    },
+    "age=7,wild=false": {
+      "model": "jaymospowers:block/rime_mint_crop_stage3"
+    },
+    "age=7,wild=true": {
+      "model": "jaymospowers:block/rime_mint_crop_stage3"
+    }
+  }
+}
