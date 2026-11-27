@@ -49,7 +49,7 @@ import org.jspecify.annotations.Nullable;
  * tool belt) weigh with it. What's packed (the inventory, both hands, the back slot, the worn backpack and tool belt,
  * and a body carried in the arms, by {@link #CARRIED_SHARE} of its {@link ThrowWeight#kilograms}, so a fattened Animal
  * Weights pig is a heavier load) is set against what the body bears freely ({@link #BASE_KG}, more with the pockets of
- * worn clothes, a backpack's straps and a tool belt).
+ * worn clothes, a backpack's straps and a tool belt, and Jaymo's Kingdoms' Endurance attribute ({@link #endurance})).
  * <p>Within that, nothing changes: nobody is slowed for carrying a sensible load. Past it the overload ({@link #over},
  * 0 to 1) slows the step, the swing and the jump, adds to the armour's load wherever that tires ({@code Exertion}) and
  * weighs the walk down ({@code client/moving/BodyWeight}). Worn armour isn't counted here: {@link ArmourKind#load}
@@ -194,7 +194,33 @@ public final class PackWeight {
 		if (!ToolBeltCompat.worn(player).isEmpty()) {
 			kg += TOOL_BELT_KG;
 		}
-		return kg;
+		return kg + endurance(player);
+	}
+
+	/** Kingdoms' {@code Stats.carryKg}, looked for once (null without Kingdoms). */
+	private static final java.lang.reflect.@Nullable Method ENDURANCE = enduranceMethod();
+
+	private static java.lang.reflect.@Nullable Method enduranceMethod() {
+		if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
+			return null;
+		}
+		try {
+			return Class.forName("com.jaymoskingdoms.Stats").getMethod("carryKg", Player.class);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			return null;
+		}
+	}
+
+	/** What {@code player}'s Endurance (Jaymo's Kingdoms' attribute) adds to what's borne freely (kilograms; 0 without Kingdoms). */
+	static float endurance(Player player) {
+		if (ENDURANCE == null) {
+			return 0.0F;
+		}
+		try {
+			return (float) ENDURANCE.invoke(null, player);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return 0.0F;
+		}
 	}
 
 	/** The step, the swing and the jump, slowed by the overload (or let go again). */
