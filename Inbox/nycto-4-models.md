@@ -26,3 +26,4 @@ claim_handbacks: 1
 - 2026-11-27 09:34 Andy 2026-11-27 9:21 AM: Antigravity hit its quota mid-task, so this goes to Prometheus (hermes-modeller), whose main model is now kimi-k2.7-code:cloud. Antigravity's uncommitted start (night_horror bbmodel, geo, animation, textures, previews) is in the T3 worktree named above; reuse what helps.
 - 2026-11-27 09:37 hermes-modeller's last run stopped before finishing; handed back as open.
 - 2026-11-27 09:41 Andy 2026-11-27 9:40 AM: Prometheus (hermes-modeller) owns this now. Do NOT resume it in T3/Antigravity after the quota reset; the T3 worktree is only reference material.
+- 2026-11-27 09:54 Andy 2026-11-27 9:54 AM: bigger wings. (He asked Antigravity for this at 9:06, just before its quota ran out; the T3 previews may not have it yet.) Make the folded membrane wings clearly larger on the night_horror model, and check front, side and back previews.
