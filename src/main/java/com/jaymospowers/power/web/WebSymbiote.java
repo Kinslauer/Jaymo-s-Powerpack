@@ -1004,9 +1004,10 @@ public final class WebSymbiote {
 		return until != null && player.level().getGameTime() < until;
 	}
 
+	/** Ticks between the rhythm struggle's pulses; a press within {@code BEAT_WINDOW} of one is on the beat. */
 	public static final int BEAT_PERIOD = 16;
 	private static final int BEAT_WINDOW = 3;
-	private static final float BEAT_PRESS = 4.0F, BEAT_FADE = 0.035F;
+	private static final float BEAT_PRESS = 4.0F, BEAT_MISS = 3.0F, BEAT_FADE = 0.035F;
 	public static final AttachmentType<Long> RHYTHM = AttachmentRegistry.create(JaymosPowers.id("web_brute_rhythm"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
 
@@ -3520,16 +3521,17 @@ public final class WebSymbiote {
 		if (rhythm != null) {
 			long age = now - rhythm;
 			long pulse = Math.floorDiv(age + BEAT_WINDOW, BEAT_PERIOD);
-			if (!sneak || live.rhythmLevel != player.level() || pulse == live.lastBeat) {
+			if (live.rhythmLevel != player.level()) {
+				return;
+			}
+			if (!sneak || !beat(age) || pulse == live.lastBeat) {
+				// a press off the beat (or a second one on the same beat) costs progress, so timing beats mashing
+				live.struggle = Math.max(0.0F, live.struggle - BEAT_MISS);
+				syncStruggle(player, live);
 				return;
 			}
 			live.lastBeat = pulse;
-			if (!beat(age)) {
-				// off-beat press costs a pulse: tapping Shift can't score the same as timing the beat
-				live.struggle = Math.max(0.0F, live.struggle - BEAT_PRESS);
-			} else {
-				live.struggle += BEAT_PRESS;
-			}
+			live.struggle += BEAT_PRESS;
 		} else {
 			// The red hunt's hold is stronger.
 			live.struggle += live.redHunt ? RED_HUNT_STRUGGLE : 1.0F;

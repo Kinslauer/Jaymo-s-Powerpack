@@ -17,8 +17,8 @@ import net.minecraft.client.player.LocalPlayer;
 
 /** The big body's remappable moves and the local camera's response to its strain. */
 final class WebBruteClient {
-	private static final int[] DEFAULTS = {InputConstants.KEY_F8, InputConstants.KEY_F10,
-		InputConstants.KEY_F12, InputConstants.KEY_PRINTSCREEN, InputConstants.KEY_PAUSE,
+	private static final int[] DEFAULTS = {InputConstants.KEY_F6, InputConstants.KEY_F10,
+		InputConstants.KEY_F12, InputConstants.KEY_F8, InputConstants.KEY_PAUSE,
 		InputConstants.KEY_NUMLOCK, InputConstants.KEY_SCROLLLOCK};
 	private static final KeyMapping[] KEYS = new KeyMapping[DEFAULTS.length];
 

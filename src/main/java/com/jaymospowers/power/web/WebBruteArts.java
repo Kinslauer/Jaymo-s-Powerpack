@@ -85,7 +85,7 @@ public final class WebBruteArts {
 		}
 	}
 
-	private record Stone(BlockCluster body, Vec3 velocity, Art art, UUID owner) {
+	private record Stone(BlockCluster body, Vec3 velocity, Art art, UUID owner, ServerLevel level) {
 	}
 
 	private static final class Run {
@@ -138,6 +138,8 @@ public final class WebBruteArts {
 			tickFlying(server);
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
+		net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL
+			.register((player, origin, destination) -> forget(player));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				forget(player);
@@ -479,7 +481,7 @@ public final class WebBruteArts {
 		body.refreshBox();
 		body.script(true, false);
 		body.linger(45, true);
-		run.stones.add(new Stone(body, motion, run.art, player.getUUID()));
+		run.stones.add(new Stone(body, motion, run.art, player.getUUID(), run.level));
 	}
 
 	private static @Nullable Stone tickStone(ServerPlayer player, Stone stone) {
@@ -508,7 +510,7 @@ public final class WebBruteArts {
 			return null;
 		}
 		body.setPos(to.x, to.y, to.z);
-		return new Stone(body, stone.velocity().add(0, -0.085, 0), stone.art(), stone.owner());
+		return new Stone(body, stone.velocity().add(0, -0.085, 0), stone.art(), stone.owner(), stone.level());
 	}
 	private static void tickStones(ServerPlayer player, List<Stone> stones) {
 		ListIterator<Stone> iterator = stones.listIterator();
@@ -594,16 +596,18 @@ public final class WebBruteArts {
 	static void hit(ServerPlayer player, LivingEntity foe, float damage, Vec3 shove) {
 		if (foe.hurtServer(player.level(), player.damageSources().playerAttack(player), damage)) {
 			Crushing.mark(foe);
-			velocity(foe, foe.getDeltaMovement().add(shove));
+			shove(foe, foe.getDeltaMovement().add(shove));
+		}
+	}
+
+	/** Moves a foe (the move's hit still lands): anything too big or a boss to haul is left where it stands. */
+	static void shove(Entity foe, Vec3 motion) {
+		if (WebHaul.haulable(foe)) {
+			velocity(foe, motion);
 		}
 	}
 
 	static void velocity(Entity entity, Vec3 motion) {
-		// bosses take the hits but are never dragged or shoved
-		if (entity instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon
-			|| entity instanceof net.minecraft.world.entity.boss.wither.WitherBoss) {
-			return;
-		}
 		entity.setDeltaMovement(motion);
 		entity.needsSync = true;
 		entity.syncVelocity = true;

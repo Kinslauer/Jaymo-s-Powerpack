@@ -300,7 +300,7 @@ public final class WebFury {
 			for (LivingEntity foe : WebBruteArts.foes(player, at, 2.3, 0.9)) {
 				if (foe.onGround()) {
 					Vec3 out = foe.position().subtract(at).horizontal().normalize().scale(0.13);
-					WebBruteArts.velocity(foe, foe.getDeltaMovement().add(out));
+					WebBruteArts.shove(foe, foe.getDeltaMovement().add(out));
 				}
 			}
 			distance -= step;

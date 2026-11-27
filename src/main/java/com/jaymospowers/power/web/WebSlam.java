@@ -158,10 +158,15 @@ public final class WebSlam {
 		player.removeAttached(STANCE);
 		Double peak = PEAK.remove(player.getUUID());
 		// a landing while busy still drops the stance, it just doesn't slam
-		if (!blocked && phase == 2 && player.onGround() && WebSymbiote.bulked(player) && now - since >= MIN_TICKS) {
+		if (!blocked && phase == 2 && nearGround(player) && WebSymbiote.bulked(player) && now - since >= MIN_TICKS) {
 			READY.put(player.getUUID(), now + COOLDOWN);
 			slam(player, peak == null ? 0.0F : (float)Math.max(0.0, peak - player.getY()));
 		}
+	}
+
+	/** On the ground, or close enough above it that the landing packet simply arrived ahead of the move. */
+	private static boolean nearGround(ServerPlayer player) {
+		return player.onGround() || !player.level().noCollision(player, player.getBoundingBox().expandTowards(0.0, -1.5, 0.0));
 	}
 
 	/** Every tick: the stance ends if the big body goes. */
