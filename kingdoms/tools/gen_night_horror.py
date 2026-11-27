@@ -534,13 +534,12 @@ def build_rig():
 	uv_foot = b.uv_box("foot", 42, 24, 2, 2, 4, "hide", hi=4, mid=3, side=3, back=2, lo=2, dark=1)
 
 	# Band 3 (y = 36..52): inner (9x12x1 -> 20x13) & outer (12x15x1 -> 26x16) wing membranes
-	uv_wing_in = b.uv_box("wing_in", 0, 36, 9, 12, 1, "membrane", detail_fn=lambda s, r: paint_wing_membrane(s, r, inner=True))
-	uv_wing_out = b.uv_box("wing_out", 20, 36, 12, 15, 1, "membrane", detail_fn=lambda s, r: paint_wing_membrane(s, r, inner=False))
+	uv_wing_in = b.uv_box("wing_in", 0, 36, 11, 15, 1, "membrane", detail_fn=lambda s, r: paint_wing_membrane(s, r, inner=True))
+	uv_wing_out = b.uv_box("wing_out", 24, 36, 15, 18, 1, "membrane", detail_fn=lambda s, r: paint_wing_membrane(s, r, inner=False))
 
 	# Band 4 (y = 53..55): wing arm & finger leading bones
-	uv_wing_arm = b.uv_box("wing_arm", 0, 53, 9, 1, 1, "membrane", hi=5, mid=4, side=4, back=3, lo=2, dark=1)
-	uv_wing_finger = b.uv_box("wing_finger", 20, 53, 12, 1, 1, "membrane", hi=5, mid=4, side=4, back=3, lo=2, dark=1)
-
+	uv_wing_arm = b.uv_box("wing_arm", 0, 57, 11, 1, 1, "membrane", hi=5, mid=4, side=4, back=3, lo=2, dark=1)
+	
 	# ---- Skeleton & Geometry (Blockbench space: y up, feet at 0, front at -z, right at +x) ----
 	HIP_Y = 17.5
 	KNEE_Y = 9.0
@@ -687,7 +686,7 @@ def build_rig():
 	# - Inner wing rises steeply up & back (+54 deg z, -58 deg y) so its hooked wrist-claw crests behind the shoulder!
 	# - Outer wing folds sharply down (-132 deg z, net -78 deg) along the spine/flanks like a folded gargoyle cloak!
 	WING_Y, WING_Z = 28.2, 0.2
-	INNER_SPAN, OUTER_SPAN = 9.0, 12.0
+	INNER_SPAN, OUTER_SPAN = 11.0, 15.0
 	for side, sx, mir in (("right", 1, False), ("left", -1, True)):
 		root_x = 1.6 * sx
 		wrist_x = (1.6 + INNER_SPAN) * sx
@@ -696,14 +695,10 @@ def build_rig():
 		b.bone(f"{side}_wing", "chest", (root_x, WING_Y, WING_Z), (8, -58 * sx, 54 * sx))
 		wx0, wx1 = sorted((root_x, wrist_x))
 		b.cube(f"{side}_wing", "arm_bone", (wx0, WING_Y - 0.45, WING_Z - 0.45), (wx1, WING_Y + 0.45, WING_Z + 0.45), uv_wing_arm, mirror=mir)
-		b.cube(f"{side}_wing", "membrane_in", (wx0, WING_Y - 12.0, WING_Z - 0.05), (wx1, WING_Y - 0.2, WING_Z + 0.05), uv_wing_in, mirror=mir)
-		tx0, tx1 = sorted(((1.6 + INNER_SPAN - 0.8) * sx, (1.6 + INNER_SPAN + 0.1) * sx))
-		b.cube(f"{side}_wing", "wrist_claw", (tx0, WING_Y + 0.3, WING_Z - 0.6), (tx1, WING_Y + 2.8, WING_Z + 0.3), uv_claw, mirror=mir)
-
+		b.cube(f"{side}_wing", "membrane_in", (wx0, WING_Y - 15.0, WING_Z - 0.05), (wx1, WING_Y - 0.15, WING_Z + 0.05), uv_wing_in, mirror=mir)
 		b.bone(f"{side}_wing_outer", f"{side}_wing", (wrist_x, WING_Y, WING_Z), (-6, 28 * sx, -132 * sx))
 		ox0, ox1 = sorted((wrist_x, tip_x))
-		b.cube(f"{side}_wing_outer", "finger_bone", (ox0, WING_Y - 0.4, WING_Z - 0.4), (ox1, WING_Y + 0.4, WING_Z + 0.4), uv_wing_finger, mirror=mir)
-		b.cube(f"{side}_wing_outer", "membrane_out", (ox0, WING_Y - 15.0, WING_Z - 0.05), (ox1, WING_Y - 0.15, WING_Z + 0.05), uv_wing_out, mirror=mir)
+		b.cube(f"{side}_wing_outer", "membrane_out", (ox0, WING_Y - 18.0, WING_Z - 0.05), (ox1, WING_Y - 0.15, WING_Z + 0.05), uv_wing_out, mirror=mir)
 
 	return b
 
