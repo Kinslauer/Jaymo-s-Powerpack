@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:45). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,13 +21,13 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for codex · open
-- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for ☀️ Apollo · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · #2255 · changes · fixing review notes
+- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · claimed
 
 
 ## In review
