@@ -9,6 +9,7 @@ import java.util.Map;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -76,49 +77,58 @@ public final class HollowCaptains {
 	// ================================================================================================================
 	// Tuning
 	/** How many of the Hollow walk with the dead in a new world. */
-	static final int START = 6;
-	/** The kinds they are, and how many in each hundred (the Pallid most: Andy, "you encounter them most"). */
-	static final List<String> KINDS = List.of("pallid", "zombie", "skeleton", "reaper");
-	static final int[] KIND_WEIGHTS = {40, 25, 25, 10};
-	/** The chance a horde of the dead (or of skeletons) brings one along while there's room. */
-	static final float HORDE_CHANCE = 0.5F;
-	/** How often (ticks) one may stand up among the dead near a player while there's room, at what chance; how near and how far from them (blocks). */
-	static final int ROAM_EVERY = 1200;
-	static final float ROAM_CHANCE = 0.5F;
-	static final double ROAM_NEAR = 24.0, ROAM_FAR = 64.0;
-	/** The chance a villager the dead kill is taken among them (one more Hollow to walk). */
-	static final float TAKE_CHANCE = 0.25F;
-	/** A Pallid captain's army: the dead he calls up as he rises, more for each rank, the most who follow him. */
-	static final int ARMY_START = 2, ARMY_PER_RANK = 1, ARMY_MOST = 10;
-	/** How far (blocks) he gathers the dead, how far they stray from him idle, and how often he looks to them (ticks). */
-	static final double ARMY_CALL = 24.0, ARMY_KEEP = 8.0;
-	static final int ARMY_EVERY = 20;
-	/** Of the dead he calls up, this share are skeletons. */
-	static final float ARMY_SKELETONS = 0.4F;
-	/** A zombie's build, before a captain's: health, blow, pace, hide, how far it sees. */
-	static final double ZOMBIE_HEALTH = 20.0, ZOMBIE_DAMAGE = 3.0, ZOMBIE_SPEED = 0.23, ZOMBIE_ARMOUR = 2.0, ZOMBIE_SIGHT = 35.0;
-	/** How far a bowman sees (a skeleton's). */
-	static final double SKELETON_SIGHT = 16.0;
-	/** What each class adds (as the Flame Avatars' do): blows, health, armour, speed (a share), steadiness. */
-	static final double WARLORD_DAMAGE = 3.0, BRUTE_DAMAGE = 3.0, BRUTE_HEALTH = 12.0, BRUTE_STEADY = 0.6, THIEF_SPEED = 0.2,
-		PALADIN_ARMOUR = 8.0, MONK_DAMAGE = 2.0, MONK_ARMOUR = 4.0, MONK_SPEED = 0.1;
-	/** A caster's bolt: this often (ticks), at a foe from this far to this far (blocks). */
-	static final int BOLT_EVERY = 100;
-	static final double BOLT_NEAR = 4.0, BOLT_FAR = 20.0;
-	/** A mender's healing: this often (ticks), this far (blocks), this much health, this colour (ARGB, a cold soul blue). */
-	static final int MEND_EVERY = 200;
-	static final double MEND_RANGE = 10.0;
-	static final float MEND = 6.0F;
-	static final int MEND_COLOUR = 0xFF7FD8E0;
-	/** A blow at most this often (ticks): a zombie's. */
-	static final int MELEE_EVERY = 20;
-	/** A bowman's: shoots from within this range (blocks), backs off inside this, draws this long and shoots this often (ticks). */
-	static final double BOW_RANGE = 15.0, BOW_NEAR = 5.0;
-	static final int BOW_DRAW = 20, BOW_EVERY = 40;
-	/** The arrow's speed and spread (a skeleton's on normal difficulty). */
-	static final float BOW_SPEED = 1.6F, BOW_SPREAD = 6.0F;
-	/** Ticks a foe who hurt them stays their foe; how often an idle one wanders, and how far (blocks). */
-	static final int GRUDGE_TICKS = 200, WANDER_EVERY = 120, WANDER = 8;
+		static final int START = 6;
+		/** How many Hollow captains each player gets on their own ladder. */
+		static final int PER_PLAYER = 12;
+		/** The kinds they are, and how many in each hundred (the Pallid most: Andy, "you encounter them most"). */
+		static final List<String> KINDS = List.of("pallid", "zombie", "skeleton", "reaper");
+		static final int[] KIND_WEIGHTS = {40, 25, 25, 10};
+		/** The chance a horde of the dead (or of skeletons) brings one along while there's room. */
+		static final float HORDE_CHANCE = 0.5F;
+		/** How often (ticks) one may stand up among the dead near a player while there's room, at what chance; how near and how far from them (blocks). */
+		static final int ROAM_EVERY = 1200;
+		static final float ROAM_CHANCE = 0.5F;
+		static final double ROAM_NEAR = 24.0, ROAM_FAR = 64.0;
+		/** The chance a villager the dead kill is taken among them (one more Hollow to walk). */
+		static final float TAKE_CHANCE = 0.25F;
+		/** A Pallid captain's army: the dead he calls up as he rises, more for each rank, the most who follow him. */
+		static final int ARMY_START = 2, ARMY_PER_RANK = 1, ARMY_MOST = 10;
+		/** How far (blocks) he gathers the dead, how far they stray from him idle, and how often he looks to them (ticks). */
+		static final double ARMY_CALL = 24.0, ARMY_KEEP = 8.0;
+		static final int ARMY_EVERY = 20;
+		/** Of the dead he calls up, this share are skeletons. */
+		static final float ARMY_SKELETONS = 0.4F;
+		/** A zombie's build, before a captain's: health, blow, pace, hide, how far it sees. */
+		static final double ZOMBIE_HEALTH = 20.0, ZOMBIE_DAMAGE = 3.0, ZOMBIE_SPEED = 0.23, ZOMBIE_ARMOUR = 2.0, ZOMBIE_SIGHT = 35.0;
+		/** How far a bowman sees (a skeleton's). */
+		static final double SKELETON_SIGHT = 16.0;
+		/** What each class adds (as the Flame Avatars' do): blows, health, armour, speed (a share), steadiness. */
+		static final double WARLORD_DAMAGE = 3.0, BRUTE_DAMAGE = 3.0, BRUTE_HEALTH = 12.0, BRUTE_STEADY = 0.6, THIEF_SPEED = 0.2,
+			PALADIN_ARMOUR = 8.0, MONK_DAMAGE = 2.0, MONK_ARMOUR = 4.0, MONK_SPEED = 0.1;
+		/** A caster's bolt: this often (ticks), at a foe from this far to this far (blocks). */
+		static final int BOLT_EVERY = 100;
+		static final double BOLT_NEAR = 4.0, BOLT_FAR = 20.0;
+		/** A mender's healing: this often (ticks), this far (blocks), this much health, this colour (ARGB, a cold soul blue). */
+		static final int MEND_EVERY = 200;
+		static final double MEND_RANGE = 10.0;
+		static final float MEND = 6.0F;
+		static final int MEND_COLOUR = 0xFF7FD8E0;
+		/** A mender heals the worst hurt of his army (or himself) when their health is this far below max. */
+				static final float MEND_THRESHOLD = 2.0F;
+		/** A blow at most this often (ticks): a zombie's. */
+		static final int MELEE_EVERY = 20;
+		/** A bowman's: shoots from within this range (blocks), backs off inside this, draws this long and shoots this often (ticks). */
+		static final double BOW_RANGE = 15.0, BOW_NEAR = 5.0;
+		static final int BOW_DRAW = 20, BOW_EVERY = 40;
+		/** The arrow's speed and spread (a skeleton's on normal difficulty). */
+		static final float BOW_SPEED = 1.6F, BOW_SPREAD = 6.0F;
+		/** Ticks a foe who hurt them stays their foe; how often an idle one wanders, and how far (blocks). */
+		static final int GRUDGE_TICKS = 200, WANDER_EVERY = 120, WANDER = 8;
+		/** Path refresh interval for melee fighters (ticks). */
+		static final int PATH_REFRESH_TICKS = 10;
+		/** Retreat: search radius (blocks), attempts, and speed multiplier. */
+		static final int RETREAT_RADIUS = 8, RETREAT_ATTEMPTS = 3;
+		static final double RETREAT_SPEED = 1.1;
 	// ================================================================================================================
 
 	/** On every one of the Hollow who walk with the dead (captain or not). */
@@ -137,10 +147,22 @@ public final class HollowCaptains {
 	static final AttachmentType<Map<String, CompoundTag>> FACES = AttachmentRegistry.create(JaymosKingdoms.id("hollow_captain_faces"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, CompoundTag.CODEC)));
 	/** On the Overworld: how many of the Hollow walk with the dead. Saved. */
-	static final AttachmentType<Integer> COUNT = AttachmentRegistry.create(JaymosKingdoms.id("hollow_count"), builder -> builder.persistent(Codec.INT));
-	/** On the Overworld: the bodies of the Hollow walking now (uuids). Saved. */
-	static final AttachmentType<List<String>> WALKING = AttachmentRegistry.create(JaymosKingdoms.id("hollow_walking"),
-		builder -> builder.persistent(Codec.STRING.listOf()));
+		static final AttachmentType<Integer> COUNT = AttachmentRegistry.create(JaymosKingdoms.id("hollow_count"), builder -> builder.persistent(Codec.INT));
+		/** On the Overworld: the bodies of the Hollow walking now (uuids). Saved. */
+		static final AttachmentType<List<String>> WALKING = AttachmentRegistry.create(JaymosKingdoms.id("hollow_walking"),
+			builder -> builder.persistent(Codec.STRING.listOf()));
+		/** On a player: how many Hollow captains they have (max {@link #PER_PLAYER}). Saved, kept through death. */
+		static final AttachmentType<Integer> PLAYER_COUNT = AttachmentRegistry.create(JaymosKingdoms.id("hollow_player_count"),
+			builder -> builder.persistent(Codec.INT).copyOnDeath());
+		/** On a player: the bodies of their Hollow captains walking now (uuids). Saved, kept through death. */
+		static final AttachmentType<List<String>> PLAYER_WALKING = AttachmentRegistry.create(JaymosKingdoms.id("hollow_player_walking"),
+			builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
+		/** On a player: the captain ids on their ladder. Saved, kept through death. */
+				static final AttachmentType<List<String>> PLAYER_LADDER = AttachmentRegistry.create(JaymosKingdoms.id("hollow_player_ladder"),
+					builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
+			/** On a Hollow entity: the UUID of the player they belong to (for plain Hollows that aren't captains). */
+			static final AttachmentType<String> HOLLOW_OWNER = AttachmentRegistry.create(JaymosKingdoms.id("hollow_owner"),
+				builder -> builder.persistent(Codec.STRING));
 
 	/** Work put off to the end of the tick (a body can't be swapped while its chunk is still loading it). */
 	private static final List<Runnable> LATER = new ArrayList<>();
@@ -153,25 +175,64 @@ public final class HollowCaptains {
 	}
 
 	static void register() {
-		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
-			BOWS.remove(entity.getUUID());
-			NEXT.remove(entity.getUUID());
-			Entity.RemovalReason why = entity.getRemovalReason();
-			if (is(entity) && why != null && why.shouldDestroy() && why != Entity.RemovalReason.KILLED) {
-				// (taken out of the world some other way: not dead, so the count stands, and another will walk in its place)
-				walking(level.getServer(), entity, false);
-			}
-		});
+			ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+				BOWS.remove(entity.getUUID());
+				NEXT.remove(entity.getUUID());
+				Entity.RemovalReason why = entity.getRemovalReason();
+					if (is(entity) && why != null && why.shouldDestroy() && why != Entity.RemovalReason.KILLED) {
+						// (taken out of the world some other way: not dead, so the count stands, and another will walk in its place)
+						// Find the player this Hollow belongs to and remove from their walking list
+						Captain c = Captains.is(entity) ? Captains.of(entity) : null;
+						String captainId = c == null ? null : c.id();
+						ServerPlayer owner = null;
+					
+						if (captainId != null) {
+							// Captain: find owner through ladder
+							owner = findPlayerWithCaptain(level.getServer(), captainId);
+						} else {
+							// Plain Hollow: get owner from entity attachment
+							String ownerUuid = entity.getAttachedOrElse(HOLLOW_OWNER, null);
+							if (ownerUuid != null) {
+								owner = level.getServer().getPlayerList().getPlayer(java.util.UUID.fromString(ownerUuid));
+							}
+						}
+					
+						if (owner != null) {
+							playerWalking(owner, entity, false);
+						} else {
+							walking(level.getServer(), entity, false);
+						}
+					}
+			});
 		ServerLivingEntityEvents.AFTER_DEATH.register(HollowCaptains::died);
-		ServerTickEvents.END_SERVER_TICK.register(HollowCaptains::roam);
-		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			if (LATER.isEmpty()) {
-				return;
-			}
-			List<Runnable> now = List.copyOf(LATER);
-			LATER.clear();
-			now.forEach(Runnable::run);
-		});
+				ServerTickEvents.END_SERVER_TICK.register(HollowCaptains::roam);
+				ServerTickEvents.END_SERVER_TICK.register(server -> {
+					if (LATER.isEmpty()) {
+						return;
+					}
+					List<Runnable> now = List.copyOf(LATER);
+					LATER.clear();
+					now.forEach(Runnable::run);
+				});
+				// When a player joins, check if any of their due-back captains can now come back
+				ServerPlayerEvents.JOIN.register(player -> {
+					if (!live()) {
+						return;
+					}
+					MinecraftServer server = player.getServer();
+					ServerLevel level = server.overworld();
+					for (String captainId : player.getAttachedOrElse(PLAYER_LADDER, List.of())) {
+						Captain c = Captains.get(server, captainId);
+						if (c != null && c.fallen() && c.back() >= 0 && c.body().isEmpty()) {
+							// Find a dead body for this captain to rise in
+							List<PathfinderMob> dead = level.getEntitiesOfClass(PathfinderMob.class, player.getBoundingBox().inflate(ROAM_FAR),
+								e -> e.isAlive() && plainDead(e) && e.distanceTo(player) >= ROAM_NEAR && !player.hasLineOfSight(e));
+							if (!dead.isEmpty()) {
+								comeBack(level, captainId, dead.get(level.getRandom().nextInt(dead.size())));
+							}
+						}
+					}
+				});
 	}
 
 	/** Whether Pallids rise to lead the dead (MCA is here). */
@@ -191,59 +252,64 @@ public final class HollowCaptains {
 	// ---- rising ---------------------------------------------------------------------------------------------------------
 
 	/**
-	 * One of the Hollow stands up in {@code dead}'s place (it's gone): captain {@code id}'s own if he was one before, else a new
-	 * one of a kind (and a Pallid's class) rolled now. Null (and {@code dead} left as it is) without MCA or if none could be made.
-	 */
-	static @Nullable PathfinderMob rise(ServerLevel level, PathfinderMob dead, @Nullable String id) {
-		if (!live() || is(dead)) {
-			return null;
+		 * One of the Hollow stands up in {@code dead}'s place (it's gone): captain {@code id}'s own if he was one before, else a new
+		 * one of a kind (and a Pallid's class) rolled now. Null (and {@code dead} left as it is) without MCA or if none could be made.
+		 * The risen Hollow is added to {@code forPlayer}'s ladder.
+		 */
+		static @Nullable PathfinderMob rise(ServerLevel level, PathfinderMob dead, @Nullable String id, @Nullable ServerPlayer forPlayer) {
+			if (!live() || is(dead) || forPlayer == null) {
+				return null;
+			}
+			MinecraftServer server = level.getServer();
+			String was = id == null ? null : Factions.level(server).getAttachedOrElse(LOOKS, Map.of()).get(id);
+			String kind = was == null ? rollKind(level.getRandom()) : was.split(":")[0];
+			PlayerClass cls = was != null && was.contains(":") ? PlayerClass.byKey(was.substring(was.indexOf(':') + 1)) : null;
+			if (cls == null && "pallid".equals(kind)) {
+				// (what he was in life: any of the classes)
+				PlayerClass[] all = PlayerClass.values();
+				cls = all[level.getRandom().nextInt(all.length)];
+			}
+			ItemStack held = dead.getMainHandItem().copy();
+			CompoundTag face = id == null ? null : Factions.level(server).getAttachedOrElse(FACES, Map.of()).get(id);
+			PathfinderMob body = McaCompat.hollowBody(level, dead.position(), dead.getYRot(), ROLE, face);
+			if (body == null) {
+				return null;
+			}
+			if (face == null) {
+				VillagerHeritage.born(body, Heritage.Kind.HOLLOW, null);
+			}
+			// (the Pallid is the Hollow's first look)
+			HeritageVariants.set(body, "pallid".equals(kind) ? null : HeritageVariants.Variant.byKey(kind));
+			for (EquipmentSlot slot : EquipmentSlot.values()) {
+				body.setItemSlot(slot, ItemStack.EMPTY);
+				body.setDropChance(slot, 0.0F);
+			}
+			build(body, kind, cls, held);
+			body.addTag(TAG);
+			if (cls != null) {
+				body.addTag(CLASS_TAG + cls.key());
+			}
+			body.addTag(Rivals.ROLLED_TAG);
+			if (!level.addFreshEntity(body)) {
+						return null;
+					}
+					// Track the owner for plain Hollows (not captains) so we can clean up PLAYER_WALKING when they die/unload
+					if (id == null) {
+						body.setAttached(HOLLOW_OWNER, forPlayer.getUUID().toString());
+					}
+					playerWalking(forPlayer, body, true);
+			McaCompat.untree(level, body);
+			level.sendParticles(ParticleTypes.SOUL, body.getX(), body.getY(0.4), body.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.HOSTILE, 0.8F, 0.7F);
+			dead.discard();
+			return body;
 		}
-		MinecraftServer server = level.getServer();
-		String was = id == null ? null : Factions.level(server).getAttachedOrElse(LOOKS, Map.of()).get(id);
-		String kind = was == null ? rollKind(level.getRandom()) : was.split(":")[0];
-		PlayerClass cls = was != null && was.contains(":") ? PlayerClass.byKey(was.substring(was.indexOf(':') + 1)) : null;
-		if (cls == null && "pallid".equals(kind)) {
-			// (what he was in life: any of the classes)
-			PlayerClass[] all = PlayerClass.values();
-			cls = all[level.getRandom().nextInt(all.length)];
-		}
-		ItemStack held = dead.getMainHandItem().copy();
-		CompoundTag face = id == null ? null : Factions.level(server).getAttachedOrElse(FACES, Map.of()).get(id);
-		PathfinderMob body = McaCompat.hollowBody(level, dead.position(), dead.getYRot(), ROLE, face);
-		if (body == null) {
-			return null;
-		}
-		if (face == null) {
-			VillagerHeritage.born(body, Heritage.Kind.HOLLOW, null);
-		}
-		// (the Pallid is the Hollow's first look)
-		HeritageVariants.set(body, "pallid".equals(kind) ? null : HeritageVariants.Variant.byKey(kind));
-		for (EquipmentSlot slot : EquipmentSlot.values()) {
-			body.setItemSlot(slot, ItemStack.EMPTY);
-			body.setDropChance(slot, 0.0F);
-		}
-		build(body, kind, cls, held);
-		body.addTag(TAG);
-		if (cls != null) {
-			body.addTag(CLASS_TAG + cls.key());
-		}
-		body.addTag(Rivals.ROLLED_TAG);
-		if (!level.addFreshEntity(body)) {
-			return null;
-		}
-		walking(server, body, true);
-		McaCompat.untree(level, body);
-		level.sendParticles(ParticleTypes.SOUL, body.getX(), body.getY(0.4), body.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
-		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.HOSTILE, 0.8F, 0.7F);
-		dead.discard();
-		return body;
-	}
 
-	/** As {@link #rise}, or {@code dead} itself if none of the Hollow could stand up in its place. */
-	static PathfinderMob riseOr(ServerLevel level, PathfinderMob dead, @Nullable String id) {
-		PathfinderMob body = rise(level, dead, id);
-		return body == null ? dead : body;
-	}
+		/** As {@link #rise}, or {@code dead} itself if none of the Hollow could stand up in its place. */
+		static PathfinderMob riseOr(ServerLevel level, PathfinderMob dead, @Nullable String id, @Nullable ServerPlayer forPlayer) {
+			PathfinderMob body = rise(level, dead, id, forPlayer);
+			return body == null ? dead : body;
+		}
 
 	/**
 	 * Their build and arms, which a captain's are put on top of: a zombie's body (a bowman sees only as far as a skeleton). A
@@ -360,19 +426,29 @@ public final class HollowCaptains {
 		}
 	}
 
-	/** (From {@link Rivals#loaded}, put off a tick) Captain {@code id}, due back, gets up in {@code dead}'s place. */
-	static void comeBack(ServerLevel level, String id, PathfinderMob dead) {
-		Captain c = Captains.get(level.getServer(), id);
-		if (c == null || c.fallen() || c.body().isPresent() || !dead.isAlive() || dead.isRemoved() || Captains.is(dead)) {
-			return;
+	/** (From {@link Rivals#loaded}, put off a tick) Captain {@code id}, due back, gets up in {@code dead}'s place for their player. */
+		static void comeBack(ServerLevel level, String id, PathfinderMob dead) {
+			Captain c = Captains.get(level.getServer(), id);
+			if (c == null || c.fallen() || c.body().isPresent() || !dead.isAlive() || dead.isRemoved() || Captains.is(dead)) {
+				return;
+			}
+			// Find the player this captain belongs to
+			ServerPlayer owner = findPlayerWithCaptain(level.getServer(), id);
+			if (owner == null) {
+				return;
+			}
+			// No room: a new Hollow may have walked in while this captain was due back; he stays fallen until a slot opens
+			if (playerRoom(owner) <= 0) {
+				return;
+			}
+			// (one of the Hollow gets up again as himself; his ladder spot was reserved)
+			boolean hollow = Factions.level(level.getServer()).getAttachedOrElse(LOOKS, Map.of()).containsKey(id);
+			PathfinderMob body = hollow ? riseOr(level, dead, id, owner) : dead;
+			Captains.embodyIn(level, c, body);
+			keep(level.getServer(), id, body);
+			playerWalking(owner, body, true);
+			muster(level, c, body);
 		}
-		// (one of the Hollow gets up again as himself; one of the titled dead takes the next of the dead, as before)
-		boolean hollow = Factions.level(level.getServer()).getAttachedOrElse(LOOKS, Map.of()).containsKey(id);
-		PathfinderMob body = hollow ? riseOr(level, dead, id) : dead;
-		Captains.embodyIn(level, c, body);
-		keep(level.getServer(), id, body);
-		muster(level, c, body);
-	}
 
 	/** {@code body}'s kind, and a Pallid's class: {@code zombie}, {@code skeleton}, {@code reaper}, {@code pallid:<class>}. */
 	static String lookOf(LivingEntity body) {
@@ -396,22 +472,129 @@ public final class HollowCaptains {
 		return KINDS.getFirst();
 	}
 
-	// ---- how many walk ----------------------------------------------------------------------------------------------------
+	// ---- how many walk (per player) -----------------------------------------------------------------------------------------
 
-	/** How many of the Hollow walk with the dead ({@link #START} in a new world). */
+		/** Default Hollow captains per player. */
+		static final int DEFAULT_PLAYER_COUNT = PER_PLAYER;
+
+		/** Get a player's Hollow captain count (max {@link #PER_PLAYER}). */
+		static int playerCount(ServerPlayer player) {
+			return player.getAttachedOrElse(PLAYER_COUNT, DEFAULT_PLAYER_COUNT);
+		}
+
+		/** Set a player's Hollow captain count. */
+		private static void playerCount(ServerPlayer player, int value) {
+			player.setAttached(PLAYER_COUNT, Math.max(0, Math.min(PER_PLAYER, value)));
+		}
+
+		/** How many more Hollow captains may stand up for this player. Due-back captains on the ladder count as reserved. */
+				static int playerRoom(ServerPlayer player) {
+					int walking = player.getAttachedOrElse(PLAYER_WALKING, List.of()).size();
+					// Count captains on this player's ladder who are due back (fallen with back >= 0)
+					MinecraftServer server = player.level().getServer();
+					int dueBack = 0;
+					for (String captainId : player.getAttachedOrElse(PLAYER_LADDER, List.of())) {
+						Captain c = Captains.get(server, captainId);
+						if (c != null && c.fallen() && c.back() >= 0) {
+							dueBack++;
+						}
+					}
+					return playerCount(player) - walking - dueBack;
+				}
+
+		/** Add or remove a body from a player's walking list. */
+		private static void playerWalking(ServerPlayer player, Entity body, boolean is) {
+			List<String> now = new ArrayList<>(player.getAttachedOrElse(PLAYER_WALKING, List.of()));
+			String id = body.getStringUUID();
+			if (is ? !now.contains(id) && now.add(id) : now.remove(id)) {
+				player.setAttached(PLAYER_WALKING, List.copyOf(now));
+			}
+		}
+
+		/** Get a player's ladder (captain ids). */
+		static List<String> playerLadder(ServerPlayer player) {
+			return new ArrayList<>(player.getAttachedOrElse(PLAYER_LADDER, List.of()));
+		}
+
+		/** Add a captain to a player's ladder (if not already present and room exists). Returns true if added. */
+		static boolean addToLadder(ServerPlayer player, String captainId) {
+			List<String> ladder = new ArrayList<>(player.getAttachedOrElse(PLAYER_LADDER, List.of()));
+			if (ladder.contains(captainId)) {
+				return false;
+			}
+			if (ladder.size() >= PER_PLAYER) {
+				return false;
+			}
+			ladder.add(captainId);
+			player.setAttached(PLAYER_LADDER, List.copyOf(ladder));
+			return true;
+		}
+
+		/** Remove a captain from a player's ladder. */
+		static void removeFromLadder(ServerPlayer player, String captainId) {
+			List<String> ladder = new ArrayList<>(player.getAttachedOrElse(PLAYER_LADDER, List.of()));
+			if (ladder.remove(captainId)) {
+				player.setAttached(PLAYER_LADDER, List.copyOf(ladder));
+			}
+		}
+
+		/** Check if a captain is on a player's ladder. */
+		static boolean isOnLadder(ServerPlayer player, String captainId) {
+			return player.getAttachedOrElse(PLAYER_LADDER, List.of()).contains(captainId);
+		}
+
+		/** Find a player who has this captain on their ladder. */
+		static @Nullable ServerPlayer findPlayerWithCaptain(MinecraftServer server, String captainId) {
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				if (isOnLadder(p, captainId)) {
+					return p;
+				}
+			}
+			return null;
+		}
+
+		/** Get all online players who have room for more Hollow captains. */
+		private static List<ServerPlayer> playersWithRoom(MinecraftServer server) {
+			List<ServerPlayer> out = new ArrayList<>();
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				if (fair(p) && playerRoom(p) > 0) {
+					out.add(p);
+				}
+			}
+			return out;
+		}
+
+		/** Pick a random online player with room for more Hollow captains. */
+		private static @Nullable ServerPlayer randomPlayerWithRoom(MinecraftServer server, net.minecraft.util.RandomSource random) {
+			List<ServerPlayer> candidates = playersWithRoom(server);
+			if (candidates.isEmpty()) {
+				return null;
+			}
+			return candidates.get(random.nextInt(candidates.size()));
+		}
+
+	// ---- legacy world-wide methods (for backward compatibility with existing worlds) ----
+
+	/** @deprecated Use per-player {@link #playerCount(ServerPlayer)} instead. */
+	@Deprecated
 	static int count(MinecraftServer server) {
 		return Factions.level(server).getAttachedOrElse(COUNT, START);
 	}
 
+	/** @deprecated Use per-player {@link #playerCount(ServerPlayer, int)} instead. */
+	@Deprecated
 	private static void count(MinecraftServer server, int by) {
 		Factions.level(server).setAttached(COUNT, Math.max(0, count(server) + by));
 	}
 
-	/** How many more may stand up now. */
+	/** @deprecated Use per-player {@link #playerRoom(ServerPlayer)} instead. */
+	@Deprecated
 	static int room(MinecraftServer server) {
 		return count(server) - Factions.level(server).getAttachedOrElse(WALKING, List.of()).size();
 	}
 
+	/** @deprecated Use per-player {@link #playerWalking(ServerPlayer, Entity, boolean)} instead. */
+	@Deprecated
 	private static void walking(MinecraftServer server, Entity body, boolean is) {
 		List<String> now = new ArrayList<>(Factions.level(server).getAttachedOrElse(WALKING, List.of()));
 		String id = body.getStringUUID();
@@ -426,67 +609,103 @@ public final class HollowCaptains {
 			&& Banes.bandOf(e) == null;
 	}
 
-	/** (From {@code ZombieHordes}) A horde of the dead or of skeletons has come: now and then one of the Hollow walks in it. */
-	static void joinHorde(ServerLevel level, List<net.minecraft.world.entity.Mob> members) {
-		if (!live() || level.dimension() != net.minecraft.world.level.Level.OVERWORLD || room(level.getServer()) <= 0
-			|| level.getRandom().nextFloat() >= HORDE_CHANCE) {
-			return;
-		}
-		for (int i = 0; i < members.size(); i++) {
-			if (plainDead(members.get(i)) && members.get(i) instanceof PathfinderMob dead) {
-				PathfinderMob body = rise(level, dead, null);
-				if (body != null) {
-					members.set(i, body);
-				}
+	/** (From {@code ZombieHordes}) A horde of the dead or of skeletons has come: now and then one of the Hollow walks in it for a nearby player. */
+		static void joinHorde(ServerLevel level, List<net.minecraft.world.entity.Mob> members) {
+			if (!live() || level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
 				return;
 			}
+			ServerPlayer near = (ServerPlayer) level.getNearestPlayer(members.getFirst().getX(), members.getFirst().getY(), members.getFirst().getZ(), ROAM_FAR, false);
+			if (near == null || !fair(near) || playerRoom(near) <= 0 || level.getRandom().nextFloat() >= HORDE_CHANCE) {
+				return;
+			}
+			for (int i = 0; i < members.size(); i++) {
+				if (plainDead(members.get(i)) && members.get(i) instanceof PathfinderMob dead) {
+					PathfinderMob body = rise(level, dead, null, near);
+					if (body != null) {
+						members.set(i, body);
+					}
+					return;
+				}
+			}
 		}
-	}
 
-	/** Every {@link #ROAM_EVERY} ticks, while there's room: one of the Hollow stands up among the dead near a player, day or night. */
-	private static void roam(MinecraftServer server) {
-		if (!live() || server.getTickCount() % ROAM_EVERY != 0 || room(server) <= 0) {
-			return;
+	/** Every {@link #ROAM_EVERY} ticks, while there's room: one of the Hollow stands up among the dead near a random online player with room. */
+		private static void roam(MinecraftServer server) {
+			if (!live() || server.getTickCount() % ROAM_EVERY != 0) {
+				return;
+			}
+			ServerLevel level = server.overworld();
+			net.minecraft.util.RandomSource random = level.getRandom();
+			ServerPlayer p = randomPlayerWithRoom(server, random);
+			if (p == null || random.nextFloat() >= ROAM_CHANCE) {
+				return;
+			}
+			List<PathfinderMob> dead = level.getEntitiesOfClass(PathfinderMob.class, p.getBoundingBox().inflate(ROAM_FAR),
+				e -> e.isAlive() && plainDead(e) && e.distanceTo(p) >= ROAM_NEAR && !p.hasLineOfSight(e));
+			if (!dead.isEmpty()) {
+				rise(level, dead.get(random.nextInt(dead.size())), null, p);
+			}
 		}
-		ServerLevel level = server.overworld();
-		net.minecraft.util.RandomSource random = level.getRandom();
-		List<ServerPlayer> players = level.players().stream().filter(HollowCaptains::fair).toList();
-		if (players.isEmpty() || random.nextFloat() >= ROAM_CHANCE) {
-			return;
-		}
-		ServerPlayer p = players.get(random.nextInt(players.size()));
-		List<PathfinderMob> dead = level.getEntitiesOfClass(PathfinderMob.class, p.getBoundingBox().inflate(ROAM_FAR),
-			e -> e.isAlive() && plainDead(e) && e.distanceTo(p) >= ROAM_NEAR && !p.hasLineOfSight(e));
-		if (!dead.isEmpty()) {
-			rise(level, dead.get(random.nextInt(dead.size())), null);
-		}
-	}
 
 	/** One of the Hollow died: unless he's a captain due back, there's one fewer. The dead took a villager: now and then, one more. */
-	private static void died(LivingEntity entity, net.minecraft.world.damagesource.DamageSource source) {
-		if (!(entity.level() instanceof ServerLevel level) || !live()) {
-			return;
-		}
-		MinecraftServer server = level.getServer();
-		if (is(entity)) {
-			walking(server, entity, false);
-			Captain c = Captains.is(entity) ? Captains.of(entity) : null;
-			String id = c == null ? null : c.id();
-			// (put off till the captain's own fall is settled: Captains)
-			later(() -> {
-				Captain now = id == null ? null : Captains.get(server, id);
-				if (now == null || !now.fallen() || now.back() < 0) {
-					count(server, -1);
+			private static void died(LivingEntity entity, net.minecraft.world.damagesource.DamageSource source) {
+				if (!(entity.level() instanceof ServerLevel level) || !live()) {
+					return;
 				}
-			});
-			return;
+				MinecraftServer server = level.getServer();
+				if (is(entity)) {
+					// Find which player this Hollow belongs to
+					Captain c = Captains.is(entity) ? Captains.of(entity) : null;
+					String captainId = c == null ? null : c.id();
+					ServerPlayer owner = null;
+				
+					if (captainId != null) {
+						// Captain: find owner through ladder
+						owner = findPlayerWithCaptain(server, captainId);
+					} else {
+						// Plain Hollow: get owner from entity attachment
+						String ownerUuid = entity.getAttachedOrElse(HOLLOW_OWNER, null);
+						if (ownerUuid != null) {
+							owner = server.getPlayerList().getPlayer(java.util.UUID.fromString(ownerUuid));
+						}
+					}
+
+					if (owner != null) {
+						playerWalking(owner, entity, false);
+						// If this captain is due back (fallen with back >= 0), they KEEP their place on the ladder
+						// The COUNT only drops when they're gone for good
+						if (c != null && c.fallen() && c.back() >= 0) {
+							// Captain due back: keep their place on the ladder, don't decrement count
+							// The walking list entry is removed (body died) but ladder spot is reserved
+							return;
+						}
+						// Not a captain due back: permanently decrement the player's count
+						playerCount(owner, playerCount(owner) - 1);
+						if (captainId != null) {
+							removeFromLadder(owner, captainId);
+						}
+						return;
+					}
+					// No owner found (shouldn't happen for captains, but handle non-captain Hollows)
+					// Fall back to old behavior for non-captain Hollows
+					walking(server, entity, false);
+					if (c == null || !c.fallen() || c.back() < 0) {
+						count(server, -1);
+					}
+					return;
+				}
+			Entity by = source.getEntity();
+			if (entity instanceof net.minecraft.world.entity.npc.villager.Villager && by != null && (is(by) || Rivals.roamer(by) == Rivals.Side.RAISED)
+				&& level.getRandom().nextFloat() < TAKE_CHANCE) {
+				// Villager taken by the dead: find the player this killer belongs to and increment their count
+				ServerPlayer owner = by instanceof ServerPlayer ? (ServerPlayer) by : findPlayerWithCaptain(server, Captains.is(by) ? Captains.of(by).id() : null);
+				if (owner != null) {
+					playerCount(owner, playerCount(owner) + 1);
+				} else {
+					count(server, 1);
+				}
+			}
 		}
-		Entity by = source.getEntity();
-		if (entity instanceof net.minecraft.world.entity.npc.villager.Villager && by != null && (is(by) || Rivals.roamer(by) == Rivals.Side.RAISED)
-			&& level.getRandom().nextFloat() < TAKE_CHANCE) {
-			count(server, 1);
-		}
-	}
 
 	// ---- his army -------------------------------------------------------------------------------------------------------
 
@@ -620,13 +839,13 @@ public final class HollowCaptains {
 	}
 
 	/** A fighter's: close and strike with what he holds. */
-	private static void strike(ServerLevel level, PathfinderMob mob, LivingEntity foe) {
-		if (!mob.isWithinMeleeAttackRange(foe)) {
-			if (mob.tickCount % 10 == 0 || mob.getNavigation().isDone()) {
-				mob.getNavigation().moveTo(foe, 1.0);
+		private static void strike(ServerLevel level, PathfinderMob mob, LivingEntity foe) {
+			if (!mob.isWithinMeleeAttackRange(foe)) {
+				if (mob.tickCount % PATH_REFRESH_TICKS == 0 || mob.getNavigation().isDone()) {
+					mob.getNavigation().moveTo(foe, 1.0);
+				}
+				return;
 			}
-			return;
-		}
 		mob.getNavigation().stop();
 		if (mob.tickCount % MELEE_EVERY == 0) {
 			mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
@@ -656,11 +875,11 @@ public final class HollowCaptains {
 			mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 1.0F, 0.8F);
 		} else if (mender(cls)) {
-			Captain c = Captains.of(mob);
-			LivingEntity worst = mob.getHealth() < mob.getMaxHealth() - 2.0F ? mob : null;
-			if (c != null) {
-				for (net.minecraft.world.entity.Mob m : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, mob.getBoundingBox().inflate(MEND_RANGE),
-					m -> m.isAlive() && m.entityTags().contains(ARMY_TAG + c.id()) && m.getHealth() < m.getMaxHealth() - 2.0F)) {
+					Captain c = Captains.of(mob);
+					LivingEntity worst = mob.getHealth() < mob.getMaxHealth() - MEND_THRESHOLD ? mob : null;
+					if (c != null) {
+						for (net.minecraft.world.entity.Mob m : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, mob.getBoundingBox().inflate(MEND_RANGE),
+							m -> m.isAlive() && m.entityTags().contains(ARMY_TAG + c.id()) && m.getHealth() < m.getMaxHealth() - MEND_THRESHOLD)) {
 					if (worst == null || m.getHealth() / m.getMaxHealth() < worst.getHealth() / worst.getMaxHealth()) {
 						worst = m;
 					}
@@ -686,12 +905,12 @@ public final class HollowCaptains {
 				mob.getNavigation().moveTo(foe, 1.0);
 			}
 		} else if (d < BOW_NEAR) {
-			if (mob.tickCount % 10 == 0) {
-				Vec3 away = DefaultRandomPos.getPosAway(mob, 8, 3, foe.position());
-				if (away != null) {
-					mob.getNavigation().moveTo(away.x, away.y, away.z, 1.1);
-				}
-			}
+					if (mob.tickCount % 10 == 0) {
+						Vec3 away = DefaultRandomPos.getPosAway(mob, RETREAT_RADIUS, RETREAT_ATTEMPTS, foe.position());
+						if (away != null) {
+							mob.getNavigation().moveTo(away.x, away.y, away.z, RETREAT_SPEED);
+						}
+					}
 		} else {
 			mob.getNavigation().stop();
 		}

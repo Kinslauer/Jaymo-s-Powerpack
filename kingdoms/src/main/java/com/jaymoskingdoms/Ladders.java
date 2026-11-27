@@ -104,35 +104,66 @@ public final class Ladders {
 	}
 
 	/** What {@code player} knows of the ladders. */
-	static Board board(ServerPlayer player) {
-		MinecraftServer server = player.level().getServer();
-		UUID you = player.getUUID();
-		Map<String, List<String>> known = player.getAttachedOrElse(Captains.KNOWN, Map.of());
-		List<String> sworn = player.getAttachedOrElse(Captains.SWORN, List.of());
-		Map<String, SwornCaptains.Bond> yours = SwornCaptains.bondsOf(server, you);
-		Map<String, List<Captain>> byLadder = new LinkedHashMap<>();
-		for (Captain c : Captains.all(server).values()) {
-			if (!c.fallen()) {
-				byLadder.computeIfAbsent(c.tribe(), k -> new ArrayList<>()).add(c);
+		static Board board(ServerPlayer player) {
+			MinecraftServer server = player.level().getServer();
+			UUID you = player.getUUID();
+			Map<String, List<String>> known = player.getAttachedOrElse(Captains.KNOWN, Map.of());
+			List<String> sworn = player.getAttachedOrElse(Captains.SWORN, List.of());
+			Map<String, SwornCaptains.Bond> yours = SwornCaptains.bondsOf(server, you);
+			Map<String, List<Captain>> byLadder = new LinkedHashMap<>();
+			for (Captain c : Captains.all(server).values()) {
+				if (!c.fallen()) {
+					byLadder.computeIfAbsent(c.tribe(), k -> new ArrayList<>()).add(c);
+				}
 			}
+			List<Ladder> out = new ArrayList<>();
+			for (Map.Entry<String, List<Captain>> e : byLadder.entrySet()) {
+				List<Captain> cs = e.getValue();
+				boolean seen = cs.stream().anyMatch(c -> known.containsKey(c.id()) || sworn.contains(c.id()) || yours.containsKey(c.id())
+					|| c.met().containsKey(you.toString()));
+				if (!seen) {
+					continue;
+				}
+				cs.sort(Comparator.comparing((Captain c) -> !c.chief()).thenComparing(Comparator.comparingInt(Captain::rank).reversed()));
+				List<Row> rows = new ArrayList<>();
+				for (Captain c : cs) {
+					rows.add(row(server, c, you, known.getOrDefault(c.id(), List.of()), sworn.contains(c.id()), yours.containsKey(c.id())));
+				}
+				out.add(new Ladder(Rivals.name(e.getKey()), rows));
+			}
+			// Add Hollow captain ladders for players the viewer knows
+			Map<String, List<String>> hollowKnown = new HashMap<>();
+			// For each player with a Hollow ladder, check if the viewer knows any of their captains
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				List<String> ladder = HollowCaptains.playerLadder(p);
+				if (ladder.isEmpty()) {
+					continue;
+				}
+				boolean seen = false;
+				for (String captainId : ladder) {
+					Captain c = Captains.get(server, captainId);
+					if (c != null && (known.containsKey(captainId) || sworn.contains(captainId) || yours.containsKey(captainId) || c.met().containsKey(you.toString()))) {
+						seen = true;
+						break;
+					}
+				}
+				if (!seen) {
+					continue;
+				}
+				List<Row> rows = new ArrayList<>();
+				for (String captainId : ladder) {
+					Captain c = Captains.get(server, captainId);
+					if (c != null) {
+						rows.add(row(server, c, you, known.getOrDefault(captainId, List.of()), sworn.contains(captainId), yours.containsKey(captainId)));
+					}
+				}
+				if (!rows.isEmpty()) {
+					Component name = Component.translatable("ladder.jaymoskingdoms.hollow", p.getDisplayName());
+					out.add(new Ladder(name, rows));
+				}
+			}
+			return new Board(out);
 		}
-		List<Ladder> out = new ArrayList<>();
-		for (Map.Entry<String, List<Captain>> e : byLadder.entrySet()) {
-			List<Captain> cs = e.getValue();
-			boolean seen = cs.stream().anyMatch(c -> known.containsKey(c.id()) || sworn.contains(c.id()) || yours.containsKey(c.id())
-				|| c.met().containsKey(you.toString()));
-			if (!seen) {
-				continue;
-			}
-			cs.sort(Comparator.comparing((Captain c) -> !c.chief()).thenComparing(Comparator.comparingInt(Captain::rank).reversed()));
-			List<Row> rows = new ArrayList<>();
-			for (Captain c : cs) {
-				rows.add(row(server, c, you, known.getOrDefault(c.id(), List.of()), sworn.contains(c.id()), yours.containsKey(c.id())));
-			}
-			out.add(new Ladder(Rivals.name(e.getKey()), rows));
-		}
-		return new Board(out);
-	}
 
 	private static Row row(MinecraftServer server, Captain c, UUID you, List<String> known, boolean foe, boolean yours) {
 		Meeting m = c.met().get(you.toString());

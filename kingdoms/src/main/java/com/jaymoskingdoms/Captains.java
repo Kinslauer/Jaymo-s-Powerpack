@@ -1875,6 +1875,8 @@ public final class Captains {
 			// (one of the Hollow who walk with the dead, made a captain by the kill: his look kept, a Pallid's army called up)
 			HollowCaptains.keep(server, c.id(), killer);
 			HollowCaptains.muster(level, c, killer);
+			// Add this captain to the player's ladder (intersecting allowed - a captain can be on multiple ladders)
+			HollowCaptains.addToLadder(player, c.id());
 		}
 		// (his head, at the height of the scene: orcs always, anyone else now and then)
 		boolean takes = Rivals.side(c.tribe()) == Rivals.Side.ORC || random.nextFloat() < HEAD_TAKING;
