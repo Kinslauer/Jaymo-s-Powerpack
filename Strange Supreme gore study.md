@@ -74,8 +74,15 @@ it looks is unknown.
 - Butterflies (Transmutation) and the void throw are tied to Doctor Strange's look, so they're left out unless Andy
   wants them.
 
-## Open questions for Andy
+## Andy's answers (2026-11-27)
 
-- Cauterized: a look for heat and energy blows, a gore preset, or both?
-- Head-to-toe split: from weapons (which ones) or only from powers?
-- Which of 1 to 7 should become Inbox tasks, and in what order?
+"Both, both, and you choose the order": cauterized is both a per-blow look and a gore preset; the head-to-toe split
+comes from both weapons and powers. Inbox tasks, in the coordinator's order (sparing bosses, idea 7, is folded into 4
+and 6):
+
+1. [[gore-1-no-arms-no-attack]]: small, stands alone.
+2. [[gore-2-cut-faces]]: the foundation for 3, 4 and 5.
+3. [[gore-3-cauterized]]
+4. [[gore-4-head-to-toe-split]]: with the boss toggle.
+5. [[gore-5-living-guts]]
+6. [[gore-6-ash-unmaking]]: last; asks Andy which powers get it.
