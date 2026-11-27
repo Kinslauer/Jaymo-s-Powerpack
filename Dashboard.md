@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 22:48). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 23:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -48,6 +48,17 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2277 spectate viewcone shows the NPC's focus, or that it's thinking or stuck (Kingdoms, 2026-11-27)
+- [ ] #2276 Villages' overgrown rooms tidied, forest trees kept off buildings, stuck walkers push through (Kingdoms, 2026-11-27)
+- [ ] #2275 Quests on the talk wheel's first ring, with a tip (Kingdoms, 2026-11-27)
+- [ ] #2274 Buildings put up over old ruins take the whole ruin down; no trench round new buildings (Kingdoms, 2026-11-27)
+- [ ] #2272 Guards shout what fits what they face (Kingdoms, 2026-11-27)
+- [ ] #2271 hoods and over-garments fit what is under them (Kingdoms, 2026-11-27)
+- [ ] #2270 Greetings fit the moment (Kingdoms, 2026-11-27)
+- [ ] #2269 Tables say what's missing; /hints off (Powers, Kingdoms, Kitchen, 2026-11-27)
+- [ ] #2268 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
+- [ ] #2267 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
+- [ ] #2266 no lift prompt on tiny bodies (Powers, Kitchen, 2026-11-27)
 - [ ] #2265 Building news is found out, not told in chat (Kingdoms, 2026-11-27)
 - [ ] #2264 crows over a body no longer hang flapping in one spot in the sky (Kingdoms, 2026-11-27)
 - [ ] #2263 Arrows stuck in you are real arrows, not tools on your back (Powers, 2026-11-27)
@@ -97,19 +108,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2200 Crocodiles and alligators death roll their prey and drag it into the water (Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2199 Alone in the wild never leaves you on the sea (Kingdoms, 2026-11-26)
 - [ ] #2198 Rivers through low ground run in gentle valleys; gorges only in high ground (Powers, 2026-11-26)
-- [ ] #2197 Mobs slow down under heavy weapons; no blood on lost limbs; owls spare the downed (Powers, Kitchen, 2026-11-26)
-- [ ] #2196 Ki Cell has its icon and name (Powers, Kingdoms, 2026-11-26)
-- [ ] #2195 Camps stop crowding; scalebane sellswords live, side with the camp that hires them, and settle in havens as the Scalebound (Kingdoms, 2026-11-26)
-- [ ] #2194 snails slide and squash into slime; missing textures (Kingdoms, 2026-11-26)
-- [ ] #2193 fish fight: the hooked fish fights in plain sight, a hand-made fight plaque, Alt zooms while fishing (Powers, 2026-11-26)
-- [ ] #2192 Realms keep their own patrons and gifts (Kingdoms, 2026-11-26)
-- [ ] #2190 Belt charms: hot-stone pouch, cold-clay flask, equinox charm (Powers, Kingdoms, Kitchen, 2026-11-26)
-- [ ] #2188 most people wear harness: everyday shirts, hose, hoods and cloaks (Kingdoms, Kitchen, 2026-11-26)
-- [ ] #2187 Mordhau harness 4: more harness at the smith's anvil (Powers, Kingdoms, 2026-11-26)
-- [ ] #2185 Mordhau harness 3: more harness at the smith's anvil (Powers, Kingdoms, 2026-11-26)
-- [ ] #2184 harness furs and turbans count for body heat; straw hats keep the sun off (Kingdoms, Kitchen, 2026-11-26)
-- [ ] #2183 Village mods 7-9: CTOV back, Tidal Towns, swamp goblins and their band, your own company (Kingdoms, 2026-11-26)
-- …and 627 older ones.
+- …and 639 older ones.
 
 ## Health
 
