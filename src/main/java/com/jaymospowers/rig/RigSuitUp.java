@@ -3,6 +3,8 @@ package com.jaymospowers.rig;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
+import com.jaymospowers.core.wounds.Mortality;
+import com.jaymospowers.power.web.WebBlossom;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -66,6 +68,8 @@ public final class RigSuitUp {
 	static final double BRAKE_GAIN = 0.32, SINK_SPEED = 0.22, DRIFT_KEPT = 0.82;
 	/** How long the brake may run before it gives up (ticks), and the landing's grace for fall damage after it. */
 	static final int BRAKE_MAX_TICKS = 160, LAND_GRACE = 10;
+	/** Even a hard fall is slowed over at least this many blocks of the brake's own reach: the brake starts this much early. */
+	static final double BRAKE_MARGIN = 9.0;
 	/** Hand-donned falling suit-up: how long the plates take before the thrusters fire (ticks). */
 	static final int HAND_ASSEMBLE = 28;
 	/** The landing burst: how far it throws things (blocks), how hard, and the shake's range. Harmless to what it throws. */
@@ -96,7 +100,7 @@ public final class RigSuitUp {
 
 	static void init() {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
-		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, origin, destination) -> forget(player));
+		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, origin, destination) -> forget(player, true));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				forget(player);
@@ -262,10 +266,12 @@ public final class RigSuitUp {
 				forget(player);
 				return;
 			}
-			double speed = -player.getDeltaMovement().y;
-			double gap = groundGap(player, 160.0);
-			// a fall too short for the whole assembly: whatever has not locked on yet locks on now, and the thrusters go
-			boolean late = gap >= 0.0 && gap <= stopDistance(speed) + 7.0;
+			// (a server player's own delta movement stays near zero: the known movement is how far it really moved)
+			double speed = Math.max(0.0, -player.getKnownMovement().y);
+			double gap = groundGap(player, 256.0);
+			// a fall too short for the whole assembly: whatever has not locked on yet locks on now, and the thrusters go; it starts
+			// from the distance the brake needs at the speed we really have, plus a tick's travel, so a fast fall cannot skip it
+			boolean late = gap >= 0.0 && gap <= stopDistance(speed + 0.5) + BRAKE_MARGIN + speed;
 			if (late && assembling) {
 				RigCall.finishNow(player);
 			}
@@ -275,11 +281,13 @@ public final class RigSuitUp {
 			return;
 		}
 		// braking
-		if (now - fall.since > BRAKE_MAX_TICKS + HAND_ASSEMBLE + 120) {
+		if (now - fall.since > BRAKE_MAX_TICKS) {
+			// the brake gave out in the air: what is left is not a fresh fall
+			player.resetFallDistance();
 			forget(player);
 			return;
 		}
-		Vec3 v = player.getDeltaMovement();
+		Vec3 v = player.getKnownMovement();
 		if (player.onGround()) {
 			land(player, fall, now);
 			return;
@@ -287,6 +295,11 @@ public final class RigSuitUp {
 		double up = Math.min(-SINK_SPEED, v.y + BRAKE_GAIN);
 		if (v.y > -SINK_SPEED) {
 			up = v.y;
+		}
+		double gap = groundGap(player, 8.0);
+		if (gap >= 0.0 && gap < 2.0 && up < -0.5) {
+			// the ground is right here: never faster than this at the end
+			up = -0.5;
 		}
 		player.setDeltaMovement(v.x * DRIFT_KEPT, up, v.z * DRIFT_KEPT);
 		player.syncVelocity = true;
@@ -341,7 +354,7 @@ public final class RigSuitUp {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.8F, 0.5F);
 		Shakes.heavy(player, at, SHAKE_RANGE, BURST_SHAKE);
 		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BURST_RADIUS),
-			e -> e != player && e.isAlive() && !e.isSpectator())) {
+			e -> e != player && !Mortality.boss(e) && WebBlossom.fight(player, e))) {
 			Vec3 away = near.position().subtract(at);
 			Vec3 flat = new Vec3(away.x, 0.0, away.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
@@ -396,9 +409,16 @@ public final class RigSuitUp {
 
 	/** Gone: everything of this player's ends (death, leaving, the server stopping). */
 	static void forget(ServerPlayer player) {
+		forget(player, false);
+	}
+
+	/** {@code keepWearing}: a change of world is not a suit being put on again, so what is worn stays remembered. */
+	static void forget(ServerPlayer player, boolean keepWearing) {
 		FALLS.remove(player.getUUID());
 		GRACE.remove(player.getUUID());
-		WEARING.remove(player.getUUID());
+		if (!keepWearing) {
+			WEARING.remove(player.getUUID());
+		}
 		RigMoves.Move move = RigMoves.get(player);
 		if (move != null && (move.kind() == RigMoves.SUITUP_FALL || move.kind() == RigMoves.SUITUP_BRAKE)) {
 			player.removeAttached(RigMoves.MOVE);

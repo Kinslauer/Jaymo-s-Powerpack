@@ -18,23 +18,25 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
 /**
- * The symbiote's suit moves from the player's side (Legends patch 4): the two remappable keys (Grind, F9 by default, and
- * Tempest, Insert), the click that starts a feeding lunge in a surge, and the stilts' input (a double tap of Jump to rise,
+ * The symbiote's suit moves from the player's side (Legends patch 4): the two remappable keys (Grind, Numpad - by default, and
+ * Tempest, Numpad *), the click that starts a feeding lunge in a surge, and the stilts' input (a double tap of Jump to rise,
  * Jump held to go higher, Sneak to come down). Only what was pressed is sent; the server checks everything.
  */
 final class WebSuitMovesClient {
 	private static final int DOUBLE_TAP_TICKS = 7, TAP_HOLD_TICKS = 4;
+	/** GLFW key codes of the numpad minus and times (InputConstants has no names for them). */
+	private static final int KP_MULTIPLY = 332, KP_SUBTRACT = 333;
 
 	private static KeyMapping grindKey, tempestKey;
-	private static boolean jumpWas, attackWas, sentUp, sentDown;
+	private static boolean jumpWas, attackWas, sentUp, sentDown, firstGrounded;
 	private static int pressedAt = -100, releasedAt = -100, clock;
 
 	private WebSuitMovesClient() {
 	}
 
 	static void register() {
-		grindKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.web_grind", InputConstants.KEY_F9, JaymosPowersClient.CATEGORY));
-		tempestKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.web_tempest", InputConstants.KEY_INSERT, JaymosPowersClient.CATEGORY));
+		grindKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.web_grind", KP_SUBTRACT, JaymosPowersClient.CATEGORY));
+		tempestKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.web_tempest", KP_MULTIPLY, JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(WebSuitMovesClient::tick);
 	}
 
@@ -66,9 +68,14 @@ final class WebSuitMovesClient {
 		if (ready && ClientPlayNetworking.canSend(WebStilts.Input.TYPE)) {
 			if (jump && !jumpWas) {
 				// a second press right after a short tap is the double tap
+				// the ground test is for the first tap (it is the jump); the second lands in the air
 				if (clock - releasedAt <= DOUBLE_TAP_TICKS && releasedAt - pressedAt <= TAP_HOLD_TICKS && WebSymbiote.tendrilKeys(player)
-					&& (player.onGround() || up)) {
+					&& (firstGrounded || up)) {
 					toggle = true;
+					com.jaymospowers.client.freerun.AirFlipClient.cancelTap();
+				}
+				if (!toggle) {
+					firstGrounded = player.onGround();
 				}
 				pressedAt = clock;
 			} else if (!jump && jumpWas) {

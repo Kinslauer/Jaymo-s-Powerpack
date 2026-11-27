@@ -72,6 +72,9 @@ public final class WebStilts {
 	}
 
 	private static final Map<UUID, Live> LIVE = new HashMap<>();
+	/** The last game time each web slinger was seen on the ground: the double tap's first tap (the jump) must have left it just now. */
+	private static final Map<UUID, Long> GROUNDED = new HashMap<>();
+	static final int GROUND_GRACE = 14;
 
 	private WebStilts() {
 	}
@@ -114,7 +117,8 @@ public final class WebStilts {
 		}
 		if (live != null) {
 			stop(player);
-		} else if (able(player) && player.onGround() && !WebGrind.active(player)) {
+		} else if (able(player) && player.level().getGameTime() - GROUNDED.getOrDefault(player.getUUID(), Long.MIN_VALUE / 2) <= GROUND_GRACE
+			&& !WebGrind.active(player)) {
 			Live fresh = new Live();
 			fresh.since = player.level().getGameTime();
 			fresh.up = in.up();
@@ -126,6 +130,9 @@ public final class WebStilts {
 
 	/** Every tick, per web slinger. */
 	static void tick(ServerPlayer player) {
+		if (player.onGround()) {
+			GROUNDED.put(player.getUUID(), player.level().getGameTime());
+		}
 		Live live = LIVE.get(player.getUUID());
 		if (live == null) {
 			return;
@@ -211,10 +218,12 @@ public final class WebStilts {
 	}
 
 	static void forget(ServerPlayer player) {
+		GROUNDED.remove(player.getUUID());
 		stop(player);
 	}
 
 	static void clearAll() {
 		LIVE.clear();
+		GROUNDED.clear();
 	}
 }

@@ -140,8 +140,7 @@ public final class WebLunge {
 		LivingEntity best = null;
 		double bestDot = AIM;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, eye.add(look.scale(RANGE))).inflate(3.0),
-			e -> e != player && e.isAlive() && !e.isSpectator() && !struck.contains(e.getUUID()) && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand)
-				&& !(e instanceof net.minecraft.world.entity.player.Player other && other.isCreative()))) {
+			e -> WebBlossom.fight(player, e) && !struck.contains(e.getUUID()) && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
 			Vec3 to = e.getBoundingBox().getCenter().subtract(eye);
 			double d = to.length();
 			if (d > RANGE || d < 1.0E-3) {

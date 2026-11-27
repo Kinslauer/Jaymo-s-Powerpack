@@ -58,7 +58,7 @@ public final class WebSymbioteSnuff {
 				// lava is not something it can stamp out: it flees
 				return false;
 			}
-			if (block.is(BlockTags.FIRE) && fires.size() < MOST && level.mayInteract(player, pos)) {
+			if (block.is(BlockTags.FIRE) && fires.size() < MOST && player.mayBuild() && level.mayInteract(player, pos)) {
 				fires.add(pos.immutable());
 			}
 		}
