@@ -54,8 +54,8 @@ public final class ValorLook {
 	static final float BEAT_SPEED = 0.15F, BEAT = 0.25F, GLOW_FLOOR = 0.75F;
 	/** A Hunter's coated eyes. */
 	static final int HUNTER_EYES = 0xFFFFB030;
-	/** Each look's wrist-mark colour (iron, stone, scale, ash, haze, lacquer). */
-	static final int[] BENT_TINT = {0xFFB8C0CC, 0xFFA89E8E, 0xFF7FC09A, 0xFFE0DCD4, 0xFFF0C890, 0xFFA0A0D8};
+	/** Each look's wrist-mark colour (iron, stone, scale, ash, haze, lacquer, concrete). */
+	static final int[] BENT_TINT = {0xFFB8C0CC, 0xFFA89E8E, 0xFF7FC09A, 0xFFE0DCD4, 0xFFF0C890, 0xFFA0A0D8, 0xFFC8C6C0};
 
 	/** On a render state: the coating up right now. */
 	public static final RenderStateDataKey<Coat> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:valor_coat");
@@ -88,7 +88,7 @@ public final class ValorLook {
 
 	static Identifier texture(int look, String suffix) {
 		Valor.Look kind = Valor.Look.values()[Mth.clamp(look, 0, Valor.Look.values().length - 1)];
-		return TEXTURES.computeIfAbsent(kind.key() + suffix, k -> JaymosKingdoms.id("textures/entity/valor/" + k + ".png"));
+		return TEXTURES.computeIfAbsent(kind.artKey() + suffix, k -> JaymosKingdoms.id("textures/entity/valor/" + k + ".png"));
 	}
 
 	static void register() {

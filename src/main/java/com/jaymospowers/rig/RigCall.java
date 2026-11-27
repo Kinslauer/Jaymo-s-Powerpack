@@ -238,7 +238,8 @@ public final class RigCall {
 			}
 			level.sendParticles(ParticleTypes.FLAME, head.x, head.y, head.z, 2, 0.05, 0.05, 0.05, 0.01);
 		}
-		if (t > last + FLY_TICKS) {
+		// (the wrap holds on until the helm's last plate, the crest, is home: its plates close in as they fly)
+		if (t > last + (style == RigSuitUp.WRAP ? RigSuitUp.WRAP_SETTLE : FLY_TICKS)) {
 			finish(player);
 			return;
 		}
