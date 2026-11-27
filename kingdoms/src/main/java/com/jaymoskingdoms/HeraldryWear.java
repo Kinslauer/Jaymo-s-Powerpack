@@ -787,6 +787,38 @@ public final class HeraldryWear {
 		Harness.give(player, HeraldryArmour.stack("torn_hood"));
 	}
 
+	/** The acrobats' fair colours: the fool's own red and gold. */
+	static final int ACROBAT_RED = 0xB02E26, ACROBAT_GOLD = 0xE8C83A;
+	/** The ringmaster's: crimson and black, with gold in the doublet's and the hose's slashes. */
+	static final int RINGMASTER_CRIMSON = 0x7A1420, RINGMASTER_BLACK = 0x1D1D21, RINGMASTER_GOLD = 0xD8B034;
+
+	/**
+	 * What the travelling fair dresses its own in (Andy: "acrobat and ringmaster should wear something involved with the
+	 * jester's outfit"), for the Rubber-folk raised by its acrobats or its ringmaster ({@code raised}: the answer's key); empty
+	 * for anyone else. The acrobats tumble light, in the fool's motley and parti-coloured hose and nothing on the head; the
+	 * ringmaster dresses to be looked at, in the fool's belled hood and motley in crimson and black, over a slashed doublet
+	 * and slashed hose.
+	 */
+	public static List<ItemStack> fairWear(String raised) {
+		return switch (raised) {
+			case "acrobats" -> List.of(twoColoured(HeraldryArmour.stack("jesters_motley"), ACROBAT_RED, ACROBAT_GOLD),
+				twoColoured(HeraldryArmour.stack("joined_hose"), ACROBAT_RED, ACROBAT_GOLD));
+			case "ringmaster" -> List.of(twoColoured(HeraldryArmour.stack("jesters_hood"), RINGMASTER_CRIMSON, RINGMASTER_BLACK),
+				twoColoured(HeraldryArmour.stack("jesters_motley"), RINGMASTER_CRIMSON, RINGMASTER_BLACK),
+				twoColoured(HeraldryArmour.stack("landsknecht_doublet"), RINGMASTER_BLACK, RINGMASTER_GOLD),
+				twoColoured(HeraldryArmour.stack("landsknecht_hose"), RINGMASTER_BLACK, RINGMASTER_GOLD));
+			default -> List.of();
+		};
+	}
+
+	/** {@code stack} dyed {@code rgb}, its second colour {@code second}. */
+	private static ItemStack twoColoured(ItemStack stack, int rgb, int second) {
+		if (!stack.isEmpty()) {
+			dyed(stack, rgb).set(HeraldryArmour.SECOND_COLOUR, second);
+		}
+		return stack;
+	}
+
 	/** From {@link Masterless}: a bandit leader, or one of his men, in torn cloth. */
 	static void bandit(Mob mob, boolean leader) {
 		if (leader || mob.getRandom().nextFloat() < BANDIT_CLOAK_SHARE) {

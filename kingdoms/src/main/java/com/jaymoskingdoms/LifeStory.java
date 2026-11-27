@@ -3012,6 +3012,12 @@ public final class LifeStory {
 		if (raised.key.equals("merchants")) {
 			give(player, purse(player, MERCHANT_SILVER));
 		}
+		if (!RAGS_ONLY) {
+			// raised by the fair's acrobats or its ringmaster: dressed as the fair dresses them, in the fool's motley
+			for (ItemStack piece : HeraldryWear.fairWear(raised.key)) {
+				Harness.give(player, piece);
+			}
+		}
 		if (raised.key.equals("foundling") && Heritage.of(player) == Heritage.Kind.FROSTBORN) {
 			// a Frostborn nobody raised here is a traveller straight from Hail (Andy), and wears their people's glass
 			equip(player, FrostTech.scouter());
