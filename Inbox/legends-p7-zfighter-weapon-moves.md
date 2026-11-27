@@ -1,5 +1,5 @@
 ---
-status: changes
+status: ready
 for: gemini
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes, 2026-11-26)
 asked: 2026-11-26
@@ -38,3 +38,5 @@ Power: Z Fighter, weapons.
 7. ZFighterPower.java:963 - Divine, Verdant and legend-form fighters never reach the Sneak+B behind-the-foe step (their own Sneak+B returns first). Try the step first when Ki Sense is on and a foe is sighted, else fall back to their move.
 8. Lash.java:1960 - Cyclone/chain-pull hits set off AirCombo's launcher and slam. Skip AirCombo during those hits (flag like FallingAttacks.landing) or use Lash's own damage source.
 9. Lash.java:1637 - Cyclone's 80-tick cooldown is dodged by switching hotbar slots. Put the cooldown on the axe when the Cyclone starts.
+- 2026-11-27 00:02 Review (head 178cb19): pass. All 9 first-round findings and 2 follow-ups fixed and re-checked; CI green. Players get Great Ape swipes, Sprint+R roar (R still charges ki), slam, leap smash and boulder throw; staged beams with a red outline on held targets; Instant Step; Overburn; Chain Axe pull and Cyclone; Cross Slash form. Not tested in game.
+- 2026-11-27 00:02 Reviewed; Andy allowed sending it to the coordinator.
