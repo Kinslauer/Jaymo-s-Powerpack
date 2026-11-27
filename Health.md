@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 23:07). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 23:22). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
@@ -49,4 +49,4 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 
 ## Project memory
 
-- 4 index lines are over 300 characters (lines 20, 21, 22, 23): move their detail into topic files.
+- 5 index lines are over 300 characters (lines 20, 21, 22, 23, 70): move their detail into topic files.
