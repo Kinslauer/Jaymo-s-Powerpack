@@ -440,14 +440,14 @@ final class StoryFigure {
 		List<ItemStack> fair = sc.bare() ? List.of() : fairWear(scenes);
 		List<ItemStack> harnessWas = fair.isEmpty() ? null : target.getAttached(com.jaymoskingdoms.Harness.WORN);
 		if (!fair.isEmpty()) {
-			List<ItemStack> lent = new java.util.ArrayList<>(com.jaymoskingdoms.Harness.worn(target));
+			List<ItemStack> fairHarness = new java.util.ArrayList<>(com.jaymoskingdoms.Harness.worn(target));
 			for (ItemStack piece : fair) {
 				com.jaymoskingdoms.Harness.Slot place = com.jaymoskingdoms.Harness.slotOf(piece);
 				if (place != null) {
-					lent.set(place.ordinal(), piece);
+					fairHarness.set(place.ordinal(), piece);
 				}
 			}
-			target.setAttached(com.jaymoskingdoms.Harness.WORN, List.copyOf(lent));
+			target.setAttached(com.jaymoskingdoms.Harness.WORN, List.copyOf(fairHarness));
 		}
 		// (0.7.364) a lost limb lent while drawn (Powers draws a body without its lost parts), and your own clothes taken off
 		// for a bare scene

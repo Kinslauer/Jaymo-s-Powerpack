@@ -155,7 +155,7 @@ public final class AetherBlocks {
 		return BlockBehaviour.Properties.of().mapColor(color).strength(AERCLOUD_HARDNESS).sound(SoundType.WOOL).noOcclusion()
 			.isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never)
 			// (see-through from inside too: a head in a cloud sees out of it, as from inside leaves)
-			.isViewBlocking(Blocks::never);
+			.isViewBlocking((state, level, pos, box) -> false);
 	}
 
 	static void init() {
@@ -347,9 +347,7 @@ public final class AetherBlocks {
 
 	private static BlockBehaviour.Properties glass(MapColor color, float hardness) {
 		return BlockBehaviour.Properties.of().mapColor(color).strength(hardness).sound(SoundType.GLASS).noOcclusion()
-			.isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never)
-			// (see-through from inside too: a head in a cloud sees out of it, as from inside leaves)
-			.isViewBlocking(Blocks::never);
+			.isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never);
 	}
 
 	private static void initGlassAndClouds() {
