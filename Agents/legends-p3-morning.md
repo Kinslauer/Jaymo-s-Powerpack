@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: legends-p3-big-symbiote
 pr:
 ---
@@ -13,3 +13,6 @@ Overnight checks by Claude on the Hermes bots' work. One line per check.
 
 ## Lessons taught
 - None yet (nothing to review).
+
+## Notes
+- 2026-11-27 02:25 No sign of work for 30 min: marked stalled (whoever ran it stopped).
