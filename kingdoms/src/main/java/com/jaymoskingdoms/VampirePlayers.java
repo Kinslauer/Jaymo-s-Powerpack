@@ -217,8 +217,11 @@ public final class VampirePlayers {
 			} else if (sunlit(player)) {
 				player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, false, true));
 				long t = Math.floorMod(clock, 24000L);
-				if (t >= NOON_FROM && t < NOON_TO && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-					player.igniteForSeconds(BURN_SECONDS);
+				// kindling: the noon sun reaches further into the day and burns longer
+				boolean kindling = BloodPage.has(player, BloodPage.Pact.KINDLING);
+				long widen = kindling ? BloodPage.KINDLING_NOON_WIDEN : 0L;
+				if (t >= NOON_FROM - widen && t < NOON_TO + widen && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+					player.igniteForSeconds(kindling ? BURN_SECONDS * BloodPage.KINDLING_BURN_TIMES : BURN_SECONDS);
 				}
 			}
 			if (VampireBlood.starving(player)) {
@@ -336,7 +339,11 @@ public final class VampirePlayers {
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 3, false, false, false));
 		}
 		player.heal(DRINK_HEAL);
-		VampireBlood.feed(player, DRINK_FOOD, DRINK_SATURATION);
+		// fine palate: only people's blood feeds them; a great one fed upon ages the blood
+		if (!BloodPage.palateRefuses(player, target)) {
+			VampireBlood.feed(player, DRINK_FOOD, DRINK_SATURATION);
+		}
+		BloodPage.fedOn(player, target);
 		KitchenCompat.drink(player, DRINK_WATER);
 		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
 		if (v != null) {

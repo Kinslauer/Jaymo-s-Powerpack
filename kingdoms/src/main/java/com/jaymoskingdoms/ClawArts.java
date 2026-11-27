@@ -295,7 +295,7 @@ public final class ClawArts {
 			}
 			// the healing that never stops
 			int every = REGEN_EVERY * (BloodLeap.weak(player) ? REGEN_WEAK : 1) / (frenzied(player) ? 2 : 1);
-			if ((player.tickCount + player.getId()) % every == 0 && player.getHealth() < player.getMaxHealth()) {
+			if ((player.tickCount + player.getId()) % every == 0 && player.getHealth() < player.getMaxHealth() && !BloodPage.thin(player)) {
 				player.heal(REGEN);
 			}
 			Pounce pounce = POUNCES.get(player.getUUID());

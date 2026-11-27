@@ -131,6 +131,10 @@ public final class FormSkills {
 				if (gift.kind() == NightGifts.DHAMPIR && i >= FIRST_SHAPE && i <= LAST_SHAPE) {
 					continue;
 				}
+				// (the Blood page) a full vampire's bar shows only the gifts slotted
+				if (!com.jaymoskingdoms.BloodPage.moveOpen(player, i)) {
+					continue;
+				}
 				out.add(JaymosKingdoms.MOD_ID + ":" + NIGHT_PREFIX + NIGHT_MOVES.get(i));
 			}
 		}

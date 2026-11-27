@@ -53,7 +53,7 @@ public final class MenuCompat {
 	static final String MAP_SCREEN = "com.jaymospowers.client.menu.MapScreen";
 	/** Where Kingdoms' tabs sit among Powers' (Character 0, Powers 10, Map 50). */
 	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_FORMS = 22, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60,
-		ORDER_MAGIC = 24, ORDER_VALOR = 26, ORDER_BOONS = 28, ORDER_TIER = 35, ORDER_FOLLOWERS = 62, ORDER_DAILY = 36, ORDER_TITLES = 29, ORDER_REWARDS = 71, ORDER_CONTROLS = 31;
+		ORDER_MAGIC = 24, ORDER_VALOR = 26, ORDER_BOONS = 28, ORDER_TIER = 35, ORDER_FOLLOWERS = 62, ORDER_DAILY = 36, ORDER_TITLES = 29, ORDER_REWARDS = 71, ORDER_CONTROLS = 31, ORDER_BLOOD = 32;
 	/** The pins' colour for your party. */
 	static final int PARTY_PIN = 0xFFC21A;
 
@@ -67,6 +67,7 @@ public final class MenuCompat {
 		ClientPlayNetworking.registerGlobalReceiver(TitleChoice.Info.TYPE, (payload, context) -> TitleChoice.info = payload);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> TitleChoice.info = null);
 		PapersScreen.register();
+		BloodPageScreen.register();
 		if (!FabricLoader.getInstance().isModLoaded(POWERS)) {
 			return;
 		}
@@ -98,6 +99,11 @@ public final class MenuCompat {
 				(Runnable)() -> Minecraft.getInstance().gui.setScreen(new VampireControlsScreen()),
 				(Predicate<Screen>)s -> s instanceof VampireControlsScreen, (Function<Screen, int[]>)s -> ((VampireControlsScreen)s).corner(),
 				(BooleanSupplier)VampireControlsScreen::available);
+			// a vampire's Blood page (and a dhampir's nodes): gifts, slots, blood age and pacts
+			register.invoke(null, "blood", ORDER_BLOOD, (Supplier<ItemStack>)() -> new ItemStack(Items.GHAST_TEAR),
+				Component.translatable("menu.jaymoskingdoms.tab.blood"), (Runnable)BloodPageScreen::open,
+				(Predicate<Screen>)s -> s instanceof BloodPageScreen, (Function<Screen, int[]>)s -> ((BloodPageScreen)s).corner(),
+				(BooleanSupplier)BloodPageScreen::available);
 			tab(register, "story", ORDER_STORY, () -> new ItemStack(Items.WRITABLE_BOOK), "menu.jaymoskingdoms.tab.story",
 				() -> Minecraft.getInstance().gui.setScreen(new RetakingScreen()), s -> s instanceof RetakingScreen, s -> ((RetakingScreen)s).corner());
 			tab(register, "growth", ORDER_GROWTH, () -> new ItemStack(Items.ENCHANTED_BOOK), "menu.jaymoskingdoms.tab.growth",
