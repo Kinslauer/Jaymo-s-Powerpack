@@ -519,7 +519,7 @@ public final class WerewolfPlayers {
 	 * ({@code tearing}) each piece takes {@link #ARMOUR_TEAR} of its durability, and breaks if that's the end of it, or
 	 * falls at their feet. Armour put on as the beast just falls off.
 	 */
-	private static void strip(ServerPlayer player, boolean tearing) {
+	public static void strip(ServerPlayer player, boolean tearing) {
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND}) {
 			ItemStack stack = player.getItemBySlot(slot);
 			if (!stack.isEmpty()) {
@@ -548,7 +548,7 @@ public final class WerewolfPlayers {
 	}
 
 	/** {@code stack} out of the claws: into the inventory, never the slot in hand, or dropped if there's no room. */
-	private static void stow(ServerPlayer player, ItemStack stack) {
+	static void stow(ServerPlayer player, ItemStack stack) {
 		Inventory inventory = player.getInventory();
 		int held = inventory.getSelectedSlot();
 		for (int i = 0; i < Inventory.INVENTORY_SIZE && !stack.isEmpty(); i++) {

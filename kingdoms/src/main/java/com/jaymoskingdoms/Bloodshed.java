@@ -140,6 +140,14 @@ public final class Bloodshed {
 		});
 	}
 
+	/**
+	 * {@code m} is to be taken for something that has just hurt a person, for another {@link #MEMORY}: a player's true shape of
+	 * the night (the horror, {@link NightHorrors}) that folk must run from and guards go for.
+	 */
+	public static void alarm(Mob m) {
+		STRUCK.put(m, m.level().getGameTime());
+	}
+
 	/** A person: a player in play, a villager (MCA's too), or one of the realms' folk. */
 	static boolean person(Entity e) {
 		return e instanceof Player p ? !p.isCreative() && !p.isSpectator() : e instanceof AbstractVillager || e instanceof Folk;

@@ -153,7 +153,8 @@ public final class NightGifts {
 	static final int DASH_MB = 50, POUND_MB = 150, GAZE_MB = 200;
 
 	/** The bar's moves, in the order of {@code FormSkills.NIGHT_MOVES}: what each index stands for. */
-	public static final int DASH = 0, POUND = 1, GAZE = 2, FEED = 3, BAT = 4, COLONY = 5, MIST = 6, STARE = 7, RAKE = 8, REND = 9, POUNCE = 10, ROAR = 11;
+	public static final int DASH = 0, POUND = 1, GAZE = 2, FEED = 3, BAT = 4, COLONY = 5, MIST = 6, STARE = 7, RAKE = 8, REND = 9, POUNCE = 10, ROAR = 11,
+		TRUE_SHAPE = 12, BARRIER = 13, BATSTEP = 14, FLECHETTES = 15;
 
 	/** What gift a player has. */
 	public static final int NONE = 0, VAMPIRE = 1, DHAMPIR = 2, WEREWOLF = 3, WOLFBLOOD = 4;
@@ -519,7 +520,7 @@ public final class NightGifts {
 	 */
 	public static boolean move(ServerPlayer player, int which) {
 		Gift g = player.getAttached(GIFT);
-		if (g == null || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isSleeping() || which < 0 || which > ROAR) {
+		if (g == null || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isSleeping() || which < 0 || which > FLECHETTES) {
 			return false;
 		}
 		ServerLevel level = player.level();
@@ -561,6 +562,10 @@ public final class NightGifts {
 			case REND -> ClawArts.REND_MB;
 			case POUNCE -> ClawArts.POUNCE_MB;
 			case ROAR -> ClawArts.ROAR_MB;
+			case TRUE_SHAPE -> com.jaymoskingdoms.nightforms.NightForms.baseCost(com.jaymoskingdoms.nightforms.NightForms.HORROR);
+			case BARRIER -> BloodBarrier.COST_MB;
+			case BATSTEP -> Batstep.COST_MB;
+			case FLECHETTES -> BloodShards.SHARD_MB;
 			default -> 0;
 		};
 	}
@@ -569,6 +574,10 @@ public final class NightGifts {
 	private static boolean vampireMove(ServerLevel level, ServerPlayer player, int which, long now) {
 		// a full vampire uses only the gifts they have learned and slotted (Feed is the body's own)
 		if (!BloodPage.moveOpen(player, which)) {
+			return false;
+		}
+		// the newer moves are a full vampire's only
+		if (which >= TRUE_SHAPE && !VampireBlood.full(player)) {
 			return false;
 		}
 		long[] ready = READY.computeIfAbsent(player.getUUID(), k -> new long[4]);
@@ -642,6 +651,18 @@ public final class NightGifts {
 			case STARE -> {
 				return com.jaymoskingdoms.nightforms.NightForms.cast(player, com.jaymoskingdoms.nightforms.NightForms.STARE);
 			}
+			case TRUE_SHAPE -> {
+				return com.jaymoskingdoms.nightforms.NightForms.cast(player, com.jaymoskingdoms.nightforms.NightForms.HORROR);
+			}
+			case BARRIER -> {
+				return BloodBarrier.cast(player);
+			}
+			case BATSTEP -> {
+				return Batstep.cast(player);
+			}
+			case FLECHETTES -> {
+				return BloodShards.cast(player);
+			}
 			default -> {
 				return ClawArts.cast(player, which);
 			}
@@ -652,6 +673,11 @@ public final class NightGifts {
 	static void thrown(ServerPlayer player) {
 		AIRBORNE.put(player.getUUID(), player.level().getGameTime());
 		player.fallDistance = 0.0;
+	}
+
+	/** No fall damage for {@code player} until they land (as after a dash): the true shape's jump, mist that slips. */
+	public static void fallsSoftly(ServerPlayer player) {
+		thrown(player);
 	}
 
 	static void push(ServerPlayer player, Vec3 v) {

@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
 final class VampireControlsScreen extends Screen {
 	private static final int W = 270, H = 196, PAD = 10, ROW = 24, HEAD = 36, FOOT = 18;
 	/** The moves of the bar, in {@code FormSkills.NIGHT_MOVES} order, and the shapes a dhampir has none of. */
-	private static final String[] MOVES = {"dash", "pound", "gaze", "feed", "bat", "colony", "mist", "stare", "rake", "rend", "pounce", "roar"};
+	private static final String[] MOVES = {"dash", "pound", "gaze", "feed", "bat", "colony", "mist", "stare", "rake", "rend", "pounce", "roar", "true_shape", "barrier", "batstep", "flechettes"};
 	private static final int FIRST_SHAPE = NightGifts.BAT, LAST_SHAPE = NightGifts.STARE;
 	private int scroll;
 
@@ -65,7 +65,7 @@ final class VampireControlsScreen extends Screen {
 		list.add(new Entry(Component.translatable("gui.jaymoskingdoms.controls.vampire.bar"),
 			Component.translatable(dhampir ? "gui.jaymoskingdoms.controls.dhampir.note" : "gui.jaymoskingdoms.controls.vampire.note"), Component.empty(), Ui.GOLD, true));
 		for (int i = 0; i < MOVES.length; i++) {
-			if (dhampir && i >= FIRST_SHAPE && i <= LAST_SHAPE) {
+			if (dhampir && (i >= FIRST_SHAPE && i <= LAST_SHAPE || i >= NightGifts.TRUE_SHAPE)) {
 				continue;
 			}
 			int cost = NightGifts.costOf(i);

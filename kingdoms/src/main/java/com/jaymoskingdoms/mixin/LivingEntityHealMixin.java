@@ -33,7 +33,7 @@ abstract class LivingEntityHealMixin {
 	private void jaymoskingdoms$blighted(float amount, CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
 		// (and a ship's hand gone hungry, her provisions run out: Provisions)
-		if (!self.level().isClientSide() && (Necromancy.blighted(self) || self.entityTags().contains(com.jaymoskingdoms.Provisions.STARVING))) {
+		if (!self.level().isClientSide() && (Necromancy.blighted(self) || com.jaymoskingdoms.BloodShards.unhealing(self) || self.entityTags().contains(com.jaymoskingdoms.Provisions.STARVING))) {
 			ci.cancel();
 		}
 	}

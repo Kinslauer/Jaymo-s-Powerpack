@@ -120,15 +120,27 @@ public final class BloodPage {
 		DASH(NightGifts.DASH, 0, null), POUND(NightGifts.POUND, 1, TreeLocks.Lock.NIGHT_POUND), GAZE(NightGifts.GAZE, 2, null),
 		BAT(NightGifts.BAT, 2, null), COLONY(NightGifts.COLONY, 2, null), MIST(NightGifts.MIST, 2, null), STARE(NightGifts.STARE, 2, null),
 		RAKE(NightGifts.RAKE, 1, null), REND(NightGifts.REND, 1, null), POUNCE(NightGifts.POUNCE, 1, null), ROAR(NightGifts.ROAR, 2, null),
-		LIFELEECH(-1, 1, TreeLocks.Lock.LIFELEECH), NIGHT_SENSE(-1, 1, TreeLocks.Lock.NIGHT_SENSE), BAT_WINGS(-1, 2, TreeLocks.Lock.BAT_WINGS);
+		LIFELEECH(-1, 1, TreeLocks.Lock.LIFELEECH), NIGHT_SENSE(-1, 1, TreeLocks.Lock.NIGHT_SENSE), BAT_WINGS(-1, 2, TreeLocks.Lock.BAT_WINGS),
+		// the newer gifts: some need another gift learned first, and some a blood age (0 fledgling, 1 grown, 2 old)
+		TRUE_SHAPE(NightGifts.TRUE_SHAPE, 4, null, null, 2), BARRIER(NightGifts.BARRIER, 2, null), BATSTEP(NightGifts.BATSTEP, 2, null),
+		FLECHETTES(NightGifts.FLECHETTES, 2, null), HUNGRY_COLONY(-1, 1, null, COLONY, 0), LONG_HOLD(-1, 1, null, STARE, 0),
+		SLIPPING_MIST(-1, 1, null, MIST, 0);
 
-		public final int move, cost;
+		public final int move, cost, minAge;
 		public final TreeLocks.@Nullable Lock lock;
+		/** The gift that must be learned first, if any. */
+		public final @Nullable Gift needs;
 
 		Gift(int move, int cost, TreeLocks.@Nullable Lock lock) {
+			this(move, cost, lock, null, 0);
+		}
+
+		Gift(int move, int cost, TreeLocks.@Nullable Lock lock, @Nullable Gift needs, int minAge) {
 			this.move = move;
 			this.cost = cost;
 			this.lock = lock;
+			this.needs = needs;
+			this.minAge = minAge;
 		}
 
 		public String key() {
@@ -441,6 +453,17 @@ public final class BloodPage {
 		return null;
 	}
 
+	/** What keeps {@code b} from learning {@code g}: a lang key for the reason, or null when nothing does. */
+	public static @Nullable String blocked(Blood b, Gift g) {
+		if (g.needs != null && !b.knows(g.needs)) {
+			return "gui.jaymoskingdoms.blood.needs";
+		}
+		if (b.age() < g.minAge) {
+			return "gui.jaymoskingdoms.blood.needs_age";
+		}
+		return null;
+	}
+
 	/** Whether {@code player} stands at a dressed coffin. */
 	public static boolean atShrine(ServerPlayer player) {
 		return shrineNear(player.level(), player.blockPosition(), (int)SHRINE_REACH) != null;
@@ -457,7 +480,7 @@ public final class BloodPage {
 		switch (Op.values()[act.op]) {
 			case LEARN -> {
 				Gift g = Gift.of(act.what);
-				if (g == null || b.knows(g) || b.points() < g.cost) {
+				if (g == null || b.knows(g) || b.points() < g.cost || blocked(b, g) != null) {
 					return;
 				}
 				learned.add(g.key());

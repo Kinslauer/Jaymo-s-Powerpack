@@ -55,9 +55,9 @@ public final class FormSkills {
 	/** (0.7.632) A vampire's moves on the bar: {@code jaymoskingdoms:night_<move>}, delivered by this; the moves, by NightGifts' index. */
 	static final String NIGHT_PREFIX = "night_";
 	static final Identifier NIGHT_HANDLER = JaymosKingdoms.id("night_move");
-	static final List<String> NIGHT_MOVES = List.of("dash", "pound", "gaze", "feed", "bat", "colony", "mist", "stare", "rake", "rend", "pounce", "roar");
+	static final List<String> NIGHT_MOVES = List.of("dash", "pound", "gaze", "feed", "bat", "colony", "mist", "stare", "rake", "rend", "pounce", "roar", "true_shape", "barrier", "batstep", "flechettes");
 	/** (Blood) The moves only a full vampire has (a dhampir has no shapes): the indexes in {@link #NIGHT_MOVES} from this one to {@link #LAST_SHAPE}. */
-	static final int FIRST_SHAPE = 4, LAST_SHAPE = 7;
+	static final int FIRST_SHAPE = 4, LAST_SHAPE = 7, FIRST_NEW = 12;
 	/** A Sorcerer's earth, water or air spell on the bar: {@code jaymoskingdoms:sorc_<spell>} ({@link com.jaymoskingdoms.SorceryPicks}), delivered by this. */
 	static final String SORC_PREFIX = "sorc_";
 	static final Identifier SORC_HANDLER = JaymosKingdoms.id("sorcerer_spell");
@@ -128,7 +128,7 @@ public final class FormSkills {
 		NightGifts.Gift gift = NightGifts.gift(player);
 		if (gift != null && gift.blood()) {
 			for (int i = 0; i < NIGHT_MOVES.size(); i++) {
-				if (gift.kind() == NightGifts.DHAMPIR && i >= FIRST_SHAPE && i <= LAST_SHAPE) {
+				if (gift.kind() == NightGifts.DHAMPIR && (i >= FIRST_SHAPE && i <= LAST_SHAPE || i >= FIRST_NEW)) {
 					continue;
 				}
 				// (the Blood page) a full vampire's bar shows only the gifts slotted

@@ -11,7 +11,9 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.HungryColony;
 import com.jaymoskingdoms.NightFlow;
+import com.jaymoskingdoms.NightHorrors;
 import com.jaymoskingdoms.Parties;
 import com.jaymoskingdoms.Skills;
 import com.jaymoskingdoms.VampireBlood;
@@ -77,7 +79,7 @@ import org.jspecify.annotations.Nullable;
  * The werewolf's beast stays the werewolf's; there is no wolf shape here.
  */
 public final class NightForms {
-	public static final String BAT = "bat", MIST = "mist";
+	public static final String BAT = "bat", MIST = "mist", HORROR = "horror";
 	/** The tag on every puppet and swarm bat this makes (a stray one left in the world is removed as it loads). */
 	public static final String PUPPET_TAG = "jaymoskingdoms_night_puppet";
 
@@ -209,6 +211,7 @@ public final class NightForms {
 			PRESSED.clear();
 		});
 		NightGaze.register();
+		NightHorrors.register();
 	}
 
 	// ---- queries ----
@@ -249,7 +252,7 @@ public final class NightForms {
 
 	// ---- the moves on the bar ----
 
-	/** The kinds a bar move can name. */
+	/** The kinds a bar move can name (and, with {@link #BAT}, {@link #MIST}, {@link #HORROR}). */
 	public static final String COLONY = "colony", STARE = "stare";
 
 	/** What the shape or move {@code kind} costs a full vampire to start (mB, by day; at night three quarters), for the controls page. */
@@ -259,6 +262,7 @@ public final class NightForms {
 			case MIST -> MIST_COST;
 			case COLONY -> COLONY_COST;
 			case STARE -> STARE_COST;
+			case HORROR -> NightHorrors.ENTER_MB;
 			default -> 0;
 		};
 	}
@@ -270,6 +274,7 @@ public final class NightForms {
 			case MIST -> canAfford(p, level, MIST_COST) && ready(p, MIST);
 			case COLONY -> canAfford(p, level, COLONY_COST) && ready(p, COLONY) && foe(p, level) != null;
 			case STARE -> canAfford(p, level, STARE_COST) && ready(p, STARE) && !NightGaze.armed(p);
+			case HORROR -> canAfford(p, level, NightHorrors.ENTER_MB) && ready(p, HORROR);
 			default -> false;
 		};
 	}
@@ -307,6 +312,7 @@ public final class NightForms {
 					colony(p, level, foe);
 				}
 			}
+			case HORROR -> enter(p, level, HORROR, NightHorrors.ENTER_MB, NightHorrors.COOLDOWN, NightHorrors.MAX_TICKS);
 			case STARE -> {
 				spend(p, cost(level, STARE_COST));
 				READY.put(key(p, STARE), now + STARE_COOLDOWN);
@@ -325,6 +331,7 @@ public final class NightForms {
 			case BAT -> BAT_COST;
 			case MIST -> MIST_COST;
 			case COLONY -> COLONY_COST;
+			case HORROR -> NightHorrors.ENTER_MB;
 			default -> STARE_COST;
 		};
 		if (!canAfford(p, level, base)) {
@@ -361,6 +368,11 @@ public final class NightForms {
 				level.playSound(null, p.blockPosition(), SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.9F, 0.4F);
 				level.sendParticles(Fx.miasma(0x7A4A5A, 1.4F), at.x, at.y, at.z, 24, 0.4, 0.6, 0.4, 0.02);
 			}
+			case HORROR -> {
+				setSize(p, NightHorrors.SCALE);
+				a.puppet = spawnPuppet(level, p, NightHorrors.TYPE);
+				NightHorrors.began(p, level, a.puppet instanceof NightHorror horror ? horror : null);
+			}
 			default -> {
 			}
 		}
@@ -386,8 +398,14 @@ public final class NightForms {
 			PUPPETS.remove(a.puppet.getUUID());
 			a.puppet.discard();
 		}
+		if (a.form.equals(HORROR)) {
+			NightHorrors.ended(p);
+		}
 		if (a.form.equals(MIST) && p.isAlive()) {
 			NightFlow.open(p, NightFlow.Link.MIST_LEAP, NightFlow.MIST_WINDOW);
+		}
+		if (a.form.equals(MIST) && NightHorrors.slips(p)) {
+			NightGifts.fallsSoftly(p);
 		}
 		setSize(p, 0.0);
 		if (a.flight) {
@@ -456,6 +474,27 @@ public final class NightForms {
 		if (a != null && a.getBaseValue() != scale) {
 			a.setBaseValue(scale);
 		}
+	}
+
+	/** Whether {@code e} is a puppet or a swarm bat this made. */
+	public static boolean isPuppet(net.minecraft.world.entity.Entity e) {
+		return PUPPETS.containsKey(e.getUUID());
+	}
+
+	/** The puppet {@code p} wears now (the true shape's horror, the bat), or null. */
+	public static @Nullable Mob puppetOf(ServerPlayer p) {
+		Active a = ACTIVE.get(p.getUUID());
+		return a == null ? null : a.puppet;
+	}
+
+	/** Makes {@code bat} one of {@code owner}'s swarm bats: untouchable, kept in order and removed with the rest. */
+	public static void track(Bat bat, UUID owner) {
+		PUPPETS.put(bat.getUUID(), owner);
+		bat.addTag(PUPPET_TAG);
+	}
+
+	public static void untrack(Bat bat) {
+		PUPPETS.remove(bat.getUUID());
 	}
 
 	private static <T extends Mob> @Nullable T spawnPuppet(ServerLevel level, ServerPlayer owner, EntityType<T> type) {
@@ -539,7 +578,15 @@ public final class NightForms {
 					}
 				}
 			}
+			case HORROR -> {
+				if (!NightHorrors.tick(p, level, age, a.puppet instanceof NightHorror horror ? horror : null)) {
+					end(p, false);
+				}
+			}
 			case MIST -> {
+				if (NightHorrors.slips(p)) {
+					p.fallDistance = 0.0;
+				}
 				if (age % 2 == 0) {
 					level.sendParticles(Fx.miasma(0x7A4A5A, 1.3F), p.getX(), p.getY() + p.getBbHeight() * 0.5, p.getZ(), 5, 0.35, 0.5, 0.35, 0.01);
 				}
@@ -562,6 +609,12 @@ public final class NightForms {
 			return false;
 		}
 		if (source.getEntity() instanceof ServerPlayer striker && mist(striker)) {
+			// slipping mist: the first blow out of it lands double and ends the mist (NightHorrors#doubled)
+			if (NightHorrors.slips(striker) && source.getDirectEntity() == striker && entity != striker) {
+				NightHorrors.outOfMist(striker, entity);
+				end(striker, false);
+				return true;
+			}
 			return false;
 		}
 		if (!(entity instanceof ServerPlayer p) || !(p.level() instanceof ServerLevel level)) {
@@ -615,7 +668,7 @@ public final class NightForms {
 
 	// ---- bats ----
 
-	private static @Nullable Bat swarmBat(ServerLevel level, ServerPlayer owner, Vec3 at) {
+	public static @Nullable Bat swarmBat(ServerLevel level, ServerPlayer owner, Vec3 at) {
 		Bat bat = EntityTypes.BAT.create(level, EntitySpawnReason.EVENT);
 		if (bat == null) {
 			return null;
@@ -634,7 +687,7 @@ public final class NightForms {
 	}
 
 	/** A burst of bats from {@code at}: they fly out and are gone. */
-	private static void burst(ServerLevel level, ServerPlayer owner, Vec3 at) {
+	public static void burst(ServerLevel level, ServerPlayer owner, Vec3 at) {
 		Swarm swarm = new Swarm(owner.getUUID(), -1, level.getGameTime(), at);
 		for (int i = 0; i < RIPOSTE_BATS; i++) {
 			Bat bat = swarmBat(level, owner, at);
@@ -683,6 +736,7 @@ public final class NightForms {
 			}
 		}
 		SWARMS.add(swarm);
+		HungryColony.begin(p, level);
 		level.playSound(null, p.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.PLAYERS, 1.2F, 0.7F);
 		level.sendParticles(Fx.miasma(0x2A0A12, 1.2F), from.x, from.y, from.z, 20, 0.5, 0.5, 0.5, 0.03);
 	}
@@ -737,7 +791,7 @@ public final class NightForms {
 		}
 	}
 
-	private static void place(Bat bat, Vec3 at, float yaw) {
+	public static void place(Bat bat, Vec3 at, float yaw) {
 		if (bat.isAlive()) {
 			bat.snapTo(at.x, at.y, at.z, yaw, 0.0F);
 			bat.setYHeadRot(yaw);
