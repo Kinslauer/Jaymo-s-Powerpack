@@ -49,8 +49,20 @@ public final class Dressed {
 	/** How far toward charcoal each char level goes, and the greyest a body gets (share of its colour lost, at the last level). */
 	private static final float[] CHAR_SHARE = {0.25F, 0.5F, 0.75F, 0.9F};
 	private static final float GREY_MOST = 0.8F, ROT_SHARE = 0.6F, ICE_SHARE = 0.7F;
-	/** Blotches are cells this many pixels across. */
-	private static final int BLOTCH = 3;
+	/**
+	 * Patches of rot and bared bone: soft blobs about this many pixels across (a smooth noise, with a finer one for a ragged
+	 * edge). Andy (2026-11-27), a rotting black bear: "the bear texture on the ground is broken". They were hard 3-pixel
+	 * squares scattered over the whole skin, so bone-white checks on black fur and thin legs striped like a ladder.
+	 */
+	private static final int BLOTCH = 6, RAGGED = 2;
+	private static final float RAGGED_SHARE = 0.3F;
+	/** The noise bunches round its middle: spread out about this middle by this much, so each level of rot bares about its share. */
+	private static final float NOISE_MIDDLE = 0.47F, NOISE_SPREAD = 1.9F;
+	/** Round a patch of bare bone, a rim of raw, dried flesh this wide (in the noise's 0-1), so it reads as torn back to the bone. */
+	private static final float RIM = 0.06F;
+	private static final int RAW = 0x6E2C24;
+	/** Bone's grain: each pixel up to this much darker. */
+	private static final float GRAIN = 0.12F;
 
 	/** Painted copies: per model, original texture and state to copy. */
 	private static final Map<Object, Map<String, Identifier>> DONE = new IdentityHashMap<>();
@@ -150,7 +162,7 @@ public final class Dressed {
 				float r = ARGB.red(argb), g = ARGB.green(argb), b = ARGB.blue(argb);
 				float lum = (r * 299 + g * 587 + b * 114) / 1000.0F;
 				float shade = 0.75F + 0.25F * lum / 255.0F;
-				float cell = hash(x / BLOTCH, y / BLOTCH, 7) % 1000 / 1000.0F;
+				float cell = patch(x, y);
 				if (grey > 0) {
 					float k = GREY_MOST * grey / Wear.LEVELS;
 					r += (lum - r) * k;
@@ -162,10 +174,16 @@ public final class Dressed {
 					g += ((ROT >> 8 & 0xFF) * shade - g) * ROT_SHARE;
 					b += ((ROT & 0xFF) * shade - b) * ROT_SHARE;
 				}
-				if (bare > 0 && cell < bare / (float) Wear.LEVELS) {
-					r = (BONE >> 16 & 0xFF) * shade;
-					g = (BONE >> 8 & 0xFF) * shade;
-					b = (BONE & 0xFF) * shade;
+				float bared = bare / (float) Wear.LEVELS;
+				if (bare >= Wear.LEVELS || bare > 0 && cell < bared) {
+					float bone = shade * (1.0F - GRAIN * (hash(x, y, 12) % 5) / 4.0F);
+					r = (BONE >> 16 & 0xFF) * bone;
+					g = (BONE >> 8 & 0xFF) * bone;
+					b = (BONE & 0xFF) * bone;
+				} else if (bare > 0 && cell < bared + RIM) {
+					r = (RAW >> 16 & 0xFF) * shade;
+					g = (RAW >> 8 & 0xFF) * shade;
+					b = (RAW & 0xFF) * shade;
 				}
 				if (charred > 0) {
 					float k = Math.min(1.0F, CHAR_SHARE[charred - 1] + (hash(x, y, 8) % 7 - 3) * 0.02F);
@@ -181,6 +199,24 @@ public final class Dressed {
 				image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), Math.min(255, (int) r), Math.min(255, (int) g), Math.min(255, (int) b)));
 			}
 		}
+	}
+
+	/** Where the rot and the bone come through first (0 to 1, low first): soft blobs with a ragged edge, the same on every copy. */
+	private static float patch(int x, int y) {
+		float v = smooth(x, y, BLOTCH, 7) * (1.0F - RAGGED_SHARE) + smooth(x, y, RAGGED, 13) * RAGGED_SHARE;
+		return Math.clamp((v - NOISE_MIDDLE) * NOISE_SPREAD + 0.5F, 0.0F, 1.0F);
+	}
+
+	/** Value noise: a random level at each corner of a {@code size}-pixel grid, eased smoothly between them. */
+	private static float smooth(int x, int y, int size, int salt) {
+		int cx = Math.floorDiv(x, size), cy = Math.floorDiv(y, size);
+		float fx = (x - cx * size + 0.5F) / size, fy = (y - cy * size + 0.5F) / size;
+		fx = fx * fx * (3.0F - 2.0F * fx);
+		fy = fy * fy * (3.0F - 2.0F * fy);
+		float a = hash(cx, cy, salt) / 65535.0F, b = hash(cx + 1, cy, salt) / 65535.0F;
+		float c = hash(cx, cy + 1, salt) / 65535.0F, d = hash(cx + 1, cy + 1, salt) / 65535.0F;
+		float top = a + (b - a) * fx, bottom = c + (d - c) * fx;
+		return top + (bottom - top) * fy;
 	}
 
 	private static void roast(NativeImage image, int colour, float amount) {
