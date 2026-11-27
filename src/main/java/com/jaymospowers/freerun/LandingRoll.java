@@ -88,6 +88,7 @@ public final class LandingRoll {
 			Long rolled = ROLLED.get(player.getUUID());
 			if (rolled != null && now - rolled <= SLACK_TICKS) {
 				// the roll got here first
+				CoreMotion.landingTaken(player);
 				rolled(player);
 				return false;
 			}
@@ -95,11 +96,15 @@ public final class LandingRoll {
 			if (tapped != null && now - tapped <= SLACK_TICKS) {
 				// the safety tap got here first: the knees take part of it
 				TAPPED.remove(player.getUUID());
+				CoreMotion.landingTaken(player);
 				deal(player, new Pending(source, amount * (1.0F - safetyCut(player)), now));
 				return false;
 			}
 			PENDING.put(player.getUUID(), new Pending(source, amount, now));
-			if (amount >= HERO_DAMAGE && amount < player.getHealth() + player.getAbsorptionAmount()) {
+			if (amount >= player.getHealth() + player.getAbsorptionAmount()) {
+				// a fall that kills (unless a roll saves it) throws no cracks
+				CoreMotion.landingTaken(player);
+			} else if (amount >= HERO_DAMAGE) {
 				heroLanding(player);
 			}
 			return false;
@@ -110,6 +115,7 @@ public final class LandingRoll {
 			Pending pending = PENDING.remove(player.getUUID());
 			if (pending != null) {
 				// rolled out of it: the hero landing that started at touchdown gives way to the roll
+				CoreMotion.landingTaken(player);
 				WebPose pose = player.getAttached(WebPower.POSE);
 				if (pose != null && pose.kind() == WebPose.HERO_LAND && now - pose.start() <= LATE_TICKS + SLACK_TICKS) {
 					player.removeAttached(WebPower.POSE);
@@ -164,6 +170,7 @@ public final class LandingRoll {
 			return;
 		}
 		long now = player.level().getGameTime();
+		CoreMotion.landingTaken(player);
 		Pending pending = PENDING.remove(player.getUUID());
 		if (pending != null) {
 			WebPose pose = player.getAttached(WebPower.POSE);
@@ -216,6 +223,7 @@ public final class LandingRoll {
 			return;
 		}
 		WebPower.pose(player, WebPose.HERO_LAND, player.getRandom().nextBoolean() ? 1 : -1);
+		CoreMotion.heroLanded(player);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 0.7F, 0.7F);
 		dust(level, player);

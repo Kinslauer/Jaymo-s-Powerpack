@@ -85,6 +85,11 @@ public final class PowerJumpClient {
 		return PowerJump.kindOf(player) != PowerJump.NONE;
 	}
 
+	/** Whether a power's jump or the Draught of Mettle's takes a press of Jump in the air for {@code player}. */
+	public static boolean takes(LocalPlayer player) {
+		return kind(player) != PowerJump.NONE;
+	}
+
 	private static byte kind(LocalPlayer player) {
 		byte kind = PowerJump.kindOf(player);
 		if (kind == PowerJump.NONE) {
@@ -151,7 +156,7 @@ public final class PowerJumpClient {
 	}
 
 	/** Not a time for a second jump: in a power's flight, on a web line, on a ride, gliding. */
-	private static boolean busy(LocalPlayer player) {
+	public static boolean busy(LocalPlayer player) {
 		return player.isSpectator() || player.isFallFlying() || player.isSleeping() || positive(player.getAttached(WindPower.FLIGHT))
 			|| Boolean.TRUE.equals(player.getAttached(WindJet.JETTING)) || positive(player.getAttached(ZFighterPower.FLIGHT))
 			|| positive(player.getAttached(XenoformState.FLIGHT)) || player.getAttached(GravityPower.ROCK_FLIGHT) != null
