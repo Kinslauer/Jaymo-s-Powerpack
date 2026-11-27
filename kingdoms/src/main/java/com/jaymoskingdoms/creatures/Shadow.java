@@ -42,8 +42,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A shadow of the ruins: a cold, thin dark shape that lives where it is dim and withers in the light (a bright place, or the
- * day, hurts it). Its touch drains Might ({@link ShadowDrain}); a player drained to nothing goes down, never to death, and
+ * A shadow of the ruins: a cold, thin dark shape that lives where it is dim and is unmade by light (the sun, a lamp, a light
+ * carried near). Its touch drains Might ({@link ShadowDrain}); a player drained to nothing goes down, never to death, and
  * their own shadow peels away from them and joins the others (it carries the Might it took, and gives it back when slain).
  * It slips through gaps a man cannot, and plain blows do half as much to it. It has no body to fall: it never goes down
  * like a person (Powers' body/simple tag), and at its end it breaks up into smoke and leaves nothing to carry or butcher
@@ -57,14 +57,25 @@ import org.jspecify.annotations.Nullable;
  * shows itself only once it is near its prey ({@link #RETURN_RANGE}), gathers for {@link #GATHER} ticks before it can touch,
  * lingers {@link #LINGER} ticks after a touch (or {@link #SHOWN_MAX} if it never lands one), then thins away to nothing for
  * {@link #GONE_MIN} to {@link #GONE_MAX} ticks, unseen, untouchable and walking through bodies, while it closes in again. Out
- * in the sun it is unmade at once ({@link #sunlit}), with no harm taken and nothing left; under cover a bright lamp still
- * withers it as before.
+ * in the sun it is unmade at once ({@link #sunlit}), with no harm taken and nothing left.
+ * <p>
+ * Andy (2026-11-26): "having a torch should dissipate them too, any light should so that includes dawnborn, and lanterns".
+ * So any light unmakes it the same way ({@link #lit}): a lamp's light where it stands (a torch, a lantern, anything that
+ * shines at least {@link #LAMP_LIGHT}), anyone within {@link #CARRIED_REACH} blocks holding a light in either hand (as
+ * bright as a torch: torches, lanterns, glowstone and the like), and a Dawnborn within that reach, who carries the sun in
+ * their blood. Its owner's own light never unmakes a peeled shadow (they cast it).
  */
 public class Shadow extends Beast {
 	static final double HEALTH = 14.0, SPEED = 0.3, DAMAGE = 1.0;
-	/** Light (0-15) from which it withers, the harm each second, and the share of a plain blow it takes. */
-	static final int BRIGHT = 10;
-	static final float WITHERS = 1.5F, PLAIN_SHARE = 0.6F;
+	/** The share of a plain blow it takes. */
+	static final float PLAIN_SHARE = 0.6F;
+	/**
+	 * A lamp's light (0-15) where it stands that unmakes it (it is only ever found where it is dimmer: Haunts), the least
+	 * light a held thing must give to count, how near a carried light or a Dawnborn unmakes it (blocks), and how often it
+	 * looks for one (ticks).
+	 */
+	static final int LAMP_LIGHT = 8, CARRIED_LIGHT = 10, LOOKS_EVERY = 4;
+	static final double CARRIED_REACH = 6.0;
 	/** Its size, smallest to biggest (as a scale); the share of them with a wispy tail instead of legs. */
 	static final float SMALLEST = 0.6F, BIGGEST = 1.5F, WISPY_SHARE = 0.4F;
 	/** Sky light (0-15) at its head that counts as standing in the sun, by day and with no rain (a thin canopy lets it through). */
@@ -200,13 +211,9 @@ public class Shadow extends Beast {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
-		if (this.sunlit(level)) {
+		if (this.sunlit(level) || this.lit(level)) {
 			this.dissipate(level);
 			return;
-		}
-		if (this.tickCount % 20 == 0 && !this.isInvisible() && level.getMaxLocalRawBrightness(this.blockPosition()) >= BRIGHT) {
-			this.hurtServer(level, level.damageSources().magic(), WITHERS);
-			level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY(0.6), this.getZ(), 6, 0.2, 0.4, 0.2, 0.02);
 		}
 		this.strikeAndGo(level);
 	}
@@ -219,7 +226,33 @@ public class Shadow extends Beast {
 		return level.getBrightness(LightLayer.SKY, BlockPos.containing(this.getX(), this.getEyeY(), this.getZ())) >= SUN_SKY;
 	}
 
-	/** The sun has it: it comes apart into smoke at once and is gone, giving back any Might it carried. */
+	/** A light has found it: a lamp's where it stands, or a light carried near, or a Dawnborn near. */
+	private boolean lit(ServerLevel level) {
+		if (level.getBrightness(LightLayer.BLOCK, BlockPos.containing(this.getX(), this.getY(0.5), this.getZ())) >= LAMP_LIGHT) {
+			return true;
+		}
+		if (this.tickCount % LOOKS_EVERY != 0) {
+			return false;
+		}
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(CARRIED_REACH),
+			e -> e.isAlive() && !e.isSpectator() && !(e instanceof Shadow) && !e.getUUID().equals(this.owner))) {
+			if (this.distanceToSqr(near) > CARRIED_REACH * CARRIED_REACH) {
+				continue;
+			}
+			if (carriesLight(near.getMainHandItem()) || carriesLight(near.getOffhandItem())
+				|| near instanceof Player player && com.jaymoskingdoms.Heritage.of(player) == com.jaymoskingdoms.Heritage.Kind.DAWNBORN) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** A thing held that gives light: one whose block shines at least as a torch nearly does. */
+	private static boolean carriesLight(net.minecraft.world.item.ItemStack stack) {
+		return !stack.isEmpty() && net.minecraft.world.level.block.Block.byItem(stack.getItem()).defaultBlockState().getLightEmission() >= CARRIED_LIGHT;
+	}
+
+	/** The sun or a light has it: it comes apart into smoke at once and is gone, giving back any Might it carried. */
 	private void dissipate(ServerLevel level) {
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY(0.5), this.getZ(), 20, 0.25 * this.getScale(), 0.6 * this.getScale(), 0.25 * this.getScale(), 0.03);
 		level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY(0.5), this.getZ(), 30, 0.3 * this.getScale(), 0.7 * this.getScale(), 0.3 * this.getScale(), 0.05);
