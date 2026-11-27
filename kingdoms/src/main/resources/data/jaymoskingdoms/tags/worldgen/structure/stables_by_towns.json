@@ -4,6 +4,10 @@
     {
       "id": "mvs:horse_campsite",
       "required": false
+    },
+    {
+      "id": "jaymoskingdoms:smalls/stable",
+      "required": false
     }
   ]
 }

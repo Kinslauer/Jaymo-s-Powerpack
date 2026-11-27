@@ -20,6 +20,10 @@
     {
       "id": "mvs:mine_with_campsite",
       "required": false
+    },
+    {
+      "id": "jaymoskingdoms:smalls/mine",
+      "required": false
     }
   ]
 }
