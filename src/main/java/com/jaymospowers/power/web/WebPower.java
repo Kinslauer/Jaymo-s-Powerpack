@@ -1668,6 +1668,10 @@ public final class WebPower implements Power {
 			}
 			// the web catches it and pulls it in; let go at once (a tap) and that's all, keep holding and it's on a lead
 			pullIn(target, player);
+			if (target instanceof LivingEntity living) {
+				// yanked from mid-air: up to you instead, into your air combo
+				com.jaymospowers.mortal.AirCombo.pullUp(player, living, true);
+			}
 			// the heavier it is, the harder it hauls back on you
 			WebHeft.recoil(player, target, load);
 			State state = state(player);
