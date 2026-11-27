@@ -18283,3 +18283,12 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
   they're going in frightens them at once, with the cry, and they run from it; before, being on their way in held off
   the fright (and the cry) for up to 15 seconds. War alarms and twisters are real frights, as before.
 - Built; not played.
+
+## 0.13.86 (2026-11-27): Night's Blood 3 - blood worth drinking (#2291)
+
+- **Fill your own bottles**: a vampire holding someone by the throat with a glass bottle in the off hand fills it (the gulps go into the bottle, 250 mB to a bottle, not into the vampire; a Kitchen blood bottle named for the donor). A glass bottle used (main hand) on a person with an open cut is held under the wound and fills much slower. Drinking a bottle gives its mB.
+- **Every blood tastes of its people**: Frostborn (cold can't touch you), Emberborn (fire resistance), Tideborn (dolphin's grace), Stoneborn (knockback resistance, slower step), Verdant (half the mB), Divine-born (it burns, as holy dread), Nightborn (a long, deep fill: half again, a little a second). A king's or lord's blood gives double mB. Bottles carry the taste and greatness. A favourite blood can now be the blood's ask ("Drink the blood you favour"; kept by a bite or a bottle of theirs).
+- **Ask to drink**: new MCA talk option for vampires with a villager who knows or half-knows (Suspicion, Exposure). Paid in emeralds or in what they want (OwnWants), or as a friend's favour; no alarm, no struggle. A refusal is remembered (new memories let_drink / refused_drink), a timid or devout villager may report it.
+- **Read your prey**: blood vision's outline takes the colour of the creature's blood (as BleedOut picks it) and dims as its health runs low.
+- Classes: BloodTaste, BloodBottling, BloodAsk; KitchenCompat (bottle donors, cold-proof), Hemomancy#drankBottle, BloodRequests (FAVOURITE), BloodVision, PowersCompat#bloodColour. Needs the Kitchen change (bottle memory) from the same patch. Loading hints 250-251.
+- Built; not played. Not tested in game: every taste's effect, the wound catch, the talk option.
