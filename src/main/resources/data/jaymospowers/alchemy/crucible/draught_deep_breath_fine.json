@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "air": 8,
+    "water": 8,
+    "life": 4
+  },
+  "result": {
+    "item": "jaymospowers:draught_deep_breath",
+    "count": 1,
+    "grade": "fine"
+  },
+  "research": "formula_deep_breath"
+}

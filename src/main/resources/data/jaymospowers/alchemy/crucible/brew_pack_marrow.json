@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "beast": 8,
+    "death": 4,
+    "life": 5,
+    "rot": 3
+  },
+  "result": {
+    "item": "jaymospowers:brew_pack_marrow",
+    "count": 1
+  },
+  "research": "formula_pack_marrow"
+}

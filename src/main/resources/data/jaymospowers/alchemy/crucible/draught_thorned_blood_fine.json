@@ -1,0 +1,15 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "death": 6,
+    "life": 6,
+    "metal": 4,
+    "spirit": 3
+  },
+  "result": {
+    "item": "jaymospowers:draught_thorned_blood",
+    "count": 1,
+    "grade": "fine"
+  },
+  "research": "formula_thorned_blood"
+}

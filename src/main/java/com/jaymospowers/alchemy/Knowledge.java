@@ -76,9 +76,25 @@ public final class Knowledge {
 		player.setAttached(KNOWLEDGE, new State(s.seen(), s.insight().plus(gained), s.research()));
 	}
 
+	/** Reads a formula (or any entry) outright: it is known from now on, with no insight paid. False if it already was. */
+	public static boolean learn(ServerPlayer player, String id) {
+		State s = of(player);
+		if (s.research().contains(id)) {
+			return false;
+		}
+		Set<String> research = new HashSet<>(s.research());
+		research.add(id);
+		player.setAttached(KNOWLEDGE, new State(s.seen(), s.insight(), Set.copyOf(research)));
+		return true;
+	}
+
 	/** Unlocks a research entry if its parents are known and the insight is there (paid). Creative pays nothing. */
 	public static boolean unlock(ServerPlayer player, Research.Entry entry) {
 		State s = of(player);
+		// a formula is read from its paper, never bought with insight
+		if (entry.category() == Research.Category.FORMULAS) {
+			return false;
+		}
 		if (s.research().contains(entry.id()) || !s.research().containsAll(entry.parents())) {
 			return false;
 		}

@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "jaymospowers"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:poison",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "jaymospowers:poison_paste",
+    "minecraft:rotten_flesh",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:hunting_vial"
+  }
+}

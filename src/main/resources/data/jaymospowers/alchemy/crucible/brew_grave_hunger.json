@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "death": 8,
+    "undeath": 6,
+    "beast": 4,
+    "life": 3
+  },
+  "result": {
+    "item": "jaymospowers:brew_grave_hunger",
+    "count": 1
+  },
+  "research": "formula_grave_hunger"
+}

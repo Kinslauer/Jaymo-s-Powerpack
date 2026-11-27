@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "fire": 7,
+    "beast": 7,
+    "motion": 6,
+    "war": 3
+  },
+  "result": {
+    "item": "jaymospowers:brew_imp_gallop",
+    "count": 1
+  },
+  "research": "formula_imp_gallop"
+}

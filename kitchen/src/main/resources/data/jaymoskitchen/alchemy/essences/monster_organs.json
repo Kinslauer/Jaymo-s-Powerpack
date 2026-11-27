@@ -1,0 +1,10 @@
+{
+  "items": {
+    "jaymoskitchen:mire_gall": {"venom": 6, "rot": 4, "water": 3, "beast": 2},
+    "jaymoskitchen:grave_tongue": {"death": 6, "undeath": 4, "rot": 3, "beast": 2},
+    "jaymoskitchen:pack_marrow": {"beast": 6, "death": 3, "life": 3, "rot": 2},
+    "jaymoskitchen:wight_sac": {"spirit": 6, "water": 4, "air": 3, "shadow": 3},
+    "jaymoskitchen:imp_gizzard": {"fire": 5, "beast": 5, "motion": 4, "war": 2},
+    "jaymoskitchen:troll_liver": {"life": 8, "earth": 5, "beast": 4, "rot": 2}
+  }
+}

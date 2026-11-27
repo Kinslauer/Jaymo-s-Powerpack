@@ -153,6 +153,9 @@ public class CodexScreen extends Screen {
 		if (Knowledge.knows(player, entry.id())) {
 			return State.KNOWN;
 		}
+		if (entry.category() == Research.Category.FORMULAS) {
+			return null;
+		}
 		for (String parent : entry.parents()) {
 			if (!Knowledge.knows(player, parent)) {
 				return null;

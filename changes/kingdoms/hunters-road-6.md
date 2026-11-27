@@ -3,3 +3,8 @@
 - **PotionClash** reads Powers' toxicity: past half a load the chance of a clash climbs, and a sour or belly clash leaves some toxin in the body.
 - Loading hints 215 to 217.
 - Built; not played.
+
+# Hunter's Road 6, part B: vials on the paste ladder
+- The five poison vials are now made from Jaymo's Powers' pastes (pure toxin, toxic paste, poison paste) when Powers is loaded; the old vanilla recipes stay only when it is not.
+- Loading hints 218 to 223.
+- Built; not played.

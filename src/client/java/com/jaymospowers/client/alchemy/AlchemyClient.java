@@ -15,5 +15,6 @@ public final class AlchemyClient {
 		SkinLayer.init();
 		MettleJump.init();
 		ToxicityClient.init();
+		DarkSightClient.init();
 	}
 }

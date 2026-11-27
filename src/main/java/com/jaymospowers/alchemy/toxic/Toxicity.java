@@ -340,7 +340,8 @@ public final class Toxicity {
 		}
 		if (strength > 0) {
 			Integer held = stack.get(HELD_TICKS);
-			dose(player, strength, held == null ? 0 : held);
+			int taken = dose(player, strength, held == null ? 0 : held);
+			com.jaymospowers.alchemy.hunter.Leans.taken(player, stack, taken);
 		}
 	}
 
@@ -409,6 +410,17 @@ public final class Toxicity {
 		}
 		if (player.isInWater() && Resting.magmaBelow(level, player.blockPosition())) {
 			return true;
+		}
+		return sittingByFire(player, was, now);
+	}
+
+	/**
+	 * Whether {@code player} sits still (moved less than a fifth of a block since {@code was}) by a lit campfire, low or on a
+	 * stool: what draws toxin out faster, and what lets a flask and a phial be refilled from spirit at a fire (patch 6, part B).
+	 */
+	public static boolean sittingByFire(ServerPlayer player, @org.jspecify.annotations.Nullable Vec3 was, Vec3 now) {
+		if (player.isCreative() || player.isSpectator() || !(player.level() instanceof ServerLevel level)) {
+			return false;
 		}
 		boolean still = was != null && was.distanceToSqr(now) < STILL_SQR;
 		return still && (Resting.restingPose(player) || seated(player)) && Resting.nearFire(level, player.blockPosition());

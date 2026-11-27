@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "life": 6,
+    "plant": 8,
+    "earth": 4
+  },
+  "result": {
+    "item": "jaymospowers:draught_plenty",
+    "count": 1,
+    "grade": "fine"
+  },
+  "research": "formula_plenty"
+}

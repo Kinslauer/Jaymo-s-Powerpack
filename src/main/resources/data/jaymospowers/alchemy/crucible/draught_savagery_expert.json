@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "war": 11,
+    "fire": 7,
+    "beast": 7
+  },
+  "result": {
+    "item": "jaymospowers:draught_savagery",
+    "count": 1,
+    "grade": "expert"
+  },
+  "research": "formula_savagery"
+}

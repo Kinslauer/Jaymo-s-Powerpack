@@ -4,6 +4,7 @@ import com.jaymoskitchen.HudBars;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.KitchenBlood;
 import com.jaymoskitchen.butchery.Butchery;
+import com.jaymoskitchen.butchery.MonsterOrgans;
 import com.jaymoskitchen.butchery.Organs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -50,9 +51,15 @@ public final class Gutting {
 			&& corpse.dragger() == null;
 	}
 
-	/** A monster with insides worth taking ({@link Organs#gutsMonster}: a spider's silk, a creeper's powder), lying loose. */
+	/**
+	 * A monster with insides worth taking ({@link Organs#gutsMonster}: a spider's silk, a creeper's powder; or a grown monster
+	 * the hunters carve, {@link MonsterOrgans}), lying loose.
+	 */
 	static boolean monster(CorpseEntity corpse) {
-		return corpse.kind() == CorpseKind.OTHER && !corpse.isMachine() && Organs.gutsMonster(corpse.sourceType());
+		if (corpse.kind() != CorpseKind.OTHER || corpse.isMachine()) {
+			return false;
+		}
+		return Organs.gutsMonster(corpse.sourceType()) || MonsterOrgans.organOf(corpse.sourceType()) != null && corpse.grown();
 	}
 
 	/** Insides to take out of it: a small body one piece, most two, a big carcass four. */

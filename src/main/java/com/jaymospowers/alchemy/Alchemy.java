@@ -68,6 +68,8 @@ public final class Alchemy {
 		LabEscape.init();
 		com.jaymospowers.alchemy.picks.AlchemyPicks.init();
 		com.jaymospowers.alchemy.toxic.Toxicity.init();
+		// Hunter's Road, part B: draughts, monster brews, refills, formulas, leans, pastes, the flask, the lab's furniture
+		com.jaymospowers.alchemy.hunter.HunterAlchemy.init();
 	}
 
 	/** Registers an item and adds it to the Alchemy tab. */
