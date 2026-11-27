@@ -9019,3 +9019,11 @@ Deviations from the plan:
 - Each piece has its own sounds (ratcheting gauntlets, the chest closing with the reactor's hum, leg pistons, the helm shutting and powering up).
 - Classes: `RigSuitUp` (WRAP, pick, sounds), `RigMoves.SUITUP_WRAP`, `RigCall` (the wrap's longer settle), `RigPose` (the T pose), `RigSuit` (each plate's close-then-fold flight), new `RigSuitUpCamera`, `RigKickCameraMixin` (also asks the new camera).
 - Built; not played.
+
+## 0.28.39 (2026-11-27): Rig suit-down - parking the suit plays the wrap backwards (#2328)
+
+- **Suit-down** (Andy: "parking the suit should show a suit down like the clip"): parking the Rig with the call key while standing still and unhurt for 5 s throws your arms out and the suit comes off piece by piece, the wrap suit-up in reverse. The helm goes first (the eyes go dark, the faceplate lifts, the helm folds back off the head), then the legs, the chest opens off the reactor, and last the gauntlets slide off past the hands. Each plate swings open and flies off, and each piece has its own unlocking sound. Then the arms come down and the pieces blast off to be parked as before.
+- Filmed from the front like the wrap: on the face for the helm, the chest for the rest, then a wide shot, and back behind you.
+- A blow part way, leaving, or a low-health failsafe parks the rest at once. Parking while moving or hurt, the sentry post and evac still park instantly as before.
+- Classes: `RigCall` (suitDown, the staged take-off), `RigSuitUp` (DOWN style, stillAndCalm, sounds), `RigMoves.SUITDOWN`, `RigSentry` (waits for a suit-down), `RigSuit` (plates flying off), `RigPose`, `RigSuitUpCamera`.
+- Built; not played.
