@@ -33,6 +33,9 @@ public final class WebBodyPose {
 	static final float PERCH_SETTLE = 6.0F;
 	private static final java.util.Map<Integer, Float> PERCH_SINCE = new java.util.HashMap<>();
 
+	/** Per entity riding a webline, when it began. */
+	private static final java.util.Map<Integer, Float> RIDE_SINCE = new java.util.HashMap<>();
+
 	private WebBodyPose() {
 	}
 
@@ -58,6 +61,19 @@ public final class WebBodyPose {
 			return;
 		}
 		PERCH_SINCE.remove(entity.getId());
+		Integer ride = entity.getAttached(com.jaymospowers.power.web.WebLineRide.RIDE);
+		if (ride != null) {
+			// on a webline: stood on it (the balanced crouch) or hanging under it by the hands
+			float now = entity.level().getGameTime() + partialTicks;
+			float began = RIDE_SINCE.computeIfAbsent(entity.getId(), id -> now);
+			if (RIDE_SINCE.size() > 64) {
+				RIDE_SINCE.keySet().removeIf(id -> id != entity.getId() && entity.level().getEntity(id) == null);
+			}
+			int kind = ride == com.jaymospowers.power.web.WebLineRide.HANG ? WebPose.LINE_HANG : WebPose.PERCH;
+			state.setData(KEY, new Pose(kind, 0, Mth.clamp((now - began) / PERCH_SETTLE, 0.0F, 1.0F), now));
+			return;
+		}
+		RIDE_SINCE.remove(entity.getId());
 		WebPose pose = entity.getAttached(WebPower.POSE);
 		if (pose == null) {
 			state.setData(KEY, null);
@@ -335,6 +351,57 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, -75.0F * lay);
 				poseStack.translate(0.0F, -middle, 0.0F);
 			}
+			case WebPose.SWAN_DIVE -> {
+				// thrown out of the release and laid out flat ahead, back arched, then folding back upright
+				float lay = hold(p, 0.3F, 0.65F);
+				poseStack.translate(0.0F, middle + 0.25F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -80.0F * lay);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.PIKE_FLIP -> {
+				// over forwards folded at the hips, so the turn is about the hips and quicker for it
+				float hips = middle * 0.85F;
+				poseStack.translate(0.0F, hips + 0.35F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -360.0F * ease(p / 0.8F));
+				poseStack.translate(0.0F, -hips, 0.0F);
+			}
+			case WebPose.SIDE_ROLL -> {
+				// a tucked aerial roll over a shoulder, sideways, the head leading it round
+				poseStack.translate(0.0F, middle + 0.3F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.ZP, pose.side() * 360.0F * ease(p / 0.85F));
+				poseStack.rotateDegrees(Axis.XP, -15.0F * swell(p));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.TWIST_FLIP -> {
+				// over backwards with a half twist, so it comes out facing the other way round
+				poseStack.translate(0.0F, middle + 0.4F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, 360.0F * ease(p / 0.8F));
+				poseStack.rotateDegrees(Axis.YP, pose.side() * 180.0F * turn);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.HANDSPRING -> {
+				// over forwards about the hands, which reach the ground (the air) a body's length below the hips
+				float hands = middle * 0.45F;
+				poseStack.translate(0.0F, hands + 0.55F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -360.0F * ease(p / 0.85F));
+				poseStack.translate(0.0F, -hands, 0.0F);
+			}
+			case WebPose.DIVE_ROLL -> {
+				// laid out along the dive and rolling about its own length; a roll that carries on (side 2) is already laid out
+				float lay = Math.abs(pose.side()) >= 2 ? 1.0F : ease(p / 0.2F);
+				float roll = (pose.side() < 0 ? -1.0F : 1.0F) * 360.0F * p;
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -75.0F * lay);
+				poseStack.rotateDegrees(Axis.YP, roll);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.LOOP_FLIP -> {
+				// the whole body going round over the anchor, slowly at the top: the hand is the middle of the turn
+				float hand = middle * 2.0F;
+				poseStack.translate(0.0F, hand, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -360.0F * turn);
+				poseStack.translate(0.0F, -hand, 0.0F);
+			}
 			case WebPose.RAGDOLL -> {
 				// flat on the back, a little twitch to it
 				float fall = Math.min(1.0F, p * 6.0F);
@@ -343,8 +410,7 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, -90.0F * fall);
 				poseStack.rotateDegrees(Axis.ZP, twitch);
 			}
-			default -> {
-			}
+			default -> WebAttackPoses.rotate(pose, poseStack, middle);
 		}
 	}
 
@@ -576,6 +642,82 @@ public final class WebBodyPose {
 				set(h.rightLeg, 0.7F, 0.0F, 0.15F, e);
 				set(h.leftLeg, -0.5F, 0.0F, -0.15F, e);
 			}
+			case WebPose.SWAN_DIVE -> {
+				// arms spread wide like wings, legs together and straight, head up
+				float arch = hold(pose.p(), 0.3F, 0.65F);
+				set(h.rightArm, 0.4F, 0.0F, 1.7F, arch);
+				set(h.leftArm, 0.4F, 0.0F, -1.7F, arch);
+				set(h.rightLeg, 0.35F, 0.0F, 0.05F, arch);
+				set(h.leftLeg, 0.35F, 0.0F, -0.05F, arch);
+				h.head.xRot = Mth.lerp(arch, h.head.xRot, -0.7F);
+			}
+			case WebPose.PIKE_FLIP -> {
+				// legs straight out in front, hands reaching for the toes
+				float pike = hold(pose.p(), 0.2F, 0.75F);
+				set(h.rightLeg, -1.55F, 0.0F, 0.05F, pike);
+				set(h.leftLeg, -1.55F, 0.0F, -0.05F, pike);
+				set(h.rightArm, -1.5F, -0.1F, 0.1F, pike);
+				set(h.leftArm, -1.5F, 0.1F, -0.1F, pike);
+				h.head.xRot = Mth.lerp(pike, h.head.xRot, 0.45F);
+			}
+			case WebPose.SIDE_ROLL -> {
+				// knees up, one arm across the chest and the other out for the turn
+				set(h.rightLeg, -1.7F, 0.0F, 0.2F, e);
+				set(h.leftLeg, -1.5F, 0.0F, -0.15F, e);
+				set(h.rightArm, -1.4F, -0.8F, 0.0F, e);
+				set(h.leftArm, -0.4F, 0.0F, -1.6F, e);
+				h.head.xRot = Mth.lerp(e, h.head.xRot, 0.4F);
+			}
+			case WebPose.TWIST_FLIP -> {
+				// tucked going over, then the arms thrown wide and the legs together to open out of the twist
+				float p = pose.p();
+				float tuck = ease((p - 0.05F) / 0.2F) * (1.0F - ease((p - 0.55F) / 0.15F));
+				float open = ease((p - 0.55F) / 0.2F);
+				set(h.rightLeg, -1.8F, 0.0F, 0.1F, tuck);
+				set(h.leftLeg, -1.8F, 0.0F, -0.1F, tuck);
+				set(h.rightArm, -1.5F, -0.3F, 0.2F, tuck);
+				set(h.leftArm, -1.5F, 0.3F, -0.2F, tuck);
+				set(h.rightArm, -0.3F, 0.0F, 1.6F, open);
+				set(h.leftArm, -0.3F, 0.0F, -1.6F, open);
+				set(h.rightLeg, 0.1F, 0.0F, 0.15F, open);
+				set(h.leftLeg, 0.1F, 0.0F, -0.15F, open);
+			}
+			case WebPose.HANDSPRING -> {
+				// arms straight out ahead (to the ground), the legs split wide as it goes over
+				float p = pose.p();
+				float reach = ease(p / 0.15F) * (1.0F - ease((p - 0.7F) / 0.2F));
+				float split = hold(p, 0.3F, 0.65F);
+				set(h.rightArm, -3.0F, 0.0F, 0.15F, reach);
+				set(h.leftArm, -3.0F, 0.0F, -0.15F, reach);
+				set(h.rightLeg, -0.3F, 0.0F, 0.75F, split);
+				set(h.leftLeg, -0.3F, 0.0F, -0.75F, split);
+				h.head.xRot = Mth.lerp(reach, h.head.xRot, 0.5F);
+			}
+			case WebPose.DIVE_ROLL -> {
+				// arms swept back along the body and the legs together, so the roll is a clean one
+				float dive = Math.abs(pose.side()) >= 2 ? 1.0F : ease(pose.p() / 0.2F);
+				set(h.rightArm, 0.1F, 0.0F, 0.25F, dive);
+				set(h.leftArm, 0.1F, 0.0F, -0.25F, dive);
+				set(h.rightLeg, 0.05F, 0.0F, 0.04F, dive);
+				set(h.leftLeg, 0.05F, 0.0F, -0.04F, dive);
+				h.head.xRot = Mth.lerp(dive, h.head.xRot, -0.5F);
+			}
+			case WebPose.LOOP_FLIP -> {
+				// the hands stay on the web: the legs tuck going over the top
+				float tuck = Mth.sin(pose.p() * Mth.PI);
+				set(h.rightLeg, -1.7F * tuck, 0.0F, 0.05F, e);
+				set(h.leftLeg, -1.7F * tuck, 0.0F, -0.05F, e);
+			}
+			case WebPose.LINE_HANG -> {
+				// hanging by both hands from the line above: arms straight up, legs loose and swaying a little
+				float e2 = ease(pose.p());
+				float sway = Mth.sin(pose.time() * 0.12F) * 0.12F;
+				set(h.rightArm, -3.05F, 0.0F, 0.14F, e2);
+				set(h.leftArm, -3.05F, 0.0F, -0.14F, e2);
+				set(h.rightLeg, 0.1F + sway, 0.0F, 0.07F, e2);
+				set(h.leftLeg, 0.1F - sway, 0.0F, -0.07F, e2);
+				h.head.xRot = Mth.lerp(e2, h.head.xRot, -0.3F);
+			}
 			case WebPose.RAGDOLL -> {
 				float t = pose.time();
 				float give = 1.0F - pose.p() * 0.7F;
@@ -589,8 +731,7 @@ public final class WebBodyPose {
 				h.leftLeg.zRot = -0.3F;
 				h.head.xRot = 0.3F;
 			}
-			default -> {
-			}
+			default -> WebAttackPoses.applyModel(h, pose);
 		}
 	}
 
