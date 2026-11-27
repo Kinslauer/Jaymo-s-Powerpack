@@ -401,6 +401,8 @@ public final class Lash {
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
 	/** Set while a buried chain axe is being ripped out: that wound is not one of the bare haft's blows. */
 	private static boolean ripping;
+	/** Set while a Cyclone or chain-pull blow is being dealt so {@code AirCombo} ignores it. */
+	public static boolean noAirCombo;
 	/** Chain axe hafts lying dropped with their heads still buried in something: dragged after it when the chain runs out. */
 	private static final List<ItemEntity> HAFTS = new java.util.ArrayList<>();
 
@@ -418,7 +420,7 @@ public final class Lash {
 		boolean swipe;
 		/** The chain axe was ripped out of what it was buried in: a longer wait before it can be swung again. */
 		boolean ripped;
-		/** The chain axe finished a spinning cyclone: uses {@link #CYCLONE_COOLDOWN}. */
+		/** The chain axe started a spinning cyclone: {@link #CYCLONE_COOLDOWN} was applied on cast. */
 		boolean cyclone;
 
 		Run(ServerPlayer player) {
@@ -1462,10 +1464,20 @@ public final class Lash {
 		player.causeFoodExhaustion(SLAM_EXHAUSTION);
 		if (level.getEntity(state.target()) instanceof LivingEntity target && struck(player, target)
 			&& target.getBoundingBox().distanceToSqr(at) < com.jaymospowers.mortal.ChainAxeItem.THROW_HIT * com.jaymospowers.mortal.ChainAxeItem.THROW_HIT) {
+			boolean hookPull = state.shape().y > 0.5;
 			target.setInvulnerableTime(0);
-			if (strike(player, target, flailDamage(player) * (SLAM_SHARE + SLAM_SPIN_BONUS * run.spin), false) && target.isAlive()
-				&& isChainAxe(player.getMainHandItem())) {
-				if (state.shape().y > 0.5) {
+			boolean was = noAirCombo;
+			if (hookPull) {
+				noAirCombo = true;
+			}
+			boolean hit;
+			try {
+				hit = strike(player, target, flailDamage(player) * (SLAM_SHARE + SLAM_SPIN_BONUS * run.spin), false);
+			} finally {
+				noAirCombo = was;
+			}
+			if (hit && target.isAlive() && isChainAxe(player.getMainHandItem())) {
+				if (hookPull) {
 					chainPull(run, state, target);
 					return;
 				}
@@ -1563,12 +1575,15 @@ public final class Lash {
 		Vec3 at = target.getBoundingBox().getCenter();
 		if (state.phase() == EMBED) {
 			player.getMainHandItem().remove(com.jaymospowers.mortal.Mortal.BURIED_IN);
+			boolean was = noAirCombo;
 			ripping = true;
+			noAirCombo = true;
 			try {
 				target.setInvulnerableTime(0);
 				target.hurtServer(level, level.damageSources().playerAttack(player), flailDamage(player) * PULL_SHARE);
 			} finally {
 				ripping = false;
+				noAirCombo = was;
 			}
 		}
 		Vec3 to = player.position().subtract(target.position());
@@ -1633,8 +1648,8 @@ public final class Lash {
 			}
 		}
 		ItemStack held = player.getMainHandItem();
-		if (!run.swipe && (state.kind() == FLAIL ? isFlail(held) : isWhip(held))) {
-			int wait = run.cyclone ? CYCLONE_COOLDOWN : run.ripped ? com.jaymospowers.mortal.ChainAxeItem.RIP_WAIT : state.kind() == FLAIL ? FLAIL_COOLDOWN : WHIP_COOLDOWN;
+		if (!run.swipe && !run.cyclone && (state.kind() == FLAIL ? isFlail(held) : isWhip(held))) {
+			int wait = run.ripped ? com.jaymospowers.mortal.ChainAxeItem.RIP_WAIT : state.kind() == FLAIL ? FLAIL_COOLDOWN : WHIP_COOLDOWN;
 			player.getCooldowns().addCooldown(held, wait);
 		}
 	}
@@ -1906,13 +1921,15 @@ public final class Lash {
 	private static void cyclone(ServerPlayer player, Vec3 head) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		ItemStack held = player.getMainHandItem();
 		Run run = new Run(player);
 		run.held = false;
 		run.swipe = false;
 		run.cyclone = true;
 		RUNS.put(player.getUUID(), run);
 		player.setAttached(STATE, new State(FLAIL, CYCLONE, now, -1, head, Vec3.ZERO, Vec3.ZERO));
-		player.getMainHandItem().hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+		player.getCooldowns().addCooldown(held, CYCLONE_COOLDOWN);
+		held.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
 		com.jaymospowers.core.fx.MagicFx.ring(level, player.position().add(0.0, 0.25, 0.0), (float)CYCLONE_RADIUS, CYCLONE_COLOR);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.0F, 1.3F);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.1F, 0.75F);
@@ -1957,7 +1974,15 @@ public final class Lash {
 			}
 			run.glanced.put(other.getId(), now);
 			other.setInvulnerableTime(0);
-			if (strike(player, other, damage, guarding(other, player))) {
+			boolean was = noAirCombo;
+			noAirCombo = true;
+			boolean hit;
+			try {
+				hit = strike(player, other, damage, guarding(other, player));
+			} finally {
+				noAirCombo = was;
+			}
+			if (hit) {
 				Vec3 out = dist < 1.0E-3 ? ahead(player) : diff.scale(1.0 / dist);
 				Vec3 tangent = new Vec3(-out.z, 0.0, out.x);
 				Vec3 push = tangent.scale(CYCLONE_TANGENT).subtract(out.scale(CYCLONE_PULL));

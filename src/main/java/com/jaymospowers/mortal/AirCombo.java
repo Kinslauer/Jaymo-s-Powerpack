@@ -1,6 +1,7 @@
 package com.jaymospowers.mortal;
 
 import com.jaymospowers.api.Power;
+import com.jaymospowers.armory.Lash;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.darktide.DarktidePower;
 import com.jaymospowers.power.gravity.GravityPower;
@@ -65,7 +66,7 @@ public final class AirCombo {
 
 	static void init() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
-			if (!FallingAttacks.landing && taken > 0.0F && source.is(DamageTypes.PLAYER_ATTACK) && source.getDirectEntity() instanceof ServerPlayer player && entity != player
+			if (!FallingAttacks.landing && !Lash.noAirCombo && taken > 0.0F && source.is(DamageTypes.PLAYER_ATTACK) && source.getDirectEntity() instanceof ServerPlayer player && entity != player
 				&& entity.isAlive() && entity.level() instanceof ServerLevel level) {
 				blow(level, player, entity);
 			}
