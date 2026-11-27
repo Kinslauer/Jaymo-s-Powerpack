@@ -51,7 +51,7 @@ import net.minecraft.world.item.Items;
  * from the brew grade of the flask or the pot it came from) and the <b>swings</b> it has left, {@link #SWINGS} by grade, used up
  * on every swing ({@link #swung}, {@link #punched}); a held blade with oil on it has a sheen ({@code OilClient}).
  * <ul>
- * <li><b>Blade oils</b>: the dead, beasts, brutes or people ({@link OilKind#monsterKind}); a blow on one of that kind does
+ * <li><b>Blade oils</b>: the dead, beasts, brutes, people or the cursed (vampires and werewolves) ({@link OilKind#monsterKind}); a blow on one of that kind does
  * {@link #BONUS} more. When the last swing of a blade oil lands on one of its kind, the hunter learns what that kind fears
  * (Kingdoms' bestiary).</li>
  * <li><b>Effect oils</b>: poison, a slowing and weakening haze, a glowing mark, deadly toxin, a blinding smoke, armour-eating acid
@@ -225,7 +225,10 @@ public final class Oils {
 			return false;
 		}
 		TagKey<EntityType<?>> tag = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath("jaymoskingdoms", "kind/" + kind.monsterKind));
-		return victim.is(tag) || kind == OilKind.DEAD && victim.is(EntityTypeTags.UNDEAD);
+		// the cursed are mostly players and villagers, not entity types: Kingdoms' MonsterKinds reads a vampire or a werewolf in beast form
+		return victim.is(tag) || kind == OilKind.DEAD && victim.is(EntityTypeTags.UNDEAD)
+			|| kind == OilKind.CURSED && Boolean.TRUE.equals(KingdomsCompat.call("MonsterKinds", "is", new Class<?>[] {net.minecraft.world.entity.Entity.class, String.class},
+				Boolean.FALSE, victim, kind.monsterKind));
 	}
 
 	/**

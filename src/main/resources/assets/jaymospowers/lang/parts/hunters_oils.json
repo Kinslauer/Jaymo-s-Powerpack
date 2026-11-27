@@ -7,6 +7,8 @@
   "tooltip.jaymospowers.oil.brutes": "Bites brutes: a coated blade hits ogres, trolls and their kin harder. Use it with a blade in your other hand, or throw it with nothing there. Sneak-use it on the ground to spill a slick.",
   "item.jaymospowers.oil_people": "Oil of Folk",
   "tooltip.jaymospowers.oil.people": "Bites people: a coated blade hits raiders, bandits and other folk harder. Use it with a blade in your other hand, or throw it with nothing there. Sneak-use it on the ground to spill a slick.",
+  "item.jaymospowers.oil_cursed": "Hunter's Oil",
+  "tooltip.jaymospowers.oil.cursed": "Garlic and silver. Bites the cursed: a coated blade hits vampires and werewolves harder. Use it with a blade in your other hand, or throw it with nothing there. Sneak-use it on the ground to spill a slick.",
   "item.jaymospowers.oil_poison": "Poison Oil",
   "tooltip.jaymospowers.oil.poison": "A coated blade poisons what it cuts. Use it with a blade in your other hand, or throw it with nothing there. Sneak-use it on the ground to spill a slick.",
   "item.jaymospowers.oil_haze": "Hazing Oil",
