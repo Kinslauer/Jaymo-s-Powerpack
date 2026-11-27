@@ -5,6 +5,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -12,7 +15,9 @@ import net.minecraft.world.phys.Vec3;
  * leaves the pillow and drifts up and out over the bed, then circles it slowly so you watch the world hurry on until
  * the sun is up. Dragging the mouse swings it round and up or down, the scroll wheel brings it nearer or further. The
  * pull-out and the circling run on real time, not ticks, since the world's ticks are sped up. Leaving bed, or the
- * morning, puts the view straight back in your eyes.
+ * morning, puts the view straight back in your eyes. The camera never shows the inside of a wall: where the pull-out
+ * passes through walls or a roof the screen dips to black ({@link #veil}) and comes up again outside, and wherever it
+ * settles it keeps clear of blocks.
  */
 public final class NightCam {
 	/** How far from the bed the camera settles (blocks) and the nearest and furthest the wheel takes it. */
@@ -24,10 +29,14 @@ public final class NightCam {
 	static final float ORBIT_DEG_PER_SEC = 3.0F;
 	/** Blocks the camera may climb to get out of solid ground or walls. */
 	static final int MOST_LIFT = 24;
+	/** How near a block the camera may come (blocks), checks along the pull-out, and how much of the pull-out the dip to black fades over. */
+	static final double CLEARANCE = 0.3;
+	static final int PATH_CHECKS = 64;
+	static final float VEIL_EDGE = 0.12F;
 
 	private static boolean active;
 	private static long startMs, lastMs;
-	private static float startYaw, orbit, distance = DISTANCE;
+	private static float startYaw, orbit, distance = DISTANCE, veil;
 
 	private NightCam() {
 	}
@@ -40,6 +49,11 @@ public final class NightCam {
 
 	public static boolean active() {
 		return active;
+	}
+
+	/** How black the screen is (0-1) while the pull-out passes through a wall or roof. */
+	public static float veil() {
+		return active ? veil : 0.0F;
 	}
 
 	/** The wheel brings the camera nearer (up) or further (down). */
@@ -82,7 +96,7 @@ public final class NightCam {
 		double flat = Math.cos(up) * distance;
 		// (behind where it looks: a camera at yaw looks along -sin, +cos)
 		Vec3 out = new Vec3(bed.x + Math.sin(rad) * flat, bed.y + Math.sin(up) * distance, bed.z - Math.cos(rad) * flat);
-		for (int lift = 0; lift < MOST_LIFT && minecraft.level.getBlockState(BlockPos.containing(out)).isSolidRender(); lift++) {
+		for (int lift = 0; lift < MOST_LIFT && blocked(minecraft.level, out); lift++) {
 			out = out.add(0.0, 1.0, 0.0);
 		}
 		Vec3 to = bed.subtract(out);
@@ -90,6 +104,47 @@ public final class NightCam {
 		float lookPitch = (float) (-(Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z)) * Mth.RAD_TO_DEG));
 		float p = Mth.smoothstep(pull);
 		Vec3 at = eye.lerp(out, p);
+		veil = pull >= 1.0F ? 0.0F : veil(minecraft.level, eye, out, p);
 		return new double[] {at.x, at.y, at.z, Mth.rotLerp(p, eyeYaw, lookYaw), Mth.lerp(p, eyePitch, lookPitch)};
+	}
+
+	/**
+	 * How black to draw the screen with the camera {@code p} of the way along the pull-out from {@code eye} to {@code out}:
+	 * fully black over the stretch that runs through blocks, fading over {@link #VEIL_EDGE} either side of it.
+	 */
+	private static float veil(Level level, Vec3 eye, Vec3 out, float p) {
+		float first = -1.0F, last = -1.0F;
+		for (int i = 0; i <= PATH_CHECKS; i++) {
+			float q = i / (float) PATH_CHECKS;
+			if (blocked(level, eye.lerp(out, q))) {
+				if (first < 0.0F) {
+					first = q;
+				}
+				last = q;
+			}
+		}
+		if (first < 0.0F) {
+			return 0.0F;
+		}
+		float outside = Math.max(first - p, p - last);
+		return Mth.clamp(1.0F - outside / VEIL_EDGE, 0.0F, 1.0F);
+	}
+
+	/** Whether a camera at {@code at} would be in a block or nearer one than {@link #CLEARANCE}. */
+	private static boolean blocked(Level level, Vec3 at) {
+		AABB box = new AABB(at.x - CLEARANCE, at.y - CLEARANCE, at.z - CLEARANCE, at.x + CLEARANCE, at.y + CLEARANCE, at.z + CLEARANCE);
+		for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX, box.minY, box.minZ), BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
+			BlockState state = level.getBlockState(pos);
+			if (state.isAir()) {
+				continue;
+			}
+			AABB local = box.move(-pos.getX(), -pos.getY(), -pos.getZ());
+			for (AABB part : state.getCollisionShape(level, pos).toAabbs()) {
+				if (part.intersects(local)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

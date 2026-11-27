@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.mixin.sleep;
 
+import com.jaymoskingdoms.client.NightCam;
 import com.jaymoskingdoms.client.RestClient;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -12,7 +13,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.5) The bed's darkness as {@link RestClient} has it: dim while resting, clear while the night runs by. */
+/**
+ * (0.7.5) The bed's darkness as {@link RestClient} has it: dim while resting, clear while the night runs by, and fully black
+ * while the night view's pull-out passes through a wall ({@link NightCam#veil}).
+ */
 @Mixin(Hud.class)
 abstract class HudSleepMixin {
 	@Shadow
@@ -25,10 +29,10 @@ abstract class HudSleepMixin {
 		if (this.minecraft.player == null || this.minecraft.player.getSleepTimer() <= 0) {
 			return;
 		}
-		float amount = RestClient.overlay();
-		if (amount > 0.0F) {
+		int alpha = (int) Math.max(220.0F * RestClient.overlay(), 255.0F * NightCam.veil());
+		if (alpha > 0) {
 			graphics.nextStratum();
-			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), (int)(220.0F * amount) << 24 | 1052704);
+			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), alpha << 24 | 1052704);
 		}
 	}
 }
