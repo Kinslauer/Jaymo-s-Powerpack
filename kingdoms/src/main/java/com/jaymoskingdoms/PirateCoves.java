@@ -219,7 +219,7 @@ final class PirateCoves {
 		}
 		Direction seaward = Direction.getApproximateNearest(water.getX() - fire.getX(), 0, water.getZ() - fire.getZ());
 		Faction camp = Faction.create(Factions.nextId(server), FactionType.BARBARIAN, name(server, random), DyeColor.BLACK, fire,
-			KingdomEvents.claim(server, fire, Camps.CLAIM_RADIUS));
+			KingdomEvents.claim(server, fire, Camps.CLAIM_RADIUS)).withAllegiance(FactionAllegiance.PIRATE);
 		Factions.put(server, camp);
 		int id = camp.id();
 		long now = level.getGameTime();

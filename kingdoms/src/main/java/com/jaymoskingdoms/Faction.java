@@ -26,7 +26,8 @@ import net.minecraft.world.level.ChunkPos;
  * {@code king}), so 0.2 kingdoms load as {@link FactionType#KINGDOM}s.
  */
 public record Faction(int id, FactionType type, String name, DyeColor color, BlockPos seat, Optional<UUID> leader, Map<UUID, Member> members,
-	long treasury, List<Long> claims, int overlord, boolean fallen, long successionAt, Map<String, Relation> relations, Holdings holdings) {
+	long treasury, List<Long> claims, int overlord, boolean fallen, long successionAt, Map<String, Relation> relations, Holdings holdings,
+	FactionAllegiance allegiance) {
 
 	/** A member: their rank in this faction (see {@link Rank}) and their standing with it (earned in its service). */
 	public record Member(int rank, int standing) {
@@ -132,12 +133,27 @@ public record Faction(int id, FactionType type, String name, DyeColor color, Blo
 			Codec.BOOL.optionalFieldOf("fallen", false).forGetter(Faction::fallen),
 			Codec.LONG.optionalFieldOf("succession_at", -1L).forGetter(Faction::successionAt),
 			Codec.unboundedMap(Codec.STRING, Relation.CODEC).optionalFieldOf("relations", Map.of()).forGetter(Faction::relations),
-			Holdings.CODEC.optionalFieldOf("holdings", Holdings.EMPTY).forGetter(Faction::holdings))
-		.apply(i, Faction::new));
+			Holdings.CODEC.optionalFieldOf("holdings", Holdings.EMPTY).forGetter(Faction::holdings),
+			FactionAllegiance.CODEC.optionalFieldOf("allegiance", FactionAllegiance.HUMAN).forGetter(Faction::allegiance))
+			.apply(i, Faction::new));
 
-	/** A new faction: no leader, members, treasury, relations or holdings yet. */
+	/** A new faction: no leader, members, treasury, relations or holdings yet. Allegiance derived from its type. */
 	public static Faction create(int id, FactionType type, String name, DyeColor color, BlockPos seat, List<Long> claims) {
-		return new Faction(id, type, name, color, seat, Optional.empty(), Map.of(), 0L, List.copyOf(claims), -1, false, -1L, Map.of(), Holdings.EMPTY);
+		return new Faction(id, type, name, color, seat, Optional.empty(), Map.of(), 0L, List.copyOf(claims), -1, false, -1L, Map.of(), Holdings.EMPTY,
+			deriveAllegiance(type));
+	}
+
+	/** Derives the allegiance from the faction's settlement form. */
+	public static FactionAllegiance deriveAllegiance(FactionType type) {
+		return switch (type) {
+			case KINGDOM, FIEFDOM, VILLAGE -> FactionAllegiance.HUMAN;
+			case BARBARIAN -> FactionAllegiance.HUMAN;
+		};
+	}
+
+	public Faction withAllegiance(FactionAllegiance allegiance) {
+		return new Faction(this.id, this.type, this.name, this.color, this.seat, this.leader, this.members, this.treasury, this.claims, this.overlord,
+			this.fallen, this.successionAt, this.relations, this.holdings, allegiance);
 	}
 
 	public boolean claims(ChunkPos chunk) {
@@ -166,17 +182,17 @@ public record Faction(int id, FactionType type, String name, DyeColor color, Blo
 
 	public Faction withType(FactionType type) {
 		return new Faction(this.id, type, this.name, this.color, this.seat, this.leader, this.members, this.treasury, this.claims, this.overlord,
-			this.fallen, this.successionAt, this.relations, this.holdings);
+			this.fallen, this.successionAt, this.relations, this.holdings, this.allegiance);
 	}
 
 	public Faction withName(String name) {
 		return new Faction(this.id, this.type, name, this.color, this.seat, this.leader, this.members, this.treasury, this.claims, this.overlord,
-			this.fallen, this.successionAt, this.relations, this.holdings);
+			this.fallen, this.successionAt, this.relations, this.holdings, this.allegiance);
 	}
 
 	public Faction withLeader(Optional<UUID> leader) {
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, leader, this.members, this.treasury, this.claims, this.overlord,
-			this.fallen, this.successionAt, this.relations, this.holdings);
+			this.fallen, this.successionAt, this.relations, this.holdings, this.allegiance);
 	}
 
 	public Faction withMember(UUID player, Member member) {
@@ -187,32 +203,32 @@ public record Faction(int id, FactionType type, String name, DyeColor color, Blo
 			members.put(player, member);
 		}
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, this.leader, Map.copyOf(members), this.treasury, this.claims,
-			this.overlord, this.fallen, this.successionAt, this.relations, this.holdings);
+			this.overlord, this.fallen, this.successionAt, this.relations, this.holdings, this.allegiance);
 	}
 
 	public Faction withTreasury(long treasury) {
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, this.leader, this.members, treasury, this.claims, this.overlord,
-			this.fallen, this.successionAt, this.relations, this.holdings);
+			this.fallen, this.successionAt, this.relations, this.holdings, this.allegiance);
 	}
 
 	public Faction withClaims(List<Long> claims) {
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, this.leader, this.members, this.treasury, List.copyOf(claims),
-			this.overlord, this.fallen, this.successionAt, this.relations, this.holdings);
+			this.overlord, this.fallen, this.successionAt, this.relations, this.holdings, this.allegiance);
 	}
 
 	public Faction withOverlord(int overlord) {
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, this.leader, this.members, this.treasury, this.claims, overlord,
-			this.fallen, this.successionAt, this.relations, this.holdings);
+			this.fallen, this.successionAt, this.relations, this.holdings, this.allegiance);
 	}
 
 	public Faction withFallen(boolean fallen) {
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, this.leader, this.members, this.treasury,
-			fallen ? List.of() : this.claims, this.overlord, fallen, this.successionAt, this.relations, this.holdings);
+			fallen ? List.of() : this.claims, this.overlord, fallen, this.successionAt, this.relations, this.holdings, this.allegiance);
 	}
 
 	public Faction withSuccessionAt(long at) {
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, this.leader, this.members, this.treasury, this.claims, this.overlord,
-			this.fallen, at, this.relations, this.holdings);
+			this.fallen, at, this.relations, this.holdings, this.allegiance);
 	}
 
 	/** Its relation with {@code other} set (one side only: {@link Relations#set} keeps both sides in step). */
@@ -224,12 +240,12 @@ public record Faction(int id, FactionType type, String name, DyeColor color, Blo
 			relations.put(Integer.toString(other), relation);
 		}
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, this.leader, this.members, this.treasury, this.claims, this.overlord,
-			this.fallen, this.successionAt, Map.copyOf(relations), this.holdings);
+			this.fallen, this.successionAt, Map.copyOf(relations), this.holdings, this.allegiance);
 	}
 
 	public Faction withHoldings(Holdings holdings) {
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, this.leader, this.members, this.treasury, this.claims, this.overlord,
-			this.fallen, this.successionAt, this.relations, holdings);
+			this.fallen, this.successionAt, this.relations, holdings, this.allegiance);
 	}
 
 	public Member member(UUID player) {
