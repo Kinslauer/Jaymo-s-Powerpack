@@ -40,16 +40,17 @@ public final class IncomingBlows {
 
 	/**
 	 * Server → the one a blow is coming at: from {@code attacker} (entity id), landing in {@code ticks}, too {@code heavy}
-	 * to parry; {@code tell}: the client draws the star and rings the bell itself (a player's swing, whose tell nobody else
+	 * to parry, or {@code yellow}: can't be blocked ({@link Guard#UNBLOCKABLE_TAG}); {@code tell}: the client draws the star and rings the bell itself (a player's swing, whose tell nobody else
 	 * gets), otherwise the server already did (a mob's).
 	 */
-	public record Incoming(int attacker, int ticks, boolean heavy, boolean tell) implements CustomPacketPayload {
+	public record Incoming(int attacker, int ticks, boolean heavy, boolean tell, boolean yellow) implements CustomPacketPayload {
 		public static final Type<Incoming> TYPE = new Type<>(JaymosPowers.id("incoming_blow"));
 		public static final StreamCodec<ByteBuf, Incoming> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Incoming::attacker,
 			ByteBufCodecs.VAR_INT, Incoming::ticks,
 			ByteBufCodecs.BOOL, Incoming::heavy,
 			ByteBufCodecs.BOOL, Incoming::tell,
+			ByteBufCodecs.BOOL, Incoming::yellow,
 			Incoming::new);
 
 		@Override
@@ -91,7 +92,7 @@ public final class IncomingBlows {
 					continue;
 				}
 			}
-			send(target, attacker, upswing, false, true);
+			send(target, attacker, upswing, false, false, true);
 		}
 	}
 
@@ -100,16 +101,21 @@ public final class IncomingBlows {
 	 * for Kingdoms (its {@code PowersCompat}): its fighters' swings and gunners' aims.
 	 */
 	public static void aimed(LivingEntity attacker, LivingEntity target, int ticks, boolean heavy) {
+		aimed(attacker, target, ticks, heavy, false);
+	}
+
+	/** {@link #aimed(LivingEntity, LivingEntity, int, boolean)} for a blow that may be a yellow one: it can't be blocked. */
+	public static void aimed(LivingEntity attacker, LivingEntity target, int ticks, boolean heavy, boolean yellow) {
 		if (target instanceof ServerPlayer player && player != attacker) {
-			send(player, attacker, ticks, heavy, false);
+			send(player, attacker, ticks, heavy, yellow, false);
 			// ((0.21.20) for a parry to turn you toward, Crowds)
 			Crowds.incoming(attacker, player, ticks);
 		}
 	}
 
-	private static void send(ServerPlayer target, LivingEntity attacker, int ticks, boolean heavy, boolean tell) {
+	private static void send(ServerPlayer target, LivingEntity attacker, int ticks, boolean heavy, boolean yellow, boolean tell) {
 		if (ServerPlayNetworking.canSend(target, Incoming.TYPE)) {
-			ServerPlayNetworking.send(target, new Incoming(attacker.getId(), Mth.clamp(ticks, MIN_TICKS, MAX_TICKS), heavy, tell));
+			ServerPlayNetworking.send(target, new Incoming(attacker.getId(), Mth.clamp(ticks, MIN_TICKS, MAX_TICKS), heavy, tell, yellow));
 		}
 	}
 }

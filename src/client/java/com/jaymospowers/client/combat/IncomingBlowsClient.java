@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The incoming-blow cue on this side (see {@link IncomingBlows}): for a player's swing, the star at their weapon hand and
  * the warning bell (only you get them); for every blow coming at you, an arc of dots round the crosshair on the side it
- * comes from (top: in front of you, bottom: behind), closing on the crosshair as it comes in. White: parry it. Red: too
+ * comes from (top: in front of you, bottom: behind), closing on the crosshair as it comes in. White: parry it. Yellow: can't be blocked, parry it or dodge. Red: too
  * heavy, block or dodge. Gold in its last {@link Guard#PERFECT_TICKS} (more while locked on to the one swinging): raise
  * the guard while it's gold for a perfect parry; any time before that is still a parry. The close is brought forward by
  * your own ping (up to {@link #MAX_PING_TICKS}), since your guard reaches the server that much later.
@@ -46,9 +46,9 @@ public final class IncomingBlowsClient {
 	static final int MAX_CUES = 6;
 	/** Ping compensation is capped at this (ticks). */
 	static final int MAX_PING_TICKS = 4;
-	static final int WHITE = 0xFFFFFF, RED = 0xE02020, GOLD = 0xFFC940, SHADOW = 0x000000;
+	static final int WHITE = 0xFFFFFF, RED = 0xE02020, GOLD = 0xFFC940, YELLOW = AttackTells.YELLOW_TELL_COLOR, SHADOW = 0x000000;
 
-	private record Cue(int attacker, long start, int ticks, boolean heavy) {
+	private record Cue(int attacker, long start, int ticks, boolean heavy, boolean yellow) {
 	}
 
 	private static final List<Cue> CUES = new ArrayList<>();
@@ -78,7 +78,7 @@ public final class IncomingBlowsClient {
 		if (CUES.size() >= MAX_CUES) {
 			CUES.remove(0);
 		}
-		CUES.add(new Cue(payload.attacker(), now, ticks, payload.heavy()));
+		CUES.add(new Cue(payload.attacker(), now, ticks, payload.heavy(), payload.yellow()));
 		if (payload.tell()) {
 			tell(level, living, payload.heavy());
 		}
@@ -150,6 +150,9 @@ public final class IncomingBlowsClient {
 			int rgb;
 			if (cue.heavy()) {
 				rgb = RED;
+			} else if (cue.yellow()) {
+				// can't be blocked: parry it in the window or dodge it
+				rgb = YELLOW;
 			} else if (landed) {
 				rgb = WHITE;
 			} else {
