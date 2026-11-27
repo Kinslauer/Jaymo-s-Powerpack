@@ -126,6 +126,8 @@ public final class RigPose {
 	/** The wrap's T: how far out the arms go (radians, near level), how wide the feet; the ticks each piece locks on at. */
 	static final float WRAP_ARMS_OUT = 1.45F, WRAP_SPREAD = 0.12F;
 	static final float[] WRAP_LOCKS = {16.0F, 30.0F, 44.0F, 60.0F};
+	/** The suit-down's unlocks (RigCall's DOWN_AT). */
+	static final float[] DOWN_UNLOCKS = {10.0F, 24.0F, 38.0F, 52.0F};
 	static final float SUITUP_SLAM_DROP = 3.0F, SUITUP_SLAM_LEAN = 0.5F, SUITUP_FIST_X = -0.1F, SUITUP_OPEN = 1.5F;
 	/** Walking at this share of full pace or more, a move leaves the legs to the walk. */
 	static final float STILL_PACE = 0.35F;
@@ -417,6 +419,28 @@ public final class RigPose {
 				set(h.rightArm, -0.15F, 0.0F, 0.12F, down);
 				set(h.leftArm, -0.15F, 0.0F, -0.12F, down);
 				crouch(h, 0.6F * jolt * wide, 0.0F);
+			}
+			case RigMoves.SUITDOWN -> {
+				// the wrap backwards: arms out wide, chin up as the helm folds back off (10 ticks in), a jolt as each piece
+				// unlocks, then the arms come down and a roll of the shoulders, the suit gone
+				float wide = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 6.0F, 1.0F, BACK, 58.0F, 1.0F, LINEAR, 66.0F, 0.0F, SINE);
+				float down = RigBeats.at(t, 58.0F, 0.0F, LINEAR, 66.0F, 1.0F, OUT, RigMoves.SUITDOWN_TICKS - 4.0F, 1.0F, LINEAR,
+					RigMoves.SUITDOWN_TICKS, 0.0F, SINE);
+				float lift = RigBeats.at(t, 8.0F, 0.0F, LINEAR, 12.0F, 1.0F, OUT, 20.0F, 0.0F, SINE);
+				float jolt = 0.0F;
+				for (float at : DOWN_UNLOCKS) {
+					float since = t - at;
+					if (since >= 0.0F && since < 4.0F) {
+						jolt = Math.max(jolt, 1.0F - since / 4.0F);
+					}
+				}
+				set(h.rightArm, -0.05F + 0.06F * jolt, 0.0F, WRAP_ARMS_OUT, wide);
+				set(h.leftArm, -0.05F + 0.06F * jolt, 0.0F, -WRAP_ARMS_OUT, wide);
+				spread(h, WRAP_SPREAD * Math.max(wide, down) * still);
+				h.head.xRot += -0.1F * wide - 0.3F * lift;
+				set(h.rightArm, 0.0F, 0.0F, 0.1F, down);
+				set(h.leftArm, 0.0F, 0.0F, -0.1F, down);
+				crouch(h, -0.3F * jolt * wide, 0.0F);
 			}
 			case RigMoves.SUITUP_STEP -> {
 				// arms held out wide while the shell stands open round you; then drawn in across the chest as it folds shut;

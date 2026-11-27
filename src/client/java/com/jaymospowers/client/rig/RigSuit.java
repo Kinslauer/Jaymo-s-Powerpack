@@ -131,7 +131,9 @@ public final class RigSuit {
 	static final float MIN_FLIGHT = 6.0F;
 	/** The wrap ({@link com.jaymospowers.rig.RigSuitUp#WRAP}): its style, and the share of a plate's flight spent closing on the body before it swings shut. */
 	static final int WRAP = com.jaymospowers.rig.RigSuitUp.WRAP;
-	static final float WRAP_APPROACH = 0.6F;
+	static final float WRAP_APPROACH = 0.6F, WRAP_FADE = 0.12F;
+	/** The suit-down ({@link com.jaymospowers.rig.RigSuitUp#DOWN}): the wrap backwards. */
+	static final int DOWN = com.jaymospowers.rig.RigSuitUp.DOWN;
 
 	/** The suit texture and its glow pass for each frame ({@link RigFrame} order), and the trim plates alone. */
 	static final Identifier[] TEXTURES = {JaymosPowers.id("textures/entity/rig/suit.png"), JaymosPowers.id("textures/entity/rig/suit_scrap.png"),
@@ -800,7 +802,7 @@ public final class RigSuit {
 				}
 			}
 			hideSkinLayers();
-			this.style = state.getData(STYLE) == null ? 0 : Math.min(WRAP, Math.max(0, state.getData(STYLE)));
+			this.style = state.getData(STYLE) == null ? 0 : Math.min(DOWN, Math.max(0, state.getData(STYLE)));
 			assemble(state.getData(AGES), Boolean.TRUE.equals(state.getData(FLY)));
 			Float face = state.getData(FACE);
 			if (face != null && face > 0.0F) {
@@ -845,6 +847,11 @@ public final class RigSuit {
 				float age = ages == null || this.only >= 0 && RigSuitMesh.PIECE[i] != this.only ? -1.0F : ages[RigSuitMesh.PIECE[i]];
 				float[] time = RigSuitMesh.TIME[i];
 				float p = age < 0.0F ? -1.0F : (age - time[0]) / time[1];
+				if (this.style == DOWN && age > 0.0F && age < time[0] + time[1]) {
+					// the suit-down: the build running backwards, each plate swinging open and flying off as the wrap's came in
+					wrap(part, i, age / Math.max(MIN_FLIGHT, time[0] + time[1]));
+					continue;
+				}
 				if (fly && this.style == WRAP && age > 0.0F && age < time[0] + time[1]) {
 					wrap(part, i, age / Math.max(MIN_FLIGHT, time[0] + time[1]));
 					continue;
@@ -919,10 +926,12 @@ public final class RigSuit {
 			part.xRot += from[3] * k + came[3] * fold;
 			part.yRot += from[4] * k + came[4] * fold;
 			part.zRot += came[5] * fold;
-			part.visible = true;
-			part.xScale = this.slim && this.arm[i] ? SLIM_ARM : 1.0F;
-			part.yScale = 1.0F;
-			part.zScale = 1.0F;
+			// it comes out of (or goes into) the air over the first stretch
+			float size = Mth.clamp(q / WRAP_FADE, 0.0F, 1.0F);
+			part.visible = size > 0.02F;
+			part.xScale = size * (this.slim && this.arm[i] ? SLIM_ARM : 1.0F);
+			part.yScale = size;
+			part.zScale = size;
 		}
 
 		/**

@@ -81,6 +81,9 @@ public final class RigSentry {
 
 	/** The Sentry key: stand the worn suit where you are, or (it already stands there) call it. */
 	static void use(ServerPlayer player) {
+		if (RigCall.parking(player)) {
+			return;
+		}
 		if (player.hasAttached(POST) || RigCall.parked(player) && !Rig.wearsAny(player)) {
 			RigCall.use(player);
 			return;
