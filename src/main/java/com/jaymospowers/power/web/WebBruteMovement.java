@@ -209,6 +209,11 @@ public final class WebBruteMovement {
 		}
 		AABB box = player.getBoundingBox();
 		Vec3 out = wall(player, box);
+		if (motion.climbTicks > 0 && out == null) {
+			// already on the wall: turning away to aim a charged leap must not drop you;
+			// the wall-facing check only gates starting a climb (climbTicks == 0)
+			out = motion.wall;
+		}
 		if (motion.climbTicks > 0 && input.shift()) {
 			motion.climbTicks = 0;
 			motion.wallGrace = now + 14;
