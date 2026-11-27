@@ -1,0 +1,57 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskingdoms:troll",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:ogre",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:cave_ogre",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:fire_ogre",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:armoured_ogre",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:ogre_king",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:bogre",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:cyclops",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:minotaur",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:made_brute",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:snow_giant",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:hornkin_brute",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:cave_brute",
+      "required": false
+    }
+  ]
+}

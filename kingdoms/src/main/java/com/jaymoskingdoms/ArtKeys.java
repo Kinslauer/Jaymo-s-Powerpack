@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  * reads the gesture from how long it was held and what the player was doing as it went down.
  * <ul>
  * <li>the <b>Soul key</b>: the Reaper's keeper ({@link SoulArts});</li>
- * <li>the <b>Claw key</b>: a vampire ({@link ClawArts});</li>
+ * <li>the <b>Claw key</b>: no longer bound to anything (a vampire's claw moves are on the skill bar now: {@link ClawArts});</li>
  * <li>the <b>Wild key</b>: a Druid, the green arts out of a shape and the sizes in one, or at any size but their own
  * ({@link GreenArts}, {@link SizeArts});</li>
  * <li>the <b>Sun key</b>: a Dawnborn, or a Cleric or Paladin who has learned the Sun's arts ({@link SunArts}).</li>
@@ -113,7 +113,9 @@ public final class ArtKeys {
 		Gesture gesture = held ? press.sneak ? Gesture.SNEAK_HOLD : Gesture.HOLD : press.sneak ? Gesture.SNEAK : press.sprint ? Gesture.SPRINT : Gesture.TAP;
 		switch (art) {
 			case SOUL -> SoulArts.key(player, gesture);
-			case CLAW -> ClawArts.key(player, gesture);
+			case CLAW -> {
+				// (a vampire's claw moves are on the skill bar: nothing answers here)
+			}
 			case WILD -> {
 				if (Druids.shaped(player) || SizeArts.size(player) != SizeArts.NATURAL) {
 					SizeArts.key(player, gesture);

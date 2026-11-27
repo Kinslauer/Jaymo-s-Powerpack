@@ -172,7 +172,7 @@ final class SkillScreen extends Screen {
 			node = com.jaymoskingdoms.ClassTrees.node(target.substring("classtree.jaymoskingdoms.".length()));
 		}
 		if (perk != null) {
-			SkillWeb.Spot spot = com.jaymoskingdoms.TreeLocks.hidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
+			SkillWeb.Spot spot = com.jaymoskingdoms.TreeLocks.webHidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
 			if (spot != null) {
 				page0();
 				selected = perk;
@@ -515,13 +515,13 @@ final class SkillScreen extends Screen {
 	/** Where {@code perk} sits on the web, or null if it isn't drawn: the Night page, before you're turned (Andy's skill-tree locks). */
 	private SkillWeb.@Nullable Spot spot(Skills.Perk perk) {
 		var player = this.minecraft == null ? null : this.minecraft.player;
-		return player != null && com.jaymoskingdoms.TreeLocks.hidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
+		return player != null && com.jaymoskingdoms.TreeLocks.webHidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
 	}
 
 	/** Whether {@code branch} isn't drawn (its gate and its name): the Night page, before you're turned. */
 	private boolean hiddenBranch(SkillWeb.Branch branch) {
 		var player = this.minecraft == null ? null : this.minecraft.player;
-		return branch == SkillWeb.Branch.NIGHT && player != null && com.jaymoskingdoms.TreeLocks.hidden(player, Skills.Perk.LIFELEECH);
+		return branch == SkillWeb.Branch.NIGHT && player != null && com.jaymoskingdoms.TreeLocks.webHidden(player, Skills.Perk.LIFELEECH);
 	}
 
 	/** Whether {@code perk} can be learnt (or raised) right now. */

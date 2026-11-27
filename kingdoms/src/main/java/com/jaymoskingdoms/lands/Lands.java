@@ -2,6 +2,7 @@ package com.jaymoskingdoms.lands;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.blossomland.BlossomAnimals;
+import com.jaymoskingdoms.noise.FastNoiseLite;
 import com.jaymoskingdoms.seas.Mohknee;
 import java.util.HashMap;
 import java.util.Map;
@@ -120,10 +121,33 @@ public final class Lands {
 
 	// ---- where the lands lie ----
 
-	/** A slow noise at block (x, z), two octaves, about -0.8 to 0.8. */
+	/**
+	 * A slow noise at block (x, z), two octaves, about -0.8 to 0.8. The place it is read at is first pushed about by
+	 * FastNoiseLite's domain warp ({@link #EDGES}), so a land's edge wanders in bays and spits instead of the smooth round
+	 * blobs a bare simplex threshold gives; the lands still lie where they did, give or take a few dozen blocks.
+	 */
 	static double field(SimplexNoise noise, double x, double z, double wave) {
 		double s = 1.0 / wave;
-		return 0.75 * noise.get(x * s, z * s) + 0.25 * noise.get(x * s * 2.7, z * s * 2.7);
+		FastNoiseLite.Vector2 at = new FastNoiseLite.Vector2(x * s, z * s);
+		EDGES.DomainWarp(at);
+		return 0.75 * noise.get(at.x, at.y) + 0.25 * noise.get(at.x * 2.7, at.y * 2.7);
+	}
+
+	/**
+	 * The lands' edge warp, in waves of each land's noise: three wiggles a wave, pushing up to about an eighth of a wave,
+	 * a second finer layer on the first. Fixed like the noises (the same in every world) and only read, so the worldgen
+	 * threads share it.
+	 */
+	private static final FastNoiseLite EDGES = edges();
+
+	private static FastNoiseLite edges() {
+		FastNoiseLite warp = new FastNoiseLite(0x1A4D5);
+		warp.SetDomainWarpType(FastNoiseLite.DomainWarpType.OpenSimplex2Reduced);
+		warp.SetFrequency(3.0F);
+		warp.SetDomainWarpAmp(0.12F);
+		warp.SetFractalType(FastNoiseLite.FractalType.DomainWarpProgressive);
+		warp.SetFractalOctaves(2);
+		return warp;
 	}
 
 	/** The block of a quart position (its middle). */

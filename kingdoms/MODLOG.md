@@ -18199,3 +18199,44 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 ## 0.13.75 (2026-11-27): Cross Slash blade form (#2255)
 
 - Cross Slash: new Blade Weapon Form art (taught by the Blade school) that dashes through foes drawing a glowing X across each, bursting a moment later for bonus damage.
+
+## 0.13.76 (2026-11-27): Hunter's Road 1 - yellow tells (#2284)
+
+- Kingdoms mirrors Powers' new `UNBLOCKABLE_TAG` (`PowersCompat`, `MobCombat`), and adds a loading hint for the gold glint (hint 209).
+- Built; not played.
+
+## 0.13.77 (2026-11-27): Ragged edges for the steam valleys, ashlands, salt pans and steppe (#2286)
+
+- The four lands (`lands/Lands`) used to end in smooth round blobs where their simplex noise crossed its threshold. The
+  place the noise is read at is now pushed about by a FastNoiseLite domain warp (two layers, three wiggles a wave, up to
+  an eighth of a wave), so their edges wander in bays and spits. The lands still lie where they did, give or take a few
+  dozen blocks; only chunks generated from now on follow the new edges.
+- FastNoiseLite 1.1.1 (Jordan Peck, MIT) vendored as `noise/FastNoiseLite` (package line added, float positions switched
+  to double), licence in `licenses/fastnoiselite/`.
+- Built (Gradle compileJava); edge shapes checked by rendering the threshold to images. Not played in game.
+
+## 0.13.78 (2026-11-27): Night's Blood 1 - one body of blood (mB reserve, every move on the bar, chains) (#2285)
+
+- **Blood reserve**: a full vampire's hunger is now blood, from 0 to 2000 mB, shown as ten dark vials where the food bar was (`VampireBlood`, `VampireBloodHud`). The exact mB shows on hover in the inventory. Bites, the throat grab, lapping, sleeping prey and bottles fill it; a bottle is 250 mB. It drains slowly over time, faster in the open sun, and with exertion: sprinting, fighting, healing and the hunger near people cost 100 mB a food point. Under 200 mB the vampire is starving and stops healing. The vanilla food bar is kept full and ignored. Dhampirs keep the food bar and pay nothing for moves.
+- **Every move on the skill bar**: bat, colony, mist, stare, Rake, Rend, Pounce and the frenzy roar join Feed, Dash, Pound and Gaze, each with its own mB cost. For vampires, O, P, the shape menu and the Claw key are gone. Werewolves keep O, P and U.
+- **Chains** (`NightFlow`): dash into Pounce or Rake, a leap that lands into Feed, Groundpound into Rend, and the end of mist into a leap. A chained move costs half.
+- New H-menu Controls tab for vampires and dhampirs (`VampireControlsScreen`), and loading hints 210 and 211.
+- Built; not played.
+
+## 0.13.79 (2026-11-27): Hunter's Road 2 - monster kinds and the bestiary (#2287)
+
+- **Kinds**: entity tags `jaymoskingdoms:kind/dead`, `corpse_eaters`, `brutes`, `beasts`, `spirits`, `cursed`, `people`, filled with vanilla, our mobs and Alex's Mobs (optional entries); other mods join by tag. `MonsterKinds.is(entity, kind)` reads the tag and the states (a vampire that is not a dhampir, a werewolf in beast form are cursed).
+- **Bestiary**: after the goblin and orc pages, one smudged page per kind for members you have not met, then a page for each member you have met (it hurt you or you hurt it): a hint, a "how it fights" line after a kill, a "what it fears" line after a sage's lesson (Research creature fears), the herbalist's new "what frightens the things on the road" talk choice, or `Bestiary.learnFear` (for the oils). At most 60 member pages. Goblin and orc pages unchanged.
+- **Hooks**: `Bestiary.learnFear(player, type)`, `told`, `toldOfKind`, `toldOfAny`.
+- Loading hint 214.
+- Classes: MonsterKinds, Bestiary, HerbalistWares, Research, StoryHoldScreen.
+- Built; not played.
+
+## 0.13.80 (2026-11-27): Night's Blood 2 - the Blood page, the shrine and the pacts (#2288)
+
+- **The Blood page** (`BloodPage`, `BloodPageScreen`): a tab on the H menu for vampires. A full vampire learns gifts (every bar move and Lifeleech, Night Sense, Bat Wings) with page points and slots them: three slots free, one more for each pact up to six. Only slotted gifts show on the bar and work. A dhampir sees only the four nodes a dhampir can take, paid with skill points as before; werewolves and wolfbloods keep their pack nodes on the skill web. Vampires and dhampirs no longer see the Night page on the web.
+- **Blood age**: fledgling, grown, old, from nights lived, new moons seen and great ones fed upon (rulers, warlords, champions, bosses). Each age gives page points; by night a grown one hits a little harder and an old one has more health too. Surrender is untouched.
+- **Five pacts**, taken and given up only at a shrine: drowned blood (water and rain slow you), kindling (fire x1.5, torches sting, the noon sun reaches further and burns longer), fine palate (only people's blood feeds, bottles half), unquiet (animals flee from further, no taming or breeding, traders charge more, `TraderUnquietMixin`), thin blood (no mending under half the reserve).
+- **The crypt shrine**: lit candles, a skull and a blood bottle in an item frame at the head of an OldRules coffin. Sneak-use on a candle, the skull, the coffin or the framed bottle opens the page with slots and pacts; elsewhere it only shows what you have. The turning crypt (`Lairs`) is built with one set.
+- Loading hints 212 and 213.
+- Built; not played.

@@ -59,7 +59,19 @@ final class Lairs {
 		for (BlockPos side : new BlockPos[] {head.east(), head.west(), foot.east(), foot.west()}) {
 			level.setBlock(side, Blocks.DARK_OAK_SLAB.defaultBlockState(), Block.UPDATE_ALL);
 		}
-		level.setBlock(head.north().above(), Blocks.SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, 0), Block.UPDATE_ALL);
+		// the shrine at the coffin's head: a skull between two lit candles, and a blood bottle framed on the wall above it
+		// (the Blood page's slots and pacts open here, {@link BloodPage})
+		BlockPos shrine = head.north();
+		level.setBlock(shrine, Blocks.SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, 0), Block.UPDATE_ALL);
+		for (BlockPos side : new BlockPos[] {shrine.east(), shrine.west()}) {
+			level.setBlock(side, Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 2).setValue(CandleBlock.LIT, true), Block.UPDATE_ALL);
+		}
+		net.minecraft.world.item.ItemStack bottle = BloodPage.bottleStack();
+		if (bottle != null) {
+			net.minecraft.world.entity.decoration.ItemFrame frame = new net.minecraft.world.entity.decoration.ItemFrame(level, shrine.above(), Direction.SOUTH);
+			frame.setItem(bottle);
+			level.addFreshEntity(frame);
+		}
 		// candles in the corners, cobwebs and a lantern overhead
 		int h = CRYPT_HALF;
 		for (int[] c : new int[][] {{-h, -h}, {h, -h}, {-h, h}, {h, h}}) {

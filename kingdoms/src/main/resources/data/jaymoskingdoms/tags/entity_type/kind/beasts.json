@@ -1,0 +1,124 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:wolf",
+    "minecraft:polar_bear",
+    "minecraft:spider",
+    "minecraft:cave_spider",
+    "minecraft:hoglin",
+    "minecraft:zoglin",
+    "minecraft:ravager",
+    {
+      "id": "jaymoskingdoms:feral_wolf",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:grizzly",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:wild_boar",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:coyote",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:great_goat",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:basilisk",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:manticore",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:harpy",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:tarantula",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:snow_widow",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:nether_scorpion",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:giant_salamander",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:sand_worm",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:rust_beast",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:piercer",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:liger",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:gorgon",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:grizzly_bear",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:crocodile",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:komodo_dragon",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:anaconda",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:tiger",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:gorilla",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:rattlesnake",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:caiman",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:tasmanian_devil",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:cave_centipede",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:bone_serpent",
+      "required": false
+    }
+  ]
+}

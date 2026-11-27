@@ -32,8 +32,8 @@ import net.minecraft.world.entity.player.Player;
  * <li>By day under the open sky: weak; round midday ({@link #NOON_FROM}-{@link #NOON_TO}) with nothing on their head,
  * they burn.</li>
  * <li>Blood: sneak and right-click a grown villager or a realm's folk with an empty hand to drink (a bite every
- * second): it feeds them, heals them, and the bitten turn too, if they live. Two nights without it and they're
- * starving (Hunger, Weakness) until they drink. Anyone of that realm who sees it cries out (a heavy crime); at night
+ * second): it feeds them (their blood is kept in mB, {@link VampireBlood}), heals them, and the bitten turn too, if they live. Under
+ * {@link VampireBlood#STARVE_BELOW} mB they're starving (Hunger, Weakness) until they drink. Anyone of that realm who sees it cries out (a heavy crime); at night
  * they show themselves too, and the guards hunt them till dawn.</li>
  * <li>The cure, for the bitten or the turned (or a werewolf, {@link WerewolfPlayers}): a rare quest from a priest
  * ({@link Cures}).</li>
@@ -60,7 +60,7 @@ public final class VampirePlayers {
 	/** (0.7.630) Lapping a pool on the ground: how near the spot, the most a gulp takes (stain size), what each unit gives. */
 	static final double LAP_RANGE = 1.5;
 	static final float LAP_MOST = 0.5F, LAP_HEAL = 3.0F, LAP_FOOD = 4.0F;
-	/** Nights without blood before they starve. */
+	/** Nights a full reserve lasts with no blood taken, before they starve ({@link VampireBlood}'s drain is set to it; a Nightborn's is longer). */
 	static final int STARVE_NIGHTS = 2;
 
 	private static final Map<UUID, Long> LAST_DRINK = new HashMap<>();
@@ -136,7 +136,7 @@ public final class VampirePlayers {
 		// (0.7.630) Andy: "is this animated?": down on hands and knees, mouth to the ground, bobbing with each gulp
 		PowersCompat.drinkAtGround(player);
 		player.heal(LAP_HEAL * drawn);
-		player.getFoodData().eat(Math.max(1, Math.round(LAP_FOOD * drawn)), 0.4F);
+		VampireBlood.feed(player, Math.max(1, Math.round(LAP_FOOD * drawn)), 0.4F);
 		KitchenCompat.drink(player, Math.max(1, Math.round(LAP_WATER * drawn)));
 		fedFromBottle(player);
 		BloodFever.bit(player);
@@ -148,11 +148,9 @@ public final class VampirePlayers {
 		return Vampires.isVampire(player);
 	}
 
-	/** Gone {@link #STARVE_NIGHTS} nights without blood (a Nightborn: {@link NightbornBlood#STARVE_NIGHTS}; also read on the client, for blood vision). */
+	/** A full vampire with under {@link VampireBlood#STARVE_BELOW} mB of blood (also read on the client, for blood vision); a dhampir never starves. */
 	public static boolean starving(Player player) {
-		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
-		return v != null && v.type() != Vampires.Kind.DHAMPIR
-			&& Vampires.nightIndex(player.level().getOverworldClockTime()) - v.fedNight() >= NightbornBlood.starveNights(player);
+		return VampireBlood.starving(player);
 	}
 
 	/** A vampire's bite on {@code player}: they'll turn at the next nightfall (unless they die first, or carry the wolf's curse). */
@@ -219,11 +217,14 @@ public final class VampirePlayers {
 			} else if (sunlit(player)) {
 				player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, false, true));
 				long t = Math.floorMod(clock, 24000L);
-				if (t >= NOON_FROM && t < NOON_TO && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-					player.igniteForSeconds(BURN_SECONDS);
+				// kindling: the noon sun reaches further into the day and burns longer
+				boolean kindling = BloodPage.has(player, BloodPage.Pact.KINDLING);
+				long widen = kindling ? BloodPage.KINDLING_NOON_WIDEN : 0L;
+				if (t >= NOON_FROM - widen && t < NOON_TO + widen && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+					player.igniteForSeconds(kindling ? BURN_SECONDS * BloodPage.KINDLING_BURN_TIMES : BURN_SECONDS);
 				}
 			}
-			if (nightNo - v.fedNight() >= NightbornBlood.starveNights(player)) {
+			if (VampireBlood.starving(player)) {
 				player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 40, 0, true, false, true));
 				player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, false, true));
 			}
@@ -253,6 +254,7 @@ public final class VampirePlayers {
 		boolean half = Boolean.TRUE.equals(player.removeAttached(HALF_TURN));
 		Vampires.Kind kind = half ? Vampires.Kind.DHAMPIR : Vampires.Kind.PLAYER;
 		player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(kind.name().toLowerCase(java.util.Locale.ROOT), nightNo - 1, player.level().getGameTime()));
+		VampireBlood.wake(player);
 		BloodThralls.release(player); // (0.7.332) a thrall who turns is no one's thrall
 		player.sendSystemMessage(Component.translatable(half ? "message.jaymoskingdoms.vampire.turned_half" : "message.jaymoskingdoms.vampire.turned")
 			.withStyle(ChatFormatting.DARK_RED));
@@ -337,7 +339,11 @@ public final class VampirePlayers {
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 3, false, false, false));
 		}
 		player.heal(DRINK_HEAL);
-		player.getFoodData().eat(DRINK_FOOD, DRINK_SATURATION);
+		// fine palate: only people's blood feeds them; a great one fed upon ages the blood
+		if (!BloodPage.palateRefuses(player, target)) {
+			VampireBlood.feed(player, DRINK_FOOD, DRINK_SATURATION);
+		}
+		BloodPage.fedOn(player, target);
 		KitchenCompat.drink(player, DRINK_WATER);
 		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
 		if (v != null) {

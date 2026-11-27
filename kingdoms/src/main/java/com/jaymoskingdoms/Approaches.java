@@ -1199,10 +1199,6 @@ public final class Approaches {
 			// a short menu of a feature (talking people round, a night out, lessons, papers)
 			return;
 		}
-		if (com.jaymoskingdoms.nightforms.NightForms.answer(player, answer)) {
-			// a vampire's shape menu
-			return;
-		}
 		if (Talks.answer(player, answer)) {
 			// (0.7.523) a talk that matters: their answer to your reply
 			return;

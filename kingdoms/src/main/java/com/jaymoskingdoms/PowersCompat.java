@@ -4983,6 +4983,8 @@ public final class PowersCompat {
 
 	/** Powers' tag on an attacker whose blow a guard can only block, never parry ({@code Guard.UNPARRYABLE_TAG}). */
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+	/** Powers' tag on an attacker whose blow a guard can't block, only parry or dodge ({@code Guard.UNBLOCKABLE_TAG}): the yellow tier. */
+	public static final String UNBLOCKABLE_TAG = "jaymospowers.unblockable";
 	/** Powers' special cuts, as {@code Armed.cut} draws them: the Wheel Cut, the Figure Eight, a hurled blade. */
 	public static final int CUT_WHEEL = 0, CUT_EIGHT = 1, CUT_HURL = 2, CUT_BOTH = 3, CUT_MILL = 4;
 
