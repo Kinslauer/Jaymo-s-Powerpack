@@ -8673,3 +8673,10 @@ Andy's Legends picks, patch 1 (web swinging and getting about), all our own code
 - **More swing poses** (`ws_poses`): the swing's free arm, legs and head now go through reach (just after a web catches), pull (falling down the arc), swing through (the fast bottom) and let go (rising and slowing), in one of four looks per web, never the one the last web had. Nine ways off a released web instead of three (front flip, back flip, corkscrew, cartwheel, plus the new swan dive, pike flip, side roll, twist flip and handspring), never one of the last two used. New poses `SWAN_DIVE`, `PIKE_FLIP`, `SIDE_ROLL`, `TWIST_FLIP`, `HANDSPRING`. `WebSwingPoses`, `WebArms`, `WebTrickClient`, `WebBodyPose`, `WebPose`, `WebStunts`.
 - No new keys: sneak, use, jump, forward and back, A and D, and Z as they already are.
 - Built; not played.
+
+## 0.28.4 (2026-11-27): New players start with low-end mode on and the vanilla texture look (#2260)
+
+- **New installs**: on an install's first launch with the pack, low-end mode is switched on (shaders off, Fast graphics) and the vanilla texture look is picked (the pack's retexture packs off, and not downloaded), on every PC, not only weak ones. The first world joined says so once in chat, with `/lowend off` (shaders and the starting graphics settings back) and `/texturelook reason` (the pack's textures back) for the full look.
+- **Existing players keep their settings**: an install counts as new only when it has no `config/jaymospowers-low-end.properties` yet, which every earlier launch wrote. Nothing changes for Andy's or Jung's installs, or for any player who has launched the pack before.
+- Classes: NewPlayerDefaults (new), LowEndMode (`newInstall`, `switchOnForNewPlayer`), TextureLook (`pickVanilla`), JaymosPowersClient (registered before the pack's resource packs are switched on).
+- Built; not played.
