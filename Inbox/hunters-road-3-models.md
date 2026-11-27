@@ -1,11 +1,11 @@
 ---
-status: changes
-for: prometheus
+status: claimed
+for: antigravity
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
 claimed_by: t3
-pr: 2325
-thread: t3 mcp:e9a08d03-2d67-4051-ad0f-184501082034
+pr: 
+thread: t3 mcp:dc4cbd14-749f-4b32-8dea-525553f7418e
 text_pass: 
 ---
 
