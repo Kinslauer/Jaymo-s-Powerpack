@@ -175,9 +175,9 @@ public final class BloodGrab {
 		return HOLDS.containsKey(player.getUUID());
 	}
 
-	/** Prey a hand can hold up: the bite's people and the Nether's piglins and Hornkin, never a player; (0.7.625) downed ones too, but not one being carried. */
+	/** Prey a hand can hold up: the bite's people and the Nether's piglins and Hornkin, never a player; (0.7.625) downed ones too, but not one being carried, nor one in a hunter's coat or a garlic wreath. */
 	static boolean prey(LivingEntity e) {
-		return !(e instanceof net.minecraft.world.entity.player.Player) && (Vampires.person(e) || Vampires.netherPrey(e)) && !e.isPassenger();
+		return !(e instanceof net.minecraft.world.entity.player.Player) && (Vampires.person(e) || Vampires.netherPrey(e)) && !e.isPassenger() && !HunterKit.refusesGrab(e);
 	}
 
 	static void start(ServerPlayer player, int id) {

@@ -7,14 +7,15 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Every oil there is (Hunter's Road, patch 7, "D4" and "T-C1"): four <b>blade oils</b> by the kind of monster they bite
- * (the dead, beasts, brutes, people: {@code jaymoskingdoms:kind/<kind>} tags), seven <b>effect oils</b> a blade carries into
+ * Every oil there is (Hunter's Road, patch 7, "D4" and "T-C1"): five <b>blade oils</b> by the kind of monster they bite
+ * (the dead, beasts, brutes, people and the cursed, the garlic-and-silver oil of the hunter's kit: {@code jaymoskingdoms:kind/<kind>} tags), seven <b>effect oils</b> a blade carries into
  * the wound, a <b>mending oil</b> for tools, and two <b>splashes</b> for friends (fire resistance and healing). The same
  * list names what an oil pot holds ({@link OilPotBlock}), what a sash carries ({@link OilSashItem}) and what a thrown oil is.
  */
 public enum OilKind implements StringRepresentable {
 	DEAD("dead", 0xB8C4D8, Group.BLADE, "dead"), BEASTS("beasts", 0xC8883A, Group.BLADE, "beasts"),
 	BRUTES("brutes", 0x7A8A5A, Group.BLADE, "brutes"), PEOPLE("people", 0xC85A5A, Group.BLADE, "people"),
+	CURSED("cursed", 0xCFD8E0, Group.BLADE, "cursed"),
 	POISON("poison", 0x6FA03A, Group.EFFECT, null), HAZE("haze", 0x9AA0A8, Group.EFFECT, null), MARK("mark", 0xF2D84A, Group.EFFECT, null),
 	TOXIN("toxin", 0x7FB020, Group.EFFECT, null), SMOKE("smoke", 0x585860, Group.EFFECT, null), ACID("acid", 0xB8D030, Group.EFFECT, null),
 	FIRE("fire", 0xF08030, Group.EFFECT, null),

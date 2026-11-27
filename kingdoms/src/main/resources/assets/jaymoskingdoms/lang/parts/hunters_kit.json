@@ -1,0 +1,15 @@
+{
+  "block.jaymoskingdoms.garlic_wreath": "Garlic Wreath",
+  "item.jaymoskingdoms.hunters_coat": "Hunter's Coat",
+  "effect.jaymoskingdoms.sour_blood": "Sour Blood",
+  "item.minecraft.potion.effect.garlic_draught": "Garlic Draught",
+  "item.minecraft.splash_potion.effect.garlic_draught": "Splash Garlic Draught",
+  "item.minecraft.lingering_potion.effect.garlic_draught": "Lingering Garlic Draught",
+  "item.minecraft.tipped_arrow.effect.garlic_draught": "Garlic Arrow",
+  "creatures.jaymoskingdoms.garlic_door": "The garlic over the door turns you back.",
+  "gui.jaymoskingdoms.story.hint.260": "Wild garlic grows in forests and swamps, and farmers sell it. Plant it on soil and it comes back. A vampire flinches from a head of garlic held out to it.",
+  "gui.jaymoskingdoms.story.hint.261": "A garlic wreath worn at the neck or on the head makes a vampire's bite slip off you, and its grab can't hold you. Hung by a door, no vampire comes through, invited or not. It withers in three days.",
+  "gui.jaymoskingdoms.story.hint.262": "Garlic in an awkward potion brews a garlic draught. While it lasts, a vampire that bites you retches, lets go and gets nothing from the bite.",
+  "gui.jaymoskingdoms.story.hint.263": "A hunter's coat turns most bites aside, and no vampire can grab whoever wears it. A village tailor sells one.",
+  "gui.jaymoskingdoms.story.hint.264": "The Lantern Warden's priests sell the hunter's kit to anyone who has slain a vampire: the coat, a garlic wreath and a blade oil of garlic and silver for the cursed."
+}

@@ -326,6 +326,11 @@ public final class VampirePlayers {
 			return;
 		}
 		LAST_DRINK.put(player.getUUID(), now);
+		if (HunterKit.slips(level, player, target)) {
+			// a garlic wreath or a hunter's coat: the bite slips off, and the grab can't hold
+			BloodGrab.release(player, false);
+			return;
+		}
 		long clock = level.getOverworldClockTime();
 		long nightNo = Vampires.nightIndex(clock);
 		if (quiet) {
@@ -337,6 +342,11 @@ public final class VampirePlayers {
 			}
 			target.hurtServer(level, level.damageSources().playerAttack(player), DRINK_DAMAGE);
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 3, false, false, false));
+		}
+		if (HunterKit.sour(target)) {
+			// sour blood (the garlic draught): they retch, let go, and the bite gives them nothing
+			HunterKit.retch(level, player);
+			return;
 		}
 		player.heal(DRINK_HEAL);
 		// fine palate: only people's blood feeds them; a great one fed upon ages the blood
