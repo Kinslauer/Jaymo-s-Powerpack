@@ -32,7 +32,8 @@ import org.jspecify.annotations.Nullable;
  * preview of you in the whole suit in the picked frame and paint (drag it to turn it); in the middle what to build (the
  * four pieces, a Rig arm, a Rig leg) and the frame, each a button that cycles (right-click steps back), with the frame's
  * numbers under them; on the right the paints (Andy: "you should also be able to customize the rigs in the forge ... I'd
- * like the ability to recolor it"): a tab for each of the plates, the trim, the under-suit and the lights, then the
+ * like the ability to recolor it"): a tab for each of the plates, the trim, the second colour (the under-suit
+ * and the second plates: biceps, belt, thighs, boots) and the lights, then the
  * sixteen dyes, a mixer (a hue bar and a shade bar, for any colour) and a chip to take the paint off; along the bottom
  * what the build costs against what you carry and what is fed into the Forge, "Paint" and "Build".
  * <p>

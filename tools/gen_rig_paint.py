@@ -8,8 +8,9 @@ the same UVs as the one it comes from, in light greys for the client to multiply
 
 - suit_paint_<frame>.png, one per frame (standard is plain suit_paint.png): the frame's own sheet as greys, lifted so its
   plates sit at a light grey. Seams, ribs and scorch marks keep their shade, so the paint has the frame's wear on it.
-- suit_under.png: the under-suit's weave alone (its glowing seams left out), in light greys, drawn over the plates in the
-  under-suit's paint.
+- suit_under.png: the second colour's pixels alone, in light greys, drawn over the plates in that paint: the under-suit's
+  weave (its glowing seams left out) and the second plates (biceps, belt, thighs, boots: the darker ones in gen_rig.py).
+  The under-suit is mostly under the plates, so on its own it would barely show.
 - suit_lights.png: every light on the suit (suit_glow.png's pixels) in white and greys by how bright each is, drawn lit
   in the lights' colour in place of the frame's own glow.
 - octo_paint.png and octo_lights.png: the same two for the Octo Core's arms (they take the trim's paint and the lights').
@@ -63,11 +64,18 @@ def lights(glow):
 
 
 def under(suit, glow):
-    """The under-suit boxes' pixels alone (not their glowing seams), as greys."""
+    """The under-suit's and the second plates' pixels alone (not their lights), as greys, each kind lifted to its grey."""
     gen_rig.suit_pack()
+    out = Image.new("RGBA", suit.size, (0, 0, 0, 0))
+    for kind, grey in (("under", UNDER_GREY), ("plate2", PLATE_GREY)):
+        kind_shades(suit, glow, kind, grey, out)
+    return out
+
+
+def kind_shades(suit, glow, kind, grey, out):
     shades = {}
     for _, box in gen_rig.suit_boxes():
-        if box["paint"] != "under":
+        if box["paint"] != kind:
             continue
         w, h, d = box["size"]
         u, v = box["uv"]
@@ -78,11 +86,9 @@ def under(suit, glow):
                     if suit.getpixel(p)[3] > 0 and glow.getpixel(p)[3] == 0:
                         shades[p] = luma(*suit.getpixel(p)[:3])
     middle = sorted(shades.values())[len(shades) // 2]
-    out = Image.new("RGBA", suit.size, (0, 0, 0, 0))
     for p, s in shades.items():
-        v = max(0, min(255, round(s * UNDER_GREY / middle)))
+        v = max(0, min(255, round(s * grey / middle)))
         out.putpixel(p, (v, v, v, 255))
-    return out
 
 
 def main():

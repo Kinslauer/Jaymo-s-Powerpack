@@ -82,7 +82,10 @@ public final class Rig {
 	public static DataComponentType<String> FRAME;
 	/** On every Rig piece: the trim's paint (rgb), picked at the Forge; none is unpainted. The plates' paint is the dyed colour. */
 	public static DataComponentType<Integer> TRIM;
-	/** On every Rig piece: the under-suit's paint and the lights' colour (rgb), picked at the Forge; none keeps the frame's own. */
+	/**
+	 * On every Rig piece: the second colour (the under-suit and the second plates: biceps, belt, thighs, boots) and the
+	 * lights' colour (rgb), picked at the Forge; none keeps the frame's own.
+	 */
 	public static DataComponentType<Integer> UNDER, LIGHTS;
 	/** On every Rig piece: the finish over its plates ({@link RigFinish}); none is plain. */
 	public static DataComponentType<Integer> FINISH;

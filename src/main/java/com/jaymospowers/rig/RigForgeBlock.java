@@ -334,7 +334,7 @@ public class RigForgeBlock extends Block implements EntityBlock {
 
 	/**
 	 * A dye on the Forge: the plates' paint (Sneak: the trim's), also put on every Rig piece you wear; a water bucket washes
-	 * every paint off (plates, trim, under-suit and lights). What the Forge builds next takes the paint.
+	 * every paint off (plates, trim, second colour and lights). What the Forge builds next takes the paint.
 	 */
 	private static void paint(ServerPlayer player, ItemStack held, RigForgeEntity forge, BlockPos pos) {
 		DyeColor dye = held.get(DataComponents.DYE);

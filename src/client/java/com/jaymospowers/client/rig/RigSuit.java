@@ -118,7 +118,7 @@ public final class RigSuit {
 	/** The frame this suit was built as ({@link RigFrame} ordinal), its trim paint (rgb, -1 for none), and whether its plates are flying in (a suit call). */
 	static final RenderStateDataKey<Integer> FRAME = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_frame");
 	static final RenderStateDataKey<Integer> TRIM = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_trim");
-	/** The under-suit's paint and the lights' colour (rgb), when the Forge has set them; null keeps the frame's own. */
+	/** The second colour (the under-suit and the second plates) and the lights' colour (rgb), when the Forge has set them; null keeps the frame's own. */
 	static final RenderStateDataKey<Integer> UNDER = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_under");
 	static final RenderStateDataKey<Integer> LIGHTS = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_lights");
 	static final RenderStateDataKey<Integer> FINISH = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_finish");
@@ -144,7 +144,8 @@ public final class RigSuit {
 	static final Identifier TRIM_TEXTURE = JaymosPowers.id("textures/entity/rig/suit_trim.png");
 	/**
 	 * The paintable sheets ({@code tools/gen_rig_paint.py}): each frame's plates in light greys for a plates paint to tint
-	 * (so a paint shows as itself, not darkened by the gunmetal), the under-suit's weave alone, and every light in white.
+	 * (so a paint shows as itself, not darkened by the gunmetal), the second colour's pixels alone (the under-suit and the second
+	 * plates), and every light in white.
 	 */
 	static final Identifier[] PAINT_TEXTURES = {JaymosPowers.id("textures/entity/rig/suit_paint.png"), JaymosPowers.id("textures/entity/rig/suit_paint_scrap.png"),
 		JaymosPowers.id("textures/entity/rig/suit_paint_shade.png"), JaymosPowers.id("textures/entity/rig/suit_paint_siege.png"),
@@ -684,7 +685,7 @@ public final class RigSuit {
 			}
 			Integer under = state.getData(UNDER);
 			if (under != null) {
-				// the under-suit, painted: its weave alone over the plates
+				// the second colour: the under-suit and the second plates, over the plates
 				collector.order(1).submitModel(suit, state, poseStack, RenderTypes.entityCutout(UNDER_TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
 					tint(under), null, 0);
 			}

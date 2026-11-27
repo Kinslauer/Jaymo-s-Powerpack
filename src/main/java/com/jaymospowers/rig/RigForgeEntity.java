@@ -17,7 +17,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * What the Rig Forge holds: the salvage fed into it (in points), the piece and frame picked, and the four paints (plates,
- * trim, under-suit and lights). Synced to everyone near, because the Forge draws the suit over itself as a turning hologram
+ * trim, the second colour and lights). Synced to everyone near, because the Forge draws the suit over itself as a turning hologram
  * (client {@code RigForgeRenderer}): the plates of the picked piece light as the salvage goes in.
  */
 public class RigForgeEntity extends BlockEntity {
@@ -33,7 +33,7 @@ public class RigForgeEntity extends BlockEntity {
 	private RigFrame frame = RigFrame.STANDARD;
 	/** The paints, by {@link #PLATES}, {@link #TRIM}, {@link #UNDER}, {@link #LIGHTS}: rgb or {@link #NO_PAINT}. */
 	private final int[] paints = {NO_PAINT, NO_PAINT, NO_PAINT, NO_PAINT};
-	/** The paints the Forge puts on: the plates, the trim, the under-suit, the lights. */
+	/** The paints the Forge puts on: the plates, the trim, the second colour (the under-suit and the second plates), the lights. */
 	public static final int PLATES = 0, TRIM = 1, UNDER = 2, LIGHTS = 3, PAINTS = 4;
 	private static final String[] PAINT_KEYS = {"plates", "trim", "under", "lights"};
 
