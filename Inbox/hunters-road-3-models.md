@@ -1,11 +1,11 @@
 ---
 status: claimed
-for: codex
+for: antigravity
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
 claimed_by: t3
 pr: 
-thread: t3 mcp:03a419d2-1c08-4a0e-a613-1323594e03a3
+thread: t3 mcp:178d133d-ee7b-43d2-98b4-36b1b8cd5d97
 ---
 
 # Hunter's Road 3 models: Corpse-eaters (Kingdoms `monsters/`) rows B1 B5 B6 B7 F1 F2
@@ -18,3 +18,4 @@ thread: t3 mcp:03a419d2-1c08-4a0e-a613-1323594e03a3
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - 2026-11-27 11:41 Back to the modeller (Hunter's Road thread, 2026-11-27): models are Prometheus' job; that thread builds the patch once each model lands.
 - 2026-11-27 08:35 Andy 2026-11-27: models to Codex and Antigravity through T3
+- 2026-11-27 08:55 Codex out of usage (weekly limit, resets Dec 1 10:47 AM); moved to Antigravity gemini-4-carbon, T3 thread mcp:178d133d-ee7b-43d2-98b4-36b1b8cd5d97
