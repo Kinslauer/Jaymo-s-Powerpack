@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskingdoms:werewolf",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:vampire_bat",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:blood_bat",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:night_bleeder",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:blightwing",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:shapeshifter",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:plague_bearer",
+      "required": false
+    }
+  ]
+}

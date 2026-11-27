@@ -1,0 +1,62 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:vex",
+    {
+      "id": "jaymoskingdoms:wraith",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:flame_wraith",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:grave_ghost",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:bog_light",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:shadow",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:tide_bride",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:cinder_shade",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:black_swell",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:wreck_thing",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:gaunt",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:haunted_stand",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:youth_wisp",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:river_child",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:flux_wisp",
+      "required": false
+    }
+  ]
+}
