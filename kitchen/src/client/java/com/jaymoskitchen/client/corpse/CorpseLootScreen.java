@@ -38,11 +38,114 @@ public class CorpseLootScreen extends AbstractContainerScreen<CorpseLootMenu> {
 		}
 	}
 
+	/** The cut-off button (in the free spot above the hands) and its list of parts, beside it over the pockets. */
+	private static final int CUT_X = CorpseLootMenu.HANDS_X - 1, CUT_Y = CorpseLootMenu.TOP - 1, CUT_SIZE = 18,
+		LIST_X = CorpseLootMenu.POCKETS_X - 1, LIST_W = 74, LIST_ROW = 12;
+	private static final String[] PART_KEYS = {"head", "right_arm", "left_arm", "right_leg", "left_leg"};
+	private static final net.minecraft.world.item.ItemStack CUT_ICON = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_AXE);
+	/** A piece bolted on: a red wash over its slot. */
+	private static final int LOCKED = 0x50C03030;
+	private boolean listOpen;
+
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		this.xMouse = mouseX;
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+		if (!this.menu.canCutOff()) {
+			return;
+		}
+		int x = this.leftPos, y = this.topPos;
+		boolean overCut = KitchenUi.over(mouseX, mouseY, x + CUT_X, y + CUT_Y, CUT_SIZE, CUT_SIZE);
+		KitchenUi.button(graphics, this.font, x + CUT_X, y + CUT_Y, CUT_SIZE, CUT_SIZE, Component.empty(), KitchenUi.ACCENT, overCut || this.listOpen, true);
+		graphics.item(CUT_ICON, x + CUT_X + 1, y + CUT_Y + 1);
+		for (int i = 0; i < 4; i++) {
+			if (this.menu.attached(i) >= 0 && this.menu.slots.get(i).isActive()) {
+				var slot = this.menu.slots.get(i);
+				graphics.fill(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, LOCKED);
+			}
+		}
+		if (this.listOpen) {
+			int[] parts = partsOn();
+			int top = y + CUT_Y;
+			graphics.fill(x + LIST_X - 1, top - 1, x + LIST_X + LIST_W + 1, top + parts.length * LIST_ROW + 1, KitchenUi.WELL_EDGE);
+			for (int i = 0; i < parts.length; i++) {
+				int rowY = top + i * LIST_ROW;
+				boolean over = KitchenUi.over(mouseX, mouseY, x + LIST_X, rowY, LIST_W, LIST_ROW);
+				graphics.fill(x + LIST_X, rowY, x + LIST_X + LIST_W, rowY + LIST_ROW, KitchenUi.PANEL);
+				KitchenUi.row(graphics, x + LIST_X, rowY, x + LIST_X + LIST_W, rowY + LIST_ROW, i, over);
+				KitchenUi.line(graphics, this.font, Component.translatable("screen.jaymoskitchen.corpse.cut." + PART_KEYS[parts[i]]),
+					x + LIST_X + 4, rowY + 2, LIST_W - 8, over ? KitchenUi.TEXT : KitchenUi.DIM);
+			}
+			if (parts.length == 0) {
+				graphics.fill(x + LIST_X, top, x + LIST_X + LIST_W, top + LIST_ROW, KitchenUi.PANEL);
+				KitchenUi.line(graphics, this.font, Component.translatable("screen.jaymoskitchen.corpse.cut.none"), x + LIST_X + 4, top + 2,
+					LIST_W - 8, KitchenUi.HINT);
+			}
+		} else if (overCut) {
+			KitchenUi.tip(graphics, this.font, Component.translatable("screen.jaymoskitchen.corpse.cut.tip"), mouseX, mouseY);
+		}
 	}
+
+	/** The parts still on the body, as indexes into {@link CorpseLootMenu#PARTS}. */
+	private int[] partsOn() {
+		if (this.menu.corpse == null) {
+			return new int[0];
+		}
+		int missing = this.menu.corpse.missing();
+		return java.util.stream.IntStream.range(0, CorpseLootMenu.PARTS.length).filter(i -> (missing & CorpseLootMenu.PARTS[i]) == 0).toArray();
+	}
+
+	@Override
+	public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+		if (this.menu.canCutOff() && this.minecraft != null && this.minecraft.gameMode != null) {
+			int x = this.leftPos, y = this.topPos;
+			if (this.listOpen) {
+				int[] parts = partsOn();
+				for (int i = 0; i < parts.length; i++) {
+					if (KitchenUi.over((int) event.x(), (int) event.y(), x + LIST_X, y + CUT_Y + i * LIST_ROW, LIST_W, LIST_ROW)) {
+						this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, CorpseLootMenu.CUT + parts[i]);
+						this.listOpen = false;
+						return true;
+					}
+				}
+			}
+			if (KitchenUi.over((int) event.x(), (int) event.y(), x + CUT_X, y + CUT_Y, CUT_SIZE, CUT_SIZE)) {
+				this.listOpen = !this.listOpen;
+				this.minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+					net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK, 1.0F));
+				return true;
+			}
+			if (this.listOpen) {
+				this.listOpen = false;
+				return true;
+			}
+			// a piece bolted on: a click on it cuts off the part it's on
+			if (this.hoveredSlot != null && this.hoveredSlot.index < CorpseLoot_GEAR && this.menu.partFor(this.hoveredSlot.index) != 0) {
+				this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, CorpseLootMenu.CUT_GEAR + this.hoveredSlot.index);
+				return true;
+			}
+		}
+		return super.mouseClicked(event, doubleClick);
+	}
+
+	@Override
+	protected java.util.List<Component> getTooltipFromContainerItem(net.minecraft.world.item.ItemStack stack) {
+		java.util.List<Component> lines = new java.util.ArrayList<>(super.getTooltipFromContainerItem(stack));
+		if (this.hoveredSlot != null && this.hoveredSlot.index < CorpseLoot_GEAR) {
+			int on = this.menu.attached(this.hoveredSlot.index);
+			int part = this.menu.partFor(this.hoveredSlot.index);
+			if (on == 0) {
+				lines.add(Component.translatable("screen.jaymoskitchen.corpse.attached.torso").withStyle(net.minecraft.ChatFormatting.RED));
+			} else if (part != 0) {
+				int i = java.util.Arrays.stream(CorpseLootMenu.PARTS).boxed().toList().indexOf(part);
+				lines.add(Component.translatable("screen.jaymoskitchen.corpse.attached." + PART_KEYS[i]).withStyle(net.minecraft.ChatFormatting.RED));
+			}
+		}
+		return lines;
+	}
+
+	/** The gear slots come first in the menu ({@code CorpseLoot.GEAR}: head, chest, legs, feet, body, hands). */
+	private static final int CorpseLoot_GEAR = 7;
 
 	@Override
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {

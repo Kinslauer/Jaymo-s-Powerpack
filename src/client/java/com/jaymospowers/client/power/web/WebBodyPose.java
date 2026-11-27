@@ -84,6 +84,11 @@ public final class WebBodyPose {
 		net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
 		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
 		boolean show = p >= 0.0F && p < 1.0F && !(ownView && WebPose.trick(pose.kind()));
+		if (show && entity instanceof net.minecraft.world.entity.player.Player player
+			&& (com.jaymospowers.client.freerun.CoreMotionClient.playing(player, "flip")
+				|| pose.kind() == WebPose.HERO_LAND && com.jaymospowers.client.freerun.CoreMotionClient.playing(player, "motion"))) {
+			show = false;
+		}
 		if (show && WebPose.acro(pose.kind()) && entity.onGround() && p > (pose.kind() == WebPose.STAND_BACKFLIP ? 0.3F : 0.15F)) {
 			// Acrobatics: down on the feet before it was done, the body stops turning there and then
 			show = false;

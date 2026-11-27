@@ -991,7 +991,16 @@ public final class Dismember {
 		} else {
 			Vec3 from = blast != null ? blast : by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
 			SeveredPart.spawn(level, target, part, from);
-			if (!BladeBlood.bleeds(target)) {
+			if (target.getType().builtInRegistryHolder().is(BladeBlood.METAL_BODIES)) {
+				// a machine (the future's androids) loses the part in sparks and torn metal, nothing bleeds
+				Vec3 at = stump(target, part);
+				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, quiet ? 8 : 24, 0.15, 0.15, 0.15, 0.25);
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.IRON_BLOCK.defaultBlockState()), at.x, at.y, at.z,
+					quiet ? 6 : 16, 0.15, 0.15, 0.15, 0.2);
+				if (!quiet) {
+					level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_GOLEM_DAMAGE, SoundSource.HOSTILE, 1.0F, 1.3F);
+				}
+			} else if (!BladeBlood.bleeds(target)) {
 				// (0.21.50) Andy: "skeletons should not bleed": a body with no blood loses the part in chips of bone, and no stump bleeds
 				Vec3 at = stump(target, part);
 				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z,
@@ -1031,13 +1040,19 @@ public final class Dismember {
 				// (0.17.183) Will's Last Look: the weaker who saw it run (Kingdoms)
 				com.jaymospowers.core.wounds.WillSkill.beheaded(by, target);
 			}
-			case RIGHT_ARM, LEFT_ARM -> emptyHand(level, target, part);
+			case RIGHT_ARM, LEFT_ARM -> {
+				emptyHand(level, target, part);
+				// a Rig's Arms (worn in the leggings slot) are plate on both arms, one piece: it comes away with the first arm
+				if (rigArms(target)) {
+					dropArmour(level, target, EquipmentSlot.LEGS);
+				}
+			}
 			default -> {
 				legs(target, mask);
 				// (Andy: leg armour falls with the leg) boots are one item for both feet: they go with the first leg; the
-				// leggings go with the second.
+				// leggings go with the second (not a Rig's Arms, which go with an arm).
 				dropArmour(level, target, EquipmentSlot.FEET);
-				if ((mask & (RIGHT_LEG | LEFT_LEG)) == (RIGHT_LEG | LEFT_LEG)) {
+				if ((mask & (RIGHT_LEG | LEFT_LEG)) == (RIGHT_LEG | LEFT_LEG) && !rigArms(target)) {
 					dropArmour(level, target, EquipmentSlot.LEGS);
 				}
 			}
@@ -1145,6 +1160,11 @@ public final class Dismember {
 	public static InteractionHand hand(LivingEntity target, int part) {
 		HumanoidArm side = part == RIGHT_ARM ? HumanoidArm.RIGHT : HumanoidArm.LEFT;
 		return target.getMainArm() == side ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+	}
+
+	/** Whether {@code target}'s leggings slot holds a Rig's Arms (arm plate, not leg armour). */
+	private static boolean rigArms(LivingEntity target) {
+		return com.jaymospowers.rig.Rig.ARMS != null && target.getItemBySlot(EquipmentSlot.LEGS).is(com.jaymospowers.rig.Rig.ARMS);
 	}
 
 	/** What {@code target} wears in {@code slot} comes off and drops (the way a severed head's helmet does). */

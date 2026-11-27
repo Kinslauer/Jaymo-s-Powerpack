@@ -283,7 +283,7 @@ public final class Downed {
 	 */
 	private static boolean armed(Mob body) {
 		return !body.getMainHandItem().isEmpty() || !body.getOffhandItem().isEmpty() || DualBlades.backGear(body.getItemBySlot(EquipmentSlot.BODY))
-			|| MobAmmo.quiver(body) > 0;
+			|| MobAmmo.quiver(body) > 0 || !NpcPockets.has(body) && !Sidearms.belt(body).isEmpty();
 	}
 
 	/** Someone of the settlement is tending {@code body} just now ({@link FieldMedics} leaves them to it). */
@@ -581,6 +581,16 @@ public final class Downed {
 				player.drop(held, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
 			took = true;
+		}
+		// (a body with no pockets to search gives up its belt weapon here instead)
+		if (!NpcPockets.has(body)) {
+			ItemStack belted = Sidearms.take(body);
+			if (!belted.isEmpty()) {
+				if (!player.getInventory().add(belted) && !belted.isEmpty()) {
+					player.drop(belted, false, net.minecraft.util.Prediction.SERVER_ONLY);
+				}
+				took = true;
+			}
 		}
 		for (ItemStack pouched : BeltPouch.take(body)) {
 			if (!player.getInventory().add(pouched) && !pouched.isEmpty()) {

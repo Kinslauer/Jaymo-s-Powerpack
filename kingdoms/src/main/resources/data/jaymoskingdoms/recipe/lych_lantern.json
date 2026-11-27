@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SL",
+    "S ",
+    "C "
+  ],
+  "key": {
+    "L": "minecraft:lantern",
+    "S": "minecraft:stripped_dark_oak_log",
+    "C": "minecraft:mossy_cobblestone"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:lych_lantern"
+  }
+}

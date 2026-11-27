@@ -17976,3 +17976,222 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
   - water mobs come in their own group sizes again (at most 2 at the coast and 4 at sea before): `WaterClusterMixin` removed.
 - Open sea keeps its own caps (fish 20, water creatures 8). Cave water creatures stay at 2, and worldgen fish still swim off (`WorldgenFishMixin`, the Deck's watchdog fix).
 - Built; not played.
+
+## 0.13.54 (2026-11-26): NPC controls by the crosshair - busy, trade, shake awake (#2253)
+
+- Andy: "a similar box should appear when interacting with npcs, like corpses, that tells you all the controls ... the talk option should change with context. saying "busy" when they are".
+- **Every control at once**: the list beside the crosshair on an MCA villager no longer swaps when you sneak; it shows right click to talk/greet/bow, Shift + right click to trade, and Shift + hold right click to pick a pocket (from behind, when learned).
+- **Busy**: when they wouldn't stop to talk (TalkBusy: fighting, talking to someone else, tending someone, seeing to the dead, with a prisoner, looting), the talk line reads "busy (fighting)" and so on. The server tells each player who is busy within 8 blocks every half second, only when it changed (`ContextBusy`).
+- **Trade** only shows for jobs that trade (not guards, outlaws, workers, nitwits or the jobless: `McaCompat.trades`), and not when the sneak click would pick their pocket instead.
+- **Fainted** folk (Overcome) show Shift + right click: shake awake.
+- **No talking while armed**: Andy: no "accidental talk activation while trying to fight". Right click on an MCA villager with a weapon in the main hand (a melee weapon as `Blows.weapon` counts, a bow or crossbow) no longer opens the talk menu; the weapon's own use goes ahead. Trade (sneak), pickpocket and the rest still work held (`McaTalkHoldMixin`, `TalkBusy.armed`).
+- `ContextLines`, `ContextBusy`, `McaCompat`, `DialogueCue`, `JaymosKingdomsClient`, `McaTalkHoldMixin`, `TalkBusy`.
+- Compile-checked; not played.
+
+## 0.13.55 (2026-11-26): swamp fire lag - fallen trees drawn lighter, windfall goes in a minute (#2254)
+
+- **Fallen trees draw far less**: a felled tree lying as a Fallen Tree redrew every block of itself every frame, all six faces of each, building it all afresh. Now what it draws is worked out once per shape and kept: blocks with tree on all six sides are left out (a leaf behind other pieces, as the pack's leaf culling does for a canopy; a log only behind solid wood), and faces turned to the tree's own wood aren't drawn (`FallingTreeRenderer`).
+- **Windfall goes sooner**: sticks, saplings (and mangrove propagules), apples and leaves that nobody threw now lie a minute instead of five, anywhere (a burning wood's leaves decay all at once and drop them by the hundred). Anything a player throws, and every other item, keeps the usual five minutes (`Windfall`, `ItemEntityAccessor`).
+- A lying tree sheds its leaves 6 every 1.5 s instead of 2 every half second (same pace), so it's resent to everyone and redrawn a third as often.
+- Built; not played.
+
+## 0.13.56 (2026-11-27): Nothing drops on its own unless a player is near (#2261)
+
+- **Unwatched drops**: anything the world drops by itself, with nobody behind it, now drops nothing unless a player is within 32 blocks (the same distance a lying tree's falling leaves already use). That covers leaves decaying (Quick Leaf Decay's quick decay too, which ringed a whole wood with saplings and sticks), crops and torches washed off by water, cactus, cane, bamboo and vines left with nothing under them, and what storms, collapses and cannon fire bring down far from anyone. A block a player, a mob, a villager at work or a falling tree breaks drops as before, near or far; an ore's experience and an infested block's silverfish still come (`Windfall.unwatched`, `UnwatchedDropsMixin`).
+- **Animals' own drops**: a chicken's egg, an armadillo's or grown turtle's scute, a sniffer's dug-up seed and a panda's sneezed slimeball aren't left with nobody within 32 blocks; that one is skipped and the next comes at its usual time (`UnwatchedGiftMixin`). A mob's death loot is unchanged (it already goes into its Kitchen corpse, not onto the ground).
+- Windfall's one-minute life for sticks, saplings, apples and leaves nobody threw is kept for the ones that do drop.
+- Built; not played.
+
+## 0.13.57 (2026-11-27): crows over a body no longer hang flapping in one spot in the sky (#2264)
+
+- **What was wrong**: the crows that come down to a body lying out (`wild.HuntWays`) are let into the world 18 blocks above it. On their first tick `Crow` took that spot in the air as their perch, and `ReturnToPerch` pulled them back to it every few ticks, so they hung there flapping in place, well after the body was gone (they never despawn). The circling also only gave each bird its next point every 5 seconds, so they reached it and hovered between.
+- **Now**: only a hanging tree's crow keeps a perch. A crow with no tree and no field has none: it circles and lands where the body draws it, and flies off for good once no body is within 64 blocks, at dusk or in rain, or after 5 minutes. A crow flying off is no longer called back by the circling, and the circling now gives each bird its next point on the ring every second.
+- Crows already in a world with a perch saved in the air (no tree) drop it when loaded, so the ones Andy saw stuck over Haldale should fly off.
+- Built; not played.
+
+## 0.13.58 (2026-11-27): Building news is found out, not told in chat (#2265)
+
+- Andy: "i was notified that a butchershop was built. first of all these should stop being shown as text. it is another thing you should notice from walking, asking the way, or hearing from the crier." These chat lines are gone: "The builders of X have finished a Y." (any player within 128 blocks of the seat), "The Y of X lies in ruins" / "X's builders begin to put up the Y again", the mine-dug lines, the overnight "While you slept, the builders laid N blocks" / "dug N blocks of its mine" lines, a village's tier-2 "a palisade will rise round it" line, and a village's (not a realm's) "X has finished Y, with the help of N hands" town-project line. Realm-wide news (walled town tier 3+, a realm's town project) already went to the town boards and Tidings, not chat, and is unchanged.
+- **The crier cries it** (`TownCrier.town`): each of those is now queued for the town's crier by the seat, after a call of its own ("Hear ye, hear ye! News of X!", separate from the court's "the court has sat"). A finished building is cried with where it stands from the seat ("The builders have finished a new Butcher's Shop, about 40 paces to the north-east of here!"). Same rules as the court's news: only players within 20 blocks hear it, kept a day, at most 6 pieces per town.
+- **Walking past** (`BuildNews`): for three days after a building is finished, walking within 8 blocks of it gets a remark from the nearest townsperson within 16 blocks who can see you, in a speech bubble for you alone ("That's our new Butcher's Shop. Went up yesterday."; children have their own lines). Once per building per player (a restart lets them say it again).
+- **Asking the way**: Ask the Way has a new "What's New" button. They turn and point to the newest building the town finished this past week, saying when and where; if nothing's finished lately, to what the builders are putting up now; else "nothing new".
+- Finished buildings now keep when they were finished (`Works.Built.finished`, 0 for ones the village already had).
+- Left in chat: your own plan-site and mason-table builds finishing (your own work), and plot choices.
+- Built; not played.
+
+## 0.13.59 (2026-11-27): Reply to what a villager says - first spoke on the talk wheel (#2267)
+
+- **Answer what they said** (Andy: "there should always be an option to address what they say here. either the first on the tree or a button"): whatever a villager opens the talk with, the first spoke on the wheel answers that line. A warning about creepers gets "Have you seen any about? Where?" and they tell you the nearest monster and which way it is (or that none are close); a word on the weather gets one back that matches the sky now (clear, rain or storm); a question ("How are you?") gets answered and they tell you how they are by their mood; a sigh about work, sleep or supper, a cold greeting ("Have I done something to you?"), an `*action*`, a hello, or anything else ("Is that so? Go on.") each have their own. They answer in their own voice (gentle, sharp, timid, odd or a child's, as refusal hints), or coldly if they're wary of you or dislike you; one who bears you too much ill won't have it (as a chat). Hearing them out is worth a heart, once a day each. The talk ends after their answer, as a chat does. Not on the stranger's page (only Introduce), the Judge, Keeper and masters, or questioning.
+- Which line it is comes from the key MCA picked for it (so the guard's creeper warning is told from the other night lines) and its words. Other features add their own kinds of line with `Replies.register` (a key test, a word test, their answer).
+- `Replies` (new), `TalkFirst` (the spoke), `McaDialogueBoxMixin` (hands it the line), `McaDialogueMixin` (the answer). Lang part `talk-replies.json`.
+- Built; not played.
+
+## 0.13.60 (2026-11-27): Stations say what's missing (#2269)
+
+- An empty lectern says how many bookshelves research wants round it (and how many there are). A hammer at a lit campfire without the smith's rank says a field forge takes a Journeyman smith. The tryworks says what its next step needs (blubber 2 at a time, full, light it, it's boiling, fill bottles). The perk-rank refusal now comes up as a tip card like the plain one.
+- Built (compileJava); not played.
+
+## 0.13.61 (2026-11-27): Reply to what a villager says - first spoke on the talk wheel (#2268)
+
+- **Answer what they said** (Andy: "there should always be an option to address what they say here. either the first on the tree or a button"): whatever a villager opens the talk with, the first spoke on the wheel answers that line. A warning about creepers gets "Have you seen any about? Where?" and they tell you the nearest monster and which way it is (or that none are close); a word on the weather gets one back that matches the sky now (clear, rain or storm); a question ("How are you?") gets answered and they tell you how they are by their mood; a sigh about work, sleep or supper, a cold greeting ("Have I done something to you?"), an `*action*`, a hello, or anything else ("Is that so? Go on.") each have their own. They answer in their own voice (gentle, sharp, timid, odd or a child's, as refusal hints), or coldly if they're wary of you or dislike you; one who bears you too much ill won't have it (as a chat). Hearing them out is worth a heart, once a day each. The talk ends after their answer, as a chat does. Not on the stranger's page (only Introduce), the Judge, Keeper and masters, or questioning.
+- Which line it is comes from the key MCA picked for it (so the guard's creeper warning is told from the other night lines) and its words. Other features add their own kinds of line with `Replies.register` (a key test, a word test, their answer).
+- `Replies` (new), `TalkFirst` (the spoke), `McaDialogueBoxMixin` (hands it the line), `McaDialogueMixin` (the answer). Lang part `talk-replies.json`.
+- Built; not played.
+
+## 0.13.62 (2026-11-27): A villager who cries out tells you why (#2268)
+
+- **What happened?** (Andy, on a villager screaming after a crook mugged her: "after they exclaim like that you should be able to ask what's wrong or it should be something they bring up before an introduction"): a villager keeps why they last cried out for three minutes: a crime done to them or seen (mugged, robbed, a fire set), what hurt them (someone's blow, a monster, an arrow, fire, a fall, drowning, a blast, cold, lightning, hunger, thorns, sickness), a monster that set them running (MCA's panic scream gives no reason of its own), or a cry they raised. Open their menu while it's fresh and they bring it up first, before any greeting ("Oh! Oh, it's you. Forgive me, I'm all in pieces. Someone just set on me."), once for each player; the talk wheel's first spoke then asks "What happened?" and they tell you: who did it and, for a crime, whether the guards have them, they're dead, or they ran off. Struck by you, they say so. With no shared tongue, a look instead of words.
+- A mugging victim who raises the alarm herself cries as the one robbed ("Help! Guards! They've taken my purse!"), never "Help! They're beating someone!".
+- One still shaken doesn't remark on your clothes.
+- `Outcry` (new), `Crooks`, `Speech`, `GearTalk`, `McaBridge`/`McaCompat` (the opening), `McaDialogueMixin`; uses `Replies` from the reply-spoke PR. Lang part `outcry.json`, `crook.json`.
+- Built; not played.
+
+## 0.13.63 (2026-11-27): shadows: see-through, sized, wispy, gone between strikes, unmade by the sun (#2262)
+
+- **Look**: a Shadow is now drawn as the ghosts are, a person's shape in the ghost's see-through skin, but in a cold near-black with pale eyes (`ShadowRenderer`, skin from `kingdoms/tools/gen_shadow_skin.py`; the old box model is gone from `tools/gen_creatures.py`).
+- **Sizes**: each one is born its own size, 0.6x to 1.5x (most near a man's), its hitbox with it. A player's own peeled-off shadow stays their size.
+- **Wispy tails**: 2 in 5 have the ghost's wispy tail instead of legs; they hang a little off the ground, bob, and lean into their drift with the tail streaming behind.
+- **Gone between strikes**: once it has prey, a Shadow strikes, lingers a moment (about 0.8 s), then thins away to nothing for 1.5-3.5 s. While gone it can't be seen, struck or bumped, and it keeps closing in; it gathers again within 4 blocks of its prey and needs half a second before it can touch. If it never lands a touch it goes after 4 s anyway.
+- **Sun**: out under the day's sky (no rain, sky light 13+ at its head, so a thin canopy doesn't save it) it comes apart into smoke at once, takes no damage and leaves nothing; a peeled shadow gives its Might back. 
+- **Any light**: light unmakes it the same way, at once. That means block light 8+ where it stands (a torch or lantern within about 6 blocks; shadows only spawn at 7 or less), anyone within 6 blocks holding a torch, lantern, glowstone or any other item whose block shines 10+ in either hand. A peeled shadow ignores its own owner's light. A Dawnborn's **Sunflare** unmakes every shadow its flash reaches (its own radius, 6 blocks at base), the caster's own peeled shadow included. This replaces the old slow withering in bright light.
+- Built; not played.
+
+## 0.13.64 (2026-11-27): Guards shout what fits what they face (#2272)
+
+- **Battle cries by foe**: MCA guards shouted from one list whatever they went for ("Stop right here, criminal scum!" at a zombie or a cow). Now the line follows the target: only a player the realm wants or has outlawed, a player with a bounty, a villager crook or a looter hears "Halt!" and "criminal scum"; an unwelcome player, a brawler who just drew blood, another realm's soldiers, raiders and bandits and illagers, the undead, spiders and crawlers, creepers, great brutes, other monsters, dangerous wild beasts and loose livestock each have their own lines (`GuardCries`, `McaGuardCryMixin`).
+- **Distance and numbers**: past 12 blocks a guard warns and calls the others ("Spider! Watch the walls!", "Raiders! Ring the bell!"); close in it's a battle cry; three or more of a kind near the target is a call to hold together against the lot; a guard below 45% health calls for aid instead.
+- **Kills in kind**: a guard who brings down a monster or a beast may say so ("Stay dead this time." over a zombie, "Well, that's supper." over a pig); MCA's one kill list ("Monster down!" for everything) is quiet (`McaGuardKillLineMixin`). People and raiders go down, not dead, so nothing is said over them here.
+- **Camp folk**: raiders, pirates, bandits and greenskins fighting as MCA guards never speak for the law; they get rougher cries of their own.
+- **Disasters**: when a quake, flood, storm (sandstorm, blizzard, hail, hurricane), tornado touchdown, fire from the sky (volcano, meteor, ash), great wave or slide strikes, up to three guards near a player shout the townsfolk to safety. Fires keep their own alarm.
+- **No repeats**: a line anyone said in the last 45 seconds is passed over while fresh ones are left, so a squad doesn't shout the same words. All speech bubbles, nothing in chat.
+- Built; not played.
+
+## 0.13.65 (2026-11-27): hoods and over-garments fit what is under them (#2271)
+
+- Andy (2026-11-27): "insane amount of space on these armor pieces. can you make it conform to the piece underneath?" (a villager in the everyday hood and cloak).
+- The harness's hoods (hood, torn hood, fur hood, cowl, mantle, coifs) and over-garments (cloak, giornea, tabard, surcoat, kaftan, monk's robe, motley, sash) were cut to go over a helm and a cuirass, so on a bare head or a shirt they stood 1-2 pixels off all round and the cloak's cape hung far out behind.
+- New `HarnessFit`: as `HeraldryLayer` draws a wearer's pieces innermost first, it keeps a box of what is on so far (the bare body with MCA's clothes and the suit, then each piece). A hood or over-garment is drawn smaller about its bone until it sits 0.3 (head) or 0.4 (body, legs) past that box, never larger than made. The cloak's cape keeps 40% of its 7 degree swing back when fitted. Over a harness helm or cuirass the piece fits that piece's box; over armour from anywhere else (vanilla, Armory, Fantasy Armor) it is left as made. Hats and sleeves are left as they are.
+- `BbModel.bounds(bone)`: each bone's box round its cubes and its children's.
+- Built (compileClientJava); not played. Walking legs can show through the front of long fitted skirts (tabard, robe, giornea) more than before.
+
+## 0.13.66 (2026-11-27): Quests on the talk wheel's first ring, with a tip (#2275)
+
+- Talking to a villager or king with a gold **!** (work on offer) or a **?** (one of your quests) over their head, **Quests** is now on the talk wheel's first ring, right after the reply spoke. It is still under Ask of Them... as well.
+- A tip sits where your line goes (bottom right, while you're not pointing at a spoke): "They have work for you. Pick Quests on the wheel to hear it", or for a ? "Pick Quests on the wheel to check on it or hand it in". It stops after you've picked Quests from the wheel 3 times (kept in `config/jaymoskingdoms-tips.properties`), and never shows with `/hints off` (or `/tips off`).
+- `TalkFirst` (Quests spoke, `questTip`), new `QuestTip`, `QuestClient.mark`, `McaDialogueBoxMixin` (draws the tip).
+- Built (compileJava); not played.
+
+## 0.13.67 (2026-11-27): Buildings put up over old ruins take the whole ruin down; no trench round new buildings (#2274)
+
+- Seen at Haldale (Deck, 2026-11-26): its windmill (1849,74,-2048) and butcher's shop (1799,74,-2083) both went up "over an old structure". The saved world shows both were built, but only the old structure's blocks inside the new footprint came down: the windmill stood among the stumps of a stone tower, the butcher's shop jammed under the stone pillars and platform of an old raised hut. Around the windmill's tower the grass at floor height had been dug out, leaving a one-block trench round it.
+- **Old structures come down whole**: a site on an old structure now also clears every column of each structure piece it touches (`Ruins.wreck`, up to 12 blocks past the footprint; a site whose old structure reaches further isn't taken). Only the structure's own made blocks go (into storage, as before): never the land's soil and stone, paths, trees, plants or water, nothing in another building or plot, nothing a living villager has claimed (`Ruins.wreckable`). The extra columns are readied after the footprint's own, by the crew, by sleep's catch-up and by an at-once finish alike (`Planner.Layout.wreck`). The guard check (seats, keeps, storage, claimed beds) now covers the whole cleared area.
+- **No trench**: readying the ground no longer digs the land's own soil at floor height where the building has nothing of its own (`Construction.digs`); where an old structure's floor comes out at floor height, dirt goes back (`Construction.patch`).
+- Built; not played.
+
+## 0.13.68 (2026-11-27): Greetings fit the moment (#2270)
+
+- **Carrying on, not recalling**: talk to someone again within three minutes of something passing between you (you fed them, gave a gift, struck them...) while they can still see you (16 blocks) and they carry on from it ("Thank you again for the food. Did you want something?") instead of a "remember when" line. 25 sets of lines (`recall.jaymoskingdoms.just.*`), 22 for their own kinds and warm, cold and plain ones for the rest. `Recollections.say/justNow`, used by `opening` and `remark`.
+- **They eat what you hand them**: food given to a hungry villager ("Spare a crust...") is held in their hand and eaten over 3 seconds (stood still, bites, crumbs, a burp at the end, nutrition healed), then their own item goes back in their hand (`HandedFood`). Only while they're eating does talking to them get the mouth-full lines (`recall.jaymoskingdoms.just.fed_eating.*`). After that it's plain thanks.
+- **No greeting after you've already dealt with them**: if anything has already passed between you and a villager (any memory of their own of you), using them opens their menu straight away. No hand out, wave, handshake or bow. `Recollections.dealtWith`, checked in `Handshakes.greet`.
+- **Who greets at all**: the first-meeting wave, handshake or bow is only for rulers, court wizards and grown villagers with a trade. Nitwits, the jobless and children's menus open as they are (`Handshakes.greets`).
+- Built (`compileClientJava`); not played. Villagers coming over to you on their own (ComingOver) are unchanged.
+
+## 0.13.69 (2026-11-27): spectate viewcone shows the NPC's focus, or that it's thinking or stuck (#2277)
+
+- **What it's focused on** (Andy: "that spectate viewcone should label their current focus, or if they are thinking"): the
+  label over an NPC an operator spectates no longer says only its fight senses ("At ease" whenever it had no foe). It now
+  reads its AI: the top line is its focus (the foe it's fighting, else the first goal or brain behaviour it's running, else
+  where it's walking), or **Thinking: picking what to do next** (no target, no path, nothing running but the always-on
+  looking and door goals), **Thinking: re-planning its path** (3 or more new paths in 3 s), or **Stuck** (a path but under
+  a block of headway across the ground in 3 s, with "climbing" when it's hanging on vines or a ladder). Under it: its alert
+  (the old line, "At ease" now reads "No foe in mind"), the task Jade shows, its brain's activity, the goals and
+  behaviours running (by their code names, so they can be looked up), its target and distance, where its path goes and
+  whether it gets there (and how far short it ends), and its brain's walk target when that's somewhere else.
+- **Drawn too**: its path ahead (white line node to node; the end cross magenta when the path stops short of its goal)
+  and its walk target (pale green cross). The top line is white when focused, yellow thinking, orange re-planning, red stuck.
+- Only for operators spectating (or any spectator in a dev game), as before. `NpcFocus` (new), `NpcEyes.View`,
+  `NpcEyesClient`, lang part `npc-eyes`.
+- Built; not played. Which always-on behaviours MCA's people run hasn't been seen: any that show in "Running" every time
+  can be added to `NpcFocus.BACKGROUND`.
+
+## 0.13.70 (2026-11-27): Villages' overgrown rooms tidied, forest trees kept off buildings, stuck walkers push through (#2276)
+
+- Andy (clip of Haldale): "broken pathing on these poorly generated buildings." Haldale's save (the Deck's region file, read block by block) showed the cause. Its town centre is Epic Structures: Villages' great square (`plains_meeting_point_3`, 45 x 48 x 45), placed intact but drawn as an overgrown ruin: a tower whose rooms and stairwell hold leaves (set persistent) and cobwebs at floor level, and oak trunks either side of its front door by the bell. Beside it, in the alley where the clip's villagers were wedged, stand trees the square's template doesn't hold (oak wood columns, most likely Just Better Forest's: its trees are pasted by the game's `minecraft:template` feature, which only checks the block under the trunk). The server log's `[stall]` lines put Haldale's stuck villagers there, at the bell.
+- **New villages** (`Overgrowth.tidy`, from `StructureStartMixin`): as a village's pieces are placed, cobwebs where folk would walk and leaves at foot or head height under a roof are taken out. Hedges and trees out in the open are left.
+- **New worlds** (`Overgrowth.crowds`, `TemplateFeatureMixin`): while the world generates, a template tree, log, bush or boulder that would land in or within a block of anything built (any block that isn't the land's own: planks, bricks, glass, doors, fences, stripped logs, a road's dirt path, a field's farmland) isn't set down. Our own grown trees (`GrownTrees`) skip the same way (their wood plus 2 blocks for leaves). Saplings that players grow aren't checked.
+- **Settlements already standing** (`Groundwork`): the groundskeeper also clears the overgrowth ("clearing the overgrowth"): cobwebs and indoor leaves where folk walk (through the buildings' floors, up to 24 blocks down each column) and wild (not persistent) leaves at foot or head height in the streets. So Haldale's tower gets cleared out without a new world. Wood is never cut (a trunk cut would fell its tree on the houses), so the square's trunks and the alley's extra trees stay.
+- **Stuck walkers push through** (`Unstick`, `Overgrowth.pushThrough`): a villager or one of our folk whose fresh path still can't get there brushes aside that overgrowth round where the path gives out and round itself, then paths again. The stall watcher's "sent on" step does the same round the villager, next to opening a shut door.
+- Not changed: two of Haldale's street pieces lie underground (`straight_05`/`straight_06` at y 55 to 62; a guard was stuck at y 51), and the buildings that never generated are another thread's.
+- Built; not played.
+
+## 0.13.71 (2026-11-27): Guards grow suspicious of what they half see or hear, light up and go to look (#2279)
+
+- **Suspicion** (Andy: "guards should also react and investigate based on your concealment. it should factor in light
+  level, (guards will have to get closer or turn on lights and approach) sounds, and other factors"): a guard (a realm's,
+  a camp's, an MCA guard) no longer either sees you at once or not at all. How hidden you are uses the same reckoning as a
+  monster's eyes: the light on you and any light he carries, sneaking, standing still, the slow pace, cover, a hood,
+  weather and mist, smell, being lit or on fire, and the rest. Within that reach he sees you. Out to 2.5 times it, in
+  front of him with nothing solid between, he catches a glimpse and grows suspicious, faster the nearer you are to being
+  seen. Your footsteps and other noises he hears raise it too, by how loud they come through the walls.
+- **What he does**: at a quarter suspicion he stops and looks where he last glimpsed or heard you. At 60% he goes to look,
+  following fresher glimpses. If it's dark there or where he stands and he has nothing lit in hand, he lights one first
+  (his kept lantern, one from his pocket, else one from the stores, else a torch), day or night, and keeps it lit till
+  he's done. With the light he sees farther, so he closes in until he can make you out. Once he sees you properly he
+  stops, looks you over for 3 s and goes back to his post. What he then makes of you is up to the law as before. He
+  won't suspect you again for 30 s. Suspicion fades by itself.
+- **You can see it**: the awareness eye fills with a guard's suspicion and shows searching while he investigates. The
+  spectate view lists "Suspicious of <player>: 45%" or "Investigating <player>".
+- `GuardWatch` (new), `Footsteps.heard`, `NightLights.lightUp` (new) and keeping the light while investigating,
+  `Senses` (gauge, `sight` opened to the package), `NpcFocus`, lang part `npc-eyes`.
+- Built; not played.
+
+## 0.13.72 (2026-11-27): NPCs take a second to think before setting on a player they've just picked out (#2279)
+
+- **The extra second** (Andy: "npcs across the board should think for an extra second to give stealth users the required
+  time to close in for a stealth takedown"): every mob that picks out a player it would fight (any target goal or brain
+  attack sensor, through `TargetingConditions.test`) now spends 1 s sizing them up before it can take them as its foe.
+  This includes monsters, animals, the folk, MCA's guards and bosses. All that second it isn't after them, so it still
+  counts as unaware for a stealth kill, a sneak attack or an assassination. It doesn't turn round either: the takedown
+  from behind still works. If it still has them after the second, it sets on them as before. Not picked out for 2 s,
+  they're sized up afresh next time.
+- **No second when**: it's already after them, a friend just told it where they are, or they just hurt it (a blow is
+  answered at once). Creative and spectator players are untouched.
+- **You can see it**: the awareness eye fills over the second, and the spectate dev view's top line reads "Thinking:
+  sizing up <player> (0.6 s left)" in yellow.
+- `ThinkFirst` (new), `mixin.TargetingThinkMixin` (new, combat mixins), `Senses` (gauge), `NpcFocus`, lang part `npc-eyes`.
+- Built; not played.
+
+## 0.13.73 (2026-11-27): ranged NPCs carry a sidearm and switch to it up close; NPCs carry real pockets you can search; their carried weapons show on the body (#2278)
+
+- **A sidearm at the belt** (`Sidearms`): every guard, archer and gunner, camp or ship fighter, forest ranger, folk fighter and pillager who carries a bow, crossbow or gun is given one sidearm, once (one a player takes is not made again): an iron dagger if they wear any metal (mail, plate, a gunner's Templar legs), a stone dagger in leather or cloth, a flint dagger for a camp raider or a pirate (Powers' daggers, else the Rogues' ones, else a sword). Gunners get a sword instead (iron in metal, stone otherwise), pillagers an iron axe. A player's recruits get none: they carry what the player gives them.
+- **Switching** (`WeaponSense.pick`): a foe inside 4 blocks of a gunner (handgonne, arquebus, plain musket, caravan musketoon) or 6 of an archer (4 for a crossbow already loaded) and the sidearm comes out; the gun or bow goes onto the belt and comes back once the foe is past 9 blocks, after someone else, or the fight is over. A gunner out of shot fights with the sidearm, never with the gun as a club. A musket with a bayonet fixed keeps its bayonet. Each swap trades the two stacks between the hand and the belt, so nothing is made or lost, and an MCA archer's bow (the pack's own stack) stays in the pack. While the sidearm is out the gunner still counts as a gunner: his kit (tassets and sabatons only), his hands and his place on the gun roll stay as they were, and the realm never hands him a second gun.
+- **Pillagers** switch to their axe up close and fight with it using the vindicator's swing (`Sidearms.BackupMelee`, a melee goal that only runs with a melee weapon in hand).
+- **Gunners** carry no shields (one in the off hand goes into the pack or is dropped) and, with no foe within 16 blocks and no sword at the belt (theirs taken or lost), walk to a weapon lying within 12 blocks they can see and take it onto the belt (a sword first; anything else only for an empty belt; the old belt weapon goes into the pack or is dropped).
+- **Pockets** (`NpcPockets`, saved on the NPC): every grown villager (MCA's too), settlement folk and illager carries a few real things, rolled the first time anyone looks and again each day: most a purse of their land's coin (fuller on a guard or merchant), a bite to eat, odds and ends, and what their trade would have (farmer seeds, fletcher feathers and flint, librarian paper and ink, smith coal and nuggets, guard a bandage; a camp raider bones and flint, a pirate gold and kelp, a ranger berries and arrows, an illager spare arrows and plunder). A realm villager with a door that locks carries their house key, once.
+- **Searching them**: the body menu's "Search them" (in place of the old pickpocket row) on anyone downed or hogtied opens a screen with their belt (the sidearm, or the gun or bow slung there) and pockets above your inventory. It reads and writes the body's own belt and pockets. Where a realm's law holds, taking from them is a theft anyone watching sees, and what you take is marked stolen. A pickpocket's lift now comes out of these same pockets. On dying, the belt and pockets drop with the body's gear, so they show up on its loot screen.
+- **On the body**: what an NPC carries but doesn't hold (the belt's sidearm or slung gun, then the weapons and shield in an MCA villager's pack; a gunner's pack shield is not shown) is hung on them by Powers' body-weapons layer, up to three (`Sidearms.show` -> `PowersCompat.carry`). NPC archers with arrows left wear a real quiver over the left shoulder (Archers' medium or small quiver, or Kitchen's quiver; drawn as the item, not lootable).
+- Not covered: a pillager's belt isn't drawn on the body (the illager model isn't a humanoid one); posted wall archers and cannon gunners don't switch to the sidearm.
+- Built; not played.
+
+## 0.13.74 (2026-11-27): The sexton: a town job for the dead, the golems and the blood (#2273)
+
+- Andy: "there should be a groundskeeper job or something similar that buries / disposes of dead bodies / limbs, repairs golems, and washes blood/grime". It's the **sexton** (Lore.md, "The sexton", new for Andy to approve): the Lantern Warden's keeper in a town. ("Groundskeeping" was already the builders' levelling of a town's ground, `Groundwork`, so the name stays theirs.)
+- **Job site: the lych lantern**, a lamp hung from the arm of a dark oak post on a mossy stone foot (vanilla textures, the out lamp is the burnt lantern). A real job site: a villager without a trade takes it up as the game's own are taken. Recipe: a lantern beside two stripped dark oak logs over mossy cobblestone. Light 14 when lit.
+- **Every town keeps one** (`TownTrades`, like the cook and the healer): an idle townsperson, a nitwit or a spare tradesman takes it up, or one moves in, with a line each way. A town with a sexton and a burying ground but no lantern gets one: the sexton sets it up beside the first headstone.
+- **The day** (`Sextons`): at dusk the sexton walks to the lantern and lights it, after dawn puts it out (flint, smoke, a word now and then). In the working day:
+  - **The dead**: a free sexton is sent for a body before anyone else, to bury the town's own and burn the enemy's (`Bearers`) and to carry monsters to the fire (`Undertakers`), so the guards keep their posts.
+  - **Limbs and heads** (Powers' severed parts) left lying a minute (yours first) are buried, spade in hand: where they lie if the ground takes a spade, else into a sack (a bundle in hand) and buried on the nearest open ground. Never a kept trophy (hook or wall), nothing carried, nor a dead player's head they still see through. **Blast mess** (Kitchen's gibs) is shovelled up too.
+  - **Golems** are mended with an iron ingot from the storehouse, as a smith does (`SmithMending`; the guards' gear stays the smiths').
+  - **Washing**: a guard or golem with blood, grime or a zombie's rotten blood on them is washed down, bucket in hand, splashing and brushing (Powers' `ArmourGrime.washAll` + `MagicWash` + zombie blood); each body at most once every two minutes.
+  - **Blood in the streets** is scrubbed out by the sexton (`BloodChores`: indoors anyone still minds it; outdoors, only a sexton).
+- **Tools are forged by the town's smiths** (`ToolGrades`). Andy: "all item materials should change dependent on the availability and realm wealth. only the richer kingdoms spend materials on iron shovels, otherwise they are wooden or stone", then "they should only gain access once a blacksmith is built and actually forges the items".
+  - A smith (toolsmith, armourer or weaponsmith) at their workstation in working hours (`Jobs`) forges the town's working tools out of the storehouse into it, before smelting: two of each pickaxe, axe, shovel and hoe. Iron (3/3/1/2 ingots) only in a wealthy realm (a fiefdom by its overlord's) with the ingots to hand, else stone out of cobblestone; the handle is two sticks, or a plank cut into sticks. An anvil's ring and sparks as each is made. In a wealthy realm a smith forges a bucket too.
+  - Folk work with the best of each kind in the stores; with none (no smith, or nothing to forge with) a wooden one they whittled. The sexton's water bucket is iron only if the stores have a bucket, else Powers' fired clay one.
+  - Tools wear out by what they're made of (Andy: "they should have varying durability. iron lasting the longest"): each kind in use loses one from the stores every two days if stone, every four if iron, so the smith keeps spending, and a town out of iron goes back to stone as its last iron ones wear out.
+  - It covers the sexton's spade and bucket, the hammer a smith or sexton mends with, every worker's hoe, pick, axe and shovel (Kingdoms folk, MCA villagers at work, the foreman's axe) and the mineshaft miners' picks. Camp builders keep stone. Weapons already work this way (`GuardKit` pays ingots, stone floor).
+- **Steel realms** (`SteelRealms`; Andy: "some kingdoms should even have acess to steel armor and weaponry. only the absolute richest and warmongers", his pick: wealthy, and the richest or warlike). A steel realm is a wealthy kingdom that is the richest in the world, or of the Conquest creed, or waging a war it declared; a fiefdom goes by its overlord.
+  - Only its smiths make steel (`Jobs`): two iron ingots and a coal into a steel ingot, keeping 16 iron back and up to 24 steel in the stores (needs Jaymo's Powers' steel).
+  - Only its guards wear and carry steel (`GuardKit`), paid in steel ingots or emeralds: the Armory's steel plate for its knights, veterans and leaders (and soldiers on the heavy lean; Templar realms keep their own plate), the Grim Templars' blackened plate, the gunners' steel Ranger pieces, and steel blades for soldiers and up (the iron sword, spear or axe forged of steel: "Steel Sword", 60% more uses, +1 damage). Steel ingots no longer pay for iron pieces.
+- **The steel blueprint** (Andy: "it can be written into lore as a specific crafting blueprint gatekept by the kingdom who has it. it is very valuable and closely kept so the information is highly sought after"). A new item, kept by one smith of each steel realm, with the realm named on it. Never sold or copied: a player gets one by pickpocketing that smith or off the smith's body, and the realm draws up a new one three days after it was given. With Jaymo's Powers, the anvil hammers plain steel only for a player who carries one or is sworn to a steel realm (anyone else gets the dull clank). Steel ingots still come from the smeltery and blast furnace for anyone; folded steel and the peoples' steels keep their own rules. Lore.md: "The steel blueprint" and "A town's tools" (new, for Andy to approve).
+- Trades (data pack `trade_set/sexton`, four levels): wheat and iron and coal bought; candles, bone meal, the lych lantern, a sponge and an iron shovel sold. Own wants (`OwnWants`): candles, a sponge, iron. MCA dresses them as a leatherworker and keeps the trade (`IS_IMPORTANT`).
+- Speech bubbles only, never chat (lang part `sextons`). Built; not played.

@@ -109,14 +109,7 @@ CREATURES["digger"] = dict(scale=0.77, translucent=False, palette=("#9a5a34", "#
     P("legR", [-1.5, 16, 0], [-1, 0, -1, 3, 8, 3], "legR", "kobold"),
     P("legL", [1.5, 16, 0], [-1, 0, -1, 3, 8, 3], "legL", "kobold"),
 ])
-CREATURES["shadow"] = dict(scale=1.0, translucent=True, palette=("#101018", "#06060c"), parts=[
-    P("body", [0, 13, 0], [-3, -12, -2, 7, 12, 3], style="shade"),
-    P("head", [0, -12, 0], [-3, -7, -3, 6, 7, 6], "head", "shade", "body", eyes=dict(c="#e8f0ff", at=[1, 3], s=[1, 1])),
-    P("armR", [-4, -11, 0], [-1, 0, -1, 2, 15, 2], "armR", "shade", "body"),
-    P("armL", [5, -11, 0], [-1, 0, -1, 2, 15, 2], "armL", "shade", "body"),
-    P("legR", [-1.5, 13, 0], [-1, 0, -1, 3, 11, 3], "legR", "shade"),
-    P("legL", [2.5, 13, 0], [-1, 0, -1, 3, 11, 3], "legL", "shade"),
-])
+# (the shadow is drawn on a player's shape in the ghost's see-through skin now: kingdoms/tools/gen_shadow_skin.py, ShadowRenderer)
 CREATURES["shapeshifter"] = dict(scale=0.98, translucent=False, palette=("#8d8f88", "#5e605a"), parts=[
     P("body", [0, 12, 0], [-4, -12, -2, 8, 12, 4], style="grey"),
     P("head", [0, -12, 0], [-4, -8, -4, 8, 8, 8], "head", "grey", "body", eyes=dict(c="#0a0a0a", at=[2, 3], s=[2, 2])),

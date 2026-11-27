@@ -200,6 +200,8 @@ public final class RangedTactics {
 			((MobAccessor)entity).jaymoskingdoms$goals().addGoal(0, new RepositionGoal((Mob)entity));
 			if (entity instanceof Pillager) {
 				((MobAccessor)entity).jaymoskingdoms$goals().addGoal(0, new WeaponSense.SenseGoal((Mob)entity));
+				// (its backup weapon, fought with as a vindicator fights: Sidearms)
+				((MobAccessor)entity).jaymoskingdoms$goals().addGoal(3, new Sidearms.BackupMelee((Pillager)entity));
 			}
 		}
 	}

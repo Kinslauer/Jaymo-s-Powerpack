@@ -58,11 +58,30 @@ public final class TryworksBlock extends Block {
 	}
 
 	@Override
+	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		ItemStack held = player.getMainHandItem();
+		if (!level.isClientSide() && (held.isEmpty() || !(held.getItem() instanceof net.minecraft.world.item.BlockItem))) {
+			// nothing it takes in hand: say what's missing for the next step (blubber, a light, or a bottle for the oil)
+			String step = state.getValue(OIL) > 0 ? "tryworks_oil" : state.getValue(BLUBBER) == 0 ? "tryworks_empty"
+				: state.getValue(LIT) ? "tryworks_boiling" : "tryworks_unlit";
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.station." + step, PER_LOAD)
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+		}
+		return InteractionResult.PASS;
+	}
+
+	@Override
 	protected InteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
 		if (held.is(Whaling.WHALE_BLUBBER)) {
 			int blubber = state.getValue(BLUBBER);
 			if (blubber >= MOST_BLUBBER || held.getCount() < PER_LOAD && !player.hasInfiniteMaterials()) {
+				if (!level.isClientSide()) {
+					// say why the blubber wasn't taken: the pots are full, or too little in hand
+					player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(blubber >= MOST_BLUBBER
+						? "message.jaymoskingdoms.station.tryworks_full" : "message.jaymoskingdoms.station.tryworks_load", PER_LOAD)
+						.withStyle(net.minecraft.ChatFormatting.GRAY));
+				}
 				return InteractionResult.FAIL;
 			}
 			if (!level.isClientSide()) {

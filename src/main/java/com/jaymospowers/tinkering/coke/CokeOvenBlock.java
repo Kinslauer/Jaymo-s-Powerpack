@@ -98,6 +98,9 @@ public class CokeOvenBlock extends HorizontalDirectionalBlock implements EntityB
 			ItemStack taken = oven.take(player.isShiftKeyDown());
 			if (!taken.isEmpty()) {
 				player.getInventory().placeItemBackInInventory(taken, net.minecraft.util.Prediction.SERVER_ONLY);
+			} else if (com.jaymospowers.core.StationHints.idle(player)) {
+				// nothing to take: say what's missing (the walls, or what it bakes)
+				com.jaymospowers.core.StationHints.tell(player, !CokeOvenEntity.formed(level, pos, state.getValue(FACING)) ? "coke_oven.unformed" : "coke_oven.takes");
 			}
 		}
 		return InteractionResult.SUCCESS;

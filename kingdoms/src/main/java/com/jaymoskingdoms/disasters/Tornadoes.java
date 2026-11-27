@@ -83,6 +83,8 @@ public final class Tornadoes {
 	static final int TWISTER_LINES = 6, DEVIL_LINES = 4;
 	/** When each tornado (by id) last had someone cry out about it. */
 	private static final java.util.Map<Integer, Long> CRIED = new java.util.HashMap<>();
+	/** Guards this near a touchdown shout everyone under cover ({@link com.jaymoskingdoms.GuardCries#disaster}). */
+	static final double TOUCHDOWN_CRY_REACH = 48.0;
 	/** Players hear of a touchdown within this distance. */
 	static final double NEWS_RANGE = 320.0;
 	/** Jaymo's Powers' tags: a Wind user, and a Cyclone Lance cast (followed by the game time). */
@@ -131,6 +133,8 @@ public final class Tornadoes {
 		t.water = onWater(level, x, y, z);
 		SERVER.add(t);
 		if (size != Tornado.DUST_DEVIL && !quiet) {
+			// (Andy, 2026-11-27) the guards near it shout everyone to the cellars
+			com.jaymoskingdoms.GuardCries.disaster(level, x, z, TOUCHDOWN_CRY_REACH, "tornado");
 			// over the sea it's a waterspout: the same funnel, its foot on the water
 			String news = t.water ? "disaster.jaymoskingdoms.touchdown.waterspout." + Tornado.NAMES[size] : "disaster.jaymoskingdoms.touchdown." + Tornado.NAMES[size];
 			for (ServerPlayer p : level.players()) {

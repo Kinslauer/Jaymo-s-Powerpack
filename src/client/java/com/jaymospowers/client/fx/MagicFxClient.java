@@ -1,6 +1,7 @@
 package com.jaymospowers.client.fx;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.fx.effekseer.SpectacleClient;
 import com.jaymospowers.core.fx.MagicFx;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -121,6 +122,7 @@ public final class MagicFxClient {
 		ParticleProviderRegistry.getInstance().register(MagicFx.RUNE, sprites -> (options, level, x, y, z, xd, yd, zd, random) ->
 			new Rune(level, x, y, z, xd, yd, zd, options.color(), options.size(), sprites));
 		ClientPlayNetworking.registerGlobalReceiver(MagicFx.Shape.TYPE, (shape, context) -> add(shape));
+		SpectacleClient.init(MagicFxClient::add);
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (minecraft.level == null) {
 				SHAPES.clear();

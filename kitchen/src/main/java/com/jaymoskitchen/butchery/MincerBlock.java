@@ -54,6 +54,17 @@ public class MincerBlock extends Block {
 	}
 
 	@Override
+	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		ItemStack held = player.getMainHandItem();
+		if (!level.isClientSide() && (held.isEmpty() || !(held.getItem() instanceof net.minecraft.world.item.BlockItem))) {
+			// nothing it minces in hand: say what it takes
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskitchen.station.mincer")
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+		}
+		return InteractionResult.PASS;
+	}
+
+	@Override
 	protected InteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
 		if (!held.is(ButcherShop.MINCEABLE) || held.is(ButcherShop.MINCE)) {
