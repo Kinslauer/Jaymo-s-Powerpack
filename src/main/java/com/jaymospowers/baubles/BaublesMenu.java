@@ -80,6 +80,8 @@ public class BaublesMenu extends AbstractContainerMenu {
 				}
 			}
 			if (!placed) {
+				// a harness piece goes on in its own place of the harness, as from the survival inventory (with Jaymo's Kingdoms)
+				com.jaymospowers.compat.KingdomsCompat.quickEquipHarness(player, slot);
 				return ItemStack.EMPTY;
 			}
 		}

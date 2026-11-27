@@ -146,6 +146,7 @@ public final class Harness {
 		MENU = Registry.register(BuiltInRegistries.MENU, JaymosKingdoms.id("harness"), new MenuType<>(HarnessMenu::new, FeatureFlags.VANILLA_SET));
 		LOOT_MENU = Registry.register(BuiltInRegistries.MENU, JaymosKingdoms.id("downed_harness"), new ExtendedMenuType<>(DownedHarnessMenu::new, ByteBufCodecs.VAR_INT));
 		PayloadTypeRegistry.serverboundPlay().register(Open.TYPE, Open.CODEC);
+		HarnessQuickEquip.register();
 		ServerPlayNetworking.registerGlobalReceiver(Open.TYPE, (payload, context) -> context.server().execute(() -> {
 			ServerPlayer player = context.player();
 			if (player.isAlive() && !player.isSpectator()) {

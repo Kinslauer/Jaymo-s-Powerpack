@@ -69,6 +69,16 @@ public final class KingdomsCompat {
 	}
 
 	/**
+	 * Shift-click on an inventory slot of the bauble screen holding a harness piece: it goes on in its own bare place of
+	 * Kingdoms' harness, as from the survival inventory ({@code HarnessQuickEquip.shiftClick}). True when it went on (or,
+	 * on the client, will); false without Kingdoms.
+	 */
+	public static boolean quickEquipHarness(Player player, net.minecraft.world.inventory.Slot slot) {
+		return call("HarnessQuickEquip", "shiftClick", new Class<?>[] {Player.class, net.minecraft.world.inventory.Slot.class}, false, player, slot)
+			instanceof Boolean on && on;
+	}
+
+	/**
 	 * What Kingdoms' world wind does to a cape on {@code wearer}'s back, client side: {streams back, to the side, flutters} in
 	 * radians, less behind a wall; null in still air or without Kingdoms.
 	 */

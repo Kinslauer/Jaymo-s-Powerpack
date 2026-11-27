@@ -35,6 +35,13 @@ public final class BaublesClient {
 		// (Artifacts) the Artifacts baubles' moves
 		ArtifactBaublesClient.init();
 		BaublesTab.init();
+		// the creative inventory moves items on the client alone: a shift-click there that puts a bauble on tells the server
+		com.jaymospowers.baubles.BaublesQuickEquip.creativeSend = slot -> {
+			if (net.minecraft.client.Minecraft.getInstance().gui.screen() instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
+				&& ClientPlayNetworking.canSend(BaublesNet.QuickEquip.TYPE)) {
+				ClientPlayNetworking.send(new BaublesNet.QuickEquip(slot));
+			}
+		};
 		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.baubles", InputConstants.UNKNOWN.getType(),
 			InputConstants.UNKNOWN.getValue(), JaymosPowersClient.CATEGORY));
 		backKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.back_slot", InputConstants.UNKNOWN.getType(),

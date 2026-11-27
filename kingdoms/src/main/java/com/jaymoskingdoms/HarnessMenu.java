@@ -88,6 +88,10 @@ public class HarnessMenu extends AbstractContainerMenu {
 					moved = moveItemStackTo(stack, i, i + 1, false);
 				}
 			}
+			// a bauble goes on in a free bauble slot, as it does from the survival inventory (with Jaymo's Powers)
+			if (!moved && PowersCompat.quickEquipBauble(player, slot)) {
+				return ItemStack.EMPTY;
+			}
 			if (!moved) {
 				int hotbar = OWN + 27;
 				if (index < hotbar ? !moveItemStackTo(stack, hotbar, this.slots.size(), false) : !moveItemStackTo(stack, OWN, hotbar, false)) {
