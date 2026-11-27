@@ -70,7 +70,7 @@ public final class StoryHard {
 	public static final double CHAIN_REACH = 9.0;
 	/**
 	 * Past the chain's reach: the pull back toward the stake per block over (a tick), the most it pulls, and how far over
-	 * (a pearl, a blast that flings them) before the chain can't hold and they're set back by it.
+	 * (a blast that flings them; a pearl frees them instead) before the chain can't hold and they're set back by it.
 	 */
 	static final double CHAIN_PULL = 0.15, CHAIN_PULL_MOST = 0.6, CHAIN_SNAP = 8.0;
 	static final int SHACKLE_LEVEL = 2, CHAIN_PICKS = 2;
@@ -81,6 +81,13 @@ public final class StoryHard {
 	 * chain one has to come to see it (blocks), and how many shouts there are to pick from.
 	 */
 	static final int LOOSE_CHECK = 20, LOOSE_LINES = 4;
+	/**
+	 * Andy (2026-11-27): "a pearl should teleport you out of captivity without a trace. it will leave the captors VERy
+	 * confused". An ender pearl thrown in chains: how long (ticks) after the throw a jump counts as the pearl's, how far a
+	 * single tick's jump must be (blocks, across the ground), and the confused lines for those who find the chain empty.
+	 */
+	static final int PEARL_WAIT = 200, BAFFLED_LINES = 6;
+	static final double PEARL_JUMP = 2.0;
 	static final double LOOSE_SIGHT = 32.0, EMPTY_CHAIN_SIGHT = 12.0;
 	/** Sentenced: the days to serve, the fine for each day left (silver coins), the cell door's lock, and the picks they have. */
 	static final int SENTENCE_DAYS = 2, FINE_PER_DAY = 3, CELL_LEVEL = 3, CELL_PICKS = 1;
@@ -128,6 +135,15 @@ public final class StoryHard {
 
 	private record Loose(BlockPos at, int camp, long until) {
 	}
+	/** Player → when (game time) they threw an ender pearl in chains. */
+	private static final Map<UUID, Long> PEARLED = new HashMap<>();
+	/** Shackled player → where they stood last tick (a pearl's jump is told by it). */
+	private static final Map<UUID, Vec3> LAST_AT = new HashMap<>();
+	/** Who pearled out of chains, while their camp is left wondering: the chain, the camp, until when (server tick), and who has wondered aloud. */
+	private static final Map<UUID, Vanished> VANISHED = new HashMap<>();
+
+	private record Vanished(BlockPos at, int camp, long until, Set<UUID> spoke) {
+	}
 	/** Player → ticks about at night (evicted); the last look's position; whether the watch has warned them. */
 	private static final Map<UUID, Integer> LOITERING = new HashMap<>();
 	private static final Map<UUID, Vec3> LOITER_AT = new HashMap<>();
@@ -165,6 +181,14 @@ public final class StoryHard {
 			}
 			return InteractionResult.SUCCESS;
 		});
+		UseItemCallback.EVENT.register((player, level, hand) -> {
+			// (a pearl thrown in chains: its landing takes them out of them, see chained)
+			if (player instanceof ServerPlayer sp && level instanceof ServerLevel && player.getItemInHand(hand).is(net.minecraft.world.item.Items.ENDER_PEARL)
+				&& sp.hasAttached(SHACKLE)) {
+				PEARLED.put(sp.getUUID(), sp.level().getGameTime());
+			}
+			return InteractionResult.PASS;
+		});
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (level.isClientSide() || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND) {
 				return InteractionResult.PASS;
@@ -186,6 +210,9 @@ public final class StoryHard {
 			SLIPPING.clear();
 			STOOD.clear();
 			LOOSE.clear();
+			PEARLED.clear();
+			LAST_AT.clear();
+			VANISHED.clear();
 			LOITERING.clear();
 			LOITER_AT.clear();
 			WARNED.clear();
@@ -195,6 +222,8 @@ public final class StoryHard {
 	private static void forget(UUID id) {
 		SLIPPING.remove(id);
 		STOOD.remove(id);
+		PEARLED.remove(id);
+		LAST_AT.remove(id);
 		LOITERING.remove(id);
 		LOITER_AT.remove(id);
 		WARNED.remove(id);
@@ -229,6 +258,9 @@ public final class StoryHard {
 				player.removeAttached(CAST_OUT);
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cast.ended").withStyle(ChatFormatting.GRAY));
 			}
+		}
+		if (!VANISHED.isEmpty() && now % LOOSE_CHECK == 0L) {
+			baffled(server, level);
 		}
 	}
 
@@ -275,6 +307,16 @@ public final class StoryHard {
 			release(player);
 			JaymosKingdoms.LOGGER.info("{} was weighed and taken from {}'s chains", player.getScoreboardName(), shackle.camp());
 			return;
+		}
+		Vec3 was = LAST_AT.put(player.getUUID(), player.position());
+		Long pearl = PEARLED.get(player.getUUID());
+		if (pearl != null) {
+			if (now - pearl > PEARL_WAIT || now < pearl) {
+				PEARLED.remove(player.getUUID());
+			} else if (was != null && player.level() == level && was.subtract(player.position()).horizontalDistance() > PEARL_JUMP) {
+				vanish(player, shackle, level);
+				return;
+			}
 		}
 		if (com.jaymoskingdoms.forms.Lasso.holderOf(player) != null) {
 			// (led on a rope: the chain goes where they're led, CaptiveLeads)
@@ -387,6 +429,51 @@ public final class StoryHard {
 		Speech.say(level, saw, Dialects.trShared(saw, "speech.jaymoskingdoms.hard.loose." + level.getRandom().nextInt(LOOSE_LINES)), Speech.RED, LOOSE_SIGHT);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.chains.hunted").withStyle(ChatFormatting.GRAY));
 		JaymosKingdoms.LOGGER.info("{}'s escape was seen by camp {}", player.getScoreboardName(), loose.camp());
+	}
+
+	/**
+	 * {@code player}'s pearl landed and took them out of the shackle: gone without a trace. No hunt is ever raised; the camp's
+	 * people who come on the empty chain that day are left wondering aloud ({@link #baffled}).
+	 */
+	private static void vanish(ServerPlayer player, Shackle shackle, ServerLevel level) {
+		release(player);
+		LOOSE.remove(player.getUUID());
+		PEARLED.remove(player.getUUID());
+		LAST_AT.remove(player.getUUID());
+		VANISHED.put(player.getUUID(), new Vanished(shackle.at(), shackle.camp(), level.getServer().getTickCount() + LifeStory.HUNT_TICKS,
+			new java.util.HashSet<>()));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.chains.pearled").withStyle(ChatFormatting.GREEN));
+		JaymosKingdoms.LOGGER.info("{} pearled out of camp {}'s chains", player.getScoreboardName(), shackle.camp());
+	}
+
+	/** The camp's people who come on a pearled captive's empty chain stop, stare at it and wonder aloud, each once. */
+	private static void baffled(MinecraftServer server, ServerLevel level) {
+		int tick = server.getTickCount();
+		for (var it = VANISHED.entrySet().iterator(); it.hasNext();) {
+			var e = it.next();
+			Vanished v = e.getValue();
+			ServerPlayer back = server.getPlayerList().getPlayer(e.getKey());
+			if (tick >= v.until() || back != null && back.hasAttached(SHACKLE)) {
+				it.remove();
+				continue;
+			}
+			if (!level.isLoaded(v.at())) {
+				continue;
+			}
+			Vec3 chain = Vec3.atCenterOf(v.at());
+			for (Folk folk : level.getEntitiesOfClass(Folk.class, new net.minecraft.world.phys.AABB(v.at()).inflate(EMPTY_CHAIN_SIGHT))) {
+				if (!folk.isAlive() || folk.factionId() != v.camp() || v.spoke().contains(folk.getUUID())
+					|| folk.getEyePosition().distanceToSqr(chain) > EMPTY_CHAIN_SIGHT * EMPTY_CHAIN_SIGHT
+					|| level.clip(new net.minecraft.world.level.ClipContext(folk.getEyePosition(), chain, net.minecraft.world.level.ClipContext.Block.VISUAL,
+						net.minecraft.world.level.ClipContext.Fluid.NONE, folk)).getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+					continue;
+				}
+				v.spoke().add(folk.getUUID());
+				folk.getLookControl().setLookAt(chain.x, chain.y, chain.z);
+				Speech.say(level, folk, Dialects.trShared(folk, "speech.jaymoskingdoms.hard.vanished." + level.getRandom().nextInt(BAFFLED_LINES)), Speech.YELLOW,
+					LOOSE_SIGHT);
+			}
+		}
 	}
 
 	/** The shackle comes off quietly, with no hunt: a captive their captors killed ({@link CaptiveConduct#executed}). */
