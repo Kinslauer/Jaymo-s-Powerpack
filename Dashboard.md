@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 04:34). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 04:43). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -49,10 +49,12 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
 - [ ] #2279 Guards grow suspicious of what they half see or hear, light up and go to look (Kingdoms, 2026-11-27)
+- [ ] #2278 NPCs' carried weapons hang on their bodies like a player's (Powers, Kingdoms, 2026-11-27)
 - [ ] #2277 spectate viewcone shows the NPC's focus, or that it's thinking or stuck (Kingdoms, 2026-11-27)
 - [ ] #2276 Villages' overgrown rooms tidied, forest trees kept off buildings, stuck walkers push through (Kingdoms, 2026-11-27)
 - [ ] #2275 Quests on the talk wheel's first ring, with a tip (Kingdoms, 2026-11-27)
 - [ ] #2274 Buildings put up over old ruins take the whole ruin down; no trench round new buildings (Kingdoms, 2026-11-27)
+- [ ] #2273 Kingdoms' sextons can wash and bury (Powers, Kingdoms, 2026-11-27)
 - [ ] #2272 Guards shout what fits what they face (Kingdoms, 2026-11-27)
 - [ ] #2271 hoods and over-garments fit what is under them (Kingdoms, 2026-11-27)
 - [ ] #2270 Greetings fit the moment (Kingdoms, 2026-11-27)
@@ -106,9 +108,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2205 anacondas lie on the ground, live in the jungle and hunt from trees and water (Kingdoms, 2026-11-26)
 - [ ] #2204 story scenes and the Warlock's midnight bargain, spoken spells (Kingdoms, 2026-11-26)
 - [ ] #2201 ships rigged when they're made; pillager long ships sail; crews fish for their food; every NPC fights its fish in view (Kingdoms, 2026-11-26)
-- [ ] #2200 Crocodiles and alligators death roll their prey and drag it into the water (Kingdoms, Kitchen, 2026-11-26)
-- [ ] #2199 Alone in the wild never leaves you on the sea (Kingdoms, 2026-11-26)
-- …and 640 older ones.
+- …and 642 older ones.
 
 ## Health
 
