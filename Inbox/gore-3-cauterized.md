@@ -1,6 +1,6 @@
 ---
 status: open
-for: any
+for: prometheus
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: Power-pack Supplement
@@ -30,4 +30,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 **Where to start:** `BloodSettings` (`Preset`, `Gore`), `BloodVideoSettingsMixin`, `BladeBlood#sparks`, `Dismember#cut` (powers' cuts).
 
 ## Notes
-- 
+- 2026-11-27 17:44 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on gore 1-4 (via Claude coordinator, 2026-11-27)

@@ -4,32 +4,30 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 22:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:57). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
+- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
-- [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for any · open
-- [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for any · open
-- [ ] [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]] · for any · open
-- [ ] [[Inbox/gore-5-living-guts|gore-5-living-guts]] · for any · open
-- [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for any · open
 - [ ] [[Inbox/black-panther-k1|black-panther-k1]] · for any · open
 - [ ] [[Inbox/black-panther-p1|black-panther-p1]] · for any · open
 - [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · open
-- [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/gore-5-living-guts|gore-5-living-guts]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for 🔥 Prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · 🔥 Prometheus · claimed
 
 
 ## In review
@@ -37,12 +35,13 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · #2248 · in-review
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
-- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
+- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
-- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
+- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
+- [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · t3 · #2331 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -79,6 +78,7 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-r5|black-panther-r5]] · for any · blocked
 - [ ] [[Inbox/black-panther-r6|black-panther-r6]] · for any · blocked
 - [ ] [[Inbox/black-panther-r7|black-panther-r7]] · for any · blocked
+- [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · 🔥 Prometheus · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
@@ -88,8 +88,8 @@ kanban-plugin: board
 
 **Complete**
 - [x] [[Inbox/Done/nycto-turning|nycto-turning]]
-- [x] [[Inbox/Done/nycto-4-models|nycto-4-models]]
 - [x] [[Inbox/Done/nycto-4|nycto-4]]
+- [x] [[Inbox/Done/nycto-4-models|nycto-4-models]]
 - [x] [[Inbox/Done/nycto-5|nycto-5]]
 - [x] [[Inbox/Done/nycto-6|nycto-6]]
 - [x] [[Inbox/Done/nycto-7|nycto-7]]

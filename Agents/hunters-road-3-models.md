@@ -2,8 +2,8 @@
 status: stalled
 task: hunters-road-3-models
 branch: claude/hunters-road-3-models
-with: 
-pr: 
+with:
+pr: '2332'
 mods: jaymoskingdoms
 versions: Kingdoms 0.14.11
 started: 2026-11-27

@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 22:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:57). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -26,6 +26,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/black-panther-r5|black-panther-r5]] · 2026-11-27 ON HOLD until black-panther-r4 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-r6|black-panther-r6]] · 2026-11-27 ON HOLD until black-panther-r5 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-r7|black-panther-r7]] · 2026-11-27 ON HOLD until black-panther-r6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · 2026-11-27 17:34 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on gore 1-4 (via Claude coordinator, 2026-11-27)
 - [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 2026-11-27 04:46 Text pass content is complete (reviewed captain-ground.json lang keys and changes/kingdoms/hollow-captains-fix.md; all player-facing, no rewri…
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
@@ -45,19 +46,21 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-16 waiting for a bot, 2 being built, 9 in review: see [[Kanban]].
+14 waiting for a bot, 2 being built, 10 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2333 Lance couch works with a shield; locked-on swings hit only the locked foe (Powers, Kingdoms, 2026-11-27)
+- [ ] #2330 country speech - most townsfolk talk rough, as few could read (Kingdoms, 2026-11-27)
 - [ ] #2329 Freerun.onWall for Kingdoms' quips (Powers, Kingdoms, 2026-11-27)
 - [ ] #2328 Rig suit-down - parking the suit plays the wrap backwards (Powers, 2026-11-27)
 - [ ] #2327 Rig wrap suit-up - arms out, the suit closes on piece by piece, filmed from the front (Powers, Kingdoms, 2026-11-27)
@@ -116,9 +119,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2269 Tables say what's missing; /hints off (Powers, Kingdoms, Kitchen, 2026-11-27)
 - [ ] #2268 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
 - [ ] #2267 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
-- [ ] #2266 no lift prompt on tiny bodies (Powers, Kitchen, 2026-11-27)
-- [ ] #2265 Building news is found out, not told in chat (Kingdoms, 2026-11-27)
-- …and 687 older ones.
+- …and 689 older ones.
 
 ## Health
 

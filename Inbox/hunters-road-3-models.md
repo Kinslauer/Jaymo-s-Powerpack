@@ -1,10 +1,10 @@
 ---
-status: claimed
-for: prometheus
+status: in-review
+for: antigravity
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: hermes-modeller
-pr: 
+claimed_by: t3
+pr: 2331
 thread: t3 mcp:dc4cbd14-749f-4b32-8dea-525553f7418e
 text_pass: 
 ---
@@ -24,3 +24,4 @@ text_pass:
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-27 15:25 Andy 2026-11-27 3:16 PM: start Codex on one model task at a time, HR 3 first. Codex (gpt-6-astra) started in T3 thread mcp:e9a08d03, branch t3/hunters-road-3-models off origin/master.
 - 2026-11-27 21:36 t3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-27 17:38 Claude review of PR #2331 (Antigravity v2): passes. 10 models (gnawer + leader, bloated dead + spined, grave brute, burrower + heavy, corpse nest, old skeleton, fallen warrior), 9-25 bones each, 23-28 colours per sheet, no half-transparent pixels, all plan moves incl. knit_back, burst and charge, loops set, asset list in the PR body. art_audit and pr_checks pass. Nits only: bloated belly reads a bit boxy; brute's charge-tell pose is cramped.

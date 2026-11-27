@@ -1,10 +1,10 @@
 ---
-status: open
-for: any
+status: claimed
+for: prometheus
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: Power-pack Supplement
-claimed_by: 
+claimed_by: hermes-modeller
 pr: 
 suggested_owns:
   - src/client/java/com/jaymospowers/client/Dismembered.java
@@ -29,4 +29,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 **Where to start:** `Dismembered#stubPart`, `SeveredPartRenderer`, `Dismember#halve`, `BladeBlood` (what each body bleeds), `BloodSettings`, Kitchen's corpse renderer (`jaymoskitchen.missing.*`).
 
 ## Notes
-- 
+- 2026-11-27 17:40 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on gore 1-4 (via Claude coordinator, 2026-11-27)
