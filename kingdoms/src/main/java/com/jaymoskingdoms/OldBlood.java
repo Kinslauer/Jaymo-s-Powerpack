@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -34,19 +33,22 @@ import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.MoonPhase;
-import net.minecraft.world.attribute.EnvironmentAttributes;
 import org.jspecify.annotations.Nullable;
 
 /**
  * The willing turning (Night's Blood, patch 6; Andy's plan: "drink the Elder's blood from a bottle under a new moon and you
- * turn at the next nightfall, as if bitten"). The Elder's Blood ({@link #BLOOD}) is a bottle that comes from the Elder in two
+ * turn at the next nightfall, as if bitten"; then Andy: "you should be able to drink it at anytime, and the next new moon
+ * should convert you"). The Elder's Blood ({@link #BLOOD}) is a bottle that comes from the Elder in two
  * ways: beating him down without killing him ({@link #beaten}: whoever downed him finds a bottle where he lies, once in
  * {@link #BLOOD_DAYS} days for each Elder), or bargaining with him in talk ({@link #ANSWER}: only one who has seen enough of
  * the other side, {@link Exposure#INITIATED}, may; he asks {@link #PRICE} silver, and no more than one bottle in
- * {@link #BARGAIN_DAYS} days). Drunk while the moon is new (day or night), it lays the bite on them
- * ({@link Vampires#BITTEN}) as a bite does, and they turn at the next nightfall ({@link VampirePlayers}); in any other moon
- * nothing happens and the bottle is kept. A vampire or a cursed one can't take it. None of it is ever said on screen: it is
+ * {@link #BARGAIN_DAYS} days). Drunk at any time, whatever the moon, it lays the bite on them
+ * ({@link Vampires#BITTEN}) as a bite does, and a pending willing turning ({@link #WILLING}): they turn at the nightfall of
+ * the next new moon whose nightfall is still ahead ({@link #due}; tonight's own is behind them if it is night already), and
+ * wait until then. Until then the bitten rules hold: the priest's cure clears it, a golden apple still makes them wake a
+ * dhampir ({@link VampirePlayers#ateGold}), and dying mid-turn has them rise turned at once as a bitten one does
+ * ({@link VampirePlayers#midTurn}); any other death leaves them as they were. A vampire, a cursed one, or one already
+ * bitten can't take it (the bottle is kept). None of it is ever said on screen: it is
  * hinted only in gossip, loose pages and a hunter's words ({@link #gossip}, {@code lore/}, {@link LairHunts}) and a loading hint.
  */
 public final class OldBlood {
@@ -72,7 +74,38 @@ public final class OldBlood {
 	/** On a player: the game time they last bargained for a bottle. Kept. */
 	static final AttachmentType<Long> BARGAINED = AttachmentRegistry.create(JaymosKingdoms.id("elder_blood_bargain"), b -> b.persistent(Codec.LONG).copyOnDeath());
 
+	/**
+	 * On a player who drank the Elder's blood and has not turned yet: the first night whose nightfall was still ahead when they
+	 * drank ({@link Vampires#nightIndex}). They turn at the first new moon's nightfall from that night on ({@link #due}). Kept;
+	 * it goes when they turn, or when the bite on them is lifted (the priest's rite, a rebirth), and a death that is not a rise
+	 * turned leaves nothing of it, as of the bite.
+	 */
+	static final AttachmentType<Long> WILLING = AttachmentRegistry.create(JaymosKingdoms.id("elder_blood_willing"), b -> b.persistent(Codec.LONG));
+	/** On the Overworld: the last night that was a new moon night while the server was running (so a night they were away for still counts). Kept. */
+	static final AttachmentType<Long> NEW_MOON_NIGHT = AttachmentRegistry.create(JaymosKingdoms.id("elder_blood_new_moon_night"), b -> b.persistent(Codec.LONG));
+
 	private OldBlood() {
+	}
+
+	/**
+	 * Whether the willing turning that waits from night {@code first} ({@link #WILLING}) is due now: it is night, no earlier than
+	 * {@code first}, and that night is a new moon night (or one was, since {@code first}, while they were away).
+	 */
+	static boolean due(ServerLevel overworld, long first, long nightNo) {
+		if (nightNo < first || !Vampires.night(overworld.getOverworldClockTime())) {
+			return false;
+		}
+		if (NewMoon.on(overworld.getServer())) {
+			noteNewMoon(overworld, nightNo);
+			return true;
+		}
+		return overworld.getAttachedOrElse(NEW_MOON_NIGHT, -1L) >= first;
+	}
+
+	private static void noteNewMoon(ServerLevel overworld, long nightNo) {
+		if (overworld.getAttachedOrElse(NEW_MOON_NIGHT, -1L) != nightNo) {
+			overworld.setAttached(NEW_MOON_NIGHT, nightNo);
+		}
 	}
 
 	static void register() {
@@ -82,14 +115,9 @@ public final class OldBlood {
 		ServerTickEvents.END_SERVER_TICK.register(OldBlood::tick);
 	}
 
-	/** Whether the game's moon is new in {@code level}'s Overworld sky, either side. */
-	static boolean newMoon(Level level) {
-		return level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.NEW_MOON;
-	}
-
 	// ---- drinking it ---------------------------------------------------------------------------------------------------
 
-	/** The bottle: drunk under a new moon, it is a bite. */
+	/** The bottle: drunk at any time, it is a bite that turns them at the next new moon. */
 	static final class Bottle extends Item {
 		Bottle(Properties properties) {
 			super(properties);
@@ -97,7 +125,7 @@ public final class OldBlood {
 
 		@Override
 		public InteractionResult use(Level level, Player player, InteractionHand hand) {
-			if (!newMoon(level) || Vampires.isVampire(player)) {
+			if (Vampires.isVampire(player) || Lycans.cursed(player) || player.hasAttached(Vampires.BITTEN)) {
 				return InteractionResult.PASS;
 			}
 			player.startUsingItem(hand);
@@ -119,13 +147,16 @@ public final class OldBlood {
 			if (!(user instanceof ServerPlayer player) || !(level instanceof ServerLevel server)) {
 				return stack;
 			}
-			if (!newMoon(server) || Vampires.isVampire(player) || Lycans.cursed(player) || player.hasAttached(Vampires.BITTEN)) {
+			if (Vampires.isVampire(player) || Lycans.cursed(player) || player.hasAttached(Vampires.BITTEN)) {
 				return stack;
 			}
 			server.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
 			server.sendParticles(PowersCompat.blood(0x8A0303, 1.0F), player.getX(), player.getY(0.8), player.getZ(), 10, 0.25, 0.3, 0.25, 0.0);
-			// as if bitten: the bite is laid on them and they turn at the next nightfall, saving throw or none
-			player.setAttached(Vampires.BITTEN, server.getOverworldClockTime());
+			// as if bitten (no saving throw), but they turn at the next new moon's nightfall, not the next nightfall: the first
+			// night still ahead is the next one (tonight's nightfall is behind them if it is night already)
+			long clock = server.getOverworldClockTime();
+			player.setAttached(Vampires.BITTEN, clock);
+			player.setAttached(WILLING, Vampires.nightIndex(clock) + 1L);
 			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, Vampires.PLAYER_BITE_TICKS, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, Vampires.PLAYER_BITE_TICKS, 1));
 			if (!player.hasInfiniteMaterials()) {
@@ -141,6 +172,9 @@ public final class OldBlood {
 	private static void tick(MinecraftServer server) {
 		if (server.getTickCount() % 20 != 9) {
 			return;
+		}
+		if (NewMoon.on(server)) {
+			noteNewMoon(server.overworld(), Vampires.nightIndex(server.overworld().getOverworldClockTime()));
 		}
 		for (ServerLevel level : server.getAllLevels()) {
 			long now = level.getGameTime();

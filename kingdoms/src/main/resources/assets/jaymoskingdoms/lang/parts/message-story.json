@@ -23,7 +23,8 @@
   "message.jaymoskingdoms.story.lab": "The air is thick, the door is open, and something metal is stirring behind you.",
   "message.jaymoskingdoms.story.android": "Your hands are cold, steady and not quite yours. The note in your pocket is crumpled from handling.",
   "message.jaymoskingdoms.story.moon_cursed": "You are certain, with no reason, that you have been looked at.",
-  "message.jaymoskingdoms.story.greenskin": "The smoke of the camp is still in your clothes.",
+  "message.jaymoskingdoms.story.bitten": "Your neck aches, and the sun is lower than you thought.",
+  "message.jaymoskingdoms.story.greenskin":"The smoke of the camp is still in your clothes.",
   "message.jaymoskingdoms.story.fated": "Fate chose your start: %s.",
   "message.jaymoskingdoms.story.fated.title": "Fate chose: %s"
 }

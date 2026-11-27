@@ -81,6 +81,9 @@ public final class RoadLocks {
 	/** The deed that opens the monster-born's road: a goblin or wolf named and made your follower ({@link NamedFollowers}). */
 	static final String NAMED_DEED = "monster.named";
 
+	/** The deed that opens the bitten road: bitten by a vampire, or turned (a player's bite, the Elder's blood, any turning). */
+	static final String BITTEN_DEED = "vampire.bitten";
+
 	/** (0.7.605) The capital's deed: a journeyman's rank in any trade. The wild's: a night out far from any settlement. Sworn's: a raider slain. */
 	static final String TRADE_DEED = "trade.ranked", WILD_DEED = "wild.night", RAIDER_DEED = "raider.slain";
 	/** (0.7.605) How far from every settlement's seat a night counts as one in the wild (blocks). */
@@ -161,6 +164,7 @@ public final class RoadLocks {
 		// the powered roads
 		lock(Start.ANDROID, p -> is(p, Question.RAISED, "smiths") && is(p, Question.YOUTH, "gunsmith", "bench"), "rise.lab");
 		lock(Start.MOON_CURSED, p -> is(p, Question.BORN, "moors") || is(p, Question.RAISED, "foundling") && is(p, Question.YOUTH, "bargain"), "moon.blood");
+		lock(Start.BITTEN, p -> is(p, Question.BORN, "moors") && is(p, Question.YOUTH, "hunted") || is(p, Question.CHILDHOOD, "caves") && is(p, Question.YOUTH, "bargain"), BITTEN_DEED);
 		// the other worlds
 		lock(Start.MOON, p -> is(p, Question.CHILDHOOD, "roofs") && is(p, Question.TURN, "fall"), "world.moon");
 		lock(Start.RUSTFALL, p -> is(p, Question.RAISED, "smiths") && is(p, Question.CHILDHOOD, "fire"), "world.rustfall");

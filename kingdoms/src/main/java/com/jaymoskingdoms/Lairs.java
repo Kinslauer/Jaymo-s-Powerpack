@@ -22,8 +22,9 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.storage.LevelData;
 
 /**
- * (0.7.66) Where the newly cursed come to: a vampire wakes from its turning in a crypt, a werewolf from its first moon
- * in a den, each dug out beneath where they stood, with a bed that's now where they wake after dying, and a ladder up.
+ * (0.7.66) Where the newly cursed come to: a vampire wakes from its turning in a crypt ({@link #farCrypt}: dug under a random
+ * spot within 1000 blocks), a werewolf from its first moon in a den (dug beneath where they stood), with a bed that's now
+ * where they wake after dying, and a ladder up.
  * Only natural ground is dug (stone, dirt, sand, gravel, ores); if there's anything else in the way (a build, a cave,
  * the sea), there's no lair and they wake where they are.
  */
@@ -34,14 +35,83 @@ final class Lairs {
 	static final int CRYPT_HALF = 3, CRYPT_HEIGHT = 3, DEN_HALF = 2, DEN_HEIGHT = 2;
 	/** The share of a lair's blocks that may be air already (small caves are fine). */
 	static final float AIR_ALLOWED = 0.2F;
+	/** The far crypt: how far from where they turned (blocks, nearest and furthest), spots tried, chunks that may be made, and how near a settlement's seat it may not be. */
+	static final int FAR_MIN = 100, FAR_RANGE = 1000, FAR_TRIES = 40, FAR_CHUNKS = 8;
+	static final double FAR_KEEP_OFF = 96.0;
 
 	private Lairs() {
 	}
 
 	/** A crypt beneath {@code player}; true if it was built (they're in it). */
 	static boolean crypt(ServerLevel level, ServerPlayer player) {
-		BlockPos floor = player.blockPosition().below(CRYPT_DEPTH);
-		if (!fits(level, floor, CRYPT_HALF, CRYPT_HEIGHT, player.blockPosition())) {
+		return crypt(level, player, player.blockPosition().below(CRYPT_DEPTH), player.blockPosition());
+	}
+
+	/**
+	 * Andy: "it should be dug under a random area within 1000 blocks". The crypt a turned player wakes in: dug under a random
+	 * spot {@link #FAR_MIN} to {@link #FAR_RANGE} blocks from where they turned ({@link #farSite}), the coffin theirs. If no
+	 * such spot is found (every try fell on sea, a build or a cave, or the land wasn't made), it is dug under where they
+	 * stood, as it always was, and if that won't do either there is no crypt. True if one was built (they're in it).
+	 */
+	static boolean farCrypt(ServerLevel level, ServerPlayer player) {
+		Site site = farSite(level, player.blockPosition());
+		if (site != null && crypt(level, player, site.floor(), site.top())) {
+			return true;
+		}
+		return crypt(level, player);
+	}
+
+	/** Where a far crypt goes: the middle of its floor, and the ground above the ladder's shaft (where the ladder comes out). */
+	record Site(BlockPos floor, BlockPos top) {
+	}
+
+	/**
+	 * A random spot {@link #FAR_MIN}-{@link #FAR_RANGE} blocks from {@code from} (an even spread over the ring) where a crypt
+	 * fits: in the Overworld, on land the seed shows dry ({@link LifeStory#foreseenDry}), inside the land Chunky has made
+	 * ({@link Pregen}) and the world border, no settlement's seat or structure there, and natural ground all through
+	 * ({@link #fits}). The land is made only as the starts make it ({@link LifeStory#reach}, at most {@link #FAR_CHUNKS} chunks).
+	 */
+	static @org.jspecify.annotations.Nullable Site farSite(ServerLevel level, BlockPos from) {
+		if (level.dimension() != Level.OVERWORLD) {
+			return null;
+		}
+		RandomSource random = level.getRandom();
+		int[] made = {FAR_CHUNKS};
+		int reach = CRYPT_HALF + 1;
+		for (int i = 0; i < FAR_TRIES && made[0] > 0; i++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			double d = Math.sqrt((double) FAR_MIN * FAR_MIN + random.nextDouble() * ((double) FAR_RANGE * FAR_RANGE - (double) FAR_MIN * FAR_MIN));
+			// (the ladder's shaft is the column drawn: the room lies CRYPT_HALF blocks west of it)
+			int x = from.getX() + net.minecraft.util.Mth.floor(Math.cos(angle) * d), z = from.getZ() + net.minecraft.util.Mth.floor(Math.sin(angle) * d);
+			BlockPos column = new BlockPos(x, 0, z);
+			if (!Pregen.inside(level, column) || !level.getWorldBorder().isWithinBounds(column) || !LifeStory.foreseenDry(level, x, z)) {
+				continue;
+			}
+			boolean ready = true;
+			for (int dx : new int[] {-CRYPT_HALF - reach, 1}) {
+				for (int dz : new int[] {-reach, reach}) {
+					ready &= LifeStory.reach(level, x + dx, z + dz, made);
+				}
+			}
+			if (!ready) {
+				continue;
+			}
+			BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+			if (!level.getWorldBorder().isWithinBounds(top) || Factions.near(level.getServer(), top, FAR_KEEP_OFF) != null
+				|| !level.structureManager().getAllStructuresAt(top.below()).isEmpty()) {
+				continue;
+			}
+			BlockPos floor = new BlockPos(x - CRYPT_HALF, top.getY() - CRYPT_DEPTH, z);
+			if (fits(level, floor, CRYPT_HALF, CRYPT_HEIGHT, top)) {
+				return new Site(floor, top);
+			}
+		}
+		return null;
+	}
+
+	/** A crypt with its floor's middle at {@code floor}, the ladder coming out at {@code top}; true if it was built (they're in it). */
+	private static boolean crypt(ServerLevel level, ServerPlayer player, BlockPos floor, BlockPos top) {
+		if (!fits(level, floor, CRYPT_HALF, CRYPT_HEIGHT, top)) {
 			return false;
 		}
 		RandomSource random = level.getRandom();
@@ -84,7 +154,7 @@ final class Lairs {
 		}
 		level.setBlock(new BlockPos(floor.getX(), floor.getY() + CRYPT_HEIGHT, floor.getZ()), Blocks.SOUL_LANTERN.defaultBlockState()
 			.setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), Block.UPDATE_ALL);
-		ladder(level, floor, CRYPT_HALF, CRYPT_HEIGHT, player.blockPosition());
+		ladder(level, floor, CRYPT_HALF, CRYPT_HEIGHT, top);
 		CoffinRest.claim(player, level, head);
 		wake(level, player, foot, head);
 		return true;
