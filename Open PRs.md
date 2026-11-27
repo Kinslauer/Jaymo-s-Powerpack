@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 13:58
+updated: 2026-11-27 15:16
 ---
 # Open PRs
 
-13 open, as of 2026-11-27 13:58. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+14 open, as of 2026-11-27 15:16. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -37,17 +37,17 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[hollow-captains-fix]]
 
 ## [#2248](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2248) Let changelings mimic players' voices while stalking
-- **Branch:** `t3/changeling-voice-mimic` · **Updated:** 2026-11-26 (today)
+- **Branch:** `t3/changeling-voice-mimic` · **Updated:** 2026-11-26 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[changeling-voice-mimic]]
 
 ## [#2249](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2249) docs: plan underground Stoneborn holds and goblin villages
-- **Branch:** `codex/underground-settlements-plan` · **Updated:** 2026-11-26 (today)
+- **Branch:** `codex/underground-settlements-plan` · **Updated:** 2026-11-26 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[codex-underground-settlements-plan]]
 
 ## [#2250](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2250) Allow rare mainland villages and surface structures on Mohknee (structures-4-mohknee PR 1)
-- **Branch:** `t3/mohknee-rare-structure-starts` · **Updated:** 2026-11-26 (today)
+- **Branch:** `t3/mohknee-rare-structure-starts` · **Updated:** 2026-11-26 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[mohknee-rare-structure-starts]]
 
@@ -66,7 +66,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2317](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2317) Magic screen becomes a spell wheel; Abilities window grows to fit long text
-- **Branch:** `claude/project-thread-uptfsr` · **Updated:** 2026-11-27 (today)
-- **Checks:** ✅ 5 passed
+## [#2323](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2323) Captive chains reach 9 blocks like a lead, escape hints once each, crude lockpick
+- **Branch:** `claude/project-thread-ams5w3` · **Updated:** 2026-11-27 (today)
+- **Checks:** ⏳ 4 of 4 running
+- **Agent:** no agent note
+
+## [#2324](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2324) Night view: dip to black instead of sliding through the bedroom wall; no idle cam in bed
+- **Branch:** `claude/project-thread-qwa9rl` · **Updated:** 2026-11-27 (today)
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
