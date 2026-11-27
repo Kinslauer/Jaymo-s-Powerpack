@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * (blue), its path ahead (white, its end magenta when the path stops short of where it's going), its brain's walk target (pale
  * green), and above its head what it is focused on or thinking over ({@link com.jaymoskingdoms.NpcFocus}): the top line's colour
  * is its state (white focused, yellow picking what to do, orange re-planning its path, red stuck), and under it its alert, task,
- * activity, running goals and behaviours, target and path.
+ * activity, target and path (the running goals and behaviours and the coordinates only with {@code -Djaymoskingdoms.eyesDetail=true}).
  */
 public final class NpcEyesClient {
 	/** The cone is drawn out to this many blocks at most; its rim has this many sides; the spokes from the eye to it. */
