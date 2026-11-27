@@ -23,3 +23,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 - 2026-11-26 21:03 ON HOLD also for Toxony (2026-11-26): Andy linked Toxony; its picks fold into this patch. Don't open until the Hunter's Road thread sends the updated plan.
 - 2026-11-26 21:06 2026-11-26 21:06 Toxony picks folded in (Andy 29 of 30): also build the plan's 'Toxony additions' > 'Into patch 6' subsection, and keep its 'Licence: ideas only' rule (no Toxony code, art, sound, journal text or invented names). Toxony hold released: back to its normal wave.
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
+- 2026-11-27 11:40 Hold lifted 2026-11-27: the Hunter's Road thread started it early (doesn't need 2).
