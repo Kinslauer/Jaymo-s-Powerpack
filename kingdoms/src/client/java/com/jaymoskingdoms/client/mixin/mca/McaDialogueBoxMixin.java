@@ -103,6 +103,8 @@ abstract class McaDialogueBoxMixin extends Screen {
 	private FormattedText jaymoskingdoms$toBox(FormattedText text) {
 		if (text instanceof Component said) {
 			DialogueCinematic.said(this.villager.asEntity().getId(), said);
+			// (Andy 2026-11-27) the wheel's first spoke answers it
+			TalkFirst.said((InteractScreen)(Object)this, said);
 		}
 		return text;
 	}
