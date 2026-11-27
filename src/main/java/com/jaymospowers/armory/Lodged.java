@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -91,6 +92,9 @@ public final class Lodged {
 
 	public static void init() {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof LivingEntity body) {
+				unlodgeArrows(body);
+			}
 			if (entity instanceof Mob mob && mob.hasAttached(DRAWS)) {
 				DRAWING.add(mob);
 			}
@@ -134,8 +138,16 @@ public final class Lodged {
 		return stuck == null ? List.of() : stuck;
 	}
 
-	/** Sticks {@code stack} in {@code body}, if there's room. */
+	/**
+	 * Sticks {@code stack} in {@code body}, if there's room. An arrow isn't held like a stuck blade (it showed as a flat
+	 * item on the back, like a carried tool): it goes in as one of the game's own stuck arrows, which work loose by
+	 * themselves.
+	 */
 	public static boolean lodge(LivingEntity body, ItemStack stack) {
+		if (!stack.isEmpty() && stack.is(ItemTags.ARROWS)) {
+			body.setArrowCount(body.getArrowCount() + 1);
+			return true;
+		}
 		List<ItemStack> stuck = new ArrayList<>(stuck(body));
 		if (stuck.size() >= MOST || stack.isEmpty()) {
 			return false;
@@ -143,6 +155,32 @@ public final class Lodged {
 		stuck.add(stack.copyWithCount(1));
 		body.setAttached(LODGED, List.copyOf(stuck));
 		return true;
+	}
+
+	/** Arrows a body was given as stuck blades before {@link #lodge} sent them to the game's own stuck arrows: moved there. */
+	private static void unlodgeArrows(LivingEntity body) {
+		List<ItemStack> stuck = stuck(body);
+		if (stuck.isEmpty()) {
+			return;
+		}
+		List<ItemStack> kept = new ArrayList<>(stuck.size());
+		int arrows = 0;
+		for (ItemStack stack : stuck) {
+			if (stack.is(ItemTags.ARROWS)) {
+				arrows++;
+			} else {
+				kept.add(stack);
+			}
+		}
+		if (arrows == 0) {
+			return;
+		}
+		if (kept.isEmpty()) {
+			body.removeAttached(LODGED);
+		} else {
+			body.setAttached(LODGED, List.copyOf(kept));
+		}
+		body.setArrowCount(body.getArrowCount() + arrows);
 	}
 
 	private static ItemStack takeLast(LivingEntity body) {
