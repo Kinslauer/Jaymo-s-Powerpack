@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:07). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,11 +19,11 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/nycto-7|nycto-7]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/nycto-6|nycto-6]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · t3 · claimed
-- [ ] [[Inbox/nycto-6|nycto-6]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · t3 · claimed
-- [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · t3 · claimed
 
 
 ## In review
@@ -37,7 +37,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
-- [ ] [[Inbox/hunters-road-7|hunters-road-7]] · ☁️ Cloud · #2290 · in-review
 - [ ] [[Inbox/nycto-3|nycto-3]] · ☁️ Cloud · #2291 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
@@ -65,6 +64,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/hunters-road-7|hunters-road-7]]
 - [x] [[Inbox/Done/nycto-2|nycto-2]]
 - [x] [[Inbox/Done/nycto-1|nycto-1]]
 - [x] [[Inbox/Done/hunters-road-2|hunters-road-2]]
@@ -72,7 +72,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/hunters-road-6|hunters-road-6]]
 - [x] [[Inbox/Done/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]]
 - [x] [[Inbox/Done/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]]
-- [x] [[Inbox/Done/legends-p6-followups|legends-p6-followups]]
 
 
 %% kanban:settings
