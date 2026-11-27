@@ -1,0 +1,21 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "jaymospowers"
+      ]
+    }
+  ],
+  "gives": {
+    "id": "jaymospowers:honey_fungus",
+    "count": 2
+  },
+  "max_uses": 8,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 3
+  },
+  "xp": 15
+}

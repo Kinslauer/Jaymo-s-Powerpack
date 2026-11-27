@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "jaymoskingdoms:block/herbalist_table_top",
+    "side": "jaymoskingdoms:block/herbalist_table_side",
+    "bottom": "jaymoskingdoms:block/herbalist_table_bottom"
+  }
+}

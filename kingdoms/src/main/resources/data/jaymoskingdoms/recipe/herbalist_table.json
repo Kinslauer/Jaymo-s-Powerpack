@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "S S",
+    "SBS"
+  ],
+  "key": {
+    "P": "minecraft:oak_planks",
+    "S": "minecraft:stick",
+    "B": "minecraft:bowl"
+  },
+  "result": {
+    "id": "jaymoskingdoms:herbalist_table"
+  }
+}

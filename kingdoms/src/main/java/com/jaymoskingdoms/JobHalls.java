@@ -381,6 +381,37 @@ final class JobHalls {
 		return s.done();
 	}
 
+	/**
+	 * The herbalist's stall (7 x 5): four posts under an awning in the settlement's colours, the herbalist's table (their
+	 * job site) at the back, a counter of slabs across the front with a gate, barrels and pots of herbs and a lantern.
+	 */
+	static Blueprint herbalistStall(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("herbalist_stall", 7, 5, 6);
+		Palette p = k.p;
+		for (int x = 0; x < 7; x++) {
+			for (int z = 0; z < 5; z++) {
+				s.set(x, 0, z, p.floor());
+				s.set(x, 4, z, x % 2 == 0 ? k.wool : k.accentWool);
+			}
+		}
+		for (int[] c : new int[][] {{0, 0}, {6, 0}, {0, 4}, {6, 4}}) {
+			for (int y = 1; y <= 3; y++) {
+				s.set(c[0], y, c[1], p.log());
+			}
+		}
+		for (int x = 1; x <= 5; x++) {
+			s.set(x, 1, 1, x == 3 ? Buildings.Sketch.facing(k.gate, Direction.NORTH) : Buildings.Sketch.top(p.woodSlab()));
+		}
+		boolean mirrored = k.chance(0.5);
+		s.set(3, 1, 3, Herbalists.TABLE.defaultBlockState());
+		s.set(mirrored ? 1 : 5, 1, 3, Blocks.BARREL.defaultBlockState());
+		s.set(mirrored ? 5 : 1, 1, 3, Blocks.COMPOSTER.defaultBlockState());
+		s.set(mirrored ? 2 : 4, 2, 1, k.flowerPot());
+		s.set(mirrored ? 4 : 2, 2, 1, k.flowerPot());
+		s.set(3, 3, 3, Buildings.Sketch.hanging(Blocks.LANTERN));
+		return s.done();
+	}
+
 	// ---- (0.7.483) the healer's infirmary --------------------------------------------------------------------------
 
 	/**

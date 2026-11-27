@@ -6,6 +6,7 @@ import com.jaymospowers.alchemy.hunter.Leans.Lean;
 import com.jaymospowers.alchemy.hunter.Pastes;
 import com.jaymospowers.ground.StoneAge;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -125,7 +126,7 @@ public final class Garden {
 				.mapColor(MapColor.PLANT).noCollision().randomTicks().instabreak().sound(SoundType.CROP).pushReaction(PushReaction.POPPED));
 			CROPS.put(id, block);
 			PRODUCE.put(id, Alchemy.item(id, Item::new));
-			SEEDS.put(id, Alchemy.item(id + "_seeds", p -> new BlockItem(block, p)));
+			SEEDS.put(id, Alchemy.item(id + "_seeds", p -> new BlockItem(block, p.useItemDescriptionPrefix())));
 			if (crop.poison()) {
 				// seeds by breaking the plant down
 				StoneAge.grinds().put(PRODUCE.get(id), SEEDS.get(id));
@@ -135,16 +136,16 @@ public final class Garden {
 			.pushReaction(PushReaction.POPPED);
 		JUNIPER_BUSH = block("juniper_bush", JuniperBushBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollision().randomTicks()
 			.instabreak().sound(SoundType.SWEET_BERRY_BUSH).pushReaction(PushReaction.POPPED));
-		JUNIPER_BERRIES = Alchemy.item("juniper_berries", p -> new BlockItem(JUNIPER_BUSH, p));
+		JUNIPER_BERRIES = Alchemy.item("juniper_berries", p -> new BlockItem(JUNIPER_BUSH, p.useItemDescriptionPrefix()));
 		CAVE_IVY = block("cave_ivy", GlowLichenBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).replaceable().noCollision()
 			.strength(0.2F).sound(SoundType.GLOW_LICHEN).pushReaction(PushReaction.POPPED));
-		CAVE_IVY_ITEM = Alchemy.item("cave_ivy", p -> new BlockItem(CAVE_IVY, p));
+		CAVE_IVY_ITEM = Alchemy.item("cave_ivy", p -> new BlockItem(CAVE_IVY, p.useItemDescriptionPrefix()));
 		BRACKEN = block("bracken", DoublePlantBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).replaceable().noCollision().instabreak()
 			.sound(SoundType.GRASS).offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.POPPED));
-		BRACKEN_ITEM = Alchemy.item("bracken", p -> new DoubleHighBlockItem(BRACKEN, p));
+		BRACKEN_ITEM = Alchemy.item("bracken", p -> new DoubleHighBlockItem(BRACKEN, p.useItemDescriptionPrefix()));
 		CARDINAL_FLOWER = block("cardinal_flower", p -> new FlowerBlock(MobEffects.FIRE_RESISTANCE, 6.0F, p), plant.mapColor(MapColor.COLOR_RED)
 			.offsetType(BlockBehaviour.OffsetType.XZ));
-		CARDINAL_FLOWER_ITEM = Alchemy.item("cardinal_flower", p -> new BlockItem(CARDINAL_FLOWER, p));
+		CARDINAL_FLOWER_ITEM = Alchemy.item("cardinal_flower", p -> new BlockItem(CARDINAL_FLOWER, p.useItemDescriptionPrefix()));
 		EARTHBALL_CAP = block("earthball_cap", HugeMushroomBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(0.2F)
 			.sound(SoundType.WOOD).ignitedByLava());
 		EARTHBALL_STEM = block("earthball_stem", HugeMushroomBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_WHITE).strength(0.2F)
@@ -155,11 +156,18 @@ public final class Garden {
 			.sound(SoundType.WOOD).ignitedByLava());
 		EARTHBALL = block("earthball", p -> new GrowingMushroomBlock(featureKey("huge_earthball"), p), mushroom(MapColor.COLOR_BROWN));
 		HONEY_FUNGUS = block("honey_fungus", p -> new GrowingMushroomBlock(featureKey("huge_honey_fungus"), p), mushroom(MapColor.GOLD));
-		EARTHBALL_ITEM = Alchemy.item("earthball", p -> new BlockItem(EARTHBALL, p));
-		HONEY_FUNGUS_ITEM = Alchemy.item("honey_fungus", p -> new BlockItem(HONEY_FUNGUS, p));
+		EARTHBALL_ITEM = Alchemy.item("earthball", p -> new BlockItem(EARTHBALL, p.useItemDescriptionPrefix()));
+		HONEY_FUNGUS_ITEM = Alchemy.item("honey_fungus", p -> new BlockItem(HONEY_FUNGUS, p.useItemDescriptionPrefix()));
 		MANDRAKE_ROOT = Alchemy.item("mandrake_root", Item::new);
 		ERGOT = Alchemy.item("ergot", Item::new);
 
+		// each block's item, for picking it and for the game to find it (as Items does for its own)
+		for (Item item : List.of(JUNIPER_BERRIES, CAVE_IVY_ITEM, BRACKEN_ITEM, CARDINAL_FLOWER_ITEM, EARTHBALL_ITEM, HONEY_FUNGUS_ITEM)) {
+			((BlockItem) item).registerBlocks(Item.BY_BLOCK, item);
+		}
+		for (Item seeds : SEEDS.values()) {
+			((BlockItem) seeds).registerBlocks(Item.BY_BLOCK, seeds);
+		}
 		pasteOnFarmland();
 		loot();
 		world();

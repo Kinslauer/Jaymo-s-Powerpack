@@ -651,6 +651,8 @@ final class McaBridge {
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.RUIN_KEEPER).orElseThrow());
 		// and a town's sexton (Sextons; their trades are the data pack's)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.SEXTON).orElseThrow());
+		// and a town's herbalist (Herbalists; their trades are the data pack's)
+		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.HERBALIST).orElseThrow());
 		// and a realm's dragon tamer (RealmDragons)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.DRAGON_TAMER).orElseThrow());
 		// a villager that was unloaded when a player was reborn forgets them as it loads

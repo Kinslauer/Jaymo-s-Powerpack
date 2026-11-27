@@ -1,0 +1,20 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "jaymospowers"
+      ]
+    }
+  ],
+  "gives": {
+    "id": "jaymospowers:valerian",
+    "count": 3
+  },
+  "max_uses": 16,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald"
+  },
+  "xp": 1
+}
