@@ -48,6 +48,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2267 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
 - [ ] #2266 no lift prompt on tiny bodies (Powers, Kitchen, 2026-11-27)
 - [ ] #2265 Building news is found out, not told in chat (Kingdoms, 2026-11-27)
 - [ ] #2264 crows over a body no longer hang flapping in one spot in the sky (Kingdoms, 2026-11-27)
@@ -107,8 +108,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2185 Mordhau harness 3: more harness at the smith's anvil (Powers, Kingdoms, 2026-11-26)
 - [ ] #2184 harness furs and turbans count for body heat; straw hats keep the sun off (Kingdoms, Kitchen, 2026-11-26)
 - [ ] #2183 Village mods 7-9: CTOV back, Tidal Towns, swamp goblins and their band, your own company (Kingdoms, 2026-11-26)
-- [ ] #2180 space pods fly: a climb through the sky, a piloted crossing, raiders, wrecks, rocks, a sling past the Maw, towing and Patrol posts (Powers, Kingdoms, 2026-11-25)
-- …and 568 older ones.
+- …and 569 older ones.
 
 ## Health
 
