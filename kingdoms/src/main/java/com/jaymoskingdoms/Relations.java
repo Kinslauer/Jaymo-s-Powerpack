@@ -35,13 +35,16 @@ public final class Relations {
 		return fa == null || fb == null ? Relation.NEUTRAL : between(fa, fb);
 	}
 
-	/** Sets the relation on both sides. */
+	/** Sets the relation on both sides. Sworn enemies (Greenskin vs Pillager) can never go above war. */
 	public static void set(MinecraftServer server, int a, int b, Relation relation) {
 		if (a == b) {
 			return;
 		}
-		Factions.update(server, a, f -> f.withRelation(b, relation));
-		Factions.update(server, b, f -> f.withRelation(a, relation));
+		Faction fa = Factions.get(server, a);
+		Faction fb = Factions.get(server, b);
+		Relation finalRelation = (fa != null && fb != null && fa.allegiance().neverAllies(fb.allegiance())) ? Relation.WAR : relation;
+		Factions.update(server, a, f -> f.withRelation(b, finalRelation));
+		Factions.update(server, b, f -> f.withRelation(a, finalRelation));
 	}
 
 	public static boolean atWar(Faction a, Faction b) {

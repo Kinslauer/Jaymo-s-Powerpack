@@ -115,7 +115,7 @@ final class OrcCamps {
 		RandomSource random = level.getRandom();
 		BlockPos fire = new BlockPos(center.getX(), floor, center.getZ());
 		Faction camp = Faction.create(Factions.nextId(server), FactionType.BARBARIAN, name(server, random), COLOURS[random.nextInt(COLOURS.length)], fire,
-			KingdomEvents.claim(server, fire, Camps.CLAIM_RADIUS));
+			KingdomEvents.claim(server, fire, Camps.CLAIM_RADIUS)).withAllegiance(FactionAllegiance.GREENSKIN);
 		Factions.put(server, camp);
 		int id = camp.id();
 		long now = level.getGameTime();
