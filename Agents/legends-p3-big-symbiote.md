@@ -2,9 +2,9 @@
 status: running
 task: legends-p3-big-symbiote
 branch: hermes/legends-p3
-pr: 
+pr: 2281
 mods: powers
-versions: 
+versions: 0.28.10
 started: 2026-11-27
 owns:
   - src/main/java/com/jaymospowers/power/web/WebBruteArts.java
