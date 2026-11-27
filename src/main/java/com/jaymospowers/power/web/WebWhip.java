@@ -61,6 +61,11 @@ public final class WebWhip {
 	 * whirls it on that single line for as long as it is held, and letting go flings it.
 	 */
 	public static final int WHIRL = 0, SLAM = 1, ONE_LINE = 2;
+	/**
+	 * Punches with both webs out: {@code SHOCK} (both on one creature) sends a shock down them ({@link WebShock}); {@code BALL}
+	 * (both in the ground) gathers a wrecking ball of debris and swings it, letting go of the punch throws it ({@link WebWreck}).
+	 */
+	public static final int SHOCK = 3, BALL = 4;
 	/** The one-line whirl: radians a tick round you, how far out and how high it swings, the longest it holds, and the fling. */
 	static final double SPIN_STEP = 0.5, SPIN_RADIUS = 3.2, SPIN_UP = 1.0;
 	static final int SPIN_MAX_TICKS = 100, SPIN_HIT_GAP = 8;
@@ -222,6 +227,20 @@ public final class WebWhip {
 	 * same bit of terrain, the whip starts, or the pry. Let go: a pry not yet torn loose is off, its cracks lingering.
 	 */
 	private static void hold(ServerPlayer player, boolean down, int mode) {
+		if (mode == SHOCK) {
+			if (down) {
+				WebShock.begin(player);
+			}
+			return;
+		}
+		if (mode == BALL) {
+			if (down) {
+				WebWreck.begin(player);
+			} else {
+				WebWreck.release(player);
+			}
+			return;
+		}
 		if (mode == ONE_LINE) {
 			if (down) {
 				beginOneLine(player);

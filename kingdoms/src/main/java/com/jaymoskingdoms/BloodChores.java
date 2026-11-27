@@ -37,7 +37,8 @@ import net.minecraft.world.phys.Vec3;
  * pressing to do, who grumbles about it and goes to scrub it up, swiping at it until it's gone, then the next stain in the
  * same room. Guards stay at their posts; a villager in a fight, a talk, tending the hurt or hauling the dead (as
  * {@link TalkBusy} has busy), afraid, held or downed leaves it. Blood with a body still lying in it (a corpse, the downed)
- * is left until the body is gone. Outdoors the rain does it. Nothing without Powers.
+ * is left until the body is gone. Outdoors the rain does it, or the town's sexton ({@link Sextons}), who scrubs the blood
+ * out of its streets and yards as well. Nothing without Powers.
  */
 final class BloodChores {
 	/** How often blood is looked for (ticks); how often a chore is driven (ticks). */
@@ -64,11 +65,14 @@ final class BloodChores {
 		Vec3 spot;
 		final long until;
 		long swiped;
+		/** A sexton's, who scrubs outdoors too. */
+		final boolean sexton;
 
-		Chore(UUID cleaner, Vec3 spot, long until) {
+		Chore(UUID cleaner, Vec3 spot, long until, boolean sexton) {
 			this.cleaner = cleaner;
 			this.spot = spot;
 			this.until = until;
+			this.sexton = sexton;
 		}
 	}
 
@@ -111,10 +115,16 @@ final class BloodChores {
 			if (f.fallen() || f.type() == FactionType.BARBARIAN || !level.isPositionEntityTicking(f.seat())) {
 				continue;
 			}
+			// (out in the street only a sexton minds it, so with none about only indoor blood is looked at)
+			boolean sexton = !level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(WATCHED), Sextons::is).isEmpty();
 			for (Vec3 stain : PowersCompat.bloodStains(level, Vec3.atCenterOf(f.seat()), WATCHED, MOST)) {
 				BlockPos at = BlockPos.containing(stain.x, stain.y + 0.1, stain.z);
-				if (!RESTING.containsKey(at) && !minded(stain) && Strays.indoors(level, at) && !bodyIn(level, stain)) {
-					notice(level, stain, now);
+				if (RESTING.containsKey(at) || minded(stain)) {
+					continue;
+				}
+				boolean outdoors = !Strays.indoors(level, at);
+				if ((sexton || !outdoors) && !bodyIn(level, stain)) {
+					notice(level, stain, now, outdoors);
 				}
 			}
 		}
@@ -136,11 +146,15 @@ final class BloodChores {
 			&& (!body.isAlive() || Downed.isDowned(body)) || BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getPath().contains("corpse")).isEmpty();
 	}
 
-	/** The nearest free grown villager who can see {@code stain} goes to scrub it, grumbling now and then. */
-	private static void notice(ServerLevel level, Vec3 stain, long now) {
+	/**
+	 * The nearest free grown villager who can see {@code stain} goes to scrub it, grumbling now and then; only a sexton
+	 * for one {@code outdoors}.
+	 */
+	private static void notice(ServerLevel level, Vec3 stain, long now, boolean outdoors) {
 		Villager cleaner = null;
 		double best = NOTICE * NOTICE;
-		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(stain, stain).inflate(NOTICE), BloodChores::free)) {
+		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(stain, stain).inflate(NOTICE),
+			v -> free(v) && (!outdoors || Sextons.is(v) && Sextons.free(v)))) {
 			double d = v.distanceToSqr(stain);
 			if (d < best && sees(level, v, stain)) {
 				best = d;
@@ -150,16 +164,26 @@ final class BloodChores {
 		if (cleaner == null) {
 			return;
 		}
-		CHORES.put(cleaner.getUUID(), new Chore(cleaner.getUUID(), stain, now + CHORE_TICKS));
+		boolean sexton = Sextons.is(cleaner);
+		CHORES.put(cleaner.getUUID(), new Chore(cleaner.getUUID(), stain, now + CHORE_TICKS, sexton));
 		if (level.getRandom().nextFloat() < TALK_CHANCE) {
-			say(level, cleaner, "start", now);
+			if (sexton) {
+				Sextons.say(level, cleaner, "scrub");
+			} else {
+				say(level, cleaner, "start", now);
+			}
 		}
 	}
 
 	/** Grown, on their feet, not a guard, and not busy with anything that can't wait. */
 	private static boolean free(Villager v) {
 		return v.isAlive() && !v.isBaby() && !Downed.isDowned(v) && !Downed.isGuard(v) && !Frights.afraid(v.getUUID()) && !Arrests.held(v)
-			&& !Strays.shooing(v.getUUID()) && !CHORES.containsKey(v.getUUID()) && !TalkBusy.occupied(v);
+			&& !Strays.shooing(v.getUUID()) && !CHORES.containsKey(v.getUUID()) && !TalkBusy.occupied(v) && !Sextons.busy(v);
+	}
+
+	/** {@code v} is scrubbing blood just now. */
+	static boolean scrubbing(Villager v) {
+		return CHORES.containsKey(v.getUUID());
 	}
 
 	/** Whether {@code v} can see the floor at {@code stain}: nothing solid between its eyes and the spot. */
@@ -177,9 +201,9 @@ final class BloodChores {
 		}
 		if (PowersCompat.bloodStains(level, c.spot, SWIPE_RANGE, 1).isEmpty() || bodyIn(level, c.spot)) {
 			// that one's done: the next stain in the room, if there is one
-			Vec3 next = next(level, c.spot);
+			Vec3 next = next(level, c.spot, c.sexton);
 			if (next == null) {
-				if (level.getRandom().nextFloat() < TALK_CHANCE * 0.5F) {
+				if (!c.sexton && level.getRandom().nextFloat() < TALK_CHANCE * 0.5F) {
 					say(level, v, "done", now);
 				}
 				return true;
@@ -203,11 +227,11 @@ final class BloodChores {
 		return false;
 	}
 
-	/** The nearest other indoor stain within {@link #ROOM} of {@code from} with no body in it, or null. */
-	private static @Nullable Vec3 next(ServerLevel level, Vec3 from) {
+	/** The nearest other indoor stain (any, for a sexton) within {@link #ROOM} of {@code from} with no body in it, or null. */
+	private static @Nullable Vec3 next(ServerLevel level, Vec3 from, boolean sexton) {
 		for (Vec3 stain : PowersCompat.bloodStains(level, from, ROOM, 8)) {
 			BlockPos at = BlockPos.containing(stain.x, stain.y + 0.1, stain.z);
-			if (!RESTING.containsKey(at) && Strays.indoors(level, at) && !bodyIn(level, stain)) {
+			if (!RESTING.containsKey(at) && (sexton || Strays.indoors(level, at)) && !bodyIn(level, stain)) {
 				return stain;
 			}
 		}

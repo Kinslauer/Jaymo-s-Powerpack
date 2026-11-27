@@ -198,6 +198,10 @@ public final class WebStrength {
 
 	/** The damage {@code entity} is about to take, more if it's pinned (from {@code WebLivingEntityMixin}). */
 	public static float modifyDamage(LivingEntity entity, float damage) {
+		if (Webbed.layers(entity) >= Webbed.FULL) {
+			// fully stuck in web: it takes more
+			damage *= Webbed.FULL_DAMAGE;
+		}
 		if (BINDS.isEmpty()) {
 			return damage;
 		}
@@ -224,17 +228,33 @@ public final class WebStrength {
 			}
 		}
 		int ticks = net.minecraft.util.Mth.lerpInt((charge - PIN_CHARGE) / (1.0F - PIN_CHARGE), PIN_TICKS_MIN, PIN_TICKS_MAX);
-		bind(level, target, at, ticks, true, dark);
+		bind(level, target, at, ticks, true, dark, false);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.6F);
+	}
+
+	/** {@code target} moved to {@code at} and pinned there for {@code ticks} (it takes {@link #PINNED_DAMAGE} times the damage), as an impact web does. */
+	static void pinAt(ServerLevel level, LivingEntity target, Vec3 at, int ticks, boolean dark) {
+		if (level.noCollision(target, target.getBoundingBox().move(at.subtract(target.position())))) {
+			target.teleportTo(at.x, at.y, at.z);
+		} else {
+			at = target.position();
+		}
+		bind(level, target, at, ticks, true, dark, true);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.6F);
+	}
+
+	/** Ends the cocoon or pin on {@code target} (the crush of a fist combo throws it free). */
+	static void unbind(LivingEntity target) {
+		BINDS.remove(target.getUUID());
 	}
 
 	/** Spun up where it stands: a layer of web on it ({@link Webbed}), held fast for {@code ticks} or till it's out of the web. */
 	static void cocoon(ServerLevel level, LivingEntity target, int ticks, boolean dark) {
-		bind(level, target, target.position(), ticks, false, dark);
+		bind(level, target, target.position(), ticks, false, dark, false);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
 	}
 
-	private static void bind(ServerLevel level, LivingEntity target, Vec3 at, int ticks, boolean pinned, boolean dark) {
+	private static void bind(ServerLevel level, LivingEntity target, Vec3 at, int ticks, boolean pinned, boolean dark, boolean holdPlayer) {
 		WebTraps.ensnare(level, target, COCOON_SLOWNESS, ticks, dark);
 		target.setDeltaMovement(Vec3.ZERO);
 		target.syncVelocity = true;
@@ -245,7 +265,7 @@ public final class WebStrength {
 		Bind old = BINDS.get(target.getUUID());
 		boolean wasPinned = old != null && old.pinned() && clock < old.until();
 		long until = Math.max(clock + ticks, old == null ? 0L : old.until());
-		BINDS.put(target.getUUID(), new Bind(level.dimension(), target instanceof Player ? null : (wasPinned && !pinned ? old.at() : at), until, pinned || wasPinned));
+		BINDS.put(target.getUUID(), new Bind(level.dimension(), target instanceof Player && !holdPlayer ? null : (wasPinned && !pinned ? old.at() : at), until, pinned || wasPinned));
 		level.sendParticles(dark ? WebSymbiote.dust(1.4F) : ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
 			24, target.getBbWidth() * 0.5, target.getBbHeight() * 0.5, target.getBbWidth() * 0.5, 0.02);
 	}
@@ -313,19 +333,29 @@ public final class WebStrength {
 			return false;
 		}
 		SHOCK_READY.put(player.getUUID(), clock + SHOCK_COOLDOWN);
+		jolt(player, target, SHOCK_DAMAGE, SHOCK_STUN_TICKS, null);
+		return true;
+	}
+
+	/**
+	 * One jolt down the web onto {@code target}: lightning damage, stunned (no walking, weakened) for {@code stun} ticks, sparks
+	 * crawling down the line from {@code from} (the player's hand when null) and bursting on it. Shared by the taser web and
+	 * the shock lines ({@link WebShock}).
+	 */
+	static void jolt(ServerPlayer player, Entity target, float damage, int stun, @org.jspecify.annotations.Nullable Vec3 from) {
 		ServerLevel level = player.level();
 		Holder<net.minecraft.world.damagesource.DamageType> type = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypes.LIGHTNING_BOLT);
-		target.hurtServer(level, new DamageSource(type, player), SHOCK_DAMAGE);
+		target.hurtServer(level, new DamageSource(type, player), damage);
 		if (target instanceof LivingEntity living && living.isAlive()) {
-			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHOCK_STUN_TICKS, COCOON_SLOWNESS));
-			living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SHOCK_STUN_TICKS * 2, 1));
+			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, stun, COCOON_SLOWNESS));
+			living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, stun * 2, 1));
 			if (living instanceof Mob mob) {
 				mob.getNavigation().stop();
 				mob.setTarget(null);
 			}
 		}
 		// sparks crawl down the line
-		Vec3 hand = player.position().add(0.0, player.getBbHeight() * 0.7, 0.0);
+		Vec3 hand = from != null ? from : player.position().add(0.0, player.getBbHeight() * 0.7, 0.0);
 		Vec3 end = target.getBoundingBox().getCenter();
 		for (int i = 1; i <= 8; i++) {
 			Vec3 p = hand.lerp(end, i / 8.0);
@@ -334,7 +364,6 @@ public final class WebStrength {
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, end.x, end.y, end.z, 16, target.getBbWidth() * 0.4, target.getBbHeight() * 0.4, target.getBbWidth() * 0.4, 0.2);
 		level.playSound(null, end.x, end.y, end.z, SoundEvents.BEE_STING, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, end.x, end.y, end.z, SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 1.0F, 1.6F);
-		return true;
 	}
 
 	// ---- webbed fists -----------------------------------------------------------------------------------------------
@@ -371,23 +400,30 @@ public final class WebStrength {
 		player.level().sendParticles(ParticleTypes.ITEM_COBWEB, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.4, 0.3, 0.4, 0.02);
 	}
 
-	/** A punch with webbed fists sticks: slower with each hit, cocooned on the third. */
+	/**
+	 * A punch with webbed fists sticks, and the blows chain ({@link WebFistCombo}): jab, kick, uppercut, twist, crush. Each is
+	 * slower than the last, the third cocoons, and the fifth throws it. A blow comes within {@link #FISTS_SLOW_TICKS} of the last.
+	 */
 	private static void stickyHit(ServerPlayer player, LivingEntity target) {
 		if (!target.isAlive() || !(target.level() instanceof ServerLevel level)) {
 			return;
 		}
 		Stuck old = STUCK.get(target.getUUID());
 		int hits = (old != null && old.by().equals(player.getUUID()) ? old.hits() : 0) + 1;
-		if (hits >= FISTS_COCOON_HIT) {
+		if (hits >= WebFistCombo.BLOWS) {
 			STUCK.remove(target.getUUID());
-			cocoon(level, target, FISTS_COCOON_TICKS, false);
-			return;
+		} else {
+			STUCK.put(target.getUUID(), new Stuck(player.getUUID(), hits, clock + FISTS_SLOW_TICKS));
 		}
-		STUCK.put(target.getUUID(), new Stuck(player.getUUID(), hits, clock + FISTS_SLOW_TICKS));
-		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, FISTS_SLOW_TICKS, hits));
-		level.sendParticles(ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
-			6 * hits, target.getBbWidth() * 0.4, target.getBbHeight() * 0.3, target.getBbWidth() * 0.4, 0.02);
-		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.8F, 0.9F + 0.2F * hits);
+		if (hits == FISTS_COCOON_HIT) {
+			cocoon(level, target, FISTS_COCOON_TICKS, false);
+		} else if (hits < WebFistCombo.BLOWS) {
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, FISTS_SLOW_TICKS, hits));
+			level.sendParticles(ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
+				6 * hits, target.getBbWidth() * 0.4, target.getBbHeight() * 0.3, target.getBbWidth() * 0.4, 0.02);
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.8F, 0.9F + 0.2F * hits);
+		}
+		WebFistCombo.blow(level, player, target, hits);
 	}
 
 	// ---- web shot stacks --------------------------------------------------------------------------------------------

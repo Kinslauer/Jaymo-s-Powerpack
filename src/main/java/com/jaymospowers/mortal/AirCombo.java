@@ -7,6 +7,7 @@ import com.jaymospowers.power.darktide.DarktidePower;
 import com.jaymospowers.power.gravity.GravityPower;
 import com.jaymospowers.power.smoke.SmokePower;
 import com.jaymospowers.power.web.WebPower;
+import com.jaymospowers.power.web.WebUptilt;
 import com.jaymospowers.power.wind.WindPower;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.zfighter.ZFighterPower;
@@ -36,7 +37,8 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li><b>Launcher:</b> sneaking, on the ground, a blow at something on the ground throws it {@link #LAUNCH} up and you
  * after it ({@link #LAUNCH_WAIT} ticks between launches). Nothing too big ({@link #BIGGEST} blocks tall) or that
- * cannot be shoved. Learned in Jaymo's Kingdoms' skill tree (Might's Air Combo, {@link com.jaymospowers.core.TreeLocks#AIR_COMBO});
+ * cannot be shoved. Learned in Jaymo's Kingdoms' skill tree (Might's Air Combo, {@link com.jaymospowers.core.TreeLocks#AIR_COMBO}),
+ * or by a web slinger with the Agility {@link WebUptilt#AGILITY_POINTS} asks;
  * the juggle and slam only follow a launch.</li>
  * <li><b>Juggle:</b> each further blow on it before it lands bumps it back up, up to {@link #JUGGLES} times, and holds
  * you up with it.</li>
@@ -79,6 +81,12 @@ public final class AirCombo {
 		});
 	}
 
+	/** Whether {@code target} is in the air after a launch by {@code by} that is still going (a web slinger can zip onto it, {@code WebSurf}). */
+	public static boolean launchedBy(LivingEntity target, Player by) {
+		Up up = UP.get(target);
+		return up != null && up.by().equals(by.getUUID()) && !target.onGround() && target.isAlive();
+	}
+
 	/** Whether {@code player}'s power lets them fight in the air. */
 	public static boolean can(Player player) {
 		Power power = Powers.of(player);
@@ -99,15 +107,18 @@ public final class AirCombo {
 				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.3F, 0.5F);
 			} else if (up.juggles() < JUGGLES) {
 				UP.put(target, new Up(up.by(), now + AIRBORNE, up.juggles() + 1));
-				fling(target, new Vec3(0.0, BUMP, 0.0));
-				fling(player, new Vec3(player.getDeltaMovement().x, HOVER, player.getDeltaMovement().z));
+				// a web slinger's blow uses the webs where there is something to stick to, and throws it higher
+				if (!WebUptilt.juggle(level, player, target, up.juggles() + 1)) {
+					fling(target, new Vec3(0.0, BUMP, 0.0));
+					fling(player, new Vec3(player.getDeltaMovement().x, HOVER, player.getDeltaMovement().z));
+				}
 				player.resetFallDistance();
 			}
 			return;
 		}
 		if (player.isShiftKeyDown() && player.onGround() && target.onGround() && can(player) && now >= READY.getOrDefault(player.getUUID(), 0L)
 			&& target.getBbHeight() <= BIGGEST && target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) < 1.0
-			&& com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.AIR_COMBO)) {
+			&& (WebUptilt.unlocked(player) || com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.AIR_COMBO))) {
 			READY.put(player.getUUID(), now + LAUNCH_WAIT);
 			UP.put(target, new Up(player.getUUID(), now + AIRBORNE, 0));
 			fling(target, new Vec3(0.0, LAUNCH, 0.0));

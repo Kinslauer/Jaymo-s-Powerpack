@@ -2969,3 +2969,26 @@ The Dragon Waterskin survives fire and lava when dropped, as netherite does. An 
 - **Looking after a crop helps it stand the wrong weather**: watered farmland and fertile or rich farmland let a crop stand a wider range of warmth. Under a greenhouse roof, or in a room a hearth warms or an icebox cools, the warmth is drawn toward what the crop likes; any solid roof helps a little. No crop is left unable to grow in the temperate starting lands.
 - Built with Gradle; not played.
 - Built (all three mods build); not played. Mixins checked against the 26.3 sources only.
+
+## 0.7.4 (2026-11-26): Cut parts off a body with a blade or an axe (#2215)
+
+Andy: "there should be a way to dismember them from the inventory screen so you can take the limb if it doesnt drop", then "it needs a blade, or an axe to butcher the same way we do animals, but only for gear not meat". A person's body (or one built like a person) can have its head, arms and legs cut off: hold use on it with a blade or an axe, and a bar fills the way a big carcass is cut up; the part comes off (a severed part with Jaymo's Powers) with whatever was worn on it. No meat comes of it.
+- The loot screen has a cut-off button above the hands: pick a part there, and the next cut takes it off. With nothing picked, a blade or axe held on the body cuts off a part with gear bolted to it, and otherwise does what it always did.
+- Gear bolted onto a body (Jaymo's Powers says which: the Rig on the future's troopers and androids) can't be taken from its slot. Its slot is washed red, its tooltip says which part it comes off with, and a click on it picks that part. A piece bolted to the torso never comes off.
+- A machine's body wearing bolted gear (an android in its Rig plate) opens the loot screen on a tap too, instead of coming apart when searched.
+- `CorpseEntity#setAttachedGear` (a reflection hook, plain types), `attachedParts`, `canCutOff`, `pickCut`, `cutApart`; parts lost any way drop their bolted gear with them. `CorpseLootMenu` buttons (`CUT`, `CUT_GEAR`), `CorpseLootScreen` button and part list, lang part `corpse_cut_off.json`.
+- Built; not played. Player bodies can't be cut apart this way.
+
+## 0.7.5 (2026-11-27): tiny bodies picked up like items (#2266)
+
+- Andy (clip of a dead fly with a lift prompt): "Things this small should be picked up as items, there shouldnt be a lift prompt for something so light you could grab in hand like any other item".
+- A fish, or any body under half a block both ways (a fly, a cricket, a mouse, a mole, a maggot, a chick), goes straight into your pack on a click of an empty hand, sneaking or not, tapped or held: no drag, no lift, no bar. Caught as it falls, it's pocketed too. Arrows still in it come out first, one a click.
+- What you get: a fish or critter with something in it gives that (a cod gives its raw cod); an animal's carcass, or a body with nothing in it, goes in whole as its Corpse item ("Fly Corpse"), to put down again, crack open with a rock, roast or butcher. A full pack drops it at your feet.
+- Rabbits, frogs, chickens and snakes are still taken up by the neck; players', machines', zombies' and skeletons' bodies never count.
+- `CorpseEntity.handSized` / `pickUp`; shared to Powers' hints as `jaymoskitchen:corpse_hand_sized` (`Corpses.SHARE_HAND_SIZED`).
+- Built; not played.
+
+## 0.7.6 (2026-11-27): Stations say what's missing (#2269)
+
+- An empty cutting board says to lay food on it and cut with a knife; the mincer says it takes raw meat.
+- Built (compileJava); not played.

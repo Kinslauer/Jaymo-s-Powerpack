@@ -19,6 +19,7 @@ looked up at run time, old dust if Powers is missing). Textures: `tools/gen_magi
 | Pool | `MagicFx.pool(level, at, radius, color, ticks)` | A flat sheet with a lapping rim, turning slowly, pale ripples running out over it | Power lying on the ground: water, shadow, a slick, a mirror |
 | Bolt | `MagicFx.bolt(level, from, to, width, color, ticks)` | A jagged lightning channel with forks running off it, white-hot core in a glow; flashes wide as it strikes, jumps to a new path every 2 ticks, flickers out | Lightning, arcs, anything that jumps between two points (a beam is steady power, a bolt jumps) |
 | Scorch | `MagicFx.scorch(level, at, normal, radius, color, cool, ticks)` | Our ragged burn mark lying on the face `normal` points out of, glowing `color` at first and cooling to `cool`, then fading | What power leaves on a surface: a lightning burn (glow to char), a frost burn (white to rime), a seared mark |
+| Spectacle | `MagicFx.spectacle(level, at, id, scale, color, ticks)` | A client-side Effekseer effect from `assets/jaymospowers/effeks/<id>.efkefc`, with an existing shape as fallback | Ultimates and big power moves only |
 | Mote | `MagicFx.mote(color, size)` (a particle) | A four-point glint, full bright | Loose power in the air; where a redstone dust was |
 | Miasma | `MagicFx.miasma(color, size)` (a particle) | A soft puff lit by the world | Dark or heavy power, gas, smoke, blight |
 | Spark | `MagicFx.spark(color, size)` (a particle) | A short jagged fork that jumps shape every tick, full bright | Lightning, crackle, charge, static |
@@ -40,6 +41,8 @@ looked up at run time, old dust if Powers is missing). Textures: `tools/gen_magi
   `level.addParticle(MagicFx.wisp(...), ...)`.
 - Sizes of motes and miasma are on redstone dust's scale, so old numbers carried over.
 - Dark colours draw as murk in every type: no white core, a deeper heart.
+
+Spectacles use the author's colors. The RGB argument colors the fallback because the vendored JNI bindings do not expose emitter tint. OpenGL clients can draw the HD effect. Vulkan clients and clients missing a native or asset draw the fallback. Credits and the ultimate mapping are in [Pack credits for ultimate effects](../src/main/resources/licenses/effekseer/CREDITS.md).
 
 ## Rules for new effects
 

@@ -224,6 +224,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// blasts that undercut a building bring down what's over the hole (chests ride down whole)
 		Collapse.register();
 		LooseWood.register();
+		// a wood's sticks, saplings and apples nobody threw go after a minute (a burning wood drops hundreds)
+		Windfall.register();
 		// 0.7.588: mob griefing always on (Andy)
 		PackRules.register();
 		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
@@ -282,6 +284,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		ClericHeals.register();
 		SmithMending.register();
 		GuardMeals.register();
+		HandedFood.register();
 		GuardKicks.register();
 		AlarmBells.register();
 		com.jaymoskingdoms.deep.Deeps.register();
@@ -316,6 +319,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("dealings attachment: {}", Dealings.DEALINGS);
 		Strays.register();
 		BloodChores.register();
+		// a town's sexton: the lych lantern, the dead and what's left lying, the golems, blood and grime (Sextons)
+		Sextons.register();
+		ToolGrades.register();
+		SteelRealms.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
@@ -401,6 +408,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		GradedTrades.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground
 		Rearm.register();
+		// ranged NPCs' sidearms, and what they carry shown on their bodies
+		Sidearms.register();
+		// NPCs' pockets: a search screen on the downed, dropped when they die
+		NpcPockets.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
 		Casting.register();
@@ -427,6 +438,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
+		// a villager who cried out tells you why if you ask, or brings it up first
+		Outcry.register();
 		NightTrouble.register();
 		NightBurglars.register();
 		SignalBrazier.register();
@@ -436,7 +449,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		VigilanteTrials.register();
 		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
+		GuardCries.register();
 		TownCrier.register();
+		BuildNews.register();
 		CrierGrudges.register();
 		// 0.7.211: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)
 		LOGGER.debug("underworld attachments: {} {} {} {} {}", Underworld.DENS, Underworld.FOUND, Busts.OFFENCES, Busts.CHARGES, Busts.JAILED);
@@ -695,6 +710,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Lamplight.register();
 		// NPCs need light to see by: they fetch a torch or lantern for the dark, and the night watch always carries one
 		NightLights.register();
+		// guards grow suspicious of a player they half make out or hear, and go to look (lit up in the dark)
+		GuardWatch.register();
 		// medieval picks: lamps gutter in abandoned places, and the court wizards' everburning mote lantern
 		GutteringLamps.register();
 		MoteLanterns.register();

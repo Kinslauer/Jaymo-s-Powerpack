@@ -83,6 +83,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		AfkCinematicFishing.init();
 		com.jaymospowers.client.bits.Mentions.init();
 		com.jaymospowers.client.bits.ItemShareClient.init();
+		com.jaymospowers.client.bits.PullApartClient.init();
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
@@ -186,6 +187,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.armory.FangGauntletsClient.init();
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
+		// a new install starts with low-end mode on and the vanilla texture look; registered first, so it runs before
+		// the pack's resource packs are switched on and before low-end mode's own first-launch check
+		NewPlayerDefaults.init();
 		// once per install: switch on the pack's resource packs (medieval MCA villagers, Fresh Animations' player) the
 		// CurseForge import downloaded
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(PackResourcePacks::enableOnce);
@@ -363,6 +367,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.fishing.FishingRealClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
 		com.jaymospowers.client.freerun.FreerunClient.init();
+		com.jaymospowers.client.freerun.CoreMotionClient.init();
+		com.jaymospowers.client.combat.KatanaFormsClient.init();
 		com.jaymospowers.client.freerun.moves.RunMovesClient.init();
 		com.jaymospowers.client.freerun.CameraFollow.init();
 		// (0.19.24) campfire embers and hot spring steam

@@ -16,7 +16,8 @@ import org.jspecify.annotations.Nullable;
  * itself loose: first a hop toward its next step (a slab, a carpet, a fence post's corner), then a step back to the
  * middle of its block and a fresh path, and at last the walk is dropped so its AI picks something else. Our own folk,
  * out of a fight, turn up where they were going in a puff instead, as builders always have. One swimming against a bank
- * its path climbs is heaved up onto it ({@link #WADE_HEAVE}).
+ * its path climbs is heaved up onto it ({@link #WADE_HEAVE}). A villager or one of our folk whose fresh path still can't
+ * get there brushes aside the wild leaves and cobwebs where it gives out ({@link Overgrowth#pushThrough}).
  *
  * <p>Vanilla's own check can't see this: it resets every time a goal asks for the path again, and chasing or
  * wandering goals ask every few ticks, so a mob snagged on a corner stays snagged.
@@ -89,7 +90,13 @@ public final class Unstick {
 				push(mob, Vec3.atBottomCenterOf(mob.blockPosition()).subtract(here), CENTRE_PUSH, false);
 			}
 			nav.stop();
-			nav.moveTo(nav.createPath(target, reach), speed);
+			Path fresh = nav.createPath(target, reach);
+			// (a villager or one of our folk with no way through wild leaves or cobwebs brushes them aside: Overgrowth)
+			if ((fresh == null || !fresh.canReach()) && (mob instanceof Villager || mob instanceof Folk)
+				&& Overgrowth.pushThrough(level, mob, fresh)) {
+				fresh = nav.createPath(target, reach);
+			}
+			nav.moveTo(fresh, speed);
 			return;
 		}
 		if (s.still >= GIVE_UP_TICKS && !(mob instanceof Folk)) {
@@ -300,6 +307,10 @@ public final class Unstick {
 				door.setOpen(v, level, state, p.immutable(), true);
 				why += ", opened a door";
 			}
+		}
+		// (wild leaves or cobwebs round it, grown into a house or an alley: brushed aside, Overgrowth)
+		if (Overgrowth.brushAround(level, at)) {
+			why += ", pushed through the overgrowth";
 		}
 		// (boxed in, as ShutIn reckons it: no way even to the open ground nearby; out there in a puff, and on from there)
 		Path out = open == null ? null : v.getNavigation().createPath(open, 1);

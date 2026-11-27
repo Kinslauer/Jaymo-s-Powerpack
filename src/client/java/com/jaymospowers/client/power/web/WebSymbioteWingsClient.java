@@ -23,6 +23,9 @@ final class WebSymbioteWingsClient {
 	/** Flared (Sneak or Back): the horizontal speed kept each tick, and the sink the wings catch it to. */
 	static final double FLARE_DRAG = 0.9, FLARE_SINK = 0.12;
 
+	/** Wind lanes found in the terrain, for the glide ({@link WebWindLanes}). */
+	private static final WebWindLanes LANES = new WebWindLanes();
+
 	private static int used;
 	private static int rechargeIn;
 	private static boolean jumpHeld;
@@ -41,6 +44,7 @@ final class WebSymbioteWingsClient {
 	}
 
 	static void reset() {
+		LANES.reset();
 		used = 0;
 		rechargeIn = 0;
 		jumpHeld = false;
@@ -96,9 +100,13 @@ final class WebSymbioteWingsClient {
 				m = m.add((look.x / lookHorizontal * moveHorizontal - m.x) * 0.1, 0.0, (look.z / lookHorizontal * moveHorizontal - m.z) * 0.1);
 			}
 			m = m.multiply(0.99, 0.98, 0.99);
+			// a wind lane between the buildings or over a cliff pushes the glide along it (WebWindLanes)
+			m = LANES.boost(player, m);
 		}
-		if (m.length() > MAX_SPEED) {
-			m = m.normalize().scale(MAX_SPEED);
+		LANES.tick(player);
+		double topSpeed = MAX_SPEED + LANES.extra();
+		if (m.length() > topSpeed) {
+			m = m.normalize().scale(topSpeed);
 		}
 		player.setDeltaMovement(m);
 		if (player.tickCount % 4 == 0) {

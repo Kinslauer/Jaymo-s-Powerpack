@@ -393,7 +393,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	/** A builder's tool, or a farmer's, miner's or woodcutter's (back in hand when he isn't carrying). */
 	@Override
 	public ItemStack tool() {
-		return Worker.toolFor(this.role(), this.style() == FactionType.BARBARIAN);
+		return Worker.toolFor(this.role(), this.style() == FactionType.BARBARIAN, ToolGrades.of(this, this.factionId()));
 	}
 
 	/** What it's carrying (the load in its hands, not a copy), or empty. */

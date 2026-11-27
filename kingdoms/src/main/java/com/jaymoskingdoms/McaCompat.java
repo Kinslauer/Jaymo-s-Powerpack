@@ -169,6 +169,12 @@ public final class McaCompat {
 		return LOADED ? McaBridge.spawnZombie(level, at) : null;
 	}
 
+	/** An MCA villager whose job trades (not a guard's, an outlaw's, a worker's, a nitwit's or no job), so sneak + right click trades. */
+	static boolean trades(net.minecraft.world.entity.Entity entity) {
+		return isMca(entity) && entity instanceof Villager v && !v.getVillagerData().profession().is(net.minecraft.world.entity.npc.villager.VillagerProfession.NITWIT)
+			&& !v.getVillagerData().profession().is(net.minecraft.world.entity.npc.villager.VillagerProfession.NONE) && !McaBridge.cannotTrade(v);
+	}
+
 	/** (0.5.29) An MCA villager (their own menu has the Quests button). */
 	static boolean isMca(net.minecraft.world.entity.Entity entity) {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
@@ -755,6 +761,11 @@ public final class McaCompat {
 	/** (0.7.380, from MCA's dialogue) Its menu opening on {@code villager}: what just passed between you, instead of MCA's own; true if so. */
 	public static boolean dealingOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.dealingOpening(villager, player);
+	}
+
+	/** (From MCA's dialogue) Its menu opening on one still shaken from crying out ({@link Outcry}): they bring it up first; true if so. */
+	public static boolean outcryOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.outcryOpening(villager, player);
 	}
 
 	/** (0.7.397, from MCA's dialogue) Its menu opening on an outlaw ({@link Outlaws}): a curt word, never a stranger's welcome; true if so. */

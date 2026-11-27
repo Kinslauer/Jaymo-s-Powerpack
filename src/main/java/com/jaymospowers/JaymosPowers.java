@@ -102,6 +102,7 @@ public class JaymosPowers implements ModInitializer {
 		// (0.21.22, Rivals patch 8) the hit streak's quick kill, and vaulting a shield
 		com.jaymospowers.combat.HitStreak.init();
 		com.jaymospowers.combat.ShieldVault.init();
+		com.jaymospowers.combat.KatanaForms.init();
 		// boxing: fist gear, the three styles and their punches
 		com.jaymospowers.boxing.Boxing.init();
 		// (0.21.23, Rivals patch 9) Chrono's and Web's takedowns
@@ -204,6 +205,7 @@ public class JaymosPowers implements ModInitializer {
 		// fighting without a power: anyone's four moves, falling attacks, air combos, the chain axe; and the hidden fight meter
 		com.jaymospowers.mortal.Mortal.init();
 		com.jaymospowers.core.Brink.init();
+		com.jaymospowers.core.StationHints.init();
 		// (0.21.29) GregTech's hand route: hammer raw ore into crushed ore, wash it in a cauldron or running water
 		com.jaymospowers.tinkering.ore.OreWashing.init();
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
@@ -333,6 +335,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.HudBar.register();
 		// Shift+T shares the hovered item in chat; soul fire burns blue (bits.SoulBurn)
 		com.jaymospowers.bits.ItemShare.register();
+		// Ctrl + right-click pulls wool, cobblestone, leather... apart into their parts
+		com.jaymospowers.bits.PullApart.register();
 		// ground that powers tear out comes back (terrain return)
 		com.jaymospowers.core.TerrainReturn.init();
 		// umbrellas, parasols and the umbrella stand
@@ -353,9 +357,9 @@ public class JaymosPowers implements ModInitializer {
 			"power.arsenal.ArsenalArmory", "power.arsenal.GlassGauntlet", "power.arsenal.ArsenalAnywhere", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.ArsenalEmber", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons", "power.arsenal.ArsenalWing", "power.arsenal.ArsenalWingMoves", "power.arsenal.ArsenalGift", "power.arsenal.ArsenalStorm", "power.arsenal.ArsenalRide", "power.arsenal.ArsenalChains", "power.arsenal.ArsenalPlaces", "power.arsenal.ArsenalStanding",
-			"power.chrono.ChronoEchoes", "power.chrono.ChronoDirectives", "power.chrono.ChronoSpeed", "power.chrono.ChronoGears", "power.chrono.ChronoPhase", "power.chrono.ChronoSlowTime", "power.chrono.ChronoMeters", "power.chrono.ChronoMomentum", "power.chrono.ChronoTunnel", "power.chrono.SpeedPrism","power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.chrono.ChronoWindDay", "power.chrono.future.Future", "power.chrono.future.FutureGuns", "power.chrono.future.FutureRuins", "power.chrono.future.FutureOmenPilots", "power.chrono.ChronoRoad", "core.PowerRoads", "power.wind.WindKick",
+			"power.chrono.ChronoEchoes", "power.chrono.ChronoDirectives", "power.chrono.ChronoSpeed", "power.chrono.ChronoGears", "power.chrono.ChronoPhase", "power.chrono.ChronoSlowTime", "power.chrono.ChronoSkip", "power.chrono.ChronoMeters", "power.chrono.ChronoMomentum", "power.chrono.ChronoTunnel", "power.chrono.SpeedPrism","power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.chrono.ChronoWindDay", "power.chrono.future.Future", "power.chrono.future.FutureGuns", "power.chrono.future.FutureRuins", "power.chrono.future.FutureOmenPilots", "power.chrono.ChronoRoad", "core.PowerRoads", "power.wind.WindKick",
 			"power.gravity.GravityPower", "power.gravity.GravityRocks", "power.gravity.GravityRockOrders", "power.gravity.GravityForward", "power.gravity.GravityWalk", "power.gravity.GravityOverturn",
-			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebMorph", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBrute", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebSymbioteBond", "power.web.WebSymbioteCushion", "power.web.WebSymbioteMend", "power.web.WebTendrils", "power.web.WebHeldGrab", "power.web.WebFury", "power.web.WebLatch", "power.web.WebPuddle", "power.web.WebExecutions",
+			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebMorph", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBrute", "power.web.WebBridges", "power.web.WebLineRide", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebSymbioteBond", "power.web.WebSymbioteCushion", "power.web.WebSymbioteMend", "power.web.WebTendrils", "power.web.WebHeldGrab", "power.web.WebFury", "power.web.WebLatch", "power.web.WebPuddle", "power.web.WebExecutions",
 			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength", "power.web.WebDarkSense", "power.web.WebShield", "power.web.WebShooters", "power.web.WebSymbioteStrains", "power.web.WebSymbioteCollect", "power.web.WebSymbioteBody",
 			"power.web.WebSymbioteMind", "power.web.WebSymbioteMemory", "power.web.WebStamina", "power.web.WebSymbioteSettings", "power.web.WebSkim", "power.web.WebSymbioteWings", "power.web.WebSymbioteSteed", "power.web.WebSymbioteArm", "power.web.WebSymbioteMolt", "power.web.WebSymbioteBloom",
 			"power.web.WebGrudges", "power.web.WebMeeting", "power.web.Webbed",
@@ -383,7 +387,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.ember.BurningSteed", "power.heritage.HeritageMoves",
 			"elemental.ElementalCorruption", "power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.NpcClimb", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.WornTotems", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.BodyWeapons", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.CoreMotion", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.NpcClimb", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "combat.KatanaForms", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.WornTotems", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.BodyWeapons", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
 			"water.Dives", "core.MagicMoves", "core.DreamCall", "core.RetiredPowers", "core.trials.PowerTrials", "bonebond.Boneiron",
 			"bits.SoulBurn", "alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.MettleDraught", "alchemy.picks.SizeDraughts", "alchemy.picks.Pacts",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",

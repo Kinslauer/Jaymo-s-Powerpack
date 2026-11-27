@@ -3,12 +3,14 @@ package com.jaymoskingdoms;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
@@ -18,6 +20,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Old structures the world generated (village houses, ATi's ruins and keeps, temples...) as ground a faction's builders
@@ -117,6 +120,62 @@ final class Ruins {
 		}
 		return level.getPoiManager().getType(at).isEmpty()
 			|| level.getPoiManager().getInSquare(type -> true, at, 0, PoiManager.Occupancy.IS_OCCUPIED).noneMatch(r -> r.getPos().equals(at));
+	}
+
+	/** How far past a building's footprint an old structure it stands on may reach and still come down whole (blocks). */
+	static final int WRECK_REACH = 12;
+
+	/**
+	 * The columns round a footprint ({@code x0..x1}, {@code z0..z1}) over old structures where the rest of those
+	 * structures comes down too, so a new building never stands half inside a torn-open ruin: every column of every piece
+	 * whose box reaches into the footprint between {@code y0} and {@code y1}, but the footprint's own and those inside
+	 * {@code keep} (other buildings, plots: {minX, minZ, maxX, maxZ}), at {@code y0}. Null if a piece reaches more than
+	 * {@link #WRECK_REACH} past the footprint (too big to pull down: the site isn't taken).
+	 */
+	static @Nullable List<BlockPos> wreck(ServerLevel level, int x0, int z0, int x1, int z1, int y0, int y1, List<int[]> keep) {
+		LinkedHashSet<Long> seen = new LinkedHashSet<>();
+		List<BoundingBox> touching = new ArrayList<>();
+		for (int cx = x0 >> 4; cx <= x1 >> 4; cx++) {
+			for (int cz = z0 >> 4; cz <= z1 >> 4; cz++) {
+				for (BoundingBox box : pieces(level, cx, cz)) {
+					if (box.maxX() < x0 || box.minX() > x1 || box.maxZ() < z0 || box.minZ() > z1 || box.maxY() < y0 || box.minY() > y1
+						|| touching.contains(box)) {
+						continue;
+					}
+					if (box.minX() < x0 - WRECK_REACH || box.maxX() > x1 + WRECK_REACH || box.minZ() < z0 - WRECK_REACH || box.maxZ() > z1 + WRECK_REACH) {
+						return null;
+					}
+					touching.add(box);
+				}
+			}
+		}
+		List<BlockPos> out = new ArrayList<>();
+		for (BoundingBox box : touching) {
+			for (int x = box.minX(); x <= box.maxX(); x++) {
+				columns:
+				for (int z = box.minZ(); z <= box.maxZ(); z++) {
+					if (x >= x0 && x <= x1 && z >= z0 && z <= z1 || !seen.add(ChunkPos.pack(x, z))) {
+						continue;
+					}
+					for (int[] k : keep) {
+						if (x >= k[0] && x <= k[2] && z >= k[1] && z <= k[3]) {
+							continue columns;
+						}
+					}
+					out.add(new BlockPos(x, y0, z));
+				}
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * What comes down of an old structure round a new building ({@link #wreck}): its own made blocks (not the land's
+	 * soil and stone, its paths, trees or plants, nor water), where they may be torn out at all ({@link #tearable}).
+	 */
+	static boolean wreckable(ServerLevel level, BlockPos at, BlockState state) {
+		return !state.isAir() && !state.canBeReplaced() && state.getFluidState().isEmpty() && !Storehouse.ground(state) && !state.is(Blocks.DIRT_PATH)
+			&& !state.is(BlockTags.LOGS) && !state.is(BlockTags.LEAVES) && tearable(level, at, state);
 	}
 
 	/**

@@ -224,7 +224,7 @@ public final class WebAscension {
 			return true;
 		}
 		live.dodgeReadyAt[charge] = now + DODGE_COOLDOWN;
-		WebCounter.opened(player, attacker);
+		WebCounter.opened(player, attacker, source.getDirectEntity());
 		// out of the way, square to where it came from, with one of four moves
 		Entity from = source.getDirectEntity() != null ? source.getDirectEntity() : attacker;
 		Vec3 away = player.position().subtract(from.position());

@@ -71,7 +71,7 @@ final class WebParkourClient {
 			lastKick = null;
 		}
 		boolean free = player.isAlive() && !player.isSpectator() && !player.isPassenger() && !player.getAbilities().flying && !player.isFallFlying()
-			&& !player.isInWater() && !player.isInLava() && !player.onClimbable() && !swing.attached() && swing.pull == null && swing.wingsTicks == 0
+			&& !player.isInWater() && !player.isInLava() && !player.onClimbable() && !swing.attached() && swing.pull == null && swing.wingsTicks == 0 && !swing.lineRide.active()
 			&& !wallRun.running() && !WebSymbioteClient.driving() && !WebPower.ragdolled(player)
 			&& !WebSymbiote.crawlTendrils(player)
 			// (0.14.3) nor while freerunning on a wall or a bar (Freerun)
@@ -170,6 +170,15 @@ final class WebParkourClient {
 		if (jumpPressed) {
 			tryWallJump(player, input, face);
 			return;
+		}
+		// climbing the wall with use held and an open ledge up it: leap for it and pull over (WebEdgeHint)
+		if (input.forward()) {
+			WebEdgeHint.glint(player, face);
+			if (WebEdgeHint.leap(player, face)) {
+				lastKick = face;
+				stop();
+				return;
+			}
 		}
 		// shimmy along the wall with A/D; after the hold you start to slip
 		Direction left = face.getCounterClockWise();

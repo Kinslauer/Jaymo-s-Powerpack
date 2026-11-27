@@ -1,0 +1,14 @@
+{
+  "buildnews.jaymoskingdoms.fresh.0": "They've only just finished the %1$s. Still smells of sawdust.",
+  "buildnews.jaymoskingdoms.fresh.1": "Look at that, the %1$s is done at last!",
+  "buildnews.jaymoskingdoms.fresh.2": "The builders finished that %1$s %2$s. About time.",
+  "buildnews.jaymoskingdoms.walk.0": "That's our new %1$s. Went up %2$s.",
+  "buildnews.jaymoskingdoms.walk.1": "Like the new %1$s? Finished %2$s.",
+  "buildnews.jaymoskingdoms.walk.2": "The %1$s there is new. Done %2$s, it was.",
+  "buildnews.jaymoskingdoms.child.0": "That's new! The %1$s! I watched them build it!",
+  "buildnews.jaymoskingdoms.child.1": "Did you see? They built a %1$s!",
+  "buildnews.jaymoskingdoms.child.2": "The %1$s is new. I'm not allowed in yet.",
+  "buildnews.jaymoskingdoms.when.today": "today",
+  "buildnews.jaymoskingdoms.when.yesterday": "yesterday",
+  "buildnews.jaymoskingdoms.when.days": "a few days back"
+}

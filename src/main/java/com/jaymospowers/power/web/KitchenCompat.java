@@ -847,6 +847,15 @@ public final class KitchenCompat {
 			// an older Kitchen whose dead stay in one piece
 		}
 		try {
+			// Andy: "they dont drop because they are attached to the user. they must be ripped off like other limbs": the Rig
+			// bolted onto a trooper or an android stays on its body, and comes away only with the part under it
+			java.util.function.BiFunction<net.minecraft.world.entity.EntityType<?>, net.minecraft.world.item.ItemStack, Integer> bolted =
+				(type, stack) -> com.jaymospowers.rig.Rig.boltedOn(type, stack);
+			Class.forName("com.jaymoskitchen.corpse.CorpseEntity").getMethod("setAttachedGear", java.util.function.BiFunction.class).invoke(null, bolted);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen: a body's gear all comes off it
+		}
+		try {
 			// (0.15.128) a body blown apart by a blast (Kitchen 0.5.21 throws its chunks): its blood bursts
 			java.util.function.BiConsumer<Entity, java.util.Map.Entry<net.minecraft.world.damagesource.DamageSource, Float>> burst =
 				(body, blast) -> {

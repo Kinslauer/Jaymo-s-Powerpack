@@ -113,6 +113,20 @@ public final class LowEndMode {
 		return Command.SINGLE_SUCCESS;
 	}
 
+	/** True when this install has never launched with the pack: no low-end file yet ({@link NewPlayerDefaults}). */
+	static boolean newInstall() {
+		return !Files.exists(path());
+	}
+
+	/** Switches low-end mode on for a new install ({@link NewPlayerDefaults}); /lowend off puts its starting settings back. */
+	static void switchOnForNewPlayer(Minecraft client) {
+		Properties state = load();
+		if (!Boolean.parseBoolean(state.getProperty("on", "false"))) {
+			switchOn(client, state);
+			save(state);
+		}
+	}
+
 	private static void checkOnce(Minecraft client) {
 		Properties state = load();
 		on = Boolean.parseBoolean(state.getProperty("on", "false"));

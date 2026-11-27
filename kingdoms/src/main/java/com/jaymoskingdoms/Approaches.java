@@ -1352,11 +1352,11 @@ public final class Approaches {
 			case HUNGRY -> {
 				ItemStack food = food(player);
 				if (option == 0 && !food.isEmpty()) {
+					// (Andy, 2026-11-26: "they should [eat] after receiving your items") they eat it there and then
+					HandedFood.eat(a.mob, food);
 					food.shrink(1);
 					McaCompat.hearts(a.mob, player, FED_HEARTS);
 					Reputation.change(player, f, FED_REP);
-					a.mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-					level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
 					reply(level, a, k + "fed", Speech.GOLD);
 				} else {
 					reply(level, a, k + "refused", Speech.WHITE);

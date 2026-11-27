@@ -491,11 +491,14 @@ public final class Bearers {
 		return level.getEntitiesOfClass(Mob.class, box, m -> m.isAlive() && (m instanceof Enemy || m.getTarget() != null && m.getTarget().isAlive())).isEmpty();
 	}
 
-	/** The nearest of {@code f}'s people to {@code corpse} free to carry it: a grown villager, a working folk, a guard with nothing to fight. */
+	/**
+	 * The nearest of {@code f}'s people to {@code corpse} free to carry it: a grown villager, a working folk, a guard with
+	 * nothing to fight. A free sexton ({@link Sextons}) is sent before anyone else, so the rest needn't leave their work.
+	 */
 	private static @Nullable PathfinderMob freeBearer(ServerLevel level, Faction f, Entity corpse) {
 		AABB box = corpse.getBoundingBox().inflate(BEARER_REACH, 12.0, BEARER_REACH);
-		PathfinderMob best = null;
-		double bestD = Double.MAX_VALUE;
+		PathfinderMob best = null, sexton = null;
+		double bestD = Double.MAX_VALUE, sextonD = Double.MAX_VALUE;
 		for (Villager v : level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && !v.isBaby() && !v.isSleeping())) {
 			if (!freeVillager(v)) {
 				continue;
@@ -505,10 +508,17 @@ public final class Bearers {
 				continue;
 			}
 			double d = v.distanceToSqr(corpse);
+			if (Sextons.is(v) && d < sextonD) {
+				sextonD = d;
+				sexton = v;
+			}
 			if (d < bestD) {
 				bestD = d;
 				best = v;
 			}
+		}
+		if (sexton != null) {
+			return sexton;
 		}
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, box, x -> x.isAlive() && x.factionId() == f.id() && !x.isSleeping() && !x.isBaby())) {
 			int role = folk.role();
@@ -528,7 +538,17 @@ public final class Bearers {
 	/** A villager with nothing else on: not panicking, not talking to a player, not in a quarrel, a riot or a theft of its own. */
 	static boolean freeVillager(Villager v) {
 		return v.getTarget() == null && !McaCompat.panicking(v) && !McaCompat.busy(v) && !Neighbours.meeting(v) && !Theft.rioting(v)
-			&& !busy(v) && !Looters.busy(v) && !Undertakers.busy(v);
+			&& !busy(v) && !Looters.busy(v) && !Undertakers.busy(v) && !Sextons.busy(v);
+	}
+
+	/** The headstone of {@code realm}'s first grave (where its burying ground began), or null if it has buried nobody yet. */
+	static @Nullable BlockPos firstGrave(ServerLevel level, int realm) {
+		for (Grave g : level.getAttachedOrElse(GRAVES, List.of())) {
+			if (g.realm() == realm) {
+				return g.headPos();
+			}
+		}
+		return null;
 	}
 
 	// ---- carrying them off ----------------------------------------------------------------------------------------------

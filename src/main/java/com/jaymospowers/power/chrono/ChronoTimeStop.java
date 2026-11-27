@@ -156,6 +156,8 @@ public final class ChronoTimeStop {
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.4F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 0.6F);
+		MagicFx.spectacle(level, player.position().add(0.0, 0.12, 0.0), "andrewfm01/magic_circle", 1.7F, ChronoSlowTime.GOLD, 36,
+			MagicFx.SIGIL, Vec3.ZERO, 3.0F);
 		// these hang in the air for the whole stop (the clients' particles are frozen too)
 		ChronoFx.particles(level, player, MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 60, 1.5, 1.0, 1.5, 0.3);
 		return true;

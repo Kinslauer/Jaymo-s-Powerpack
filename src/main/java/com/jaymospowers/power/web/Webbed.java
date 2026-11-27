@@ -79,6 +79,13 @@ public final class Webbed {
 	public static final int STRUGGLE_FORGET = 40;
 	/** A friend cutting someone out with a blade takes off one layer at most every this many ticks. */
 	public static final int CUT_COOLDOWN = 10;
+	/**
+	 * Fully stuck: all {@link #MOST} layers on. Then it takes {@link #FULL_DAMAGE} times the damage, and once it tears free of
+	 * the last layer it can't be webbed again for {@link #RESIST_TICKS}, so webbing a boss never locks it for good.
+	 */
+	public static final int FULL = MOST;
+	public static final float FULL_DAMAGE = 1.25F;
+	public static final int RESIST_TICKS = 80;
 	/** The cobweb grey of its icon and its name. */
 	public static final int COLOR = 0xdcdce4;
 
@@ -106,6 +113,9 @@ public final class Webbed {
 	private static final Map<UUID, long[]> STRUGGLES = new HashMap<>();
 	/** When each cutter may cut again. */
 	private static final Map<UUID, Long> CUT_READY = new HashMap<>();
+	/** Who has worn every layer at once (until it is free), and who may not be webbed again before the game tick given. */
+	private static final java.util.Set<UUID> WAS_FULL = new java.util.HashSet<>();
+	private static final Map<UUID, Long> RESISTS = new HashMap<>();
 	private static long clock;
 	private static boolean registered;
 
@@ -126,6 +136,8 @@ public final class Webbed {
 			TRACKED.clear();
 			STRUGGLES.clear();
 			CUT_READY.clear();
+			WAS_FULL.clear();
+			RESISTS.clear();
 		});
 		// a blade's hit cuts a layer
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
@@ -200,12 +212,28 @@ public final class Webbed {
 			burnFx(level, target);
 			return false;
 		}
+		if (resisting(target)) {
+			return false;
+		}
 		int have = layers(target);
 		int n = Math.min(MOST, have + Math.max(1, add));
 		MobEffectInstance now = target.getEffect(EFFECT);
 		int top = n == have && now != null ? Math.max(ticks, now.getDuration()) : ticks;
 		set(target, n, top);
 		return true;
+	}
+
+	/** Whether {@code body} tore free of a full stack a moment ago and can't be webbed yet. */
+	public static boolean resisting(LivingEntity body) {
+		Long until = RESISTS.get(body.getUUID());
+		return until != null && clock < until;
+	}
+
+	/** {@code body} is free of every layer: if it was fully stuck, it shrugs the next web off for a while. */
+	private static void freed(LivingEntity body) {
+		if (WAS_FULL.remove(body.getUUID())) {
+			RESISTS.put(body.getUUID(), clock + RESIST_TICKS);
+		}
 	}
 
 	/** {@code body} wears {@code n} layers, the top one for {@code top} ticks and each under it {@link #UNDER_TICKS} more. */
@@ -216,6 +244,10 @@ public final class Webbed {
 		if (n <= 0) {
 			body.removeEffect(EFFECT);
 			return;
+		}
+		if (n >= FULL && WAS_FULL.add(body.getUUID()) && body.level() instanceof ServerLevel level) {
+			// fully stuck: a dull thud of web, and it takes more from here
+			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 0.8F, 0.6F);
 		}
 		int under = body instanceof Player ? UNDER_TICKS : UNDER_TICKS_MOB;
 		MobEffectInstance stack = null;
@@ -238,6 +270,7 @@ public final class Webbed {
 		if (n - 1 <= 0) {
 			body.removeAttached(LAYERS);
 			TRACKED.remove(body);
+			freed(body);
 		}
 		peelFx(level, body, n - 1 <= 0);
 		return true;
@@ -248,6 +281,7 @@ public final class Webbed {
 		if (EFFECT != null && body.removeEffect(EFFECT)) {
 			body.removeAttached(LAYERS);
 			TRACKED.remove(body);
+			WAS_FULL.remove(body.getUUID());
 		}
 		burnFx(level, body);
 	}
@@ -316,6 +350,9 @@ public final class Webbed {
 
 	private static void tick(MinecraftServer server) {
 		clock++;
+		if (!RESISTS.isEmpty()) {
+			RESISTS.values().removeIf(until -> clock >= until);
+		}
 		if (TRACKED.isEmpty()) {
 			return;
 		}
@@ -340,6 +377,11 @@ public final class Webbed {
 			if (n <= 0) {
 				it.remove();
 				STRUGGLES.remove(body.getUUID());
+				if (here) {
+					freed(body);
+				} else {
+					WAS_FULL.remove(body.getUUID());
+				}
 			}
 		}
 		if (!CUT_READY.isEmpty()) {
