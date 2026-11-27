@@ -18371,3 +18371,9 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - Gifts with a prerequisite or an age show "Needs ..." on the Blood page and cannot be learned until met. Four new skill-bar moves (full vampires only), icons, lang part `nights-blood-4.json`, loading hints 290-296.
 - Classes: `NightHorrors`, `NightHorror`, `NightTargets`, `BloodBarrier`, `Batstep`, `BloodShards`, `HungryColony`, `NightGaze`, `NightForms`, `BloodPage`, `NightGifts`, mixins `PlayerHorrorMixin`, `MistSlipMixin`, `LivingEntityHealMixin`, client `NightHorrorRenderer`, `NightFormsClient`.
 - Built; not played.
+
+## 0.13.96 (2026-11-27): Squelch-the-narrator button on the life story (#2306)
+
+- **Squelch the narrator**: a small note button on the life story and on its "Your story is being written" loading screen. Pressing it cuts the narrator off mid-line and keeps him quiet in every later story (struck-through note); pressing it again lets him speak, starting the current page from the top. On question pages it sits in the top right corner, on the panel pages (story summary, realms, the road) left of Next. Kept in `config/jaymoskingdoms-narrator.txt`. Spirits' voices aren't the narrator and still speak.
+- `NarratorSetting` (new), `LifeStoryScreen`, `StoryHoldScreen`; lang part `narrator-squelch.json`.
+- Built; not played.
