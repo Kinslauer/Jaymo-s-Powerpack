@@ -1,4 +1,7 @@
 {
+  "dialogue.main.jaymoskingdoms_reply.outcry": "What happened?",
+  "talkwheel.jaymoskingdoms.jaymoskingdoms_reply.outcry": "Easy now. What happened?",
+  "outcry.jaymoskingdoms.answer.passed": "It's passed now. I'd rather not dwell on it.",
   "dialogue.chat.jaymoskingdoms.outcry_wordless": "*They're shaking, and keep glancing back over their shoulder.*",
   "outcry.jaymoskingdoms.opening.mugged": "Oh! Oh, it's you. Forgive me, I'm all in pieces. Someone just set on me.",
   "outcry.jaymoskingdoms.opening.saw_mugged": "Did you see it? They were beating someone, right out in the open!",

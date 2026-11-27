@@ -46,6 +46,8 @@ public final class Outcry {
 	static final double LOOK_RANGE = 48.0;
 	/** The opening lines' key prefix (the reply spoke's topic), and the answers'. */
 	public static final String OPENING = "outcry.jaymoskingdoms.opening.";
+	/** The reply spoke's topic ({@link Replies}). */
+	static final String TOPIC = "outcry";
 	static final String ANSWER = "outcry.jaymoskingdoms.answer.";
 	static final String AFTER = "outcry.jaymoskingdoms.after.";
 	/** The look given in place of words to one who shares no tongue with them. */
@@ -80,6 +82,14 @@ public final class Outcry {
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Outcry::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> CAUSES.clear());
+		// the talk wheel's reply spoke on their opening line: "What happened?" (both sides: the client picks it, the server answers)
+		Replies.register(new Replies.Topic(TOPIC, k -> k.startsWith(OPENING), t -> false, Outcry::reply));
+	}
+
+	/** The reply spoke's answer: what it was, or (if it's passed by now) that they'd rather not dwell on it. */
+	private static Component reply(ServerPlayer player, LivingEntity v) {
+		Component said = answer(player, v);
+		return said != null ? said : Component.translatable(ANSWER + "passed");
 	}
 
 	// ---- what they cried out about ------------------------------------------------------------------------------------------
