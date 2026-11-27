@@ -21,6 +21,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/hunters-road-6|hunters-road-6]] · ☁️ Cloud · claimed
 
 
 ## In review
@@ -52,7 +53,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-5|hunters-road-5]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/hunters-road-6|hunters-road-6]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · ☁️ Cloud · blocked
