@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: antigravity
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
-claimed_by: t3
+claimed_by: 
 pr: 
 thread: 
 ---
@@ -20,3 +20,4 @@ thread:
 - 2026-11-27 11:41 Back to the modeller (Hunter's Road thread, 2026-11-27): models are Prometheus' job; that thread builds the patch once each model lands.
 - 2026-11-27 11:43 Opened: nycto-2 is in review (#2288), as the wave plan says.
 - 2026-11-27 08:35 Andy 2026-11-27: models to Codex and Antigravity through T3
+- 2026-11-27 09:06 t3's claim had no sign of work for 30 min: handed back as open.

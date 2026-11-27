@@ -5,7 +5,7 @@ from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
 claimed_by: t3
 pr: 
-thread: 
+thread: t3 mcp:a702d48f-4420-4429-be7a-54786d6548e5
 ---
 
 # Hunter's Road 8 models: new gear
