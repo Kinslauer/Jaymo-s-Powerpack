@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 00:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 00:17). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -41,11 +41,10 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/legends-p3|legends-p3]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/structures-6-stable-mine-farm|structures-6-stable-mine-farm]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-15 waiting for a bot, 7 being built, 3 in review: see [[Kanban]].
+14 waiting for a bot, 6 being built, 5 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -115,7 +114,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-27 problems in the notes: [[Health]].
+26 problems in the notes: [[Health]].
 
 ## Last week
 
