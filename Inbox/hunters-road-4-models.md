@@ -5,7 +5,7 @@ from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
 claimed_by: t3
 pr: 
-thread: t3 mcp:8c6c9f9d-989a-4a25-9d6c-8c2cf549c08f
+thread: t3 mcp:398bb09e-1f3f-4d3d-b57f-fdee68183413
 ---
 
 # Hunter's Road 4 models: The drowned, hags and fog (Kingdoms `monsters/`) rows B2 B3 B4

@@ -5,7 +5,7 @@ from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
 claimed_by: t3
 pr: 
-thread: t3 mcp:1ca8347d-7ec8-4d81-8835-11efc71d50ac
+thread: t3 mcp:396c0d08-53dc-4178-ad46-0e0eb1278dbe
 ---
 
 # Hunter's Road 5 models: Trolls, imps and the frost giant (Kingdoms `creatures/`, `monsters/`) rows C1 C2 C3 C4
