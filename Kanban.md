@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:17). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:26). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -43,8 +43,6 @@ kanban-plugin: board
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
-- [ ] [[Inbox/nycto-4|nycto-4]] · ☁️ Cloud · #2305 · in-review
-- [ ] [[Inbox/nycto-turning|nycto-turning]] · ☁️ Cloud · #2304 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
