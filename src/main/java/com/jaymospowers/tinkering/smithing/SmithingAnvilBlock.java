@@ -121,6 +121,10 @@ public class SmithingAnvilBlock extends HorizontalDirectionalBlock implements En
 
 	private static InteractionResult takeFrom(SmithingAnvilEntity anvil, Level level, Player player) {
 		if (anvil.work().isEmpty() && anvil.result().isEmpty()) {
+			if (!level.isClientSide() && com.jaymospowers.core.StationHints.idle(player)) {
+				// nothing on the anvil: say what goes on it
+				com.jaymospowers.core.StationHints.tell(player, "smithing_anvil.empty");
+			}
 			return InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {

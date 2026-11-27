@@ -205,6 +205,7 @@ public class JaymosPowers implements ModInitializer {
 		// fighting without a power: anyone's four moves, falling attacks, air combos, the chain axe; and the hidden fight meter
 		com.jaymospowers.mortal.Mortal.init();
 		com.jaymospowers.core.Brink.init();
+		com.jaymospowers.core.StationHints.init();
 		// (0.21.29) GregTech's hand route: hammer raw ore into crushed ore, wash it in a cauldron or running water
 		com.jaymospowers.tinkering.ore.OreWashing.init();
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks

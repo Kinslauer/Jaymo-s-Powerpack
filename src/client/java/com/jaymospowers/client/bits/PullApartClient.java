@@ -181,7 +181,7 @@ public final class PullApartClient {
 			graphics.pose().popMatrix();
 			// for a while after it's turned on, the explanation beside it (Andy: "use this shorter descp", the hover text).
 			// Set here, as the widget draws, so it goes out with the screen's tooltips (set after the screen, it was lost)
-			if (on && Util.getMillis() - turnedOn < EXPLAIN_MS && !isHovered()) {
+			if (on && Util.getMillis() - turnedOn < EXPLAIN_MS && !isHovered() && com.jaymospowers.client.hud.TipCard.enabled()) {
 				UiStyle.tip(graphics, Minecraft.getInstance().font, Component.translatable("button.jaymospowers.pull_apart.hover"),
 					x + SIZE, y + SIZE + 4);
 			}
