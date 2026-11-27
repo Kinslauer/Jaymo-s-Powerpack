@@ -1,10 +1,11 @@
 ---
-status: in-review
+status: changes
 for: gemini
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes, 2026-11-26)
 asked: 2026-11-26
 claimed_by: 
 pr: 2255
+text_pass: 
 ---
 
 # Legends patch 7: Great Ape moves, staged beams, instant step, stacking power-up, chain blades, cross slash
