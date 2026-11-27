@@ -81,6 +81,8 @@ public final class SpellEngineCompat {
 			// no spinning up again while down (knocked out by the spin or anything else)
 			SpellEvents.CASTING_ATTEMPT.PRE.register(args -> WHIRLWIND.equals(idOf(args.spell())) && Downed.isDowned(args.caster())
 				? SpellCast.Attempt.none() : null);
+			// a snuffed caster casts nothing (the magic snuffer bomb)
+			SpellEvents.CASTING_ATTEMPT.PRE.register(args -> com.jaymospowers.alchemy.bomb.BombStatus.snuffed(args.caster()) ? SpellCast.Attempt.none() : null);
 		}
 
 		static boolean spinning(LivingEntity entity) {

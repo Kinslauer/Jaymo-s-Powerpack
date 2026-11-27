@@ -74,6 +74,7 @@ public final class Organs {
 		IMP_GIZZARD = item("imp_gizzard", 0, 0.0F);
 		TROLL_LIVER = item("troll_liver", 0, 0.0F);
 		MonsterOrgans.register();
+		MonsterFat.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			for (Item item : List.of(HEART, LIVER, KIDNEY, LUNG, TRIPE, COOKED_HEART, COOKED_LIVER, COOKED_KIDNEY, COOKED_TRIPE)) {
 				output.accept(new ItemStack(item));

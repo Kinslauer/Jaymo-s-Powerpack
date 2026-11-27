@@ -10,6 +10,7 @@ public final class AlchemyPicks {
 	public static float incoming(net.minecraft.world.entity.LivingEntity victim, net.minecraft.world.damagesource.DamageSource source, float amount) {
 		amount = com.jaymospowers.alchemy.hunter.Draughts.incoming(victim, source, amount);
 		amount = com.jaymospowers.alchemy.toxic.Harms.incoming(victim, source, amount);
+		amount = com.jaymospowers.alchemy.oil.Oils.incoming(victim, source, amount);
 		if (!(victim instanceof net.minecraft.server.level.ServerPlayer)) {
 			return amount;
 		}

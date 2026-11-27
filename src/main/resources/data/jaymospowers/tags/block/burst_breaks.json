@@ -1,0 +1,9 @@
+{
+  "values": [
+    "minecraft:cobweb",
+    {
+      "id": "jaymoskingdoms:nest",
+      "required": false
+    }
+  ]
+}

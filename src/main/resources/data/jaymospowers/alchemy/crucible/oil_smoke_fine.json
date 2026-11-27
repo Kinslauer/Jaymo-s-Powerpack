@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:dead_grease",
+  "essences": {
+    "air": 8,
+    "shadow": 6,
+    "fire": 3
+  },
+  "result": {
+    "item": "jaymospowers:oil_smoke",
+    "count": 1,
+    "grade": "fine"
+  },
+  "research": "hunters_oils"
+}

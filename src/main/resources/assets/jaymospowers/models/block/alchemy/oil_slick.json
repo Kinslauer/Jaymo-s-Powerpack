@@ -1,0 +1,40 @@
+{
+  "textures": {
+    "particle": "jaymospowers:block/alchemy/oil_slick",
+    "s": "jaymospowers:block/alchemy/oil_slick"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        0.5,
+        16
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#s"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#s"
+        }
+      }
+    }
+  ]
+}
