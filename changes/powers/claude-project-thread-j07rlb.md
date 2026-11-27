@@ -1,3 +1,0 @@
-# /autohud command to turn Auto HUD off and on
-- **/autohud off** stops Auto HUD hiding parts of the HUD, so the whole HUD stays on screen; **/autohud on** lets it fade them out again; a bare **/autohud** says which it is now. The choice is kept on your computer (`config/jaymospowers-client.properties`, `autohud.off`) and put back each time the game starts. Before anyone uses it, Auto HUD's own "Enable on game load" setting decides, as before; its toggle key and Mod Menu page still work. Without Auto HUD the command just says it isn't installed (`compat/AutoHudToggle`, Auto HUD looked up by name).
-- Built; not played.

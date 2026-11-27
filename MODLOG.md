@@ -8928,3 +8928,8 @@ Deviations from the plan:
 - **Bottled cloud is how cloud is gathered**: a blue, golden or purple aercloud fills a Bottle of Blue / Golden / Purple Cloud, every other cloud (and the open sky) a plain Bottle of Cloud. Every bottle lays the same puff and hands the glass back when crafted with. The recipes that took aercloud blocks take bottles now: the four gliders (plain bottles for the cold glider), the cloud skiff, the updraft vent and cloudwool (`CloudBottle`, `tools/gen_stone_ores.py`, `gen_aether_gear.py`, `gen_aether_animals.py`).
 - **A puff of bottled cloud** is the one firm cloud: it still holds you up and still catches a faller (`CloudPuffBlock.soft()` false).
 - Built; not played.
+
+## 0.28.27 (2026-11-27): /autohud command to turn Auto HUD off and on (#2309)
+
+- **/autohud off** stops Auto HUD hiding parts of the HUD, so the whole HUD stays on screen; **/autohud on** lets it fade them out again; a bare **/autohud** says which it is now. The choice is kept on your computer (`config/jaymospowers-client.properties`, `autohud.off`) and put back each time the game starts. Before anyone uses it, Auto HUD's own "Enable on game load" setting decides, as before; its toggle key and Mod Menu page still work. Without Auto HUD the command just says it isn't installed (`compat/AutoHudToggle`, Auto HUD looked up by name).
+- Built; not played.
