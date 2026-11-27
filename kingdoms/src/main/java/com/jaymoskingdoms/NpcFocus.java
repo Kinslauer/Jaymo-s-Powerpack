@@ -41,6 +41,9 @@ import org.jspecify.annotations.Nullable;
  * <li>otherwise its <b>focus</b>: the foe, else the first goal or behaviour it's running, else where it's walking.</li>
  * </ul>
  * Kept only for the mob a spectating operator looks at, sampled when the view is sent ({@link NpcEyes#DEV_EVERY}).
+ * <p>Andy (2026-11-27): "theres ALOT going on in this menu, i think the coordinates are unnecesary, and the Running: line". So the
+ * label leaves out coordinates (paths and walk targets give only how far) and the goals and behaviours running; a game started with
+ * {@code -Djaymoskingdoms.eyesDetail=true} shows them again, for working on the AI.
  */
 public final class NpcFocus {
 	/** Stuck: with a path, less than this far across the ground (blocks) in this long (ticks, 3 s). */
@@ -52,6 +55,9 @@ public final class NpcFocus {
 	static final int WATCH_GAP = 20;
 	/** At most this many path nodes are sent, this many goals or behaviours named, each name cut to this length. */
 	static final int PATH_MAX = 48, NAMES_MAX = 4, NAME_LEN = 56;
+
+	/** The JVM flag that puts the coordinates and the "Running" line back on the label. */
+	static final String DETAIL_PROPERTY = "jaymoskingdoms.eyesDetail";
 
 	/** The state on the top line, as sent. */
 	public static final int STEADY = 0, THINKING = 1, REPLANNING = 2, STUCK = 3;
@@ -83,6 +89,7 @@ public final class NpcFocus {
 	/** What {@code mob} is doing; {@code alert} is the fight senses' line ({@link NpcEyes}). */
 	static Focus of(Mob mob, Component alert) {
 		long now = mob.level().getGameTime();
+		boolean detail = Boolean.getBoolean(DETAIL_PROPERTY);
 		PathNavigation nav = mob.getNavigation();
 		Path path = nav.getPath();
 		boolean walking = path != null && !path.isDone();
@@ -161,7 +168,9 @@ public final class NpcFocus {
 				focus = Component.literal(running.get(0));
 			} else {
 				BlockPos to = walking ? path.getTarget() : BlockPos.containing(walk);
-				focus = Component.translatable("gui.jaymoskingdoms.eyes.focus.walking", to.getX(), to.getY(), to.getZ());
+				focus = detail
+					? Component.translatable("gui.jaymoskingdoms.eyes.focus.walking_at", to.getX(), to.getY(), to.getZ())
+					: Component.translatable("gui.jaymoskingdoms.eyes.focus.walking", metres(Math.sqrt(mob.distanceToSqr(Vec3.atBottomCenterOf(to)))));
 			}
 			top = Component.translatable("gui.jaymoskingdoms.eyes.focus", focus);
 		}
@@ -182,7 +191,7 @@ public final class NpcFocus {
 		if (activity.isPresent()) {
 			lines.add(Component.translatable("gui.jaymoskingdoms.eyes.activity", activity.get().getName()));
 		}
-		if (!running.isEmpty()) {
+		if (detail && !running.isEmpty()) {
 			String names = String.join(", ", running.subList(0, Math.min(NAMES_MAX, running.size())));
 			lines.add(running.size() > NAMES_MAX
 				? Component.translatable("gui.jaymoskingdoms.eyes.running_more", names, running.size() - NAMES_MAX)
@@ -205,20 +214,24 @@ public final class NpcFocus {
 			reaches = path.canReach();
 			int left = path.getNodeCount() - path.getNextNodeIndex();
 			if (reaches) {
-				lines.add(Component.translatable("gui.jaymoskingdoms.eyes.path", to.getX(), to.getY(), to.getZ(),
-					metres(Math.sqrt(mob.distanceToSqr(Vec3.atBottomCenterOf(to)))), left));
+				String away = metres(Math.sqrt(mob.distanceToSqr(Vec3.atBottomCenterOf(to))));
+				lines.add(detail ? Component.translatable("gui.jaymoskingdoms.eyes.path_at", to.getX(), to.getY(), to.getZ(), away, left)
+					: Component.translatable("gui.jaymoskingdoms.eyes.path", away, left));
 			} else {
 				BlockPos end = path.getEndNode() == null ? to : path.getEndNode().asBlockPos();
-				lines.add(Component.translatable("gui.jaymoskingdoms.eyes.path_short", to.getX(), to.getY(), to.getZ(),
-					metres(Math.sqrt(end.distSqr(to))), left));
+				String shortBy = metres(Math.sqrt(end.distSqr(to)));
+				lines.add(detail ? Component.translatable("gui.jaymoskingdoms.eyes.path_short_at", to.getX(), to.getY(), to.getZ(), shortBy, left)
+					: Component.translatable("gui.jaymoskingdoms.eyes.path_short", shortBy, left));
 			}
 			for (int i = path.getNextNodeIndex(); i < path.getNodeCount() && nodes.size() < PATH_MAX; i++) {
 				nodes.add(path.getNodePos(i));
 			}
 		}
 		if (walk != null && (!walking || walk.distanceToSqr(Vec3.atBottomCenterOf(path.getTarget())) > 4.0)) {
+			String away = metres(Math.sqrt(mob.distanceToSqr(walk)));
 			BlockPos at = BlockPos.containing(walk);
-			lines.add(Component.translatable("gui.jaymoskingdoms.eyes.walk", at.getX(), at.getY(), at.getZ(), metres(Math.sqrt(mob.distanceToSqr(walk)))));
+			lines.add(detail ? Component.translatable("gui.jaymoskingdoms.eyes.walk_at", at.getX(), at.getY(), at.getZ(), away)
+				: Component.translatable("gui.jaymoskingdoms.eyes.walk", away));
 		}
 		return new Focus(state, lines, nodes, reaches, walk);
 	}
