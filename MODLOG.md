@@ -8687,3 +8687,8 @@ Andy's Legends picks, patch 1 (web swinging and getting about), all our own code
 - **Old saves**: arrows already lodged that way move over to the game's stuck arrows the next time the player (or mob) loads; stuck blades stay as they were. The stuck-weapon layer never draws an arrow.
 - Classes: Lodged (`lodge` sends arrows to the arrow count, `unlodgeArrows` on entity load), LodgedLayer (skips arrows).
 - Built; not played.
+
+## 0.28.6 (2026-11-27): no lift prompt on tiny bodies (#2266)
+
+- The hint box on a body Kitchen picks up like an item (a fly, a mouse, a fish...) shows only "Right Button: pick up" (or "pull out an arrow" while one's in it), no hold-to-drag or Shift-lift lines. `ContextHints.handSized` asks Kitchen through the `jaymoskitchen:corpse_hand_sized` object share, so an older Kitchen just shows the old lines.
+- Built; not played.
