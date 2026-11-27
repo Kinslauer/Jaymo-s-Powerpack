@@ -3037,3 +3037,11 @@ Andy: "there should be a way to dismember them from the inventory screen so you 
 - A burning corpse no longer lights anything around it (Andy: "bodies that catch fire should no longer spread the flame. it gets far too rampant far too quickly and often burns loot"). It still burns down to bone and ash on its own and drops its worn gear in the ash. Fire from anything else spreads as it did (the faster fire from Kingdoms is untouched).
 - `CorpseEntity`: `spreadFire`, `burnable`, `flammableBeside` and the saved `FiresLit` count removed.
 - Built; not played.
+
+## 0.7.14 (2026-11-27): longer wind for sprinting (#2322)
+
+- **Sprint wind lasts longer**: a full wind bar now lasts 20 seconds of sprinting instead of about 13 (it still holds as
+  much as your hunger bar is full, and refills at the same speed after the same one-second pause). Under adrenaline's
+  burn a full bar now lasts about 12 seconds sprinting instead of 11.
+- `Stamina.SPRINT_COST` 0.075 to 0.05 a tick.
+- Built; not played.

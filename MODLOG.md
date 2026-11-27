@@ -8986,3 +8986,17 @@ Deviations from the plan:
 - The server log now names every hurt a player takes, once per cause per 10 s, attacker hits too: "X hurt by generic from RunningHot (1.0 health), nobody did it", "X hurt by mob (3.0 health), done by Maiko (entity.minecraft.villager)".
 - Server: `core/wounds/HurtCause` (`Hurt` payload); client: `client/wounds/HurtCauseHud`. A client without the mod still gets the old action-bar line.
 - Built; not played.
+
+## 0.28.35 (2026-11-27): carry more before the pack weighs you down (#2322)
+
+- **More carried freely**: what a body bears without slowing goes from 30 kg to 60 kg, and a worn backpack's straps
+  from 20 kg to 30 kg (clothes' pockets and the tool belt are as they were). A full overload is still twice what's borne.
+- **Blocks weigh less**: a block was 1.5 kg plus 0.2 kg per point of hardness (up to 12 kg), so a single stack of
+  cobblestone (121 kg) or dirt (102 kg) was a full overload by itself. Now 0.4 kg plus 0.15 kg per point (up to 6 kg):
+  cobblestone and logs 0.7 kg (45 kg a stack), dirt 0.48 kg (30 kg), deepslate 0.85 kg, obsidian 6 kg. Things placed as
+  blocks that break at a touch (torches, flowers, saplings, seeds, redstone dust, string) were 1.5 kg each (96 kg for 64
+  torches) and are now 0.1 kg.
+- **Endurance carries more**: with Jaymo's Kingdoms, every point of its Endurance attribute adds 0.5 kg to what's
+  borne freely (100 points: +50 kg), read from Kingdoms' `Stats.carryKg` by reflection.
+- `PackWeight` (BASE_KG, BACKPACK_KG, BLOCK_KG, BLOCK_HARDNESS_KG, BLOCK_MOST_KG, new INSTANT_BLOCK_KG, endurance).
+- Built; not played.
