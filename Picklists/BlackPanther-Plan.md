@@ -6,8 +6,9 @@ cmsg_017LSt6rWz6CzxSGvzDd41XWKDbjDVfM7RUSYmWoGRsH6m. Octo Core thread (PR #2301)
 cmsg_017LSt6rWz6CzxSGvzDd41XWDg8Tfm5GWa6GER8Zf9kCE8.
 
 - **Not picked, never build:** A10 (the hammer in the stone), B6 (the shape-shifting gauntlet), E5 (the hero codex).
-- **Kept by the Octo Core thread, not queued here:** E3 (first-person arms, high priority), N1 (Octo arms carry a downed
-  body), N2 (the Tinkerer's arm heads). They build on PR #2301. N2 also builds on r1 (E1's Forge tiers) below.
+- **Kept by the Octo Core thread, not queued here:** E3 (first-person arms, high priority) and N1 (Octo arms carry a
+  downed body). They build on PR #2301. N2 (the Tinkerer's claw heads) was dropped by Andy (2026-11-27: "remove the claw
+  heads idea"): never build it.
 - **Queued here:** the other 41 rows, as 23 patches on three tracks.
 
 ## Source and licence
@@ -39,7 +40,7 @@ cmsg_017LSt6rWz6CzxSGvzDd41XWDg8Tfm5GWa6GER8Zf9kCE8.
 ## Track R: Powers, the Rig (opens when PR #2301 merges)
 - **r1. Forge tiers and the Rig stand** (E1, E2). Rig Forge tiers on top of its frames: five tiers, each paid in harder
   materials on our progression ladder (tier 2 uses p1's crystal-spire metal). A Rig stand: shows a suit; the Forge still
-  does the building. Start at RigForgeEntity, RigFrame, RigForgeScreen, Rig. The Octo thread's N2 waits on this.
+  does the building. Start at RigForgeEntity, RigFrame, RigForgeScreen, Rig.
 - **r2. The woven frame and the falling suit-up** (A1, A11). A1: a new frame, a woven make of the Frostborn suit: hits
   taken fill charge (Resistance from 40%), the veins glow brighter as it fills, release it as a shockwave; silent, no fall
   damage, and a cloak-then-ambush opener whose crit shreds armour. A11: RigSuitUp#FALL already builds the suit through a
@@ -153,7 +154,7 @@ cmsg_017LSt6rWz6CzxSGvzDd41XWDg8Tfm5GWa6GER8Zf9kCE8.
 
 ## Order
 Three tracks, each one patch at a time: the next opens when the last merges.
-- R: r1, r2, r3, r4, r5, r6, r7. r1 waits for PR #2301 to merge. Tell the Octo Core thread when r1 merges (N2 needs it).
+- R: r1, r2, r3, r4, r5, r6, r7. r1 waits for PR #2301 to merge.
 - P: p1, p2, p3, p4, p5, p6, p7, p8, p9.
 - K: k1, k2, k3, k4, k5, k6, k7. k2 also waits for p2.
 - Cross-track: r1's tier 2 uses p1's metal (p1 opens first). r6 and k2 wire the chains to the pact, whichever lands second.
