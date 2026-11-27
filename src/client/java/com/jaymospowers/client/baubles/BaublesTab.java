@@ -59,7 +59,8 @@ public final class BaublesTab extends AbstractButton {
 	void place() {
 		ContainerScreenAccessor at = (ContainerScreenAccessor)this.screen;
 		this.visible = at.jaymospowers$leftPos() == (this.screen.width - INVENTORY_W) / 2;
-		setPosition(at.jaymospowers$leftPos() - OUT, at.jaymospowers$topPos() + DOWN);
+		// (under Icy's horse tab while you sit a tame horse)
+		setPosition(at.jaymospowers$leftPos() - OUT, at.jaymospowers$topPos() + DOWN + com.jaymospowers.client.IcyRiderTab.shift(this.screen));
 	}
 
 	@Override
