@@ -162,6 +162,13 @@ public final class ContextHints {
 		// Andy (2026-11-25): a body that can't be opened or has nothing left shows no search line, so nobody taps on and
 		// on at it; arrows come out first, a tap each, and a picked-clean skeleton gives up its bones
 		boolean animal = !corpse.isFish() && !corpse.isMachine() && corpse.clientBody() instanceof Animal;
+		if (handSized(corpse)) {
+			// Andy (2026-11-27): "there shouldnt be a lift prompt for something so light you could grab in hand like any
+			// other item": a click takes it into the pack (any arrows out of it first), nothing to hold
+			list.add(line(TAP, com.jaymoskitchen.archery.StuckArrows.total(corpse.arrows()) > 0
+				? "jaymospowers.context.pull_arrow" : "jaymospowers.context.pick_up", "key.use"));
+			return;
+		}
 		if (com.jaymoskitchen.archery.StuckArrows.total(corpse.arrows()) > 0) {
 			list.add(line(TAP, "jaymospowers.context.pull_arrow", "key.use"));
 		} else if (!animal) {
@@ -196,6 +203,13 @@ public final class ContextHints {
 			list.add(line(HOLD, "jaymospowers.context.drag", "key.use"));
 		}
 		list.add(line(TAP, "jaymospowers.context.body_menu", "key.use"));
+	}
+
+	/** Whether Kitchen picks this body up like an item ({@code Corpses.SHARE_HAND_SIZED}); an older Kitchen: never. */
+	@SuppressWarnings("unchecked")
+	private static boolean handSized(CorpseEntity corpse) {
+		return FabricLoader.getInstance().getObjectShare().get("jaymoskitchen:corpse_hand_sized") instanceof java.util.function.Predicate<?> f
+			&& ((java.util.function.Predicate<Entity>) f).test(corpse);
 	}
 
 	/** Kitchen's {@code CorpseEntity.TAP_LOOT} and {@code TAP_BONE}. */
