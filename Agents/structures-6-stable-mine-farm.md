@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: structures-6-stable-mine-farm
 branch: claude/structures-6-stable-mine-farm
 with: 
