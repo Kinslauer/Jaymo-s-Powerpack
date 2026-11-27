@@ -45,7 +45,7 @@ public class PurpleAercloudBlock extends AercloudBlock {
 	@Override
 	protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
 		if (entity.isShiftKeyDown() || entity instanceof Projectile) {
-			this.settle(entity);
+			this.settle(level, pos, entity);
 			return;
 		}
 		Direction way = state.getValue(FACING);

@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": "jaymospowers:golden_aercloud",
+    "A": "jaymospowers:bottle_of_golden_cloud",
     "T": "jaymospowers:cloudtwine",
     "S": "minecraft:stick",
     "Z": "jaymospowers:golden_amber"

@@ -40,7 +40,9 @@ against the 26.3 sources. New keys default to unbound unless said otherwise (R/G
   Worldgen data, new chunks only. Lore: the miners' mixed seams (already canon).
 - **Bottled cloud** [bb-cloudbottle]: an empty bottle used on cloudbank or aercloud, or anywhere in the Cloud Sea or
   high sky bands, gives a Bottle of Cloud. Used on a block it places a short-lived cloud puff (2x1x2 of a temporary
-  cloud block, soft like cloudbank, thins away in about 20 s); used in mid-air it catches you below your feet once.
+  cloud block that holds you up, unlike cloudbank and the aerclouds, which you fall through; thins away in about 20 s);
+  used in mid-air it catches you below your feet once. Blue, golden and purple aerclouds fill a bottle of their own colour
+  (their gliders' material, since clouds drop nothing).
   Lore paragraph (new).
 
 ## Patch 4: Moving about (Powers + Kingdoms)

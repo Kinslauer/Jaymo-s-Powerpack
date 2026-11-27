@@ -782,10 +782,10 @@ def recipes():
         "key": {"P": "%s:beast_pelt" % NS, "S": "minecraft:string", "C": "minecraft:chest"}, "result": {"id": "%s:moa_saddlebag" % NS}})
 
 
-    # the cloud skiff: cold cloud on a skyroot keel
+    # the cloud skiff: cold cloud (bottled: clouds drop nothing) on a skyroot keel
     write(os.path.join(out, "cloud_skiff.json"), {
         "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["A A", "SSS"],
-        "key": {"A": "%s:cold_aercloud" % NS, "S": "%s:skyroot_planks" % NS}, "result": {"id": "%s:cloud_skiff" % NS}})
+        "key": {"A": "%s:bottle_of_cloud" % NS, "S": "%s:skyroot_planks" % NS}, "result": {"id": "%s:cloud_skiff" % NS}})
 
 
 def lang():
