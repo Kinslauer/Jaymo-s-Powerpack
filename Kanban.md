@@ -4,18 +4,24 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:58). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 10:08). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
+- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
+- [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · for any · open
+- [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for any · open
+- [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for any · open
+- [ ] [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]] · for any · open
+- [ ] [[Inbox/gore-5-living-guts|gore-5-living-guts]] · for any · open
+- [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for any · open
 
 
 ## Being built
