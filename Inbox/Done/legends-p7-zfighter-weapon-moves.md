@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: gemini
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes, 2026-11-26)
 asked: 2026-11-26
@@ -41,3 +41,4 @@ Power: Z Fighter, weapons.
 - 2026-11-27 00:02 Review (head 178cb19): pass. All 9 first-round findings and 2 follow-ups fixed and re-checked; CI green. Players get Great Ape swipes, Sprint+R roar (R still charges ki), slam, leap smash and boulder throw; staged beams with a red outline on held targets; Instant Step; Overburn; Chain Axe pull and Cyclone; Cross Slash form. Not tested in game.
 - 2026-11-27 00:02 Reviewed; Andy allowed sending it to the coordinator.
 - 2026-11-27 10:25 Claude thread finished the review fixes itself (Andy: 'finish both here'), 3b645f8367 + ff4dc22bab; CI green, ready to merge.
+- 2026-11-27 11:03 PR #2255 is merged into master; moved to Inbox/Done.

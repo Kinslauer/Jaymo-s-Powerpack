@@ -1,6 +1,6 @@
 ---
 agent: gemini
-status: in-review
+status: done
 branch: gemini/legends-p7-zfighter-weapon-moves
 worktree: E:/wt/legends-p7-zfighter-weapon-moves
 pr: 2255
@@ -50,3 +50,6 @@ updated: 2026-11-26
 - Built `compileClientJava` for both Powers and Kingdoms (both succeeded).
 - Ran `python tools/pr_checks.py` (passed, 33 changed files against `origin/master`).
 - Opened PR #2255 to `master` (not merged; awaiting Claude review).
+
+## Notes
+- 2026-11-27 11:03 PR #2255 is merged into master; moved to Agents/Done.
