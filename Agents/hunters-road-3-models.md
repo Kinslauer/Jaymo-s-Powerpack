@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: hunters-road-3-models
 branch: claude/hunters-road-3-models
 with: 
@@ -36,3 +36,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-27 23:06 No sign of work for 30 min: marked stalled (whoever ran it stopped).
