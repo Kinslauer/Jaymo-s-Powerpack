@@ -1,18 +1,5 @@
 {
   "type": "minecraft:block",
-  "pools": [
-    {
-      "rolls": 1,
-      "condition": {
-        "type": "minecraft:survives_explosion"
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jaymospowers:green_aercloud"
-        }
-      ]
-    }
-  ],
+  "pools": [],
   "random_sequence": "jaymospowers:blocks/green_aercloud"
 }

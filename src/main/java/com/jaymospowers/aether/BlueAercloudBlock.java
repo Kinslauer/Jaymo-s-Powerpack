@@ -41,7 +41,7 @@ public class BlueAercloudBlock extends AercloudBlock {
 	@Override
 	protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
 		if (entity.isShiftKeyDown()) {
-			this.settle(entity);
+			this.settle(level, pos, entity);
 			return;
 		}
 		Vec3 v = entity.getDeltaMovement();

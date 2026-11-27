@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "#": "jaymospowers:cold_aercloud"
+    "#": "jaymospowers:bottle_of_cloud"
   },
   "pattern": [
     "##",

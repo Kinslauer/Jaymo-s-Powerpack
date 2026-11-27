@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "A": "jaymospowers:cold_aercloud",
+    "A": "jaymospowers:bottle_of_cloud",
     "T": "jaymospowers:cloudtwine",
     "S": "minecraft:stick",
     "Z": "jaymospowers:ambrosium_shard"
