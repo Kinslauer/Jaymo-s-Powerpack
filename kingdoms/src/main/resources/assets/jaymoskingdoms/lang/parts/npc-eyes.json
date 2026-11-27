@@ -24,5 +24,7 @@
   "gui.jaymoskingdoms.eyes.target": "Target: %1$s (%2$s m)",
   "gui.jaymoskingdoms.eyes.path": "Path: to %1$s %2$s %3$s, %4$s m away, %5$s steps left",
   "gui.jaymoskingdoms.eyes.path_short": "Path: to %1$s %2$s %3$s, can't reach, ends %4$s m short, %5$s steps left",
-  "gui.jaymoskingdoms.eyes.walk": "Walk target: %1$s %2$s %3$s (%4$s m)"
+  "gui.jaymoskingdoms.eyes.walk": "Walk target: %1$s %2$s %3$s (%4$s m)",
+  "gui.jaymoskingdoms.eyes.suspicion": "Suspicious of %1$s: %2$s%%",
+  "gui.jaymoskingdoms.eyes.investigating": "Investigating %1$s: %2$s%% suspicious"
 }

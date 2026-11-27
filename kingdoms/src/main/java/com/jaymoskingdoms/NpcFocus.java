@@ -188,6 +188,13 @@ public final class NpcFocus {
 				? Component.translatable("gui.jaymoskingdoms.eyes.running_more", names, running.size() - NAMES_MAX)
 				: Component.translatable("gui.jaymoskingdoms.eyes.running", names));
 		}
+		Map.Entry<java.util.UUID, Float> suspect = GuardWatch.most(mob);
+		Player suspected = suspect == null ? null : mob.level().getPlayerByUUID(suspect.getKey());
+		if (suspected != null) {
+			// (GuardWatch) a guard's suspicion of a player he half made out or heard
+			lines.add(Component.translatable(GuardWatch.investigating(mob) ? "gui.jaymoskingdoms.eyes.investigating" : "gui.jaymoskingdoms.eyes.suspicion",
+				suspected.getDisplayName(), Math.round(suspect.getValue() * 100.0F)));
+		}
 		if (target != null) {
 			lines.add(Component.translatable("gui.jaymoskingdoms.eyes.target", target.getDisplayName(), metres(mob.distanceTo(target))));
 		}

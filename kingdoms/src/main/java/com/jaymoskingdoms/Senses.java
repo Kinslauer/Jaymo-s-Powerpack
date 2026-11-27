@@ -478,7 +478,7 @@ public final class Senses {
 	}
 
 	/** {@link #factor} for a player and a mob it applies to. */
-	private static double sight(ServerPlayer player, ServerLevel level, Mob looker) {
+	static double sight(ServerPlayer player, ServerLevel level, Mob looker) {
 		BlockPos eyes = BlockPos.containing(player.getEyePosition());
 		// (NightLights) the world's people see by the moon, by what you carry and by their own light
 		double light = (NightLights.npc(looker) ? NightLights.light(level, looker, player, player.distanceTo(looker)) : level.getMaxLocalRawBrightness(eyes)) / 15.0;
@@ -1004,7 +1004,7 @@ public final class Senses {
 		if (!touched(player) && player.isAlive() && player.level() instanceof ServerLevel level) {
 			boolean feels = feelsStalkers(player);
 			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(GAUGE_RANGE),
-				m -> m.isAlive() && (sensing(m) || com.jaymoskingdoms.wild.WolfStalkers.after(m, player)))) {
+				m -> m.isAlive() && (sensing(m) || com.jaymoskingdoms.wild.WolfStalkers.after(m, player) || GuardWatch.watching(m)))) {
 				if (mob.getTarget() == player) {
 					state = SPOTTED;
 					break;
@@ -1022,8 +1022,9 @@ public final class Senses {
 					state = NOTICING;
 					fill = Math.max(fill, FILL_STEPS / 2);
 				} else {
-					// (ThinkFirst) it has picked you out and is making up its mind: the eye fills over that second
-					double thinking = ThinkFirst.share(mob, player);
+					// (ThinkFirst) it has picked you out and is making up its mind: the eye fills over that second; (GuardWatch) a
+					// guard's suspicion of you fills it the same way
+					double thinking = Math.max(ThinkFirst.share(mob, player), GuardWatch.of(mob, player.getUUID()));
 					if (thinking > 0.0 && state <= NOTICING) {
 						state = NOTICING;
 						fill = Math.max(fill, Math.max(1, (int) Math.round(thinking * FILL_STEPS)));
