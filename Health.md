@@ -45,3 +45,7 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]]: `for: coordinator` matches no bot or agent, so no one will claim it.
 - [[Inbox/structures-4-mohknee|structures-4-mohknee]]: `for: gemini` matches no bot or agent, so no one will claim it.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]]: `for: codex` matches no bot or agent, so no one will claim it.
+
+## Project memory
+
+- 4 index lines are over 300 characters (lines 19, 20, 21, 22): move their detail into topic files.
