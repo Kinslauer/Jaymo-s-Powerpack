@@ -21,7 +21,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
 - [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · for codex · open
-- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for 🍇 Bacchus · open
 
 
 ## Being built
@@ -29,6 +28,7 @@ kanban-plugin: board
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · changes · fixing review notes
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · changes · fixing review notes
+- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 🍇 Bacchus · claimed
 
 
 ## In review
