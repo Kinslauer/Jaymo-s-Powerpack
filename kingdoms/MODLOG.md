@@ -18496,3 +18496,9 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - Built (compileJava, compileClientJava); not played.
 - **Old-tongued knights** (OldKnights, Andy's follow-up: "a companion you can encounter who strictly speaks like this"): about a third of the fallen knights who turn up on the roads for hire are Sir (or Dame) somebody who speaks only the old tongue. Every word they say comes out all thee and thou (OldenTalk, Dialects#olden, through the same client step as goblin talk), whoever wrote it: their pitch ("Town fool, come hence, if thou value thy life! For 10 silver, my sword is thine."), MCA's talk, fight callouts and road remarks. Hand-written versions of any line go in lang part `old-knights.json` as `dialect.jaymoskingdoms.olden.<key>`. Hired, he alone says 8 of the quips (Quips#GATED): squire or town fool, worse shot than a hero, fare thee well armourless, cleave in twain, gone all medieval, and three of his own (one knight in this company, "shall we flee? Nay", what beast hast thou become). `/kingdom oldknight` (op) brings one to you for testing.
 - Lasting moments (unarmoured near a guard, up on a wall) now roll once when they begin, not every second they last, so the quips stay rare.
+
+## 0.14.13 (2026-11-27): Locked on, Weapon Forms and combat arts hit only the locked foe (#2333)
+
+- While you're locked on (Powers' lock-on), forms and combat arts (Spear Lunge and its pierce, Couched Lance, blade sweeps and the rest) find and strike only the locked foe. With a flail or the chain axe in hand they still hit everyone in reach.
+- `CombatArts.strikesOnly` and `CombatArts.wide`, checked in `CombatArts.strike`; `Forms.targets` keeps only the locked foe.
+- Built; not played.

@@ -9032,3 +9032,10 @@ Deviations from the plan:
 
 - `Freerun#onWall(Player)`: clinging to, climbing or running up a wall, as last synced. Kingdoms' guards and townsfolk remark on it (Quips).
 - Built (compileJava); not played.
+
+## 0.28.41 (2026-11-27): Lance couch works with a shield; locked-on swings hit only the locked foe (#2333)
+
+- **Couching fixed**: right-click with an Armory lance from the saddle couches it again whatever is in the off hand. The guard's right-click came first and turned the click away when the off hand held something that isn't a weapon (a shield, a torch, food), so the lance never couched.
+- **Locked on, a swing hits only the locked foe**: Better Combat's arc, vanilla's sweep, a cleave off the blow and a spear's stab no longer hurt anyone else while you're locked on. The swing's arc is unchanged. A couched lance only goes into the locked foe too. Flails and the chain axe still hit everything they sweep through. Not locked on, nothing changes. Powers, arrows and thrown weapons aren't swings and are left alone.
+- New `combat/LockedSwings` and `mixin/LockedSwingMixin` (`Player.attack`, cancellable, priority 500); `LanceCouch.couches`, checked at the top of `Guard.use`; `Blows.swinging` is now package-visible.
+- Built; not played.
