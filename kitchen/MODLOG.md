@@ -3017,3 +3017,17 @@ Andy: "there should be a way to dismember them from the inventory screen so you 
 - **Bottle of blood**: a bottle filled from someone (Jaymo's Kingdoms' vampires) is named "Blood of <name>", remembers who they were, the taste of their people's blood and whether they were a king or lord, and shows the taste under its name. Grate bottles are as before.
 - **Hooks for Kingdoms**: `Butchery.addOnDrinkBottle` (a hook that is given the bottle drunk), `Butchery.filledBottle`, `BloodBottleItem.donor/donorId/taste/great`, and `WinterCold.addColdProof` (more than one reason the cold can't touch someone).
 - Built; not played.
+
+## 0.7.11 (2026-11-27): Rotting bodies bare bone in patches, not checks (#2294)
+
+- Andy's clip: a rotting black bear's body looked broken, bone-white squares all over black fur and its legs striped
+  like a ladder. Rot and bared bone (`Dressed.weather`) were painted in hard 3-pixel squares picked at random across
+  the skin. They now come through in soft, ragged-edged patches (a smooth noise about 6 pixels across), each level of
+  rot baring about its share, with a rim of raw dried flesh round the bone and a little grain in it. Same for a body
+  a scavenger has eaten down to the bone.
+- Built; not played.
+
+## 0.7.12 (2026-11-27): Air combo throws mobs as ragdolls (#2300)
+
+- `MobRagdolls.thrown(mob, vx, vy, vz)`: Jaymo's Powers' air combo knocks a mob limp (or takes one already limp) and throws the body at that speed, not cut to the knockback caps (a throw on purpose, as players' `LivingRagdolls.knock`), with a flick at the head (`THROWN_TUMBLE` 0.2) so it turns over in the air; its limp time starts again so it doesn't get up in mid-air. Does nothing with Ragdollified Reactions loaded.
+- Built; not played.

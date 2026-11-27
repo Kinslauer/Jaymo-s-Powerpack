@@ -16,7 +16,8 @@ import org.jspecify.annotations.Nullable;
  * (pb-jump) A fire, lightning or wind Sorcerer's second jump ({@link SorcererJump}): a fresh press of Jump a few ticks off
  * the ground kicks once, until they stand on something, swim, climb or ride again. The fall is counted from the top of the
  * jump, as vanilla's is. With a power of Jaymo's Powers (its own second jump) or a cloud in a bottle (its jump goes first),
- * those answer the press and this waits, so no press makes two.
+ * those answer the press and this waits, so no press makes two. A press that kicks off a foe in Powers' air combo (its
+ * enemy step) is that, and this waits too.
  */
 final class SorcererJumpClient {
 	/** Upward speed of the jump (blocks a tick; a plain jump is 0.42), and the push the way they steer. */
@@ -27,7 +28,7 @@ final class SorcererJumpClient {
 	private static boolean spent, wasJump;
 	private static int air;
 	/** Jaymo's Powers' answers, looked up once: does the player have a power's jump, does the cloud bottle take this press. */
-	private static @Nullable MethodHandle powerJump, cloudJump;
+	private static @Nullable MethodHandle powerJump, cloudJump, enemyStep;
 	private static boolean looked;
 
 	private SorcererJumpClient() {
@@ -50,6 +51,13 @@ final class SorcererJumpClient {
 		} catch (ReflectiveOperationException | LinkageError e) {
 			powerJump = null;
 			cloudJump = null;
+		}
+		try {
+			enemyStep = MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.client.jump.EnemyStepClient"), "takes",
+				MethodType.methodType(boolean.class, LocalPlayer.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			// a Jaymo's Powers without the air combo's enemy step
+			enemyStep = null;
 		}
 	}
 
@@ -87,7 +95,7 @@ final class SorcererJumpClient {
 			return;
 		}
 		look();
-		if (asked(powerJump, player) || asked(cloudJump, player)) {
+		if (asked(enemyStep, player) || asked(powerJump, player) || asked(cloudJump, player)) {
 			return;
 		}
 		spent = true;

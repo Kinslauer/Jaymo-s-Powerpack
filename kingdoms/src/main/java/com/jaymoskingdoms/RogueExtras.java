@@ -473,9 +473,9 @@ public final class RogueExtras {
 		return Recollections.of(mark, player).stream().anyMatch(r -> r.kind().equals(Recollections.Kind.ROBBED.key()));
 	}
 
-	/** Whether {@code mark}'s pockets are worth the reach: not picked clean today, and a rich one's, or a villager carrying goods. */
+	/** Whether {@code mark}'s pockets are worth the reach: not picked bare, and a rich one's, or a villager carrying goods. */
 	private static boolean worthIt(ServerLevel level, LivingEntity mark) {
-		if (Pickpocket.PICKED.getOrDefault(mark.getUUID(), 0L) > level.getGameTime()) {
+		if (!Pickpocket.hasAnything(level, mark)) {
 			return false;
 		}
 		return Pickpocket.rich(mark) || mark instanceof Villager v && !v.getInventory().isEmpty();

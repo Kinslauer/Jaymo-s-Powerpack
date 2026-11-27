@@ -1,4 +1,5 @@
 {
   "skill.jaymoskingdoms.perk.air_combo": "Air Combo",
-  "skill.jaymoskingdoms.perk.air_combo.desc": "For those whose power follows a foe into the air (Wind, Z Fighter, Smoke, Xenoform, Web, Darktide, Gravity): crouch and strike a foe on the ground to launch it up and leap after it. Strike it again in the air to juggle it; crouch and strike to slam it down."
+  "skill.jaymoskingdoms.perk.air_combo.desc": "For those whose power follows a foe into the air (Wind, Z Fighter, Smoke, Xenoform, Web, Darktide, Gravity) and anyone a symbiote rides: crouch and strike a foe on the ground to launch it up and leap after it. Strike it again in the air to juggle it; crouch and strike to slam it down (your friends and villagers nearby are spared). In mid-air, a Yank or a tendril grab hauls a foe up to you into the combo, and jumping off a juggled foe with a second jump starts the combo over.",
+  "gui.jaymoskingdoms.story.hint.253": "Air Combo: a juggled foe can be kicked off. Press jump in mid-air right beside it (you need a second jump of any kind) to spring off it and start the combo count over, then hit it again before it lands. Web slingers and symbiote hosts can Yank or grab a foe off the ground while in the air to start a combo or keep one going."
 }

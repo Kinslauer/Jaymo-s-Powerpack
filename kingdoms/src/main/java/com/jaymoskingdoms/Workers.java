@@ -124,6 +124,10 @@ public final class Workers {
 			// (fighting AI patch 7) its band's style in a fight; rolling out of a blow (a bandit, an assassin), its brain waits
 			return true;
 		}
+		if (Hitching.brainStep(mob) || MakeWay.brainStep(mob)) {
+			// a rider leading their horse to a fence or back to it, or anyone standing aside to let someone by: its brain waits
+			return true;
+		}
 		if (SwornCaptains.free(mob)) {
 			// (0.7.433) a captain sworn to a player: at their side, his brain his own (and never taken onto a roster)
 			return SwornCaptains.step(level, w);

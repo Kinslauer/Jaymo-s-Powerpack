@@ -307,6 +307,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.moving.LateJumps.init();
 		com.jaymospowers.client.moving.BodyWeight.init();
 		com.jaymospowers.client.jump.PowerJumpClient.init();
+		com.jaymospowers.client.jump.EnemyStepClient.init();
 		com.jaymospowers.client.moving.AutoWalk.init();
 		StanceScroll.init();
 		ProneTransition.init();
