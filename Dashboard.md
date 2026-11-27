@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 02:59). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:02). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -49,6 +49,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
 - [ ] #2258 Legends Core animation library, landings by height, shared movement set and katana stance set (Powers, 2026-11-27)
+- [ ] #2257 Chrono: the wormhole, time skip, blitz poses, a fighting afterimage, blur steps (Powers, 2026-11-27)
 - [ ] #2254 swamp fire lag - fallen trees drawn lighter, windfall goes in a minute (Kingdoms, 2026-11-26)
 - [ ] #2253 NPC controls by the crosshair - downed and tied-up bodies (Powers, Kingdoms, 2026-11-26)
 - [ ] #2252 pull apart - wool, rocks, leather and more come apart in the inventory (Powers, 2026-11-26)
@@ -107,12 +108,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2178 Mordhau harness 2: the coif's cuts and the wrapper at the anvil, the champion's wreath (Powers, Kingdoms, 2026-11-25)
 - [ ] #2177 The Last Lantern: a second hand-built start example (Kingdoms, 2026-11-25)
 - [ ] #2176 The numpad's other keys stay quiet while the cleric's medallion board is up (Kingdoms, 2026-11-25)
-- [ ] #2175 Swinging while locked on no longer crashes the game (Powers, 2026-11-25)
-- …and 621 older ones.
+- …and 622 older ones.
 
 ## Health
 
-28 problems in the notes: [[Health]].
+29 problems in the notes: [[Health]].
 
 ## Last week
 
