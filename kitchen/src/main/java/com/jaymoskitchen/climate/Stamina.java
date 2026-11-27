@@ -38,13 +38,13 @@ import net.minecraft.world.entity.player.Player;
 public final class Stamina {
 	/** A full bar. */
 	public static final float MAX = 20.0F;
-	/** Spent a tick sprinting (a full bar lasts about thirteen seconds), and refilled a tick at rest. */
-	static final float SPRINT_COST = 0.075F, REFILL = 0.1F;
+	/** Spent a tick sprinting (a full bar lasts twenty seconds), and refilled a tick at rest. */
+	static final float SPRINT_COST = 0.05F, REFILL = 0.1F;
 	/** Ticks after a sprint before it refills; ticks you're slowed when it runs out. */
 	static final int REFILL_DELAY = 20, WINDED_TICKS = 60;
 	/** Winded until it's refilled to this share of what you can hold. */
 	static final float RECOVER_SHARE = 0.25F;
-	/** Burning (adrenaline): spent a tick even at rest (a full bar lasts about 30 seconds standing, 11 sprinting). */
+	/** Burning (adrenaline): spent a tick even at rest (a full bar lasts about 30 seconds standing, 12 sprinting). */
 	static final float BURN = MAX / 600.0F;
 
 	/** What you have, what you can hold now, and whether you're winded. */

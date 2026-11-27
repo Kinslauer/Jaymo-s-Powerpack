@@ -58,9 +58,9 @@ import org.jspecify.annotations.Nullable;
 public final class PackWeight {
 	// ===== the knobs (kilograms) ====================================================================================
 	/** What a body bears without slowing, before pockets. */
-	public static final float BASE_KG = 30.0F;
+	public static final float BASE_KG = 60.0F;
 	/** Pockets: each worn piece of padding, mail or plate (padded coats have the most), a worn backpack, a worn tool belt. */
-	public static final float POCKET_CLOTH = 3.0F, POCKET_MAIL = 2.0F, POCKET_PLATE = 1.0F, BACKPACK_KG = 20.0F, TOOL_BELT_KG = 6.0F;
+	public static final float POCKET_CLOTH = 3.0F, POCKET_MAIL = 2.0F, POCKET_PLATE = 1.0F, BACKPACK_KG = 30.0F, TOOL_BELT_KG = 6.0F;
 	/** Share of a carried body's weight that counts (borne across the shoulders, the legs take most of it). */
 	public static final float CARRIED_SHARE = 0.3F;
 	/** The overload is how far past what's borne freely, as a share of it, up to this. */
@@ -69,8 +69,12 @@ public final class PackWeight {
 	public static final float SLOW_AT_FULL = 0.45F, SWING_AT_FULL = 0.3F, JUMP_AT_FULL = 0.35F;
 	/** How often (ticks) the load is weighed again. */
 	public static final int CHECK_TICKS = 10;
-	/** Items: a block (and per point of hardness, up to the most), slab share. */
-	public static final float BLOCK_KG = 1.5F, BLOCK_HARDNESS_KG = 0.2F, BLOCK_MOST_KG = 12.0F, SLAB_SHARE = 0.5F;
+	/**
+	 * Items: a block (and per point of hardness, up to the most), slab share, and a block that breaks at a touch (a torch,
+	 * a flower, seeds, redstone dust, string: all placed as blocks, none of them heavy).
+	 */
+	public static final float BLOCK_KG = 0.4F, BLOCK_HARDNESS_KG = 0.15F, BLOCK_MOST_KG = 6.0F, SLAB_SHARE = 0.5F,
+		INSTANT_BLOCK_KG = 0.1F;
 	/** An empty bucket, a full one, a bottle or potion, an ingot, a nugget, a gem or crystal, a mouthful of food, anything else. */
 	public static final float BUCKET_KG = 1.0F, FULL_BUCKET_KG = 10.0F, BOTTLE_KG = 0.5F, INGOT_KG = 1.0F, NUGGET_KG = 0.1F, GEM_KG = 0.2F,
 		FOOD_KG = 0.3F, ITEM_KG = 0.1F;
@@ -298,7 +302,11 @@ public final class PackWeight {
 			return BOTTLE_KG;
 		}
 		if (item instanceof BlockItem block) {
-			float hardness = Math.max(0.0F, block.getBlock().defaultDestroyTime());
+			float hardness = block.getBlock().defaultDestroyTime();
+			if (hardness == 0.0F) {
+				return INSTANT_BLOCK_KG;
+			}
+			hardness = Math.max(0.0F, hardness);
 			float kg = Math.min(BLOCK_MOST_KG, BLOCK_KG + hardness * BLOCK_HARDNESS_KG);
 			return block.getBlock() instanceof net.minecraft.world.level.block.SlabBlock ? kg * SLAB_SHARE : kg;
 		}
