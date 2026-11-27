@@ -111,6 +111,22 @@ public final class LairHunts {
 	private static final Map<UUID, Party> ACTIVE = new HashMap<>();
 	private static final List<Entity> STRAYS = new ArrayList<>();
 
+	/** The men of the party sent after {@code player}'s lair, those loaded; empty if none are out ({@link Fledglings} come to their sire's side). */
+	static List<Mob> men(MinecraftServer server, UUID player) {
+		Party party = ACTIVE.get(player);
+		List<Mob> out = new ArrayList<>();
+		if (party != null) {
+			for (UUID id : party.men) {
+				for (ServerLevel level : server.getAllLevels()) {
+					if (level.getEntity(id) instanceof Mob m && m.isAlive()) {
+						out.add(m);
+					}
+				}
+			}
+		}
+		return out;
+	}
+
 	private LairHunts() {
 	}
 

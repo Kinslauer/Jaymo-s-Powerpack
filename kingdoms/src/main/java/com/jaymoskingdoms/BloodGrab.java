@@ -239,6 +239,11 @@ public final class BloodGrab {
 			// (a grab asks in start; a bite here)
 			return false;
 		}
+		if (Servants.calm(player, target)) {
+			// one held by the stare is drunk from calmly: no grab, no blow, and it never turns them (Night's Blood: servants)
+			VampirePlayers.drink(level, player, target, true, false);
+			return true;
+		}
 		if (prey(target) && !isHeld(target)) {
 			start(player, target.getId());
 			return holding(player);
@@ -253,7 +258,8 @@ public final class BloodGrab {
 
 	/** Who Feed would take: any it can, the one in the crosshair first, else the nearest within {@link #FEED_CONE} of the look. */
 	static boolean feedable(ServerPlayer player, LivingEntity e) {
-		return e != player && e.isAlive() && !e.isSpectator() && (prey(e) || SleepingPrey.prey(e) || Vampires.person(e) || Vampires.netherPrey(e));
+		return e != player && e.isAlive() && !e.isSpectator() && (prey(e) || SleepingPrey.prey(e) || Vampires.person(e) || Vampires.netherPrey(e)
+			|| Servants.calm(player, e));
 	}
 
 	static @Nullable LivingEntity feedTarget(ServerPlayer player) {

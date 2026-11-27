@@ -368,6 +368,8 @@ public final class VampirePlayers {
 		// (0.7.615) a bite that doesn't infect (a sleeper, the Nether's piglins and Hornkin) never turns its prey
 		if (infect && target.isAlive() && target instanceof PathfinderMob p && !Lycans.cursed(p) && !p.hasAttached(Vampires.BITTEN)) {
 			Vampires.bite(p, clock);
+			// the one who turns them is their sire (Night's Blood: your get)
+			Fledglings.sired(p, player);
 		} else if (infect && target.isAlive() && target instanceof ServerPlayer bitten) {
 			// (0.7.185) a ravenous fever's player prey ({@link BloodFever})
 			bitten(bitten);
@@ -377,6 +379,8 @@ public final class VampirePlayers {
 		if (target instanceof ServerPlayer victim && target.isAlive()) {
 			BloodThralls.drank(player, victim, nightNo);
 		}
+		// a calm drink from a person or beast held by the stare, on one more night, binds a servant (Night's Blood: servants)
+		Servants.drank(level, player, target, nightNo);
 		BloodRequests.fed(player, target);
 		Commandments.act(player, "blood");
 		VampireMask.fed(player);

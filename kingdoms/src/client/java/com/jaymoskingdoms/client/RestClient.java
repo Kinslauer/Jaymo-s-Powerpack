@@ -110,6 +110,6 @@ public final class RestClient {
 
 	/** How dark to draw the sleep overlay now (0-1). */
 	public static float overlay() {
-		return shown;
+		return ThrallRideClient.riding() ? 0.0F : shown;
 	}
 }

@@ -728,6 +728,7 @@ public final class Vampires {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(kind == Kind.ELDER ? ELDER_PREY_RANGE : PREY_RANGE),
 			e -> e != mob && !e.getUUID().equals(LAST_PREY.get(mob.getUUID())) && !Downed.isDowned(e)
 				&& (kind == Kind.HUNTER ? e.isAlive() && exposed(e) : person(e) || mortal(e) && !(kind == Kind.ELDER && NightbornBlood.kin(e)))
+				&& !Fledglings.spares(mob, e)
 				// (a lone victim: nobody it would go for with several armed about them)
 				&& armedNear(level, e, mob) < GROUP_ARMED)) {
 			double d = e.distanceToSqr(mob);
@@ -812,11 +813,20 @@ public final class Vampires {
 
 	private static void fed(PathfinderMob mob, Vampire v, long nightNo, long now) {
 		mob.setAttached(VAMPIRE, new Vampire(v.kind(), nightNo, now));
+		Fledglings.fed(mob);
 		Hunt had = HUNTS.remove(mob.getUUID());
 		if (had != null) {
 			LAST_PREY.put(mob.getUUID(), had.prey);
 		}
 		release(mob);
+	}
+
+	/** {@code mob} goes after {@code prey} now, as if it had picked it (a fledgling turned on its sire). */
+	static void huntNow(ServerLevel level, PathfinderMob mob, LivingEntity prey) {
+		Hunt had = HUNTS.get(mob.getUUID());
+		if (had == null || !had.prey.equals(prey.getUUID())) {
+			HUNTS.put(mob.getUUID(), new Hunt(prey.getUUID(), level.getGameTime(), Outcome.LEAVE));
+		}
 	}
 
 	/** (Nightfall) A vampire fed raw beef by hand: the hunger's quieted for tonight, as if it had fed. */
@@ -1100,6 +1110,8 @@ public final class Vampires {
 		}
 		mob.removeAttached(BITTEN);
 		mob.setAttached(VAMPIRE, new Vampire(kind.id(), nightIndex(level.getOverworldClockTime()) - (kind == Kind.ABSTAINER ? 0 : 1), 0L));
+		// one a player's bite turned is that player's fledgling
+		Fledglings.turned(level, mob);
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
 			health.removeModifier(HEALTH);
@@ -1115,6 +1127,7 @@ public final class Vampires {
 	static void cure(PathfinderMob mob) {
 		mob.removeAttached(VAMPIRE);
 		mob.removeAttached(BITTEN);
+		Fledglings.freed(mob);
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
 			health.removeModifier(HEALTH);
