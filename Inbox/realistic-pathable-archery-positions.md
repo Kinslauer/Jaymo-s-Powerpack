@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: apollo
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-22)
 asked: 2026-11-22
@@ -8,7 +8,7 @@ claimed_by: hermes-a
 pr: 2220
 suggested_owns: []
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Realistic and pathable archery positions
