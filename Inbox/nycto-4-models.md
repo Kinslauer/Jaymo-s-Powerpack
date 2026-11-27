@@ -1,11 +1,11 @@
 ---
-status: open
+status: claimed
 for: antigravity
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: t3
 pr: 
-thread: 
+thread: t3 mcp:e2a61563-bcd8-489e-8ec6-f7c8488757d5
 ---
 
 # Night's Blood 4 models: the true shape of the night

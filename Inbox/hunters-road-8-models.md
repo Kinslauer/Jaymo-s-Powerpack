@@ -23,3 +23,4 @@ thread: t3 mcp:a702d48f-4420-4429-be7a-54786d6548e5
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - 2026-11-27 11:41 Back to the modeller (Hunter's Road thread, 2026-11-27): models are Prometheus' job; that thread builds the patch once each model lands.
 - 2026-11-27 08:35 Andy 2026-11-27: models to Codex and Antigravity through T3
+- 2026-11-27 09:08 Antigravity quota reached 2026-11-27 (resets about 1:30 PM). Only tools/gen_hunters_road_8_models.py started (uncommitted) in its T3 worktree; resume with t3 thread send to mcp:a702d48f after the reset.
