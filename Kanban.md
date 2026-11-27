@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 10:46). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 10:48). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,7 +27,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · 🪶 Quill · #2302 · writing
 
 
 ## In review
@@ -44,6 +43,7 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-7|nycto-7]] · ☁️ Cloud · #2296 · in-review
 - [ ] [[Inbox/nycto-6|nycto-6]] · ☁️ Cloud · #2298 · in-review
 - [ ] [[Inbox/nycto-5|nycto-5]] · ☁️ Cloud · #2299 · in-review
+- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · 🔥 Prometheus · #2302 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
