@@ -46,6 +46,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.MoonPhase;
@@ -384,7 +385,9 @@ public final class BloodPage {
 
 	/** Unquiet: a trader asks more of {@code player} once they start trading. */
 	public static void tolls(AbstractVillager trader, @Nullable Player player) {
-		if (player == null || !has(player, Pact.UNQUIET)) {
+		// only a villager: it clears its special prices each time trading starts (updateSpecialPrices), so the toll is
+		// laid fresh once a talk; a wandering trader never clears them, and a toll there would pile up talk after talk
+		if (player == null || !(trader instanceof Villager) || !has(player, Pact.UNQUIET)) {
 			return;
 		}
 		for (MerchantOffer offer : trader.getOffers()) {
