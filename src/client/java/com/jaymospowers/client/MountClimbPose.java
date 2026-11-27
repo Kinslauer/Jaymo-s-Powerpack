@@ -24,6 +24,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -200,7 +201,9 @@ public final class MountClimbPose {
 					Seat before = SEATS.get(player.getId());
 					RIDE_SPEED.put(player.getId(), before != null && before.mountId == vehicle.getId()
 						? Math.hypot(vehicle.getX() - before.mountAt.x, vehicle.getZ() - before.mountAt.z) : 0.0);
-					SEATS.put(player.getId(), new Seat(vehicle.getId(), player.position(), bodyYaw(vehicle), vehicle.position()));
+					// where the rider is drawn, which on Icy's horses isn't always where the server seats them (IcySaddle)
+					SEATS.put(player.getId(), new Seat(vehicle.getId(), player.position().subtract(IcySaddle.drawnShift(vehicle)), bodyYaw(vehicle),
+						vehicle.position()));
 				} else {
 					SEATS.remove(player.getId());
 				}
@@ -317,6 +320,11 @@ public final class MountClimbPose {
 		float s = c.share(partialTicks);
 		Vec3 at = player.getPosition(partialTicks);
 		Vec3 from = c.start(player, partialTicks);
+		if ((c.kind == Kind.ON_LEFT || c.kind == Kind.ON_RIGHT) && player.level().getEntity(c.mountId) instanceof AbstractHorse horse) {
+			// a foot in the stirrup first: out from inside a big horse's flank (Icy's draft breeds) if they stood there
+			Vec3 stirrup = IcySaddle.stirrup(horse, from, c.kind == Kind.ON_RIGHT ? 1 : -1);
+			from = from.lerp(stirrup, smooth(0.0F, IcySaddle.STEP_OUT, s));
+		}
 		if (c.kind.on()) {
 			// where they end up: the seat the mount offers (the second seat, for a pillion climb: Kingdoms places it for a
 			// rider not yet aboard), or, once they're seated, simply where they are, so the path runs on to its end
@@ -429,8 +437,10 @@ public final class MountClimbPose {
 			// these place their rider by hand (positionRider), not by the usual attachment point
 			return mount.getPosition(partialTicks).add(0.0, rideable.seatY(), 0.0);
 		}
-		return mount.getPassengerRidingPosition(player).subtract(player.getVehicleAttachmentPoint(mount))
+		Vec3 seat = mount.getPassengerRidingPosition(player).subtract(player.getVehicleAttachmentPoint(mount))
 			.subtract(mount.position()).add(mount.getPosition(partialTicks));
+		// down to where Icy's will draw them once seated (asked after the seat: Icy's works it out then)
+		return seat.subtract(IcySaddle.drawnShift(mount));
 	}
 
 	/**

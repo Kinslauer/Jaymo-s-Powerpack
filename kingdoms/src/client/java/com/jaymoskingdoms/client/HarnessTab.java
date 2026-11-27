@@ -28,6 +28,9 @@ public final class HarnessTab extends AbstractButton {
 	/** Out from the screen's left edge, and down from its top (under Powers' powers and baubles tabs). */
 	static final int OUT = 25, DOWN = 60;
 	private static final int INVENTORY_W = 176;
+	/** Icy's horse tab's class, and how far the left-edge tabs move down under it (as Powers' IcyRiderTab.ROOM). */
+	static final String ICY_TAB = "icy.betterhorses.net.client.RiderPanel$Tab";
+	static final int ICY_ROOM = 40;
 
 	private final AbstractContainerScreen<?> screen;
 	/** True on the harness screen (back to the inventory), false on the inventory (to the harness). */
@@ -59,7 +62,21 @@ public final class HarnessTab extends AbstractButton {
 	void place() {
 		AbstractContainerScreenAccessor at = (AbstractContainerScreenAccessor)this.screen;
 		this.visible = at.jaymoskingdoms$leftPos() == (this.screen.width - INVENTORY_W) / 2;
-		setPosition(at.jaymoskingdoms$leftPos() - OUT, at.jaymoskingdoms$topPos() + DOWN);
+		setPosition(at.jaymoskingdoms$leftPos() - OUT, at.jaymoskingdoms$topPos() + DOWN + icyShift(this.screen));
+	}
+
+	/**
+	 * Icy's Better Horses' horse-head tab (back to the horse's inventory) sits on this edge while you ride a tame horse,
+	 * 24 px down: Powers' tabs and this one move down {@link #ICY_ROOM} under it while it is there (the same check as
+	 * Powers' IcyRiderTab; the tab is Icy's client internals, so it is found by name).
+	 */
+	static int icyShift(net.minecraft.client.gui.screens.Screen screen) {
+		for (net.minecraft.client.gui.components.AbstractWidget widget : Screens.getWidgets(screen)) {
+			if (widget.visible && widget.getClass().getName().equals(ICY_TAB)) {
+				return ICY_ROOM;
+			}
+		}
+		return 0;
 	}
 
 	@Override
