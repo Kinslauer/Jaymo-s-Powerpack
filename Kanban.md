@@ -24,6 +24,7 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for any · open
 - [ ] [[Inbox/black-panther-k1|black-panther-k1]] · for any · open
 - [ ] [[Inbox/black-panther-p1|black-panther-p1]] · for any · open
+- [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · open
 
 
 ## Being built
@@ -80,7 +81,6 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-r5|black-panther-r5]] · for any · blocked
 - [ ] [[Inbox/black-panther-r6|black-panther-r6]] · for any · blocked
 - [ ] [[Inbox/black-panther-r7|black-panther-r7]] · for any · blocked
-- [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
