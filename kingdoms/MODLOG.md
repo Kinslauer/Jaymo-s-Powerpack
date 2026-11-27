@@ -18377,3 +18377,8 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Squelch the narrator**: a small note button on the life story and on its "Your story is being written" loading screen. Pressing it cuts the narrator off mid-line and keeps him quiet in every later story (struck-through note); pressing it again lets him speak, starting the current page from the top. On question pages it sits in the top right corner, on the panel pages (story summary, realms, the road) left of Next. Kept in `config/jaymoskingdoms-narrator.txt`. Spirits' voices aren't the narrator and still speak.
 - `NarratorSetting` (new), `LifeStoryScreen`, `StoryHoldScreen`; lang part `narrator-squelch.json`.
 - Built; not played.
+
+## 0.13.97 (2026-11-27): harness tab moves under Icy's horse tab (#2311)
+
+- **Inventory**: while you ride a tame horse, Icy's Better Horses' horse-head tab (back to the horse's inventory) sits on the survival inventory's left edge, where the harness tab, with Powers' powers and baubles tabs, covered it. The harness tab now moves down 40 px under it with Powers' tabs while it is there (`HarnessTab.icyShift`).
+- Built; not played.

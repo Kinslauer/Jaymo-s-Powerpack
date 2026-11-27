@@ -8933,3 +8933,10 @@ Deviations from the plan:
 
 - **/autohud off** stops Auto HUD hiding parts of the HUD, so the whole HUD stays on screen; **/autohud on** lets it fade them out again; a bare **/autohud** says which it is now. The choice is kept on your computer (`config/jaymospowers-client.properties`, `autohud.off`) and put back each time the game starts. Before anyone uses it, Auto HUD's own "Enable on game load" setting decides, as before; its toggle key and Mod Menu page still work. Without Auto HUD the command just says it isn't installed (`compat/AutoHudToggle`, Auto HUD looked up by name).
 - Built; not played.
+
+## 0.28.28 (2026-11-27): climbs onto Icy's horses land in its saddle; Icy's horse tab no longer hidden in the inventory (#2311)
+
+- **Climbing on and off Icy's horses**: a climb now ends where Icy's Better Horses draws its rider, not at the seat the server keeps. Icy's sets a Percheron's seat a quarter block above where it draws the rider (and a rearing horse's back along its rump), so a climber stood a quarter block over the saddle at the end of the climb and then dropped into it; getting off started that high too. Both now go to and from the drawn saddle (`IcySaddle.drawnShift`, read from Icy's own `BhRiderSeat.applied`; `MountClimbPose.seatOf` and the seat a rider is last seen in).
+- **Foot in the stirrup first**: climbing on from a horse's side, someone standing closer in than its flank (easy at an Icy's draft horse's shoulder, 1.5 to 1.6 blocks wide) first steps out to it over the opening of the climb, instead of rising out of its body (`IcySaddle.stirrup`). Any horse-like mount, players and the villagers and guards who mount on their own alike.
+- **Inventory tabs**: while you ride a tame horse, Icy's horse-head tab (back to the horse's inventory) sits on the survival inventory's left edge, where the powers and baubles tabs covered it. They now move down 40 px under it while it is there (`IcyRiderTab`), and back up when it isn't.
+- Built; not played. Pictures in the PR are worked out from the code, not taken in game.
