@@ -54,22 +54,23 @@ final class RigMenuScreen extends Screen {
 		// flight actives
 		RigPicks.PULLUP, RigPicks.HYPER, RigPicks.BANK_TURN, RigPicks.METEOR, RigPicks.SMOOTH,
 		// the Octo Core's arms (RigOcto): shown only while one is worn
-		RigOcto.ARMS, RigOcto.GRAB, RigOcto.SKEWER, RigOcto.PINWHEEL, RigOcto.VAULT, RigOcto.ANCHOR, RigOcto.WATCH};
+		RigOcto.ARMS, RigOcto.GRAB, RigOcto.SKEWER, RigOcto.PINWHEEL, RigOcto.VAULT, RigOcto.ANCHOR, RigOcto.WATCH, RigOcto.WALK, RigOcto.COMBO};
 	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start", "dash", "barrage",
 		"slow_beat", "failsafe", "blade", "mace", "pile", "drill", "lance", "lash", "mimic", "wingslash", "spears", "pincer", "grapple", "horns",
 		"palm_charge", "gatling", "railgun", "sonic", "twin", "siege", "pullup", "hyper", "bank_turn", "meteor", "smooth",
-		"octo_arms", "octo_grab", "octo_skewer", "octo_pinwheel", "octo_vault", "octo_anchor", "octo_watch"};
+		"octo_arms", "octo_grab", "octo_skewer", "octo_pinwheel", "octo_vault", "octo_anchor", "octo_watch", "octo_walk", "octo_combo"};
 	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1,
 		RigForms.BLADE_LEVEL, RigForms.MACE_LEVEL, RigForms.PILE_LEVEL, RigForms.DRILL_LEVEL, RigForms.LANCE_LEVEL, RigForms.LASH_LEVEL, RigForms.MIMIC_LEVEL,
 		3, 2, 3, 2, 4,
 		Rig.LOCK_LEVEL, Rig.SCAN_LEVEL, Rig.UNIBEAM_LEVEL, Rig.UNIBEAM_LEVEL, Rig.MAX_LEVEL, Rig.MAX_LEVEL,
 		Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL,
-		RigOcto.ARMS_LEVEL, RigOcto.GRAB_LEVEL, RigOcto.SKEWER_LEVEL, RigOcto.PINWHEEL_LEVEL, RigOcto.VAULT_LEVEL, RigOcto.ANCHOR_LEVEL, RigOcto.WATCH_LEVEL};
+		RigOcto.ARMS_LEVEL, RigOcto.GRAB_LEVEL, RigOcto.SKEWER_LEVEL, RigOcto.PINWHEEL_LEVEL, RigOcto.VAULT_LEVEL, RigOcto.ANCHOR_LEVEL, RigOcto.WATCH_LEVEL,
+		RigOcto.WALK_LEVEL, RigOcto.COMBO_LEVEL};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
 	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		RigForms.BLADE_COOLDOWN, RigForms.MACE_COOLDOWN, RigForms.PILE_COOLDOWN, RigForms.DRILL_COOLDOWN, RigForms.LANCE_COOLDOWN, RigForms.LASH_COOLDOWN, RigForms.MIMIC_COOLDOWN,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0};
+		0, 0, 0, 0, 0, 0, 0, 0, 0};
 	/** The entries on the ring now (indices into {@link #ACTIONS}): the Octo Core's only while one is worn. */
 	private int[] shown = new int[0];
 	private double slice = 360.0;
@@ -144,6 +145,8 @@ final class RigMenuScreen extends Screen {
 			case 47 -> Items.RABBIT_FOOT;
 			case 48 -> Items.TRIPWIRE_HOOK;
 			case 49 -> Items.OBSERVER;
+			case 50 -> Items.SCAFFOLDING;
+			case 51 -> Items.BLAZE_POWDER;
 			default -> Items.ENDER_EYE;
 		};
 	}
@@ -257,6 +260,7 @@ final class RigMenuScreen extends Screen {
 				case RigPicks.SMOOTH -> RigClient.status.smoothOthers();
 				case RigOcto.ARMS -> RigOcto.out(player);
 				case RigOcto.WATCH -> RigOcto.watching(player);
+				case RigOcto.WALK -> RigOcto.walking(player);
 				default -> false;
 			};
 		}
@@ -351,7 +355,7 @@ final class RigMenuScreen extends Screen {
 			if (ACTIONS[selected] == RigNet.FACEPLATE || ACTIONS[selected] == RigNet.NIGHT || ACTIONS[selected] == RigNet.HOVER || ACTIONS[selected] == RigClient.JET_START
 				|| ACTIONS[selected] == RigClient.SLOW_BEAT || ACTIONS[selected] == RigPicks.FAILSAFE || ACTIONS[selected] == RigPicks.PULLUP || ACTIONS[selected] == RigPicks.HYPER
 				|| ACTIONS[selected] == RigPicks.BANK_TURN || ACTIONS[selected] == RigPicks.SMOOTH || ACTIONS[selected] == RigOcto.ARMS
-				|| ACTIONS[selected] == RigOcto.WATCH) {
+				|| ACTIONS[selected] == RigOcto.WATCH || ACTIONS[selected] == RigOcto.WALK) {
 				return Component.translatable(on(player, selected) ? "gui.jaymospowers.rig_menu.on" : "gui.jaymospowers.rig_menu.off");
 			}
 			return Component.translatable("gui.jaymospowers.rig_menu.ready");

@@ -450,7 +450,7 @@ public final class Rig {
 	/** Whether this player is hovering on their thrusters (server): they mustn't be kicked for floating. */
 	public static boolean hovering(Player player) {
 		// the Octo Core's lower arms gripping a wall count too
-		return RigActives.hovering(player) || RigOcto.clinging(player);
+		return RigActives.hovering(player) || RigOcto.clinging(player) || RigOcto.carried(player);
 	}
 
 	/** (0.11.87) Whether this player is in the Rig's full flight (server). */

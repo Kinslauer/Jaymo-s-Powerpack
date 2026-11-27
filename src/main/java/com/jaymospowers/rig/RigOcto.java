@@ -73,25 +73,34 @@ import org.jspecify.annotations.Nullable;
  * creature it hauls it to you (the tendril zip).</li>
  * <li><b>Arm watch</b> ({@link #WATCH}): a switch: the arms fight on their own, striking the nearest monster in reach and
  * batting away shots, each for a little charge, until the Core runs low.</li>
+ * <li><b>Arm walk</b> ({@link #WALK}): a switch (Andy: "they can do wall climbing and walking like the tendrils"): the four
+ * arms telescope out to the ground, walls and ceilings round you and carry you along between them, the way the symbiote's
+ * Wall Crawl strides (client RigOctoWalk). Jump climbs, Sneak lowers, Sneak on the ground stands you on your feet. It
+ * drains a little charge while it holds you up.</li>
+ * <li><b>Jab, cross, blast</b> ({@link #COMBO}; Andy: "a strong jab cross and blast combo"): the upper right arm telescopes
+ * out in a jab, the upper left follows with a heavier cross, then all four claws close on one point and fire a focused
+ * blast down the look (an instant beam, like the palm blast, paid for in charge).</li>
  * </ul>
  * Mind levels and costs are below. Menu entries and moves are numbered clear of the other Rig patches'.
  */
 public final class RigOcto {
 	// ---- tuning ----
 	/** Rig menu entries ({@link RigPicks}). */
-	public static final int ARMS = 80, GRAB = 81, SKEWER = 82, PINWHEEL = 83, VAULT = 84, ANCHOR = 85, WATCH = 86;
+	public static final int ARMS = 80, GRAB = 81, SKEWER = 82, PINWHEEL = 83, VAULT = 84, ANCHOR = 85, WATCH = 86, WALK = 87, COMBO = 88;
 	/** Synced moves ({@link RigMoves}). */
 	public static final int MOVE_GRAB = 80, MOVE_HOLD = 81, MOVE_HURL = 82, MOVE_SKEWER = 83, MOVE_PINWHEEL = 84, MOVE_VAULT = 85,
-		MOVE_DIVE = 86, MOVE_ANCHOR = 87, MOVE_LANCE = 88, MOVE_CRESCENT = 89, MOVE_CLAMP = 90, MOVE_LAUNCH = 91, MOVE_WATCH = 92;
+		MOVE_DIVE = 86, MOVE_ANCHOR = 87, MOVE_LANCE = 88, MOVE_CRESCENT = 89, MOVE_CLAMP = 90, MOVE_LAUNCH = 91, MOVE_WATCH = 92,
+		MOVE_JAB = 93, MOVE_CROSS = 94, MOVE_BLAST = 95;
 	public static final int GRAB_TICKS = 8, HOLD_TICKS = 300, HURL_TICKS = 8, SKEWER_TICKS = 22, PINWHEEL_TICKS = 50, VAULT_TICKS = 14,
-		DIVE_TICKS = 30, ANCHOR_TICKS = 12, STRIKE_TICKS = 8, WATCH_STRIKE_TICKS = 6;
+		DIVE_TICKS = 30, ANCHOR_TICKS = 16, STRIKE_TICKS = 8, WATCH_STRIKE_TICKS = 6, JAB_TICKS = 7, CROSS_TICKS = 8, BLAST_TICKS = 16;
 	/** Mind levels. */
-	public static final int ARMS_LEVEL = 1, GRAB_LEVEL = 1, SKEWER_LEVEL = 2, PINWHEEL_LEVEL = 3, VAULT_LEVEL = 2, ANCHOR_LEVEL = 2, WATCH_LEVEL = 3;
+	public static final int ARMS_LEVEL = 1, GRAB_LEVEL = 1, SKEWER_LEVEL = 2, PINWHEEL_LEVEL = 3, VAULT_LEVEL = 2, ANCHOR_LEVEL = 2, WATCH_LEVEL = 3, WALK_LEVEL = 1,
+		COMBO_LEVEL = 2;
 	/** Charge each costs (the flurry and the watch per blow or shot). */
 	static final int GRAB_COST = 20, RIP_COST = 30, SKEWER_COST = 45, PINWHEEL_COST = 50, VAULT_COST = 20, DIVE_COST = 25, ANCHOR_COST = 20,
-		FLURRY_COST = 4, WATCH_COST = 3;
+		FLURRY_COST = 4, WATCH_COST = 3, COMBO_COST = 50;
 	/** Arm grab: reach (blocks), how far ahead it is held and how far down, the steer toward that spot, the hurl's speed; the rip. */
-	static final double GRAB_RANGE = 9.0, HOLD_FORWARD = 2.1, HOLD_DROP = 0.4, HOLD_STEER = 0.45, HOLD_MAX_SPEED = 1.4, HURL_SPEED = 2.2;
+	static final double GRAB_RANGE = 14.0, HOLD_FORWARD = 2.1, HOLD_DROP = 0.4, HOLD_STEER = 0.45, HOLD_MAX_SPEED = 1.4, HURL_SPEED = 2.2;
 	static final int RIP_PIECES = 6;
 	static final float RIP_HARDEST = 4.0F;
 	/** What the arms can't lift: anything with more health than this. */
@@ -112,7 +121,7 @@ public final class RigOcto {
 	static final int VAULT_WINDOW = 40;
 	static final float DIVE_DAMAGE = 14.0F;
 	/** Anchor: reach (blocks) and pull (blocks a tick). */
-	static final double ANCHOR_RANGE = 20.0, ANCHOR_PULL = 1.4;
+	public static final double ANCHOR_RANGE = 20.0, ANCHOR_PULL = 1.4;
 	/** The flurry: a step's blow on top of yours, the reach round the front; how long the chain waits for your next blow (ticks). */
 	static final float LANCE_DAMAGE = 4.0F, CRESCENT_DAMAGE = 4.0F, CLAMP_DAMAGE = 5.0F, LAUNCH_DAMAGE = 6.0F;
 	static final double FLURRY_REACH = 4.5;
@@ -122,7 +131,17 @@ public final class RigOcto {
 	static final float WATCH_DAMAGE = 5.0F;
 	static final int WATCH_EVERY = 10, WATCH_LOW = 40;
 	/** Climbing: how close a wall must be (blocks). */
-	static final double WALL_GAP = 0.35;
+	public static final double WALL_GAP = 0.35;
+	/** Arm walk: the charge it drains while it holds you off the ground, every this many ticks. */
+	static final int WALK_COST = 1, WALK_DRAIN_EVERY = 20;
+	/**
+	 * Jab, cross, blast: how far the jab and cross telescope out (blocks), their blows and knockback; when the cross and the
+	 * blast start after the jab (ticks) and when in the blast it fires; the blast's reach, blow, knockback and kick; the
+	 * wait before the combo can go again (ticks).
+	 */
+	public static final double COMBO_REACH = 7.0, JAB_KNOCK = 0.3, CROSS_KNOCK = 0.9, BLAST_RANGE = 24.0, BLAST_KNOCK = 1.6;
+	static final float JAB_DAMAGE = 6.0F, CROSS_DAMAGE = 9.0F, BLAST_DAMAGE = 14.0F, BLAST_SHAKE = 0.6F;
+	static final int CROSS_AT = 7, BLAST_AT = 15, BLAST_FIRE = 8, COMBO_COOLDOWN = 40;
 	/** The Forge's price for the Octo Core in the standard frame: salvage points, iron, pistons. */
 	static final int OCTO_POINTS = 15, OCTO_IRON = 8, OCTO_PISTONS = 4;
 	public static final int FX = 0x5FE6FF;
@@ -133,7 +152,7 @@ public final class RigOcto {
 	/** What the arms are doing, synced to everyone (client RigOctoClient): {@link #OUT} and {@link #WATCHING} bits. */
 	public static final AttachmentType<Integer> STATE = AttachmentRegistry.create(JaymosPowers.id("rig_octo"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	public static final int OUT = 1, WATCHING = 2;
+	public static final int OUT = 1, WATCHING = 2, WALKING = 4;
 	/** Who the arms hold (entity id), synced to everyone so the arms are drawn reaching for it; -1 for nothing. */
 	public static final AttachmentType<Integer> HELD = AttachmentRegistry.create(JaymosPowers.id("rig_octo_held"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
@@ -162,6 +181,8 @@ public final class RigOcto {
 	private static final Map<UUID, Chain> CHAINS = new HashMap<>();
 	private static final Map<UUID, Long> HOLD_SINCE = new HashMap<>();
 	private static final List<Thrown> THROWN = new ArrayList<>();
+	/** When each wearer's combo may go again (game time). */
+	private static final Map<UUID, Long> COMBO_READY = new HashMap<>();
 
 	private RigOcto() {
 	}
@@ -247,6 +268,16 @@ public final class RigOcto {
 		return (bits(player) & WATCHING) != 0 && out(player);
 	}
 
+	/** Whether the arm walk is on (both sides): the arms carry you when they have something to grab. */
+	public static boolean walking(Player player) {
+		return (bits(player) & WALKING) != 0 && out(player);
+	}
+
+	/** Held up off the ground on the walking arms (server: no kick for floating, no fall to take). */
+	public static boolean carried(Player player) {
+		return walking(player) && !player.onGround() && !player.isPassenger() && !player.isFallFlying() && !player.isSpectator();
+	}
+
 	private static void setBits(ServerPlayer player, int bits) {
 		if (bits == 0) {
 			player.removeAttached(STATE);
@@ -274,7 +305,7 @@ public final class RigOcto {
 
 	/** Whether {@code action} is one of these menu entries. */
 	public static boolean is(int action) {
-		return action >= ARMS && action <= WATCH;
+		return action >= ARMS && action <= COMBO;
 	}
 
 	/** How long one of these moves plays (ticks), or 0. */
@@ -290,6 +321,9 @@ public final class RigOcto {
 			case MOVE_ANCHOR -> ANCHOR_TICKS;
 			case MOVE_LANCE, MOVE_CRESCENT, MOVE_CLAMP, MOVE_LAUNCH -> STRIKE_TICKS;
 			case MOVE_WATCH -> WATCH_STRIKE_TICKS;
+			case MOVE_JAB -> JAB_TICKS;
+			case MOVE_CROSS -> CROSS_TICKS;
+			case MOVE_BLAST -> BLAST_TICKS;
 			default -> 0;
 		};
 	}
@@ -306,6 +340,8 @@ public final class RigOcto {
 			case PINWHEEL -> PINWHEEL_LEVEL;
 			case VAULT -> VAULT_LEVEL;
 			case ANCHOR -> ANCHOR_LEVEL;
+			case WALK -> WALK_LEVEL;
+			case COMBO -> COMBO_LEVEL;
 			default -> WATCH_LEVEL;
 		};
 		if (!RigActives.needs(player, level)) {
@@ -338,6 +374,8 @@ public final class RigOcto {
 				}
 			}
 			case WATCH -> toggleWatch(player);
+			case WALK -> toggleWalk(player);
+			case COMBO -> combo(player);
 			default -> {
 			}
 		}
@@ -368,9 +406,21 @@ public final class RigOcto {
 			RigMind.empty(player);
 			return;
 		}
-		setBits(player, OUT | (on ? WATCHING : 0));
+		setBits(player, on ? bits(player) | WATCHING : bits(player) & ~WATCHING);
 		servo(player, on ? 1.6F : 0.9F);
 		player.sendOverlayMessage(Component.translatable(on ? "message.jaymospowers.rig_octo.watch_on" : "message.jaymospowers.rig_octo.watch_off")
+			.withStyle(ChatFormatting.AQUA));
+	}
+
+	private static void toggleWalk(ServerPlayer player) {
+		boolean on = !walking(player);
+		if (on && Rig.charge(player) < WALK_COST * 10 && !player.isCreative()) {
+			RigMind.empty(player);
+			return;
+		}
+		setBits(player, on ? bits(player) | WALKING : bits(player) & ~WALKING);
+		servo(player, on ? 0.9F : 0.7F);
+		player.sendOverlayMessage(Component.translatable(on ? "message.jaymospowers.rig_octo.walk_on" : "message.jaymospowers.rig_octo.walk_off")
 			.withStyle(ChatFormatting.AQUA));
 	}
 
@@ -780,11 +830,96 @@ public final class RigOcto {
 		e.hurtServer(player.level(), player.level().damageSources().playerAttack(player), damage);
 	}
 
+	// ---- jab, cross, blast -------------------------------------------------------------------------------------------------
+
+	private static void combo(ServerPlayer player) {
+		long now = player.level().getGameTime();
+		Long ready = COMBO_READY.get(player.getUUID());
+		if (ready != null && now < ready || held(player) != null) {
+			return;
+		}
+		if (!pay(player, COMBO_COST)) {
+			return;
+		}
+		COMBO_READY.put(player.getUUID(), now + BLAST_AT + BLAST_TICKS + COMBO_COOLDOWN);
+		punch(player, MOVE_JAB, JAB_DAMAGE, JAB_KNOCK, 1.5F);
+		RigActives.later(player, CROSS_AT, () -> {
+			if (out(player)) {
+				punch(player, MOVE_CROSS, CROSS_DAMAGE, CROSS_KNOCK, 1.1F);
+			}
+		});
+		RigActives.later(player, BLAST_AT, () -> {
+			if (out(player)) {
+				RigMoves.start(player, MOVE_BLAST);
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.7F, 1.8F);
+				RigActives.later(player, BLAST_FIRE, () -> {
+					if (out(player)) {
+						blast(player);
+					}
+				});
+			}
+		});
+	}
+
+	/** One telescoping punch down the look: the first thing in reach takes it. */
+	private static void punch(ServerPlayer player, int move, float damage, double knock, float pitch) {
+		RigMoves.start(player, move);
+		ServerLevel level = player.level();
+		Entity aimed = aimed(player, COMBO_REACH, e -> e instanceof LivingEntity);
+		LivingEntity target = aimed instanceof LivingEntity l ? l : nearestInFront(player, COMBO_REACH * 0.5);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PISTON_EXTEND, SoundSource.PLAYERS, 0.9F, pitch);
+		if (target == null) {
+			return;
+		}
+		float blow = damage * RigActives.levelDamage(player);
+		strike(player, target, blow);
+		Vec3 look = player.getLookAngle();
+		if (!heavy(target)) {
+			target.knockback(knock, -look.x, -look.z, level.damageSources().playerAttack(player), blow);
+			target.syncVelocity = true;
+		}
+		Vec3 at = target.getBoundingBox().getCenter();
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, pitch * 0.7F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.35F, 1.6F);
+	}
+
+	/** The four claws on one point: a focused blast down the look. */
+	private static void blast(ServerPlayer player) {
+		ServerLevel level = player.level();
+		Vec3 eye = player.getEyePosition(), look = player.getLookAngle();
+		Vec3 end = eye.add(look.scale(BLAST_RANGE));
+		BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		if (block.getType() != HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, player.getBoundingBox().expandTowards(end.subtract(eye)).inflate(1.0),
+			e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e != player, eye.distanceToSqr(end));
+		if (hit != null) {
+			end = hit.getLocation();
+		}
+		// from where the claws meet, a little ahead of the chest
+		Vec3 from = eye.add(look.scale(1.6)).subtract(0.0, 0.3, 0.0);
+		MagicFx.beam(level, from, end, 0.14F, FX, 6);
+		MagicFx.blast(level, end, 0.9F, FX);
+		MagicFx.ring(level, from, 0.8F, FX);
+		com.jaymospowers.core.Shakes.send(player, BLAST_SHAKE, end);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0F, 1.2F);
+		level.playSound(null, end.x, end.y, end.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.5F, 1.6F);
+		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
+			float blow = BLAST_DAMAGE * RigActives.levelDamage(player);
+			strike(player, target, blow);
+			if (!heavy(target)) {
+				target.knockback(BLAST_KNOCK, -look.x, -look.z, level.damageSources().playerAttack(player), blow);
+				target.syncVelocity = true;
+			}
+		}
+	}
+
 	// ---- the watch --------------------------------------------------------------------------------------------------------
 
 	private static void tickWatch(ServerPlayer player, long now) {
 		if (!player.isCreative() && Rig.charge(player) < WATCH_LOW) {
-			setBits(player, OUT);
+			setBits(player, bits(player) & ~WATCHING);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_octo.watch_low").withStyle(ChatFormatting.GRAY));
 			return;
 		}
@@ -883,6 +1018,7 @@ public final class RigOcto {
 			}
 			HOISTS.remove(id);
 			SPINS.remove(id);
+			COMBO_READY.remove(id);
 			DIVING.remove(id);
 			return;
 		}
@@ -905,9 +1041,14 @@ public final class RigOcto {
 		if (watching(player)) {
 			tickWatch(player, now);
 		}
-		if (clinging(player)) {
-			// the lower arms have the wall: no fall to take
+		if (clinging(player) || carried(player)) {
+			// the arms have the wall, or hold you up: no fall to take
 			player.resetFallDistance();
+		}
+		if (carried(player) && now % WALK_DRAIN_EVERY == 0 && !player.isCreative() && !Rig.spend(player, WALK_COST)) {
+			// out of charge: the arms let you down
+			setBits(player, bits(player) & ~WALKING);
+			RigMind.empty(player);
 		}
 	}
 

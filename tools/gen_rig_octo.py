@@ -2,10 +2,11 @@
 
 Run from the repo root: python3 tools/gen_rig_octo.py
 
-- textures/entity/rig/octo.png (32x32) and octo_glow.png: the four arms' sheet. The Rig's gunmetal ramp (the same five
+- textures/entity/rig/octo.png (64x32) and octo_glow.png: the four arms' sheet. The Rig's gunmetal ramp (the same five
   shades as tools/gen_rig.py), placed as fixed plates and seams, never per-pixel noise (docs/Vanilla-Style.md): the shoulder
   strut at 0,0, the forearm at 0,12, the spine mount at 0,24, the elbow joint at 12,24 (lit cyan: it glows), the claw hub
-  at 22,24 and the prongs at 22,28. Each cube's box faces are painted lit on top, darker underneath.
+  at 22,24, the prongs at 22,28, and the telescoping rods that slide out of the struts at 24,0 (upper) and 24,12 (fore):
+  polished steel, lighter than the plates, with no seams. Each cube's box faces are painted lit on top, darker underneath.
 - textures/item/rig/octo_core.png (16x16): the Core's icon with the four arms curling out of its corners, painted pixel by
   pixel from the Core's own icon and palette.
 """
@@ -26,7 +27,7 @@ GLOW_DIM = (40, 140, 170)
 WHITE = (220, 255, 255)
 
 
-def box(im, u, v, w, h, d, glow=None, lit=False):
+def box(im, u, v, w, h, d, glow=None, lit=False, rod=False):
     """Paints one cube's UV layout (vanilla's box unwrap) at u, v: w wide, h high, d deep, in whole pixels."""
     w, h, d = max(1, round(w)), max(1, round(h)), max(1, round(d))
     faces = {
@@ -36,7 +37,10 @@ def box(im, u, v, w, h, d, glow=None, lit=False):
     for face, (fx, fy, fw, fh) in faces.items():
         for y in range(fh):
             for x in range(fw):
-                if lit:
+                if rod:
+                    # polished steel: a bright line along the top edge, the rest light plate
+                    c = PLATE_TOP if y == 0 or face == "top" else PLATE if face == "bottom" else PLATE_HI
+                elif lit:
                     c = WHITE if (x + y) % 3 == 0 and face in ("top", "front") else GLOW
                 elif face == "top":
                     c = PLATE_TOP if y == 0 else PLATE_HI
@@ -59,14 +63,16 @@ def box(im, u, v, w, h, d, glow=None, lit=False):
 
 
 def arms():
-    im = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    glow = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    im = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    glow = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
     box(im, 0, 0, 2, 2, 9)          # shoulder strut
     box(im, 0, 12, 1.5, 1.5, 8)     # forearm
     box(im, 0, 24, 3, 3, 2)         # the mount on the spine
     box(im, 12, 24, 2.5, 2.5, 2.5, glow, lit=True)  # the elbow joint, lit
     box(im, 22, 24, 2, 2, 1.5)      # claw hub
     box(im, 22, 28, 0.8, 0.8, 3)    # prong
+    box(im, 24, 0, 1.2, 1.2, 9, rod=True)   # the upper rod, out of the shoulder strut
+    box(im, 24, 12, 1, 1, 8, rod=True)      # the fore rod, out of the forearm
     # a lit strip down each strut's outer face: the servo line (in the glow pass too)
     for y in range(9, 11):
         for x in range(0, 9, 4):
