@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 20:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:01). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**28 problems.**
+**27 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -15,7 +15,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Agents/blood-awakening-per-blood-patch-1|blood-awakening-per-blood-patch-1]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/codex|codex]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hollow-captains-fix|hollow-captains-fix]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -23,6 +22,10 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-6-stable-mine-farm|structures-6-stable-mine-farm]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+
+## Agent notes whose task is done
+
+- [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 
 ## Missing PR numbers
 
@@ -38,7 +41,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/changeling-voice-mimic|changeling-voice-mimic]]: `for: codex` matches no bot or agent, so no one will claim it.
 - [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]]: `for: codex` matches no bot or agent, so no one will claim it.
 - [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]]: `for: held-for-p3` matches no bot or agent, so no one will claim it.
-- [[Inbox/legends-p6-core-animations|legends-p6-core-animations]]: `for: codex` matches no bot or agent, so no one will claim it.
 - [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]]: `for: gemini` matches no bot or agent, so no one will claim it.
 - [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]]: `for: any (needs Andy's PC: the folder is local)` matches no bot or agent, so no one will claim it.
 - [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]]: `for: coordinator` matches no bot or agent, so no one will claim it.
