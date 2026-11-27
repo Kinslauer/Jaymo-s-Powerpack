@@ -51,6 +51,10 @@ def stable(api):
         elif (x, z) != (6, 1):
             for y in (3, 4, 5):
                 g.put(x, y, z, "cobblestone")
+    # clear the inside so a hillside doesn't fill it with dirt or grass
+    for (x, z) in rect(2, 10, 2, 10):
+        for y in (3, 4, 5):
+            g.clear(x, y, z)
     g.clear(6, 3, 1); g.clear(6, 4, 1)
     g.put(6, 3, 1, "oak_door", {"facing": "south", "half": "lower", "hinge": "left", "open": "false", "powered": "false"})
     g.put(6, 4, 1, "oak_door", {"facing": "south", "half": "upper", "hinge": "left", "open": "false", "powered": "false"})
@@ -59,12 +63,14 @@ def stable(api):
     for (x, z) in rect(1, 11, 1, 11):
         if (x, z) != (3, 3):
             g.put(x, 6, z, "spruce_planks")
-    for y in (7, 8, 9):
+    for y in (6, 7, 8, 9):
         g.put(3, y, 3, "bricks")
     g.put(3, 10, 3, "brick_stairs",
           {"half": "lower", "facing": "north", "waterlogged": "false", "shape": "straight"})
     for (x, z) in ((3, 4), (3, 8), (9, 4), (9, 8)):
         g.put(x, 5, z, "lantern", {"hanging": "true", "waterlogged": "false"})
+    # a horse in a stall
+    g.entity(3, 3, 4, "minecraft:horse")
     return g
 
 
@@ -93,6 +99,9 @@ def mine(api):
         for y in range(1, 8):
             g.put(x, y, z, "oak_log", {"axis": "y"})
         g.put(x, 8, z, "lantern", {"hanging": "false", "waterlogged": "false"})
+    # a ladder down the north-west corner so the quarry can be walked into
+    for y in range(1, 8):
+        g.put(3, y, 4, "ladder", {"facing": "east"})
     return g
 
 
@@ -102,7 +111,7 @@ def mine(api):
 # a scarecrow in the first plot. Layers: 0 the earth, 1 the ground (farmland and paths),
 # 2 the shed's roof.
 def farm(api):
-    g = api.Grid(15, 3, 15)
+    g = api.Grid(15, 4, 15)
     cross = [(x, z) for x in range(2, 13) for z in (6, 7, 8)] + [(x, z) for z in range(2, 13) for x in (6, 7, 8)]
     cross_set = set(cross)
     for (x, z) in cross:
@@ -119,7 +128,7 @@ def farm(api):
         for (x, z) in cells:
             g.put(x, 1, z, "farmland", {"moisture": "7"})
             if (x + z) % 3 == want[kind]:
-                g.put(x, 1, z, crop[kind], {"age": "7"})
+                g.put(x, 2, z, crop[kind], {"age": "7"})
     # the shed: log walls, a plank roof that overhangs, a door, hay and a trough inside
     for (x, z) in shed:
         if x in (11, 13) or z in (11, 13):
@@ -132,6 +141,8 @@ def farm(api):
     g.put(12, 1, 11, "oak_door", {"facing": "south", "half": "lower", "hinge": "left", "open": "false", "powered": "false"})
     g.put(12, 2, 11, "oak_door", {"facing": "south", "half": "upper", "hinge": "left", "open": "false", "powered": "false"})
     g.put(12, 1, 12, "hay_block")
+    # clear inside the shed
+    g.clear(12, 2, 12)
     g.put(11, 1, 12, "water_cauldron")
     # fences round the farm, lanterns at its corners, a gate on the north side, a scarecrow
     ring = [(x, z) for x in range(15) for z in range(15) if x in (0, 14) or z in (0, 14)]

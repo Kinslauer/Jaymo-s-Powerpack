@@ -47,6 +47,7 @@ class Grid:
     def __init__(self, w, h, d):
         self.w, self.h, self.d = w, h, d
         self.b = {}
+        self.entities = []
 
     def put(self, x, y, z, name, props=None, data=None):
         if 0 <= x < self.w and 0 <= y < self.h and 0 <= z < self.d:
@@ -68,6 +69,14 @@ class Grid:
         self.put(x, y, z, "barrel", {"facing": facing, "open": "false"},
                  {"LootTable": Tag(nbt.STRING, NS + ":" + loot), "id": Tag(nbt.STRING, "minecraft:barrel")})
 
+    def entity(self, x, y, z, id, **data):
+        """An entity to spawn in the template: id plus any extra NBT fields."""
+        e = {"id": Tag(nbt.STRING, id),
+             "Pos": Tag(nbt.LIST, (nbt.DOUBLE, [Tag(nbt.DOUBLE, float(x)), Tag(nbt.DOUBLE, float(y)), Tag(nbt.DOUBLE, float(z))]))}
+        for k, v in data.items():
+            e[k] = Tag(nbt.STRING, v) if isinstance(v, str) else Tag(nbt.INT, v)
+        self.entities.append(Tag(nbt.COMPOUND, e))
+
 
 def template(g):
     palette, index, blocks = [], {}, []
@@ -86,7 +95,7 @@ def template(g):
         blocks.append(Tag(nbt.COMPOUND, b))
     return {
         "size": Tag(nbt.LIST, (nbt.INT, [Tag(nbt.INT, g.w), Tag(nbt.INT, g.h), Tag(nbt.INT, g.d)])),
-        "entities": Tag(nbt.LIST, (nbt.COMPOUND, [])),
+        "entities": Tag(nbt.LIST, (nbt.COMPOUND, g.entities)),
         "blocks": Tag(nbt.LIST, (nbt.COMPOUND, blocks)),
         "palette": Tag(nbt.LIST, (nbt.COMPOUND, palette)),
         "DataVersion": Tag(nbt.INT, DATA_VERSION),
