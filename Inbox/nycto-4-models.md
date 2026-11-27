@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: prometheus
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
