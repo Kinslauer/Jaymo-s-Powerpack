@@ -32,7 +32,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Might:</b> every blow hits harder.</li>
  * <li><b>Agility:</b> quicker on your feet.</li>
  * <li><b>Finesse:</b> quicker swings, and (Powers' lock-on) head shots that miss and glance less.</li>
- * <li><b>Endurance:</b> hunger drains slower.</li>
+ * <li><b>Endurance:</b> hunger drains slower, and you carry more before your pack weighs you down (Jaymo's Powers'
+ * pack weight asks {@link #carryKg} by reflection).</li>
  * <li><b>Grit:</b> armour, a firmer stance, and toughness ({@link Toughness}): every point is one, so blows land lighter.</li>
  * <li><b>Wits:</b> every pillar learns faster, and a little luck.</li>
  * <li><b>Presence</b>: how you carry yourself among people. It sways persuading, lying, threatening and haggling
@@ -85,6 +86,8 @@ public final class Stats {
 	static final double FINESSE = 0.025 / STEP * TOP_SHARE;
 	/** Endurance: this share off hunger's drain per point (100: 37.5% less). */
 	static final float ENDURANCE = (float)(0.025 / STEP * TOP_SHARE);
+	/** Endurance: kilograms more borne freely per point (100: +50 kg on Powers' 60 kg base). */
+	public static final float ENDURANCE_CARRY_KG = 0.5F;
 	/** Grit: armour points, and knockback resistance, per point (100: +7.5 armour, +30%). */
 	static final double GRIT_ARMOR = 0.5 / STEP * TOP_SHARE, GRIT_KNOCKBACK = 0.02 / STEP * TOP_SHARE;
 	/** Wits: this share more skill experience, and this much luck, per point (100: +45%, +1.5 luck). */
@@ -328,7 +331,7 @@ public final class Stats {
 			case MIGHT -> Component.translatable("stat.jaymoskingdoms.might.now", pct(MIGHT * value));
 			case AGILITY -> Component.translatable("stat.jaymoskingdoms.agility.now", pct(AGILITY * value));
 			case FINESSE -> Component.translatable("stat.jaymoskingdoms.finesse.now", pct(FINESSE * value));
-			case ENDURANCE -> Component.translatable("stat.jaymoskingdoms.endurance.now", pct(ENDURANCE * value));
+			case ENDURANCE -> Component.translatable("stat.jaymoskingdoms.endurance.now", pct(ENDURANCE * value), num(ENDURANCE_CARRY_KG * value));
 			case GRIT -> Component.translatable("stat.jaymoskingdoms.grit.now", num(GRIT_ARMOR * value), pct(Toughness.shrug(Toughness.BASE + value)),
 				pct(GRIT_KNOCKBACK * value));
 			case WITS -> Component.translatable("stat.jaymoskingdoms.wits.now", pct(WITS_XP * value), num(WITS_LUCK * value));
@@ -359,6 +362,14 @@ public final class Stats {
 	 */
 	public static double agility(Player player) {
 		return AGILITY * value(player, Stat.AGILITY);
+	}
+
+	/**
+	 * What {@code player}'s Endurance adds to what they carry without slowing (kilograms; 100 points: 50). Jaymo's Powers'
+	 * pack weight ({@code core.PackWeight}) calls this by reflection; either side.
+	 */
+	public static float carryKg(Player player) {
+		return ENDURANCE_CARRY_KG * value(player, Stat.ENDURANCE);
 	}
 
 	/** The factor on {@code player}'s hunger drain (Endurance). */
