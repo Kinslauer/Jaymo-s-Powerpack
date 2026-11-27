@@ -95,14 +95,23 @@ final class LifeStoryScreen extends Screen {
 	static final long SLIDE_MS = 220L;
 	static final int SLIDE_PX = 36;
 
-	/** One page: a question, the realm to name for a question's answer, or the story read back. */
-	private record Step(@Nullable Question question, boolean realm, boolean gender) {
+	/** One page: a question, the realm to name for a question's answer, the ideal, bond and flaw, or the story read back. */
+	private record Step(@Nullable Question question, boolean realm, boolean gender, boolean sparks) {
 		static final Step SUMMARY = new Step(null, false, false);
 		/** (0.7.304) Andy: "The first screen should be choosing your gender". */
 		static final Step GENDER = new Step(null, false, true);
+		/**
+		 * Andy: "move the ideal bond and flaw to it's own screen, leave harder life here as they are optional. the ideal
+		 * bond and flaw arent." Their own page, just before the story read back: one of each has to be picked to go on.
+		 */
+		static final Step SPARKS = new Step(null, false, false, true);
+
+		Step(@Nullable Question question, boolean realm, boolean gender) {
+			this(question, realm, gender, false);
+		}
 
 		boolean summary() {
-			return this.question == null && !this.gender;
+			return this.question == null && !this.gender && !this.sparks;
 		}
 	}
 
@@ -367,6 +376,7 @@ final class LifeStoryScreen extends Screen {
 				out.add(new Step(q, true, false));
 			}
 		}
+		out.add(Step.SPARKS);
 		out.add(Step.SUMMARY);
 		return out;
 	}
@@ -468,6 +478,9 @@ final class LifeStoryScreen extends Screen {
 	private static boolean answered(Step s) {
 		if (s.gender) {
 			return draft.gender >= 0;
+		}
+		if (s.sparks) {
+			return sparksPicked();
 		}
 		if (s.question == null) {
 			// (0.7.349) a road that's no longer open (the birthplace changed under it) has to be picked again
@@ -1140,6 +1153,10 @@ final class LifeStoryScreen extends Screen {
 
 	/** The lines the narrator reads on page {@code s}, as lang keys. */
 	private static List<String> lines(Step s) {
+		// (the ideal, bond and flaw are picked in silence: there's no tale on that page)
+		if (s.sparks) {
+			return List.of();
+		}
 		if (s.gender) {
 			// (0.7.360) Andy: "should just say, 'Who are you' no other voice line, on this screen"
 			return List.of("story.jaymoskingdoms.gender.title");
@@ -1583,7 +1600,9 @@ final class LifeStoryScreen extends Screen {
 		int viewTop = y + HEADER, viewBottom = y + h - FOOTER;
 		this.viewH = viewBottom - viewTop;
 		graphics.enableScissor(px + 1, viewTop, px + pw - 1, viewBottom);
-		if (!s.summary()) {
+		if (s.sparks) {
+			sparksPage(graphics, mouseX, mouseY);
+		} else if (!s.summary()) {
 			rows(graphics, s, mouseX, mouseY);
 		} else if (draft.explicit) {
 			// (the cards are widgets, drawn with the buttons)
@@ -1944,6 +1963,9 @@ final class LifeStoryScreen extends Screen {
 	private Component heading(Step s) {
 		if (s.gender) {
 			return Component.translatable("story.jaymoskingdoms.gender.title");
+		}
+		if (s.sparks) {
+			return Component.translatable("gui.jaymoskingdoms.story.sparks");
 		}
 		if (s.question == null) {
 			return Component.translatable(draft.explicit ? "gui.jaymoskingdoms.creator.title" : "gui.jaymoskingdoms.story.summary");
@@ -2429,8 +2451,10 @@ final class LifeStoryScreen extends Screen {
 		return draft.sparks[kind];
 	}
 
+	/** Steps the {@code kind} picked through its offers, round and round: never to none, since one of each must be picked. */
 	static void cycleSpark(int kind, int dir) {
-		draft.sparks[kind] = Math.floorMod(draft.sparks[kind] + dir, com.jaymoskingdoms.Sparks.options(null, kind).size() + 1);
+		int n = com.jaymoskingdoms.Sparks.options(null, kind).size();
+		draft.sparks[kind] = draft.sparks[kind] < 1 ? dir > 0 ? 1 : n : Math.floorMod(draft.sparks[kind] - 1 + dir, n) + 1;
 		draft.sparksTouched = true;
 	}
 
@@ -2489,7 +2513,9 @@ final class LifeStoryScreen extends Screen {
 			draft.switches = p.switches;
 		}
 		for (int i = 0; i < draft.sparks.length; i++) {
-			draft.sparks[i] = p.sparks != null && i < p.sparks.length ? Math.clamp(p.sparks[i], 0, 3) : 0;
+			// (a kept face from before one of each had to be picked: the first offer, as a new story starts with)
+			int at = p.sparks != null && i < p.sparks.length ? p.sparks[i] : 0;
+			draft.sparks[i] = at >= 1 && at <= 3 ? at : 1;
 		}
 		draft.sparksTouched = true;
 		draft.raisedRealm = realmNamed(p.raisedRealm == null ? "" : p.raisedRealm);
@@ -2570,7 +2596,7 @@ final class LifeStoryScreen extends Screen {
 			}
 			y += rh;
 		}
-		return sparkRows(graphics, mouseX, mouseY, y, px, pw, textW);
+		return y;
 	}
 
 	/** A flaw's or spark's box at x, y (9 square), struck with the story's hand-drawn X when {@code on}. */
@@ -2588,27 +2614,50 @@ final class LifeStoryScreen extends Screen {
 	/** The first choice index of the spark picks: 3 lists of 3, ideal then bond then flaw. */
 	private static final int SPARK_BASE = 8;
 
-	/** (After heritage and class) the ideal, bond and flaw to play true to: three offered by the start for each. */
+	/** Whether one of each of the ideal, bond and flaw is picked (none of them is optional). */
+	private static boolean sparksPicked() {
+		for (int at : draft.sparks) {
+			if (at < 1 || at > 3) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** The ideal, bond and flaw's own page: what they are, the three lists, and (while one is missing) what's wanted to go on. */
+	private void sparksPage(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		int px = paneX(), pw = paneW(), textW = pw - 22;
+		int y = top() + HEADER + 4 - this.scroll;
+		int startY = y;
+		this.choiceRows.clear();
+		this.chipsTop = -1;
+		y = sparkRows(graphics, mouseX, mouseY, y, px, pw, textW);
+		if (!sparksPicked()) {
+			y += 6;
+			for (FormattedCharSequence l : this.font.split(Component.translatable("gui.jaymoskingdoms.story.sparks.need"), textW)) {
+				graphics.text(this.font, l, px + 10, y, ACCENT);
+				y += Ui.LINE;
+			}
+		}
+		this.contentH = y + this.scroll - startY + 4;
+		this.scroll = Math.clamp(this.scroll, 0, Math.max(0, this.contentH - this.viewH));
+	}
+
+	/** The ideal, bond and flaw to play true to: three offered by the start for each, a list still unpicked headed in the accent. */
 	private int sparkRows(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int y, int px, int pw, int textW) {
 		Answer road = picked(Question.ROAD);
 		com.jaymoskingdoms.LifeStory.Start start = road == null ? null : road.start();
 		if (!draft.sparksTouched && draft.sparks[0] == 0 && draft.sparks[1] == 0 && draft.sparks[2] == 0) {
 			Arrays.fill(draft.sparks, 1);
 		}
-		y += 6;
-		Ui.rule(graphics, px + 6, px + pw - 6, y - 3);
-		graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.sparks"), px + 10, y, ACCENT);
-		y += 11;
-		for (String line : new String[] {"gui.jaymoskingdoms.story.sparks.about"}) {
-			for (FormattedCharSequence l : this.font.split(Component.translatable(line), textW)) {
-				graphics.text(this.font, l, px + 10, y, Ui.DIM);
-				y += Ui.LINE;
-			}
+		for (FormattedCharSequence l : this.font.split(Component.translatable("gui.jaymoskingdoms.story.sparks.about"), textW)) {
+			graphics.text(this.font, l, px + 10, y, Ui.DIM);
+			y += Ui.LINE;
 		}
 		String[] kinds = {"ideal", "bond", "flaw"};
 		for (int kind = 0; kind < 3; kind++) {
 			y += 4;
-			graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.sparks." + kinds[kind]), px + 10, y, Ui.DIM);
+			graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.sparks." + kinds[kind]), px + 10, y, draft.sparks[kind] == 0 ? ACCENT : Ui.DIM);
 			y += 11;
 			List<String> offered = com.jaymoskingdoms.Sparks.options(start, kind);
 			for (int pos = 0; pos < offered.size(); pos++) {
@@ -2638,7 +2687,8 @@ final class LifeStoryScreen extends Screen {
 
 	/** The choice row at the mouse, or -1. */
 	private int choiceAt(int mouseX, int mouseY) {
-		if (!step().summary() || mouseY < top() + HEADER || mouseY >= top() + panelH() - FOOTER || mouseX < paneX() + 6 || mouseX >= paneX() + paneW() - 8) {
+		Step s = step();
+		if (!s.summary() && !s.sparks || mouseY < top() + HEADER || mouseY >= top() + panelH() - FOOTER || mouseX < paneX() + 6 || mouseX >= paneX() + paneW() - 8) {
 			return -1;
 		}
 		for (int[] row : this.choiceRows) {
@@ -2650,11 +2700,11 @@ final class LifeStoryScreen extends Screen {
 		return -1;
 	}
 
-	/** Flips choice {@code i}: a flaw (never a third), or a switch. */
+	/** Flips choice {@code i}: a flaw (never a third), or a switch; or picks an ideal, bond or flaw (one stays picked: they aren't optional). */
 	static void flip(int i) {
 		if (i >= SPARK_BASE) {
 			int kind = (i - SPARK_BASE) / 3, pos = (i - SPARK_BASE) % 3 + 1;
-			draft.sparks[kind] = draft.sparks[kind] == pos ? 0 : pos;
+			draft.sparks[kind] = pos;
 			draft.sparksTouched = true;
 			return;
 		}
