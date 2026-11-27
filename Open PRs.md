@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 20:29
+updated: 2026-11-26 21:00
 ---
 # Open PRs
 
-11 open, as of 2026-11-26 20:29. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-26 21:00. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -60,3 +60,13 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `gemini/legends-p7-zfighter-weapon-moves` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[legends-p7-zfighter-weapon-moves]]
+
+## [#2256](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2256) HD Effekseer effects for ultimates
+- **Branch:** `codex/effekseer-hd` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2257](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2257) Legends: web swinging, web attacks and uptilt, Chrono wormhole
+- **Branch:** `claude/project-thread-aaw9tm` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note

@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: changes
 for: apollo
 claimed_by: hermes-a
 from: Andy (Claude chat, 2026-11-26)
 asked: 2026-11-26
 pr: 2245
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Hollow captains: keep the count, 12 per player, own ladders
@@ -51,3 +51,4 @@ Delegated to Apollo (Andy: hand both jobs to the Hermes bots now). It was briefl
 - 2026-11-26 06:07 hermes-a's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-26 11:51 hermes-a's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-26 14:12 Text pass: rewrote changes/kingdoms/hollow-captains-fix.md to be player-facing (per-player ladders of up to 12, kill-only promotion, intersecting ladders, captain-due-back keeps their ladder place, count bug fix; no code internals). The PR adds no lang, chat, screen or dialogue strings — HollowCaptains.java and Captains.java changes are code only (per-player attachments, named tuning constants). Kingdoms builds (sh ./gradlew build --no-daemon) and python tools/pr_checks.py pass; not play-tested.
+- 2026-11-27 02:59 Review (head 7a79807), cloud coordinator for Andy: changes needed. 1) HollowCaptains.java:402: the original bug isn't fixed, it now ends the other way: a due-back captain isn't counted in playerRoom (line 452 counts only walking bodies), so roam fills his slot and comeBack then returns with no retry; he never comes back. Count due-back captains on the player's ladder as taken in playerRoom, so their place really is reserved. 2) Plain Hollow (not captains) risen for a player go into PLAYER_WALKING via rise(), but died() and the unload hook (lines 187 and 629) only find an owner through the ladder, so plain Hollow are never removed from PLAYER_WALKING; after 12 die, no more rise near that player. Store the owner on the Hollow itself (entity attachment) and remove by that. 3) comeBack and findPlayerWithCaptain only look at online players, so a captain whose player is offline never comes back; the change note says their Hollow keep walking and their ladder is kept. Decide and build it (e.g. due-back captains wait until the owner is on). 4) Each player's own ladder isn't shown anywhere: Ladders, LadderScreen and Rivals.ladder() still show the world-wide one, so 'they should all have their own ladders' isn't visible in game. 5) START and the world-wide COUNT/WALKING still run for non-captain paths; the task said 12 per player replaces START = 6. 6) Lore.md 'The Hollow among the dead' (new) paragraph not written. 7) MEND_THRESHOLD javadoc says 'how often'; it is a health margin. CI is green.
