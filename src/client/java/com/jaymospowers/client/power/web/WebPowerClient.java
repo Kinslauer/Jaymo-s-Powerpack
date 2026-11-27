@@ -48,6 +48,7 @@ public final class WebPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		WebCutClient.register();
+		WebBruteClient.register();
 		WebZipMarker.init();
 		WebGooClient.init();
 		// a Verdant or Frost-born with the suit: the plain left click is the weapon arm's, sneak + left hold the race's

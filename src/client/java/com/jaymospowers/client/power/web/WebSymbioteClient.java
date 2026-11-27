@@ -3,6 +3,8 @@ package com.jaymospowers.client.power.web;
 import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.power.web.WebNet;
+import com.jaymospowers.power.web.WebPose;
+import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.web.WebSymbioteState;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -960,7 +962,7 @@ public final class WebSymbioteClient {
 	 * press at once), anyone else's as the server syncs it.
 	 */
 	public static float struggleShare(Player player) {
-		if (player == Minecraft.getInstance().player && (takeoverTicks > 0 || peelTicks > 0)) {
+		if (player == Minecraft.getInstance().player && player.getAttached(WebSymbiote.RHYTHM) == null && (takeoverTicks > 0 || peelTicks > 0)) {
 			int needed = neededNow(player);
 			return needed > 0 ? Mth.clamp(struggleMeter / needed, 0.0F, 1.0F) : 0.0F;
 		}
@@ -970,12 +972,13 @@ public final class WebSymbioteClient {
 
 	/** The movement keys during a takeover: each new press is a struggle. */
 	public static void struggleKeys(Input keys) {
+		boolean sneak = keys.shift() && !heldKeys.shift();
 		boolean pressed = keys.forward() && !heldKeys.forward() || keys.backward() && !heldKeys.backward() || keys.left() && !heldKeys.left()
 			|| keys.right() && !heldKeys.right() || keys.jump() && !heldKeys.jump() || keys.shift() && !heldKeys.shift()
 			|| keys.sprint() && !heldKeys.sprint();
 		heldKeys = keys;
 		if (pressed) {
-			struggle();
+			struggle(sneak);
 		}
 	}
 
@@ -992,18 +995,26 @@ public final class WebSymbioteClient {
 
 	/** One press against its hold (at most one a tick reaches the server; see WebSymbiote.breakFreeNeeded). */
 	public static void struggle() {
+		struggle(false);
+	}
+
+	private static void struggle(boolean sneak) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null || !inputLocked() || player.tickCount == struggleTick) {
 			return;
 		}
+		Long rhythm = player.getAttached(WebSymbiote.RHYTHM);
+		if (rhythm != null && !sneak) {
+			return;
+		}
 		struggleTick = player.tickCount;
-		if (neededNow(player) > 0) {
+		if (rhythm == null && neededNow(player) > 0) {
 			struggleMeter += 1.0F;
 			// every heave against it jolts your view, harder the further out of it you've torn
 			com.jaymospowers.client.ScreenShake.add(STRUGGLE_SHAKE + STRUGGLE_SHAKE_PER * struggleShare(player));
 		}
 		if (ClientPlayNetworking.canSend(WebNet.Struggle.TYPE)) {
-			ClientPlayNetworking.send(new WebNet.Struggle());
+			ClientPlayNetworking.send(new WebNet.Struggle(sneak));
 		}
 	}
 
@@ -1928,6 +1939,17 @@ public final class WebSymbioteClient {
 		boolean wall = !tired && !player.level().noCollision(player, box.inflate(0.12, -0.1, 0.12));
 		boolean ceiling = !tired && !player.onGround() && !player.level().noCollision(player, box.move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05));
 		Input input = player.input.keyPresses;
+		WebPose brute = player.getAttached(WebPower.POSE);
+		boolean serverPose = brute != null && (brute.kind() == WebPose.BRUTE_AIR || brute.kind() == WebPose.BRUTE_NOVA
+			|| brute.kind() >= WebPose.BRUTE_WALL_GRAB && brute.kind() <= WebPose.BRUTE_WALL_LEDGE);
+		if (WebSymbiote.bulked(player) && com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE)
+			&& !player.isInWater() && player.getAttached(WebSymbiote.WALL) == null
+			&& (serverPose || wall && !ceiling && input.jump())) {
+			wallClinging = false;
+			ceilingClinging = false;
+			letGoOfWall();
+			return;
+		}
 		Vec3 move = inputDirection(player, input);
 		boolean sneakPressed = input.shift() && !sneakWas;
 		sneakWas = input.shift();

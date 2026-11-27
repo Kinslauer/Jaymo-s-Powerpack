@@ -67,6 +67,8 @@ public final class UltimateFilm {
 	 * {@link Play#target} is the foe.
 	 */
 	public static final int DRAG = 14;
+	/** Low orbit round the big suit as its fury builds. */
+	public static final int BRUTE_NOVA = 15;
 	/**
 	 * (0.20.9) {@code MORPH}: letterboxed, it zooms on each changing part of {@code caster} in turn (the {@link Play#parts} list, in
 	 * order), holds while that part grows from the base alien into the Ultimate, then pulls back to the whole new body.

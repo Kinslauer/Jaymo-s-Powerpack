@@ -1,6 +1,12 @@
 package com.jaymospowers.power.web;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The suit's charged leap, as numbers both sides share: how hard a charge throws you up, how high that carries you, and
@@ -51,6 +57,51 @@ public final class WebLeap {
 			v = (v - gravity) * DRAG;
 		}
 		return top;
+	}
+
+	/** A full charge can land on a foe only when the whole body clears the expected arc. */
+	static @Nullable Vec3 aimedVelocity(ServerPlayer player, Vec3 land) {
+		Vec3 start = player.position();
+		Vec3 span = land.subtract(start);
+		double gravity = player.getAttributeValue(Attributes.GRAVITY);
+		for (float charge = 0.48F; charge <= 1.01F; charge += 0.04F) {
+			double up = speed(charge);
+			double y = 0.0, v = up, travel = 0.0, stride = 1.0;
+			int ticks = 0;
+			while (ticks < 56 && (v >= 0 || y > span.y)) {
+				y += v;
+				v = (v - gravity) * DRAG;
+				travel += stride;
+				stride *= 0.98;
+				ticks++;
+			}
+			if (ticks >= 56 || travel <= 0 || span.horizontalDistance() / travel > 1.65 || y > span.y) {
+				continue;
+			}
+			Vec3 across = span.horizontal().scale(1 / travel);
+			AABB body = player.getBoundingBox();
+			double xz = 0.0;
+			y = 0.0;
+			v = up;
+			stride = 1.0;
+			boolean clear = true;
+			for (int i = 0; i < ticks; i++) {
+				xz += stride;
+				y += v;
+				Vec3 offset = across.scale(xz).add(0, Math.max(i == ticks - 1 ? span.y : -Double.MAX_VALUE, y), 0);
+				if (!player.level().hasChunkAt(BlockPos.containing(start.add(offset)))
+					|| !player.level().noCollision(player, body.move(offset))) {
+					clear = false;
+					break;
+				}
+				v = (v - gravity) * DRAG;
+				stride *= 0.98;
+			}
+			if (clear) {
+				return across.add(0, up, 0);
+			}
+		}
+		return null;
 	}
 
 	/**

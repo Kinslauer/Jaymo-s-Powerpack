@@ -188,9 +188,9 @@ public final class WebNet {
 	}
 
 	/** Client → server: a key pressed against a takeover's hold (the client swallows them all while it drives). */
-	public record Struggle() implements CustomPacketPayload {
+	public record Struggle(boolean sneak) implements CustomPacketPayload {
 		public static final Type<Struggle> TYPE = new Type<>(JaymosPowers.id("web_symbiote_struggle"));
-		public static final StreamCodec<ByteBuf, Struggle> CODEC = StreamCodec.unit(new Struggle());
+		public static final StreamCodec<ByteBuf, Struggle> CODEC = ByteBufCodecs.BOOL.map(Struggle::new, Struggle::sneak);
 
 		@Override
 		public Type<Struggle> type() {

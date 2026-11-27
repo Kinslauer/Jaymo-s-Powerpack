@@ -1240,6 +1240,12 @@ public final class WebSwing {
 
 	/** The leap itself, from a charge of {@code ticks} (of {@link #CHARGE_FULL}): up, and forward along the look. */
 	private void leap(LocalPlayer player, int ticks) {
+		if (com.jaymospowers.power.web.WebSymbiote.bulked(player)
+			&& com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE) && player.onGround()) {
+			// The server launches and validates the big suit's ground leap.
+			WebSymbioteClient.leapt();
+			return;
+		}
 		float c = Math.min(ticks, CHARGE_FULL) / (float)CHARGE_FULL;
 		Vec3 look = player.getLookAngle();
 		Vec3 flat = new Vec3(look.x, 0.0, look.z);

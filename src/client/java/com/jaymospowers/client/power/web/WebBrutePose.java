@@ -1,6 +1,9 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.power.web.WebBrute;
+import com.jaymospowers.power.web.WebBruteArts;
+import com.jaymospowers.power.web.WebPose;
+import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.web.WebSymbiote;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -39,9 +42,13 @@ public final class WebBrutePose {
 	// ================================================================================================================
 
 	/** {@code kind}: a {@link WebBrute} move; {@code t}: ticks into it. */
-	public record Pose(int kind, float t) {
+	public record Pose(int kind, float t, int side) {
 	}
 
+	private record Gait(boolean air, boolean run) {
+	}
+
+	private static final RenderStateDataKey<Gait> GAIT = RenderStateDataKey.create(() -> "jaymospowers:web_brute_gait");
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_brute");
 
 	private WebBrutePose() {
@@ -49,13 +56,25 @@ public final class WebBrutePose {
 
 	/** From the avatar renderer's extractRenderState. */
 	public static void extract(Entity entity, AvatarRenderState state) {
-		WebBrute.Move move = entity.getAttached(WebBrute.MOVE);
-		if (move == null || !(entity instanceof Player player) || !WebSymbiote.bulked(player)) {
-			state.setData(KEY, null);
+		state.setData(KEY, null);
+		state.setData(GAIT, null);
+		if (!(entity instanceof Player player) || !(WebSymbiote.bulked(player) && player.isAlive())) {
 			return;
 		}
+		long now = entity.level().getGameTime();
 		float partial = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
-		state.setData(KEY, new Pose(move.kind(), Math.max(0.0F, entity.level().getGameTime() - move.since() + partial)));
+		WebPose current = player.getAttached(WebPower.POSE);
+		if (current != null && WebPose.brute(current.kind()) && now - current.start() < current.ticks()) {
+			state.setData(KEY, new Pose(current.kind(), Math.max(0, now - current.start() + partial), current.side()));
+			return;
+		}
+		WebBrute.Move move = entity.getAttached(WebBrute.MOVE);
+		if (move != null) {
+			state.setData(KEY, new Pose(move.kind(), Math.max(0.0F, now - move.since() + partial), 1));
+		} else if (current == null && !player.isSwimming() && !player.isFallFlying() && !player.isPassenger()
+			&& !player.isCrouching() && !player.getAbilities().flying) {
+			state.setData(GAIT, new Gait(!player.onGround(), player.isSprinting()));
+		}
 	}
 
 	private static float smooth(float x) {
@@ -79,6 +98,10 @@ public final class WebBrutePose {
 		if (pose == null) {
 			return false;
 		}
+		if (WebPose.brute(pose.kind())) {
+			art(h, state, pose, slim);
+			return true;
+		}
 		float weight = smooth(pose.t() / BLEND_IN);
 		float length = length(pose.kind());
 		if (length > 0.0F) {
@@ -100,8 +123,116 @@ public final class WebBrutePose {
 		return true;
 	}
 
+	static boolean gait(HumanoidModel<?> h, AvatarRenderState state, boolean slim) {
+		Gait gait = state.getData(GAIT);
+		if (gait == null || state.getData(WebArms.KEY) != null || state.getData(WebClimbPose.KEY) != null) {
+			return false;
+		}
+		if (gait.air()) {
+			flight(h, state, slim, 0.4F);
+			return true;
+		}
+		float speed = Mth.clamp(state.walkAnimationSpeed * 1.6F, 0.0F, 1.0F);
+		float step = Mth.cos(state.walkAnimationPos * (gait.run() ? 0.78F : 0.58F));
+		float breath = Mth.sin(state.ageInTicks * 0.12F) * 0.04F;
+		float bend = Mth.lerp(speed, 0.18F + breath, gait.run() ? 1.02F : 0.34F);
+		lean(h, bend, slim);
+		legs(h, 0.18F, 0.1F);
+		h.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.46F - 0.5F * bend;
+		float stride = step * speed * (gait.run() ? 1.16F : 0.67F);
+		h.leftLeg.xRot -= stride;
+		h.rightLeg.xRot += stride;
+		arms(h, -0.25F - bend - stride, -0.25F - bend + stride, 0.29F - 0.11F * speed);
+		h.root().y += Math.abs(step) * speed * (gait.run() ? 1.7F : 0.7F);
+		return true;
+	}
+
+	private static void art(HumanoidModel<?> h, AvatarRenderState state, Pose pose, boolean slim) {
+		float t = pose.t();
+		float side = pose.side();
+		switch (pose.kind()) {
+			case WebPose.BRUTE_CLAP -> {
+				float draw = smooth(t / 18.0F);
+				float clap = smooth((t - 22.0F) / 6.0F) * (1.0F - smooth((t - 29.0F) / 9.0F));
+				lean(h, Mth.lerp(clap, -0.18F * draw, 0.48F), slim);
+				legs(h, 0.22F + 0.19F * clap, 0.18F);
+				float arms = Mth.lerp(clap, 0.72F * draw, -1.55F);
+				arms(h, arms, arms, 0.34F * (1.0F - clap));
+				h.rightArm.yRot = Mth.lerp(clap, 0.45F * draw, -0.73F);
+				h.leftArm.yRot = -h.rightArm.yRot;
+			}
+			case WebPose.BRUTE_POUND, WebPose.BRUTE_STOMP -> {
+				boolean stomp = pose.kind() == WebPose.BRUTE_STOMP;
+				float swing = stomp ? t : t % 20;
+				float up = smooth(swing / (stomp ? 6 : 12));
+				float down = smooth((swing - (stomp ? 7 : 14)) / 3.0F);
+				lean(h, Mth.lerp(down, -0.15F * up, stomp ? 0.56F : 1.05F), slim);
+				legs(h, 0.18F + 0.42F * down, 0.19F);
+				float fists = Mth.lerp(down, -2.9F * up, -0.64F);
+				arms(h, fists, fists, 0.17F);
+				if (stomp) {
+					h.rightLeg.xRot -= 0.85F * up * (1.0F - down);
+				}
+			}
+			case WebPose.BRUTE_FLIP -> {
+				if (t < 8) {
+					rip(h, state, t * 2, slim);
+				} else {
+					float lift = smooth((t - 8) / 6.0F);
+					lean(h, Mth.lerp(lift, 0.92F, -0.2F), slim);
+					legs(h, 0.58F * (1 - lift), 0.17F);
+					float swing = Mth.lerp(lift, -0.7F, -2.85F);
+					arms(h, swing, swing, 0.25F);
+				}
+			}
+			case WebPose.BRUTE_NOVA -> {
+				float surge = smooth(t / WebBruteArts.NOVA_WINDUP);
+				float release = smooth((t - 34) / 6.0F);
+				float strain = Mth.sin(t * 2.1F) * 0.08F * surge;
+				lean(h, Mth.lerp(release, 0.64F * surge + strain, -0.28F), slim);
+				legs(h, 0.53F * surge * (1.0F - release), 0.24F);
+				arms(h, -1.05F * surge - strain, -1.05F * surge + strain, 0.17F + 0.96F * release);
+			}
+			case WebPose.BRUTE_RAMPAGE -> ram(h, state, smooth(t / 9.0F), slim);
+			case WebPose.BRUTE_COIL -> {
+				float coil = 0.2F + 0.8F * smooth(t / 30.0F);
+				lean(h, 0.91F * coil, slim);
+				legs(h, 0.65F * coil, 0.18F);
+				arms(h, -0.9F * coil, -0.9F * coil, 0.25F);
+			}
+			case WebPose.BRUTE_AIR, WebPose.BRUTE_WALL_LEAP -> flight(h, state, slim, smooth((t - 8) / 17.0F));
+			case WebPose.BRUTE_LAND -> {
+				float settle = 1 - smooth(t / 12.0F);
+				lean(h, 1.08F * settle, slim);
+				legs(h, 0.7F * settle, 0.18F);
+				arms(h, -1.43F * settle, -0.55F * settle, 0.21F);
+			}
+			case WebPose.BRUTE_HOOK, WebPose.BRUTE_HOOK_LUNGE -> {
+				boolean lunge = pose.kind() == WebPose.BRUTE_HOOK_LUNGE;
+				float reach = smooth(t / 5.0F) * (1 - smooth((t - 5) / (lunge ? 12.0F : 7.0F)));
+				lean(h, 0.2F + (lunge ? 0.7F : 0.27F) * reach, slim);
+				legs(h, 0.2F + 0.25F * reach, 0.15F);
+				arms(h, -0.74F, -0.74F, 0.25F);
+				h.body.yRot = side * Mth.lerp(reach, -0.43F, 0.56F);
+				ModelPart striking = side > 0 ? h.rightArm : h.leftArm;
+				striking.xRot = Mth.lerp(reach, -0.4F, -1.65F);
+				striking.yRot = side * Mth.lerp(reach, 0.85F, -0.92F);
+			}
+			default -> WebClimbPose.brute(h, pose.kind(), t, side, slim);
+		}
+		h.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.45F - 0.36F * h.body.xRot;
+	}
+
+	private static void flight(HumanoidModel<?> h, AvatarRenderState state, boolean slim, float fall) {
+		lean(h, Mth.lerp(fall, 0.36F, -0.15F), slim);
+		legs(h, 0.43F, 0.24F);
+		h.rightLeg.xRot -= 0.35F;
+		arms(h, -1.14F + 0.58F * fall, -1.14F + 0.58F * fall, 0.35F + 0.63F * fall);
+		h.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.45F - 0.25F;
+	}
+
 	/** The body bent to {@code bend} with the head and arm pivots carried round with it. */
-	private static void lean(HumanoidModel<?> h, float bend, boolean slim) {
+	static void lean(HumanoidModel<?> h, float bend, boolean slim) {
 		float armY = slim ? 2.5F : 2.0F;
 		WebFeral.place(h.body, 0.0F, 0.0F, bend);
 		WebFeral.place(h.head, 0.0F, 0.0F, bend);
@@ -113,7 +244,7 @@ public final class WebBrutePose {
 	}
 
 	/** Knees bent {@code squat} and braced apart {@code apart}; the body sunk to keep the feet down. */
-	private static void legs(HumanoidModel<?> h, float squat, float apart) {
+	static void legs(HumanoidModel<?> h, float squat, float apart) {
 		for (ModelPart leg : new ModelPart[] {h.rightLeg, h.leftLeg}) {
 			float side = leg == h.rightLeg ? 1.0F : -1.0F;
 			leg.xRot = -squat;
@@ -123,7 +254,7 @@ public final class WebBrutePose {
 		h.root().y = 12.0F * (1.0F - Mth.cos(squat));
 	}
 
-	private static void arms(HumanoidModel<?> h, float rightX, float leftX, float spread) {
+	static void arms(HumanoidModel<?> h, float rightX, float leftX, float spread) {
 		h.rightArm.xRot = rightX;
 		h.leftArm.xRot = leftX;
 		h.rightArm.yRot = 0.0F;
