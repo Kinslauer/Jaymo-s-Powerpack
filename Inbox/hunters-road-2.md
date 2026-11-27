@@ -1,10 +1,11 @@
 ---
 status: open
-for: any
+for: claude-cloud
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 ---
 
 # Hunter's Road 2: Monster kinds, the bestiary, silver and steel (Kingdoms) rows F4 F3 E1
@@ -18,3 +19,4 @@ pr:
 **Order:** tracks two at a time: 1+2, then 3+6, then 4+7, then 5+8, then 9+10 (this is wave 1).
 
 ## Notes
+- 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.

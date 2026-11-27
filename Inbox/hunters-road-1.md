@@ -1,10 +1,11 @@
 ---
 status: open
-for: any
+for: claude-cloud
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 ---
 
 # Hunter's Road 1: Yellow tells and lunges (Powers, `combat/`) rows A1 A2 A3
@@ -19,3 +20,4 @@ pr:
 
 **One PR for all 10 patches' plan doc:** this patch's PR also commits the plan as `docs/HuntersRoad-Plan.md` (copy of the live vault file).
 ## Notes
+- 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.

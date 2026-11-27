@@ -1,10 +1,11 @@
 ---
 status: blocked
-for: any
+for: claude-cloud
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 ---
 
 # Night's Blood 5: Servants and your get (Kingdoms)
@@ -19,3 +20,4 @@ pr:
 
 ## Notes
 - 2026-11-26 ON HOLD until the earlier waves merge (1, then 2+7, then 3+6, then 4+5). Not a question for Andy: the vault coordinator opens it when its turn comes.
+- 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
