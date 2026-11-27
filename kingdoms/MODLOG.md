@@ -18441,3 +18441,10 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Ones already generated get propped up**: a compound laid before this fix, not yet founded, gets ground filled under its castle down to the land when it is founded (the first time a player comes near its bell). A castle that is already someone's seat (Dragard in Andy's world) stays as it stands.
 - Classes: SeatCompounds (Compound, found, underpin).
 - Built; not played.
+
+## 0.14.6 (2026-11-27): Ideal, bond and flaw get their own page in the life story (#2321)
+
+- **Their own page**: the ideal, bond and flaw are no longer at the foot of the story read back. They have a page of their own, "Ideal, bond and flaw", just before "Your story": the questions (and the road's realm), then this page, then the story with its Harder life (flaws and switches), which stays optional where it was. Back and Next step through them in that order; the story page's button is still "On to your looks" (or "Live this life").
+- **Not optional**: one of each must be picked. Clicking the ticked row no longer unticks it, Next stays greyed while one is missing, the list still to pick is headed in gold, and a line under the lists says to pick one of each. They still start on the first offer of each list. The skipped story's Life tab steps each card round its three offers and never to none, and a kept face saved without them takes the first offers. (`LifeStoryScreen` `Step.SPARKS`, `sparksPage`, `sparksPicked`; `cycleSpark`; lang `gui.jaymoskingdoms.story.sparks.need`.)
+- The descriptions that look alike ("A teacher" and Knowledge, "A vow"/"A debt" and Honour) were left as they are: they say what earns the spark, and those pairs are earned the same way (`Sparks` `IDEAL_ACTS`/`BOND_ACTS`).
+- Built; not played.
