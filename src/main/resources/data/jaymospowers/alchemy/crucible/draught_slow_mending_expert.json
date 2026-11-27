@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "life": 13,
+    "plant": 7,
+    "earth": 4
+  },
+  "result": {
+    "item": "jaymospowers:draught_slow_mending",
+    "count": 1,
+    "grade": "expert"
+  },
+  "research": "formula_slow_mending"
+}

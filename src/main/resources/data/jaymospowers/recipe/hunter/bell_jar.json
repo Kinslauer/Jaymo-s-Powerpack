@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " C ",
+    "G G",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "G": "minecraft:glass"
+  },
+  "result": {
+    "id": "jaymospowers:bell_jar",
+    "count": 1
+  }
+}

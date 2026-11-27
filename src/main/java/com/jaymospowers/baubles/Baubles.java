@@ -163,6 +163,7 @@ public final class Baubles {
 		com.jaymospowers.baubles.artifacts.ArtifactBaubles.init();
 		// the ticking charm: clicks faster the nearer the blight
 		TickingCharm.init();
+		com.jaymospowers.alchemy.toxic.ToxinGaugeItem.init();
 		// belt charms against the heat and the cold, counted in Kitchen's body heat when it is loaded
 		ClimateCharms.init();
 		com.jaymospowers.compat.KitchenBodyHeat.init();
@@ -195,7 +196,7 @@ public final class Baubles {
 	}
 
 	/** (0.20.12) Lists a registered bauble of ours: its bonuses taken off when it comes off, and in the creative tab. */
-	static <T extends BaubleItem> T add(T item) {
+	public static <T extends BaubleItem> T add(T item) {
 		for (BaubleItem.Bonus bonus : item.bonuses()) {
 			TOUCHED.add(bonus.attribute());
 		}

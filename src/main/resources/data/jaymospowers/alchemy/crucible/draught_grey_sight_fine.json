@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "shadow": 8,
+    "mind": 6,
+    "light": 3
+  },
+  "result": {
+    "item": "jaymospowers:draught_grey_sight",
+    "count": 1,
+    "grade": "fine"
+  },
+  "research": "formula_grey_sight"
+}

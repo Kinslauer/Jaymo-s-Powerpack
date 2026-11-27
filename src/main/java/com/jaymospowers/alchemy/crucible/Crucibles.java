@@ -86,10 +86,12 @@ public final class Crucibles {
 	 * @param research the research the thrower must know ({@link com.jaymospowers.alchemy.Knowledge#knows})
 	 */
 	public record Recipe(String catalyst, EssenceList essences, Result result, String research) {
-		public record Result(Identifier item, int count) {
+		/** {@code grade}: a brew grade id (plain, fine, expert...) the made item is given, or empty for none. */
+		public record Result(Identifier item, int count, String grade) {
 			public static final Codec<Result> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Identifier.CODEC.fieldOf("item").forGetter(Result::item),
-				Codec.intRange(1, 64).optionalFieldOf("count", 1).forGetter(Result::count)).apply(i, Result::new));
+				Codec.intRange(1, 64).optionalFieldOf("count", 1).forGetter(Result::count),
+				Codec.STRING.optionalFieldOf("grade", "").forGetter(Result::grade)).apply(i, Result::new));
 		}
 
 		public static final Codec<Recipe> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -109,7 +111,14 @@ public final class Crucibles {
 
 		/** What it makes (null if the result's item doesn't exist: a recipe for a mod that isn't loaded). */
 		public @Nullable ItemStack make() {
-			return BuiltInRegistries.ITEM.getOptional(result.item()).map(item -> new ItemStack(item, result.count())).orElse(null);
+			return BuiltInRegistries.ITEM.getOptional(result.item()).map(item -> {
+				ItemStack made = new ItemStack(item, result.count());
+				com.jaymospowers.alchemy.brewing.BrewGrade grade = com.jaymospowers.alchemy.brewing.BrewGrade.byId(result.grade());
+				if (grade != null) {
+					com.jaymospowers.alchemy.brewing.BrewGrades.set(made, grade);
+				}
+				return made;
+			}).orElse(null);
 		}
 	}
 

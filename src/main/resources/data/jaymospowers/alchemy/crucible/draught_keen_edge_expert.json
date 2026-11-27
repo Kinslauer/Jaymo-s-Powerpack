@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "metal": 11,
+    "war": 9,
+    "spark": 4
+  },
+  "result": {
+    "item": "jaymospowers:draught_keen_edge",
+    "count": 1,
+    "grade": "expert"
+  },
+  "research": "formula_keen_edge"
+}

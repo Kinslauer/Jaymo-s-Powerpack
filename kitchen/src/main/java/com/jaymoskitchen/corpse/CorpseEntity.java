@@ -3605,6 +3605,11 @@ public class CorpseEntity extends Entity {
 		return type != null && (type.builtInRegistryHolder().is(Corpses.FISH_CORPSES) || Corpses.isSmallCritter(type));
 	}
 
+	/** Whether the mob was full grown (not a baby); true if it can't be told. A young monster has no organ worth carving. */
+	boolean grown() {
+		return !(rebuild() instanceof LivingEntity mob) || !mob.isBaby();
+	}
+
 	/** (0.5.20) How big the mob was against its kind (a scaled one's scale), 1 if it can't be told. */
 	float bodyScale() {
 		return rebuild() instanceof LivingEntity mob ? mob.getScale() : 1.0F;

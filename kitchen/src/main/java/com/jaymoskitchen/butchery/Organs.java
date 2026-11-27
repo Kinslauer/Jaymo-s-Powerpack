@@ -41,6 +41,11 @@ public final class Organs {
 	public static Item COOKED_HEART, COOKED_LIVER, COOKED_KIDNEY, COOKED_TRIPE;
 	/** The odd ones: a spider's silk, a venomous spider's or bee's sting, a ghast's floats, a creeper's powder. */
 	public static Item SILK_GLAND, VENOM_GLAND, GAS_BLADDER, POWDER_GLAND;
+	/**
+	 * What a hunter carves from a grown monster ({@link MonsterOrgans}), each the stuff of one of Jaymo's Powers' monster
+	 * brews: a mire hag's gall, a grave hag's tongue, a gnawer leader's marrow, a fog-wight's sac, a warrior imp's gizzard, a troll's liver.
+	 */
+	public static Item MIRE_GALL, GRAVE_TONGUE, PACK_MARROW, WIGHT_SAC, IMP_GIZZARD, TROLL_LIVER;
 
 	/** What each kind of body holds (looked up when gutted, since the items are registered after this class loads). */
 	private static @Nullable Map<EntityType<?>, List<Supplier<Item>>> sets;
@@ -62,13 +67,21 @@ public final class Organs {
 		VENOM_GLAND = item("venom_gland", 0, 0.0F);
 		GAS_BLADDER = item("gas_bladder", 0, 0.0F);
 		POWDER_GLAND = item("powder_gland", 0, 0.0F);
+		MIRE_GALL = item("mire_gall", 0, 0.0F);
+		GRAVE_TONGUE = item("grave_tongue", 0, 0.0F);
+		PACK_MARROW = item("pack_marrow", 0, 0.0F);
+		WIGHT_SAC = item("wight_sac", 0, 0.0F);
+		IMP_GIZZARD = item("imp_gizzard", 0, 0.0F);
+		TROLL_LIVER = item("troll_liver", 0, 0.0F);
+		MonsterOrgans.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			for (Item item : List.of(HEART, LIVER, KIDNEY, LUNG, TRIPE, COOKED_HEART, COOKED_LIVER, COOKED_KIDNEY, COOKED_TRIPE)) {
 				output.accept(new ItemStack(item));
 			}
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
-			for (Item item : List.of(SILK_GLAND, VENOM_GLAND, GAS_BLADDER, POWDER_GLAND)) {
+			for (Item item : List.of(SILK_GLAND, VENOM_GLAND, GAS_BLADDER, POWDER_GLAND, MIRE_GALL, GRAVE_TONGUE, PACK_MARROW, WIGHT_SAC,
+				IMP_GIZZARD, TROLL_LIVER)) {
 				output.accept(new ItemStack(item));
 			}
 		});
@@ -117,8 +130,15 @@ public final class Organs {
 		return type == EntityTypes.SPIDER || type == EntityTypes.CAVE_SPIDER || type == EntityTypes.CREEPER || type == EntityTypes.GHAST;
 	}
 
-	/** The organs of a body of {@code type} (by its size if nothing lists it: {@code small} one-handed, {@code big} too big to lift). */
+	/**
+	 * The organs of a body of {@code type} (by its size if nothing lists it: {@code small} one-handed, {@code big} too big to
+	 * lift). A monster the hunters carve ({@link MonsterOrgans}) gives its one organ and nothing else.
+	 */
 	public static List<Item> of(@Nullable EntityType<?> type, boolean small, boolean big) {
+		Item carved = MonsterOrgans.organOf(type);
+		if (carved != null) {
+			return List.of(carved);
+		}
 		List<Supplier<Item>> set = type == null ? null : sets().get(type);
 		List<Item> out = new ArrayList<>();
 		for (Supplier<Item> organ : set != null ? set : bySize(small, big)) {

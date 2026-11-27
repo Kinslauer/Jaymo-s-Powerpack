@@ -1,0 +1,13 @@
+{
+  "catalyst": "jaymospowers:poison_paste",
+  "essences": {
+    "venom": 8,
+    "rot": 6,
+    "fire": 4
+  },
+  "result": {
+    "item": "jaymospowers:toxic_paste",
+    "count": 1
+  },
+  "research": "poison_pastes"
+}

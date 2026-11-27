@@ -50,7 +50,7 @@ public class BrewersAlembicEntity extends BlockEntity {
 	/** Whether every bottle in it has been through already. */
 	private boolean done() {
 		for (ItemStack bottle : bottles) {
-			if (!BrewGrades.distilled(bottle)) {
+			if (!BrewGrades.distilled(bottle) && !com.jaymospowers.alchemy.hunter.Pastes.isPure(bottle)) {
 				return false;
 			}
 		}
@@ -59,7 +59,7 @@ public class BrewersAlembicEntity extends BlockEntity {
 
 	public void use(ServerPlayer player, ItemStack held, InteractionHand hand) {
 		if (!held.isEmpty()) {
-			if (BrewGrades.isBrew(held)) {
+			if (BrewGrades.isBrew(held) || com.jaymospowers.alchemy.hunter.Pastes.distillable(held)) {
 				if (!Knowledge.knows(player, Brewing.DISTILLING)) {
 					say(player, "unknown");
 				} else if (BrewGrades.distilled(held)) {
@@ -135,6 +135,20 @@ public class BrewersAlembicEntity extends BlockEntity {
 
 	private void distil(ServerLevel server) {
 		ItemStack first = bottles.getFirst();
+		if (com.jaymospowers.alchemy.hunter.Pastes.distillable(first)) {
+			// toxic paste becomes pure toxin, a paste fewer (Hunter's Road, the paste ladder)
+			int made = bottles.size() - com.jaymospowers.alchemy.hunter.Pastes.YIELD_LOSS;
+			bottles.clear();
+			for (int i = 0; i < made; i++) {
+				bottles.add(new ItemStack(com.jaymospowers.alchemy.hunter.Pastes.PURE_TOXIN));
+			}
+			progress = 0;
+			server.playSound(null, worldPosition, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 0.8F);
+			server.sendParticles(ParticleTypes.HAPPY_VILLAGER, worldPosition.getX() + 0.5, worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5,
+				6, 0.3, 0.2, 0.3, 0.0);
+			changed();
+			return;
+		}
 		BrewGrade next = BrewGrades.orPlain(first).higher();
 		int keep = bottles.size() - BOTTLE_LOSS;
 		List<ItemStack> out = new ArrayList<>();

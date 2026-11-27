@@ -1,0 +1,14 @@
+{
+  "gives": {
+    "id": "jaymospowers:formula",
+    "components": {
+      "jaymospowers:formula": "plenty"
+    }
+  },
+  "max_uses": 1,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 20
+  }
+}

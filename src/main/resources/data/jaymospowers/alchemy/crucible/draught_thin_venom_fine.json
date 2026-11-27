@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "venom": 6,
+    "salt": 8,
+    "water": 4
+  },
+  "result": {
+    "item": "jaymospowers:draught_thin_venom",
+    "count": 1,
+    "grade": "fine"
+  },
+  "research": "formula_thin_venom"
+}

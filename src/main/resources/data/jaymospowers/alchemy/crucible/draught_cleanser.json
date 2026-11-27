@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "salt": 6,
+    "water": 5,
+    "light": 3
+  },
+  "result": {
+    "item": "jaymospowers:draught_cleanser",
+    "count": 1,
+    "grade": "plain"
+  },
+  "research": "formula_cleanser"
+}
