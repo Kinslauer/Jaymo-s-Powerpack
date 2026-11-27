@@ -130,7 +130,8 @@ public final class GuardKit {
 	private static final ArmorType[] TYPES = {ArmorType.HELMET, ArmorType.CHESTPLATE, ArmorType.LEGGINGS, ArmorType.BOOTS};
 	private static final int MAINHAND = 4, OFFHAND = 5, HARNESS = 6, SIZE = HARNESS + Harness.SLOTS;
 
-	private static final Predicate<ItemStack> IRON = s -> s.is(Items.IRON_INGOT) || s.is(Armory.STEEL_INGOTS), COPPER = s -> s.is(Items.COPPER_INGOT),
+	// (steel pays only for steel, a steel realm's: SteelRealms)
+	private static final Predicate<ItemStack> IRON = s -> s.is(Items.IRON_INGOT), STEEL = s -> s.is(Armory.STEEL_INGOTS), COPPER = s -> s.is(Items.COPPER_INGOT),
 		LEATHER = s -> s.is(Items.LEATHER), WOOL = s -> s.is(ItemTags.WOOL);
 
 	/** What a guard was issued (by place), for which settlement, as who, and when he was last looked over. */
@@ -167,7 +168,7 @@ public final class GuardKit {
 
 	/** One guard's settlement, as his kit is chosen for it. */
 	private record Ctx(ServerLevel level, Faction f, int who, Climate land, int kind, boolean templar, boolean grim, GreatWars.@Nullable Creed creed,
-		boolean ironRich, int field, long hash, int helmCut, @Nullable String tag, String finish, int lean) {
+		boolean ironRich, int field, long hash, int helmCut, @Nullable String tag, String finish, int lean, boolean steel) {
 		boolean is(int mask) {
 			return (this.who & mask) != 0;
 		}
@@ -280,7 +281,8 @@ public final class GuardKit {
 		h = (h ^ h >>> 31) * 0xBF58476D1CE4E5B9L;
 		return new Ctx(level, f, who, land, kind, realm && FrontierWear.templar(server, f), hold != null && hold.isGrim(),
 			realm ? GreatWars.creed(server, f) : null, IronVeins.near(level, f), Outfits.rgb(Outfits.heraldry(f, server).field()), h ^ h >>> 29, Math.floorMod(m.getUUID().hashCode(), 3),
-			realm ? HeraldryWear.realmTag(server, f) : null, realm ? HeraldryWear.knightFinish(server, f, land) : "", lean(who, land, m));
+			realm ? HeraldryWear.realmTag(server, f) : null, realm ? HeraldryWear.knightFinish(server, f, land) : "", lean(who, land, m),
+			SteelRealms.steel(server, f));
 	}
 
 	/** {@code m}'s lean in {@code land}: its land's ({@link #WARM} light, {@link #COLD} heavy), or now and then the other. */
@@ -743,20 +745,29 @@ public final class GuardKit {
 		// whole sets: the Templars', the gunners' harness, the land's champions', the villages' settler gear
 		// (Andy: "only melee guards should get this plate, its too heavy for gunners or archers")
 		if (c.is(SOL | KN | VET | LEAD) && c.templar()) {
-			if (c.grim()) {
-				add(out, FrontierArmour.stack("templar_steel", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i] + STEEL_EXTRA);
+			if (c.grim() && c.steel()) {
+				add(out, FrontierArmour.stack("templar_steel", type), STEEL, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i] + STEEL_EXTRA);
 			}
 			add(out, FrontierArmour.stack("templar", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i]);
 		}
 		// (a Templar realm's gunner may wear its tassets and sabatons, never its surcoat or great helm)
 		if (c.is(GUN) && c.templar() && i >= 2) {
-			if (c.grim()) {
-				add(out, FrontierArmour.stack("templar_steel", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i] + STEEL_EXTRA);
+			if (c.grim() && c.steel()) {
+				add(out, FrontierArmour.stack("templar_steel", type), STEEL, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i] + STEEL_EXTRA);
 			}
 			add(out, FrontierArmour.stack("templar", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i]);
 		}
+		// (Andy: steel "only the absolute richest and warmongers": SteelRealms) a steel realm's plate for its ranks
+		if (c.steel() && !c.templar() && (c.is(KN | VET | LEAD) && c.plate() || c.heavy() && c.is(SOL))) {
+			Item steel = Armory.STEEL_PLATE_PIECES.get(type);
+			if (steel != null) {
+				add(out, new ItemStack(steel), STEEL, INGOTS[i], IRON_PRICE[i] + STEEL_EXTRA);
+			}
+		}
+		if (c.is(GUN) && c.steel()) {
+			add(out, FrontierArmour.stack("ranger_steel", type), STEEL, INGOTS[i], RANGER_PRICE[i] + STEEL_EXTRA);
+		}
 		if (c.is(GUN)) {
-			add(out, FrontierArmour.stack("ranger_steel", type), IRON, INGOTS[i], RANGER_PRICE[i] + STEEL_EXTRA);
 			add(out, FrontierArmour.stack("ranger", type), IRON, INGOTS[i], RANGER_PRICE[i]);
 		}
 		if (c.is(VET | LEAD)) {
@@ -1099,6 +1110,9 @@ public final class GuardKit {
 		}
 		int k = kind(given);
 		Item[] iron = {Items.IRON_SWORD, Items.IRON_SPEAR, Items.IRON_AXE}, copper = {Items.COPPER_SWORD, Items.COPPER_SPEAR, Items.COPPER_AXE};
+		if (c.steel() && c.is(SOL | KN | VET | LEAD)) {
+			add(out, SteelRealms.blade(plain(given, iron[k])), STEEL, WEAPON_INGOTS[k], IRON_WEAPON[k] + STEEL_EXTRA);
+		}
 		add(out, plain(given, iron[k]), IRON, WEAPON_INGOTS[k], IRON_WEAPON[k]);
 		add(out, plain(given, copper[k]), COPPER, WEAPON_INGOTS[k], COPPER_WEAPON[k]);
 		return out;

@@ -319,6 +319,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("dealings attachment: {}", Dealings.DEALINGS);
 		Strays.register();
 		BloodChores.register();
+		// a town's sexton: the lych lantern, the dead and what's left lying, the golems, blood and grime (Sextons)
+		Sextons.register();
+		ToolGrades.register();
+		SteelRealms.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)

@@ -229,7 +229,7 @@ public final class ShaftMiners {
 			v.finalizeSpawn(level, level.getCurrentDifficultyAt(spot), EntitySpawnReason.EVENT, null);
 			v.setVillagerData(v.getVillagerData().withProfession(BuiltInRegistries.VILLAGER_PROFESSION.wrapAsHolder(Professions.MINER)));
 			v.setVillagerXp(Math.max(1, v.getVillagerXp()));
-			v.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
+			v.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(com.jaymoskingdoms.ToolGrades.pickaxe(com.jaymoskingdoms.ToolGrades.of(level, f))));
 			v.setPersistenceRequired();
 			v.setHomeTo(spot, WORK_RANGE);
 			v.setAttached(POST, new Post(key, f.id(), spot.asLong()));

@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.483) Every settlement keeps a butcher and a healer (a cleric). Andy: "too many times i get to a kingdom and they
  * have no butcher or healer". Then (Andy, 2026-11-21, the villages plan) every town keeps every trade it lives by: a
- * butcher, a healer ({@link Professions#HEALER}), a cook, a cleric, a farmer, a tanner (the game's leatherworker) and,
+ * butcher, a healer ({@link Professions#HEALER}), a cook, a sexton ({@link Sextons}), a cleric, a farmer, a tanner (the game's leatherworker) and,
  * where it has water, a fisherman ({@link #needed}); and a miner and a woodcutter as soon as it has a mine (or quarry) and
  * a tree farm for them, through the hire every realm worker comes by ({@link Gatherers#hire}), since a miner with no mine
  * isn't kept on. {@link TownFitting} gives the trades their blocks. Each kingdom, fiefdom and village (never a barbarian camp) is looked at every
@@ -111,11 +111,13 @@ public final class TownTrades {
 		}
 	}
 
-	/** The trades {@code f} keeps: the game's ({@link #NEEDED}), a healer and a cook, and a fisherman if it has water. */
+	/** The trades {@code f} keeps: the game's ({@link #NEEDED}), a healer, a cook and a sexton, and a fisherman if it has water. */
 	static List<ResourceKey<VillagerProfession>> needed(ServerLevel level, Faction f) {
 		List<ResourceKey<VillagerProfession>> out = new ArrayList<>(NEEDED);
 		out.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.HEALER).orElseThrow());
 		out.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
+		// and a sexton, for the dead and what the fighting leaves (Sextons)
+		out.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.SEXTON).orElseThrow());
 		if (watered(level, f.seat())) {
 			out.add(VillagerProfession.FISHERMAN);
 		}

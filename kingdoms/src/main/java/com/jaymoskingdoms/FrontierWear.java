@@ -89,7 +89,8 @@ public final class FrontierWear {
 		}
 		if (f.type().isRealm() && templar(server, f)) {
 			Holds.Hold hold = Holds.get(server, f.id());
-			return f.type() == FactionType.FIEFDOM && hold != null && hold.isGrim() ? "templar_steel" : "templar";
+			// (black steel only where the realm keeps the steel blueprint: SteelRealms)
+			return f.type() == FactionType.FIEFDOM && hold != null && hold.isGrim() && SteelRealms.steel(server, f) ? "templar_steel" : "templar";
 		}
 		return null;
 	}

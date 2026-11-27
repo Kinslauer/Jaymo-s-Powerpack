@@ -99,7 +99,8 @@ abstract class McaWorkerMixin implements Enlisted {
 
 	@Override
 	public ItemStack tool() {
-		return Worker.isWork(this.jaymoskingdoms$role) ? Worker.toolFor(this.jaymoskingdoms$role, false) : ItemStack.EMPTY;
+		return Worker.isWork(this.jaymoskingdoms$role) ? Worker.toolFor(this.jaymoskingdoms$role, false,
+			com.jaymoskingdoms.ToolGrades.of(this.jaymoskingdoms$self(), this.jaymoskingdoms$faction)) : ItemStack.EMPTY;
 	}
 
 	@Override
@@ -131,7 +132,7 @@ abstract class McaWorkerMixin implements Enlisted {
 			self.spawnAtLocation(level, this.takeCarried());
 		}
 		ItemStack hand = self.getMainHandItem();
-		if (!hand.isEmpty() && (hand.is(this.tool().getItem()) || this.jaymoskingdoms$role == Sorcery.WIZARD && CourtWizards.isStaff(hand))) {
+		if (!hand.isEmpty() && (com.jaymoskingdoms.ToolGrades.sameKind(hand, this.tool()) || this.jaymoskingdoms$role == Sorcery.WIZARD && CourtWizards.isStaff(hand))) {
 			self.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		}
 		this.jaymoskingdoms$role = -1;
