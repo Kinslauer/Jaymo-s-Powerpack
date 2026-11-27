@@ -18396,3 +18396,11 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **From the bauble screen**: shift-clicking a harness piece in the bauble screen's inventory puts it on in the harness (Powers calls `HarnessQuickEquip.shiftClick` by reflection). **From the harness screen**: shift-clicking a bauble in its inventory now puts it on in a free bauble slot, as the survival inventory does (`PowersCompat.quickEquipBauble`), before falling back to the old inventory/hotbar move. Shift-clicking a worn piece in the harness screen still takes it off into the inventory.
 - Classes: new `HarnessQuickEquip` (+ `QuickEquip` packet) and `mixin/HarnessQuickEquipMixin` (on `InventoryMenu.quickMoveStack`, in the combat mixin config); `HarnessMenu`, `PowersCompat`, `Harness.register`, client `HeraldryClient` (creative hook); two lines in `lang/parts/heraldry-armour.json`.
 - Built; not played.
+
+## 0.14.0 (2026-11-27): carry freed prisoners and followers (#2314)
+
+- Andy (2026-11-27): "you should be able to carry prisoners and anyone willing".
+- A captive you freed (following you home) and anyone who takes your orders (Followers.takesOrders: family, hired, escorts, crew, thralls) are willing to be carried: sneak + hold right-click lifts them (Powers' Carry). A freed captive carried into their home town still counts as brought home.
+- The captive's talk card has a new choice, "Break the chains and carry them out in your arms": freed and lifted at once (too far off or too heavy in their armour, they follow on foot and can be lifted later).
+- Classes: Captives (rescuedBy, talk), Followers (register), PowersCompat (willingCheck, liftChosen). Lang: talk.jaymoskingdoms.captive.carry.
+- Built; not played.
