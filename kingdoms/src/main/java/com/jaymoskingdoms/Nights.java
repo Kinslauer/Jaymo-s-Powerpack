@@ -3,12 +3,10 @@ package com.jaymoskingdoms;
 import java.util.List;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,8 +28,6 @@ public final class Nights {
 	static final long MOST = 24000L;
 	/** A crop grows a stage in about this many ticks (vanilla's random ticks on watered farmland). */
 	static final int CROP_TICKS_PER_STAGE = 2500;
-	/** Players this close to a seat are told what got done. */
-	static final double TELL_RANGE = 160.0;
 
 	private static long lastClock = Long.MIN_VALUE, lastTick;
 
@@ -85,21 +81,12 @@ public final class Nights {
 			int grown = grow(level, f.seat(), (int)(ticks / CROP_TICKS_PER_STAGE));
 			JaymosKingdoms.LOGGER.debug("{} made up {} ticks overnight: {} blocks laid, {} dug, {} gathered, {} crops grown", f.name(), ticks, laid, dug,
 				gathered, grown);
+			// (not in chat, Andy 2026-11-27: the crier cries the night's work)
 			if (dug + gathered > 0) {
-				Component news = Component.translatable("message.jaymoskingdoms.overnight_gathered", f.name(), dug, gathered).withStyle(ChatFormatting.GRAY);
-				for (ServerPlayer player : level.players()) {
-					if (player.distanceToSqr(f.seat().getX(), f.seat().getY(), f.seat().getZ()) <= TELL_RANGE * TELL_RANGE) {
-						player.sendSystemMessage(news);
-					}
-				}
+				TownCrier.town(level, f, "overnight_gathered", Component.literal(Integer.toString(dug)), Component.literal(Integer.toString(gathered)));
 			}
 			if (laid > 0) {
-				Component news = Component.translatable("message.jaymoskingdoms.overnight", f.name(), laid).withStyle(ChatFormatting.GRAY);
-				for (ServerPlayer player : level.players()) {
-					if (player.distanceToSqr(f.seat().getX(), f.seat().getY(), f.seat().getZ()) <= TELL_RANGE * TELL_RANGE) {
-						player.sendSystemMessage(news);
-					}
-				}
+				TownCrier.town(level, f, "overnight", Component.literal(Integer.toString(laid)));
 			}
 		}
 	}
