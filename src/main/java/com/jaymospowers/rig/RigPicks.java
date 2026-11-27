@@ -20,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
  * <li>{@link #BANK_TURN} banking turns ({@link RigActives}).</li>
  * <li>{@link #METEOR} meteor dive ({@link RigDive}).</li>
  * <li>{@link #SMOOTH} smooth other flyers ({@link RigActives}).</li>
+ * <li>The Octo Core's arms ({@link RigOcto}), shown only while one is worn.</li>
  * </ul>
  * These actions share {@link RigNet.Use} with the Rig's own, numbered from {@link #FIRST}.
  */
@@ -51,19 +52,22 @@ public final class RigPicks {
 		RigDive.init();
 		RigForms.init();
 		RigBack.init();
+		RigOcto.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				RigDrones.tick(player);
 				RigField.tick(player);
 				RigStrikes.tick(player);
 				RigBack.tick(player);
+				RigOcto.tick(player);
 			}
+			RigOcto.serverTick(server);
 		});
 	}
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-		return action >= FIRST && action <= SMOOTH || RigBack.is(action);
+		return action >= FIRST && action <= SMOOTH || RigBack.is(action) || RigOcto.is(action);
 	}
 
 	/** A Rig menu entry from the client. */
@@ -73,6 +77,11 @@ public final class RigPicks {
 		}
 		if (action == FAILSAFE) {
 			RigCall.toggleFailsafe(player);
+			return;
+		}
+		if (RigOcto.is(action)) {
+			// the Octo Core's arms ask for the Core alone
+			RigOcto.use(player, action);
 			return;
 		}
 		if (!Rig.wearsAny(player)) {

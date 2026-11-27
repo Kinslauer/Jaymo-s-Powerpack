@@ -36,10 +36,12 @@ import org.jspecify.annotations.Nullable;
  * <li>Salvage in hand, right-click: it is fed in (up to {@link RigForgeEntity#MAX_FED} points) and the hologram's
  * plates for the picked piece light as it goes. Builds spend what was fed first, then salvage carried.</li>
  * <li>Right-click with a free hand: the Forge's screen (client {@code RigForgeScreen}, in the Costume Table's style): a
- * preview of you in the suit, the piece and frame ({@link RigFrame}), the two paints, the cost and Build ({@link #set}).</li>
+ * preview of you in the suit, the piece and frame ({@link RigFrame}), the four paints (dyes or a mixed colour), the cost
+ * and Build ({@link #set}).</li>
  * <li>A dye in hand still works: the plates' paint; with Sneak, the trim's. What is worn is repainted too, and what is
- * built next takes it. A water bucket washes both off.</li>
+ * built next takes it. A water bucket washes every paint off.</li>
  * <li>A worn-down Rig piece in hand refits it ({@link #REFIT_POINTS}). Creative builds for free.</li>
+ * <li>The Octo Core ({@link RigOcto}) is one more pick, for a Tinkerer or a web slinger only.</li>
  * </ul>
  */
 public class RigForgeBlock extends Block implements EntityBlock {
@@ -85,6 +87,9 @@ public class RigForgeBlock extends Block implements EntityBlock {
 
 	/** What the Forge is set to build costs. */
 	static Cost costOf(RigForgeEntity forge) {
+		if (forge.octo()) {
+			return RigOcto.cost(forge.frame());
+		}
 		Rig.Piece piece = forge.piece();
 		return piece != null ? cost(piece, forge.frame()) : limbCost(forge.limb(), forge.frame());
 	}
@@ -141,13 +146,16 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		if (!held.isEmpty()) {
 			return;
 		}
-		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new RigNet.ForgeOpen(pos));
+		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new RigNet.ForgeOpen(pos, RigOcto.canBuild(player)));
 	}
 
 	/** How far from the Forge its screen still works (blocks, squared). */
 	static final double SCREEN_REACH_SQR = 64.0;
 
-	/** From the Forge's screen: the pick, the paints (each costs one dye of that colour unless it is what the Forge has), and the build. */
+	/**
+	 * From the Forge's screen: the pick, the four paints (each new one costs one dye: its own, or for a mixed colour the
+	 * nearest; none if it is what the Forge has), and the build.
+	 */
 	static void set(ServerPlayer player, RigNet.ForgeSet set) {
 		BlockPos pos = set.pos();
 		if (player.distanceToSqr(Vec3.atCenterOf(pos)) > SCREEN_REACH_SQR || !com.jaymospowers.core.Loaded.made(player.level(), pos)) {
@@ -159,30 +167,36 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		}
 		RigForgeEntity forge = RigForgeEntity.of(player.level(), pos, state);
 		if (set.selection() != forge.selection() && set.selection() >= 0 && set.selection() < RigForgeEntity.SELECTIONS) {
-			forge.setSelection(set.selection());
+			if (set.selection() == RigForgeEntity.OCTO && !RigOcto.canBuild(player)) {
+				// the Octo Core's drawings are a Tinkerer's or a web slinger's
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_octo.cant_build").withStyle(ChatFormatting.GRAY));
+			} else {
+				forge.setSelection(set.selection());
+			}
 		}
 		RigFrame[] frames = RigFrame.values();
 		if (set.frame() >= 0 && set.frame() < frames.length && frames[set.frame()] != forge.frame()) {
 			forge.setFrame(frames[set.frame()]);
 		}
-		for (int pass = 0; pass < 2; pass++) {
-			boolean trim = pass == 1;
-			int wanted = trim ? set.trim() : set.plates(), has = trim ? forge.trim() : forge.plates();
-			if (wanted == RigNet.PAINT_LEAVE || wanted < RigNet.PAINT_LEAVE || wanted >= DyeColor.values().length) {
+		java.util.List<Integer> paints = set.paints();
+		for (int which = 0; which < RigForgeEntity.PAINTS && which < paints.size(); which++) {
+			int wanted = paints.get(which), has = forge.paint(which);
+			if (wanted == RigNet.PAINT_LEAVE || wanted < RigNet.PAINT_LEAVE || wanted > 0xFFFFFF) {
 				continue;
 			}
-			DyeColor dye = wanted == RigNet.PAINT_WASH ? null : DyeColor.byId(wanted);
-			int rgb = dye == null ? RigForgeEntity.NO_PAINT : dye.getTextureDiffuseColor() & 0xFFFFFF;
+			int rgb = wanted == RigNet.PAINT_WASH ? RigForgeEntity.NO_PAINT : wanted;
 			if (rgb == has) {
 				continue;
 			}
+			// a new paint takes a dye: the one it is, or for a mixed colour the nearest
+			DyeColor dye = rgb == RigForgeEntity.NO_PAINT ? null : nearestDye(rgb);
 			if (dye != null && !player.isCreative() && !takeDye(player, dye)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_forge.no_dye",
 					Component.translatable("color.minecraft." + dye.getName())));
 				continue;
 			}
-			forge.setPaint(trim ? forge.plates() : rgb, trim ? rgb : forge.trim());
-			repaintWorn(player, trim, rgb);
+			forge.setPaint(which, rgb);
+			repaintWorn(player, which, rgb);
 			player.level().playSound(null, pos, dye == null ? SoundEvents.BUCKET_EMPTY : SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
 		}
 		if (set.build()) {
@@ -201,25 +215,51 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		return false;
 	}
 
+	/** The dye nearest a colour (a mixed paint costs one of it). */
+	public static DyeColor nearestDye(int rgb) {
+		DyeColor best = DyeColor.WHITE;
+		long bestFar = Long.MAX_VALUE;
+		for (DyeColor colour : DyeColor.values()) {
+			int c = colour.getTextureDiffuseColor();
+			long dr = (c >> 16 & 0xFF) - (rgb >> 16 & 0xFF), dg = (c >> 8 & 0xFF) - (rgb >> 8 & 0xFF), db = (c & 0xFF) - (rgb & 0xFF);
+			// weighted the way the eye weighs them
+			long far = 3 * dr * dr + 4 * dg * dg + 2 * db * db;
+			if (far < bestFar) {
+				bestFar = far;
+				best = colour;
+			}
+		}
+		return best;
+	}
+
+	/** Puts one paint on a Rig piece ({@link RigForgeEntity#NO_PAINT}: takes it off). */
+	static void paintOn(ItemStack stack, int which, int rgb) {
+		if (which == RigForgeEntity.PLATES) {
+			if (rgb == RigForgeEntity.NO_PAINT) {
+				stack.remove(DataComponents.DYED_COLOR);
+			} else {
+				stack.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb));
+			}
+			return;
+		}
+		net.minecraft.core.component.DataComponentType<Integer> type = which == RigForgeEntity.TRIM ? Rig.TRIM : which == RigForgeEntity.UNDER ? Rig.UNDER
+			: Rig.LIGHTS;
+		if (rgb == RigForgeEntity.NO_PAINT) {
+			stack.remove(type);
+		} else {
+			stack.set(type, rgb);
+		}
+	}
+
 	/** Puts one paint ({@link RigForgeEntity#NO_PAINT}: none) on every Rig piece worn; how many took it. */
-	private static int repaintWorn(Player player, boolean trim, int rgb) {
+	private static int repaintWorn(Player player, int which, int rgb) {
 		int pieces = 0;
 		for (Rig.Piece piece : Rig.Piece.values()) {
 			ItemStack worn = player.getItemBySlot(piece.slot);
 			if (piece.item() == null || !worn.is(piece.item())) {
 				continue;
 			}
-			if (trim) {
-				if (rgb == RigForgeEntity.NO_PAINT) {
-					worn.remove(Rig.TRIM);
-				} else {
-					worn.set(Rig.TRIM, rgb);
-				}
-			} else if (rgb == RigForgeEntity.NO_PAINT) {
-				worn.remove(DataComponents.DYED_COLOR);
-			} else {
-				worn.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb));
-			}
+			paintOn(worn, which, rgb);
 			pieces++;
 		}
 		return pieces;
@@ -229,6 +269,11 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		Rig.Piece piece = forge.piece();
 		Cost cost = costOf(forge);
 		boolean free = player.isCreative();
+		if (forge.octo() && !RigOcto.canBuild(player)) {
+			// set by someone who could, built by someone who can't
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.rig_octo.cant_build").withStyle(ChatFormatting.RED));
+			return;
+		}
 		if (!free && (points(player) + forge.fed() < cost.points() || count(player, cost.first()) < cost.firstCount()
 			|| count(player, cost.second()) < cost.secondCount())) {
 			describe(player, forge);
@@ -242,11 +287,15 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		}
 		ItemStack made = new ItemStack(piece != null ? piece.item() : forge.limb() == RigForgeEntity.ARM ? Prosthetics.RIG_ARM_ITEM : Prosthetics.RIG_LEG_ITEM);
 		Rig.stamp(made, forge.frame());
-		if (piece != null && forge.plates() != RigForgeEntity.NO_PAINT) {
-			made.set(DataComponents.DYED_COLOR, new DyedItemColor(forge.plates()));
+		if (forge.octo()) {
+			RigOcto.make(made);
 		}
-		if (piece != null && forge.trim() != RigForgeEntity.NO_PAINT) {
-			made.set(Rig.TRIM, forge.trim());
+		if (piece != null) {
+			for (int which = 0; which < RigForgeEntity.PAINTS; which++) {
+				if (forge.paint(which) != RigForgeEntity.NO_PAINT) {
+					paintOn(made, which, forge.paint(which));
+				}
+			}
 		}
 		player.getInventory().placeItemBackInInventory(made, Prediction.SERVER_ONLY);
 		player.level().playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8F, 0.9F);
@@ -285,18 +334,16 @@ public class RigForgeBlock extends Block implements EntityBlock {
 
 	/**
 	 * A dye on the Forge: the plates' paint (Sneak: the trim's), also put on every Rig piece you wear; a water bucket washes
-	 * both off. What the Forge builds next takes the paint.
+	 * every paint off (plates, trim, second colour and lights). What the Forge builds next takes the paint.
 	 */
 	private static void paint(ServerPlayer player, ItemStack held, RigForgeEntity forge, BlockPos pos) {
 		DyeColor dye = held.get(DataComponents.DYE);
 		boolean trim = player.isShiftKeyDown();
 		int rgb = dye == null ? RigForgeEntity.NO_PAINT : dye.getTextureDiffuseColor() & 0xFFFFFF;
 		if (dye == null) {
-			forge.setPaint(RigForgeEntity.NO_PAINT, RigForgeEntity.NO_PAINT);
-		} else if (trim) {
-			forge.setPaint(forge.plates(), rgb);
+			forge.wash();
 		} else {
-			forge.setPaint(rgb, forge.trim());
+			forge.setPaint(trim ? RigForgeEntity.TRIM : RigForgeEntity.PLATES, rgb);
 		}
 		int pieces = 0;
 		for (Rig.Piece piece : Rig.Piece.values()) {
@@ -305,12 +352,11 @@ public class RigForgeBlock extends Block implements EntityBlock {
 				continue;
 			}
 			if (dye == null) {
-				worn.remove(DataComponents.DYED_COLOR);
-				worn.remove(Rig.TRIM);
-			} else if (trim) {
-				worn.set(Rig.TRIM, rgb);
+				for (int which = 0; which < RigForgeEntity.PAINTS; which++) {
+					paintOn(worn, which, RigForgeEntity.NO_PAINT);
+				}
 			} else {
-				worn.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb));
+				paintOn(worn, trim ? RigForgeEntity.TRIM : RigForgeEntity.PLATES, rgb);
 			}
 			pieces++;
 		}
@@ -326,7 +372,7 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		Rig.Piece piece = forge.piece();
 		Cost cost = costOf(forge);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.rig_forge.selected",
-			Component.translatable(piece != null ? "item.jaymospowers.rig_" + piece.id()
+			Component.translatable(forge.octo() ? "item.jaymospowers.rig_octo_core" : piece != null ? "item.jaymospowers.rig_" + piece.id()
 				: forge.limb() == RigForgeEntity.ARM ? "item.jaymospowers.rig_arm" : "item.jaymospowers.rig_leg").withStyle(ChatFormatting.AQUA),
 			Component.translatable("rig.jaymospowers.frame." + forge.frame().id()).withStyle(ChatFormatting.AQUA),
 			cost.points(), points(player) + forge.fed(),

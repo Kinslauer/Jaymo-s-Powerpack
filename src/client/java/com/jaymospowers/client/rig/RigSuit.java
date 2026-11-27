@@ -103,8 +103,6 @@ public final class RigSuit {
 	static final float FACE_LIFT = 1.45F, FACE_EASE = 0.25F;
 	/** (0.12.2) Each piece's dye from the Rig Forge (rgb), or -1 for bare metal; null when none is dyed. */
 	static final RenderStateDataKey<int[]> COLORS = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_colors");
-	/** The plates are mid grey, so a dye is brightened this much before it tints them (or it comes out dark). */
-	static final float DYE_LIFT = 1.7F;
 	/**
 	 * A move's light on the suit: {the piece that charges ({@link Rig.Piece} ordinal), how bright its lights burn over
 	 * their own (0-1), the white flash as it lets go (0-1), 1 if the flash takes the whole suit}; null with no move on.
@@ -120,6 +118,9 @@ public final class RigSuit {
 	/** The frame this suit was built as ({@link RigFrame} ordinal), its trim paint (rgb, -1 for none), and whether its plates are flying in (a suit call). */
 	static final RenderStateDataKey<Integer> FRAME = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_frame");
 	static final RenderStateDataKey<Integer> TRIM = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_trim");
+	/** The second colour (the under-suit and the second plates) and the lights' colour (rgb), when the Forge has set them; null keeps the frame's own. */
+	static final RenderStateDataKey<Integer> UNDER = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_under");
+	static final RenderStateDataKey<Integer> LIGHTS = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_lights");
 	static final RenderStateDataKey<Integer> FINISH = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_finish");
 	static final RenderStateDataKey<Boolean> FLY = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_fly");
 	/** Which suit-up the plates fly in as ({@link com.jaymospowers.rig.RigSuitUp}'s styles; 0 for the plain call). */
@@ -141,6 +142,16 @@ public final class RigSuit {
 		JaymosPowers.id("textures/entity/rig/finish_skybreaker.png"), JaymosPowers.id("textures/entity/rig/finish_last_stand.png")};
 	static final boolean[] FINISH_LIT = {false, true, false, false};
 	static final Identifier TRIM_TEXTURE = JaymosPowers.id("textures/entity/rig/suit_trim.png");
+	/**
+	 * The paintable sheets ({@code tools/gen_rig_paint.py}): each frame's plates in light greys for a plates paint to tint
+	 * (so a paint shows as itself, not darkened by the gunmetal), the second colour's pixels alone (the under-suit and the second
+	 * plates), and every light in white.
+	 */
+	static final Identifier[] PAINT_TEXTURES = {JaymosPowers.id("textures/entity/rig/suit_paint.png"), JaymosPowers.id("textures/entity/rig/suit_paint_scrap.png"),
+		JaymosPowers.id("textures/entity/rig/suit_paint_shade.png"), JaymosPowers.id("textures/entity/rig/suit_paint_siege.png"),
+		JaymosPowers.id("textures/entity/rig/suit_paint_hail.png"), JaymosPowers.id("textures/entity/rig/suit_paint_tinker.png")};
+	static final Identifier UNDER_TEXTURE = JaymosPowers.id("textures/entity/rig/suit_under.png");
+	static final Identifier LIGHTS_TEXTURE = JaymosPowers.id("textures/entity/rig/suit_lights.png");
 	static final Identifier TEXTURE = TEXTURES[0];
 	static final Identifier GLOW_TEXTURE = GLOW_TEXTURES[0];
 	/** Narrower than this (pixels), an arm is a slim one. */
@@ -276,11 +287,13 @@ public final class RigSuit {
 	 * the state: the Rig's pieces still on it come off it (the vanilla armour layer would draw them) and onto the suit.
 	 */
 	/** The Forge screen's preview: while {@code run} extracts the local player's render state, they wear the whole suit in this frame and paint (-1: bare). */
-	static void withPreview(RigFrame frame, int plates, int trim, int finish, Runnable run) {
+	static void withPreview(RigFrame frame, int plates, int trim, int under, int lights, int finish, Runnable run) {
 		previewFinish = finish;
 		previewFrame = frame;
 		previewPlates = plates;
 		previewTrim = trim;
+		previewUnder = under;
+		previewLights = lights;
 		try {
 			run.run();
 		} finally {
@@ -289,7 +302,7 @@ public final class RigSuit {
 	}
 
 	private static @org.jspecify.annotations.Nullable RigFrame previewFrame;
-	private static int previewPlates, previewTrim, previewFinish;
+	private static int previewPlates, previewTrim, previewUnder, previewLights, previewFinish;
 	/** A piece this old (ticks) is fully on. */
 	private static final float PREVIEW_AGE = 10000.0F;
 
@@ -297,12 +310,15 @@ public final class RigSuit {
 		state.setData(AGES, null);
 		state.setData(FRAME, null);
 		state.setData(TRIM, null);
+		state.setData(UNDER, null);
+		state.setData(LIGHTS, null);
 		state.setData(FINISH, null);
 		state.setData(FLY, null);
 		state.setData(STYLE, null);
 		state.setData(BODY, null);
 		state.setData(PARENT, null);
 		state.setData(RigBackClient.BACK, null);
+		state.setData(RigOctoClient.ARMS, null);
 		if (!(entity instanceof Player player)) {
 			return;
 		}
@@ -312,7 +328,7 @@ public final class RigSuit {
 		float[] ages = null;
 		int[] colors = null;
 		RigFrame frame = null;
-		int trim = -1, finish = RigFinish.NONE;
+		int trim = -1, under = -1, lights = -1, finish = RigFinish.NONE;
 		for (int i = 0; i < PIECES.length; i++) {
 			Rig.Piece piece = PIECES[i];
 			boolean onState = piece.item() != null && equipment(state, piece).is(piece.item());
@@ -327,6 +343,14 @@ public final class RigSuit {
 				Integer painted = stack.get(Rig.TRIM);
 				if (painted != null && (trim < 0 || piece == Rig.Piece.CORE)) {
 					trim = painted & 0xFFFFFF;
+				}
+				Integer weave = stack.get(Rig.UNDER);
+				if (weave != null && (under < 0 || piece == Rig.Piece.CORE)) {
+					under = weave & 0xFFFFFF;
+				}
+				Integer lit = stack.get(Rig.LIGHTS);
+				if (lit != null && (lights < 0 || piece == Rig.Piece.CORE)) {
+					lights = lit & 0xFFFFFF;
 				}
 				DyedItemColor dye = equipment(state, piece).get(DataComponents.DYED_COLOR);
 				if (dye != null) {
@@ -367,6 +391,8 @@ public final class RigSuit {
 			ages = new float[] {PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE};
 			frame = previewFrame;
 			trim = previewTrim;
+			under = previewUnder;
+			lights = previewLights;
 			finish = previewFinish;
 			colors = previewPlates < 0 ? null : new int[] {previewPlates, previewPlates, previewPlates, previewPlates};
 			state.headEquipment = ItemStack.EMPTY;
@@ -378,6 +404,8 @@ public final class RigSuit {
 		state.setData(AGES, ages);
 		state.setData(FRAME, ages == null || frame == null ? null : frame.ordinal());
 		state.setData(TRIM, ages == null || trim < 0 ? null : trim);
+		state.setData(UNDER, ages == null || under < 0 ? null : under);
+		state.setData(LIGHTS, ages == null || lights < 0 ? null : lights);
 		state.setData(FINISH, ages == null || finish == RigFinish.NONE ? null : finish);
 		state.setData(FLY, ages == null || !player.getAttachedOrElse(RigCall.FLYING_IN, false) ? null : Boolean.TRUE);
 		state.setData(STYLE, ages == null ? null : player.getAttachedOrElse(com.jaymospowers.rig.RigSuitUp.STYLE, 0));
@@ -389,6 +417,8 @@ public final class RigSuit {
 		if (ages != null) {
 			// the back rig's vanes, legs and pincers (RigBackClient)
 			RigBackClient.extract(player, state, partialTicks);
+			// the Octo Core's four arms (RigOctoClient)
+			RigOctoClient.extract(player, state, partialTicks);
 		}
 	}
 
@@ -531,15 +561,20 @@ public final class RigSuit {
 		return 1.0F + (OVERSHOOT + 1.0F) * q * q * q + OVERSHOOT * q * q;
 	}
 
-	/** A dye as the plates' tint: brightened (they're grey), opaque. -1 (bare metal) stays white. */
+	/** A paint as a tint over a paintable (light grey) sheet: itself, opaque. -1 (bare metal) stays white. */
 	static int tint(int rgb) {
-		if (rgb < 0) {
-			return 0xFFFFFFFF;
-		}
-		int r = Math.min(255, Math.round((rgb >> 16 & 0xFF) * DYE_LIFT));
-		int g = Math.min(255, Math.round((rgb >> 8 & 0xFF) * DYE_LIFT));
-		int b = Math.min(255, Math.round((rgb & 0xFF) * DYE_LIFT));
-		return 0xFF000000 | r << 16 | g << 8 | b;
+		return rgb < 0 ? 0xFFFFFFFF : 0xFF000000 | rgb & 0xFFFFFF;
+	}
+
+	/** The plates' sheet for a frame: its own gunmetal bare, its paintable greys under a paint. */
+	static Identifier plates(int frame, int rgb) {
+		return rgb < 0 ? TEXTURES[frame] : PAINT_TEXTURES[frame];
+	}
+
+	/** The lights' colour times how far they are up ({@code glow}, a grey). */
+	static int lit(int rgb, int glow) {
+		int v = glow & 0xFF;
+		return 0xFF000000 | (rgb >> 16 & 0xFF) * v / 255 << 16 | (rgb >> 8 & 0xFF) * v / 255 << 8 | (rgb & 0xFF) * v / 255;
 	}
 
 	// ---- first person ---------------------------------------------------------------------------------------------------
@@ -581,19 +616,28 @@ public final class RigSuit {
 		ItemStack stack = player.getItemBySlot(Rig.Piece.ARMS.slot);
 		int frame = Mth.clamp(RigFrame.of(stack).ordinal(), 0, TEXTURES.length - 1);
 		DyedItemColor dye = stack.get(DataComponents.DYED_COLOR);
-		collector.submitModelPart(sleeve, poseStack, RenderTypes.entityCutout(TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null,
-			tint(dye == null ? -1 : dye.rgb() & 0xFFFFFF));
+		int paint = dye == null ? -1 : dye.rgb() & 0xFFFFFF;
+		collector.submitModelPart(sleeve, poseStack, RenderTypes.entityCutout(plates(frame, paint)), light, OverlayTexture.NO_OVERLAY, null, tint(paint));
+		Integer under = stack.get(Rig.UNDER);
+		if (under != null) {
+			collector.order(1).submitModelPart(sleeve, poseStack, RenderTypes.entityCutout(UNDER_TEXTURE), light, OverlayTexture.NO_OVERLAY, null,
+				tint(under & 0xFFFFFF));
+		}
+		Integer lights = stack.get(Rig.LIGHTS);
+		Identifier glowSheet = lights == null ? GLOW_TEXTURES[frame] : LIGHTS_TEXTURE;
+		int glowFull = lights == null ? 0xFFFFFFFF : tint(lights & 0xFFFFFF);
 		int finish = RigFinish.of(stack);
 		if (finish != RigFinish.NONE) {
 			collector.submitModelPart(sleeve, poseStack, FINISH_LIT[finish] ? RenderTypes.eyes(FINISH_TEXTURES[finish])
 				: RenderTypes.entityCutout(FINISH_TEXTURES[finish]), light, OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF);
 		}
-		collector.submitModelPart(sleeve, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null, 0xFFFFFFFF);
+		collector.submitModelPart(sleeve, poseStack, RenderTypes.eyes(glowSheet), light, OverlayTexture.NO_OVERLAY, null, glowFull);
 		float time = player.level().getGameTime() + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		float[] charge = charge(player, time);
 		if (charge != null && (int)charge[0] == Rig.Piece.ARMS.ordinal()) {
 			if (charge[1] > 0.02F) {
-				collector.submitModelPart(sleeve, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null, grey(charge[1]));
+				collector.submitModelPart(sleeve, poseStack, RenderTypes.eyes(glowSheet), light, OverlayTexture.NO_OVERLAY, null,
+					lit(glowFull, grey(charge[1])));
 			}
 			if (charge[2] > 0.02F) {
 				collector.submitModelPart(sleeve, poseStack, RenderTypes.eyes(TEXTURES[frame]), light, OverlayTexture.NO_OVERLAY, null, grey(charge[2]));
@@ -630,13 +674,20 @@ public final class RigSuit {
 			Integer frameIndex = state.getData(FRAME);
 			int frame = frameIndex == null ? 0 : Mth.clamp(frameIndex, 0, TEXTURES.length - 1);
 			if (colors == null || same(colors)) {
-				renderColoredCutoutModel(suit, TEXTURES[frame], poseStack, collector, lightCoords, state, tint(colors == null ? -1 : colors[0]), 1);
+				int paint = colors == null ? -1 : colors[0];
+				renderColoredCutoutModel(suit, plates(frame, paint), poseStack, collector, lightCoords, state, tint(paint), 1);
 			} else {
 				// dyed piece by piece: each piece's plates in its own colour
 				Suit[] parts = slimArms ? this.slimParts : this.wideParts;
 				for (int i = 0; i < parts.length; i++) {
-					renderColoredCutoutModel(parts[i], TEXTURES[frame], poseStack, collector, lightCoords, state, tint(colors[i]), 1);
+					renderColoredCutoutModel(parts[i], plates(frame, colors[i]), poseStack, collector, lightCoords, state, tint(colors[i]), 1);
 				}
+			}
+			Integer under = state.getData(UNDER);
+			if (under != null) {
+				// the second colour: the under-suit and the second plates, over the plates
+				collector.order(1).submitModel(suit, state, poseStack, RenderTypes.entityCutout(UNDER_TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
+					tint(under), null, 0);
 			}
 			Integer finish = state.getData(FINISH);
 			if (finish != null) {
@@ -645,15 +696,19 @@ public final class RigSuit {
 					: RenderTypes.entityCutout(FINISH_TEXTURES[finish]), lightCoords, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF, null, 0);
 			}
 			Integer glow = state.getData(GLOW);
-			collector.order(1).submitModel(suit, state, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), lightCoords, OverlayTexture.NO_OVERLAY,
-				glow == null ? 0xFFFFFFFF : glow, null, 0);
+			Integer lights = state.getData(LIGHTS);
+			// the lights: the frame's own glow, or every light in the colour the Forge gave them
+			Identifier glowSheet = lights == null ? GLOW_TEXTURES[frame] : LIGHTS_TEXTURE;
+			int glowFull = lights == null ? 0xFFFFFFFF : tint(lights);
+			collector.order(1).submitModel(suit, state, poseStack, RenderTypes.eyes(glowSheet), lightCoords, OverlayTexture.NO_OVERLAY,
+				glow == null ? glowFull : lit(glowFull, glow), null, 0);
 			float[] charge = state.getData(CHARGE);
 			if (charge != null) {
 				// the piece that charges burns brighter over its own lights, and its plates flash white as the shot leaves
 				Suit piece = (slimArms ? this.slimParts : this.wideParts)[Mth.clamp((int)charge[0], 0, PIECES.length - 1)];
 				if (charge[1] > 0.02F) {
-					collector.order(1).submitModel(piece, state, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), lightCoords, OverlayTexture.NO_OVERLAY,
-						grey(charge[1]), null, 0);
+					collector.order(1).submitModel(piece, state, poseStack, RenderTypes.eyes(glowSheet), lightCoords, OverlayTexture.NO_OVERLAY,
+						lit(glowFull, grey(charge[1])), null, 0);
 				}
 				if (charge[2] > 0.02F) {
 					collector.order(1).submitModel(charge[3] > 0.5F ? suit : piece, state, poseStack, RenderTypes.eyes(TEXTURES[frame]), lightCoords,
@@ -667,6 +722,7 @@ public final class RigSuit {
 					0xFF000000 | trim, null, 0);
 			}
 			RigBackClient.submit(poseStack, collector, lightCoords, state, parent);
+			RigOctoClient.submit(poseStack, collector, lightCoords, state, parent);
 		}
 
 		private static boolean same(int[] colors) {

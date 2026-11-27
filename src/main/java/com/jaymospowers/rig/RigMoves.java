@@ -123,8 +123,8 @@ public final class RigMoves {
 			case SONIC -> SONIC_TICKS;
 			case TWIN -> TWIN_TICKS;
 			case SIEGE -> SIEGE_TICKS;
-			// the back rig's (RigBack)
-			default -> RigBack.length(kind);
+			// the back rig's (RigBack), then the Octo Core's arms (RigOcto)
+			default -> RigBack.length(kind) > 0 ? RigBack.length(kind) : RigOcto.length(kind);
 		};
 	}
 

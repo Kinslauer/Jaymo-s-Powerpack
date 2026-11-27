@@ -31,11 +31,15 @@ import org.jspecify.annotations.Nullable;
  * The Rig Forge's screen, in the Costume Table designer's look (Andy: "they deserve a costume style UI"): on the left a
  * preview of you in the whole suit in the picked frame and paint (drag it to turn it); in the middle what to build (the
  * four pieces, a Rig arm, a Rig leg) and the frame, each a button that cycles (right-click steps back), with the frame's
- * numbers under them; on the right the two paints, plates and trim, as dye swatches with a bare-metal chip; along the
- * bottom what the build costs against what you carry and what is fed into the Forge, "Paint" and "Build".
+ * numbers under them; on the right the paints (Andy: "you should also be able to customize the rigs in the forge ... I'd
+ * like the ability to recolor it"): a tab for each of the plates, the trim, the second colour (the under-suit
+ * and the second plates: biceps, belt, thighs, boots) and the lights, then the
+ * sixteen dyes, a mixer (a hue bar and a shade bar, for any colour) and a chip to take the paint off; along the bottom
+ * what the build costs against what you carry and what is fed into the Forge, "Paint" and "Build".
  * <p>
  * Piece and frame are sent as they change, so the hologram over the Forge follows. Paint is only sent by "Paint" or
- * "Build": a new paint takes one dye of that colour ({@link RigForgeBlock}). The server checks everything again.
+ * "Build": a new paint takes one dye, of that colour or, mixed, the nearest ({@link RigForgeBlock}). The server checks
+ * everything again.
  */
 public class RigForgeScreen extends Screen {
 	private static final int W = 372, H = 236;
@@ -49,23 +53,35 @@ public class RigForgeScreen extends Screen {
 	/** The finish chips: their height, and each one's colour (plain first). */
 	private static final int FINISH_H = 14;
 	private static final int[] FINISH_CHIPS = {0xFF8A8F98, 0xFF29DFEB, 0xFFB4D6F6, 0xFF3A302B};
-	/** A paint pick that is bare metal. */
+	/** A paint pick that is bare metal (or, for the lights, the frame's own glow). */
 	private static final int BARE = -1;
+	/** The paint tabs (two rows of two), and the mixer's bars: height, and the gap under each. */
+	private static final int TAB_H = 12, BAR_H = 6, BAR_GAP = 3;
+	private static final String[] PARTS = {"plates", "trim", "under", "lights"};
+	/** The mixer bar being dragged: none, the hue, the shade. */
+	private static final int NO_BAR = 0, HUE_BAR = 1, SHADE_BAR = 2;
 
 	private final BlockPos pos;
+	/** Whether this player may pick the Octo Core (a Tinkerer or a web slinger; the server says, and checks again). */
+	private final boolean octo;
 	private static float yaw = 20.0F;
 	private int selection;
 	private RigFrame frame = RigFrame.STANDARD;
-	/** The paints picked here: a dye's id or {@link #BARE}. */
-	private int plates = BARE, trim = BARE;
+	/** The paints picked here, in {@link RigForgeEntity#PLATES} order: rgb or {@link #BARE}. */
+	private final int[] paints = {BARE, BARE, BARE, BARE};
+	/** The paint being picked (a {@link #PARTS} index), and the mixer's hue and shade (0-1: black, the pure hue, white). */
+	private int tab;
+	private float hue, shade = 0.5F;
+	private int dragging = NO_BAR;
 	/** The finish shown on the preview: the one worn, until another is picked. */
 	private int finish = -1;
 	private boolean turning;
 	private Button pieceButton, frameButton, build, paint;
 
-	public RigForgeScreen(BlockPos pos) {
+	public RigForgeScreen(BlockPos pos, boolean octo) {
 		super(Component.translatable("screen.jaymospowers.rig_forge.title"));
 		this.pos = pos;
+		this.octo = octo;
 	}
 
 	private @Nullable RigForgeEntity forge() {
@@ -96,8 +112,24 @@ public class RigForgeScreen extends Screen {
 		return middleX() + MIDDLE_W + 8;
 	}
 
-	private int swatchY(boolean trimRow) {
-		return contentY() + (trimRow ? 62 : 12);
+	private int wide() {
+		return SWATCHES_PER_ROW * SWATCH_W;
+	}
+
+	private int tabsY() {
+		return contentY();
+	}
+
+	private int swatchY() {
+		return contentY() + 2 * TAB_H + 15;
+	}
+
+	private int barY(int bar) {
+		return swatchY() + 2 * SWATCH_H + 3 + (bar - 1) * (BAR_H + BAR_GAP);
+	}
+
+	private int bareY() {
+		return barY(SHADE_BAR) + BAR_H + BAR_GAP;
 	}
 
 	private int bottomY() {
@@ -108,10 +140,12 @@ public class RigForgeScreen extends Screen {
 	protected void init() {
 		RigForgeEntity forge = forge();
 		if (forge != null) {
-			this.selection = forge.selection();
+			this.selection = forge.selection() == RigForgeEntity.OCTO && !this.octo ? 0 : forge.selection();
 			this.frame = forge.frame();
-			this.plates = dyeOf(forge.plates());
-			this.trim = dyeOf(forge.trim());
+			for (int i = 0; i < RigForgeEntity.PAINTS; i++) {
+				this.paints[i] = forge.paint(i) == RigForgeEntity.NO_PAINT ? BARE : forge.paint(i);
+			}
+			mixFrom(this.paints[this.tab]);
 		}
 		int mx = middleX(), y = contentY();
 		this.pieceButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cyclePiece(1)).bounds(mx, y + 2, MIDDLE_W, 14).build());
@@ -125,24 +159,56 @@ public class RigForgeScreen extends Screen {
 		labels();
 	}
 
-	/** The dye whose colour {@code rgb} is, or bare. */
-	private static int dyeOf(int rgb) {
-		if (rgb != RigForgeEntity.NO_PAINT) {
-			for (DyeColor colour : DyeColor.values()) {
-				if ((colour.getTextureDiffuseColor() & 0xFFFFFF) == (rgb & 0xFFFFFF)) {
-					return colour.getId();
-				}
+	/** The dye whose colour {@code rgb} is exactly, or null for a mixed colour. */
+	private static @Nullable DyeColor dyeOf(int rgb) {
+		for (DyeColor colour : DyeColor.values()) {
+			if ((colour.getTextureDiffuseColor() & 0xFFFFFF) == (rgb & 0xFFFFFF)) {
+				return colour;
 			}
 		}
-		return BARE;
+		return null;
 	}
 
-	private static int rgbOf(int dye) {
-		return dye < 0 ? -1 : DyeColor.byId(dye).getTextureDiffuseColor() & 0xFFFFFF;
+	/** The mixer's colour: the hue at full strength, darkened toward black below the middle of the shade bar and paled toward white above it. */
+	private static int mixed(float hue, float shade) {
+		int pure = java.awt.Color.HSBtoRGB(hue, 1.0F, 1.0F) & 0xFFFFFF;
+		int r = pure >> 16 & 0xFF, g = pure >> 8 & 0xFF, b = pure & 0xFF;
+		if (shade < 0.5F) {
+			float k = shade * 2.0F;
+			return Math.round(r * k) << 16 | Math.round(g * k) << 8 | Math.round(b * k);
+		}
+		float k = (shade - 0.5F) * 2.0F;
+		return Math.round(r + (255 - r) * k) << 16 | Math.round(g + (255 - g) * k) << 8 | Math.round(b + (255 - b) * k);
+	}
+
+	/** Sets the mixer's bars to show {@code rgb} (as near as a hue and a shade can). */
+	private void mixFrom(int rgb) {
+		if (rgb < 0) {
+			return;
+		}
+		float[] hsb = java.awt.Color.RGBtoHSB(rgb >> 16 & 0xFF, rgb >> 8 & 0xFF, rgb & 0xFF, null);
+		if (hsb[1] > 0.05F) {
+			this.hue = hsb[0];
+		}
+		// full strength and bright is the middle; dark below it, pale above it
+		this.shade = hsb[2] < 0.999F ? hsb[2] * 0.5F : 0.5F + (1.0F - hsb[1]) * 0.5F;
+	}
+
+	/** A paint's name: the dye it is, bare (the lights: the frame's own), or a mixed colour as hex. */
+	private Component paintName(int which, int rgb) {
+		if (rgb < 0) {
+			return Component.translatable(which == RigForgeEntity.LIGHTS ? "screen.jaymospowers.rig_forge.own_glow" : "screen.jaymospowers.rig_forge.bare");
+		}
+		DyeColor dye = dyeOf(rgb);
+		return dye != null ? Component.translatable("color.minecraft." + dye.getName())
+			: Component.translatable("screen.jaymospowers.rig_forge.mixed", String.format("#%06X", rgb & 0xFFFFFF));
 	}
 
 	private Component pieceName() {
 		Rig.Piece[] pieces = Rig.Piece.values();
+		if (this.selection == RigForgeEntity.OCTO) {
+			return Component.translatable("item.jaymospowers.rig_octo_core");
+		}
 		return Component.translatable(this.selection < pieces.length ? "item.jaymospowers.rig_" + pieces[this.selection].id()
 			: this.selection == pieces.length ? "item.jaymospowers.rig_arm" : "item.jaymospowers.rig_leg");
 	}
@@ -155,6 +221,10 @@ public class RigForgeScreen extends Screen {
 
 	private void cyclePiece(int by) {
 		this.selection = Math.floorMod(this.selection + by, RigForgeEntity.SELECTIONS);
+		if (this.selection == RigForgeEntity.OCTO && !this.octo) {
+			// only a Tinkerer or a web slinger sees the Octo Core's drawings
+			this.selection = Math.floorMod(this.selection + by, RigForgeEntity.SELECTIONS);
+		}
 		labels();
 		send(false, false);
 	}
@@ -166,13 +236,18 @@ public class RigForgeScreen extends Screen {
 	}
 
 	private void send(boolean withPaint, boolean build) {
-		ClientPlayNetworking.send(new RigNet.ForgeSet(this.pos, this.selection, this.frame.ordinal(),
-			withPaint ? (this.plates < 0 ? RigNet.PAINT_WASH : this.plates) : RigNet.PAINT_LEAVE,
-			withPaint ? (this.trim < 0 ? RigNet.PAINT_WASH : this.trim) : RigNet.PAINT_LEAVE, build));
+		java.util.List<Integer> out = new java.util.ArrayList<>();
+		for (int paint : this.paints) {
+			out.add(withPaint ? (paint < 0 ? RigNet.PAINT_WASH : paint) : RigNet.PAINT_LEAVE);
+		}
+		ClientPlayNetworking.send(new RigNet.ForgeSet(this.pos, this.selection, this.frame.ordinal(), out, build));
 	}
 
 	private RigForgeBlock.Cost cost() {
 		Rig.Piece[] pieces = Rig.Piece.values();
+		if (this.selection == RigForgeEntity.OCTO) {
+			return com.jaymospowers.rig.RigOcto.cost(this.frame);
+		}
 		return this.selection < pieces.length ? RigForgeBlock.cost(pieces[this.selection], this.frame)
 			: RigForgeBlock.limbCost(this.selection - pieces.length + 1, this.frame);
 	}
@@ -219,18 +294,38 @@ public class RigForgeScreen extends Screen {
 			}
 			return true;
 		}
-		for (int row = 0; row < 2; row++) {
-			int picked = swatchAt(mouseX, mouseY, row == 1);
-			if (picked != Integer.MIN_VALUE) {
-				if (row == 1) {
-					this.trim = picked;
-				} else {
-					this.plates = picked;
-				}
-				return true;
-			}
+		int tabAt = tabAt(mouseX, mouseY);
+		if (tabAt >= 0) {
+			this.tab = tabAt;
+			mixFrom(this.paints[tabAt]);
+			return true;
+		}
+		int bar = barAt(mouseX, mouseY);
+		if (bar != NO_BAR) {
+			this.dragging = bar;
+			slide(mouseX);
+			return true;
+		}
+		int picked = swatchAt(mouseX, mouseY);
+		if (picked != Integer.MIN_VALUE) {
+			this.paints[this.tab] = picked < 0 ? BARE : DyeColor.byId(picked).getTextureDiffuseColor() & 0xFFFFFF;
+			mixFrom(this.paints[this.tab]);
+			return true;
 		}
 		return false;
+	}
+
+	/** Moves the dragged mixer bar to the mouse and takes its colour as the paint. */
+	private void slide(double mouseX) {
+		float at = net.minecraft.util.Mth.clamp((float)(mouseX - paintX()) / (wide() - 1), 0.0F, 1.0F);
+		if (this.dragging == HUE_BAR) {
+			this.hue = at;
+		} else if (this.dragging == SHADE_BAR) {
+			this.shade = at;
+		} else {
+			return;
+		}
+		this.paints[this.tab] = mixed(this.hue, this.shade);
 	}
 
 	@Override
@@ -239,22 +334,47 @@ public class RigForgeScreen extends Screen {
 			yaw = (yaw + (float)dx * TURN_PER_PIXEL) % 360.0F;
 			return true;
 		}
+		if (this.dragging != NO_BAR) {
+			slide(event.x());
+			return true;
+		}
 		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
 	public boolean mouseReleased(MouseButtonEvent event) {
 		this.turning = false;
+		this.dragging = NO_BAR;
 		return super.mouseReleased(event);
 	}
 
-	/** The paint under the mouse in a row: a dye's id, {@link #BARE} for the bare-metal chip, or {@code Integer.MIN_VALUE} for none. */
-	private int swatchAt(int mouseX, int mouseY, boolean trimRow) {
-		int x = mouseX - paintX(), y = mouseY - swatchY(trimRow);
-		if (x >= 0 && y >= 0 && x < SWATCHES_PER_ROW * SWATCH_W && y < 2 * SWATCH_H) {
+	/** The paint tab under the mouse, or -1. */
+	private int tabAt(int mouseX, int mouseY) {
+		int x = mouseX - paintX(), y = mouseY - tabsY(), half = wide() / 2;
+		return x >= 0 && y >= 0 && x < wide() && y < 2 * TAB_H ? y / TAB_H * 2 + x / half : -1;
+	}
+
+	/** The mixer bar under the mouse, or {@link #NO_BAR}. */
+	private int barAt(int mouseX, int mouseY) {
+		int x = mouseX - paintX();
+		if (x < 0 || x >= wide()) {
+			return NO_BAR;
+		}
+		for (int bar = HUE_BAR; bar <= SHADE_BAR; bar++) {
+			if (mouseY >= barY(bar) - 1 && mouseY < barY(bar) + BAR_H + 1) {
+				return bar;
+			}
+		}
+		return NO_BAR;
+	}
+
+	/** The swatch under the mouse: a dye's id, {@link #BARE} for the chip that takes the paint off, or {@code Integer.MIN_VALUE} for none. */
+	private int swatchAt(int mouseX, int mouseY) {
+		int x = mouseX - paintX(), y = mouseY - swatchY();
+		if (x >= 0 && y >= 0 && x < wide() && y < 2 * SWATCH_H) {
 			return y / SWATCH_H * SWATCHES_PER_ROW + x / SWATCH_W;
 		}
-		if (x >= 0 && x < SWATCHES_PER_ROW * SWATCH_W && y >= 2 * SWATCH_H + 2 && y < 3 * SWATCH_H + 2) {
+		if (x >= 0 && x < wide() / 2 && mouseY >= bareY() && mouseY < bareY() + SWATCH_H) {
 			return BARE;
 		}
 		return Integer.MIN_VALUE;
@@ -278,7 +398,7 @@ public class RigForgeScreen extends Screen {
 		finishes(graphics, player, mouseX, mouseY);
 		cost(graphics, player);
 		RigForgeEntity forge = forge();
-		this.paint.active = forge != null && (rgbOf(this.plates) != forge.plates() || rgbOf(this.trim) != forge.trim());
+		this.paint.active = forge != null && changed(forge);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
@@ -290,7 +410,8 @@ public class RigForgeScreen extends Screen {
 			py + PREVIEW_H - 10, PREVIEW_W - 4, UiStyle.HINT);
 		EntityRenderer<? super LivingEntity, ?> renderer = this.minecraft.getEntityRenderDispatcher().getRenderer((LivingEntity)player);
 		EntityRenderState[] state = new EntityRenderState[1];
-		RigSuit.withPreview(this.frame, rgbOf(this.plates), rgbOf(this.trim), finish(player), () -> state[0] = renderer.createRenderState(player, 1.0F));
+		RigSuit.withPreview(this.frame, this.paints[RigForgeEntity.PLATES], this.paints[RigForgeEntity.TRIM], this.paints[RigForgeEntity.UNDER],
+			this.paints[RigForgeEntity.LIGHTS], finish(player), () -> state[0] = renderer.createRenderState(player, 1.0F));
 		EntityRenderState renderState = state[0];
 		renderState.shadowPieces.clear();
 		renderState.outlineColor = 0;
@@ -337,39 +458,76 @@ public class RigForgeScreen extends Screen {
 		return Math.round(share * 100.0) + "%";
 	}
 
-	/** The two paints: sixteen dyes and a bare-metal chip each. */
-	private void paints(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		int x = paintX(), wide = SWATCHES_PER_ROW * SWATCH_W;
-		for (int row = 0; row < 2; row++) {
-			boolean trimRow = row == 1;
-			int chosen = trimRow ? this.trim : this.plates;
-			int sy = swatchY(trimRow);
-			Component name = chosen < 0 ? Component.translatable("screen.jaymospowers.rig_forge.bare")
-				: Component.translatable("color.minecraft." + DyeColor.byId(chosen).getName());
-			UiStyle.line(graphics, this.font, Component.translatable(trimRow ? "screen.jaymospowers.rig_forge.trim" : "screen.jaymospowers.rig_forge.plates",
-				name), x, sy - 10, wide, UiStyle.DIM);
-			for (DyeColor colour : DyeColor.values()) {
-				int i = colour.getId();
-				int cx = x + i % SWATCHES_PER_ROW * SWATCH_W, cy = sy + i / SWATCHES_PER_ROW * SWATCH_H;
-				graphics.fill(cx, cy, cx + SWATCH_W - 1, cy + SWATCH_H - 1, 0xFF000000 | colour.getTextureDiffuseColor());
-				if (i == chosen) {
-					graphics.outline(cx - 1, cy - 1, SWATCH_W + 1, SWATCH_H + 1, UiStyle.TEXT);
-				}
-			}
-			int by = sy + 2 * SWATCH_H + 2;
-			graphics.fill(x, by, x + wide - 1, by + SWATCH_H - 1, UiStyle.ROW);
-			UiStyle.lineCentred(graphics, this.font, Component.translatable("screen.jaymospowers.rig_forge.bare"), x + wide / 2, by + 1, wide - 4,
-				chosen < 0 ? UiStyle.TEXT : UiStyle.DIM);
-			if (chosen < 0) {
-				graphics.outline(x - 1, by - 1, wide + 1, SWATCH_H + 1, UiStyle.TEXT);
-			}
-			int hovered = swatchAt(mouseX, mouseY, trimRow);
-			if (hovered >= 0) {
-				UiStyle.tip(graphics, this.font, Component.translatable("color.minecraft." + DyeColor.byId(hovered).getName()), mouseX, mouseY);
+	/** Whether any paint picked here differs from the Forge's. */
+	private boolean changed(RigForgeEntity forge) {
+		for (int i = 0; i < RigForgeEntity.PAINTS; i++) {
+			if ((this.paints[i] < 0 ? RigForgeEntity.NO_PAINT : this.paints[i]) != forge.paint(i)) {
+				return true;
 			}
 		}
-		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.rig_forge.dye_cost"), x, swatchY(true) + 3 * SWATCH_H + 8, wide,
-			UiStyle.HINT);
+		return false;
+	}
+
+	/** The paints: a tab for each part, then the sixteen dyes, the mixer's hue and shade bars, and the chip that takes the paint off. */
+	private void paints(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		int x = paintX(), wide = wide(), half = wide / 2;
+		// the tabs: each part's name over a strip of its paint
+		for (int i = 0; i < PARTS.length; i++) {
+			int tx = x + i % 2 * half, ty = tabsY() + i / 2 * TAB_H;
+			graphics.fill(tx, ty, tx + half - 1, ty + TAB_H - 1, i == this.tab ? UiStyle.ROW_ALT : UiStyle.ROW);
+			int colour = this.paints[i];
+			graphics.fill(tx, ty + TAB_H - 3, tx + half - 1, ty + TAB_H - 1, colour < 0 ? 0xFF6A7078 : 0xFF000000 | colour);
+			UiStyle.lineCentred(graphics, this.font, Component.translatable("screen.jaymospowers.rig_forge.part." + PARTS[i]), tx + half / 2, ty + 1,
+				half - 4, i == this.tab ? UiStyle.TEXT : UiStyle.DIM);
+			if (i == this.tab) {
+				graphics.outline(tx - 1, ty - 1, half + 1, TAB_H + 1, ACCENT);
+			}
+		}
+		int chosen = this.paints[this.tab];
+		int sy = swatchY();
+		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.rig_forge." + PARTS[this.tab], paintName(this.tab, chosen)),
+			x, sy - 10, wide, UiStyle.DIM);
+		DyeColor exact = chosen < 0 ? null : dyeOf(chosen);
+		for (DyeColor colour : DyeColor.values()) {
+			int i = colour.getId();
+			int cx = x + i % SWATCHES_PER_ROW * SWATCH_W, cy = sy + i / SWATCHES_PER_ROW * SWATCH_H;
+			graphics.fill(cx, cy, cx + SWATCH_W - 1, cy + SWATCH_H - 1, 0xFF000000 | colour.getTextureDiffuseColor());
+			if (colour == exact) {
+				graphics.outline(cx - 1, cy - 1, SWATCH_W + 1, SWATCH_H + 1, UiStyle.TEXT);
+			}
+		}
+		// the mixer: a hue bar and a shade bar (black, the hue, white), each with its marker
+		for (int bar = HUE_BAR; bar <= SHADE_BAR; bar++) {
+			int by = barY(bar);
+			for (int i = 0; i < wide; i++) {
+				float at = i / (float)(wide - 1);
+				int c = bar == HUE_BAR ? mixed(at, 0.5F) : mixed(this.hue, at);
+				graphics.fill(x + i, by, x + i + 1, by + BAR_H, 0xFF000000 | c);
+			}
+			int mark = x + Math.round((bar == HUE_BAR ? this.hue : this.shade) * (wide - 1));
+			graphics.fill(mark - 1, by - 1, mark + 2, by + BAR_H + 1, UiStyle.TEXT);
+			graphics.fill(mark, by, mark + 1, by + BAR_H, 0xFF000000);
+		}
+		// the chip that takes it off, and the colour as it stands
+		int by = bareY();
+		graphics.fill(x, by, x + half - 1, by + SWATCH_H - 1, UiStyle.ROW);
+		UiStyle.lineCentred(graphics, this.font, Component.translatable(this.tab == RigForgeEntity.LIGHTS ? "screen.jaymospowers.rig_forge.own_glow"
+			: "screen.jaymospowers.rig_forge.bare"), x + half / 2, by + 1, half - 4, chosen < 0 ? UiStyle.TEXT : UiStyle.DIM);
+		if (chosen < 0) {
+			graphics.outline(x - 1, by - 1, half + 1, SWATCH_H + 1, UiStyle.TEXT);
+		} else {
+			graphics.fill(x + half, by, x + wide - 1, by + SWATCH_H - 1, 0xFF000000 | chosen);
+		}
+		UiStyle.line(graphics, this.font, chosen < 0 || exact != null ? Component.translatable("screen.jaymospowers.rig_forge.dye_cost")
+			: Component.translatable("screen.jaymospowers.rig_forge.mix_cost", Component.translatable("color.minecraft."
+				+ RigForgeBlock.nearestDye(chosen).getName())), x, by + SWATCH_H + 3, wide, UiStyle.HINT);
+		int hovered = swatchAt(mouseX, mouseY);
+		if (hovered >= 0) {
+			UiStyle.tip(graphics, this.font, Component.translatable("color.minecraft." + DyeColor.byId(hovered).getName()), mouseX, mouseY);
+		} else if (tabAt(mouseX, mouseY) >= 0) {
+			UiStyle.tip(graphics, this.font, Component.translatable("screen.jaymospowers.rig_forge.part." + PARTS[tabAt(mouseX, mouseY)] + ".tip"),
+				mouseX, mouseY);
+		}
 	}
 
 	/** The finish the preview wears: the one picked here, else the one on the Core (or any piece) worn. */
@@ -388,7 +546,7 @@ public class RigForgeScreen extends Screen {
 	}
 
 	private int finishY() {
-		return swatchY(true) + 3 * SWATCH_H + 30;
+		return bareY() + SWATCH_H + 26;
 	}
 
 	/** The finish chip under the mouse, or -1. */
