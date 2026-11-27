@@ -171,6 +171,7 @@ public final class LifeAims {
 		AIMS.put(Start.LAB, new Aim(Kind.SETTLE, 1, Stats.Stat.FINESSE));
 		AIMS.put(Start.ANDROID, new Aim(Kind.MONSTERS, 15, Stats.Stat.MIGHT));
 		AIMS.put(Start.MOON_CURSED, new Aim(Kind.SURVIVE, 10, Stats.Stat.GRIT));
+		AIMS.put(Start.BITTEN, new Aim(Kind.SURVIVE, 10, Stats.Stat.GRIT));
 	}
 
 	// ---- state ---------------------------------------------------------------------------------------------------------

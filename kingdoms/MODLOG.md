@@ -18351,3 +18351,10 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - Wings are folded flat against the back at rest and idle and unfurl wide in the leap, strike, roar and run; the membranes are painted as flat shade bands with clean lighter bone struts and a dark trailing rim, no speckle, in all five skins.
 - Truly digitigrade legs: thigh forward, shin back to a raised hock, long metatarsal, and only the toes and talons on the ground, kept through walk, run and leap.
 - Built; not played yet. The entity and ability code for this shape lands in the Night's Blood 4 code task.
+
+## 0.13.94 (2026-11-27): how a player turns - a far crypt, the Elder's blood at any time, a bitten start (#2304)
+
+- **The crypt is far**: a player who turns (bite, Nightborn, a death's rise, the Elder's blood, a dhampir waking) now wakes in a crypt dug under a random spot 100 to 1000 blocks from where they turned (`Lairs.farCrypt`): dry land, no settlement or structure, natural ground. They are carried there while the black of the turning is still on them (5 seconds before they wake), so nothing shows. Nowhere found: dug under where they stood, as before. The coffin is their bed as before.
+- **Elder's Blood any time**: it can be drunk whatever the moon, and is always used up. They are bitten, and turn at the next new moon's nightfall that is still ahead (`OldBlood.WILLING`, `OldBlood.due`); a night they were away for still counts. Until then the bitten rules hold: the priest's rite clears it, a golden apple still makes them wake a dhampir, a death that rises them turned does so at once. The Elder's lines, the gossip, the hunter's ledger and loading hint 274 no longer say to drink it under a new moon.
+- **Bitten start**: a new road, "Bitten at dusk" (`Start.BITTEN`), built like the moon's mark: same landing (the wild or a village's edge), same kind of card, perk, aim and fate odds. The bite is laid on them (no saving throw) and they turn at the first nightfall. Locked like it: a deed (bitten or turned) or a secret past (Nightborn from the moors and a hunted youth, or the caves and a bargain).
+- Built; not played.
