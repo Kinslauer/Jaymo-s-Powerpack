@@ -126,8 +126,11 @@ public final class RigPose {
 	/** The wrap's T: how far out the arms go (radians, near level), how wide the feet; the ticks each piece locks on at. */
 	static final float WRAP_ARMS_OUT = 1.45F, WRAP_SPREAD = 0.12F;
 	static final float[] WRAP_LOCKS = {16.0F, 30.0F, 44.0F, 60.0F};
+<<<<<<< HEAD
 	/** The suit-down's unlocks (RigCall's DOWN_AT). */
 	static final float[] DOWN_UNLOCKS = {10.0F, 24.0F, 38.0F, 52.0F};
+=======
+>>>>>>> 3dd8abc5c354a0f9c640aabb4098c707258c857a
 	static final float SUITUP_SLAM_DROP = 3.0F, SUITUP_SLAM_LEAN = 0.5F, SUITUP_FIST_X = -0.1F, SUITUP_OPEN = 1.5F;
 	/** Walking at this share of full pace or more, a move leaves the legs to the walk. */
 	static final float STILL_PACE = 0.35F;
@@ -420,6 +423,7 @@ public final class RigPose {
 				set(h.leftArm, -0.15F, 0.0F, -0.12F, down);
 				crouch(h, 0.6F * jolt * wide, 0.0F);
 			}
+<<<<<<< HEAD
 			case RigMoves.SUITDOWN -> {
 				// the wrap backwards: arms out wide, chin up as the helm folds back off (10 ticks in), a jolt as each piece
 				// unlocks, then the arms come down and a roll of the shoulders, the suit gone
@@ -442,6 +446,8 @@ public final class RigPose {
 				set(h.leftArm, 0.0F, 0.0F, -0.1F, down);
 				crouch(h, -0.3F * jolt * wide, 0.0F);
 			}
+=======
+>>>>>>> 3dd8abc5c354a0f9c640aabb4098c707258c857a
 			case RigMoves.SUITUP_STEP -> {
 				// arms held out wide while the shell stands open round you; then drawn in across the chest as it folds shut;
 				// then the arms fall and the chin comes up
