@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
@@ -21,3 +21,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 **One PR for all 10 patches' plan doc:** this patch's PR also commits the plan as `docs/HuntersRoad-Plan.md` (copy of the live vault file).
 ## Notes
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
+- 2026-11-27 13:20 Merged #2284 on Andy's "merge everything" (2026-11-27).
