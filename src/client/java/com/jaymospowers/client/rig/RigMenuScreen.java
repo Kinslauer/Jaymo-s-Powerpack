@@ -5,6 +5,7 @@ import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigForms;
 import com.jaymospowers.rig.RigHelm;
 import com.jaymospowers.rig.RigNet;
+import com.jaymospowers.rig.RigOcto;
 import com.jaymospowers.rig.RigPicks;
 import com.jaymospowers.rig.RigScan;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -51,26 +52,44 @@ final class RigMenuScreen extends Screen {
 		// the guns (RigGuns)
 		RigNet.PALM_CHARGE, RigNet.GATLING, RigNet.RAILGUN, RigNet.SONIC, RigNet.TWIN, RigNet.SIEGE,
 		// flight actives
-		RigPicks.PULLUP, RigPicks.HYPER, RigPicks.BANK_TURN, RigPicks.METEOR, RigPicks.SMOOTH};
+		RigPicks.PULLUP, RigPicks.HYPER, RigPicks.BANK_TURN, RigPicks.METEOR, RigPicks.SMOOTH,
+		// the Octo Core's arms (RigOcto): shown only while one is worn
+		RigOcto.ARMS, RigOcto.GRAB, RigOcto.SKEWER, RigOcto.PINWHEEL, RigOcto.VAULT, RigOcto.ANCHOR, RigOcto.WATCH};
 	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start", "dash", "barrage",
 		"slow_beat", "failsafe", "blade", "mace", "pile", "drill", "lance", "lash", "mimic", "wingslash", "spears", "pincer", "grapple", "horns",
-		"palm_charge", "gatling", "railgun", "sonic", "twin", "siege", "pullup", "hyper", "bank_turn", "meteor", "smooth"};
+		"palm_charge", "gatling", "railgun", "sonic", "twin", "siege", "pullup", "hyper", "bank_turn", "meteor", "smooth",
+		"octo_arms", "octo_grab", "octo_skewer", "octo_pinwheel", "octo_vault", "octo_anchor", "octo_watch"};
 	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1,
 		RigForms.BLADE_LEVEL, RigForms.MACE_LEVEL, RigForms.PILE_LEVEL, RigForms.DRILL_LEVEL, RigForms.LANCE_LEVEL, RigForms.LASH_LEVEL, RigForms.MIMIC_LEVEL,
 		3, 2, 3, 2, 4,
 		Rig.LOCK_LEVEL, Rig.SCAN_LEVEL, Rig.UNIBEAM_LEVEL, Rig.UNIBEAM_LEVEL, Rig.MAX_LEVEL, Rig.MAX_LEVEL,
-		Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL};
+		Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL,
+		RigOcto.ARMS_LEVEL, RigOcto.GRAB_LEVEL, RigOcto.SKEWER_LEVEL, RigOcto.PINWHEEL_LEVEL, RigOcto.VAULT_LEVEL, RigOcto.ANCHOR_LEVEL, RigOcto.WATCH_LEVEL};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
 	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		RigForms.BLADE_COOLDOWN, RigForms.MACE_COOLDOWN, RigForms.PILE_COOLDOWN, RigForms.DRILL_COOLDOWN, RigForms.LANCE_COOLDOWN, RigForms.LASH_COOLDOWN, RigForms.MIMIC_COOLDOWN,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	private static final double SLICE = 360.0 / ACTIONS.length;
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0};
+	/** The entries on the ring now (indices into {@link #ACTIONS}): the Octo Core's only while one is worn. */
+	private int[] shown = new int[0];
+	private double slice = 360.0;
 
 	private int selected = -1;
 	private boolean chosen;
 
 	RigMenuScreen() {
 		super(Component.translatable("screen.jaymospowers.rig_menu"));
+		LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+		boolean octo = player != null && RigOcto.wears(player);
+		int[] list = new int[ACTIONS.length];
+		int n = 0;
+		for (int i = 0; i < ACTIONS.length; i++) {
+			if (octo || !RigOcto.is(ACTIONS[i])) {
+				list[n++] = i;
+			}
+		}
+		this.shown = java.util.Arrays.copyOf(list, n);
+		this.slice = 360.0 / Math.max(1, n);
 	}
 
 	private static Item icon(int i) {
@@ -117,6 +136,14 @@ final class RigMenuScreen extends Screen {
 			case 40 -> Items.FEATHER;
 			case 41 -> Items.FIRE_CHARGE;
 			case 42 -> Items.CLOCK;
+			// the Octo Core's arms
+			case 43 -> Items.PISTON;
+			case 44 -> Items.STICKY_PISTON;
+			case 45 -> Items.POINTED_DRIPSTONE;
+			case 46 -> Items.BREEZE_ROD;
+			case 47 -> Items.RABBIT_FOOT;
+			case 48 -> Items.TRIPWIRE_HOOK;
+			case 49 -> Items.OBSERVER;
 			default -> Items.ENDER_EYE;
 		};
 	}
@@ -180,6 +207,12 @@ final class RigMenuScreen extends Screen {
 			int action = ACTIONS[i];
 			boolean helm = Rig.wears(player, Rig.Piece.HELM);
 			boolean core = !Rig.core(player).isEmpty();
+			if (RigOcto.is(action) && !RigOcto.wears(player)) {
+				return Component.translatable("gui.jaymospowers.rig_menu.no_octo");
+			}
+			if (RigOcto.is(action) && action != RigOcto.ARMS && !RigOcto.out(player)) {
+				return Component.translatable("gui.jaymospowers.rig_menu.arms_in");
+			}
 			if (action == RigNet.FACEPLATE && !helm) {
 				return Component.translatable("gui.jaymospowers.rig_menu.no_helm");
 			}
@@ -222,6 +255,8 @@ final class RigMenuScreen extends Screen {
 				case RigPicks.HYPER -> RigClient.status.hyper();
 				case RigPicks.BANK_TURN -> RigClient.status.banking();
 				case RigPicks.SMOOTH -> RigClient.status.smoothOthers();
+				case RigOcto.ARMS -> RigOcto.out(player);
+				case RigOcto.WATCH -> RigOcto.watching(player);
 				default -> false;
 			};
 		}
@@ -244,7 +279,7 @@ final class RigMenuScreen extends Screen {
 			selected = -1;
 		} else {
 			double angle = Math.toDegrees(Math.atan2(dy, dx)) + 90.0;
-			selected = Math.floorMod((int)Math.round(angle / SLICE), ACTIONS.length);
+			selected = this.shown.length == 0 ? -1 : this.shown[Math.floorMod((int)Math.round(angle / this.slice), this.shown.length)];
 		}
 		if (selected != before && selected >= 0) {
 			player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,
@@ -259,15 +294,16 @@ final class RigMenuScreen extends Screen {
 			UiStyle.wheelPointer(graphics, cx, cy, radius, tile, t, ACCENT);
 		}
 
-		for (int i = 0; i < ACTIONS.length; i++) {
-			double t = Math.toRadians(i * SLICE - 90.0);
+		for (int k = 0; k < this.shown.length; k++) {
+			int i = this.shown[k];
+			double t = Math.toRadians(k * this.slice - 90.0);
 			int x = cx + (int)Math.round(Math.cos(t) * radius) - tile / 2;
 			int y = cy + (int)Math.round(Math.sin(t) * radius) - tile / 2;
 			int left = left(i);
 			boolean blocked = blocker(player, i) != null;
 			boolean picked = i == selected;
 			boolean jKey = ACTIONS[i] == RigClient.selected;
-			UiStyle.wheelTile(graphics, x, y, tile, i, picked, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			UiStyle.wheelTile(graphics, x, y, tile, k, picked, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
 			graphics.item(new ItemStack(icon(i)), x + (tile - 16) / 2, y + (tile - 16) / 2);
 			if (left > 0 && COOLDOWN[i] > 0) {
 				int shade = (int)Math.ceil((tile - 2) * Math.min(1.0, left / (double)COOLDOWN[i]));
@@ -314,7 +350,8 @@ final class RigMenuScreen extends Screen {
 			}
 			if (ACTIONS[selected] == RigNet.FACEPLATE || ACTIONS[selected] == RigNet.NIGHT || ACTIONS[selected] == RigNet.HOVER || ACTIONS[selected] == RigClient.JET_START
 				|| ACTIONS[selected] == RigClient.SLOW_BEAT || ACTIONS[selected] == RigPicks.FAILSAFE || ACTIONS[selected] == RigPicks.PULLUP || ACTIONS[selected] == RigPicks.HYPER
-				|| ACTIONS[selected] == RigPicks.BANK_TURN || ACTIONS[selected] == RigPicks.SMOOTH) {
+				|| ACTIONS[selected] == RigPicks.BANK_TURN || ACTIONS[selected] == RigPicks.SMOOTH || ACTIONS[selected] == RigOcto.ARMS
+				|| ACTIONS[selected] == RigOcto.WATCH) {
 				return Component.translatable(on(player, selected) ? "gui.jaymospowers.rig_menu.on" : "gui.jaymospowers.rig_menu.off");
 			}
 			return Component.translatable("gui.jaymospowers.rig_menu.ready");

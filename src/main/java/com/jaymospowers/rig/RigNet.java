@@ -40,10 +40,11 @@ public final class RigNet {
 	public static final int WARN_LOW_CHARGE = 1, WARN_LOW_HEALTH = 2, WARN_PROJECTILE = 4, WARN_EXPLOSION = 8, WARN_LAVA = 16,
 	WARN_VOID = 32, WARN_BEHIND = 64;
 
-	/** Server → client: open the Rig Forge's screen for the Forge at {@code pos}. */
-	public record ForgeOpen(net.minecraft.core.BlockPos pos) implements CustomPacketPayload {
+	/** Server → client: open the Rig Forge's screen for the Forge at {@code pos}; {@code octo}: whether this player may pick the Octo Core ({@link RigOcto#canBuild}). */
+	public record ForgeOpen(net.minecraft.core.BlockPos pos, boolean octo) implements CustomPacketPayload {
 	public static final Type<ForgeOpen> TYPE = new Type<>(JaymosPowers.id("rig_forge_open"));
-	public static final StreamCodec<ByteBuf, ForgeOpen> CODEC = net.minecraft.core.BlockPos.STREAM_CODEC.map(ForgeOpen::new, ForgeOpen::pos);
+	public static final StreamCodec<ByteBuf, ForgeOpen> CODEC = StreamCodec.composite(net.minecraft.core.BlockPos.STREAM_CODEC, ForgeOpen::pos,
+		ByteBufCodecs.BOOL, ForgeOpen::octo, ForgeOpen::new);
 
 		@Override
 		public Type<ForgeOpen> type() {

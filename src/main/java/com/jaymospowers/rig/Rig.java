@@ -212,6 +212,7 @@ public final class Rig {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			output.accept(HELM);
 			output.accept(CORE);
+			output.accept(RigOcto.creativeStack());
 			output.accept(ARMS);
 			output.accept(THRUSTERS);
 		});
@@ -448,7 +449,8 @@ public final class Rig {
 
 	/** Whether this player is hovering on their thrusters (server): they mustn't be kicked for floating. */
 	public static boolean hovering(Player player) {
-		return RigActives.hovering(player);
+		// the Octo Core's lower arms gripping a wall count too
+		return RigActives.hovering(player) || RigOcto.clinging(player);
 	}
 
 	/** (0.11.87) Whether this player is in the Rig's full flight (server). */

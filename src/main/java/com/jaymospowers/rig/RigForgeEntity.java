@@ -51,9 +51,16 @@ public class RigForgeEntity extends BlockEntity {
 		return this.fed;
 	}
 
-	/** What the Forge is set to build: the four pieces, then a Rig arm and a Rig leg ({@link #SELECTIONS}). */
-	public static final int SELECTIONS = Rig.Piece.values().length + 2;
+	/** What the Forge is set to build: the four pieces, then a Rig arm and a Rig leg, then the Octo Core ({@link #SELECTIONS}). */
+	public static final int SELECTIONS = Rig.Piece.values().length + 3;
 	public static final int ARM = 1, LEG = 2;
+	/** The selection that builds an Octo Core ({@link RigOcto}): a Tinkerer's or a web slinger's alone. */
+	public static final int OCTO = Rig.Piece.values().length + 2;
+
+	/** Whether the Forge is set to the Octo Core (it builds a Core, so {@link #piece} is the Core then). */
+	public boolean octo() {
+		return selection() == OCTO;
+	}
 
 	public int selection() {
 		return Math.floorMod(this.selection, SELECTIONS);
@@ -62,13 +69,13 @@ public class RigForgeEntity extends BlockEntity {
 	/** The picked piece, or null while it is set to a limb. */
 	public Rig.@Nullable Piece piece() {
 		int s = selection();
-		return s < Rig.Piece.values().length ? Rig.Piece.values()[s] : null;
+		return s == OCTO ? Rig.Piece.CORE : s < Rig.Piece.values().length ? Rig.Piece.values()[s] : null;
 	}
 
 	/** {@link #ARM} or {@link #LEG} while the Forge is set to a Rig limb, else 0. */
 	public int limb() {
 		int s = selection() - Rig.Piece.values().length;
-		return s < 0 ? 0 : s + 1;
+		return s < 0 || selection() == OCTO ? 0 : s + 1;
 	}
 
 	public void setSelection(int selection) {

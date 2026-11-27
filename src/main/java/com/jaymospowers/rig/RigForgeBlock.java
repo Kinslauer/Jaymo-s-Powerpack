@@ -40,6 +40,7 @@ import org.jspecify.annotations.Nullable;
  * <li>A dye in hand still works: the plates' paint; with Sneak, the trim's. What is worn is repainted too, and what is
  * built next takes it. A water bucket washes both off.</li>
  * <li>A worn-down Rig piece in hand refits it ({@link #REFIT_POINTS}). Creative builds for free.</li>
+ * <li>The Octo Core ({@link RigOcto}) is one more pick, for a Tinkerer or a web slinger only.</li>
  * </ul>
  */
 public class RigForgeBlock extends Block implements EntityBlock {
@@ -85,6 +86,9 @@ public class RigForgeBlock extends Block implements EntityBlock {
 
 	/** What the Forge is set to build costs. */
 	static Cost costOf(RigForgeEntity forge) {
+		if (forge.octo()) {
+			return RigOcto.cost(forge.frame());
+		}
 		Rig.Piece piece = forge.piece();
 		return piece != null ? cost(piece, forge.frame()) : limbCost(forge.limb(), forge.frame());
 	}
@@ -141,7 +145,7 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		if (!held.isEmpty()) {
 			return;
 		}
-		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new RigNet.ForgeOpen(pos));
+		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new RigNet.ForgeOpen(pos, RigOcto.canBuild(player)));
 	}
 
 	/** How far from the Forge its screen still works (blocks, squared). */
@@ -159,7 +163,12 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		}
 		RigForgeEntity forge = RigForgeEntity.of(player.level(), pos, state);
 		if (set.selection() != forge.selection() && set.selection() >= 0 && set.selection() < RigForgeEntity.SELECTIONS) {
-			forge.setSelection(set.selection());
+			if (set.selection() == RigForgeEntity.OCTO && !RigOcto.canBuild(player)) {
+				// the Octo Core's drawings are a Tinkerer's or a web slinger's
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_octo.cant_build").withStyle(ChatFormatting.GRAY));
+			} else {
+				forge.setSelection(set.selection());
+			}
 		}
 		RigFrame[] frames = RigFrame.values();
 		if (set.frame() >= 0 && set.frame() < frames.length && frames[set.frame()] != forge.frame()) {
@@ -229,6 +238,11 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		Rig.Piece piece = forge.piece();
 		Cost cost = costOf(forge);
 		boolean free = player.isCreative();
+		if (forge.octo() && !RigOcto.canBuild(player)) {
+			// set by someone who could, built by someone who can't
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.rig_octo.cant_build").withStyle(ChatFormatting.RED));
+			return;
+		}
 		if (!free && (points(player) + forge.fed() < cost.points() || count(player, cost.first()) < cost.firstCount()
 			|| count(player, cost.second()) < cost.secondCount())) {
 			describe(player, forge);
@@ -242,6 +256,9 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		}
 		ItemStack made = new ItemStack(piece != null ? piece.item() : forge.limb() == RigForgeEntity.ARM ? Prosthetics.RIG_ARM_ITEM : Prosthetics.RIG_LEG_ITEM);
 		Rig.stamp(made, forge.frame());
+		if (forge.octo()) {
+			RigOcto.make(made);
+		}
 		if (piece != null && forge.plates() != RigForgeEntity.NO_PAINT) {
 			made.set(DataComponents.DYED_COLOR, new DyedItemColor(forge.plates()));
 		}
@@ -326,7 +343,7 @@ public class RigForgeBlock extends Block implements EntityBlock {
 		Rig.Piece piece = forge.piece();
 		Cost cost = costOf(forge);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.rig_forge.selected",
-			Component.translatable(piece != null ? "item.jaymospowers.rig_" + piece.id()
+			Component.translatable(forge.octo() ? "item.jaymospowers.rig_octo_core" : piece != null ? "item.jaymospowers.rig_" + piece.id()
 				: forge.limb() == RigForgeEntity.ARM ? "item.jaymospowers.rig_arm" : "item.jaymospowers.rig_leg").withStyle(ChatFormatting.AQUA),
 			Component.translatable("rig.jaymospowers.frame." + forge.frame().id()).withStyle(ChatFormatting.AQUA),
 			cost.points(), points(player) + forge.fed(),

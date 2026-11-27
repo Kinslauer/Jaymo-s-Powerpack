@@ -53,6 +53,8 @@ public class RigForgeScreen extends Screen {
 	private static final int BARE = -1;
 
 	private final BlockPos pos;
+	/** Whether this player may pick the Octo Core (a Tinkerer or a web slinger; the server says, and checks again). */
+	private final boolean octo;
 	private static float yaw = 20.0F;
 	private int selection;
 	private RigFrame frame = RigFrame.STANDARD;
@@ -63,9 +65,10 @@ public class RigForgeScreen extends Screen {
 	private boolean turning;
 	private Button pieceButton, frameButton, build, paint;
 
-	public RigForgeScreen(BlockPos pos) {
+	public RigForgeScreen(BlockPos pos, boolean octo) {
 		super(Component.translatable("screen.jaymospowers.rig_forge.title"));
 		this.pos = pos;
+		this.octo = octo;
 	}
 
 	private @Nullable RigForgeEntity forge() {
@@ -108,7 +111,7 @@ public class RigForgeScreen extends Screen {
 	protected void init() {
 		RigForgeEntity forge = forge();
 		if (forge != null) {
-			this.selection = forge.selection();
+			this.selection = forge.selection() == RigForgeEntity.OCTO && !this.octo ? 0 : forge.selection();
 			this.frame = forge.frame();
 			this.plates = dyeOf(forge.plates());
 			this.trim = dyeOf(forge.trim());
@@ -143,6 +146,9 @@ public class RigForgeScreen extends Screen {
 
 	private Component pieceName() {
 		Rig.Piece[] pieces = Rig.Piece.values();
+		if (this.selection == RigForgeEntity.OCTO) {
+			return Component.translatable("item.jaymospowers.rig_octo_core");
+		}
 		return Component.translatable(this.selection < pieces.length ? "item.jaymospowers.rig_" + pieces[this.selection].id()
 			: this.selection == pieces.length ? "item.jaymospowers.rig_arm" : "item.jaymospowers.rig_leg");
 	}
@@ -155,6 +161,10 @@ public class RigForgeScreen extends Screen {
 
 	private void cyclePiece(int by) {
 		this.selection = Math.floorMod(this.selection + by, RigForgeEntity.SELECTIONS);
+		if (this.selection == RigForgeEntity.OCTO && !this.octo) {
+			// only a Tinkerer or a web slinger sees the Octo Core's drawings
+			this.selection = Math.floorMod(this.selection + by, RigForgeEntity.SELECTIONS);
+		}
 		labels();
 		send(false, false);
 	}
@@ -173,6 +183,9 @@ public class RigForgeScreen extends Screen {
 
 	private RigForgeBlock.Cost cost() {
 		Rig.Piece[] pieces = Rig.Piece.values();
+		if (this.selection == RigForgeEntity.OCTO) {
+			return com.jaymospowers.rig.RigOcto.cost(this.frame);
+		}
 		return this.selection < pieces.length ? RigForgeBlock.cost(pieces[this.selection], this.frame)
 			: RigForgeBlock.limbCost(this.selection - pieces.length + 1, this.frame);
 	}

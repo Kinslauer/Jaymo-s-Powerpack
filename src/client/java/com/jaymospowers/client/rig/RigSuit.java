@@ -303,6 +303,7 @@ public final class RigSuit {
 		state.setData(BODY, null);
 		state.setData(PARENT, null);
 		state.setData(RigBackClient.BACK, null);
+		state.setData(RigOctoClient.ARMS, null);
 		if (!(entity instanceof Player player)) {
 			return;
 		}
@@ -389,6 +390,8 @@ public final class RigSuit {
 		if (ages != null) {
 			// the back rig's vanes, legs and pincers (RigBackClient)
 			RigBackClient.extract(player, state, partialTicks);
+			// the Octo Core's four arms (RigOctoClient)
+			RigOctoClient.extract(player, state, partialTicks);
 		}
 	}
 
@@ -667,6 +670,7 @@ public final class RigSuit {
 					0xFF000000 | trim, null, 0);
 			}
 			RigBackClient.submit(poseStack, collector, lightCoords, state, parent);
+			RigOctoClient.submit(poseStack, collector, lightCoords, state, parent);
 		}
 
 		private static boolean same(int[] colors) {
