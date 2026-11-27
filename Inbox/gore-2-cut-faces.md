@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: prometheus
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: Power-pack Supplement
-claimed_by: hermes-modeller
+claimed_by: 
 pr: 
 suggested_owns:
   - src/client/java/com/jaymospowers/client/Dismembered.java
@@ -30,3 +30,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 
 ## Notes
 - 2026-11-27 17:40 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on gore 1-4 (via Claude coordinator, 2026-11-27)
+- 2026-11-27 18:28 hermes-modeller's claim had no sign of work for 30 min: handed back as open.
