@@ -10,5 +10,4 @@ Deviations from `docs/Legends-Plan.md` Patch 7:
 
 - Chain blades exist only on the Chain Axe, not on the other chain weapons the plan names.
 - Instant Step only blinks behind a foe; it has no forward blink and no Sneak variant (the plan's "a few blocks ahead" is not built).
-- Cross slash (`ot_xslash`, Weapon Forms sword move) is not built.
 - Not checked in a running game: only compiled.
