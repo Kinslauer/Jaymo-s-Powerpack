@@ -22,4 +22,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 - 2026-11-26 ON HOLD until the earlier waves merge (1, then 2+7, then 3+6, then 4+5). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - 2026-11-27 13:20 Hold lifted: nycto-1 and -2 merged. Next in the Hunter's Road thread.
-- 2026-11-27 16:28 Merged #2298.
+- 2026-11-27 11:29 PR #2298 is merged into master; moved to Inbox/Done.
