@@ -29,8 +29,10 @@ import org.jspecify.annotations.Nullable;
  * kind the storehouse holds ({@link #of}); with none, a wooden one they whittled themselves. A water bucket is iron
  * only if there's a bucket in the stores (a smith forges one in a wealthy realm), else Jaymo's Powers' fired clay one.
  * <p>
- * Tools wear out: once a day ({@link #WEAR_EVERY}) one of each kind in use is gone from the stores, so a town keeps
- * spending iron or stone on them, and a town that runs out of iron goes back to stone as the last iron ones wear out.
+ * Tools wear out (Andy: "they should have varying durability. iron lasting the longest"): each kind in use loses one
+ * from the stores every {@link #LASTS} days by what it's made of, a stone one every two days, an iron one every four
+ * (about vanilla's 131 uses to 250), so a town keeps spending iron or stone on them, and one that runs out of iron goes
+ * back to stone as the last iron ones wear out.
  * Each settlement's tools are looked over once every {@link #FRESH} ticks, or as soon as its smith forges one.
  */
 public final class ToolGrades {
@@ -48,8 +50,9 @@ public final class ToolGrades {
 	static final long FRESH = 1200L;
 	/** A smith keeps this many of each tool in the stores (a bucket: {@link #KEEP_BUCKETS}). */
 	static final int KEEP = 2, KEEP_BUCKETS = 1;
-	/** How often a tool of each kind in use wears out (ticks: a day). */
+	/** Tools are looked at for wear once a day (ticks); how many days one lasts by {@link Grade} (wood is whittled again for nothing). */
 	static final long WEAR_EVERY = 24000L;
+	static final int[] LASTS = {1, 2, 4};
 	/** Iron ingots or cobblestone a tool takes: pickaxe, axe, shovel, hoe, bucket (a bucket has no handle). */
 	private static final int[] HEADS = {3, 3, 1, 2, 3};
 	/** Sticks a handle takes; sticks one plank is cut into. */
@@ -165,7 +168,7 @@ public final class ToolGrades {
 		return Storage.count(level, f, Items.STICK) >= HANDLE;
 	}
 
-	/** Once a day, one of each kind of tool the settlement works with wears out of its stores. */
+	/** Once a day: each kind of tool the settlement works with whose days are up ({@link #LASTS}) wears out of its stores. */
 	private static void wear(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
@@ -181,7 +184,9 @@ public final class ToolGrades {
 					continue;
 				}
 				Grade g = stocked(level, f, kind);
-				if (g != Grade.WOOD) {
+				int lasts = LASTS[g.ordinal()];
+				// (each settlement and kind on its own day of the round, so they don't all wear out together)
+				if (g != Grade.WOOD && Math.floorMod(now / WEAR_EVERY + f.id() + kind.ordinal(), lasts) == 0) {
 					Storage.take(level, f, item(kind, g), 1);
 				}
 			}

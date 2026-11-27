@@ -3605,6 +3605,9 @@ public final class PowersCompat {
 			realms.getField("keeps").set(null, keeps);
 			java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, String> knows = PowersCompat::knowsSteel;
 			Class.forName("com.jaymospowers.tinkering.smithing.RealmSteels").getField("knows").set(null, knows);
+			// and who knows steelmaking (RealmSteels.steelKnown): the realm's steel blueprint, SteelRealms
+			java.util.function.Predicate<net.minecraft.server.level.ServerPlayer> steel = SteelRealms::knows;
+			Class.forName("com.jaymospowers.tinkering.smithing.RealmSteels").getField("steelKnown").set(null, steel);
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the realm designs and steels (older Powers?)", e);
 		}
