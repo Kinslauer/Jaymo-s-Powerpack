@@ -18272,3 +18272,14 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Spectate view label** (`NpcFocus`): the label over an NPC you spectate no longer shows coordinates or the "Running: ..." list of goals and behaviours. Path reads "Path: 4.7 m away, 10 steps left" (or "can't reach, ends X m short"), the walk target and a "walking" focus give only how far. Focus/Thinking/Stuck, Alert, Task, Activity, Target and suspicion lines stay; the path line drawing is unchanged.
 - Start the game with `-Djaymoskingdoms.eyesDetail=true` to get the coordinates and the Running line back for AI debugging.
 - Built; not played.
+
+## 0.13.85 (2026-11-27): Villagers going in at night aren't "Running scared" (#2293)
+
+- Andy's clip: a villager walking home at night showed "Running scared" with its activity "rest" and no foe anywhere. It
+  wasn't frightened: being out under the open sky at night (or in heavy rain) sends people in (`TakeCover`), and that
+  was handled as a fright (`Frights.shelter`), so Jade and the spectate label called it running scared, and it hurried.
+- Going in is now its own kind (`Frights.cover`): at night they walk in at an ordinary pace (in rain they still hurry),
+  don't yelp, and Jade says "Going home", "Resting at home" or "Sheltering" (`NpcTasks`). A monster that turns up while
+  they're going in frightens them at once, with the cry, and they run from it; before, being on their way in held off
+  the fright (and the cry) for up to 15 seconds. War alarms and twisters are real frights, as before.
+- Built; not played.
