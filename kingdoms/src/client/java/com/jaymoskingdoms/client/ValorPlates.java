@@ -33,6 +33,8 @@ import net.minecraft.world.entity.LivingEntity;
  * <li>Stone: rough lumps of rock here and there;</li>
  * <li>Ash: thin flakes curling off;</li>
  * <li>Lacquer: overlapping shell segments, like a beetle's;</li>
+ * <li>Concrete: thick rough-cast sheets stacked up the arm; going up, each one pillars up out of the ground (a tall column
+ * shooting up from under the feet, shortening into its sheet as it slams home), several rising at once, the hand's first;</li>
  * <li>Haze has none: it's a shimmer, not a shell.</li>
  * </ul>
  * Under King's coating the plates glint in the soul colour. Textures from {@code tools/gen_valor_coats.py}.
@@ -46,6 +48,11 @@ public final class ValorPlates {
 	static final int[] COVER = {3, 6, 8, 12, 12};
 	/** The right arm (classic): its centre across, its top and bottom (pixels); a slim arm is this much as wide, its centre. */
 	static final float CENTRE = -1.0F, TOP = -2.0F, HAND = 10.0F, SLIM = 0.75F, SLIM_CENTRE = -0.5F;
+
+	/** Concrete's pillars: how far below its place a slab starts (pixels, the shoulder's height off the ground), how much longer it is as it rises, how much its rises overlap. */
+	static final float PILLAR_DROP = 24.0F, PILLAR_STRETCH = 3.0F, PILLAR_OVERLAP = 0.5F;
+	/** Concrete's slabs: vanilla's own light grey concrete (no new art), the King's glint on Stone's cracks. */
+	static final Identifier CONCRETE_TEXTURE = Identifier.withDefaultNamespace("textures/block/light_gray_concrete.png");
 
 	/** The plate box's size (pixels): across and down, and its thickness. */
 	static final float BOX_W = 8.0F, BOX_T = 2.0F;
@@ -120,17 +127,28 @@ public final class ValorPlates {
 			poseStack.scale(SLIM, 1.0F, 1.0F);
 			poseStack.translate(-side * CENTRE / 16.0F, 0.0F, 0.0F);
 		}
+		boolean concrete = coat.look() == Valor.Look.CONCRETE.ordinal();
 		int i = 0;
 		for (Plate p : plates) {
 			boolean pauldron = p.y() < TOP;
 			if (pauldron ? coat.rank() < Valor.UNBROKEN : p.y() < covered - 0.01F) {
 				continue;
 			}
-			// one after another from the hand
-			float s = Mth.clamp(coat.grow() * shown - i, 0.0F, 1.0F);
+			// one after another from the hand (concrete's overlapping, several pillars rising at once)
+			float s = concrete ? Mth.clamp(coat.grow() * (shown * PILLAR_OVERLAP + 1.0F) - i * PILLAR_OVERLAP, 0.0F, 1.0F)
+				: Mth.clamp(coat.grow() * shown - i, 0.0F, 1.0F);
 			i++;
 			if (s <= 0.0F) {
 				continue;
+			}
+			float rise = 0.0F, stretch = 1.0F;
+			if (concrete) {
+				// a pillar up out of the ground: below its place by the rest of the way, long, full width from the start
+				float left = 1.0F - s;
+				float e = 1.0F - left * left * left;
+				rise = (PILLAR_DROP - p.y()) * (1.0F - e);
+				stretch = 1.0F + PILLAR_STRETCH * (1.0F - e);
+				s = 1.0F;
 			}
 			float x, z;
 			switch (p.face()) {
@@ -148,10 +166,10 @@ public final class ValorPlates {
 				}
 			}
 			poseStack.pushPose();
-			poseStack.translate(side * x / 16.0F, p.y() / 16.0F, z / 16.0F);
+			poseStack.translate(side * x / 16.0F, (p.y() + rise) / 16.0F, z / 16.0F);
 			poseStack.rotate(Axis.YP, p.face() == Face.OUTER ? side * p.face().yRot : p.face().yRot);
 			poseStack.rotate(Axis.XP, p.tilt());
-			poseStack.scale(p.w() / BOX_W * s, p.h() / BOX_W * s, p.t() / BOX_T * s);
+			poseStack.scale(p.w() / BOX_W * s, p.h() / BOX_W * s * stretch, p.t() / BOX_T * s);
 			collector.order(1).submitModelPart(set.box(), poseStack, RenderTypes.entityCutout(set.texture()), light, OverlayTexture.NO_OVERLAY, null, -1);
 			if (glow != 0) {
 				collector.order(2).submitModelPart(set.box(), poseStack, RenderTypes.eyes(set.glow()), light, OverlayTexture.NO_OVERLAY, null, glow);
@@ -168,7 +186,8 @@ public final class ValorPlates {
 			return null;
 		}
 		return SETS.computeIfAbsent(kind.ordinal(), k -> new Set(plates(kind), box(),
-			JaymosKingdoms.id("textures/entity/valor/plate_" + kind.key() + ".png"), JaymosKingdoms.id("textures/entity/valor/plate_" + kind.key() + "_glow.png")));
+			kind == Valor.Look.CONCRETE ? CONCRETE_TEXTURE : JaymosKingdoms.id("textures/entity/valor/plate_" + kind.key() + ".png"),
+			JaymosKingdoms.id("textures/entity/valor/plate_" + kind.artKey() + "_glow.png")));
 	}
 
 	/** The plate box: {@link #BOX_W} across and down, {@link #BOX_T} out from its top edge's middle (each plate is this, scaled), so its faces show the texture's 8x8 pattern. */
@@ -224,6 +243,15 @@ public final class ValorPlates {
 				for (float y = HAND - 2.4F; y >= TOP - 0.4F; y -= 1.9F) {
 					for (Face f : Face.values()) {
 						out.add(new Plate(f, 0.0F, y, 4.5F, 2.4F, 0.5F, 0.22F));
+					}
+				}
+			}
+			case CONCRETE -> {
+				// thick sheets, a little off true each (poured, not forged), each overlapping the one below
+				for (float y = HAND - 2.8F; y >= TOP - 0.4F; y -= 2.4F) {
+					for (Face f : Face.values()) {
+						out.add(new Plate(f, (r.nextFloat() - 0.5F) * 0.5F, y, 4.6F + r.nextFloat() * 0.5F, 2.8F + r.nextFloat() * 0.4F,
+							0.9F + r.nextFloat() * 0.3F, 0.08F + r.nextFloat() * 0.1F));
 					}
 				}
 			}

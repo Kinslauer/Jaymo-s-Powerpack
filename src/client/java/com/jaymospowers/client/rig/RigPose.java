@@ -123,6 +123,9 @@ public final class RigPose {
 	static final float BARRAGE_DROP = 2.4F, BARRAGE_LEAN = 0.3F, BARRAGE_ARM_BACK = 0.2F, BARRAGE_ARM_OUT = 0.5F, BARRAGE_SPREAD = 0.2F, BARRAGE_CHIN = 0.3F,
 		BARRAGE_THUMP = 0.5F, BARRAGE_POD_DOWN_AT = 28.0F;
 	/** The suit-ups: the slam's crouch (drop, lean), the fists' reach down, the arms thrown wide as it finishes. */
+	/** The wrap's T: how far out the arms go (radians, near level), how wide the feet; the ticks each piece locks on at. */
+	static final float WRAP_ARMS_OUT = 1.45F, WRAP_SPREAD = 0.12F;
+	static final float[] WRAP_LOCKS = {16.0F, 30.0F, 44.0F, 60.0F};
 	static final float SUITUP_SLAM_DROP = 3.0F, SUITUP_SLAM_LEAN = 0.5F, SUITUP_FIST_X = -0.1F, SUITUP_OPEN = 1.5F;
 	/** Walking at this share of full pace or more, a move leaves the legs to the walk. */
 	static final float STILL_PACE = 0.35F;
@@ -391,6 +394,29 @@ public final class RigPose {
 				h.head.xRot += 0.35F * down - 0.5F * open;
 				set(h.rightArm, 0.2F, 0.0F, SUITUP_OPEN, open);
 				set(h.leftArm, 0.2F, 0.0F, -SUITUP_OPEN, open);
+			}
+			case RigMoves.SUITUP_WRAP -> {
+				// arms thrown out wide and held there, feet apart, chin up as the shell comes in; the head dips as the helm folds
+				// over it (it lands 60 ticks in) and comes up lit; then the arms come down to the sides with fists closed
+				float wide = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 7.0F, 1.0F, BACK, 66.0F, 1.0F, LINEAR, 76.0F, 0.0F, SINE);
+				float down = RigBeats.at(t, 66.0F, 0.0F, LINEAR, 76.0F, 1.0F, OUT, RigMoves.SUITUP_WRAP_TICKS - 4.0F, 1.0F, LINEAR,
+					RigMoves.SUITUP_WRAP_TICKS, 0.0F, SINE);
+				float dip = RigBeats.at(t, 56.0F, 0.0F, LINEAR, 60.0F, 1.0F, OUT, 68.0F, 0.0F, SINE);
+				// each piece's lock jolts the arms a little (arms, core, legs land 16, 30, 44 ticks in)
+				float jolt = 0.0F;
+				for (float at : WRAP_LOCKS) {
+					float since = t - at;
+					if (since >= 0.0F && since < 4.0F) {
+						jolt = Math.max(jolt, 1.0F - since / 4.0F);
+					}
+				}
+				set(h.rightArm, -0.05F - 0.06F * jolt, 0.0F, WRAP_ARMS_OUT, wide);
+				set(h.leftArm, -0.05F - 0.06F * jolt, 0.0F, -WRAP_ARMS_OUT, wide);
+				spread(h, WRAP_SPREAD * Math.max(wide, down) * still);
+				h.head.xRot += -0.18F * wide + 0.35F * dip;
+				set(h.rightArm, -0.15F, 0.0F, 0.12F, down);
+				set(h.leftArm, -0.15F, 0.0F, -0.12F, down);
+				crouch(h, 0.6F * jolt * wide, 0.0F);
 			}
 			case RigMoves.SUITUP_STEP -> {
 				// arms held out wide while the shell stands open round you; then drawn in across the chest as it folds shut;

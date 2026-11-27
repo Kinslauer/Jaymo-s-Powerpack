@@ -94,7 +94,7 @@ public final class ValorWingsLook {
 	static Identifier texture(int design, int look) {
 		int i = Mth.clamp(look, 0, Valor.Look.values().length - 1);
 		if (TEXTURES[design][i] == null) {
-			TEXTURES[design][i] = JaymosKingdoms.id("textures/entity/valor/wings_" + prefix(design) + Valor.Look.values()[i].key() + ".png");
+			TEXTURES[design][i] = JaymosKingdoms.id("textures/entity/valor/wings_" + prefix(design) + Valor.Look.values()[i].artKey() + ".png");
 		}
 		return TEXTURES[design][i];
 	}
@@ -109,7 +109,7 @@ public final class ValorWingsLook {
 	static Identifier sleeve(int look) {
 		int i = Mth.clamp(look, 0, Valor.Look.values().length - 1);
 		if (SLEEVES[i] == null) {
-			SLEEVES[i] = JaymosKingdoms.id("textures/entity/valor/wings_sleeve_" + Valor.Look.values()[i].key() + ".png");
+			SLEEVES[i] = JaymosKingdoms.id("textures/entity/valor/wings_sleeve_" + Valor.Look.values()[i].artKey() + ".png");
 		}
 		return SLEEVES[i];
 	}

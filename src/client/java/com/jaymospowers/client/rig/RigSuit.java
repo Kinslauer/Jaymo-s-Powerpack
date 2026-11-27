@@ -129,6 +129,9 @@ public final class RigSuit {
 	static final float FLY_SPREAD = 110.0F, FLY_HEIGHT = 70.0F, FLY_TUMBLE = 4.0F;
 	/** The shortest a plate's flight takes (ticks). */
 	static final float MIN_FLIGHT = 6.0F;
+	/** The wrap ({@link com.jaymospowers.rig.RigSuitUp#WRAP}): its style, and the share of a plate's flight spent closing on the body before it swings shut. */
+	static final int WRAP = com.jaymospowers.rig.RigSuitUp.WRAP;
+	static final float WRAP_APPROACH = 0.6F;
 
 	/** The suit texture and its glow pass for each frame ({@link RigFrame} order), and the trim plates alone. */
 	static final Identifier[] TEXTURES = {JaymosPowers.id("textures/entity/rig/suit.png"), JaymosPowers.id("textures/entity/rig/suit_scrap.png"),
@@ -749,6 +752,8 @@ public final class RigSuit {
 		private final int only;
 		/** The suit-up the plates fly in as this frame (see {@link #STYLE}). */
 		private int style;
+		/** The wrap's start for each plate, by its bone ({@link #wrapFrom}). */
+		private final float[][] wrapFrom;
 
 		Suit(boolean slim, Supplier<PlayerModel> wearer, int only) {
 			super(RigSuitMesh.create(slim).bakeRoot(), slim);
@@ -764,6 +769,10 @@ public final class RigSuit {
 				this.face[i] = RigSuitMesh.PLATES[i][1].equals("helm_face");
 				this.plates[i] = root().getChild(RigSuitMesh.PLATES[i][0]).getChild(RigSuitMesh.PLATES[i][1]);
 				this.arm[i] = RigSuitMesh.PLATES[i][0].endsWith("_arm");
+			}
+			this.wrapFrom = new float[this.plates.length][];
+			for (int i = 0; i < this.plates.length; i++) {
+				this.wrapFrom[i] = wrapFrom(i);
 			}
 			hideSkinLayers();
 		}
@@ -791,7 +800,7 @@ public final class RigSuit {
 				}
 			}
 			hideSkinLayers();
-			this.style = state.getData(STYLE) == null ? 0 : Math.min(4, Math.max(0, state.getData(STYLE)));
+			this.style = state.getData(STYLE) == null ? 0 : Math.min(WRAP, Math.max(0, state.getData(STYLE)));
 			assemble(state.getData(AGES), Boolean.TRUE.equals(state.getData(FLY)));
 			Float face = state.getData(FACE);
 			if (face != null && face > 0.0F) {
@@ -836,6 +845,10 @@ public final class RigSuit {
 				float age = ages == null || this.only >= 0 && RigSuitMesh.PIECE[i] != this.only ? -1.0F : ages[RigSuitMesh.PIECE[i]];
 				float[] time = RigSuitMesh.TIME[i];
 				float p = age < 0.0F ? -1.0F : (age - time[0]) / time[1];
+				if (fly && this.style == WRAP && age > 0.0F && age < time[0] + time[1]) {
+					wrap(part, i, age / Math.max(MIN_FLIGHT, time[0] + time[1]));
+					continue;
+				}
 				if (fly && age > 0.0F && age < time[0] + time[1]) {
 					// a called suit: the plate flies in from where it was scattered, locking on at its time
 					float q = age / Math.max(MIN_FLIGHT, time[0] + time[1]);
@@ -886,6 +899,53 @@ public final class RigSuit {
 				part.yScale = Math.max(0.0F, scale);
 				part.zScale = Math.max(0.0F, scale);
 			}
+		}
+
+		/**
+		 * A wrap's plate on its way ({@code q} 0-1 of its flight): first it closes on the body from its bone's side, held open
+		 * as it was folded ({@link RigSuitMesh#CAME}); then it swings and slides shut onto its place, overshooting a little,
+		 * and the usual clunk follows once it's home.
+		 */
+		private void wrap(ModelPart part, int i, float q) {
+			float[] from = this.wrapFrom[i];
+			float[] came = RigSuitMesh.CAME[i];
+			float approach = Mth.clamp(q / WRAP_APPROACH, 0.0F, 1.0F);
+			float a = 1.0F - (1.0F - approach) * (1.0F - approach);
+			float fold = q <= WRAP_APPROACH ? 1.0F : 1.0F - backOut((q - WRAP_APPROACH) / (1.0F - WRAP_APPROACH));
+			float k = 1.0F - a;
+			part.x += from[0] * k + came[0] * fold;
+			part.y += from[1] * k + came[1] * fold;
+			part.z += from[2] * k + came[2] * fold;
+			part.xRot += from[3] * k + came[3] * fold;
+			part.yRot += from[4] * k + came[4] * fold;
+			part.zRot += came[5] * fold;
+			part.visible = true;
+			part.xScale = this.slim && this.arm[i] ? SLIM_ARM : 1.0F;
+			part.yScale = 1.0F;
+			part.zScale = 1.0F;
+		}
+
+		/**
+		 * Where a wrap's plate comes from, by its bone ({x, y, z (pixels, on the bone), xRot, yRot}): the arms' slide up the
+		 * outstretched arm from past the hand, the body's come in from the front (the spine unit and its wings from behind),
+		 * the legs' from below and in front, the helm's fold over from behind the head, the faceplate drops from above.
+		 */
+		private static float[] wrapFrom(int i) {
+			String bone = RigSuitMesh.PLATES[i][0], name = RigSuitMesh.PLATES[i][1];
+			float j = (i * 7) % 5;
+			if (bone.endsWith("_arm")) {
+				return new float[] {0.0F, 22.0F + j * 3.0F, -4.0F - j, 0.5F, 0.0F};
+			}
+			if (bone.endsWith("_leg")) {
+				return new float[] {0.0F, 14.0F + j * 2.0F, -14.0F - j * 2.0F, -0.6F, 0.0F};
+			}
+			if (bone.equals("head")) {
+				return name.equals("helm_face") ? new float[] {0.0F, -16.0F, -3.0F, -1.8F, 0.0F}
+					: new float[] {0.0F, -8.0F - j, 14.0F + j, -1.4F, 0.0F};
+			}
+			boolean back = name.equals("spine") || name.startsWith("wing_");
+			float across = (j - 2.0F) * 3.0F;
+			return back ? new float[] {across, -4.0F, 32.0F + j * 3.0F, 0.6F, 0.0F} : new float[] {across, -2.0F + j, -30.0F - j * 4.0F, -0.5F, 0.0F};
 		}
 
 		/** The skin's outer layers have no part in the suit. */

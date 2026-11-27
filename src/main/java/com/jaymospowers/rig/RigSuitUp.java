@@ -48,12 +48,22 @@ import org.jspecify.annotations.Nullable;
  * <li>{@link #FALL}: called while falling from a great height with the Thrusters to hand: the suit assembles piece by
  * piece through the fall, then the thrusters fire and kill the momentum (no fall damage, a landing burst on the ground).
  * It costs {@link #BRAKE_COST} charge; with less than that the thrusters only sputter and the fall is the fall.</li>
+ * <li>{@link #WRAP}: called standing still and out of a fight (Andy: suit-ups "like these", the Iron Man 2 suit-up and
+ * its game remake): you throw your arms out wide, the suit flies in as one shell and comes apart round you; the gauntlets
+ * slide up the outstretched arms from past the hands, the chest closes over the reactor, the legs clamp shut, and last the
+ * helm folds over the head from behind, the faceplate drops and the eyes light. Your own view swings round to film it from
+ * the front ({@code RigSuitUpCamera}).</li>
  * </ul>
  * The plates' flight is drawn by the client ({@code RigSuit}) from {@link #STYLE}; the body's pose from the
  * {@link RigMoves} kinds {@link RigMoves#SUITUP_SLAM} to {@link RigMoves#SUITUP_BRAKE}.
  */
 public final class RigSuitUp {
-	public static final int NONE = 0, SLAM = 1, STEP = 2, FLIGHT = 3, FALL = 4;
+	public static final int NONE = 0, SLAM = 1, STEP = 2, FLIGHT = 3, FALL = 4, WRAP = 5;
+	/** The wrap needs you still (horizontal speed under this, blocks/tick) and unhurt for this long (ticks). */
+	static final double WRAP_STILL = 0.08;
+	static final int WRAP_CALM = 100;
+	/** How long the wrap's call stays open after the helm lands (ticks): its plates' flights end by then. */
+	static final int WRAP_SETTLE = 20;
 
 	/** The style of the suit-up under way (synced to everyone, so the plates are drawn flying in that way). */
 	public static final AttachmentType<Integer> STYLE = AttachmentRegistry.create(JaymosPowers.id("rig_suitup_style"),
@@ -77,8 +87,8 @@ public final class RigSuitUp {
 	static final float BURST_SHAKE = 1.4F;
 
 	/** When each piece ({@link Rig.Piece} order: core, arms, thrusters, helm) lands, ticks after the first, and the streak's lead-in, per style. */
-	private static final int[][] LAND_AT = {null, {0, 3, 6, 9}, {0, 9, 18, 27}, {0, 5, 10, 15}, {0, 20, 40, 60}};
-	private static final int[] INBOUND = {12, 5, 14, 9, 12};
+	private static final int[][] LAND_AT = {null, {0, 3, 6, 9}, {0, 9, 18, 27}, {0, 5, 10, 15}, {0, 20, 40, 60}, {14, 0, 28, 44}};
+	private static final int[] INBOUND = {12, 5, 14, 9, 12, 16};
 
 	private enum Phase { ASSEMBLE, BRAKE }
 
@@ -127,7 +137,7 @@ public final class RigSuitUp {
 
 	/** When style {@code style}'s pieces land, ticks after the first. */
 	static int[] landAt(int style) {
-		return LAND_AT[Math.max(SLAM, Math.min(style, FALL))];
+		return LAND_AT[Math.max(SLAM, Math.min(style, WRAP))];
 	}
 
 	/** The move (pose) a style plays. */
@@ -136,13 +146,15 @@ public final class RigSuitUp {
 			case STEP -> RigMoves.SUITUP_STEP;
 			case FLIGHT -> RigMoves.SUITUP_FLIGHT;
 			case FALL -> RigMoves.SUITUP_FALL;
+			case WRAP -> RigMoves.SUITUP_WRAP;
 			default -> RigMoves.SUITUP_SLAM;
 		};
 	}
 
 	/**
 	 * Which suit-up this situation gets: a fall from height (with the Thrusters on you or parked) the falling assembly;
-	 * airborne otherwise (or under thrust) the flight-in; at the parked post the step-in; else the slam.
+	 * airborne otherwise (or under thrust) the flight-in; at the parked post the step-in; standing still out of a fight the
+	 * wrap; else (moving, or hurt lately) the slam.
 	 *
 	 * @param post where the suit was standing sentry, if it was
 	 * @param thrusters whether the Thrusters are worn or parked
@@ -158,7 +170,10 @@ public final class RigSuitUp {
 		if (post != null && post.distanceToSqr(player.position()) <= STEP_RANGE * STEP_RANGE) {
 			return STEP;
 		}
-		return SLAM;
+		Vec3 moving = player.getKnownMovement();
+		boolean still = moving.x * moving.x + moving.z * moving.z < WRAP_STILL * WRAP_STILL && !player.isSprinting() && !player.isShiftKeyDown();
+		boolean calm = player.hurtTime == 0 && player.tickCount - player.getLastHurtByMobTimestamp() > WRAP_CALM;
+		return still && calm && player.onGround() ? WRAP : SLAM;
 	}
 
 	/** A suit-up of {@code style} begins for this player: its pose, its plates' manner (synced) and its first sounds. */
@@ -178,6 +193,11 @@ public final class RigSuitUp {
 					fall.assembleUntil = fall.since + assembleTicks;
 				}
 				FALLS.put(player.getUUID(), fall);
+			}
+			case WRAP -> {
+				// the shell on its way, whole, before it comes apart round you
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 0.7F, 0.6F);
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 0.6F, 0.7F);
 			}
 			default -> level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS, 0.6F, 0.7F);
 		}
@@ -205,6 +225,35 @@ public final class RigSuitUp {
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 0.7F, 0.9F + index * 0.12F);
 				if (index == 3) {
 					MagicFx.ring(level, player.position().add(0.0, 1.0, 0.0), null, 1.8F, RigActives.FLAME_HOT, 10);
+				}
+			}
+			case WRAP -> {
+				// (index in the call's order: core, arms, thrusters, helm; the arms land first)
+				switch (index) {
+					case 1 -> {
+						// the gauntlets ratchet up the arms: a run of clicks out at both hands
+						float yaw = player.yBodyRot * net.minecraft.util.Mth.DEG_TO_RAD;
+						double sx = net.minecraft.util.Mth.cos(yaw), sz = net.minecraft.util.Mth.sin(yaw);
+						for (int side = -1; side <= 1; side += 2) {
+							level.sendParticles(MagicFx.spark(RigActives.FLAME_HOT, 0.8F), player.getX() + sx * 1.2 * side, player.getY() + 1.4,
+								player.getZ() + sz * 1.2 * side, 5, 0.1, 0.05, 0.1, 0.08);
+						}
+						level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.PLAYERS, 0.7F, 1.6F);
+						level.playSound(null, at.x, at.y, at.z, SoundEvents.CROSSBOW_LOADING_END.value(), SoundSource.PLAYERS, 0.8F, 1.3F);
+					}
+					case 0 -> {
+						// the chest closes over the reactor, and it lights
+						MagicFx.blast(level, player.position().add(0.0, 1.2, 0.0), 0.7F, RigActives.FLAME_HOT);
+						level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 0.8F, 1.1F);
+						level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.5F, 1.8F);
+					}
+					case 2 -> level.playSound(null, at.x, at.y, at.z, SoundEvents.PISTON_CONTRACT, SoundSource.PLAYERS, 0.8F, 1.2F);
+					default -> {
+						// the helm folds over, the faceplate drops, the eyes come on
+						level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.PLAYERS, 0.9F, 0.8F);
+						level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.6F, 2.0F);
+						MagicFx.ring(level, player.position().add(0.0, 1.0, 0.0), null, 1.6F, RigActives.FLAME_HOT, 10);
+					}
 				}
 			}
 			case FLIGHT -> {
@@ -239,6 +288,10 @@ public final class RigSuitUp {
 	private static void byHand(ServerPlayer player) {
 		boolean thrusters = Rig.wears(player, Rig.Piece.THRUSTERS) && Rig.wears(player, Rig.Piece.CORE);
 		int style = pick(player, null, thrusters);
+		if (style == WRAP) {
+			// one piece put on by hand is no film: the wrap is for a called suit
+			style = SLAM;
+		}
 		if (style == FALL) {
 			begin(player, FALL, HAND_ASSEMBLE);
 			return;

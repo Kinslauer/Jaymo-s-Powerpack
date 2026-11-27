@@ -187,9 +187,13 @@ public final class Valor {
 		}
 	}
 
-	/** How the coating looks on the arms (drawn by ValorLook; its dust in this colour). */
+	/**
+	 * How the coating looks on the arms (drawn by ValorLook; its dust in this colour). Concrete (Andy: "another set of valor
+	 * that pillars over like concrete sheets"): slabs burst up out of the ground and stack onto the arms as sheets; its shell
+	 * under them is Stone's.
+	 */
 	public enum Look {
-		IRON(0x3A3F47), STONE(0x5A544C), SCALE(0x1F3A2E), ASH(0x6E6E6E), HAZE(0x8A6A4A), LACQUER(0x0D0D12);
+		IRON(0x3A3F47), STONE(0x5A544C), SCALE(0x1F3A2E), ASH(0x6E6E6E), HAZE(0x8A6A4A), LACQUER(0x0D0D12), CONCRETE(0x8E8C86);
 
 		public final int color;
 
@@ -199,6 +203,11 @@ public final class Valor {
 
 		public String key() {
 			return name().toLowerCase(java.util.Locale.ROOT);
+		}
+
+		/** The look whose coat textures this one wears (Concrete's slabs go over Stone's shell). */
+		public String artKey() {
+			return this == CONCRETE ? STONE.key() : key();
 		}
 	}
 
@@ -655,7 +664,7 @@ public final class Valor {
 		}
 		return switch (origin) {
 			case EMBER -> Look.HAZE;
-			case ROOTED -> Look.STONE;
+			case ROOTED -> r.nextBoolean() ? Look.STONE : Look.CONCRETE;
 			case BULWARK -> Look.IRON;
 			case HOLLOW -> Look.LACQUER;
 			case UNDYING -> Look.ASH;
@@ -680,7 +689,8 @@ public final class Valor {
 		Look.SCALE, new String[] {"Scale", "Coil", "Fang"},
 		Look.ASH, new String[] {"Ash", "Cinder", "Grey"},
 		Look.HAZE, new String[] {"Haze", "Shimmer", "Heat"},
-		Look.LACQUER, new String[] {"Shell", "Lacquer", "Night"});
+		Look.LACQUER, new String[] {"Shell", "Lacquer", "Night"},
+		Look.CONCRETE, new String[] {"Slab", "Pillar", "Rampart"});
 
 	/** A name from its origin and look: "the Unbowed Hide", "the Spellbane Shell". */
 	static String name(Origin origin, Look look, RandomSource r) {
@@ -1167,6 +1177,37 @@ public final class Valor {
 					play(level, e, SoundEvents.ANVIL_LAND, 0.12F, pitch * 1.9F);
 				}
 			}
+			case CONCRETE -> {
+				if (raised) {
+					// the slabs grind up out of the ground and slam home on the arms
+					play(level, e, SoundEvents.PISTON_EXTEND, 0.7F, pitch * 0.5F);
+					play(level, e, SoundEvents.STONE_PLACE, 1.0F, pitch * 0.55F);
+					concreteRise(level, e);
+				} else {
+					play(level, e, SoundEvents.STONE_BREAK, 0.8F, pitch * 0.7F);
+					play(level, e, SoundEvents.DEEPSLATE_HIT, 0.5F, pitch * 0.6F);
+				}
+			}
+		}
+	}
+
+	private static final BlockParticleOption CONCRETE_CHIPS = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.CONCRETE.pick(net.minecraft.world.item.DyeColor.LIGHT_GRAY).defaultBlockState());
+
+	/**
+	 * Concrete going up: the ground round the feet heaves, and chips fly up in columns at each side where the slabs rise
+	 * (ValorPlates draws the slabs themselves pillaring up onto the arms).
+	 */
+	static void concreteRise(ServerLevel level, LivingEntity e) {
+		BlockState under = level.getBlockState(e.blockPosition().below());
+		ParticleOptions ground = under.isAir() ? CONCRETE_CHIPS : new BlockParticleOption(ParticleTypes.BLOCK, under);
+		level.sendParticles(ground, e.getX(), e.getY() + 0.05, e.getZ(), 24, 0.7, 0.02, 0.7, 0.12);
+		float yaw = e.yBodyRot * Mth.DEG_TO_RAD;
+		double sx = Mth.cos(yaw), sz = Mth.sin(yaw);
+		for (int side = -1; side <= 1; side += 2) {
+			double x = e.getX() + sx * 0.45 * side, z = e.getZ() + sz * 0.45 * side;
+			for (int i = 0; i < 6; i++) {
+				level.sendParticles(CONCRETE_CHIPS, x, e.getY() + i * 0.25, z, 2, 0.1, 0.05, 0.1, 0.05);
+			}
 		}
 	}
 
@@ -1183,6 +1224,7 @@ public final class Valor {
 			case ASH -> ParticleTypes.WHITE_ASH;
 			case HAZE -> ParticleTypes.SMOKE;
 			case LACQUER -> ParticleTypes.SQUID_INK;
+			case CONCRETE -> new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.CONCRETE_POWDER.pick(net.minecraft.world.item.DyeColor.LIGHT_GRAY).defaultBlockState());
 		};
 	}
 

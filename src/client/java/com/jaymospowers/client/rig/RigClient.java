@@ -194,6 +194,7 @@ public final class RigClient {
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		RigKickCamera.tick(minecraft);
+		RigSuitUpCamera.tick(minecraft);
 		if (player == null) {
 			status = RigNet.Status.NONE;
 			java.util.Arrays.fill(powerKeysDown, false);
