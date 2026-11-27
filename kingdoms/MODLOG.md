@@ -18030,3 +18030,18 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 
 - An empty lectern says how many bookshelves research wants round it (and how many there are). A hammer at a lit campfire without the smith's rank says a field forge takes a Journeyman smith. The tryworks says what its next step needs (blubber 2 at a time, full, light it, it's boiling, fill bottles). The perk-rank refusal now comes up as a tip card like the plain one.
 - Built (compileJava); not played.
+
+## 0.13.61 (2026-11-27): Reply to what a villager says - first spoke on the talk wheel (#2268)
+
+- **Answer what they said** (Andy: "there should always be an option to address what they say here. either the first on the tree or a button"): whatever a villager opens the talk with, the first spoke on the wheel answers that line. A warning about creepers gets "Have you seen any about? Where?" and they tell you the nearest monster and which way it is (or that none are close); a word on the weather gets one back that matches the sky now (clear, rain or storm); a question ("How are you?") gets answered and they tell you how they are by their mood; a sigh about work, sleep or supper, a cold greeting ("Have I done something to you?"), an `*action*`, a hello, or anything else ("Is that so? Go on.") each have their own. They answer in their own voice (gentle, sharp, timid, odd or a child's, as refusal hints), or coldly if they're wary of you or dislike you; one who bears you too much ill won't have it (as a chat). Hearing them out is worth a heart, once a day each. The talk ends after their answer, as a chat does. Not on the stranger's page (only Introduce), the Judge, Keeper and masters, or questioning.
+- Which line it is comes from the key MCA picked for it (so the guard's creeper warning is told from the other night lines) and its words. Other features add their own kinds of line with `Replies.register` (a key test, a word test, their answer).
+- `Replies` (new), `TalkFirst` (the spoke), `McaDialogueBoxMixin` (hands it the line), `McaDialogueMixin` (the answer). Lang part `talk-replies.json`.
+- Built; not played.
+
+## 0.13.62 (2026-11-27): A villager who cries out tells you why (#2268)
+
+- **What happened?** (Andy, on a villager screaming after a crook mugged her: "after they exclaim like that you should be able to ask what's wrong or it should be something they bring up before an introduction"): a villager keeps why they last cried out for three minutes: a crime done to them or seen (mugged, robbed, a fire set), what hurt them (someone's blow, a monster, an arrow, fire, a fall, drowning, a blast, cold, lightning, hunger, thorns, sickness), a monster that set them running (MCA's panic scream gives no reason of its own), or a cry they raised. Open their menu while it's fresh and they bring it up first, before any greeting ("Oh! Oh, it's you. Forgive me, I'm all in pieces. Someone just set on me."), once for each player; the talk wheel's first spoke then asks "What happened?" and they tell you: who did it and, for a crime, whether the guards have them, they're dead, or they ran off. Struck by you, they say so. With no shared tongue, a look instead of words.
+- A mugging victim who raises the alarm herself cries as the one robbed ("Help! Guards! They've taken my purse!"), never "Help! They're beating someone!".
+- One still shaken doesn't remark on your clothes.
+- `Outcry` (new), `Crooks`, `Speech`, `GearTalk`, `McaBridge`/`McaCompat` (the opening), `McaDialogueMixin`; uses `Replies` from the reply-spoke PR. Lang part `outcry.json`, `crook.json`.
+- Built; not played.
