@@ -29,6 +29,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -84,7 +85,7 @@ public final class WebBruteArts {
 		}
 	}
 
-	private record Stone(BlockCluster body, Vec3 velocity) {
+	private record Stone(BlockCluster body, Vec3 velocity, Art art, UUID owner) {
 	}
 
 	private static final class Run {
@@ -115,6 +116,7 @@ public final class WebBruteArts {
 	private static final Art[] ARTS = Art.values();
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
 	private static final Map<UUID, Long> READY = new HashMap<>();
+	private static final List<Stone> FLYING = new ArrayList<>();
 
 	private WebBruteArts() {
 	}
@@ -133,6 +135,7 @@ public final class WebBruteArts {
 				tick(player);
 				WebBruteMovement.tick(player);
 			}
+			tickFlying(server);
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -187,6 +190,15 @@ public final class WebBruteArts {
 
 	static void forget(ServerPlayer player) {
 		finish(player);
+		// stones still in the air for this player stop when they leave
+		var it = FLYING.iterator();
+		while (it.hasNext()) {
+			Stone stone = it.next();
+			if (stone.owner() != null && stone.owner().equals(player.getUUID())) {
+				stone.body().discard();
+				it.remove();
+			}
+		}
 		WebBruteMovement.forget(player);
 		WebSymbiote.cancelRhythm(player);
 		READY.remove(player.getUUID());
@@ -227,10 +239,14 @@ public final class WebBruteArts {
 			case RAMPAGE -> rampage(player, run, age);
 			case NOVA -> nova(player, run, age);
 		};
-		tickStones(player, run);
-		if (!keep && run.stones.isEmpty()) {
+		if (!keep) {
+			// the move's own ticks are done: hand control back, let its stones finish on their own list
+			FLYING.addAll(run.stones);
+			run.stones.clear();
 			finish(player);
+			return;
 		}
+		tickStones(player, run.stones);
 	}
 
 	private static boolean clap(ServerPlayer player, Run run, int age) {
@@ -276,7 +292,7 @@ public final class WebBruteArts {
 		}
 		if (run.art == Art.CRACK) {
 			if (age < 10 + STRIP_LENGTH) {
-				advance(player, run, 1.05, true);
+				advance(player, run, 1.05, true, true);
 			}
 			if (age >= 10 + CRACK_DELAY) {
 				int index = (age - 10 - CRACK_DELAY) * 3;
@@ -288,13 +304,16 @@ public final class WebBruteArts {
 		}
 		int length = run.art == Art.UPHEAVE ? 15 : STRIP_LENGTH;
 		if (age < 10 + length && age % 2 == 0) {
-			advance(player, run, 1.8, false);
+			advance(player, run, 1.8, false, run.art == Art.RUBBLE);
+			if (run.art == Art.UPHEAVE) {
+				WebSlam.breakGround(player, run.head, 1.0);
+			}
 		}
 		return age < 10 + length;
 	}
 
-	private static void advance(ServerPlayer player, Run run, double stride, boolean cracks) {
-		Vec3 dir = cracks ? steer(player, run, 0.18) : run.direction;
+	private static void advance(ServerPlayer player, Run run, double stride, boolean cracks, boolean steer) {
+		Vec3 dir = steer ? steer(player, run, 0.18) : run.direction;
 		Vec3 next = run.head.add(dir.scale(stride));
 		Vec3 from = run.head.add(0, 0.55, 0);
 		Vec3 to = next.add(0, 0.55, 0);
@@ -344,7 +363,7 @@ public final class WebBruteArts {
 		Vec3 at = Vec3.atBottomCenterOf(ground.above());
 		Debris.puff(run.level, ground, run.level.getBlockState(ground), 1.0F);
 		Vec3 toss = run.direction.scale(slab ? 0.23 : 0.48);
-		stone(run, ground, at, toss.add(0, lift, 0), slab);
+		stone(run, player, ground, at, toss.add(0, lift, 0), slab);
 		for (LivingEntity foe : foes(player, at, 1.45, 2.0)) {
 			if (run.hit.add(foe.getId())) {
 				hit(player, foe, damage, toss.add(0, lift, 0));
@@ -370,12 +389,15 @@ public final class WebBruteArts {
 				Vec3 inward = run.origin.subtract(foe.position()).horizontal().normalize();
 				hit(player, foe, last ? 9.0F : 4.0F, inward.scale(last ? 0.0 : 0.40).add(0, last ? 1.0 : 0.32, 0));
 			}
-			for (int i = 0; i < 4; i++) {
-				double angle = (i + age * 0.017) * Math.PI / 2.0;
-				Vec3 out = new Vec3(Math.cos(angle), 0, Math.sin(angle));
-				BlockPos ground = ground(run.level, run.origin.add(out.scale(1.5)));
+			int spawned = 0;
+			for (LivingEntity foe : foes(player, run.origin, 8.0, 4.0)) {
+				if (spawned >= 4) {
+					break;
+				}
+				BlockPos ground = ground(run.level, Vec3.atBottomCenterOf(foe.blockPosition()));
 				if (ground != null) {
-					stone(run, ground, Vec3.atBottomCenterOf(ground.above()), out.scale(0.18).add(0, 0.68, 0), true);
+					stone(run, player, ground, Vec3.atBottomCenterOf(ground.above()), new Vec3(0, 0.68, 0), true);
+					spawned++;
 				}
 			}
 		}
@@ -447,7 +469,7 @@ public final class WebBruteArts {
 		return true;
 	}
 
-	private static void stone(Run run, BlockPos ground, Vec3 at, Vec3 motion, boolean slab) {
+	private static void stone(Run run, ServerPlayer player, BlockPos ground, Vec3 at, Vec3 motion, boolean slab) {
 		var material = run.level.getBlockState(ground);
 		if (material.hasBlockEntity() || material.isAir() || !material.getFluidState().isEmpty()) {
 			return;
@@ -457,32 +479,38 @@ public final class WebBruteArts {
 		body.refreshBox();
 		body.script(true, false);
 		body.linger(45, true);
-		run.stones.add(new Stone(body, motion));
+		run.stones.add(new Stone(body, motion, run.art, player.getUUID()));
 	}
 
-	private static void tickStones(ServerPlayer player, Run run) {
-		ListIterator<Stone> iterator = run.stones.listIterator();
-		while (iterator.hasNext()) {
-			Stone stone = iterator.next();
-			BlockCluster body = stone.body();
-			if (body.isRemoved()) {
-				iterator.remove();
-				continue;
-			}
-			Vec3 to = body.position().add(stone.velocity());
-			if (!run.level.hasChunkAt(BlockPos.containing(to))
-				|| !run.level.noCollision(body, AABB.ofSize(to.add(0, 0.35, 0), 0.38, 0.6, 0.38))) {
-				if (run.art == Art.POUND && stone.velocity().y < 0) {
-					for (LivingEntity foe : foes(player, body.position(), 1.5, 2.0)) {
-						hit(player, foe, 5.0F, new Vec3(0, 0.25, 0));
-					}
+	private static @Nullable Stone tickStone(ServerPlayer player, Stone stone) {
+		BlockCluster body = stone.body();
+		if (body.isRemoved()) {
+			return null;
+		}
+		ServerLevel level = player.level();
+		Vec3 to = body.position().add(stone.velocity());
+		if (!level.hasChunkAt(BlockPos.containing(to))
+			|| !level.noCollision(body, AABB.ofSize(to.add(0, 0.35, 0), 0.38, 0.6, 0.38))) {
+			if (stone.art() == Art.POUND && stone.velocity().y < 0) {
+				for (LivingEntity foe : foes(player, body.position(), 1.5, 2.0)) {
+					hit(player, foe, 5.0F, new Vec3(0, 0.25, 0));
 				}
-				body.discard();
-				iterator.remove();
-				continue;
 			}
-			body.setPos(to.x, to.y, to.z);
-			iterator.set(new Stone(body, stone.velocity().add(0, -0.085, 0)));
+			body.discard();
+			return null;
+		}
+		body.setPos(to.x, to.y, to.z);
+		return new Stone(body, stone.velocity().add(0, -0.085, 0), stone.art(), stone.owner());
+	}
+	private static void tickStones(ServerPlayer player, List<Stone> stones) {
+		ListIterator<Stone> iterator = stones.listIterator();
+		while (iterator.hasNext()) {
+			Stone ticked = tickStone(player, iterator.next());
+			if (ticked == null) {
+				iterator.remove();
+			} else {
+				iterator.set(ticked);
+			}
 		}
 	}
 
@@ -490,6 +518,25 @@ public final class WebBruteArts {
 		return level.hasChunkAt(BlockPos.containing(to))
 			&& level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, actor)).getType()
 				== HitResult.Type.MISS;
+	}
+
+	private static void tickFlying(MinecraftServer server) {
+		java.util.ListIterator<Stone> it = FLYING.listIterator();
+		while (it.hasNext()) {
+			Stone stone = it.next();
+			ServerPlayer owner = stone.owner() == null ? null : server.getPlayerList().getPlayer(stone.owner());
+			if (owner == null) {
+				stone.body().discard();
+				it.remove();
+				continue;
+			}
+			Stone ticked = tickStone(owner, stone);
+			if (ticked == null) {
+				it.remove();
+			} else {
+				it.set(ticked);
+			}
+		}
 	}
 
 	static @Nullable BlockPos ground(ServerLevel level, Vec3 at) {

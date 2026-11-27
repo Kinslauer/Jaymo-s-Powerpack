@@ -279,7 +279,7 @@ public final class WebBruteMovement {
 				continue;
 			}
 			double dot = toward.dot(facing);
-			if (dot > score) {
+			if (dot > 0.5 && dot > score) {
 				best = toward.scale(-1);
 				score = dot;
 			}

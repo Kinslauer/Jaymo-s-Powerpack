@@ -1019,6 +1019,10 @@ public final class WebSymbiote {
 		return age >= 0 && (phase <= BEAT_WINDOW || phase >= BEAT_PERIOD - BEAT_WINDOW);
 	}
 
+	/**
+	 * A takeover has you: present the whole time, holding how far your struggle bar is filled (0-1, in steps of
+	 * {@link #STRUGGLE_SYNC_STEP}). Synced to everyone: the suit visibly peels back off you as it fills (WebSuitGrowth).
+	 */
 	public static final AttachmentType<Float> STRUGGLE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_struggling"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
 
@@ -3211,7 +3215,6 @@ public final class WebSymbiote {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.9F, 1.5F);
 	}
 
-	/** It hands control back. */
 	static void cancelRhythm(ServerPlayer player) {
 		Live live = player.getAttached(LIVE);
 		if (live != null && live.rhythmLevel != null) {
@@ -3219,6 +3222,7 @@ public final class WebSymbiote {
 		}
 	}
 
+	/** It hands control back. */
 	private static void endTakeover(ServerPlayer player, Live live) {
 		live.rhythmLevel = null;
 		player.removeAttached(RHYTHM);
@@ -4792,9 +4796,6 @@ public final class WebSymbiote {
 	}
 
 	/**
-	 * The red one's big body comes off: back into the plain suit (Living Armor put away with it, so the bond doesn't swell
-	 * it straight back), after the fight for it (WebSymbioteBond#fightForBody) or, when it lets you, at a press.
-	 */
 	/** Spending the big body leaves its bonded armour on. */
 	static void exhaustBulk(ServerPlayer player) {
 		Live live = live(player);
@@ -4804,6 +4805,10 @@ public final class WebSymbiote {
 		set(player, state.withFlag(WebSymbioteState.SUIT, true));
 	}
 
+	/**
+	 * The red one's big body comes off: back into the plain suit (Living Armor put away with it, so the bond doesn't swell
+	 * it straight back), after the fight for it (WebSymbioteBond#fightForBody) or, when it lets you, at a press.
+	 */
 	static void shedRedBody(ServerPlayer player) {
 		Live live = live(player);
 		live.redHeld = false;
