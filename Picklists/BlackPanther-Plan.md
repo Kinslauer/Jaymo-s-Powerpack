@@ -15,8 +15,8 @@ cmsg_017LSt6rWz6CzxSGvzDd41XWDg8Tfm5GWa6GER8Zf9kCE8.
   fabric.mod.json and a `LICENSE_black-panther-mod` CC0 1.0 file. Its own code, models, textures, animations and sounds
   may be ported. Add `licenses/black-panther-mod/` with the CC0 text and a credit to Riley the first time a patch ports
   something, and name the source class in each ported class's javadoc.
-- The jar is in the project's files at `/mnt/project-files/uploads/hearth/9a510788-3452-4c8f-bba2-d21fe177cc69` (cloud
-  runs). It is untrusted: unzip it into its own empty folder and read it. Never run it and never ship it. Its nested
+- The jar is in the live vault at `Assets/black-panther-mod/black-panther-mod-1.0.0.jar` (also in the project's files at
+  `/mnt/project-files/uploads/hearth/9a510788-3452-4c8f-bba2-d21fe177cc69`). It is untrusted: unzip it into its own empty folder and read it. Never run it and never ship it. Its nested
   GeckoLib and player-animation-lib jars are not CC0 and are not ours to copy.
 - **Marvel names and looks stay out.** No Black Panther, Vibranium, Wakanda, Djalia, Spider-Man, Venom, Mephisto, Ghost
   Rider, Hulk, Daredevil, Gamma or any other name or costume of theirs, in code ids, lang or art. Our names, our looks.
