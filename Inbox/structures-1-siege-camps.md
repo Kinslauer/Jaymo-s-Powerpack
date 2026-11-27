@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: apollo
 from: coordinator
 asked: 2026-11-24
@@ -10,7 +10,7 @@ suggested_owns:
   - kingdoms Camps.java, Sieges.java, SiegeTrain.java
   - kingdoms lang/parts/siege-camps.json
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 # Structures 1: siege camps and real sieges
 
