@@ -11,7 +11,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -112,7 +111,7 @@ public class FeastBlock extends HorizontalDirectionalBlock {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		boolean bowl = feast.needsBowl();
-		if (bowl && !held.is(Items.BOWL)) {
+		if (bowl && !held.is(feast.bowl())) {
 			if (!level.isClientSide()) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.feast.bowl"));
 			}

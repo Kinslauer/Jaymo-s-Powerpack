@@ -1,0 +1,8 @@
+{
+  "gui.button.trade_hat": "Sew a Hat",
+  "tailor.jaymoskingdoms.hat_fee": "A trade's hat? %s silver, whichever you like.",
+  "tailor.jaymoskingdoms.hat_option": "%s (%s silver)",
+  "tailor.jaymoskingdoms.hat_cant_pay": "That's %s silver, and you haven't got it.",
+  "tailor.jaymoskingdoms.hat_sold": "There. Your %s, for %s silver. Wear it in good health.",
+  "tailor.jaymoskingdoms.no_hats": "I've no pattern for a hat like that."
+}

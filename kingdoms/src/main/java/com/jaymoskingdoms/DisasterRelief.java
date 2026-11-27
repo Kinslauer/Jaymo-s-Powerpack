@@ -84,6 +84,8 @@ public final class DisasterRelief {
 		if (level != Factions.level(server)) {
 			return;
 		}
+		// (Andy, 2026-11-27) the guards about shout the townsfolk to safety
+		GuardCries.disaster(level, x, z, radius, kind);
 		double reach = radius + STRUCK_MARGIN;
 		for (Faction f : Factions.all(server)) {
 			if (f.fallen() || f.type() == FactionType.BARBARIAN) {

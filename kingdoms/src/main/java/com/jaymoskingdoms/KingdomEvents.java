@@ -226,6 +226,10 @@ public final class KingdomEvents {
 		if (founded != null && village.id().startsWith(Havens.CTOV)) {
 			Havens.ctov(level, founded);
 		}
+		// (village mods patch 7) a Tidal Towns raft is the Tideborn's, moored to the sea's trade (TidalTowns)
+		if (founded != null && village.id().equals(TidalTowns.ID)) {
+			TidalTowns.found(level, founded);
+		}
 	}
 
 	/** The chunks within {@code radius} of {@code center} that no standing faction holds (packed). */
@@ -363,7 +367,7 @@ public final class KingdomEvents {
 		StoryGround.noRealm = false;
 		var random = level.getRandom();
 		DyeColor color = DyeColor.values()[random.nextInt(DyeColor.values().length)];
-		Faction kingdom = Faction.create(Factions.nextId(server), FactionType.KINGDOM, Names.kingdom(random), color, capital,
+		Faction kingdom = Faction.create(Factions.nextId(server), FactionType.KINGDOM, Names.kingdom(server, random), color, capital,
 			claim(server, capital, CLAIM_RADIUS)).withTreasury(Treasuries.start(random));
 		Factions.put(server, kingdom);
 		raiseBanner(level, kingdom);
@@ -656,6 +660,7 @@ public final class KingdomEvents {
 		if (killer != null) {
 			// (0.7.519) whoever slew the ruler does not stand at the election after
 			Elections.killed(faction.id(), killer.getUUID());
+			DeedTitles.add(killer, DeedTitles.Deed.KEEPS, 1);
 			Reputation.change(killer, faction, lord ? REP_KILL_LORD : REP_KILL_KING);
 			// the realm's rivals are glad of it (every other standing realm that isn't its vassal or overlord)
 			for (Faction other : Factions.all(server)) {

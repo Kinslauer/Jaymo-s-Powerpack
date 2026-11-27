@@ -5,7 +5,8 @@
 	"client": [
 		"LimbSwingMixin",
 		"TwoHandedSweepMixin",
-		"ToolSwingGateMixin"
+		"ToolSwingGateMixin",
+		"LockedSwingTargetMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0

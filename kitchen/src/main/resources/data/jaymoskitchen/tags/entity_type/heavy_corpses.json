@@ -9,6 +9,8 @@
 		{ "id": "jaymospowers:omen_red", "required": false },
 		{ "id": "jaymospowers:omen_blue", "required": false },
 		{ "id": "jaymospowers:sentry_golem", "required": false },
-		{ "id": "jaymospowers:slider", "required": false }
+		{ "id": "jaymospowers:slider", "required": false },
+		{ "id": "jaymospowers:frostborn_siege_rig", "required": false },
+		{ "id": "jaymospowers:tinkerer_colossus", "required": false }
 	]
 }

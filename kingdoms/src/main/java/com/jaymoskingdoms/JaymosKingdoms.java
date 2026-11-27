@@ -49,6 +49,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Professions.register();
 		// (0.7.498) the copper bit and the coin purse (the realms' coins are Currencies')
 		com.jaymoskingdoms.money.MoneyItems.register();
+		// banks: accounts, loans and letters of credit at a realm's counting house (Banks)
+		LetterOfCredit.register();
+		Banks.register();
+		PlacementReasons.register();
 		McaCompat.register();
 		// offline accounts sign in (EasyAuth, server only) before their character creation starts
 		SignIn.register();
@@ -79,6 +83,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Disguise.register();
 		// 0.7.250: Blossom villages rising among the cherry trees, and the Blossom land's guards in the ronin harness
 		BlossomVillages.register();
+		VillageStyles.register();
+		RoadOutposts.register();
+		Outliers.register();
+		CampExtras.register();
 		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
 		HiddenBlade.register();
 		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
@@ -161,6 +169,14 @@ public final class JaymosKingdoms implements ModInitializer {
 		WoolClothes.register();
 		// qiviut, the muskox's underwool, and the clothes knitted from it
 		QiviutClothes.register();
+		// clothes for the sun, the ranger's leaf cloak, and the herbalist's belt charms
+		LeafCloak.register();
+		ClimateWear.register();
+		ClimateVisits.register();
+		WeatherWise.register();
+		Notices.register();
+		HearthFolk.register();
+		HerbalistWares.register();
 		Buildings.register();
 		Construction.register();
 		// 0.7.202: the world weathers (moss, cracks, mud, leaf litter, tufts); a settlement's builders keep up its upkeep
@@ -173,10 +189,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Firefighting.register();
 		// Peterwolf's Forest Fire (when it's in the pack): its fire runs our wildfires, its wind follows ours
 		ForestFireCompat.register();
+		// Psithurism (when it's in the pack): a soak in its onsen water lifts the winter cold
+		PsithurismCompat.register();
 		// 0.7.31: disasters strike settlements: news, repairs, tempers, relief quests
 		DisasterRelief.register();
 		// 0.5.23: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
 		Undertakers.register();
+		Gravediggers.register();
 		// 0.7.132: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
 		LOGGER.debug("grave attachment: {}", Bearers.GRAVES);
 		Bearers.register();
@@ -197,8 +216,16 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("falling tree attachments: {} {}", FallingTree.PIECES, FallingTree.HEADING);
 		// 0.5.25: trees take chops to fell (TreeChop's way), the chopped logs narrowing
 		ChoppedLog.register();
+		// what a tree cut through leaves: a carved stump to sit on, dig out or leave to rot
+		TreeStump.register();
 		Trees.register();
+		// felling: cut through the trunk, cracks and creaks, the ground's thump, half-cut trees that give way
+		Felling.register();
+		// blasts that undercut a building bring down what's over the hole (chests ride down whole)
+		Collapse.register();
 		LooseWood.register();
+		// a wood's sticks, saplings and apples nobody threw go after a minute (a burning wood drops hundreds)
+		Windfall.register();
 		// 0.7.588: mob griefing always on (Andy)
 		PackRules.register();
 		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
@@ -252,18 +279,23 @@ public final class JaymosKingdoms implements ModInitializer {
 		Meals.register();
 		// smiths sharpen the guards' dull blades at a grindstone
 		Whetting.register();
+		WorkScenes.register();
 		// village mods 3: guards that fight and mend
 		ClericHeals.register();
 		SmithMending.register();
 		GuardMeals.register();
+		HandedFood.register();
 		GuardKicks.register();
 		AlarmBells.register();
+		com.jaymoskingdoms.deep.Deeps.register();
 		RaidBeasts.register();
 		WitchRaids.register();
 		GolemPathing.register();
+		VillagerFixes.register();
 		Visitors.register();
 		// 0.7.483: every settlement keeps a butcher and a healer
 		TownTrades.register();
+		TownNeeds.register();
 		TownFitting.register();
 		LOGGER.debug("visitor attachment: {}", Visitors.VISIT);
 		Reforms.register();
@@ -271,13 +303,20 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
+		Parasols.register();
+		TakeCover.register();
+		ArmedFright.register();
 		// the Family farmhand's family: wary of monsters, indoors at night, at work on the farm
 		FarmFamily.register();
 		FarmhandWake.register();
+		StoryScenes.register();
+		MidnightBargain.register();
 		// 0.7.576: monsters keep off a lit campfire near a player
 		CampfireWard.register();
 		Clearing.register();
 		Herds.register();
+		WeatherShelter.register();
+		LOGGER.debug("dealings attachment: {}", Dealings.DEALINGS);
 		Strays.register();
 		BloodChores.register();
 		// a town's sexton: the lych lantern, the dead and what's left lying, the golems, blood and grime (Sextons)
@@ -293,6 +332,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("identity attachments: {} {} {}", Identities.ALL, Identities.SIGHTINGS, Identities.MASKED_AS);
 		Identities.register();
 		MaskedFaces.register();
+		Celebrations.register();
 		// 0.7.149: the name picked in MCA's creator shows in place of the username (and its attachment)
 		CharacterNames.register();
 		// 0.7.180: names over heads only once you've been told them (and its attachments)
@@ -384,10 +424,17 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.497) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
 		LOGGER.debug("locks attachments: {} {} {}", Locks.LOCKS, Locks.WORN_KEYS, NightLocks.INDEX);
 		Locks.register();
+		// (where things came from, stolen marks, heirlooms, the strongbox)
+		Provenance.register();
+		StolenGoods.register();
+		Heirlooms.register();
+		Strongbox.register();
 		NightLocks.register();
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
+		// a villager who cried out tells you why if you ask, or brings it up first
+		Outcry.register();
 		NightTrouble.register();
 		NightBurglars.register();
 		SignalBrazier.register();
@@ -397,6 +444,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		VigilanteTrials.register();
 		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
+		GuardCries.register();
+		TownCrier.register();
+		BuildNews.register();
+		CrierGrudges.register();
 		// 0.7.211: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)
 		LOGGER.debug("underworld attachments: {} {} {} {} {}", Underworld.DENS, Underworld.FOUND, Busts.OFFENCES, Busts.CHARGES, Busts.JAILED);
 		Underworld.register();
@@ -429,6 +480,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
 			WorldTiers.FLOOR);
 		WorldTiers.register();
+		Rematches.register();
 		HarshLands.register();
 		// Hostile Mobs Improve Over Time's levels follow the world tier, not play time
 		HostileMobsTiers.register();
@@ -467,6 +519,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spoils.register();
 		HavenGates.register();
 		HavenWares.register();
+		// the glow-woods: giant fungi, fungal woods and fairy rings (ported from Spore & Stem), and the Sylvan havens' share
+		com.jaymoskingdoms.glowwood.GlowWoods.register();
+		GlowWoodHavens.register();
+		// their creatures: sporelings, trufflers, glowmoths, the old woods' mimicaps and bloatshrooms, the spore-rot's shamblers and the Myceliarch
+		com.jaymoskingdoms.glowwood.creatures.GlowCreatures.register();
+		GlowHavenLife.register();
+		Allays.register();
 		// (0.7.490) Havens expand: their works, land and sworn order
 		HavenGrowth.register();
 		// (0.7.490) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
@@ -477,6 +536,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.491) Hordes patch 4: the greenskin king city (warpath, tribute pacts, the horde oath)
 		HordeCity.register();
 		GreenMarket.register();
+		// village mods patch 8: the swamp goblins' blocks, their stilt villages, and the goblin band
+		SwampBlocks.register();
+		GoblinBands.register();
+		SwampGoblins.register();
 		BorderClashes.register();
 		TribePacts.register();
 		Tails.register();
@@ -486,8 +549,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		FrostTech.register();
 		LOGGER.debug("heritage attachments: {} {} {}", Heritage.HERITAGE, FrostPrison.LAST, FrostTech.FITTED);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
-		LOGGER.debug("bio-built and rubber-folk attachments: {} {} {} {} {} {} {} {} {}", BioBuilt.FORM, BioBuilt.WORTH, HeritageHold.ABSORBING, RubberFolk.ADOPTED,
-			RubberStomach.STOMACH, RubberStomach.MASS, RubberStomach.INSIDE, RubberStomach.HOLDING, RubberStomach.SAFE);
+		LOGGER.debug("bio-built and rubber-folk attachments: {} {} {} {} {} {} {} {} {} {} {}", BioBuilt.FORM, BioBuilt.WORTH, HeritageHold.ABSORBING, RubberFolk.ADOPTED,
+			RubberStomach.STOMACH, RubberStomach.MASS, RubberStomach.INSIDE, RubberStomach.HOLDING, RubberStomach.SAFE, RubberNewborns.BOUND_FOR, RubberNewborns.ESCORT);
 		HeritageHold.register();
 		DivineBorn.register();
 		BioBuilt.register();
@@ -532,6 +595,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		HollowSighting.register();
 		LOGGER.debug("pallid seen attachment: {}", PallidHollows.SEEN);
 		PallidHollows.register();
+		HollowCaptains.register();
 		// the Skeleton Lord's curse: the only way to rise a skeleton (and its attachment)
 		LOGGER.debug("skeleton curse attachment: {}", SkeletonCurse.CURSED);
 		SkeletonCurse.register();
@@ -597,8 +661,20 @@ public final class JaymosKingdoms implements ModInitializer {
 		VoiceMasks.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
+		// underground rivers' lanterns, jungle pillar crowns, volcanic islands and lit lava tunnels
+		TerrainFeatures.register();
+		// (climate track E) the steam valley, ashlands, salt pans and steppe: their blocks, features and the cold steppe night
+		com.jaymoskingdoms.lands.Lands.register();
 		// kingdoms' seats the world generates whole: a castle with its square, garden, barracks and homes round it
 		SeatCompounds.register();
+		// village mods 6, small structures: the tree sites (the hollow oak's hermit, the lookout's bandits, the hanging
+		// tree's crows) and the changing maze under a necromancer's crypt (their attachments load with them)
+		TreeSites.register();
+		FieldCrows.register();
+		com.jaymoskingdoms.harvest.WickedHarvest.register();
+		CryptMaze.register();
+		// and the druids' cave gardens, tended while their druid lives
+		CaveGardens.register();
 		EpicTowns.register();
 		TownWakes.register();
 		// 0.5: seats in the world's buildings (and their attachment); fiefdoms and camps in Grim Kingdoms' ruins (only with
@@ -640,6 +716,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.SpiderMinds.register();
 		// small spiders squashed underfoot, bigger ones by a landing jump, and any of them dead to one blow
 		com.jaymoskingdoms.wild.SpiderSquash.register();
+		com.jaymoskingdoms.wild.SnailSlime.register();
 		// medieval picks: one a spider killed (or who died among spiders underground) wakes webbed up in their lair
 		com.jaymoskingdoms.wild.SpiderLairs.register();
 		// spiders leave anyone webbed up, or kept in their lair, be till they're struck
@@ -650,6 +727,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.mineshafts.Mineshafts.register();
 		// GTNH patch 6: marked monsters (and captains' marked traits), and MCA's turned villagers who remember their trade (and their attachments)
 		MarkedMonsters.register();
+		// CC0 picks (MobGear): a datapack's mobgear/<mob> loot table dresses that mob as it spawns
+		MobGearTables.register();
 		TurnedVillagers.register();
 		LOGGER.debug("marked and turned attachments: {} {}", MarkedMonsters.MARKS, TurnedVillagers.TRADE);
 		com.jaymoskingdoms.wild.WolfStalkers.register();
@@ -698,6 +777,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
 		LOGGER.debug("road attachment: {}", Roads.ROADS);
 		Roads.register();
+		// village mods 6: an inn halfway along each long King's Road (and its attachment)
+		LOGGER.debug("wayside inn attachment: {}", WaysideInns.INNS);
+		WaysideInns.register();
+		// (Andy 2026-11-25) starts built by hand, as an adventure map is (and their attachment)
+		LOGGER.debug("written start attachment: {}", WrittenStarts.PLACED);
+		WrittenStarts.register();
 		// 0.7.103: roads are quicker going, sand, snow and leaves slower
 		RoadPace.register();
 		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
@@ -707,6 +792,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
 		com.jaymoskingdoms.equestrian.Equestrian.register();
 		com.jaymoskingdoms.equestrian.MythicMounts.register();
+		com.jaymoskingdoms.equestrian.WonderHorses.register();
 		// 0.5.46: Jaymo's Equestrian, stage 2 (bond and tack: trust, disciplines, tricks, needs, tack) and its attachments
 		com.jaymoskingdoms.equestrian.Bonding.register();
 		// 0.7.305: Jaymo's Equestrian, stage 3 (the herd: mares and stallions, orders, defending, the roster; riding extras; breed gifts)
@@ -784,11 +870,24 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.forms.Styles.register();
 		Levelled.register();
 		Followers.register();
+		// village mods patch 9: your own company
+		Company.register();
 		// the shared fighting brain, friend and foe (docs/Pawn-Plan.md)
 		Comrades.register();
 		Callouts.register();
 		FieldMedics.register();
 		BandLeaders.register();
+		// no knots of fighters: a fight among people takes turns, the rest hold off on a ring
+		Turns.register();
+		BreakOff.register();
+		DangerSense.register();
+		Passages.register();
+		Detours.register();
+		Hiding.register();
+		PathProbes.register();
+		Disembark.register();
+		// (fighting AI patch 7) band styles: heavy blows and leaps, shield walls, a second arrow, rolls and two blades
+		BandStyles.register();
 		QuickOrders.register();
 		// (pawn picks patch 2) holding a foe or pinning you, a leg up, readying and ambushes, grabbing loot mid-fight
 		Grapples.register();
@@ -841,6 +940,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("promise attachment: {}", Promises.PROMISES);
 		Bearings.register();
 		Talks.register();
+		GearTalk.register();
 		Promises.register();
 		// (0.7.454) asking the way in town
 		Directions.register();
@@ -867,9 +967,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rites.register();
 		Sermons.register();
 		RealmFaiths.register();
+		RealmGifts.register();
+		Names.register();
 		// (0.7.518) patron gods, part (c): the champions and their temples
 		PatronChampions.register();
 		Temples.register();
+		// the patrons' colossi: the three sworn callings' strike, and the hunt for commandment breakers
+		com.jaymoskingdoms.colossus.Colossi.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
 		CostumedFolk.register();
@@ -879,6 +983,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Languages.register();
 		// the illager tongue, learned from their writings, banners, paintings and holds, and talking with illagers once you know it
 		IllagerTongue.register();
+		// Alex's Caves: its cave biomes mostly under Mohknee, and cave maps that reach that far
+		AlexsCavesCompat.register();
 		IllagerHolds.register();
 		BlastMend.register();
 		Craters.register();
@@ -891,6 +997,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Needs.register();
 		// villagers left standing still for minutes: written to the log, then sent on their way
 		Unstick.register();
+		// humanoids stranded on a roof or a ledge climb down
+		Stranded.register();
 		// 0.7.19: villagers' regard for one another, and the meetings it makes (fights to hugs) (and its attachment)
 		LOGGER.debug("regard attachment: {}", Neighbours.REGARD);
 		Neighbours.register();
@@ -924,6 +1032,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spirits.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
+		SoulJars.register();
 		// the elemental spell tomes: left-click bolts, a loaded page on right click
 		Tomes.register();
 		// a forbidden rite of blood magic: a captive made into a great foe (and its attachment)
@@ -986,6 +1095,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
 		Vampires.register();
 		VampireAlarm.register();
+		CrocWatch.register();
+		// a taker hides among a village's people; its cellar; a night when anger spills over; a rope lead tied off on a post
+		Takers.register();
+		Unrest.register();
+		CaptiveLeads.register();
 		// a camp struck sends a runner to its fire to blow the horn, then patrols and defends until it's safe
 		CampAlarm.register();
 		Stakes.register();
@@ -1075,6 +1189,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Corsairs.register();
 		Navies.register();
 		Fishers.register();
+		Anglers.register();
+		PillagerShips.register();
 		SeaPassers.register();
 		SeaTrade.register();
 		Whalers.register();
@@ -1096,6 +1212,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		RoyalDress.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
+		BoardTerms.register(); // (village mods 4) notice terms, the held notice, hand-in at the board
+		// (village mods 5) a town's gift of a house, what the town is doing, each land's known goods, the wandering pilgrim
+		LOGGER.debug("town life attachments: {} {}", GiftHouses.GIFTS, KnownGoods.TRADES);
+		GiftHouses.register();
+		TownDoings.register();
+		Pilgrims.register();
 		MerchantOrders.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)
 		Gloom.register();
@@ -1114,6 +1236,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		FeatsBody.register();
 		FeatsFight.register();
 		FeatsTrade.register();
+		// reference mods patch 16: titles, worn gear that asks for skill, found gear's quality, salvage, named followers, monster-born
+		DeedTitles.register();
+		FoundQuality.register();
+		GearSalvage.register();
+		NamedFollowers.register();
+		MonsterBorn.register();
+		Feasting.register();
+		DemonThrone.register();
+		Shades.register();
 		// patch 8, magic items: bonds, curses, unknown properties, wills, wands, gadgets, the deck, potion clashes
 		Gadgets.register();
 		RelicCurses.register();
@@ -1125,6 +1256,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// the magic rules and the first spells (patch 6): parts, gags, rituals, counterspell, dispel, cantrips, fields, the new scrolls
 		NewSpells.register();
 		com.jaymoskingdoms.traps.Traps.register();
+		HiddenSwitches.register();
+		com.jaymoskingdoms.illagers.ModEntityTypes.register();
 		DeathRites.register();
 		// the gone-before: remains in the wild, their last camps, the ruins' traps, the headless rider
 		Remains.register();
@@ -1155,6 +1288,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Deafened.register();
 		Nets.register();
 		Poisons.register();
+		LeechKit.register();
+		HedgeWitches.register();
 		Surprise.register();
 		ThiefSneak.register();
 		RecklessBlows.register();
@@ -1173,6 +1308,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		RisenLooks.register();
 		// the Awakening picks: the Warding Hush (the Lantern Warden's, and a scroll) and Rot (the Ash Whisperer's)
 		HushWard.register();
+		// chat, toasts and advancement lines wait till a joining player can see the world
+		JoinHush.register();
 		AshRot.register();
 		ArtKeys.register();
 		// the Cleric's medallion board (the medallion key and the number keys as its marks)

@@ -1,5 +1,7 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -7,7 +9,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -15,8 +21,16 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
@@ -314,5 +328,192 @@ public final class Economy {
 	static void clear() {
 		LAST_ATTACK.clear();
 		ATTACKERS.clear();
+		WORTH.clear();
+	}
+
+	// ---- what things are worth (village mods patch 4, fair pay) ---------------------------------------------------
+
+	/**
+	 * What raw goods are worth, in milli (an emerald is {@link Money#UNIT}), about what a villager trades them at: what
+	 * grows, is mined, shorn or hunted. An id, or {@code #tag} for every item in it. Everything made is worth what went
+	 * into it ({@link #worth}).
+	 */
+	private static final Map<String, Integer> RAW_WORTH = Map.ofEntries(
+		Map.entry("minecraft:dirt", 2), Map.entry("minecraft:cobblestone", 5), Map.entry("minecraft:cobbled_deepslate", 6),
+		Map.entry("minecraft:sand", 5), Map.entry("minecraft:red_sand", 6), Map.entry("minecraft:gravel", 5), Map.entry("minecraft:mud", 6),
+		Map.entry("minecraft:snowball", 2), Map.entry("minecraft:ice", 20), Map.entry("minecraft:clay_ball", 60), Map.entry("minecraft:flint", 30),
+		Map.entry("#minecraft:logs", 60), Map.entry("minecraft:bamboo", 10), Map.entry("minecraft:cactus", 30), Map.entry("minecraft:sugar_cane", 40),
+		Map.entry("minecraft:kelp", 10), Map.entry("minecraft:vine", 10), Map.entry("minecraft:lily_pad", 40), Map.entry("#minecraft:small_flowers", 20),
+		Map.entry("minecraft:pink_petals", 15), Map.entry("minecraft:brown_mushroom", 40), Map.entry("minecraft:red_mushroom", 40),
+		Map.entry("minecraft:resin_clump", 150), Map.entry("minecraft:mangrove_roots", 20),
+		Map.entry("minecraft:wheat", 50), Map.entry("minecraft:wheat_seeds", 5), Map.entry("minecraft:carrot", 60), Map.entry("minecraft:potato", 50),
+		Map.entry("minecraft:beetroot", 50), Map.entry("minecraft:melon_slice", 25), Map.entry("minecraft:pumpkin", 150),
+		Map.entry("minecraft:sweet_berries", 30), Map.entry("minecraft:cocoa_beans", 60), Map.entry("minecraft:apple", 80), Map.entry("minecraft:egg", 60),
+		Map.entry("minecraft:honeycomb", 150), Map.entry("minecraft:honey_bottle", 200),
+		Map.entry("minecraft:cod", 120), Map.entry("minecraft:salmon", 150), Map.entry("minecraft:beef", 150), Map.entry("minecraft:porkchop", 150),
+		Map.entry("minecraft:chicken", 100), Map.entry("minecraft:mutton", 120), Map.entry("minecraft:rabbit", 120),
+		Map.entry("minecraft:leather", 200), Map.entry("minecraft:rabbit_hide", 60), Map.entry("#minecraft:wool", 100), Map.entry("minecraft:string", 70),
+		Map.entry("minecraft:bone", 60), Map.entry("minecraft:feather", 40), Map.entry("minecraft:rotten_flesh", 20), Map.entry("minecraft:slime_ball", 250),
+		Map.entry("minecraft:gunpowder", 200), Map.entry("minecraft:spider_eye", 100), Map.entry("minecraft:ink_sac", 80),
+		Map.entry("minecraft:coal", 70), Map.entry("minecraft:raw_iron", 300), Map.entry("minecraft:raw_copper", 60), Map.entry("minecraft:raw_gold", 600),
+		Map.entry("minecraft:redstone", 60), Map.entry("minecraft:lapis_lazuli", 150), Map.entry("minecraft:quartz", 120),
+		Map.entry("minecraft:amethyst_shard", 150), Map.entry("minecraft:obsidian", 200), Map.entry("minecraft:glowstone_dust", 120),
+		Map.entry("minecraft:emerald", 1000), Map.entry("minecraft:diamond", 8000), Map.entry("minecraft:netherite_scrap", 15000),
+		Map.entry("minecraft:ender_pearl", 1500), Map.entry("minecraft:blaze_rod", 1500), Map.entry("minecraft:ghast_tear", 3000),
+		Map.entry("minecraft:nether_wart", 60),
+		Map.entry("minecraft:water_bucket", 1050), Map.entry("minecraft:lava_bucket", 1300), Map.entry("minecraft:milk_bucket", 1100));
+	/** What a beast led in on a rope is worth (milli), by entity id; one not listed is {@link #BEAST_WORTH}. */
+	private static final Map<String, Integer> BEASTS = Map.of("minecraft:sheep", 1500, "minecraft:cow", 2000, "minecraft:pig", 1200,
+		"minecraft:chicken", 400, "minecraft:camel", 6000, "minecraft:llama", 3000, "minecraft:goat", 2500, "minecraft:frog", 1500,
+		"minecraft:mooshroom", 4000);
+	static final int BEAST_WORTH = 1500;
+	/** A thing made is worth what went into it and this much over, for the work. */
+	static final float MADE_SHARE = 1.1F;
+	/** How many times the recipes are walked, each time pricing what's made of what the last walk priced. */
+	static final int WORTH_WALKS = 8;
+	/** What a thing nobody makes and nobody listed is worth (milli), by rarity; and what rarity multiplies a made thing's worth by. */
+	static final int COMMON_WORTH = 50, UNCOMMON_WORTH = 500, RARE_WORTH = 2000, EPIC_WORTH = 6000;
+	static final float UNCOMMON_SHARE = 1.5F, RARE_SHARE = 2.0F, EPIC_SHARE = 3.0F;
+
+	/** The worth table, built the first time it's asked for after the server starts. */
+	private static final Map<Item, Long> WORTH = new HashMap<>();
+
+	/** What one {@code item} is worth (milli): its raw worth, or what it's made of, times its rarity. */
+	static long worth(MinecraftServer server, Item item) {
+		if (WORTH.isEmpty()) {
+			buildWorth(server);
+		}
+		Long known = WORTH.get(item);
+		if (known != null) {
+			return known;
+		}
+		return switch (new ItemStack(item).getRarity()) {
+			case COMMON -> COMMON_WORTH;
+			case UNCOMMON -> UNCOMMON_WORTH;
+			case RARE -> RARE_WORTH;
+			case EPIC -> EPIC_WORTH;
+		};
+	}
+
+	/** {@code target} as a quest asks for it (an item id, maybe with a {@code @grade}, or a {@code #tag}: its cheapest item), one of it. */
+	static long worth(MinecraftServer server, String target) {
+		String id = Quests.itemId(target);
+		if (id.startsWith("#")) {
+			Identifier tag = Identifier.tryParse(id.substring(1));
+			long least = Long.MAX_VALUE;
+			if (tag != null) {
+				for (Holder<Item> h : BuiltInRegistries.ITEM.getTagOrEmpty(TagKey.create(Registries.ITEM, tag))) {
+					least = Math.min(least, worth(server, h.value()));
+				}
+			}
+			return least == Long.MAX_VALUE ? COMMON_WORTH : least;
+		}
+		Identifier key = Identifier.tryParse(id);
+		Item item = key == null ? null : BuiltInRegistries.ITEM.getOptional(key).orElse(null);
+		return item == null ? COMMON_WORTH : worth(server, item);
+	}
+
+	/** What one beast of {@code type} (an entity id) led in is worth (milli). */
+	static long beastWorth(String type) {
+		return BEASTS.getOrDefault(type, BEAST_WORTH);
+	}
+
+	private static void buildWorth(MinecraftServer server) {
+		Map<Item, Long> raw = new HashMap<>();
+		for (Item item : BuiltInRegistries.ITEM) {
+			ItemStack stack = new ItemStack(item);
+			String id = BuiltInRegistries.ITEM.getKey(item).toString();
+			Integer w = RAW_WORTH.get(id);
+			if (w == null) {
+				for (Map.Entry<String, Integer> e : RAW_WORTH.entrySet()) {
+					Identifier tag = e.getKey().startsWith("#") ? Identifier.tryParse(e.getKey().substring(1)) : null;
+					if (tag != null && stack.is(TagKey.create(Registries.ITEM, tag))) {
+						w = e.getValue();
+						break;
+					}
+				}
+			}
+			if (w != null) {
+				raw.put(item, (long)w);
+			}
+		}
+		Map<Item, Long> worth = new HashMap<>(raw);
+		ContextMap context = SlotDisplayContext.fromLevel(server.overworld());
+		record Made(Item result, int count, List<List<Item>> slots) {
+		}
+		List<Made> made = new ArrayList<>();
+		for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
+			try {
+				Recipe<?> recipe = holder.value();
+				var placement = recipe.placementInfo();
+				if (placement.isImpossibleToPlace()) {
+					continue;
+				}
+				List<List<Item>> slots = new ArrayList<>();
+				for (Ingredient ingredient : placement.ingredients()) {
+					slots.add(ingredient.items().map(Holder::value).toList());
+				}
+				for (RecipeDisplay display : recipe.display()) {
+					for (ItemStack out : display.result().resolveForStacks(context)) {
+						// (an item made from itself, a repair or a dye, says nothing of its worth)
+						if (!raw.containsKey(out.getItem()) && slots.stream().noneMatch(s -> s.contains(out.getItem()))) {
+							made.add(new Made(out.getItem(), Math.max(1, out.getCount()), slots));
+						}
+					}
+				}
+			} catch (RuntimeException e) {
+				JaymosKingdoms.LOGGER.debug("Worth table skipped recipe {}: {}", holder.id(), e.toString());
+			}
+		}
+		for (int walk = 0; walk < WORTH_WALKS; walk++) {
+			boolean changed = false;
+			for (Made m : made) {
+				long cost = 0;
+				for (List<Item> slot : m.slots()) {
+					long least = Long.MAX_VALUE;
+					for (Item i : slot) {
+						Long w = worth.get(i);
+						if (w != null) {
+							least = Math.min(least, w);
+						}
+					}
+					if (least == Long.MAX_VALUE) {
+						cost = -1;
+						break;
+					}
+					cost += least;
+				}
+				if (cost < 0) {
+					continue;
+				}
+				long each = Math.max(1L, Math.round(cost * MADE_SHARE / m.count()));
+				Long was = worth.get(m.result());
+				// (the cheapest way of making it sets its worth)
+				if (was == null || each < was) {
+					worth.put(m.result(), each);
+					changed = true;
+				}
+			}
+			if (!changed) {
+				break;
+			}
+		}
+		for (Map.Entry<Item, Long> e : worth.entrySet()) {
+			float share = switch (new ItemStack(e.getKey()).getRarity()) {
+				case COMMON -> 1.0F;
+				case UNCOMMON -> UNCOMMON_SHARE;
+				case RARE -> RARE_SHARE;
+				case EPIC -> EPIC_SHARE;
+			};
+			WORTH.put(e.getKey(), Math.round((double)e.getValue() * share));
+		}
+		JaymosKingdoms.LOGGER.info("Worth table: {} items priced ({} raw, {} recipes)", WORTH.size(), raw.size(), made.size());
+	}
+
+	/** {@code milli} as a quest's pay: whole emeralds' worth, and the rest in copper bits. */
+	static Quest.Reward pay(long milli, List<String> goods, int hearts, int reputation) {
+		long m = Math.max(0L, milli);
+		return new Quest.Reward((int)(m / Money.UNIT), goods, java.util.Optional.empty(), java.util.Optional.empty(), hearts, reputation, 0,
+			(int)(m % Money.UNIT / Currency.BIT.base));
 	}
 }

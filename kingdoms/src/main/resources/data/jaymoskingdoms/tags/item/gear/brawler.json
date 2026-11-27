@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:brawlers_belt",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_knuckles",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:leather_thrower_belt",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_thrower_belt",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:steel_thrower_belt",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:ram_bracer",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:fire_gauntlet",
+      "required": false
+    }
+  ]
+}

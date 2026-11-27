@@ -98,8 +98,9 @@ public final class Climate {
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
 		WATERSKIN_IRON = item("waterskin_iron", p -> new WaterskinItem(WaterskinItem.Tier.IRON, p), new Item.Properties().stacksTo(1)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
+		// dragon hide doesn't burn: dropped in fire or lava the skin survives, as netherite does (the damage-resistant component)
 		WATERSKIN_DRAGON = item("waterskin_dragon", p -> new WaterskinItem(WaterskinItem.Tier.DRAGON, p), new Item.Properties().stacksTo(1)
-			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
+			.fireResistant().component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
 		WATER_FILTER = item("water_filter", WaterFilterItem::new, new Item.Properties().durability(WaterFilterItem.USES));
 		BOILED = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKitchen.id("boiled"),
 			DataComponentType.<Unit>builder().persistent(Unit.CODEC).networkSynchronized(Unit.STREAM_CODEC).build());
@@ -107,6 +108,10 @@ public final class Climate {
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK).usingConvertsTo(Items.BUCKET));
 		ParasiteEffect.register();
 		Warmth.register();
+		// the climate patch's food, drink and house blocks (bowls of water, the rain barrel, the wall gauge) and the sinew
+		WaterBowls.register();
+		HouseBlocks.register();
+		com.jaymoskitchen.corpse.Sinew.register();
 		Soot.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			output.accept(CLEAN_WATER);
@@ -126,8 +131,9 @@ public final class Climate {
 			BodyHeat.forget(handler.player.getUUID());
 			Stamina.forget(handler.player.getUUID());
 		});
-		// 90 seconds' grace from the cold and heat on spawning into the world and on coming back from dying
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> BodyHeat.grace(handler.player));
+		// 90 seconds' grace from the cold and heat on spawning into the world and on coming back from dying, and a newcomer's
+		// first wake gets ten minutes of it, once
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> BodyHeat.joined(handler.player));
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			if (!alive) {
 				BodyHeat.grace(newPlayer);
@@ -251,6 +257,10 @@ public final class Climate {
 		if (held.is(CACTUS_WATER)) {
 			return !held.has(BOILED);
 		}
+		if (held.is(WaterBowls.WATER_BOWL)) {
+			// a bowl of pond water: boil it clean
+			return true;
+		}
 		if (held.is(Items.POTION)) {
 			PotionContents contents = held.get(DataComponents.POTION_CONTENTS);
 			return contents != null && contents.is(Potions.WATER);
@@ -271,14 +281,14 @@ public final class Climate {
 			return true;
 		}
 		boolean lit = state.hasProperty(BlockStateProperties.LIT) && state.getValue(BlockStateProperties.LIT);
-		return lit && (state.getBlock() instanceof HearthBlock || BONFIRE_EDGE.equals(BuiltInRegistries.BLOCK.getKey(state.getBlock())));
+		return lit && (HearthBlock.warm(state) || BONFIRE_EDGE.equals(BuiltInRegistries.BLOCK.getKey(state.getBlock())));
 	}
 
 	/** Jaymo's Powers' bonfire edge, the stone ring round a 3x3 bonfire. */
 	private static final net.minecraft.resources.Identifier BONFIRE_EDGE = net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "bonfire_edge");
 
 	/** A water cauldron with heat under it (anything Kitchen's cookware cooks on). */
-	static boolean boiledCauldron(Level level, BlockPos pos) {
+	public static boolean boiledCauldron(Level level, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
 		return state.is(Blocks.WATER_CAULDRON) && CookwareBlock.hot(level.getBlockState(pos.below()));
 	}
@@ -303,6 +313,9 @@ public final class Climate {
 		if (held.is(WATERSKIN_LEATHER) || held.is(WATERSKIN_IRON) || held.is(WATERSKIN_DRAGON)) {
 			held.set(WATERSKIN_WATER, new WaterskinItem.Water(WaterskinItem.water(held).sips(), true, 1,
 				player.level().getGameTime() + Warmth.SKIN_KEEPS));
+		} else if (held.is(WaterBowls.WATER_BOWL)) {
+			// one bowl of the stack comes off the fire clean; the rest wait their turn
+			player.setItemInHand(InteractionHand.MAIN_HAND, ItemUtils.createFilledResult(held, player, new ItemStack(WaterBowls.CLEAN_WATER_BOWL)));
 		} else if (held.is(CACTUS_WATER)) {
 			held.set(BOILED, Unit.INSTANCE);
 			held.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymoskitchen.cactus_water_bucket.boiled"));

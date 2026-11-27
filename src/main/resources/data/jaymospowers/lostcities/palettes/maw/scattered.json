@@ -1,0 +1,629 @@
+{
+  "palette": [
+    {
+      "char": "΂",
+      "block": "minecraft:lightning_rod[facing=west,powered=false,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ͱ",
+      "block": "minecraft:iron_bars[east=false,north=true,south=true,waterlogged=false,west=true]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "΁",
+      "block": "minecraft:verdant_froglight[axis=y]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "&",
+      "block": "minecraft:smooth_stone",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "c",
+      "block": "minecraft:quartz_bricks",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "2",
+      "block": "minecraft:mossy_cobblestone",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ͷ",
+      "block": "minecraft:smithing_table",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Έ",
+      "block": "minecraft:deepslate_tile_wall[east=none,north=low,south=low,up=false,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "t",
+      "block": "minecraft:spruce_log[axis=z]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "X",
+      "block": "minecraft:waxed_weathered_cut_copper_stairs[facing=west,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "j",
+      "block": "minecraft:short_grass",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "͵",
+      "block": "minecraft:iron_bars[east=false,north=true,south=false,waterlogged=false,west=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "l",
+      "block": "minecraft:white_stained_glass",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "\\",
+      "block": "minecraft:deepslate_brick_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "p",
+      "block": "minecraft:oak_leaves[distance=1,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Α",
+      "block": "minecraft:deepslate_tile_wall[east=low,north=low,south=none,up=true,waterlogged=false,west=low]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ώ",
+      "block": "minecraft:deepslate_tile_wall[east=low,north=none,south=none,up=false,waterlogged=false,west=low]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "$",
+      "block": "minecraft:deepslate_tiles",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "ͱ",
+      "block": "minecraft:iron_bars[east=true,north=true,south=true,waterlogged=false,west=true]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "ʹ",
+      "block": "minecraft:iron_bars[east=false,north=false,south=true,waterlogged=false,west=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "*",
+      "block": "minecraft:granite",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Γ",
+      "block": "minecraft:deepslate_tile_wall[east=low,north=tall,south=tall,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ε",
+      "block": "minecraft:stone_brick_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "/",
+      "block": "minecraft:waxed_exposed_cut_copper",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "f",
+      "block": "minecraft:polished_andesite_stairs[facing=west,half=top,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "D",
+      "block": "minecraft:stripped_acacia_wood[axis=x]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "R",
+      "block": "minecraft:deepslate_brick_wall[east=none,north=low,south=none,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "!",
+      "block": "minecraft:polished_diorite",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Δ",
+      "block": "minecraft:stone_brick_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "͹",
+      "block": "minecraft:stone",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ϳ",
+      "block": "minecraft:poppy",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "U",
+      "block": "minecraft:ladder[facing=south,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "g",
+      "block": "minecraft:chest[facing=west,type=single,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ί",
+      "block": "minecraft:deepslate_tile_wall[east=tall,north=none,south=tall,up=true,waterlogged=false,west=tall]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ͳ",
+      "block": "minecraft:iron_bars[east=true,north=true,south=true,waterlogged=false,west=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "W",
+      "block": "minecraft:waxed_weathered_cut_copper_stairs[facing=west,half=top,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "^",
+      "block": "minecraft:waxed_weathered_cut_copper",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "V",
+      "block": "minecraft:deepslate_brick_wall[east=low,north=none,south=none,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "΄",
+      "block": "minecraft:lightning_rod[facing=east,powered=false,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ")",
+      "block": "minecraft:iron_block",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "a",
+      "block": "minecraft:dark_oak_leaves[distance=7,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Β",
+      "block": "minecraft:deepslate_tile_wall[east=none,north=tall,south=tall,up=true,waterlogged=false,west=tall]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ">",
+      "block": "minecraft:wheat[age=4]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "P",
+      "block": "minecraft:deepslate_brick_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=low]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "A",
+      "block": "minecraft:waxed_weathered_copper",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "#",
+      "block": "minecraft:oak_leaves[distance=7,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "u",
+      "block": "minecraft:spruce_log[axis=x]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "h",
+      "block": "minecraft:iron_bars[east=true,north=false,south=true,waterlogged=false,west=true]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "e",
+      "block": "minecraft:iron_bars[east=true,north=false,south=false,waterlogged=false,west=true]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "}",
+      "block": "minecraft:iron_bars[east=false,north=true,south=false,waterlogged=false,west=true]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "=",
+      "block": "minecraft:wheat[age=5]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "b",
+      "block": "minecraft:dark_oak_wood[axis=y]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Z",
+      "block": "minecraft:deepslate_brick_stairs[facing=west,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "M",
+      "block": "minecraft:deepslate_brick_wall[east=low,north=low,south=none,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ".",
+      "block": "minecraft:waxed_exposed_copper",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "w",
+      "block": "minecraft:spruce_log[axis=y]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "΀",
+      "block": "minecraft:tinted_glass",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "΍",
+      "block": "minecraft:deepslate_tile_wall[east=tall,north=none,south=low,up=true,waterlogged=false,west=tall]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "r",
+      "block": "minecraft:oak_leaves[distance=2,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "T",
+      "block": "minecraft:deepslate_bricks",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "5",
+      "block": "minecraft:light_gray_stained_glass",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "'",
+      "block": "minecraft:deepslate_tile_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "·",
+      "block": "minecraft:iron_bars[east=false,north=false,south=false,waterlogged=false,west=true]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ύ",
+      "block": "minecraft:iron_bars[east=false,north=false,south=false,waterlogged=false,west=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "3",
+      "block": "minecraft:mossy_stone_bricks",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "9",
+      "block": "minecraft:wheat[age=6]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "d",
+      "block": "minecraft:polished_andesite_stairs[facing=north,half=top,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "L",
+      "block": "minecraft:deepslate_brick_wall[east=none,north=none,south=low,up=true,waterlogged=false,west=low]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "΋",
+      "block": "minecraft:deepslate_tile_wall[east=tall,north=low,south=none,up=true,waterlogged=false,west=tall]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ",",
+      "block": "minecraft:quartz_block",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "%",
+      "block": "minecraft:polished_deepslate",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "i",
+      "block": "minecraft:chest[facing=east,type=single,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "ͺ",
+      "block": "minecraft:coal_ore",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "7",
+      "block": "minecraft:farmland[moisture=7]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "N",
+      "block": "minecraft:deepslate_brick_wall[east=none,north=none,south=low,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "x",
+      "block": "minecraft:oak_leaves[distance=5,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "ͻ",
+      "block": "minecraft:grass_block[snowy=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "(",
+      "block": "minecraft:polished_andesite",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "0",
+      "block": "minecraft:cracked_stone_bricks",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "k",
+      "block": "minecraft:iron_bars[east=true,north=true,south=false,waterlogged=false,west=true]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "͸",
+      "block": "minecraft:chest[facing=north,type=single,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ή",
+      "block": "minecraft:deepslate_tile_wall[east=tall,north=tall,south=tall,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "8",
+      "block": "minecraft:wheat[age=7]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "`",
+      "block": "minecraft:deepslate_tile_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "-",
+      "block": "minecraft:blue_stained_glass",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "z",
+      "block": "minecraft:iron_bars[east=true,north=false,south=true,waterlogged=false,west=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "H",
+      "block": "minecraft:terracotta",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "΃",
+      "block": "minecraft:lightning_rod[facing=north,powered=false,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ";",
+      "block": "minecraft:farmland[moisture=0]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Y",
+      "block": "minecraft:deepslate_brick_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "s",
+      "block": "minecraft:oak_leaves[distance=4,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "K",
+      "block": "minecraft:deepslate_brick_wall[east=low,north=none,south=low,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "o",
+      "block": "minecraft:chest[facing=south,type=single,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "O",
+      "block": "minecraft:deepslate_brick_wall[east=low,north=low,south=low,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "_",
+      "block": "minecraft:waxed_exposed_cut_copper_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "B",
+      "block": "minecraft:lightning_rod[facing=down,powered=false,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "6",
+      "block": "minecraft:dirt",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "{",
+      "block": "minecraft:iron_bars[east=false,north=false,south=true,waterlogged=false,west=true]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "΅",
+      "block": "minecraft:deepslate_tile_wall[east=tall,north=none,south=none,up=false,waterlogged=false,west=tall]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "E",
+      "block": "minecraft:stripped_acacia_wood[axis=y]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "ͳ",
+      "block": "minecraft:iron_bars[east=false,north=true,south=true,waterlogged=false,west=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "<",
+      "block": "minecraft:air",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "ͼ",
+      "block": "minecraft:polished_andesite_stairs[facing=east,half=top,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "S",
+      "block": "minecraft:deepslate_brick_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "I",
+      "block": "minecraft:cut_red_sandstone",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "m",
+      "block": "minecraft:tall_grass[half=lower]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "[",
+      "block": "minecraft:ladder[facing=east,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "ΐ",
+      "block": "minecraft:deepslate_tile_wall[east=tall,north=tall,south=none,up=true,waterlogged=false,west=tall]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ζ",
+      "block": "minecraft:stone_brick_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "q",
+      "block": "minecraft:oak_leaves[distance=3,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "+",
+      "block": "minecraft:polished_andesite_stairs[facing=south,half=top,shape=straight,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "|",
+      "block": "minecraft:iron_bars[east=true,north=true,south=false,waterlogged=false,west=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "J",
+      "block": "minecraft:gray_stained_glass",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "?",
+      "block": "minecraft:wheat[age=1]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ό",
+      "block": "minecraft:deepslate_tile_wall[east=none,north=tall,south=tall,up=true,waterlogged=false,west=low]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "n",
+      "block": "minecraft:tall_grass[half=upper]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "G",
+      "block": "minecraft:stripped_acacia_wood[axis=z]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "@",
+      "block": "minecraft:chiseled_deepslate",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Q",
+      "block": "minecraft:deepslate_brick_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "Ά",
+      "block": "minecraft:deepslate_tile_wall[east=none,north=tall,south=tall,up=false,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "ͷ",
+      "block": "minecraft:iron_bars[east=true,north=false,south=false,waterlogged=false,west=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "]",
+      "block": "minecraft:iron_chain[axis=y,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "y",
+      "block": "minecraft:oak_leaves[distance=6,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "ͽ",
+      "block": "minecraft:dandelion",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ";",
+      "block": "minecraft:oxeye_daisy",
+      "damaged": "minecraft:iron_bars"
+    }
+  ]
+}

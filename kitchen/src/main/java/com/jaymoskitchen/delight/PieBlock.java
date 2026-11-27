@@ -160,6 +160,10 @@ public class PieBlock extends Block {
 			Consumable consumable = eaten.get(DataComponents.CONSUMABLE);
 			if (consumable != null) {
 				eaten.getAllOfType(ConsumableListener.class).forEach(listener -> listener.onConsume(level, player, eaten, consumable));
+				if (player instanceof net.minecraft.server.level.ServerPlayer hungry && server.getGameRules().get(com.jaymoskitchen.climate.Climate.BODY_HEAT)) {
+					// a slice eaten where the pie stands is as hot as one cut and carried
+					com.jaymoskitchen.climate.Warmth.consumed(hungry, eaten);
+				}
 				consumable.onConsumeEffects().forEach(effect -> effect.apply(level, eaten, player));
 			}
 			takeBite(level, pos, state);

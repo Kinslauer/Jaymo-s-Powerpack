@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:leech_kit_mix",
+  "ingredients": [
+    "jaymoskingdoms:corroding_thorn",
+    "jaymoskingdoms:stripping_thorn"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:bonewash_thorn"
+  }
+}

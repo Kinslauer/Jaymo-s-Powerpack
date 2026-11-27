@@ -1,0 +1,13 @@
+{
+ "values": [
+  "minecraft:frog",
+  {
+   "id": "cubeanimals:barnowl",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:cricket",
+   "required": false
+  }
+ ]
+}

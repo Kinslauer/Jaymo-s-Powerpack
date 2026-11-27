@@ -164,6 +164,7 @@ public final class ArsenalPower implements Power {
 		Summoned.TYPE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("arsenal_summoned"),
 			DataComponentType.<Summoned>builder().persistent(Summoned.CODEC).networkSynchronized(Summoned.STREAM_CODEC).build());
 		ArsenalEntities.init();
+		ArsenalAxeThrow.init();
 		ArsenalStash.init();
 		ArsenalPocket.init();
 		ArsenalArmory.init();

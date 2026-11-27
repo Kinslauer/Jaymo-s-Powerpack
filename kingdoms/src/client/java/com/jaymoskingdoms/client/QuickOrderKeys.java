@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Company;
 import com.jaymoskingdoms.Formations;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.QuickOrders;
@@ -19,6 +20,8 @@ public final class QuickOrderKeys {
 	/** (medieval picks) The formation's keys ({@link Formations}): the next shape (F6), go where you look or at whom (F8), charge (F9). */
 	private static final KeyMapping[] FORMATION_KEYS = new KeyMapping[3];
 	private static final int[] FORMATION_ORDERS = {Formations.CYCLE, Formations.POINT, Formations.CHARGE};
+	/** (village mods rc2_groups) The next group of your company your orders go to ({@link Company}); unbound to start. */
+	private static KeyMapping group;
 
 	private QuickOrderKeys() {
 	}
@@ -35,7 +38,13 @@ public final class QuickOrderKeys {
 			FORMATION_KEYS[i] = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.formation_" + new String[] {"shape", "point", "charge"}[i],
 				new int[] {InputConstants.KEY_F6, InputConstants.KEY_F8, InputConstants.KEY_F9}[i], category));
 		}
+		group = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.company_group", InputConstants.UNKNOWN.getValue(), category));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			while (group.consumeClick()) {
+				if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(Company.Pick.TYPE)) {
+					ClientPlayNetworking.send(new Company.Pick());
+				}
+			}
 			for (int kind = QuickOrders.GO; kind <= QuickOrders.HELP; kind++) {
 				while (KEYS[kind].consumeClick()) {
 					if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(QuickOrders.Give.TYPE)) {

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/apron",
+    "layer1": "jaymoskingdoms:item/apron_trim"
+  }
+}

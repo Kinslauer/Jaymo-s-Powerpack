@@ -16,6 +16,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,8 +35,13 @@ import net.minecraft.world.phys.Vec3;
  * plumes end ({@link StormParticle#PALL}): big, slow, dark grey puffs that hang there, drift downwind and linger a minute
  * or two after the fire is out (Andy, 2026-11-20). The server says where the large flames are, out to 512 blocks
  * ({@link FireSmog}), so a pall, and a plume under it, can be seen from afar. The smog shares a budget of its own.</li>
- * <li>Right over the flames, on the ground under the trees as well as in a burning canopy, thick black smoke banks up
- * ({@link #smother}): it hardly rises and drifts with the wind, so a big blaze is hidden even seen from outside it.</li>
+ * <li>Under the column and the high smog, a low bank settles too (Andy, 2026-11-26: "the smoke should settle closer to the
+ * ground, and plume out to the maximum of where it is now", then "keep both"): more plume puffs that rise only a little and
+ * spread out sideways as they settle ({@link #settle}), and a bank of smog a few blocks over the flames that spreads as wide
+ * as the biggest blaze's high smog, round every large flame. Breathing it a long while makes you sick
+ * ({@code SmokeSickness}). Each has a budget of its own.</li>
+ * <li>On the ground under the flames, whether they burn on the forest floor or up in a canopy, thick black smoke banks
+ * up ({@link #smother}): it hardly rises and drifts with the wind, so a big blaze is hidden even seen from outside it.</li>
  * <li>Near a big blaze and out under the sky, the air fills with smoke: the fog closes in and browns
  * ({@link #haze}, read by {@code SkiesFogMixin} with the weather's other fogs).</li>
  * </ul>
@@ -57,8 +63,15 @@ public final class FireSmoke {
 	/** How long a puff lasts (ticks), how fast it starts rising (blocks a tick), and how much it swells by the end (times). */
 	static final int LIFE_MIN = 300, LIFE_MAX = 460;
 	static final float RISE_MIN = 0.1F, RISE_MAX = 0.16F, SWELL = 1.6F;
+	/** Settling puffs (the low bank's plumes): puffs a tick for each fire in a cell, the most a tick for all of them
+	 * (normal, low-end), how fast they start rising, and how fast they spread out sideways by the end of their life (blocks
+	 * a tick; least, most; each covers about half that times its life). */
+	static final float SETTLE_PER_FIRE = 0.008F, SETTLE_BUDGET = 0.8F, SETTLE_LOW_BUDGET = 0.25F;
+	static final float SETTLE_RISE_MIN = 0.045F, SETTLE_RISE_MAX = 0.07F, SPREAD_MIN = 0.04F, SPREAD_MAX = 0.09F;
 	/** Its grey (by day) at the foot and the top, and how thick it is at the foot. */
 	static final float GREY_FOOT = 0.22F, GREY_TOP = 0.46F, ALPHA = 0.55F;
+	/** How lit from below by the flames a plume's puff and a ground bank's start out (0..1; {@link StormParticle#lit}). */
+	static final float PLUME_LIT = 0.6F, GROUND_LIT = 0.4F;
 	/** How fast it leans with the wind once aloft, as a share of the wind's own drift. */
 	static final float LEAN = 1.5F;
 	/** Smog: puffs a tick for each fire under it, and the most a tick for every pall together (normal, low-end). A pall's
@@ -70,6 +83,12 @@ public final class FireSmoke {
 	static final float PALL_SPREAD = 8.0F, PALL_SPREAD_BIG = 18.0F, PALL_DOWNWIND = 8.0F, PALL_DOWNWIND_BIG = 24.0F;
 	/** A smog puff's size (blocks) over a small and over a big fire; how much it swells. */
 	static final float PALL_SIZE_SMALL = 12.0F, PALL_SIZE_BIG = 28.0F, PALL_SWELL = 0.5F;
+	/** The low bank of smog: puffs a tick for each fire under it, the most a tick for all of them (normal, low-end), how
+	 * high over the highest flame it hangs (small fire, big, how much either way), and how far it spreads each way and
+	 * downwind (the high smog's widest, for every fire). Its puffs are the high smog's size, life and grey. */
+	static final float BANK_PER_FIRE = 0.003F, BANK_BUDGET = 0.15F, BANK_LOW_BUDGET = 0.05F;
+	static final float BANK_HEIGHT = 7.0F, BANK_HEIGHT_BIG = 11.0F, BANK_HEIGHT_SPREAD = 3.0F;
+	static final float BANK_SPREAD = PALL_SPREAD_BIG, BANK_DOWNWIND = PALL_DOWNWIND_BIG;
 	/** How long a smog puff lasts (ticks; over a big fire, and a small one's share of that), how fast it drifts as a share of
 	 * the wind, its grey by day (a big fire's is darker) and how thick it is. */
 	static final int PALL_LIFE_MIN = 1400, PALL_LIFE_MAX = 2200;
@@ -97,15 +116,20 @@ public final class FireSmoke {
 	static final int GROUND_LIFE_MIN = 160, GROUND_LIFE_MAX = 260;
 	static final float GROUND_RISE_MIN = 0.015F, GROUND_RISE_MAX = 0.035F, GROUND_SWELL = 0.9F;
 	static final float GROUND_GREY_FOOT = 0.05F, GROUND_GREY_TOP = 0.13F, GROUND_ALPHA = 0.8F;
+	/** Where a ground puff starts (Andy, 2026-11-24: "still too high, make it start just above ground level, not the
+	 * flames"): on the ground under the fire, not up at a burning canopy, and up to this much over it (blocks); the
+	 * deepest a column is walked down to find that ground. */
+	static final float GROUND_LIFT = 0.5F;
+	static final int GROUND_DEPTH = 48;
 	/** How often low-end mode is asked about (ticks). */
 	static final int LOW_CHECK = 40;
 
 	private static final class Cell {
 		/** Fires found, each worth the columns one sample stands for, cooling every tick. */
 		float tally;
-		/** The height of the last fire found in it, and the puffs (plume, smog) owed. */
+		/** The height of the last fire found in it, and the puffs owed (plume, settling). */
 		int top;
-		float carry;
+		float carry, settleCarry;
 
 		float fires() {
 			return this.tally * (1.0F - COOL);
@@ -115,7 +139,8 @@ public final class FireSmoke {
 	private static final Long2ObjectOpenHashMap<Cell> CELLS = new Long2ObjectOpenHashMap<>();
 	/** The large flames the server last told of, and the smog and far plume puffs owed to each (by where it is). */
 	private static List<FireSmog.Source> sources = List.of();
-	private static final Long2FloatOpenHashMap PALL_OWED = new Long2FloatOpenHashMap(), FAR_OWED = new Long2FloatOpenHashMap();
+	private static final Long2FloatOpenHashMap PALL_OWED = new Long2FloatOpenHashMap(), FAR_OWED = new Long2FloatOpenHashMap(),
+		BANK_OWED = new Long2FloatOpenHashMap();
 	private static boolean low;
 	private static int clock;
 
@@ -135,7 +160,7 @@ public final class FireSmoke {
 	/** The server's new list: what's owed to a fire no longer on it is dropped. */
 	private static void heard(List<FireSmog.Source> now) {
 		sources = now;
-		if (PALL_OWED.isEmpty() && FAR_OWED.isEmpty()) {
+		if (PALL_OWED.isEmpty() && FAR_OWED.isEmpty() && BANK_OWED.isEmpty()) {
 			return;
 		}
 		LongOpenHashSet keep = new LongOpenHashSet();
@@ -144,6 +169,7 @@ public final class FireSmoke {
 		}
 		PALL_OWED.keySet().removeIf(k -> !keep.contains(k));
 		FAR_OWED.keySet().removeIf(k -> !keep.contains(k));
+		BANK_OWED.keySet().removeIf(k -> !keep.contains(k));
 	}
 
 	static void tick(Minecraft minecraft, ClientLevel level, Vec3 eye, RandomSource random) {
@@ -192,14 +218,29 @@ public final class FireSmoke {
 			cell.top = top ? y : floor;
 			if (ground >= 1.0F && cell.fires() >= SMOKES_FROM && StormsClient.cloudSprites != null) {
 				float blaze = Mth.clamp(round(x >> CELL, z >> CELL) / BIG, 0.0F, 1.0F);
+				int foot = floorUnder(level, at, x, under ? floor : y, z);
 				for (int n = 0; n < GROUND_PER_FIRE && ground >= 1.0F; n++, ground -= 1.0F) {
-					smother(minecraft, level, random, x + random.nextDouble(), (under ? floor : y) + 0.3 + random.nextDouble(), z + random.nextDouble(), blaze);
+					smother(minecraft, level, random, x + random.nextDouble(), foot + GROUND_LIFT * random.nextDouble(), z + random.nextDouble(), blaze);
 				}
 			}
 		}
 	}
 
-	/** One puff of thick black smoke right over a flame at (x, y, z), in a blaze of {@code blaze} (0..1): it hardly rises,
+	/** The ground under a fire at (x, y, z): down through the leaves, logs, air and plants of a burning wood to the first
+	 * other block (or water), at most GROUND_DEPTH down. */
+	private static int floorUnder(ClientLevel level, BlockPos.MutableBlockPos at, int x, int y, int z) {
+		int bottom = Math.max(level.getMinY(), y - GROUND_DEPTH);
+		while (y > bottom) {
+			BlockState below = level.getBlockState(at.set(x, y - 1, z));
+			if (!below.getFluidState().isEmpty() || !below.isAir() && !below.canBeReplaced() && !below.is(BlockTags.LEAVES) && !below.is(BlockTags.LOGS) && !below.is(BlockTags.FIRE)) {
+				break;
+			}
+			y--;
+		}
+		return y;
+	}
+
+	/** One puff of thick black smoke at (x, y, z), on the ground under a flame, in a blaze of {@code blaze} (0..1): it hardly rises,
 	 * spreads and drifts with the wind, so a burning wood is hidden behind it even seen from outside. */
 	private static void smother(Minecraft minecraft, ClientLevel level, RandomSource random, double x, double y, double z, float blaze) {
 		float size = Mth.lerp(blaze, GROUND_SIZE_SMALL, GROUND_SIZE_BIG) * (0.8F + random.nextFloat() * 0.4F);
@@ -207,7 +248,7 @@ public final class FireSmoke {
 		float rise = Mth.lerp(random.nextFloat(), GROUND_RISE_MIN, GROUND_RISE_MAX);
 		double wx = Math.cos(Storms.clientWindAngle) * Storms.clientWindSpeed, wz = Math.sin(Storms.clientWindAngle) * Storms.clientWindSpeed;
 		minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.SMOKE, 0, size, life,
-			GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_ALPHA).smoke(rise, wx, wz, GROUND_SWELL, GROUND_GREY_FOOT, GROUND_GREY_TOP));
+			GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_ALPHA).smoke(rise, wx, wz, GROUND_SWELL, GROUND_GREY_FOOT, GROUND_GREY_TOP).lit(GROUND_LIT));
 	}
 
 	/** Every cell cools, the cold or far ones are forgotten; how many fires are near the camera (the nearer the more). */
@@ -246,6 +287,7 @@ public final class FireSmoke {
 			return;
 		}
 		float share = Math.min(1.0F, (low ? LOW_BUDGET : BUDGET) / wanted);
+		float settleShare = Math.min(1.0F, (low ? SETTLE_LOW_BUDGET : SETTLE_BUDGET) / (wanted / PUFFS_PER_FIRE * SETTLE_PER_FIRE));
 		double drift = Storms.clientWindSpeed * LEAN;
 		double wx = Math.cos(Storms.clientWindAngle) * drift, wz = Math.sin(Storms.clientWindAngle) * drift;
 		for (Long2ObjectMap.Entry<Cell> e : CELLS.long2ObjectEntrySet()) {
@@ -254,15 +296,21 @@ public final class FireSmoke {
 				continue;
 			}
 			cell.carry += cell.fires() * PUFFS_PER_FIRE * share;
-			int n = (int)cell.carry;
+			cell.settleCarry += cell.fires() * SETTLE_PER_FIRE * settleShare;
+			int n = (int)cell.carry, m = (int)cell.settleCarry;
 			cell.carry -= n;
-			if (n == 0) {
+			cell.settleCarry -= m;
+			if (n == 0 && m == 0) {
 				continue;
 			}
 			int gx = BlockPos.getX(e.getLongKey()), gz = BlockPos.getZ(e.getLongKey());
 			float blaze = Mth.clamp(round(gx, gz) / BIG, 0.0F, 1.0F);
 			for (int i = 0; i < n; i++) {
 				plume(minecraft, level, random, (gx << CELL) + random.nextDouble() * (1 << CELL), cell.top + 1.0 + random.nextDouble() * 2.0,
+					(gz << CELL) + random.nextDouble() * (1 << CELL), blaze, wx, wz);
+			}
+			for (int i = 0; i < m; i++) {
+				settle(minecraft, level, random, (gx << CELL) + random.nextDouble() * (1 << CELL), cell.top + 1.0 + random.nextDouble() * 2.0,
 					(gz << CELL) + random.nextDouble() * (1 << CELL), blaze, wx, wz);
 			}
 		}
@@ -274,7 +322,19 @@ public final class FireSmoke {
 		int life = Mth.nextInt(random, LIFE_MIN, LIFE_MAX);
 		float rise = Mth.lerp(random.nextFloat(), RISE_MIN, RISE_MAX) * (0.85F + 0.3F * blaze);
 		minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.SMOKE, 0, size, life,
-			GREY_FOOT, GREY_FOOT * 0.95F, GREY_FOOT * 0.92F, ALPHA).smoke(rise, wx, wz, SWELL, GREY_FOOT, GREY_TOP));
+			GREY_FOOT, GREY_FOOT * 0.95F, GREY_FOOT * 0.92F, ALPHA).smoke(rise, wx, wz, SWELL, GREY_FOOT, GREY_TOP).lit(PLUME_LIT));
+	}
+
+	/** One settling puff at (x, y, z), over a blaze of {@code blaze} (0..1): a plume puff that rises only a little and
+	 * spreads out sideways as it settles. */
+	private static void settle(Minecraft minecraft, ClientLevel level, RandomSource random, double x, double y, double z, float blaze, double wx, double wz) {
+		float size = Mth.lerp(blaze, SIZE_SMALL, SIZE_BIG) * (0.8F + random.nextFloat() * 0.4F);
+		int life = Mth.nextInt(random, LIFE_MIN, LIFE_MAX);
+		float rise = Mth.lerp(random.nextFloat(), SETTLE_RISE_MIN, SETTLE_RISE_MAX) * (0.85F + 0.3F * blaze);
+		float way = random.nextFloat() * Mth.TWO_PI, out = Mth.lerp(random.nextFloat(), SPREAD_MIN, SPREAD_MAX);
+		minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.SMOKE, 0, size, life,
+			GREY_FOOT, GREY_FOOT * 0.95F, GREY_FOOT * 0.92F, ALPHA).smoke(rise, wx, wz, SWELL, GREY_FOOT, GREY_TOP)
+			.spread(Mth.cos(way) * out, Mth.sin(way) * out).lit(PLUME_LIT));
 	}
 
 	/** Each large flame the server told of gathers its share of this tick's smog high above it; one further off than the
@@ -292,6 +352,7 @@ public final class FireSmoke {
 			}
 		}
 		float share = Math.min(1.0F, (low ? PALL_LOW_BUDGET : PALL_BUDGET) / wanted);
+		float bankShare = Math.min(1.0F, (low ? BANK_LOW_BUDGET : BANK_BUDGET) / (wanted / PALL_PER_FIRE * BANK_PER_FIRE));
 		float shareFar = wantedFar <= 0.0F ? 0.0F : Math.min(1.0F, (low ? FAR_LOW_BUDGET : FAR_BUDGET) / wantedFar);
 		double ca = Math.cos(Storms.clientWindAngle), sa = Math.sin(Storms.clientWindAngle);
 		double drift = Storms.clientWindSpeed * PALL_DRIFT, lean = Storms.clientWindSpeed * LEAN;
@@ -323,7 +384,26 @@ public final class FireSmoke {
 				minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.PALL, 0, size, life,
 					grey, grey * 0.97F, grey * 0.95F, PALL_ALPHA).pall(ca * drift, sa * drift, PALL_SWELL));
 			}
+			owed = BANK_OWED.get(key) + src.fires() * BANK_PER_FIRE * bankShare;
+			n = (int)owed;
+			BANK_OWED.put(key, owed - n);
+			for (int i = 0; i < n; i++) {
+				double down = random.nextDouble() * BANK_DOWNWIND;
+				double x = src.x() + (random.nextDouble() * 2.0 - 1.0) * BANK_SPREAD + ca * down;
+				double z = src.z() + (random.nextDouble() * 2.0 - 1.0) * BANK_SPREAD + sa * down;
+				double y = src.top() + Mth.lerp(blaze, BANK_HEIGHT, BANK_HEIGHT_BIG) + (random.nextDouble() * 2.0 - 1.0) * BANK_HEIGHT_SPREAD;
+				smog(minecraft, level, random, x, y, z, blaze, ca * drift, sa * drift);
+			}
 		}
+	}
+
+	/** One big, slow puff of smog at (x, y, z) over a blaze of {@code blaze} (0..1), drifting (dx, dz) a tick. */
+	private static void smog(Minecraft minecraft, ClientLevel level, RandomSource random, double x, double y, double z, float blaze, double dx, double dz) {
+		float size = Mth.lerp(blaze, PALL_SIZE_SMALL, PALL_SIZE_BIG) * (0.8F + random.nextFloat() * 0.4F);
+		int life = (int)(Mth.nextInt(random, PALL_LIFE_MIN, PALL_LIFE_MAX) * Mth.lerp(blaze, PALL_LIFE_SMALL, 1.0F));
+		float grey = Mth.lerp(blaze, PALL_GREY, PALL_GREY_BIG) * (0.9F + random.nextFloat() * 0.2F);
+		minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.PALL, 0, size, life,
+			grey, grey * 0.97F, grey * 0.95F, PALL_ALPHA).pall(dx, dz, PALL_SWELL));
 	}
 
 	private static double away2(FireSmog.Source src, Vec3 eye) {

@@ -436,7 +436,8 @@ public final class Dismember {
 				return false;
 			}
 			attacker = striker;
-			scale = scale(target, BLADE_CHANCE);
+			// a deeper blade (diamond, netherite, Sharpness) takes a limb off likelier, a shallow one (wood, stone) seldomer
+			scale = scale(target, BLADE_CHANCE) * com.jaymospowers.core.wounds.CutDepth.severScale(target.level(), striker.getMainHandItem());
 		}
 		// (0.18.87) Andy: rubber limbs come off easier (they grow back with a swallow, Kingdoms' RubberFolk)
 		if (target.entityTags().contains(RUBBER_TAG)) {
@@ -828,6 +829,18 @@ public final class Dismember {
 		return lethalSever(target, lethalPart(target, source, landed), source);
 	}
 
+	/**
+	 * Cuts that added up on one limb ({@code CutTotals}) tear {@code part} off, by the same rules as any severing: a body
+	 * that can lose parts, a player only while downed, never the head. True if it came off.
+	 */
+	public static boolean tearOff(LivingEntity target, int part, @Nullable LivingEntity by) {
+		if (part == HEAD || !canLoseParts(target) || (missing(target) & part) != 0
+			|| target instanceof Player p && (p.isCreative() || p.isSpectator() || !Downed.isDowned(p))) {
+			return false;
+		}
+		return sever(target, part, by);
+	}
+
 	/** Takes {@code part} off {@code target} (if it still has it), with everything that follows. True if it came off. */
 	public static boolean sever(LivingEntity target, int part, @Nullable LivingEntity by) {
 		return lose(target, part, by, false, null, false);
@@ -978,7 +991,16 @@ public final class Dismember {
 		} else {
 			Vec3 from = blast != null ? blast : by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
 			SeveredPart.spawn(level, target, part, from);
-			if (!BladeBlood.bleeds(target)) {
+			if (target.getType().builtInRegistryHolder().is(BladeBlood.METAL_BODIES)) {
+				// a machine (the future's androids) loses the part in sparks and torn metal, nothing bleeds
+				Vec3 at = stump(target, part);
+				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, quiet ? 8 : 24, 0.15, 0.15, 0.15, 0.25);
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.IRON_BLOCK.defaultBlockState()), at.x, at.y, at.z,
+					quiet ? 6 : 16, 0.15, 0.15, 0.15, 0.2);
+				if (!quiet) {
+					level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_GOLEM_DAMAGE, SoundSource.HOSTILE, 1.0F, 1.3F);
+				}
+			} else if (!BladeBlood.bleeds(target)) {
 				// (0.21.50) Andy: "skeletons should not bleed": a body with no blood loses the part in chips of bone, and no stump bleeds
 				Vec3 at = stump(target, part);
 				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z,
@@ -1018,13 +1040,19 @@ public final class Dismember {
 				// (0.17.183) Will's Last Look: the weaker who saw it run (Kingdoms)
 				com.jaymospowers.core.wounds.WillSkill.beheaded(by, target);
 			}
-			case RIGHT_ARM, LEFT_ARM -> emptyHand(level, target, part);
+			case RIGHT_ARM, LEFT_ARM -> {
+				emptyHand(level, target, part);
+				// a Rig's Arms (worn in the leggings slot) are plate on both arms, one piece: it comes away with the first arm
+				if (rigArms(target)) {
+					dropArmour(level, target, EquipmentSlot.LEGS);
+				}
+			}
 			default -> {
 				legs(target, mask);
 				// (Andy: leg armour falls with the leg) boots are one item for both feet: they go with the first leg; the
-				// leggings go with the second.
+				// leggings go with the second (not a Rig's Arms, which go with an arm).
 				dropArmour(level, target, EquipmentSlot.FEET);
-				if ((mask & (RIGHT_LEG | LEFT_LEG)) == (RIGHT_LEG | LEFT_LEG)) {
+				if ((mask & (RIGHT_LEG | LEFT_LEG)) == (RIGHT_LEG | LEFT_LEG) && !rigArms(target)) {
 					dropArmour(level, target, EquipmentSlot.LEGS);
 				}
 			}
@@ -1134,6 +1162,11 @@ public final class Dismember {
 		return target.getMainArm() == side ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
 	}
 
+	/** Whether {@code target}'s leggings slot holds a Rig's Arms (arm plate, not leg armour). */
+	private static boolean rigArms(LivingEntity target) {
+		return com.jaymospowers.rig.Rig.ARMS != null && target.getItemBySlot(EquipmentSlot.LEGS).is(com.jaymospowers.rig.Rig.ARMS);
+	}
+
 	/** What {@code target} wears in {@code slot} comes off and drops (the way a severed head's helmet does). */
 	private static void dropArmour(ServerLevel level, LivingEntity target, EquipmentSlot slot) {
 		ItemStack worn = target.getItemBySlot(slot);
@@ -1172,6 +1205,9 @@ public final class Dismember {
 
 	/** (Andy: armour guards against severing) What's left of the chance to sever {@code part} after the armour over it: 1 bare. */
 	public static float armourGuard(LivingEntity target, int part) {
+		if (part == HEAD && ArmourFace.skipped(target)) {
+			return 1.0F;
+		}
 		return 1.0F - (float) Math.min(ARMOUR_GUARD_MAX, armourOn(target, part) * ARMOUR_GUARD);
 	}
 

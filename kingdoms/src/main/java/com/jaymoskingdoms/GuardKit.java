@@ -51,7 +51,9 @@ import org.jspecify.annotations.Nullable;
  * emeralds from the treasury, which keeps {@link #TREASURY_KEPT}. What can't be paid for he goes without, and wears the
  * next piece down. At the bottom is leather and mail (Andy: "the basic fallback should be leather and mail based and
  * all on the harness"): mail if it's paid for, the levy's leather for nothing. Over it every guard wears the harness: a
- * quilted coat at the least, the tabard in the realm's colours, and what his rank may have bought.
+ * quilted coat at the least (a leather jack on the warm lands' light lean), the tabard in the realm's colours, and what
+ * his rank may have bought. The land leans each man's kit ({@link #WARM}): mail and leather in the warm, quilting and
+ * plate in the north, and now and then the other.
  * <p>
  * What a guard was issued is kept on him ({@link #KIT}), so it's paid once and put on again from there (MCA's guards
  * dress for duty many times a day). Once a day ({@link #REVIEW}) he is looked over and better bought if there's money
@@ -112,6 +114,16 @@ public final class GuardKit {
 	/** The kinds of settlement. */
 	static final int KINGDOM = 1, FIEF = 2, VILLAGE = 4, HAVEN = 8;
 	static final Set<Climate> DRY = EnumSet.of(Climate.SAVANNA, Climate.DESERT, Climate.BADLANDS), COLD = EnumSet.of(Climate.TAIGA, Climate.SNOWY);
+	/**
+	 * (Andy, 2026-11-26: "more mail and leather in the warm, quilting and plate in the north. Either can wear either too
+	 * its just rarer and more situation specific, like northern archers in leather, and southern legionnairres in plate")
+	 * The warm lands lean {@link #LIGHT}, the north {@link #HEAVY}; the plains and the cherry groves neither. A guard goes
+	 * against his land's lean at {@link #AGAINST}, a northern archer at {@link #NORTH_ARCHER}, a southern soldier or
+	 * knight (the legionnaire) at {@link #SOUTH_LEGION}.
+	 */
+	static final Set<Climate> WARM = EnumSet.of(Climate.SAVANNA, Climate.DESERT, Climate.BADLANDS, Climate.JUNGLE, Climate.SWAMP);
+	static final float AGAINST = 0.15F, NORTH_ARCHER = 0.5F, SOUTH_LEGION = 0.35F;
+	static final int EVEN = 0, LIGHT = 1, HEAVY = 2;
 
 	/** A kit's places: the four armour slots, the hands, then the harness. */
 	private static final EquipmentSlot[] ARMOUR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
@@ -155,7 +167,7 @@ public final class GuardKit {
 
 	/** One guard's settlement, as his kit is chosen for it. */
 	private record Ctx(ServerLevel level, Faction f, int who, Climate land, int kind, boolean templar, boolean grim, GreatWars.@Nullable Creed creed,
-		boolean ironRich, int field, long hash, @Nullable String tag, String finish) {
+		boolean ironRich, int field, long hash, int helmCut, @Nullable String tag, String finish, int lean) {
 		boolean is(int mask) {
 			return (this.who & mask) != 0;
 		}
@@ -170,6 +182,20 @@ public final class GuardKit {
 
 		boolean realm() {
 			return this.kind(KINGDOM | FIEF);
+		}
+
+		/** Whether he goes in mail and leather (light) or in quilting and plate (heavy). */
+		boolean light() {
+			return this.lean == LIGHT;
+		}
+
+		boolean heavy() {
+			return this.lean == HEAVY;
+		}
+
+		/** Whether plate is his to wear: not on the light lean, but for a veteran's or leader's, which their rank gives them. */
+		boolean plate() {
+			return !this.light() || this.is(VET | LEAD);
 		}
 	}
 
@@ -253,8 +279,20 @@ public final class GuardKit {
 		long h = f.id() * 0x9E3779B97F4A7C15L + 0x632BE59BD9B4E019L;
 		h = (h ^ h >>> 31) * 0xBF58476D1CE4E5B9L;
 		return new Ctx(level, f, who, land, kind, realm && FrontierWear.templar(server, f), hold != null && hold.isGrim(),
-			realm ? GreatWars.creed(server, f) : null, IronVeins.near(level, f), Outfits.rgb(Outfits.heraldry(f, server).field()), h ^ h >>> 29,
-			realm ? HeraldryWear.realmTag(server, f) : null, realm ? HeraldryWear.knightFinish(server, f, land) : "");
+			realm ? GreatWars.creed(server, f) : null, IronVeins.near(level, f), Outfits.rgb(Outfits.heraldry(f, server).field()), h ^ h >>> 29, Math.floorMod(m.getUUID().hashCode(), 3),
+			realm ? HeraldryWear.realmTag(server, f) : null, realm ? HeraldryWear.knightFinish(server, f, land) : "", lean(who, land, m));
+	}
+
+	/** {@code m}'s lean in {@code land}: its land's ({@link #WARM} light, {@link #COLD} heavy), or now and then the other. */
+	private static int lean(int who, Climate land, Mob m) {
+		boolean warm = WARM.contains(land);
+		if (!warm && !COLD.contains(land)) {
+			return EVEN;
+		}
+		long h = m.getUUID().getLeastSignificantBits() * 0x9E3779B97F4A7C15L;
+		float roll = Math.floorMod(h ^ h >>> 32, 1000L) / 1000.0F;
+		float against = warm ? ((who & (SOL | KN)) != 0 ? SOUTH_LEGION : AGAINST) : (who & ARCH) != 0 ? NORTH_ARCHER : AGAINST;
+		return (roll < against) == warm ? HEAVY : LIGHT;
 	}
 
 	// ---- putting it on -------------------------------------------------------------------------------------------------
@@ -290,7 +328,8 @@ public final class GuardKit {
 		if (f == null) {
 			return stack;
 		}
-		if (kit == null || kit.realm() != f.id()) {
+		// (a kit with Templar pieces its wearer may not wear, from before that plate was kept to melee guards, is made again)
+		if (kit == null || kit.realm() != f.id() || unfit(m, kit)) {
 			Ctx c = ctx(level, m, f);
 			if (c == null) {
 				return stack;
@@ -349,7 +388,9 @@ public final class GuardKit {
 		given[MAINHAND] = m.getMainHandItem().copy();
 		given[OFFHAND] = m.getOffhandItem().copy();
 		for (Harness.Slot slot : Harness.Slot.values()) {
-			given[HARNESS + slot.ordinal()] = Harness.get(m, slot).copy();
+			ItemStack worn = Harness.get(m, slot);
+			// (what the cold put on them, HearthFolk, isn't issued kit)
+			given[HARNESS + slot.ordinal()] = HearthFolk.marked(worn) ? ItemStack.EMPTY : worn.copy();
 		}
 		return given;
 	}
@@ -382,6 +423,15 @@ public final class GuardKit {
 		harness(m, kit);
 	}
 
+	/** A piece of harness was taken off {@code m} (a loot screen): what he was issued for that place goes with it, so he is not paid for it again or put back in it. */
+	static void forget(LivingEntity m, Harness.Slot place) {
+		Kit kit = m.getAttached(KIT);
+		if (kit != null) {
+			m.setAttached(KIT, kit.with(HARNESS + place.ordinal(), ItemStack.EMPTY));
+		}
+	}
+
+	/** Puts the harness {@code kit} holds on {@code m} (the pieces his kit still has: a place someone took from him is bare, {@link Harness#dress}). */
 	private static void harness(Mob m, Kit kit) {
 		ItemStack[] pieces = new ItemStack[Harness.SLOTS];
 		for (Harness.Slot slot : Harness.Slot.values()) {
@@ -447,6 +497,14 @@ public final class GuardKit {
 	private static Kit kit(Ctx c, Mob m, ItemStack[] given) {
 		Kit had = m.getAttached(KIT);
 		boolean keep = had != null && had.realm() == c.f().id() && had.who() == c.who();
+		// A new post is a new issue, paid for from the stores and treasury as ever: his first kit, or the kit of the settlement he
+		// is enlisted to now. A change of who he is in the same one (a gunner now or no longer, an archer) is not, as it can be
+		// brought about again and again (a musket taken, a musket given), so it never makes good what was taken from him. (A
+		// guard's rank is fixed by his own id here, and a recruit's kit is not his settlement's.) Else the places someone took a
+		// piece from stay bare, so the daily look-over never buys the same piece twice.
+		if (had == null || had.realm() != c.f().id()) {
+			Harness.issued(m);
+		}
 		if (had != null && !keep && had.realm() == c.f().id()) {
 			for (ItemStack piece : had.pieces()) {
 				if (!piece.isEmpty()) {
@@ -469,7 +527,7 @@ public final class GuardKit {
 				out.set(i, choose(c, shields(c, given[i]), held, given[i], null, null));
 			} else {
 				Harness.Slot slot = Harness.Slot.values()[i - HARNESS];
-				out.set(i, choose(c, harness(c, slot), held, given[i], null, cloth(c, slot)));
+				out.set(i, Harness.wasTaken(m, slot) ? ItemStack.EMPTY : choose(c, harness(c, slot), held, given[i], null, cloth(c, slot)));
 			}
 		}
 		Kit kit = new Kit(c.f().id(), c.who(), c.level().getGameTime(), List.copyOf(out));
@@ -663,6 +721,16 @@ public final class GuardKit {
 		return stack;
 	}
 
+	/** {@code kit} holds a Templar piece {@code m} may not wear ({@link FrontierWear#plateFit}). */
+	private static boolean unfit(Mob m, Kit kit) {
+		for (int i = 0; i < TYPES.length && i < kit.pieces().size(); i++) {
+			if (FrontierWear.guardsOnly(FrontierArmour.setOf(kit.pieces().get(i))) && !FrontierWear.plateFit(m, TYPES[i].getSlot())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** {@code item}, or what's {@code given} if it's the same (so the trim and colour it was put on with stay). */
 	private static ItemStack plain(ItemStack given, Item item) {
 		return given.is(item) ? given.copy() : new ItemStack(item);
@@ -673,7 +741,15 @@ public final class GuardKit {
 		List<Option> out = new ArrayList<>();
 		ArmorType type = TYPES[i];
 		// whole sets: the Templars', the gunners' harness, the land's champions', the villages' settler gear
-		if (c.is(SOL | KN | VET | LEAD | ARCH) && c.templar()) {
+		// (Andy: "only melee guards should get this plate, its too heavy for gunners or archers")
+		if (c.is(SOL | KN | VET | LEAD) && c.templar()) {
+			if (c.grim()) {
+				add(out, FrontierArmour.stack("templar_steel", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i] + STEEL_EXTRA);
+			}
+			add(out, FrontierArmour.stack("templar", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i]);
+		}
+		// (a Templar realm's gunner may wear its tassets and sabatons, never its surcoat or great helm)
+		if (c.is(GUN) && c.templar() && i >= 2) {
 			if (c.grim()) {
 				add(out, FrontierArmour.stack("templar_steel", type), IRON, INGOTS[i], FrontierWear.TEMPLAR_PRICE[i] + STEEL_EXTRA);
 			}
@@ -728,11 +804,12 @@ public final class GuardKit {
 				if (c.is(KN | VET | LEAD) && c.in(COLD)) {
 					add(out, HeraldryArmour.stack("fur_lined_cuirass", c.finish()), IRON, CUIRASS, CREED_CUIRASS);
 				}
-				if (c.is(VET | LEAD) && c.realm() && c.ironRich()) {
+				// (on the heavy lean a soldier's too: the north's plate, the south's legionnaire)
+				if ((c.is(VET | LEAD) || c.heavy() && c.is(SOL | KN)) && c.realm() && c.ironRich()) {
 					add(out, HeraldryArmour.stack("plate_cuirass", c.finish()), IRON, CUIRASS, CUIRASS);
 				}
 				// a poorer realm sews its plates inside a coat in its colour
-				if (c.is(SOL | KN | VET | LEAD) && c.realm() && !c.ironRich()) {
+				if (c.is(SOL | KN | VET | LEAD) && c.plate() && c.realm() && !c.ironRich()) {
 					add(out, dyed(HeraldryArmour.stack("coat_of_plates"), c.field()), IRON, COAT_OF_PLATES, COAT_OF_PLATES);
 				}
 				if (c.is(SOL | KN | VET) && c.land() == Climate.CHERRY) {
@@ -741,7 +818,7 @@ public final class GuardKit {
 				if (c.is(SOL | KN) && (c.land() == Climate.SAVANNA || c.land() == Climate.DESERT)) {
 					add(out, HeraldryArmour.stack("bronze_armor"), COPPER, INGOTS[1], LAND_CHEST);
 				}
-				if (c.is(KN | VET | LEAD)) {
+				if (c.is(KN | VET | LEAD) && c.plate() || c.heavy() && c.is(SOL)) {
 					add(out, plain(given, Items.IRON_CHESTPLATE), IRON, INGOTS[1], IRON_PRICE[1]);
 				}
 				if (c.is(MIL | SOL | ARCH) && (c.land() == Climate.JUNGLE || c.land() == Climate.DESERT || c.land() == Climate.SAVANNA)) {
@@ -763,15 +840,17 @@ public final class GuardKit {
 		Item[] iron = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS};
 		Item[] copper = {Items.COPPER_HELMET, Items.COPPER_CHESTPLATE, Items.COPPER_LEGGINGS, Items.COPPER_BOOTS};
 		Item[] mail = {Items.CHAINMAIL_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.CHAINMAIL_LEGGINGS, Items.CHAINMAIL_BOOTS};
-		if (i != 1 && c.is(KN | VET | LEAD)) {
+		if (i != 1 && (c.is(KN | VET | LEAD) && c.plate() || c.heavy() && c.is(SOL))) {
 			add(out, plain(given, iron[i]), IRON, INGOTS[i], IRON_PRICE[i]);
 		}
 		// bronze where the realm has no iron, in the dry lands
 		if (c.is(MIL | SOL | ARCH) && c.in(DRY) && !c.ironRich()) {
 			add(out, plain(given, copper[i]), COPPER, INGOTS[i], BRONZE_PRICE[i]);
 		}
-		// and mail, the floor's paid half, for everyone
-		add(out, plain(given, mail[i]), IRON, MAIL_INGOTS[i], MAIL_PRICE[i]);
+		// and mail, the floor's paid half, for everyone but an archer on the light lean, who goes in leather
+		if (!(c.light() && c.is(ARCH))) {
+			add(out, plain(given, mail[i]), IRON, MAIL_INGOTS[i], MAIL_PRICE[i]);
+		}
 		return out;
 	}
 
@@ -803,6 +882,17 @@ public final class GuardKit {
 	 * of the rest, the realm's own shape for its veterans and leaders. The frog-mouth helm is for the joust, never issued.
 	 */
 	private static @Nullable String helm(Ctx c) {
+		if (c.realm() && c.is(MIL | SOL | ARCH | GUN)) {
+			if (c.helmCut() == 0) {
+				return HeraldryWear.kettle(c.f());
+			}
+			if (c.helmCut() == 1) {
+				return c.in(COLD) ? "spectacle_helm" : c.land() == Climate.DESERT ? "turban_helm" : "nasal_helm";
+			}
+			if (c.is(ARCH)) return "archers_sallet";
+			if (c.is(MIL)) return "skullcap";
+			return c.in(COLD) ? "gallowglass_helm" : c.in(DRY) ? "morion" : "lobster_tail";
+		}
 		GreatWars.Creed creed = c.creed();
 		List<String> by = new ArrayList<>();
 		if (c.is(SOL | KN) && creed == GreatWars.Creed.COIN) {
@@ -826,9 +916,10 @@ public final class GuardKit {
 			}
 		}
 		if (by.isEmpty()) {
-			// (a kingdom's soldiers too: its own of the kettle hat and the lobster tail, so not every realm's are alike)
+			// (a kingdom's soldiers too: its own of the kettle hat and the lobster tail, so not every realm's are alike; the
+			// kettle in the realm's own cut, HeraldryWear.KETTLE_CUTS)
 			if (c.is(MIL | SOL | ARCH | GUN) && c.kind(VILLAGE | HAVEN | FIEF) || c.is(SOL) && c.kind(KINGDOM)) {
-				by.add("kettle_hat");
+				by.add(HeraldryWear.kettle(c.f()));
 			}
 			if (c.is(KN | VET)) {
 				by.add("sallet");
@@ -868,12 +959,16 @@ public final class GuardKit {
 				if (c.is(KN | VET | LEAD)) {
 					add(out, dyed(HeraldryArmour.stack("arming_doublet"), c.field()), WOOL, CLOTH_WOOL, HeraldryWear.DOUBLET_PRICE);
 				}
+				if (c.light() && c.is(MIL | SOL | ARCH | GUN)) {
+					add(out, HeraldryArmour.stack("leather_jack"), LEATHER, CLOTH_WOOL, CLOTH_PART);
+				}
 			}
 			case MAIL -> {
-				if (c.is(SOL | KN | VET | LEAD)) {
+				// the light lean's mail for the ranks too (an archer in leather aside), the heavy lean's quilting under plate
+				if (c.light() ? !c.is(ARCH) : c.is(KN | VET | LEAD) || !c.heavy() && c.is(SOL)) {
 					add(out, HeraldryArmour.stack("mail_haubergeon"), IRON, PLATE_INGOTS, PLATE_PART);
 				}
-				if (c.is(MIL | SOL | ARCH | GUN)) {
+				if (c.is(MIL | SOL | ARCH | GUN) && !c.light()) {
 					add(out, HeraldryArmour.stack("quilted_coat"), WOOL, CLOTH_WOOL + 1, CLOTH_PART);
 				}
 			}
@@ -910,11 +1005,14 @@ public final class GuardKit {
 				if (c.is(KN | VET | LEAD) && c.in(COLD)) {
 					add(out, HeraldryArmour.stack("fur_lined_gauntlets", fin), IRON, PLATE_INGOTS - 1, PLATE_PART - 1);
 				}
-				if (c.is(KN | VET | LEAD)) {
+				if (c.is(KN | VET | LEAD) && c.plate() || c.heavy() && c.is(SOL)) {
 					add(out, HeraldryArmour.stack("plate_gauntlets", fin), IRON, PLATE_INGOTS - 1, PLATE_PART - 1);
 				}
 			}
 			case THIGHS -> {
+				if (c.light() && c.is(MIL | SOL | ARCH)) {
+					add(out, HeraldryArmour.stack("leather_cuisses"), LEATHER, CLOTH_WOOL, CLOTH_PART);
+				}
 				if (c.is(VET | LEAD) && c.in(COLD)) {
 					add(out, HeraldryArmour.stack("fur_lined_cuisses", fin), IRON, PLATE_INGOTS + 1, PLATE_PART + 1);
 				}
@@ -926,7 +1024,7 @@ public final class GuardKit {
 				if (c.is(KN | VET | LEAD) && c.in(COLD)) {
 					add(out, HeraldryArmour.stack("fur_lined_greaves", fin), IRON, PLATE_INGOTS, PLATE_PART);
 				}
-				if (c.is(KN | VET | LEAD)) {
+				if (c.is(KN | VET | LEAD) && c.plate() || c.heavy() && c.is(SOL)) {
 					add(out, HeraldryArmour.stack("plate_greaves", fin), IRON, PLATE_INGOTS, PLATE_PART);
 				}
 			}
@@ -956,14 +1054,16 @@ public final class GuardKit {
 	}
 
 	/**
-	 * The harness's free floor: a quilted coat for everyone, and (but for a gunner's lamp) the tabard in the realm's colours;
+	 * The harness's free floor: a quilted coat for everyone (a leather jack on the light lean), and (but for a gunner's lamp) the tabard in the realm's colours;
 	 * and in a realm the levy's cloth its livery gives ({@link Liveries}): a hood in its colour (fur in the cold), leather
 	 * tassets, padded cuisses.
 	 */
 	private static @Nullable ItemStack cloth(Ctx c, Harness.Slot slot) {
 		int levy = c.realm() ? Liveries.cloth(Liveries.of(c.level().getServer(), c.f())) : 0;
 		return switch (slot) {
-			case MAIL -> HeraldryArmour.stack("quilted_coat");
+			// (the light lean's floor is the leather jack beneath, not quilting)
+			case MAIL -> c.light() ? null : HeraldryArmour.stack("quilted_coat");
+			case PADDING -> c.light() ? HeraldryArmour.stack("leather_jack") : null;
 			case OVER -> c.is(GUN) ? null : HeraldryWear.withArms(dyed(HeraldryArmour.stack("tabard"), c.field()), c.level().getServer(), c.f());
 			case HOOD -> (levy & Liveries.HOOD) == 0 ? null : c.in(COLD) ? HeraldryArmour.stack("fur_hood") : dyed(HeraldryArmour.stack("hood"), c.field());
 			case WAIST -> (levy & Liveries.TASSETS) == 0 ? null : HeraldryArmour.stack("leather_tassets");

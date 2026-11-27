@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:torch",
+    "minecraft:soul_torch",
+    "minecraft:lantern",
+    "minecraft:soul_lantern",
+    {
+      "id": "minecraft:copper_torch",
+      "required": false
+    },
+    {
+      "id": "minecraft:copper_lantern",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:guttering_lantern",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:guttering_soul_lantern",
+      "required": false
+    }
+  ]
+}

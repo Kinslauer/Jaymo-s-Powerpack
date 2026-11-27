@@ -16,6 +16,8 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 /** The bauble screen, the inventory tab that opens it, and the Baubles key (unbound by default). */
 public final class BaublesClient {
 	private static KeyMapping key;
+	/** (Vanilla+) The back slot's swap key, unbound by default. */
+	private static KeyMapping backKey;
 
 	private BaublesClient() {
 	}
@@ -28,12 +30,21 @@ public final class BaublesClient {
 		BondsClient.init();
 		// (0.21.37) every other worn bauble drawn on the body
 		WornLooks.init();
+		// (Village mods patch 5) the trade hats, drawn on the head with their own models
+		TradeHatLayer.init();
 		// (Artifacts) the Artifacts baubles' moves
 		ArtifactBaublesClient.init();
 		BaublesTab.init();
 		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.baubles", InputConstants.UNKNOWN.getType(),
 			InputConstants.UNKNOWN.getValue(), JaymosPowersClient.CATEGORY));
+		backKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.back_slot", InputConstants.UNKNOWN.getType(),
+			InputConstants.UNKNOWN.getValue(), JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			while (backKey.consumeClick()) {
+				if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(com.jaymospowers.baubles.BackSlot.Swap.TYPE)) {
+					ClientPlayNetworking.send(new com.jaymospowers.baubles.BackSlot.Swap());
+				}
+			}
 			while (key.consumeClick()) {
 				if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(BaublesNet.Open.TYPE)) {
 					ClientPlayNetworking.send(new BaublesNet.Open());

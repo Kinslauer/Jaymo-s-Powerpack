@@ -576,6 +576,8 @@ public final class ZFighterPatrol {
 	/** A pod nobody can take (0.18.49: a complete pod entity, locked by {@link #POD_TAG}). */
 	static PodEntity pod(ServerLevel level, Vec3 at) {
 		PodEntity pod = PodEntity.spawn(level, at, true, ZFighterSpace.MAX_FUEL);
+		// a Patrol keel has every socket
+		pod.setSockets(com.jaymospowers.power.zfighter.pod.PodModules.MOST_SOCKETS);
 		pod.addTag(POD_TAG);
 		return pod;
 	}
@@ -921,6 +923,12 @@ public final class ZFighterPatrol {
 					ZFighterPatrolRelief.of(player).done()),
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		}
+		// a pinch of stardust for one line of hint about the sky
+		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.stardust", com.jaymospowers.power.zfighter.pod.PodStardust.has(player), () -> {
+			Component hint = com.jaymospowers.power.zfighter.pod.PodStardust.hint(player);
+			ZFighterNpcs.ask(player, man, hint == null ? Component.translatable("talk.jaymospowers.stardust.none") : hint,
+				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
+		}));
 		ZFighterNpcs.ask(player, man, words, options);
 	}
 
@@ -966,7 +974,8 @@ public final class ZFighterPatrol {
 		player.setAttached(MEMBER, new Member(0, 0L));
 		ServerLevel level = player.level();
 		// (0.18.49) a pod is no longer an item: a complete one, full of fuel, is set down beside the new officer
-		PodEntity.spawn(level, ZFighterPodTrip.roomFor(level, player.blockPosition()), true, ZFighterSpace.MAX_FUEL);
+		PodEntity.spawn(level, ZFighterPodTrip.roomFor(level, player.blockPosition()), true, ZFighterSpace.MAX_FUEL)
+			.setSockets(com.jaymospowers.power.zfighter.pod.PodModules.MOST_SOCKETS);
 		ZFighterSagas.give(player, new ItemStack(LICENSE));
 		// (0.18.53) and the chart of Rustfall, where the Patrol's work is
 		ZFighterSagas.give(player, com.jaymospowers.power.zfighter.sky.Charts.stack(ZFighterSpace.RUSTFALL));
@@ -1008,8 +1017,16 @@ public final class ZFighterPatrol {
 	/** Down on a far world ({@code ZFighterSpace.arrived}): a licensed officer may find a warrant out there. */
 	static void arrived(ServerPlayer player, ZFighterSpace.@Nullable Dest dest) {
 		PatrolLaw.arrived(player);
+		issue(player, dest);
+	}
+
+	/** What {@link #issue} came to. */
+	static final int ISSUED = 0, NO_LICENSE = 1, HOLDING = 2, NOTHING = 3;
+
+	/** A licensed officer on {@code dest} is given a warrant if none is held, none was given for this world a day ago, and a rogue can be found. */
+	private static int issue(ServerPlayer player, ZFighterSpace.@Nullable Dest dest) {
 		if (dest == null || !licensed(player)) {
-			return;
+			return NO_LICENSE;
 		}
 		int planet = -1;
 		for (int i = 0; i < ZFighterSpace.DESTS.length; i++) {
@@ -1018,28 +1035,37 @@ public final class ZFighterPatrol {
 			}
 		}
 		if (planet < 0 || planet == ZFighterSpace.FUTURE) {
-			return;
+			return NOTHING;
 		}
 		for (Warrant w : WARRANTS) {
 			if (w.owner().equals(player.getUUID())) {
-				return;
+				return HOLDING;
 			}
 		}
 		ServerLevel level = player.level();
 		String key = player.getUUID() + "|" + planet;
 		long now = level.getGameTime();
 		if (now < NEXT_WARRANT.getOrDefault(key, 0L)) {
-			return;
+			return NOTHING;
 		}
 		ZFighterRogue criminal = criminal(level, player, dest);
 		if (criminal == null) {
-			return;
+			return NOTHING;
 		}
 		NEXT_WARRANT.put(key, now + WARRANT_GAP);
 		WARRANTS.add(new Warrant(player.getUUID(), criminal.getUUID(), level.dimension(), planet));
 		int rank = rank(player, player.getAttached(MEMBER).arrests());
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.warrant", criminal.getDisplayName(),
 			Component.translatable("space.jaymospowers.dest." + dest.key()), KingdomsMoney.text(player, KingdomsMoney.worth(bounty(rank)))).withStyle(ChatFormatting.GOLD));
+		return ISSUED;
+	}
+
+	/** (Patch 9, tr_patrol) The warrant board of a Patrol post: an officer asks for the day's warrant on the world below, and is told why not. */
+	public static void postWarrant(ServerPlayer player) {
+		int result = issue(player, ZFighterSpace.here(player.level()));
+		if (result != ISSUED) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.patrol.post_warrant." + result).withStyle(ChatFormatting.GRAY));
+		}
 	}
 
 	private static int bounty(int rank) {

@@ -58,6 +58,14 @@ public final class Orcs {
 	static final double SLAM_TRIGGER = 3.5, SLAM_RADIUS = 5.0, SLAM_THROW = 1.3;
 	static final float SLAM_DAMAGE = 8.0F;
 	static final int SLAM_COOLDOWN = 20 * 8;
+	/**
+	 * A ranger takes up the crossbow (the flatter, longer shot) for a foe past the bow's distance band, and the bow again for one inside
+	 * the crossbow's: the ends of {@link WeaponSense}'s bands, so the weapon and the range it keeps agree.
+	 */
+	static final double RANGER_CROSSBOW_FROM = WeaponSense.Arm.BOW.most, RANGER_BOW_WITHIN = WeaponSense.Arm.CROSSBOW.least;
+	/** A grunt with a foe at least this far off charges: fast for this long (ticks). */
+	static final double CHARGE_FROM = 7.0;
+	static final int CHARGE_TICKS = 20 * 3;
 	/** One grunt in this many wears a helm; one in this many a mail shirt. */
 	static final int HELM_ONE_IN = 3, MAIL_ONE_IN = 4;
 	/** While fighting, a grunt bellows a war cry about once in this many ticks. */
@@ -113,7 +121,7 @@ public final class Orcs {
 			folk.getAttribute(Attributes.SCALE).setBaseValue(WARCHIEF_SCALE);
 			folk.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(WARCHIEF_KNOCKBACK_RESIST);
 			folk.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(WARCHIEF_TOUGHNESS);
-			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_AXE));
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.MACE));
 			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
 			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.CHAINMAIL_CHESTPLATE));
 			folk.setItemSlot(EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, BLOOD_HIDE));
@@ -183,7 +191,8 @@ public final class Orcs {
 	/** (0.7.490) What an orc of camp {@code camp} attacks on sight: {@link #prey(LivingEntity)}, and the folk of a camp it is raiding or being raided by. */
 	static boolean prey(int camp, LivingEntity target) {
 		// ((am-feuds) and goblins met in the wild)
-		return prey(target) || Brutality.foe(camp, target) || Feuds.greenskins(camp, target, true);
+		// (V23: a player in the band just outside the camp's skull totems is only watched, CampExtras)
+		return prey(target) && !CampExtras.watched(camp, target) || Brutality.foe(camp, target) || Feuds.greenskins(camp, target, true);
 	}
 
 	/** What an orc attacks on sight. */
@@ -217,6 +226,21 @@ public final class Orcs {
 			level.sendParticles(ParticleTypes.ANGRY_VILLAGER, folk.getX(), folk.getY() + 2.0, folk.getZ(), 3, 0.3, 0.2, 0.3, 0.0);
 			level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.PIGLIN_BRUTE_ANGRY, SoundSource.HOSTILE, 1.2F, 0.6F);
 			Speech.say(level, folk, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.rage_" + level.getRandom().nextInt(3)), Speech.RED, 20.0);
+		}
+		// the four roles' own ways: a ranger changes weapon with the range, a grunt rushes in
+		if (role == RANGER && fighting) {
+			double range = folk.distanceTo(target);
+			ItemStack held = folk.getMainHandItem();
+			// (only a bow for a crossbow and back: a blade it was rushed to, with its bow in the other hand, is WeaponSense's to put away)
+			Item want = held.is(Items.BOW) && range > RANGER_CROSSBOW_FROM ? Items.CROSSBOW : held.is(Items.CROSSBOW) && range < RANGER_BOW_WITHIN ? Items.BOW : null;
+			if (want != null) {
+				folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(want));
+				level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.HOSTILE, 0.8F, 1.0F);
+			}
+		}
+		if (role == GRUNT && fighting && !folk.hasEffect(MobEffects.SPEED) && folk.distanceTo(target) >= CHARGE_FROM) {
+			folk.addEffect(new MobEffectInstance(MobEffects.SPEED, CHARGE_TICKS, 1));
+			level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.PIGLIN_BRUTE_ANGRY, SoundSource.HOSTILE, 1.0F, 0.6F);
 		}
 		if (role == GRUNT && fighting && level.getRandom().nextInt(CRY_ONE_IN / 10) == 0) {
 			level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.PIGLIN_BRUTE_ANGRY, SoundSource.HOSTILE, 1.0F, 0.7F);
@@ -269,7 +293,7 @@ public final class Orcs {
 		mob.getAttribute(Attributes.SCALE).setBaseValue(chief ? WARCHIEF_SCALE : 1.0);
 		mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(chief ? WARCHIEF_KNOCKBACK_RESIST : GRUNT_KNOCKBACK_RESIST);
 		mob.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(chief ? WARCHIEF_TOUGHNESS : 0.0);
-		mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(chief ? Items.NETHERITE_AXE : Items.IRON_AXE));
+		mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(chief ? Items.MACE : Items.IRON_AXE));
 		mob.setItemSlot(EquipmentSlot.HEAD, chief ? new ItemStack(Items.IRON_HELMET) : ItemStack.EMPTY);
 		mob.setItemSlot(EquipmentSlot.CHEST, chief ? new ItemStack(Items.CHAINMAIL_CHESTPLATE) : dyed(Items.LEATHER_CHESTPLATE, BLACK_HIDE));
 		mob.setItemSlot(EquipmentSlot.FEET, chief ? new ItemStack(Items.IRON_BOOTS) : ItemStack.EMPTY);

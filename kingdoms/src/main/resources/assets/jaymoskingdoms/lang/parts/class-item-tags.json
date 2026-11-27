@@ -1,0 +1,18 @@
+{
+  "tag.item.jaymoskingdoms.class.thief": "Thief's Gear",
+  "tag.item.jaymoskingdoms.class.warlord": "Warlord's Gear",
+  "tag.item.jaymoskingdoms.class.mage": "Mage's Gear",
+  "tag.item.jaymoskingdoms.class.brute": "Brute's Gear",
+  "tag.item.jaymoskingdoms.class.marksman": "Marksman's Gear",
+  "tag.item.jaymoskingdoms.class.sorcerer": "Sorcerer's Gear",
+  "tag.item.jaymoskingdoms.class.rider": "Rider's Gear",
+  "tag.item.jaymoskingdoms.class.cleric": "Cleric's Gear",
+  "tag.item.jaymoskingdoms.class.druid": "Druid's Gear",
+  "tag.item.jaymoskingdoms.class.monk": "Monk's Gear",
+  "tag.item.jaymoskingdoms.class.paladin": "Paladin's Gear",
+  "tag.item.jaymoskingdoms.class.ranger": "Ranger's Gear",
+  "tag.item.jaymoskingdoms.class.warlock": "Warlock's Gear",
+  "tag.item.jaymoskingdoms.class.tinkerer": "Tinkerer's Gear",
+  "tag.item.jaymoskingdoms.class.artificer": "Artificer's Gear",
+  "gui.jaymoskingdoms.story.hint.208": "Type a class's name in the item list's search, like Cleric or Ranger, to see everything that class uses: its focus, its weapons, its armour and the rest."
+}

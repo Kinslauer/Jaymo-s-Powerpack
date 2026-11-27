@@ -1,0 +1,49 @@
+{
+  "palette": [
+    {
+      "char": "(",
+      "block": "minecraft:deepslate_tile_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "+",
+      "block": "minecraft:deepslate_tile_wall[east=low,north=none,south=none,up=false,waterlogged=false,west=low]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "!",
+      "block": "minecraft:deepslate_tiles",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ",",
+      "block": "minecraft:deepslate_tile_wall[east=none,north=low,south=low,up=false,waterlogged=false,west=none]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": ")",
+      "block": "minecraft:gray_stained_glass",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "&",
+      "block": "minecraft:iron_block",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "#",
+      "block": "minecraft:oak_leaves[distance=7,persistent=true,waterlogged=false]",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "'",
+      "block": "minecraft:blue_stained_glass",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "$",
+      "block": "minecraft:polished_deepslate",
+      "damaged": "minecraft:iron_bars"
+    }
+  ]
+}

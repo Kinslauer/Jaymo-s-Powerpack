@@ -21,11 +21,16 @@ import net.minecraft.world.level.levelgen.GenerationStep;
  * {@code maw_ground}), so the broken world ({@link MawWorld}) hangs over a country of streets and wrecked buildings stretching
  * away in every direction. As the future does ({@code FutureCities}): the city feature is added to the Maw's own biome alone, and
  * each server start tells Lost Cities to build in the Maw (it forgets between starts), with a profile of ours ({@link #RUINS},
- * set on Lost Cities' defaults) that it is handed at the same time. Without Lost Cities the wasteland is bare.
+ * set on Lost Cities' defaults) that it is handed at the same time. Its districts come from {@link #WORLD_STYLE}: what is left
+ * of a fallen country's works (factories, military bases, quarries, solar farms, wrecked towns and the odd roadside ruin), ported
+ * from Pomkot's World (MIT, by grc-mcs; {@code tools/pomkot_maw_port.py}), with Lost Cities' own town as one district among them.
+ * Without Lost Cities the wasteland is bare.
  */
 final class MawCities {
 	/** The profile's name in Lost Cities' list. */
 	static final String PROFILE = "jaymospowers_maw";
+	/** The Lost Cities world style the profile builds with ({@code data/jaymospowers/lostcities/worldstyles/maw.json}). */
+	static final String WORLD_STYLE = "jaymospowers:maw";
 	/**
 	 * How much of the Maw the ruins cover. A chunk is city where Lost Cities' city noise (roughly -12 to 12, half of it below 0)
 	 * times {@code CITY_PERLIN_INNERSCALE} minus this offset passes {@code CITY_THRESHOLD}. Lost Cities' own "largecities" has
@@ -98,6 +103,7 @@ final class MawCities {
 			for (Map.Entry<String, Object> field : RUINS.entrySet()) {
 				profileClass.getField(field.getKey()).set(profile, field.getValue());
 			}
+			profileClass.getMethod("setWorldStyle", String.class).invoke(profile, WORLD_STYLE);
 			((Map<String, Object>)Class.forName("mcjty.lostcities.config.ProfileSetup").getField("STANDARD_PROFILES").get(null)).put(PROFILE, profile);
 			Object api = Class.forName("mcjty.lostcities.LostCities").getField("lostCitiesImp").get(null);
 			Method registerDimension = Class.forName("mcjty.lostcities.api.ILostCities")

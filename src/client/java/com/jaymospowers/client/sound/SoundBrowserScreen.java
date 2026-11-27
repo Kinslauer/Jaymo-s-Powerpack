@@ -1,5 +1,6 @@
 package com.jaymospowers.client.sound;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.jaymospowers.client.UiStyle;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -150,7 +151,7 @@ public class SoundBrowserScreen extends Screen {
 		int i = at(event.x(), event.y());
 		if (i >= 0) {
 			Identifier id = rows.get(i);
-			if (event.button() == 1) {
+			if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
 				SoundTuning.set(id, 1.0F);
 			} else if (event.x() >= barX() - 2) {
 				SoundTuning.set(id, (float)Mth.clamp((event.x() - barX()) / BAR_W, 0.0, 1.0));

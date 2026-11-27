@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.wild;
 
 import com.jaymoskingdoms.Downed;
+import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.PowersCompat;
 import com.jaymoskingdoms.wild.nest.BroodQueen;
 import java.util.ArrayList;
@@ -10,10 +11,13 @@ import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.monster.Enemy;
@@ -39,6 +43,15 @@ import net.minecraft.world.phys.AABB;
  * before. Whoever squashes must stand on real feet: a player or one of the folk, or a beast of some size (a cow, a horse),
  * at least {@link #FOOT_HEIGHT} tall, up and not down or carried. Monsters don't squash their own side's spiders. A
  * squashed spider dies crushed (Powers' and Kitchen's tag), so Kitchen bursts it into a few loose legs and no body.
+ * <p>Andy: "maggots, crickets, small bugs should burst into bug blood after a stomp like spiders." The small bugs
+ * ({@link #BUGS}: our crickets, maggots, roaches, flies and snails, the barrow beetle, silverfish and endermites, and the
+ * other mods' ants, caterpillars, cockroaches, flies, snails and slugs) are squashed and struck down the same way, by the
+ * same size tiers. A squashed bug leaves no body: it bursts flat in its own blood, a few drops and a splat sized to it
+ * (Powers' {@code BladeBlood.squashed}). A squashed spider spatters the same, beside its legs.
+ * <p>Andy: snails "should squash into slime and you should be able to collect it." A squashed snail or slug's ({@link #SLIMY})
+ * splat can be scraped up with a right click, as Kingdoms' snail slime ({@link SnailSlime}; four make a slimeball).
+ * <p>Andy: maggots "should also splat if you walk on them." A bug is splatted by any part of a foot that comes down on
+ * it ({@link #BUG_FOOT}), not only the middle of one, and monsters' feet splat bugs too ({@link #bugStomper}).
  */
 public final class SpiderSquash {
 	// ================================================================================================================
@@ -54,6 +67,9 @@ public final class SpiderSquash {
 	/** Walking over: the walker's middle must be over the spider (its footprint widened by this, blocks), and moving at
 	 * least this fast (blocks a tick; sneaking is about 0.04). */
 	static final double WALK_REACH = 0.15, WALK_SPEED = 0.02;
+	/** A bug is splatted by any part of a foot coming down on it: the walker's footprint (this share of its width, each
+	 * side of its middle) need only reach the bug's, not its middle. */
+	static final double BUG_FOOT = 0.4;
 	/** A landing's feet may be this far below the spider's bottom or above it (blocks). */
 	static final double LAND_BELOW = 0.6, LAND_ABOVE = 0.3;
 	/** Who squashes: at least this tall (blocks; a player sneaking is 1.5, a sheep 1.3, a wolf 0.85). */
@@ -62,14 +78,20 @@ public final class SpiderSquash {
 
 	/** Kitchen's (and Powers' Crushing's) tag for a death that crushes. */
 	static final String CRUSHED_TAG = "jaymoskitchen.crushed";
+	/** Kitchen's tag for a death that leaves no body. */
+	static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
 	private static final boolean KITCHEN = FabricLoader.getInstance().isModLoaded("jaymoskitchen");
+	/** The small bugs squashed like small spiders (and struck down as easily). */
+	public static final TagKey<EntityType<?>> BUGS = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("squashable_bugs"));
+	/** The bugs that squash into slime you can pick up (snails and slugs). */
+	public static final TagKey<EntityType<?>> SLIMY = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("slimy_bugs"));
 
 	/** How a spider can be squashed. */
 	public enum Tier {
 		NONE, WALK, JUMP
 	}
 
-	/** Every loaded spider (and tarantula) that can be squashed. */
+	/** Every loaded spider (and tarantula) and small bug that can be squashed. */
 	private static final Set<LivingEntity> SPIDERS = Collections.newSetFromMap(new WeakHashMap<>());
 
 	private SpiderSquash() {
@@ -77,7 +99,7 @@ public final class SpiderSquash {
 
 	public static void register() {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof Spider || entity instanceof Tarantula) {
+			if (entity instanceof Spider || entity instanceof Tarantula || entity instanceof LivingEntity living && bug(living)) {
 				SPIDERS.add((LivingEntity) entity);
 			}
 		});
@@ -98,7 +120,7 @@ public final class SpiderSquash {
 
 	/** How {@code body} can be squashed (by its size now: the scale attribute counts). */
 	public static Tier tier(LivingEntity body) {
-		if (!(body instanceof Spider || body instanceof Tarantula)) {
+		if (!(body instanceof Spider || body instanceof Tarantula || bug(body))) {
 			return Tier.NONE;
 		}
 		float h = body.getBbHeight(), w = body.getBbWidth();
@@ -108,7 +130,12 @@ public final class SpiderSquash {
 		return h <= JUMP_HEIGHT && w <= JUMP_WIDTH && body.getMaxHealth() < MAX_HEALTH ? Tier.JUMP : Tier.NONE;
 	}
 
-	/** Whether {@code body} is a spider small enough to squash (and to die to a few blows). */
+	/** Whether {@code body} is one of the small bugs ({@link #BUGS}). */
+	public static boolean bug(LivingEntity body) {
+		return body.getType().builtInRegistryHolder().is(BUGS);
+	}
+
+	/** Whether {@code body} is a spider or bug small enough to squash (and to die to a few blows). */
 	public static boolean squashable(LivingEntity body) {
 		return tier(body) != Tier.NONE;
 	}
@@ -154,15 +181,17 @@ public final class SpiderSquash {
 	/** A small spider: anyone walking with their middle over it squashes it. */
 	private static void walkedOver(ServerLevel level, LivingEntity spider) {
 		AABB box = spider.getBoundingBox();
+		boolean bug = bug(spider);
 		for (LivingEntity walker : level.getEntitiesOfClass(LivingEntity.class, box.inflate(1.0, 0.0, 1.0).expandTowards(0.0, 0.6, 0.0),
 			e -> e != spider && e.isAlive() && !e.isSpectator())) {
-			if (!walker.onGround() || !stomper(walker)) {
+			if (!walker.onGround() || !(bug ? bugStomper(walker) : stomper(walker))) {
 				continue;
 			}
 			double feet = walker.getY();
+			double reach = bug ? WALK_REACH + walker.getBbWidth() * BUG_FOOT : WALK_REACH;
 			if (feet < box.minY - 0.1 || feet > box.maxY + 0.1
-				|| walker.getX() < box.minX - WALK_REACH || walker.getX() > box.maxX + WALK_REACH
-				|| walker.getZ() < box.minZ - WALK_REACH || walker.getZ() > box.maxZ + WALK_REACH) {
+				|| walker.getX() < box.minX - reach || walker.getX() > box.maxX + reach
+				|| walker.getZ() < box.minZ - reach || walker.getZ() > box.maxZ + reach) {
 				continue;
 			}
 			// (only someone walking onto it: one standing still that a spider runs under isn't stamping)
@@ -175,18 +204,34 @@ public final class SpiderSquash {
 		}
 	}
 
-	/** {@code spider} is squashed by {@code by}: it dies crushed (Kitchen bursts it into legs), at {@code by}'s hand. */
+	/**
+	 * {@code spider} (or a bug) is squashed by {@code by}: it dies crushed (Kitchen bursts a spider into legs; a bug leaves
+	 * no body), at {@code by}'s hand, and bursts flat in its own blood.
+	 */
 	static void squash(ServerLevel level, LivingEntity spider, LivingEntity by) {
 		DamageSource source = by instanceof Player player ? level.damageSources().playerAttack(player) : level.damageSources().mobAttack(by);
+		boolean bug = bug(spider);
 		spider.addTag(CRUSHED_TAG);
+		if (bug) {
+			spider.addTag(NO_CORPSE_TAG);
+		}
 		spider.setInvulnerableTime(0);
 		spider.hurtServer(level, source, lethal(spider));
 		if (!spider.isDeadOrDying()) {
 			spider.removeTag(CRUSHED_TAG);
+			spider.removeTag(NO_CORPSE_TAG);
 			return;
 		}
 		SPIDERS.remove(spider);
-		if (!KITCHEN) {
+		PowersCompat.squashed(spider);
+		if (bug) {
+			// a small wet crunch (no body for Kitchen to burst)
+			level.playSound(null, spider.getX(), spider.getY(), spider.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.NEUTRAL, 0.5F, 1.3F);
+			if (spider.getType().builtInRegistryHolder().is(SLIMY)) {
+				// Andy: snails "should squash into slime and you should be able to collect it": right-click the splat
+				SnailSlime.burst(level, spider);
+			}
+		} else if (!KITCHEN) {
 			// (Kitchen squelches as it bursts the body; without it, the squelch is ours)
 			level.playSound(null, spider.getX(), spider.getY(), spider.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.0F, 0.6F);
 		}
@@ -202,6 +247,16 @@ public final class SpiderSquash {
 		return !spiderKind(who) && !(who instanceof Enemy) && !who.isSpectator() && who.getBbHeight() >= FOOT_HEIGHT
 			&& !who.isPassenger() && (who.getPose() == Pose.STANDING || who.getPose() == Pose.CROUCHING)
 			&& !(who instanceof Player player && player.getAbilities().flying)
+			&& !Downed.isDowned(who) && !PowersCompat.outOfPlay(who);
+	}
+
+	/**
+	 * Whether {@code who} splats a bug underfoot: anyone who would squash a spider, and the monsters too (a zombie
+	 * shambling through a heap of maggots bursts them as surely as a farmer's boot; only spiders spare their own kind).
+	 */
+	static boolean bugStomper(LivingEntity who) {
+		return stomper(who) || who instanceof Enemy && !spiderKind(who) && !who.isSpectator() && who.getBbHeight() >= FOOT_HEIGHT
+			&& !who.isPassenger() && (who.getPose() == Pose.STANDING || who.getPose() == Pose.CROUCHING)
 			&& !Downed.isDowned(who) && !PowersCompat.outOfPlay(who);
 	}
 

@@ -1,0 +1,70 @@
+{
+  "replace": false,
+  "values": [
+    "#jaymoskingdoms:guns",
+    {
+      "id": "weaponmod:bullet",
+      "required": false
+    },
+    {
+      "id": "weaponmod:cannonball",
+      "required": false
+    },
+    {
+      "id": "minecraft:crossbow",
+      "required": false
+    },
+    {
+      "id": "#minecraft:enchantable/crossbow",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:heavy_crossbow",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:tinker_crossbow",
+      "required": false
+    },
+    {
+      "id": "archers:rapid_crossbow",
+      "required": false
+    },
+    {
+      "id": "archers:heavy_crossbow",
+      "required": false
+    },
+    {
+      "id": "archers:ruby_rapid_crossbow",
+      "required": false
+    },
+    {
+      "id": "archers:ruby_heavy_crossbow",
+      "required": false
+    },
+    {
+      "id": "archers:netherite_rapid_crossbow",
+      "required": false
+    },
+    {
+      "id": "archers:netherite_heavy_crossbow",
+      "required": false
+    },
+    {
+      "id": "archers:aether_rapid_crossbow",
+      "required": false
+    },
+    {
+      "id": "archers:aether_heavy_crossbow",
+      "required": false
+    },
+    "jaymoskingdoms:ranger_helmet",
+    "jaymoskingdoms:ranger_chestplate",
+    "jaymoskingdoms:ranger_leggings",
+    "jaymoskingdoms:ranger_boots",
+    "jaymoskingdoms:ranger_steel_helmet",
+    "jaymoskingdoms:ranger_steel_chestplate",
+    "jaymoskingdoms:ranger_steel_leggings",
+    "jaymoskingdoms:ranger_steel_boots"
+  ]
+}

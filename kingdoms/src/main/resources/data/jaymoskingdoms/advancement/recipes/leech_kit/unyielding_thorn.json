@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_restoring_thorn": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "jaymoskingdoms:restoring_thorn"
+          }
+        ]
+      }
+    },
+    "has_numbing_thorn": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "jaymoskingdoms:numbing_thorn"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": "jaymoskingdoms:unyielding_thorn"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_restoring_thorn",
+      "has_numbing_thorn",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "jaymoskingdoms:unyielding_thorn"
+    ]
+  }
+}

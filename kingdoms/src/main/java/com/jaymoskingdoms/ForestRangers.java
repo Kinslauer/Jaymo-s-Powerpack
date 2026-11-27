@@ -339,15 +339,31 @@ public final class ForestRangers {
 						}
 					}));
 			}
+			charm(player, choices);
+			LeafCloak.offer(player, choices);
 			choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.not_now"), p -> {
 			}));
 			Menus.ask(player, v, Component.translatable("speech.jaymoskingdoms.ranger.offer"), choices);
 			return;
 		}
 		int lesson = 1 + player.getRandom().nextInt(4);
-		Menus.ask(player, v, Component.translatable("speech.jaymoskingdoms.ranger.lesson." + lesson), List.of(
-			Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.thanks"), p -> {
-			})));
+		List<Menus.Choice> answers = new ArrayList<>();
+		answers.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.thanks"), p -> {
+		}));
+		charm(player, answers);
+		LeafCloak.offer(player, answers);
+		Menus.ask(player, v, Component.translatable("speech.jaymoskingdoms.ranger.lesson." + lesson), answers);
+	}
+
+	/** A beast-tamer's work (the bone charm, {@link BoneCharm}): with a bone in hand and the price in the pack, a ranger will carve one. */
+	private static void charm(ServerPlayer player, List<Menus.Choice> choices) {
+		if (BoneCharm.EMPTY != null && BoneCharm.canCarve(player)) {
+			choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.charm", BoneCharm.PRICE), p -> {
+				if (BoneCharm.carve(p)) {
+					p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.ranger.charmed").withStyle(ChatFormatting.DARK_GREEN));
+				}
+			}));
+		}
 	}
 
 	// ---- the poacher ------------------------------------------------------------------------------------------------
@@ -434,14 +450,12 @@ public final class ForestRangers {
 		String side = Comrades.side(folk);
 		boolean outlaw = side.startsWith("f:") && Camps.all(server).containsKey(side.substring(2));
 		Faction home = outlaw ? null : Factions.around(server, level, folk.blockPosition(), Hunters.TOWN_RANGE + 32.0);
-		Component name = folk.getName();
+		// not to chat (Andy, 2026-11-26): the ranger says it aloud, and the court's crier cries what came of it (TownCrier)
 		Component courtName = Component.literal(court != null ? court.name() : "");
-		for (ServerPlayer p : level.players()) {
-			if (p.distanceTo(folk) < SIGHT * 2) {
-				p.sendSystemMessage(Component.translatable(court == null ? "message.jaymoskingdoms.ranger.folk_let_off"
-					: outlaw ? "message.jaymoskingdoms.ranger.folk_taken" : "message.jaymoskingdoms.ranger.folk_fined", ranger.getName(), name, courtName)
-					.withStyle(ChatFormatting.DARK_GREEN));
-			}
+		Speech.say(level, ranger, Component.translatable(court == null ? "speech.jaymoskingdoms.ranger.folk_let_off" : "speech.jaymoskingdoms.ranger.folk_to_court",
+			folk.getName(), courtName), 0x88CC66, SIGHT);
+		if (court != null) {
+			TownCrier.cry(level, court, outlaw ? "ranger.taken" : "ranger.fined", folk);
 		}
 		if (court == null) {
 			Lasso.free(folk);

@@ -91,6 +91,8 @@ public final class SeatCompounds {
 	static final int TREE_CLEAR = 40;
 	/** Fiefdoms a seat compound may become: a kingdom this near (blocks) takes it. */
 	static final double FIEF_RANGE = GrimSites.RANGE;
+	/** The share of compounds whose castle also has a hedge maze ({@link HedgeMaze}) in its grounds. */
+	static final double MAZE_CHANCE = 0.4;
 
 	public static StructureType<Compound> TYPE;
 	public static StructurePieceType PIECE, CLEAN;
@@ -122,7 +124,7 @@ public final class SeatCompounds {
 
 	/** What a ring piece is (HOUSE: no longer drawn, kept for compounds already in saved chunks). */
 	enum Kind {
-		SQUARE("meeting_point_square"), GARDEN("decor_garden"), BARRACKS("barracks"), HOUSE("house");
+		SQUARE("meeting_point_square"), GARDEN("decor_garden"), BARRACKS("barracks"), HOUSE("house"), MAZE("decor_hedge_maze");
 
 		/** Its piece's name ({@link Seats#name}): a square and a garden are no building to seat a lord in. */
 		final String name;
@@ -188,6 +190,7 @@ public final class SeatCompounds {
 			case GARDEN -> garden(k);
 			case BARRACKS -> Buildings.barracks(k);
 			case HOUSE -> Buildings.house(k);
+			case MAZE -> HedgeMaze.draw(k, seed);
 		};
 	}
 
@@ -339,10 +342,14 @@ public final class SeatCompounds {
 			if (core == null) {
 				return Optional.empty();
 			}
-			// the square, the barracks and the garden beside it
-			List<Kind> plan = List.of(Kind.SQUARE, Kind.BARRACKS, Kind.GARDEN);
+			// the square, the barracks and the garden beside it, and now and then a hedge maze on one side of the castle
+			List<Kind> plan = new ArrayList<>(List.of(Kind.SQUARE, Kind.BARRACKS, Kind.GARDEN));
 			double base = random.nextDouble() * Math.PI * 2.0;
+			if (random.nextDouble() < MAZE_CHANCE) {
+				plan.add(Kind.MAZE);
+			}
 			boolean squared = false;
+			Piece maze = null;
 			for (int i = 0; i < plan.size(); i++) {
 				Kind kind = plan.get(i);
 				// (the square at the front, the barracks beside it, the garden behind)
@@ -350,10 +357,16 @@ public final class SeatCompounds {
 					case SQUARE -> base;
 					case BARRACKS -> base + Math.PI / 3.0;
 					case GARDEN, HOUSE -> base + Math.PI;
+					case MAZE -> base + Math.PI * 1.5;
 				};
 				Piece piece = this.ring(context, kind, land, random.nextLong(), want, core, placed, middle);
 				if (piece != null) {
-					all.addPiece(piece);
+					if (kind == Kind.MAZE) {
+						// (held back until the town fits round it)
+						maze = piece;
+					} else {
+						all.addPiece(piece);
+					}
 					placed.add(piece.getBoundingBox());
 					squared |= kind == Kind.SQUARE;
 				}
@@ -364,7 +377,18 @@ public final class SeatCompounds {
 			}
 			// the land's Epic town round all of it, its middle under the castle
 			if (!this.town(context, land, middle, placed, all)) {
-				return Optional.empty();
+				// the maze crowded the town out: try without it
+				if (maze == null) {
+					return Optional.empty();
+				}
+				placed.remove(maze.getBoundingBox());
+				maze = null;
+				if (!this.town(context, land, middle, placed, all)) {
+					return Optional.empty();
+				}
+			}
+			if (maze != null) {
+				all.addPiece(maze);
 			}
 			// last, the castle cleared of its spawners and loot as each chunk of it is made
 			all.addPiece(new Clean(core.inflatedBy(2)));
@@ -742,7 +766,7 @@ public final class SeatCompounds {
 	}
 
 	/** Clipped hedge: the land's own leaves (oak where its wood has none), kept from decaying. */
-	private static BlockState leaves(Palette p) {
+	static BlockState leaves(Palette p) {
 		String wood = BuiltInRegistries.BLOCK.getKey(p.planks().getBlock()).getPath().replace("_planks", "");
 		Block b = BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(wood + "_leaves"));
 		BlockState state = (b == Blocks.AIR || !(b instanceof LeavesBlock) ? Blocks.OAK_LEAVES : b).defaultBlockState();

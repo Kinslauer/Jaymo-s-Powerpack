@@ -1,0 +1,24 @@
+{
+  "palette": [
+    {
+      "char": "X",
+      "variant": "jaymospowers:maw/brownlightblock",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "$",
+      "variant": "jaymospowers:maw/brownblock",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "#",
+      "variant": "jaymospowers:maw/brownlightblock",
+      "damaged": "minecraft:iron_bars"
+    },
+    {
+      "char": "}",
+      "variant": "jaymospowers:maw/brownlightblock",
+      "damaged": "minecraft:iron_bars"
+    }
+  ]
+}

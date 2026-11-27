@@ -1,0 +1,24 @@
+{
+  "dimx": 3,
+  "dimz": 4,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_farmland00",
+      "jaymospowers:maw/scattered/scattered_farmland01",
+      "jaymospowers:maw/scattered/scattered_farmland02",
+      "jaymospowers:maw/scattered/scattered_farmland03"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_farmland10",
+      "jaymospowers:maw/scattered/scattered_farmland11",
+      "jaymospowers:maw/scattered/scattered_farmland12",
+      "jaymospowers:maw/scattered/scattered_farmland13"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_farmland20",
+      "jaymospowers:maw/scattered/scattered_farmland21",
+      "jaymospowers:maw/scattered/scattered_farmland22",
+      "jaymospowers:maw/scattered/scattered_farmland23"
+    ]
+  ]
+}

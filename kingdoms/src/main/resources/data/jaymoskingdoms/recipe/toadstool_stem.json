@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:brown_mushroom",
+    "minecraft:brown_mushroom",
+    "minecraft:bone_meal",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "count": 2,
+    "id": "jaymoskingdoms:toadstool_stem"
+  }
+}

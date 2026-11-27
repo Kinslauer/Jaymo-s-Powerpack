@@ -436,6 +436,10 @@ public final class Pickpocket {
 				mark.getDisplayName()).withStyle(ChatFormatting.GRAY).append(gained));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, 1.4F);
 			StoryRoads.thief(player, "lift");
+			if (f != null) {
+				// (lifted where a realm's law holds: its merchants and guards will know it)
+				StolenGoods.mark(level, loot, f);
+			}
 			if (!player.getInventory().add(loot) && !loot.isEmpty()) {
 				player.drop(loot, false, Prediction.SERVER_ONLY);
 			}

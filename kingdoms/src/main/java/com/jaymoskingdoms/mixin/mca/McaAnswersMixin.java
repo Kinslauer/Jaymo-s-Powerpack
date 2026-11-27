@@ -106,6 +106,14 @@ abstract class McaAnswersMixin {
 			// (Andy, 2026-11-12) a wizard or a necromancer, while you hold a mane lock
 			cir.getReturnValue().remove(com.jaymoskingdoms.equestrian.HorseRevival.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.RubberNewborns.canAsk(villager)) {
+			// (Andy, 2026-11-24) only a newborn Rubber-folk asks to be shown the way
+			cir.getReturnValue().remove(com.jaymoskingdoms.RubberNewborns.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Banks.canAsk(villager)) {
+			// (Andy, 2026-11-23) a money-changer at a bank's counter
+			cir.getReturnValue().remove(com.jaymoskingdoms.Banks.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.equestrian.HorseKit.canAsk(villager)) {
 			// (Andy, 2026-11-14) only a court wizard sells enchanted tack
 			cir.getReturnValue().remove(com.jaymoskingdoms.equestrian.HorseKit.ANSWER);

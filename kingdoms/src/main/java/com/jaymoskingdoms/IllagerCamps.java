@@ -137,6 +137,8 @@ final class IllagerCamps {
 			BlockPos cage = layout.cage();
 			allay.snapTo(cage.getX() + 0.5, cage.getY(), cage.getZ() + 0.5, 0.0F, 0.0F);
 			allay.setPersistenceRequired();
+			// caged, to be broken out (Allays)
+			allay.addTag(IllagerSites.CAGED_TAG);
 			level.addFreshEntity(allay);
 		}
 		JaymosKingdoms.LOGGER.info("An illager camp, {}, rose at {}", camp.name(), fire);

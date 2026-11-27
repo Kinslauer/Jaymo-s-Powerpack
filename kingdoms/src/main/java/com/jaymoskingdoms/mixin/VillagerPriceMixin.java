@@ -26,6 +26,10 @@ abstract class VillagerPriceMixin {
 		com.jaymoskingdoms.FrontierWear.offers((Villager)(Object)this, player);
 		// the tailor's doublets, hoods, cloaks and giorneas, and the armourer's crests
 		com.jaymoskingdoms.HeraldryWear.offers((Villager)(Object)this, player);
+		// the sun hats on farmers' and tailors' counters, desert garb on a hot land's tailor's
+		com.jaymoskingdoms.ClimateWear.offers((Villager)(Object)this, player);
+		// cartographers know the weather: thermometers, waterskins, the almanac, the land's climate clothes
+		com.jaymoskingdoms.WeatherWise.offers((Villager)(Object)this, player);
 		// (0.7.519) and a trade charter partner's people pay less
 		com.jaymoskingdoms.Treaties.prices((Villager)(Object)this, player);
 		// (0.7.523) and how they feel about you: fond ones charge less, sour ones more
@@ -41,6 +45,10 @@ abstract class VillagerPriceMixin {
 		com.jaymoskingdoms.Liars.prices((Villager)(Object)this, player);
 		// (gb-customs) a plains realm's market day
 		com.jaymoskingdoms.Customs.prices((Villager)(Object)this, player);
+		// (Village mods patch 5) the land's dish and good, for one who has traded here often enough (before the coin)
+		com.jaymoskingdoms.KnownGoods.offers((Villager)(Object)this, player);
+		// a regular's price on their usuals, and a sold-out usual kept back for them
+		com.jaymoskingdoms.Dealings.prices((Villager)(Object)this, player);
 		com.jaymoskingdoms.Currencies.localize((Villager)(Object)this, player);
 	}
 }

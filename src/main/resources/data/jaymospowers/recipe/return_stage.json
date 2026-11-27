@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "minecraft:blaze_powder",
+    "minecraft:gunpowder",
+    "minecraft:paper"
+  ],
+  "result": {
+    "id": "jaymospowers:return_stage",
+    "count": 1
+  }
+}

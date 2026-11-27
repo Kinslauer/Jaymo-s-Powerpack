@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:dirt",
+    "minecraft:bone_meal",
+    "#c:mushrooms",
+    "#c:mushrooms"
+  ],
+  "result": {
+    "id": "jaymoskitchen:mycelial_soil",
+    "count": 2
+  }
+}

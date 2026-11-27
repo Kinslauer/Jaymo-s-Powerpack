@@ -148,7 +148,7 @@ final class Assassins {
 	// ---- contracts ---------------------------------------------------------------------------------------------------------
 
 	/**
-	 * A price on a head. {@code target}: "realm:&lt;id&gt;" (its ruler) or a player's UUID. {@code hirer}: the realm that
+	 * A price on a head. {@code target}: "realm:&lt;id&gt;" (its ruler), "crier:&lt;uuid&gt;" (a town crier, {@link #onCrier}) or a player's UUID. {@code hirer}: the realm that
 	 * paid, or -1 ({@code motive} says who: rival, people, heir, guild; for a player grudge, rogue, renown). The blade
 	 * comes from {@code strikeAfter} (game time) and the contract lapses at {@code expires}. {@code forewarned}: the
 	 * ruler was warned. {@code forced}: an op's (comes at once, day or night).
@@ -170,13 +170,21 @@ final class Assassins {
 		}
 
 		@Nullable UUID player() {
-			return this.target.startsWith("realm:") ? null : UUID.fromString(this.target);
+			return this.target.startsWith("realm:") || this.target.startsWith(CRIER) ? null : UUID.fromString(this.target);
+		}
+
+		/** The town crier the price is on, or null. */
+		@Nullable UUID crier() {
+			return this.target.startsWith(CRIER) ? UUID.fromString(this.target.substring(CRIER.length())) : null;
 		}
 
 		Contract warned() {
 			return new Contract(this.target, this.hirer, this.motive, this.strikeAfter, this.expires, true, this.forced, this.fee);
 		}
 	}
+
+	/** A contract on a town crier: this, then his UUID. */
+	static final String CRIER = "crier:";
 
 	/** The contracts out (saved with the Overworld). */
 	static final AttachmentType<List<Contract>> CONTRACTS = AttachmentRegistry.create(JaymosKingdoms.id("contracts"),
@@ -407,6 +415,21 @@ final class Assassins {
 		JaymosKingdoms.LOGGER.info("A contract on {} ({})", player.getName().getString(), motive);
 	}
 
+	/**
+	 * A kinsman who didn't like what {@code crier} cried has paid a blade to come for him (Andy, 2026-11-26: "npcs that dont
+	 * like what they are saying may attack or hire a hit on them"; {@link CrierGrudges}). As a contract on a player, it goes
+	 * past {@link #MAX_CONTRACTS}: it's the town's quarrel, not the world's.
+	 */
+	static void onCrier(ServerLevel level, Villager crier) {
+		MinecraftServer server = level.getServer();
+		String target = CRIER + crier.getStringUUID();
+		if (contractOn(server, target) != null) {
+			return;
+		}
+		replace(server, contract(target, -1, "kin", level.getGameTime(), level.getRandom(), false));
+		JaymosKingdoms.LOGGER.info("A contract on the crier {} (kin)", crier.getName().getString());
+	}
+
 	private static Contract contract(String target, int hirer, String motive, long now, RandomSource random, boolean forced) {
 		long wait = forced ? 0L : (WHISPER_DAYS_MIN + random.nextInt(WHISPER_DAYS_MAX - WHISPER_DAYS_MIN + 1)) * 24000L;
 		return new Contract(target, hirer, motive, now + wait, now + EXPIRE_DAYS * 24000L, false, forced, FEE_MIN + random.nextInt(FEE_MAX - FEE_MIN + 1));
@@ -435,6 +458,8 @@ final class Assassins {
 					line = Component.translatable("assassin.jaymoskingdoms.whisper." + c.motive() + "." + random.nextInt(2), ruler(level, f));
 				} else if (player.getUUID().equals(c.player()) && here != null) {
 					line = Component.translatable("assassin.jaymoskingdoms.whisper.you." + random.nextInt(3), Identities.shownName(player));
+				} else if (c.crier() != null && level.getEntity(c.crier()) instanceof Villager crier && crier.distanceTo(player) < WITNESS_RANGE) {
+					line = Component.translatable("assassin.jaymoskingdoms.whisper.crier." + random.nextInt(3), Introductions.called(player, crier));
 				} else {
 					continue;
 				}
@@ -485,6 +510,18 @@ final class Assassins {
 			}
 			victim = king;
 			dress = f;
+		} else if (c.crier() != null) {
+			// a town crier: the blade comes only where a player is by to see it
+			if (!(level.getEntity(c.crier()) instanceof Villager crier) || !crier.isAlive() || !level.isPositionEntityTicking(crier.blockPosition())) {
+				return;
+			}
+			boolean seen = !level.getEntitiesOfClass(ServerPlayer.class, crier.getBoundingBox().inflate(WITNESS_RANGE),
+				p -> !p.isCreative() && !p.isSpectator() || c.forced()).isEmpty();
+			dress = Theft.lawAt(level, crier.blockPosition());
+			if (!seen || dress == null) {
+				return;
+			}
+			victim = crier;
 		} else {
 			ServerPlayer player = server.getPlayerList().getPlayer(c.player());
 			if (player == null || player.level() != level || player.isSpectator() || player.isCreative() && !c.forced()) {
@@ -577,6 +614,8 @@ final class Assassins {
 		} else {
 			a.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
 		}
+		// (fighting AI patch 7, st-dodge) a second blade, maybe a shield on his back (DualBlades); none of it drops
+		DualBlades.arm(a, true);
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			a.setDropChance(slot, 0.0F);
 		}
@@ -712,6 +751,12 @@ final class Assassins {
 			player.addEffect(new MobEffectInstance(MobEffects.POISON, PLAYER_POISON_TICKS, PLAYER_POISON_LEVEL));
 			level.playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 1.2F, 0.7F);
 			player.sendSystemMessage(Component.translatable("assassin.jaymoskingdoms.player.stabbed").withStyle(ChatFormatting.DARK_RED));
+		} else if (p.contract.crier() != null) {
+			// a town crier: a stab and a poison, and he cries out (no chat: whoever's by sees it)
+			victim.hurtServer(level, level.damageSources().mobAttack(a), PLAYER_STAB);
+			victim.addEffect(new MobEffectInstance(MobEffects.POISON, PLAYER_POISON_TICKS, PLAYER_POISON_LEVEL));
+			level.playSound(null, victim.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 1.2F, 0.7F);
+			Speech.say(level, victim, Component.translatable("assassin.jaymoskingdoms.crier.stabbed." + level.getRandom().nextInt(3)), Speech.RED, WITNESS_RANGE);
 		}
 		p.stage = Stage.FIGHT;
 		p.stageAt = now;
@@ -967,7 +1012,9 @@ final class Assassins {
 		MinecraftServer server = level.getServer();
 		Contract c = p.contract;
 		Faction hirer = c.hirer() >= 0 ? Factions.get(server, c.hirer()) : null;
-		Component victimName = c.realm() >= 0 ? realmRuler(level, c.realm()) : playerName(server, c.player());
+		Component victimName = c.realm() >= 0 ? realmRuler(level, c.realm())
+			: c.crier() != null ? (level.getEntity(c.crier()) instanceof Villager crier ? crier.getDisplayName() : Component.translatable("crier.jaymoskingdoms.someone.villager"))
+			: playerName(server, c.player());
 		a.spawnAtLocation(level, sealedContract(victimName, hirer, c));
 		// (0.7.498) the blade's fee, in silver coins
 		for (ItemStack coins : Money.stacks(Money.worth(c.fee()))) {

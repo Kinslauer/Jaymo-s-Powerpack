@@ -259,6 +259,10 @@ public final class ClassPerks {
 				lines.add(line("strong", pct(Warlocks.POWER - 1.0)));
 				lines.add(line("debt", "!"));
 			}
+			case ARTIFICER -> {
+				lines.add(line("reforge", String.valueOf(Artificers.REFORGE_SHARDS)));
+				lines.add(line("elixirs", String.valueOf(Artificers.ELIXIRS.size())));
+			}
 			case TINKERER -> {
 				lines.add(line("infusions", String.valueOf(Tinkerers.MOST)));
 				lines.add(line("gadgets", String.valueOf(Tinkerers.GADGETS.size())));
@@ -340,7 +344,7 @@ public final class ClassPerks {
 			case MONK -> true;
 			case PALADIN -> weapon.is(net.minecraft.tags.ItemTags.SWORDS) || weapon.is(BLUDGEONS);
 			case CLERIC -> weapon.is(BLUDGEONS) || Clerics.isSymbol(weapon);
-			case DRUID, WARLOCK, TINKERER -> false;
+			case DRUID, WARLOCK, TINKERER, ARTIFICER -> false;
 			case MARKSMAN -> weapon.is(GUNS) || weapon.getItem() instanceof net.minecraft.world.item.CrossbowItem;
 			case SORCERER -> weapon.is(net.minecraft.tags.ItemTags.SWORDS) || weapon.is(LIGHT_BLADES) || Tomes.isTome(weapon);
 			case MAGE -> weapon.is(Arcana.BONE_STAFF) || weapon.is(Arcana.TOTEM_STAFF) || weapon.is(Arcana.WIZARD_STAFF) || Tomes.isTome(weapon);
@@ -407,7 +411,7 @@ public final class ClassPerks {
 						fistSpeed += s * (MONK_FIST_SPEED);
 					}
 				}
-				case CLERIC, DRUID, TINKERER -> {
+				case CLERIC, DRUID, TINKERER, ARTIFICER -> {
 				}
 				case BRUTE -> {
 					if (held.is(BLUDGEONS)) {

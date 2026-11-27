@@ -1,0 +1,19 @@
+{
+  "item.jaymoskingdoms.linen_robe": "Linen Robe",
+  "item.jaymoskingdoms.linen_headscarf": "Linen Headscarf",
+  "item.jaymoskingdoms.rabbit_hide_robe": "Rabbit-Hide Robe",
+  "item.jaymoskingdoms.rabbit_hide_headscarf": "Rabbit-Hide Headscarf",
+  "item.jaymoskingdoms.bamboo_hat": "Bamboo Hat",
+  "item.jaymoskingdoms.reed_hat": "Reed Hat",
+  "item.jaymoskingdoms.palm_leaf_hat": "Palm-Leaf Hat",
+  "item.jaymoskingdoms.leaf_cloak": "Leaf Cloak",
+  "speech.jaymoskingdoms.ranger.leaf_cloak": "Buy a leaf cloak (%1$s)",
+  "message.jaymoskingdoms.ranger.leaf_cloaked": "The ranger shakes out a cloak of woven leaves and hands it over.",
+  "speech.jaymoskingdoms.herbalist.wares": "I put stones in the fire at night and clay in the stream by day. Take one to wear at your belt: warm in the cold, cool in the heat.",
+  "speech.jaymoskingdoms.herbalist.pouch": "A hot-stone pouch (%1$s)",
+  "speech.jaymoskingdoms.herbalist.flask": "A cold-clay flask (%1$s)",
+  "gui.button.herbalist_wares": "Belt Charms",
+  "speech.jaymoskingdoms.herbalist.none": "I've nothing to sell you.",
+  "speech.jaymoskingdoms.herbalist.leave": "Not today.",
+  "message.jaymoskingdoms.herbalist.sold": "The herbalist hands you the %1$s."
+}

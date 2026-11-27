@@ -74,6 +74,8 @@ public final class WebSuitGrowth {
 	 * over {@code FIGHT_SETTLE_TICKS} (the suit flowing back over the chest and arms) instead of popping back.
 	 */
 	static final float FIGHT_SETTLE_TICKS = 10.0F;
+	/** The wearer's own body is hidden inside the slender body once its frame is this far its own (0-1). */
+	static final float SLENDER_HIDE = 0.6F;
 
 	/** What each of the suit layer's models is. */
 	enum Role {
@@ -82,7 +84,9 @@ public final class WebSuitGrowth {
 		/** The raw goo under it, laid first. */
 		GOO,
 		/** The big body. */
-		HULK
+		HULK,
+		/** The red strain's slender body (worn in the big body's place, WebSlender). */
+		SLENDER
 	}
 
 	/**
@@ -99,6 +103,17 @@ public final class WebSuitGrowth {
 	 * ({@link com.jaymospowers.power.web.WebSymbioteCushion}), or null. Only drawn bare of the suit (the suit takes no
 	 * fall damage).
 	 */
+	/**
+	 * On a player's render state while their big body congeals through a gap ({@link com.jaymospowers.power.web.WebSymbioteDoors}):
+	 * how far through the squeeze it is (0-1), else null. Its real size shrinks with it (the server cuts the scale), so the
+	 * models stretch back up to the height they had (and a little past) and narrow to {@code SQUEEZE_NARROW} less across:
+	 * a tall thin body poured through a slot, then it reforms.
+	 */
+	public static final RenderStateDataKey<Float> SQUEEZE = RenderStateDataKey.create(() -> "jaymospowers:web_suit_squeeze");
+	private static final Map<Model<?>, Boolean> SQUEEZED = new WeakHashMap<>();
+	static final float SQUEEZE_NARROW = 0.45F, SQUEEZE_STRETCH = 0.12F;
+	/** A model's root: its feet sit this far (model pixels) below its origin. */
+	static final float FEET = 24.0F;
 	public static final RenderStateDataKey<Float> CUSHION = RenderStateDataKey.create(() -> "jaymospowers:web_suit_cushion");
 	/** How much wider than the leg the goo pools at the foot, and how hard its surface ripples. */
 	static final float CUSHION_SPREAD = 0.22F, CUSHION_RIPPLE = 0.06F;
@@ -148,6 +163,8 @@ public final class WebSuitGrowth {
 	static void extract(Player player, AvatarRenderState state, float partialTicks) {
 		int now = level(player);
 		state.setData(CUSHION, cushion(player, partialTicks));
+		float squeeze = com.jaymospowers.power.web.WebSymbioteDoors.share(player);
+		state.setData(SQUEEZE, squeeze > 0.0F ? squeeze : null);
 		long[] change = CHANGES.get(player.getId());
 		// game time, not the player's own age: a respawned player's age starts over, which would hold a change
 		// (the suit falling away at death) part-done until it caught up
@@ -289,9 +306,19 @@ public final class WebSuitGrowth {
 			mcaUnder(model, covered(avatar) && !bared(avatar), faceShown(avatar));
 			return;
 		}
+		squeeze(model, avatar.getData(SQUEEZE));
 		float k = hulkness(avatar);
+		boolean slender = slender(avatar);
 		if (model instanceof net.minecraft.client.model.HumanoidModel<?> humanoid) {
-			WebHulk.shift(humanoid, k);
+			if (slender) {
+				// (hunched over first, so its frame follows the bent back)
+				WebSlender.hunch(humanoid, avatar, k, WebSlender.STANCE);
+				WebSlender.shift(humanoid, k);
+			} else {
+				// (the big body crouched wide and low, WebHulk.STANCE)
+				WebSlender.hunch(humanoid, avatar, k, WebHulk.STANCE);
+				WebHulk.shift(humanoid, k);
+			}
 		}
 		if (!(model instanceof PlayerModel player)) {
 			return;
@@ -304,6 +331,10 @@ public final class WebSuitGrowth {
 				player.leftPants.visible = false;
 				player.rightPants.visible = false;
 			}
+			// the wearer's own body inside the slender body: it's narrower than they are and would show through it, so
+			// it's hidden once the body is mostly built (its parts still carry every layer drawn off them)
+			// (not while they fight its hold: they tear out of it, WebSymbioteLayer)
+			hideWearer(player, slender && k > SLENDER_HIDE && avatar.getData(PULL) == null);
 			// the wearer's own body: the skin's outer layer (hat, jacket, sleeves, trousers) sits further out than the
 			// suit, and would poke through it in patches, so it goes under the suit while the suit covers it all
 			if (covered(avatar)) {
@@ -323,25 +354,68 @@ public final class WebSuitGrowth {
 			}
 			return;
 		}
-		if (role == Role.HULK) {
+		if (role == Role.SLENDER) {
+			WebSlender.Model body = (WebSlender.Model)model;
+			float g = hulkBuilt(avatar);
+			body.build(g, peeledHulk(avatar), k);
+			body.animate(avatar, g);
+		} else if (role == Role.HULK) {
 			WebHulk.Model hulk = (WebHulk.Model)model;
 			hulk.build(hulkBuilt(avatar), peeledHulk(avatar), k, avatar.ageInTicks, WebHulk.teeth(avatar));
 			hulk.breathe(avatar);
-			// elbows and knees bending with the stride (after the limbs are posed above)
+			// elbows and knees bending with the stride (after the limbs are posed above), the elbows crooked in its crouch
 			hulk.limbs(avatar);
+			hulk.elbowRight.xRot -= WebHulk.CROUCH_ELBOWS * k;
+			hulk.elbowLeft.xRot -= WebHulk.CROUCH_ELBOWS * k;
 		} else {
 			lay(player, avatar, role);
 			// (laid under the big body as it's built or peeled: stretched to its longer frame)
-			WebHulk.stretch(player, k, avatar.ageInTicks);
+			if (slender) {
+				WebSlender.stretch(player, k, avatar.ageInTicks);
+			} else {
+				WebHulk.stretch(player, k, avatar.ageInTicks);
+			}
 		}
 		if (WebSymbioteClient.ownFirstPerson(avatar)) {
 			player.head.visible = false;
 		}
 	}
 
+	/**
+	 * The squeeze on a model (every one drawn for the wearer, so they stay together): its root stretched back to the full
+	 * height (and a touch more) and narrowed, its feet kept where they were. Set from the model's own start each time.
+	 */
+	private static void squeeze(Model<?> model, @org.jspecify.annotations.Nullable Float share) {
+		net.minecraft.client.model.geom.ModelPart root = model.root();
+		if (share == null) {
+			if (SQUEEZED.remove(model) != null) {
+				// (reformed: a model that isn't re-posed every frame mustn't keep the squeeze)
+				root.xScale = 1.0F;
+				root.yScale = 1.0F;
+				root.zScale = 1.0F;
+				root.y = root.getInitialPose().y();
+			}
+			return;
+		}
+		SQUEEZED.put(model, Boolean.TRUE);
+		float undo = 1.0F / (1.0F - com.jaymospowers.power.web.WebSymbioteDoors.CUT * share);
+		float up = undo * (1.0F + SQUEEZE_STRETCH * share);
+		float across = undo * (1.0F - SQUEEZE_NARROW * share);
+		root.xScale = across;
+		root.zScale = across;
+		root.yScale = up;
+		root.y = root.getInitialPose().y() + FEET * (1.0F - up);
+	}
+
 	/** Moves a model drawn outside the usual passes (a layer reading the body's parts) out to the big body's frame. */
 	static void shift(net.minecraft.client.model.HumanoidModel<?> model, AvatarRenderState state) {
-		WebHulk.shift(model, hulkness(state));
+		if (slender(state)) {
+			WebSlender.hunch(model, state, hulkness(state), WebSlender.STANCE);
+			WebSlender.shift(model, hulkness(state));
+		} else {
+			WebSlender.hunch(model, state, hulkness(state), WebHulk.STANCE);
+			WebHulk.shift(model, hulkness(state));
+		}
 	}
 
 	/** How far into the big body's frame the body is spread (0 not at all, 1 the whole way): it grows as the goo swells. */
@@ -360,6 +434,31 @@ public final class WebSuitGrowth {
 	public static boolean bigBody(AvatarRenderState avatar) {
 		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
 		return tendrils != null && tendrils.armor() || Boolean.TRUE.equals(avatar.getData(WebSymbioteClient.TENDRILS_IN));
+	}
+
+	/**
+	 * The big body on this player is the red strain's slender one ({@link WebSlender}): the red strain wears its own body in
+	 * the big body's place (Andy, 2026-11-24), the black and the white the big body.
+	 */
+	public static boolean slender(AvatarRenderState avatar) {
+		return WebStrainLook.of(avatar) == com.jaymospowers.power.web.WebSymbioteStrain.RED;
+	}
+
+	/** Wearers whose own head is hidden inside the slender body (the head's visibility isn't reset each frame, the rest is). */
+	private static final Set<ModelPart> HIDDEN_HEADS = Collections.newSetFromMap(new WeakHashMap<>());
+
+	private static void hideWearer(PlayerModel player, boolean hide) {
+		if (hide) {
+			player.head.visible = false;
+			player.body.visible = false;
+			player.rightArm.visible = false;
+			player.leftArm.visible = false;
+			player.rightLeg.visible = false;
+			player.leftLeg.visible = false;
+			HIDDEN_HEADS.add(player.head);
+		} else if (HIDDEN_HEADS.remove(player.head)) {
+			player.head.visible = true;
+		}
 	}
 
 	/** How far the big body is built (0-1). */

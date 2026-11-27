@@ -93,7 +93,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link ZFighterRealism}); off, deaths are as they were.</li>
  * <li>Every survivor wakes, and every death respawns, on no more than half a stomach ({@link #WAKE_FOOD}).</li>
  * </ul>
- * Survival only (creative never dies here), not one of the dead in the Other World (it holds its own), and a totem in hand is
+ * Survival only (creative never dies here), not one of the dead in the Other World (it holds its own), and a totem in hand or worn is
  * left to do its work.
  */
 public final class Mortality {
@@ -419,7 +419,9 @@ public final class Mortality {
 		SpawnCalm.register();
 		Afflictions.register();
 		Scars.register();
+		DeathToll.register();
 		Karma.register();
+		Reincarnate.register();
 	}
 
 	// ---- told by the downed state -----------------------------------------------------------------------------------------
@@ -756,7 +758,7 @@ public final class Mortality {
 		Boolean executed = EXECUTED.remove(player);
 		if (!on() || player.isCreative() || player.isSpectator() || isFinal(player) || ZFighterAfterlife.among(player)
 			|| Karma.pending(player)
-			|| player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)) {
+			|| com.jaymospowers.baubles.WornTotems.ready(player)) {
 			return true;
 		}
 		if (Karma.below(player)) {
@@ -1457,6 +1459,7 @@ public final class Mortality {
 			} else {
 				injure(player, wake.cause, wake.sub);
 			}
+			DeathToll.woke(player);
 			player.setAttached(SURVIVOR, true);
 			tendTaken(player, line);
 		}
@@ -1632,6 +1635,24 @@ public final class Mortality {
 	}
 
 	/**
+	 * {@code player} chose to end this character ({@link Reincarnate}), alive: as a final death that has them back on their
+	 * feet, black at once and at the world's spawn, then born again from nothing ({@link #tick}, {@link #endLife}).
+	 */
+	static void chooseToEnd(ServerPlayer player) {
+		MinecraftServer server = player.level().getServer();
+		player.closeContainer();
+		if (player.isPassenger()) {
+			player.stopRiding();
+		}
+		player.setAttached(REBORNING, (long)server.getTickCount());
+		player.setAttached(FINAL, Reincarnate.CHOSEN);
+		ServerLevel overworld = server.overworld();
+		BlockPos spawn = safe(overworld, overworld.getRespawnData().pos());
+		player.teleportTo(overworld, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, Set.of(), player.getYRot(), 0.0F, true);
+		JaymosPowers.LOGGER.info("{} chose to reincarnate", player.getScoreboardName());
+	}
+
+	/**
 	 * A timer ran out ({@link Afflictions}): {@code player} dies of it, for good, with no going down first.
 	 */
 	static void succumb(ServerPlayer player, Cause cause) {
@@ -1656,6 +1677,7 @@ public final class Mortality {
 		HeartCrystals.onFinalDeath(player);
 		Afflictions.clear(player);
 		Scars.clear(player);
+		DeathToll.clear(player);
 		Breaks.clearAll(player);
 		Wounds.healAll(player);
 		player.removeAttached(Lodged.LODGED);
@@ -1696,6 +1718,7 @@ public final class Mortality {
 		player.removeAttached(SURVIVOR);
 		Afflictions.clear(player);
 		Scars.clear(player);
+		DeathToll.clear(player);
 		Breaks.clearAll(player);
 		Wounds.healAll(player);
 		player.removeAttached(Lodged.LODGED);

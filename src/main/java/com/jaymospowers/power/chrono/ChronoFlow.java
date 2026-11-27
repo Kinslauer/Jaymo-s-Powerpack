@@ -158,6 +158,9 @@ public final class ChronoFlow {
 	 * (until they land, {@code FLUNG_MIN}..{@code FLUNG_TICKS}). */
 	public static final int FLINCH = 0, FLUNG = 1;
 	public static final int FLINCH_TICKS = 7, FLUNG_MIN = 5, FLUNG_TICKS = 40;
+	/** A blitz strike's reel: one of {@link #STRIKE_POSES} poses, held {@link #STRIKE_TICKS} ({@code ChronoBlitz}). */
+	public static final int STRIKE = 2;
+	public static final int STRIKE_TICKS = 14, STRIKE_POSES = 6;
 	/** A time echo's blow has this chance to pour Time Flow into a Chrono who hasn't earned it, for this long (5 min). */
 	static final float GRANT_CHANCE = 0.5F;
 	static final int GRANT_TICKS = 6000;
@@ -211,9 +214,13 @@ public final class ChronoFlow {
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
 	/** How a creature reels from a Time Flow blow: {@link #FLINCH} or {@link #FLUNG}, since {@code start}, jolted to {@code side}. */
-	public record Reel(long start, int kind, int side) {
+	public record Reel(long start, int kind, int side, int pose) {
 		public static final StreamCodec<ByteBuf, Reel> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_LONG, Reel::start,
-			ByteBufCodecs.VAR_INT, Reel::kind, ByteBufCodecs.VAR_INT, Reel::side, Reel::new);
+			ByteBufCodecs.VAR_INT, Reel::kind, ByteBufCodecs.VAR_INT, Reel::side, ByteBufCodecs.VAR_INT, Reel::pose, Reel::new);
+
+		public Reel(long start, int kind, int side) {
+			this(start, kind, side, 0);
+		}
 	}
 
 	/** (0.11.40) A blow passed through an intangible player: the Space cue is up until this game time (synced to all, who see it). */
@@ -379,10 +386,15 @@ public final class ChronoFlow {
 
 	/** {@code target} reels: a flinch (jolted to {@code side}) or, thrown, a ragdoll until it lands. */
 	static void reel(LivingEntity target, int kind, int side) {
+		reel(target, kind, side, 0);
+	}
+
+	/** The same, in one of a blitz's {@link #STRIKE_POSES} (for {@link #STRIKE}; the others ignore it). */
+	static void reel(LivingEntity target, int kind, int side, int pose) {
 		if (target.getAttached(REEL) == null) {
 			REELING.add(target);
 		}
-		target.setAttached(REEL, new Reel(target.level().getGameTime(), kind, side));
+		target.setAttached(REEL, new Reel(target.level().getGameTime(), kind, side, pose));
 	}
 
 	/** Whether a Time Flow blow has this creature flying, limp (either side: the reel is synced). */
@@ -1200,7 +1212,7 @@ public final class ChronoFlow {
 				Reel reel = entity.getAttached(REEL);
 				long t = reel == null ? 0 : entity.level().getGameTime() - reel.start();
 				boolean over = reel == null || entity.isRemoved() || !entity.isAlive()
-					|| (reel.kind() == FLINCH ? t >= FLINCH_TICKS : t >= FLUNG_TICKS || t >= FLUNG_MIN && entity.onGround());
+					|| (reel.kind() == FLINCH ? t >= FLINCH_TICKS : reel.kind() == STRIKE ? t >= STRIKE_TICKS : t >= FLUNG_TICKS || t >= FLUNG_MIN && entity.onGround());
 				if (over) {
 					it.remove();
 					entity.removeAttached(REEL);

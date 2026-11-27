@@ -8,13 +8,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** A soldier's shot passes over their own side: the archers behind a shield wall don't hit its front rank ({@link Formations#spares}). */
+/**
+ * A soldier's shot passes over their own side: the archers behind a shield wall don't hit its front rank ({@link Formations#spares});
+ * a camp's hired bowmen don't hit its own people, nor they them ({@code CampBeasts.spares}).
+ */
 @Mixin(Projectile.class)
 abstract class ProjectileAlliesMixin {
 	@Inject(method = "canHitEntity", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$overTheWall(Entity entity, CallbackInfoReturnable<Boolean> cir) {
 		Projectile self = (Projectile) (Object) this;
-		if (!self.level().isClientSide() && Formations.spares(self.getOwner(), entity)) {
+		if (!self.level().isClientSide() && (Formations.spares(self.getOwner(), entity) || com.jaymoskingdoms.CampBeasts.spares(self.getOwner(), entity))) {
 			cir.setReturnValue(false);
 		}
 	}

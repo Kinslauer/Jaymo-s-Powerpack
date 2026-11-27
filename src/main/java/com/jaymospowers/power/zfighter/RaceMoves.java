@@ -80,9 +80,7 @@ public final class RaceMoves {
 	}
 
 	private static void hold(ServerPlayer player) {
-		if (!player.isAlive() || player.isSpectator() || !player.getMainHandItem().isEmpty() || ZFighterLineage.ape(player)
-			|| !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.BLOOD)) {
-			// ((Andy's skill-tree locks) a blood's hold is learned: Blood Awakening)
+		if (!player.isAlive() || player.isSpectator() || !player.getMainHandItem().isEmpty() || ZFighterLineage.ape(player)) {
 			return;
 		}
 		int lineage = ZFighterLineage.of(player);
@@ -102,7 +100,8 @@ public final class RaceMoves {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Stretch last = player.getAttached(STRETCH);
-		if (last != null && now - last.start() < STRETCH_COOLDOWN && now >= last.start()) {
+		// (Blood Awakening) awakened, the arm is ready again in half the time
+		if (last != null && now - last.start() < com.jaymospowers.core.TreeLocks.wait(player, STRETCH_COOLDOWN) && now >= last.start()) {
 			// still on its cooldown
 			return;
 		}

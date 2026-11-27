@@ -38,6 +38,6 @@
   "message.jaymoskingdoms.lasso.shrugged": "%s shrugs the rope off.",
   "message.jaymoskingdoms.lasso.let_go": "You let %s go.",
   "message.jaymoskingdoms.lasso.lost": "The rope goes slack.",
-  "message.jaymoskingdoms.lasso.snapped": "The rope snaps.",
+  "message.jaymoskingdoms.lasso.dropped": "The rope goes with the lasso: keep it in your off hand to lead %s with the other hand free.",
   "message.jaymoskingdoms.lasso.broke_out": "%s breaks out of the rope."
 }

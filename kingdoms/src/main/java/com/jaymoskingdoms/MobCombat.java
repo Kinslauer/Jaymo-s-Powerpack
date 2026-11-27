@@ -118,6 +118,23 @@ public final class MobCombat {
 	static final double HEAVY_DAMAGE = 1.4;
 	/** (enemy damage balance) When a combo comes round to a heavy move, the chance it's thrown (else a plain one is). */
 	static final float HEAVY_PICK_CHANCE = 0.25F;
+	/**
+	 * Andy (2026-11-24): "armed enemies should [not] attack with unblockables EVERY attack anymore, it should be closer to
+	 * 20%". A two-handed weapon's swings, and the plain blows of a heavy hitter ({@link #PLAIN_HEAVY_DAMAGE}), are red only
+	 * this share of the time; the rest glint white and can be parried. A one-handed weapon's heavy move is already thrown
+	 * only now and then ({@link #HEAVY_PICK_CHANCE}) and stays red when it is.
+	 */
+	static final float RED_CHANCE = 0.2F;
+	/** The red share for a band reading a parrier's guard ({@link FoeLore}): any blow of theirs, this often. */
+	static final float READ_RED_CHANCE = 0.35F;
+	/**
+	 * Andy: "the windup should be longer so players can react". A red swing winds up this much longer than the same swing
+	 * would white, at least {@link #RED_MIN_WINDUP} ticks and at most {@link #RED_MAX_WINDUP} (the incoming-blow cue's
+	 * longest), unless it was already longer. The whole swing is stretched to fit, so its animation's blow still falls on
+	 * the hit; never past {@link #RED_MAX_SWING} ticks.
+	 */
+	static final double RED_WINDUP_SCALE = 1.6;
+	static final int RED_MIN_WINDUP = 18, RED_MAX_WINDUP = 30, RED_MAX_SWING = 80;
 	static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
 	static final float TELL_SIZE = 1.2F;
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
@@ -164,8 +181,12 @@ public final class MobCombat {
 		int combo;
 		/** (0.7.283) A plain blow ({@link #plainBlow}): one target, no Better Combat move. */
 		boolean plain;
+		/** This swing is a red one (rolled as it starts): it can't be parried. */
+		boolean red;
 		/** ({@link Duellists}) Until this game time the next swing is a quick one ({@link #quicken}). */
 		long quickUntil;
+		/** (st-dodge) This swing is the off hand's blade's, two blades going hand after hand ({@link DualBlades}). */
+		boolean offHand;
 	}
 
 	private static final Map<Mob, Swing> SWINGS = new WeakHashMap<>();
@@ -173,8 +194,11 @@ public final class MobCombat {
 	/** (0.7.267) A gunman aiming → when the shot goes (game time). */
 	private static final Map<Mob, Long> AIMS = new WeakHashMap<>();
 
-	/** Server → watchers: play {@code animation} on the mob, stretched over {@code length} ticks. */
-	public record MobSwing(int entityId, String animation, int length, float upswing) implements CustomPacketPayload {
+	/**
+	 * Server → watchers: play {@code animation} on the mob, stretched over {@code length} ticks; {@code mirror}ed for an off-hand blade's
+	 * swing ({@link DualBlades}).
+	 */
+	public record MobSwing(int entityId, String animation, int length, float upswing, boolean mirror) implements CustomPacketPayload {
 		public static final Type<MobSwing> TYPE = new Type<>(JaymosKingdoms.id("mob_swing"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, MobSwing> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -182,8 +206,13 @@ public final class MobCombat {
 				buf.writeUtf(p.animation);
 				buf.writeVarInt(p.length);
 				buf.writeFloat(p.upswing);
+				buf.writeBoolean(p.mirror);
 			},
-			buf -> new MobSwing(buf.readVarInt(), buf.readUtf(256), buf.readVarInt(), buf.readFloat()));
+			buf -> new MobSwing(buf.readVarInt(), buf.readUtf(256), buf.readVarInt(), buf.readFloat(), buf.readBoolean()));
+
+		public MobSwing(int entityId, String animation, int length, float upswing) {
+			this(entityId, animation, length, upswing, false);
+		}
 
 		@Override
 		public Type<MobSwing> type() {
@@ -227,22 +256,50 @@ public final class MobCombat {
 	}
 
 	/**
+	 * Andy (2026-11-24): "can you make npcs that attack with two handed weapons use both hands? especially the zombies,
+	 * that would give the slower swing more sense". The pose a humanoid ({@link #humanoid}) holds its two-handed weapon in
+	 * between swings, both hands on it, as a player holds it (Better Combat's pose for that weapon): the client's
+	 * {@code MobAnimations} lays it over the model while no swing plays (the swings themselves are already two-handed).
+	 * Null when it doesn't hold one, or isn't standing (lying downed, sleeping, swimming).
+	 */
+	public static @Nullable String holdPose(Mob mob) {
+		if (!ENABLED || !mob.isAlive() || mob.getPose() != net.minecraft.world.entity.Pose.STANDING
+			&& mob.getPose() != net.minecraft.world.entity.Pose.CROUCHING || !humanoid(mob)) {
+			return null;
+		}
+		return BetterCombatBridge.holdPose(mob.getMainHandItem());
+	}
+
+	/**
 	 * Called every tick its melee goal would attack ({@code MeleeAttackGoal.checkAndPerformAttack}, which then does
 	 * nothing more): starts the next swing of the combo when the target is in reach and the last swing is over.
 	 */
 	public static void attackTick(Mob mob, LivingEntity target) {
 		Duellists.engaged(mob, target);
-		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds)
-		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG)) {
+		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds, and a fight among people, Turns)
+		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG) || Turns.waiting(mob)) {
 			return;
 		}
 		Moves moves = BetterCombatBridge.moves(mob.getMainHandItem());
 		if (moves == null || moves.attacks().isEmpty()) {
 			return;
 		}
+		// ((st-dodge) two blades go hand after hand: the off hand's turn swings its own blade's moves, if Better Combat knows it;
+		// else a plain blow of the off arm's)
+		boolean offHand = false;
+		if (DualBlades.offNext(mob)) {
+			Moves off = BetterCombatBridge.moves(mob.getOffhandItem());
+			if (off == null || off.attacks().isEmpty()) {
+				plainBlow(mob, target);
+				return;
+			}
+			moves = off;
+			offHand = true;
+		}
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
-		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0) {
+		// ((fighting AI patch 3, ml-crit) and never sooner than its weapon's full charge after the last: no spam)
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || !Blows.charged(mob, now - swing.lastSwing)) {
 			return;
 		}
 		if (now - swing.endsAt > COMBO_RESET_TICKS) {
@@ -253,24 +310,36 @@ public final class MobCombat {
 		if (gap(mob, target) > reach * START_REACH_SHARE || !mob.getSensing().hasLineOfSight(target)) {
 			return;
 		}
-		start(level, mob, target, moves, move, swing, now);
+		start(level, mob, target, moves, move, red(mob, moves, move), swing, now, offHand);
+		// (ml-crit) a heavy weapon's blow may be timed to fall from a jump
+		Blows.plan(mob, target, swing.hitAt, now);
 	}
 
-	/** Starts {@code move} at {@code target}: the tell, the wind-up, the slow, and the animation for those watching. */
-	private static void start(ServerLevel level, Mob mob, LivingEntity target, Moves moves, Move move, Swing swing, long now) {
+	/**
+	 * Starts {@code move} at {@code target}: the tell, the wind-up, the slow, and the animation for those watching. A
+	 * {@code red} swing winds up longer ({@link #redLength}).
+	 */
+	private static void start(ServerLevel level, Mob mob, LivingEntity target, Moves moves, Move move, boolean red, Swing swing, long now, boolean offHand) {
 		int length = swingTicks(mob);
 		if (now < swing.quickUntil) {
 			// (Duellists) a punishing swing comes quicker
 			length = Math.max(MIN_SWING_TICKS, (int) Math.round(length * QUICK_SWING));
 			swing.quickUntil = 0;
 		}
+		if (red && !small(target)) {
+			length = redLength(length, move.upswing());
+		}
 		int upswing = small(target) ? MIN_UPSWING_TICKS : Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * move.upswing()));
-		tell(level, mob, heavy(moves, move));
 		swing.target = target;
 		swing.move = move;
 		swing.plain = false;
+		swing.red = red;
+		swing.offHand = offHand;
 		swing.hitAt = now + Math.min(upswing, length - 1);
-		PowersCompat.tellIncoming(mob, target, (int) (swing.hitAt - now), heavy(moves, move));
+		tell(level, mob, red, (int) (swing.hitAt - now));
+		PowersCompat.tellIncoming(mob, target, (int) (swing.hitAt - now), red);
+		// (st-dodge) a bandit or assassin who sees it coming may roll out of it
+		NpcDodge.incoming(target, mob, (int) (swing.hitAt - now));
 		swing.endsAt = now + length;
 		swing.lastSwing = now;
 		swing.combo++;
@@ -281,14 +350,14 @@ public final class MobCombat {
 		}
 		// watchers see the swing: Better Combat's animation where their client can play it, vanilla's arm swing otherwise
 		if (move.animation() != null) {
-			MobSwing packet = new MobSwing(mob.getId(), move.animation(), length, (float) move.upswing());
+			MobSwing packet = new MobSwing(mob.getId(), move.animation(), length, (float) move.upswing(), offHand);
 			for (ServerPlayer player : PlayerLookup.tracking(mob)) {
 				if (ServerPlayNetworking.canSend(player, MobSwing.TYPE)) {
 					ServerPlayNetworking.send(player, packet);
 				}
 			}
 		} else {
-			mob.swingForAttack(net.minecraft.world.InteractionHand.MAIN_HAND);
+			mob.swingForAttack(offHand ? net.minecraft.world.InteractionHand.OFF_HAND : net.minecraft.world.InteractionHand.MAIN_HAND);
 		}
 		mob.setAggressive(true);
 	}
@@ -308,7 +377,7 @@ public final class MobCombat {
 		}
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
-		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0) {
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || !Blows.charged(mob, now - swing.lastSwing)) {
 			return false;
 		}
 		Move heaviest = pick(mob, moves, 0);
@@ -319,7 +388,8 @@ public final class MobCombat {
 			}
 		}
 		swing.combo = 0;
-		start(level, mob, target, moves, heaviest, swing, now);
+		// (the closing blow is rare already: red whenever its move is heavy)
+		start(level, mob, target, moves, heaviest, heavy(moves, heaviest), swing, now, false);
 		return true;
 	}
 
@@ -336,13 +406,13 @@ public final class MobCombat {
 	 */
 	public static void plainBlow(Mob mob, LivingEntity target) {
 		Duellists.engaged(mob, target);
-		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds)
-		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG)) {
+		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds, and a fight among people, Turns)
+		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG) || Turns.waiting(mob)) {
 			return;
 		}
 		long now = level.getGameTime();
 		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
-		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0) {
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0 || !Blows.charged(mob, now - swing.lastSwing)) {
 			return;
 		}
 		if (now - swing.endsAt > COMBO_RESET_TICKS) {
@@ -354,28 +424,38 @@ public final class MobCombat {
 		if (gap(mob, target) > BASE_REACH * START_REACH_SHARE && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
 			return;
 		}
+		boolean red = (plainHeavy(mob) || FoeLore.reading(mob)) && mob.getRandom().nextFloat() < redChance(mob);
 		int length = swingTicks(mob);
+		if (red && !small(target)) {
+			length = redLength(length, PLAIN_UPSWING);
+		}
 		int upswing = small(target) ? MIN_UPSWING_TICKS : Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * PLAIN_UPSWING));
-		tell(level, mob, plainHeavy(mob));
+		// ((st-dodge) two blades go hand after hand: the off hand's turn is the game's off-arm swing)
+		boolean offHand = DualBlades.offNext(mob);
 		swing.target = target;
 		swing.move = null;
 		swing.plain = true;
+		swing.red = red;
+		swing.offHand = offHand;
 		swing.hitAt = now + Math.min(upswing, length - 1);
-		PowersCompat.tellIncoming(mob, target, (int) (swing.hitAt - now), plainHeavy(mob));
+		tell(level, mob, red, (int) (swing.hitAt - now));
+		PowersCompat.tellIncoming(mob, target, (int) (swing.hitAt - now), red);
+		// (st-dodge) a bandit or assassin who sees it coming may roll out of it
+		NpcDodge.incoming(target, mob, (int) (swing.hitAt - now));
 		swing.endsAt = now + length;
 		swing.lastSwing = now;
 		String animation = mob.getMainHandItem().isEmpty() ? (swing.combo % 3 == 2 ? UPPERCUT : PUNCH) : CUT;
 		swing.combo++;
 		MobSwing packet = new MobSwing(mob.getId(), animation, length, (float) PLAIN_UPSWING);
 		boolean animated = false;
-		for (ServerPlayer player : PlayerLookup.tracking(mob)) {
+		for (ServerPlayer player : offHand ? List.<ServerPlayer>of() : PlayerLookup.tracking(mob)) {
 			if (ServerPlayNetworking.canSend(player, MobSwing.TYPE)) {
 				ServerPlayNetworking.send(player, packet);
 				animated = true;
 			}
 		}
 		if (!animated) {
-			mob.swingForAttack(net.minecraft.world.InteractionHand.MAIN_HAND);
+			mob.swingForAttack(offHand ? net.minecraft.world.InteractionHand.OFF_HAND : net.minecraft.world.InteractionHand.MAIN_HAND);
 		}
 		mob.setAggressive(true);
 	}
@@ -387,13 +467,19 @@ public final class MobCombat {
 	}
 
 	/** (0.7.283) The plain blow lands on its one target, if it's still in reach and sight; a miss is heard. */
-	private static void plainStrike(ServerLevel level, Mob mob, @Nullable LivingEntity target) {
+	private static void plainStrike(ServerLevel level, Mob mob, @Nullable LivingEntity target, boolean heavy, boolean offHand) {
+		Blows.blown(mob);
+		// ((st-dodge) the blow is this hand's: an off hand's strikes with its own blade, DualBlades)
+		DualBlades.swung(mob, offHand);
+		// ((st-dodge) a bandit or assassin who rolled out of it is missed)
+		if (target != null && NpcDodge.dodged(target, mob)) {
+			target = null;
+		}
 		if (target == null || !target.isAlive() || target.level() != level
 			|| gap(mob, target) > BASE_REACH + 0.25 + slack(target) && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, mob.getSoundSource(), 0.6F, 0.8F);
 			return;
 		}
-		boolean heavy = plainHeavy(mob);
 		if (heavy) {
 			mob.addTag(UNPARRYABLE_TAG);
 		}
@@ -411,13 +497,47 @@ public final class MobCombat {
 		return moves.twoHanded() || move.damage() >= HEAVY_DAMAGE;
 	}
 
-	/** (0.7.267) The glint as a swing begins, at the weapon hand. */
+	/**
+	 * Whether this swing of {@code move} is red ({@link #RED_CHANCE}): a one-handed weapon's heavy move, which {@link #pick}
+	 * throws only now and then, always is; a two-handed weapon's swing (every one heavy), or a heavy move with nothing
+	 * plainer to swap for, only by the roll. A band reading a parrier ({@link FoeLore}) rolls on any swing, more often.
+	 */
+	static boolean red(Mob mob, Moves moves, Move move) {
+		boolean heavy = heavy(moves, move);
+		if (heavy && !moves.twoHanded() && usable(mob, moves).stream().anyMatch(other -> !heavy(moves, other))) {
+			return true;
+		}
+		return (heavy || FoeLore.reading(mob)) && mob.getRandom().nextFloat() < redChance(mob);
+	}
+
+	/** The share of {@code mob}'s heavy swings that are red. */
+	static float redChance(Mob mob) {
+		return FoeLore.reading(mob) ? READ_RED_CHANCE : RED_CHANCE;
+	}
+
+	/**
+	 * A red swing's length: {@code length} stretched so its wind-up ({@code share} of it) is {@link #RED_WINDUP_SCALE}
+	 * longer, inside {@link #RED_MIN_WINDUP} to {@link #RED_MAX_WINDUP} ticks (never shorter than it was).
+	 */
+	static int redLength(int length, double share) {
+		double at = Math.max(share, 0.1);
+		int windup = (int) Math.round(length * at);
+		int wanted = Math.max(windup, Math.min(RED_MAX_WINDUP, Math.max(RED_MIN_WINDUP, (int) Math.round(windup * RED_WINDUP_SCALE))));
+		return Math.max(length, Math.min(RED_MAX_SWING, (int) Math.ceil(wanted / at)));
+	}
+
+	/** (0.7.267) The glint as a swing begins, at the weapon hand, for the usual wind-up. */
 	static void tell(ServerLevel level, Mob mob, boolean heavy) {
+		tell(level, mob, heavy, 0);
+	}
+
+	/** The glint as a swing begins, at the weapon hand; it holds for the {@code windup} (ticks; 0 for the usual). */
+	static void tell(ServerLevel level, Mob mob, boolean heavy, int windup) {
 		Vec3 facing = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
 		Vec3 side = new Vec3(-facing.z, 0.0, facing.x).scale(mob.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? -0.35 : 0.35);
 		Vec3 at = mob.getEyePosition().add(facing.scale(0.4)).add(side).add(0.0, -0.2, 0.0);
 		// (0.7.505) Powers' star and warning bell; the old dust and a bell without it
-		if (PowersCompat.tellGlint(level, at, heavy)) {
+		if (PowersCompat.tellGlint(level, at, heavy, windup)) {
 			return;
 		}
 		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(heavy ? HEAVY_TELL_COLOR : TELL_COLOR, TELL_SIZE),
@@ -460,6 +580,12 @@ public final class MobCombat {
 		shot.addTag(UNPARRYABLE_TAG);
 	}
 
+	/** (sh-shooter) Whether this gunman has its gun up on a foe just now (its red glint, {@link #aimed}), the shot to come. */
+	static boolean aiming(Mob mob) {
+		Long fireAt = AIMS.get(mob);
+		return fireAt != null && mob.level().getGameTime() <= fireAt + AIM_STALE;
+	}
+
 	/** (0.7.267) Its next swing may start at once (a parry answered, {@link MobParry}). */
 	static void hasten(Mob mob) {
 		Swing swing = SWINGS.get(mob);
@@ -470,6 +596,22 @@ public final class MobCombat {
 
 	/** The attack the combo is on, skipping those whose conditions this mob doesn't meet. */
 	private static Move pick(Mob mob, Moves moves, int combo) {
+		List<Move> usable = usable(mob, moves);
+		Move move = usable.get(Math.floorMod(combo, usable.size()));
+		if (!moves.twoHanded() && heavy(moves, move) && mob.getRandom().nextFloat() >= HEAVY_PICK_CHANCE) {
+			// (enemy damage balance, Andy: basic attacks most of the time, the heavy ones only now and then) a heavy move in
+			// the combo is mostly swapped for a plain one; a two-handed weapon's every blow is heavy, so it keeps them
+			for (Move plain : usable) {
+				if (!heavy(moves, plain)) {
+					return plain;
+				}
+			}
+		}
+		return move;
+	}
+
+	/** The moves of {@code moves} this mob can throw: those whose conditions it meets, and only the basic ones if it's green. */
+	private static List<Move> usable(Mob mob, Moves moves) {
 		List<Move> usable = new ArrayList<>();
 		boolean shield = !mob.getOffhandItem().isEmpty() && mob.getOffhandItem().has(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS);
 		boolean emptyOffhand = mob.getOffhandItem().isEmpty();
@@ -485,17 +627,7 @@ public final class MobCombat {
 		if (!WeaponForms.experienced(mob)) {
 			usable = WeaponForms.basic(usable, Move::animation);
 		}
-		Move move = usable.get(Math.floorMod(combo, usable.size()));
-		if (!moves.twoHanded() && heavy(moves, move) && mob.getRandom().nextFloat() >= HEAVY_PICK_CHANCE) {
-			// (enemy damage balance, Andy: basic attacks most of the time, the heavy ones only now and then) a heavy move in
-			// the combo is mostly swapped for a plain one; a two-handed weapon's every blow is heavy, so it keeps them
-			for (Move plain : usable) {
-				if (!heavy(moves, plain)) {
-					return plain;
-				}
-			}
-		}
-		return move;
+		return usable;
 	}
 
 	/** A swing's length (ticks): the weapon's attack speed, slowed for mobs. */
@@ -564,9 +696,9 @@ public final class MobCombat {
 			if (swing.hitAt >= 0 && now >= swing.hitAt) {
 				swing.hitAt = -1;
 				if (swing.plain) {
-					plainStrike(level, mob, swing.target);
-				} else if (swing.move != null && !mob.getMainHandItem().isEmpty()) {
-					strike(level, mob, swing.move, swing.target);
+					plainStrike(level, mob, swing.target, swing.red, swing.offHand);
+				} else if (swing.move != null && !(swing.offHand ? mob.getOffhandItem() : mob.getMainHandItem()).isEmpty()) {
+					strike(level, mob, swing.move, swing.target, swing.red, swing.offHand);
 				}
 			}
 			if (now >= swing.endsAt) {
@@ -581,12 +713,15 @@ public final class MobCombat {
 		}
 	}
 
-	/** The blow: every foe in the arc and reach, at the attack's damage multiplier. */
-	private static void strike(ServerLevel level, Mob mob, Move move, @Nullable LivingEntity primary) {
-		Moves moves = BetterCombatBridge.moves(mob.getMainHandItem());
+	/** The blow: every foe in the arc and reach, at the attack's damage multiplier; a {@code heavy} (red) one can't be parried. */
+	private static void strike(ServerLevel level, Mob mob, Move move, @Nullable LivingEntity primary, boolean heavy, boolean offHand) {
+		Moves moves = BetterCombatBridge.moves(offHand ? mob.getOffhandItem() : mob.getMainHandItem());
 		if (moves == null) {
 			return;
 		}
+		Blows.blown(mob);
+		// ((st-dodge) the blow is this hand's: an off hand's strikes with its own blade, DualBlades)
+		DualBlades.swung(mob, offHand);
 		double reach = moves.reach() * move.reachScale();
 		double half = switch (move.shape()) {
 			case 2 -> Math.max(STAB_HALF_ANGLE, move.angle() / 2.0);
@@ -599,7 +734,9 @@ public final class MobCombat {
 		float yaw = mob.getYHeadRot();
 		Vec3 facing = Vec3.directionFromRotation(0.0F, yaw);
 		List<LivingEntity> hits = new ArrayList<>();
-		if (primary != null && primary.isAlive() && gap(mob, primary) <= reach + 0.25 + slack(primary) && mob.getSensing().hasLineOfSight(primary)) {
+		// ((st-dodge) a bandit or assassin who rolled out of it is missed)
+		boolean dodged = primary != null && NpcDodge.dodged(primary, mob);
+		if (primary != null && !dodged && primary.isAlive() && gap(mob, primary) <= reach + 0.25 + slack(primary) && mob.getSensing().hasLineOfSight(primary)) {
 			hits.add(primary);
 		}
 		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(reach + 1.0),
@@ -631,7 +768,6 @@ public final class MobCombat {
 		if (damage != null && move.damage() != 1.0) {
 			damage.addOrUpdateTransientModifier(new AttributeModifier(COMBO_DAMAGE, move.damage() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
-		boolean heavy = heavy(moves, move);
 		if (heavy) {
 			mob.addTag(UNPARRYABLE_TAG);
 		}
@@ -705,6 +841,10 @@ public final class MobCombat {
 	/** The sidestep: fighting folk, and rangers and crewmen in leather or mail, may dodge a player's blow. */
 	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
 		if (!(entity instanceof Mob mob) || !(entity.level() instanceof ServerLevel level)) {
+			return true;
+		}
+		if (NpcDodge.dodger(mob) || Assassins.is(mob)) {
+			// (st-dodge) a bandit or assassin rolls out of blows instead (NpcDodge); one still in disguise takes it, and is found out
 			return true;
 		}
 		Folk folk = mob instanceof Folk f && f.combatant() ? f : null;

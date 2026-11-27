@@ -72,6 +72,8 @@ final class ZFighterTournaments {
 	static final int BOUT_EMERALDS = 4;
 	static final int WIN_TP = 750;
 	static final int WIN_EMERALDS = 24;
+	/** The item the tournament's champion is crowned with (Jaymo's Kingdoms' victor's wreath, worn in the harness's hood place). */
+	static final String WREATH = "laurel_wreath";
 	static final long DAY = 24000L;
 	static final String[] CHAMPIONS = {"krell", "toma", "shin", "bora", "yarro", "pashi", "namu", "gula"};
 	static final int RING_COLOR = 0xFFE070;
@@ -591,6 +593,10 @@ static final String[] TYRANTS = {"garrok", "vexa", "kural", "morrow", "saiza", "
 		if (winner != null) {
 			int mult = t.theme == THEME_TYRANT ? 2 : 1;
 			pay(winner, WIN_TP * mult, WIN_EMERALDS * mult);
+			// (Kingdoms' Mordhau harness 2) and the victor's wreath, when Kingdoms is in
+			net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskingdoms", WREATH))
+				.ifPresent(wreath -> winner.getInventory().placeItemBackInInventory(new net.minecraft.world.item.ItemStack(wreath),
+					net.minecraft.util.Prediction.SERVER_ONLY));
 			t.level.sendParticles(ParticleTypes.FIREWORK, winner.getX(), winner.getY() + 1.5, winner.getZ(), 60, 0.6, 1.0, 0.6, 0.15);
 		}
 	}

@@ -129,6 +129,19 @@ public class HydrologyManager {
     private static final double BANK_MEET_MIN = 5.0;
 
     private static final double BANK_TALUS = 1.0;
+
+    /**
+     * Gentle lowland banks (open-gorge mode, the default): a lowland river's banks, and a mountain stream's where it runs
+     * through low ground, climb at most one block for every {@code BANK_GENTLE_RUN} out from the water, out to the
+     * gorge's reach, so the ground eases down to the water the way a river valley does instead of breaking off in a
+     * sheer cut. High ground still makes a gorge.
+     */
+    private static final double BANK_GENTLE_RUN = 2.0;
+    private static final double BANK_GENTLE_TALUS = 1.0 / BANK_GENTLE_RUN;
+
+    private static double gentleBank(double rise) {
+        return Math.min(GORGE_REACH, Math.max(0.0, rise) * BANK_GENTLE_RUN);
+    }
     private static final double LEVEE_TALUS = 0.5;
 
     private static final double LEVEE_CREST = 2.0;
@@ -853,6 +866,17 @@ public class HydrologyManager {
         return WORLD_SEA_LEVEL;
     }
 
+    /** The sea level Dynamic Waters' fixed heights were set against (vanilla's). */
+    private static final int TUNED_SEA_LEVEL = 63;
+
+    /**
+     * A height Dynamic Waters set as a fixed Y for vanilla's sea at 63, moved with the world's own sea (the pack's higher
+     * sea stands 8 blocks up, with the land lifted as much), so it stays as far above the water as was meant.
+     */
+    public static int aboveSea(int tunedY) {
+        return tunedY + WORLD_SEA_LEVEL - TUNED_SEA_LEVEL;
+    }
+
     public static long getRegionKey(int rx, int rz) {
         return ((long) rx & 0xFFFFFFFFL) | (((long) rz & 0xFFFFFFFFL) << 32);
     }
@@ -1310,7 +1334,7 @@ public class HydrologyManager {
             final double reach = path.maxWaterRadius() + GORGE_REACH + GORGE_SEAL + 4.0;
             if (path.fractal().boxDistanceSq(x, z) >= reach * reach) continue;
             if (path.fractal().nearestPoint(x, z, onRiver) >= reach * reach) continue;
-            if (coarseGroundAt(onRiver[0], onRiver[1], gen, rs) <= GORGE_FROM) continue;
+            if (coarseGroundAt(onRiver[0], onRiver[1], gen, rs) <= aboveSea(GORGE_FROM)) continue;
             return true;
         }
         return false;
@@ -1731,7 +1755,8 @@ public class HydrologyManager {
         return flow;
     }
 
-    private static final double GORGE_FROM = 76.0;
+    /** Where a lowland river starts to cut a gorge: 13 blocks over the sea (Y 76 with vanilla's sea). */
+    private static final int GORGE_FROM = 76;
     private static final double GORGE_RAMP = 10.0;
 
     private static final double GORGE_GRADE_SLOT = 5.0;
@@ -2520,7 +2545,7 @@ public class HydrologyManager {
     }
 
     public static double gorgeShare(double riverGround) {
-        final double t = Mth.clamp((riverGround - GORGE_FROM) / GORGE_RAMP, 0.0, 1.0);
+        final double t = Mth.clamp((riverGround - aboveSea(GORGE_FROM)) / GORGE_RAMP, 0.0, 1.0);
         return t * t * (3.0 - 2.0 * t);
     }
 
@@ -2530,7 +2555,8 @@ public class HydrologyManager {
         if (dOut <= 0.0 || ground <= base) return ground;
 
         final double bank = Math.min(ground, base + ChannelForm.bankRise(dOut, ground - base,
-                delta ? DELTA_PLAIN : bankMeet(waterRadius), delta ? DELTA_PLAIN_SLOPE : BANK_TALUS));
+                delta ? DELTA_PLAIN : Math.max(bankMeet(waterRadius), gentleBank(ground - base)),
+                delta ? DELTA_PLAIN_SLOPE : BANK_GENTLE_TALUS));
         final double gorge = gorgeShare(riverGround);
         if (gorge < 0.5 || delta) return bank;
         if (dOut >= GORGE_REACH + GORGE_ROUGH) return ground;
@@ -2910,12 +2936,14 @@ public class HydrologyManager {
                     final double riverGround = generator != null && randomState != null
                             ? coarseGroundAt(onRiver[0], onRiver[1], generator, randomState)
                             : originalY;
-                    final double t = Mth.clamp((riverGround - GORGE_FROM) / GORGE_RAMP, 0.0, 1.0);
+                    final double t = Mth.clamp((riverGround - aboveSea(GORGE_FROM)) / GORGE_RAMP, 0.0, 1.0);
                     gorge = t * t * (3.0 - 2.0 * t);
 
                     gorgeDepth = Math.max(8.0, (riverGround - (seaLevel - 1)) * 1.1 + 6.0);
                 }
-                final boolean inReach = rawDistance < (path.delta() ? maxRadius + DELTA_PLAIN : maxRadius * 2.0);
+                final double gentle = gorgeMode && !path.delta() ? gentleBank(originalY - (seaLevel - 1)) : 0.0;
+                final boolean inReach = rawDistance < (path.delta() ? maxRadius + DELTA_PLAIN
+                        : Math.max(maxRadius * 2.0, maxRadius + gentle));
                 if (!inReach && !(gorge > 0.0 && rawDistance < gorgeReach)) {
                     continue;
                 }
@@ -2957,7 +2985,7 @@ public class HydrologyManager {
                 double hDiff = Math.max(0.0, originalY - baselineY);
 
                 double oldBaseWidth = 16.0 * (1.0 - widthFactor) + 4.0 * widthFactor;
-                if (originalY < 80) {
+                if (originalY < aboveSea(80)) {
                     double reqNormSq = hDiff / 5.6;
                     double reqNorm = Math.sqrt(Math.max(1.0, reqNormSq));
 
@@ -2974,6 +3002,7 @@ public class HydrologyManager {
 
                 final int tunnelLedge = tunnelFactor > 0.0 ? Config.NORMAL_TUNNEL_LEDGE.get() : 0;
                 targetBankWidth = Math.max(targetBankWidth, tunnelLedge * tunnelFactor);
+                targetBankWidth = Math.max(targetBankWidth, gentle);
 
                 if (mCtx.bestPath != null) {
                     double distToMouth = mCtx.distance;
@@ -3077,8 +3106,10 @@ public class HydrologyManager {
                             int slopeY = originalY;
                             if (inCanyon && targetBankWidth > 0.0) {
                                 final double dOut = Math.max(0.0, edgeOut);
-                                final double bankReach = path.delta() ? DELTA_PLAIN : bankMeet(canyonRadius);
-                                final double talus = path.delta() ? DELTA_PLAIN_SLOPE : BANK_TALUS;
+                                final double bankReach = path.delta() ? DELTA_PLAIN
+                                        : Math.max(bankMeet(canyonRadius), gentle);
+                                final double talus = path.delta() ? DELTA_PLAIN_SLOPE
+                                        : gorgeMode ? BANK_GENTLE_TALUS : BANK_TALUS;
                                 slopeY = (int) Math.floor(baselineY
                                         + ChannelForm.bankRise(dOut, originalY - baselineY, bankReach, talus));
 
@@ -3365,6 +3396,10 @@ public class HydrologyManager {
                         boolean isNearOutlet = distToOutlet < 24.0;
 
                         double reach = Math.max(BANK_ZONE_MIN, BANK_ZONE_PER_WIDTH * chanW);
+                        // gentle banks where a stream runs through low ground (not into a gorge, ravine or tunnel)
+                        final double gentle = ravine == null && !atRim && !tunnel
+                                && originalY < aboveSea(GORGE_FROM) ? gentleBank(originalY - data.y) : 0.0;
+                        reach = Math.max(reach, gentle);
 
                         if (data.beyondEnd && (data.distance >= chanW || channelBowl(data, chanW) == 0)
                                 && data.distance < chanW + Math.max(reach, RAVINE_NEAR)
@@ -3521,7 +3556,7 @@ public class HydrologyManager {
                                         }
                                     }
 
-                                    final double bankWidth = bankMeet(chanW);
+                                    final double bankWidth = Math.max(bankMeet(chanW), gentle);
                                     final double tOut = Math.min(1.0, dOut / bankWidth);
 
                                     final double wallNoise = RIVER_BED_NOISE.get(x * 0.15, z * 0.15) * 0.25;
@@ -3557,7 +3592,8 @@ public class HydrologyManager {
                                         finalTargetY = bermTop;
                                     } else {
                                         int bankTop = (int) Math.floor(data.y
-                                                + ChannelForm.bankRise(dOut, originalY - data.y, bankWidth, BANK_TALUS) + wallNoise);
+                                                + ChannelForm.bankRise(dOut, originalY - data.y, bankWidth,
+                                                        gentle > 0.0 ? BANK_GENTLE_TALUS : BANK_TALUS) + wallNoise);
 
                                         if (originalY <= seaLevel + 1 && bankTop < seaLevel + 1) {
                                             bankTop = Math.max(bankTop, seaLevel + 1);

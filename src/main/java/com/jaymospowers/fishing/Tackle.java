@@ -132,7 +132,8 @@ public final class Tackle {
         LEDGER_ROD = rod("ledger_rod", Rod.LEDGER, 96);
         // natural baits:                   cod salmon puffer tropical shark tuna
         EARTHWORM = bait("earthworm", new int[]{3, 3, 1, 1, 0, 0}, Cat.WORM);
-        MAGGOTS = bait("maggots", new int[]{2, 3, 0, 2, 0, 0}, Cat.WORM);
+        // (Andy: "pickup maggots as an item for bait") the river angler's best: every freshwater fish takes a maggot
+        MAGGOTS = bait("maggots", new int[]{2, 4, 0, 2, 0, 0}, Cat.WORM);
         DOUGH_BAIT = bait("dough_bait", new int[]{2, 3, 0, 1, 0, 0}, Cat.PLANT);
         BOILIE = bait("boilie", new int[]{1, 3, 0, 0, 0, 0}, Cat.PLANT);
         LUGWORM = bait("lugworm", new int[]{4, 1, 2, 2, 0, 1}, Cat.WORM);

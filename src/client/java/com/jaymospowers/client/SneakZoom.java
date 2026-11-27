@@ -11,7 +11,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.20.74) Andy: "shift + left alt should make you zoom". Holding Sneak and the Dodge key (Left Alt) together zooms
- * as well, until Alt is let go (0.20.98: letting go of Shift first keeps it); {@code DodgeClient} doesn't dodge on Alt while Sneak is down. Alt alone still rolls.
+ * as well, until Alt is let go (0.20.98: letting go of Shift first keeps it); {@code DodgeClient} doesn't dodge on Alt while Sneak is down. Alt alone still rolls,
+ * except with a fishing line out ({@link #lineOut}): then Alt alone zooms.
  * <p>Kept from the old double-tap gesture: no zoom from Sneak while clinging to a wall or hanging from a bar (Sneak lets go
  * there) nor until {@link #CLING_SETTLE} ticks after, none from Web's double-Sneak yank, and none in a slide (a held
  * Sneak in a fast run is the slide's).
@@ -73,8 +74,9 @@ public final class SneakZoom {
 			if (!alt) {
 				setZoom(minecraft, false);
 			}
-		} else if (sneak && alt) {
-			// (0.20.74) Shift + Left Alt zooms too, for as long as both are held (Alt with Shift down doesn't dodge)
+		} else if (sneak && alt || alt && lineOut(player)) {
+			// (0.20.74) Shift + Left Alt zooms too, for as long as both are held (Alt with Shift down doesn't dodge);
+			// (Andy, 2026-11-26) with a fishing line out, Alt alone zooms, and DodgeClient throws no dash or roll
 			setZoom(minecraft, true);
 			byAlt = true;
 		}
@@ -86,6 +88,14 @@ public final class SneakZoom {
 			}
 		}
 		sneakWasDown = sneak;
+	}
+
+	/**
+	 * (Andy, 2026-11-26: "make alt zoom alone when the line is out, so you dont do the dash or cancel the cast") A fishing
+	 * line is out: Alt alone is the zoom then, not a dodge ({@code DodgeClient} skips the press).
+	 */
+	public static boolean lineOut(LocalPlayer player) {
+		return player.fishing != null && !player.fishing.isRemoved();
 	}
 
 	private static void setZoom(Minecraft minecraft, boolean on) {

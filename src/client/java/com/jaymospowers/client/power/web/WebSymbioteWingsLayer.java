@@ -106,7 +106,8 @@ final class WebSymbioteWingsLayer extends RenderLayer<AvatarRenderState, PlayerM
 		poseStack.pushPose();
 		parent.root().translateAndRotate(poseStack);
 		parent.body.translateAndRotate(poseStack);
-		if (big) {
+		// (the red strain's slender body is no wider than its host: its wings stay their own size)
+		if (big && !WebSuitGrowth.slender(state)) {
 			poseStack.scale(BIG_BODY_SCALE, BIG_BODY_SCALE, BIG_BODY_SCALE);
 		}
 		Vec3[][] wings = {pose(ease, angle, 1.0), pose(ease, angle, -1.0)};

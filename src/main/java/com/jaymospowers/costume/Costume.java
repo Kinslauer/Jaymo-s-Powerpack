@@ -232,7 +232,19 @@ public final class Costume {
 			player.sendOverlayMessage(Component.translatable(worn == null ? "message.jaymospowers.costume.none" : "message.jaymospowers.costume.no_mask"));
 			return;
 		}
+		if (!unmasked(player) && symbioteShape(player) && com.jaymospowers.power.web.WebSymbiote.suitShown(player)
+			&& com.jaymospowers.power.web.WebSymbiote.fightsMask(player)) {
+			// (Andy, 2026-11-25) a symbiote in a host without the Web fights them for the mask, every time
+			return;
+		}
 		MaskMotion.begin(player, () -> flipMask(player));
+	}
+
+	/** The worn costume's head piece comes off if it's on (a won fight with a symbiote's suit that wears its shape). */
+	public static void maskOff(ServerPlayer player) {
+		if (!unmasked(player)) {
+			flipMask(player);
+		}
 	}
 
 	/** The worn costume's head piece, off or back on (the hands are at the face). */

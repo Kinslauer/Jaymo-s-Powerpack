@@ -144,7 +144,7 @@ public final class RubberEngulf {
 	/** How far {@code player}'s swallow has got (0 .. 1), at {@code clock}; noted for when it ends. */
 	private static float progress(Player player, float clock) {
 		float started = STARTED.computeIfAbsent(player.getId(), k -> clock);
-		float t = Mth.clamp((clock - started) / RubberFolk.ABSORB_TICKS, 0.0F, 1.0F);
+		float t = Mth.clamp((clock - started) / player.getAttachedOrElse(com.jaymoskingdoms.HeritageHold.ABSORB_NEED, RubberFolk.ABSORB_TICKS), 0.0F, 1.0F);
 		REACHED.put(player.getId(), t);
 		return t;
 	}

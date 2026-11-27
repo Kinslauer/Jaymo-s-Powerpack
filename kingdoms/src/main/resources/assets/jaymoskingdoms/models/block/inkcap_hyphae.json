@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jaymoskingdoms:block/inkcap_stem",
+    "side": "jaymoskingdoms:block/inkcap_stem"
+  }
+}

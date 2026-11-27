@@ -1,0 +1,16 @@
+{
+  "talk.jaymoskingdoms.croc_watch.warn.0": "%s! In the water, there! Keep back from the bank!",
+  "talk.jaymoskingdoms.croc_watch.warn.1": "Get away from the river, there's a %s!",
+  "talk.jaymoskingdoms.croc_watch.warn.2": "That's no log. %s! Call the children in!",
+  "talk.jaymoskingdoms.croc_watch.warn.3": "Bring the dogs in, a %s's come up the water!",
+  "talk.jaymoskingdoms.croc_watch.warn.4": "Nobody goes down to the water, a %s is lying there!",
+  "talk.jaymoskingdoms.croc_watch.warn.5": "Mind the reeds! %s!",
+  "talk.jaymoskingdoms.croc_watch.guards.0": "Someone fetch the guard, it'll take a child next!",
+  "talk.jaymoskingdoms.croc_watch.guards.1": "Guards! There's a beast at the water!",
+  "talk.jaymoskingdoms.croc_watch.guards.2": "Tell the watch, before it takes somebody!",
+  "talk.jaymoskingdoms.croc_watch.guards.3": "Guards! Down by the river, quick!",
+  "talk.jaymoskingdoms.croc_watch.hunt.0": "A %s? Spears out, we're putting it down.",
+  "talk.jaymoskingdoms.croc_watch.hunt.1": "Keep everyone back. I'll see to the %s.",
+  "talk.jaymoskingdoms.croc_watch.hunt.2": "Not in my town. After it!",
+  "talk.jaymoskingdoms.croc_watch.hunt.3": "Stay off the bank till that %s is dead."
+}

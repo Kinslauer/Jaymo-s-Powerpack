@@ -74,6 +74,13 @@ public abstract class FishingHookMixin {
         com.jaymospowers.fishing.IceFishing.tick(hook);
         com.jaymospowers.fishing.LureDepth.tick(hook);
         com.jaymospowers.fishing.LavaFishing.tick(hook);
+        // (Andy, 2026-11-26) a fish on the line has the hook in its mouth: the hook rides with it, on both sides, so the line
+        // runs to the fish you're fighting (FishOnLine); vanilla only does this for a hook thrown into an entity
+        Entity fish = hook.getHookedIn();
+        if (fish instanceof LivingEntity && !fish.isRemoved()) {
+            hook.setPos(fish.getX(), fish.getY(0.8), fish.getZ());
+            hook.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+        }
     }
 
     /** While a fish is on the line, don't retrieve the hook or drop vanilla loot. */

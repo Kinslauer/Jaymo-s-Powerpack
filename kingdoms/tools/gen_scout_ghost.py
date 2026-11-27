@@ -4,6 +4,9 @@ little less thin so it reads at night, with two bright eyes and legs that thin a
 ki ghost is drawn (client/KiGhost). Run from kingdoms/: python3 tools/gen_scout_ghost.py"""
 import os
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(HERE, '..', 'src', 'main', 'resources', 'assets', 'jaymoskingdoms', 'textures')
@@ -47,19 +50,8 @@ def ghost():
 
 
 def egg(name, shell, spots):
-    """A vanilla-shaped spawn egg: the shape of one we already ship, in this creature's colours."""
-    src = Image.open(os.path.join(ASSETS, 'item', 'scalebane_spawn_egg.png')).convert('RGBA')
-    tones = sorted({p[:3] for p in src.getdata() if p[3] > 0}, key=sum)
-    out = Image.new('RGBA', src.size, (0, 0, 0, 0))
-    for y in range(src.height):
-        for x in range(src.width):
-            r, g, b, a = src.getpixel((x, y))
-            if a == 0:
-                continue
-            t = tones.index((r, g, b)) / max(1, len(tones) - 1)
-            base = spots if (x * 7 + y * 13) % 11 < 2 and 3 < x < 12 and 3 < y < 13 else shell
-            out.putpixel((x, y), tuple(int(c * (0.55 + 0.55 * t)) if c * (0.55 + 0.55 * t) < 255 else 255 for c in base) + (a,))
-    out.save(os.path.join(ASSETS, 'item', name + '_spawn_egg.png'))
+    """The Reason look's spawn egg: vanilla's spotted egg (vanilla_egg.py) in this creature's colours."""
+    vanilla_egg.save(os.path.join(ASSETS, 'item', name + '_spawn_egg.png'), shell, spots)
 
 
 if __name__ == '__main__':

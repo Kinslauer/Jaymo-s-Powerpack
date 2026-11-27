@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:glowcap_stem",
+    "jaymoskingdoms:stripped_glowcap_stem",
+    "jaymoskingdoms:glowcap_hyphae",
+    "jaymoskingdoms:stripped_glowcap_hyphae",
+    "jaymoskingdoms:bouncecap_stem",
+    "jaymoskingdoms:stripped_bouncecap_stem",
+    "jaymoskingdoms:bouncecap_hyphae",
+    "jaymoskingdoms:stripped_bouncecap_hyphae",
+    "jaymoskingdoms:inkcap_stem",
+    "jaymoskingdoms:stripped_inkcap_stem",
+    "jaymoskingdoms:inkcap_hyphae",
+    "jaymoskingdoms:stripped_inkcap_hyphae"
+  ]
+}

@@ -54,6 +54,7 @@ final class CorpseRagdoll {
 	private static final double SLUMP_TIP = 0.02;
 
 	RagdollBody body;
+	private final CorpseEntity corpse;
 	private final LevelRagdollWorld world;
 	/** What was last written to the entity (or seen on it at the start). */
 	private Vec3 wrotePos = Vec3.ZERO, wroteVel = Vec3.ZERO;
@@ -75,6 +76,7 @@ final class CorpseRagdoll {
 
 	CorpseRagdoll(CorpseEntity corpse, RagdollBody body, @org.jspecify.annotations.Nullable KeelOver keel) {
 		this.body = body;
+		this.corpse = corpse;
 		this.world = new LevelRagdollWorld(corpse.level(), corpse);
 		this.keel = keel;
 		corpse.setKeeling(keel != null);
@@ -208,6 +210,23 @@ final class CorpseRagdoll {
 			send(corpse);
 		}
 		wasAsleep = asleep;
+		RagdollBudget.note(this, !asleep);
+		RagdollBudget.enforce(level);
+	}
+
+	CorpseEntity corpse() {
+		return corpse;
+	}
+
+	/** Whether the budget may settle it: moving free, not held, pinned, keeling over or sliding down a wall. */
+	boolean settleable(net.minecraft.server.level.ServerLevel level) {
+		return !corpse.isRemoved() && corpse.level() == level && !body.asleep() && !body.gripped() && !body.pinned() && keel == null
+			&& slump == null;
+	}
+
+	/** Over the budget: it stops where it is and sleeps until something moves it. */
+	void settle() {
+		body.settle();
 	}
 
 	/** (0.5.24) Pins the body to the butcher table its torso lies on, if it lies on one. */

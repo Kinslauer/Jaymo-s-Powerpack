@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "minecraft:block/blackstone",
+    "side": "minecraft:block/blackstone",
+    "top": "jaymoskingdoms:block/harvest_altar_top"
+  }
+}

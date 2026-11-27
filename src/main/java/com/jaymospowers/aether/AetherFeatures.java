@@ -2,6 +2,7 @@ package com.jaymospowers.aether;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.aether.world.CloudbedFeature;
+import com.jaymospowers.aether.world.CloudLaneFeature;
 import com.jaymospowers.aether.world.FerrositeSpireFeature;
 import com.jaymospowers.aether.world.IceSpikeFeature;
 import com.jaymospowers.aether.world.MoaNestFeature;
@@ -49,6 +50,7 @@ public final class AetherFeatures {
 		register("aercloud", AercloudFeature.CODEC);
 		register("quicksoil_shelf", QuicksoilShelfFeature.CODEC);
 		register("cloudbed", CloudbedFeature.CODEC);
+		register("cloud_lane", CloudLaneFeature.CODEC);
 		register("ice_spike", IceSpikeFeature.CODEC);
 		register("ferrosite_spire", FerrositeSpireFeature.CODEC);
 		register("moa_nest", MoaNestFeature.CODEC);

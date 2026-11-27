@@ -1,0 +1,13 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "allowFillers": false,
+  "minfloors": 0,
+  "maxfloors": 0,
+  "parts": [
+    {
+      "part": "jaymospowers:maw/scattered/scattered_minifactory00_0"
+    }
+  ]
+}

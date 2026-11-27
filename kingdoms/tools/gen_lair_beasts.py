@@ -29,6 +29,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gen_tomb_undead as kit  # noqa: E402
+kit.CLEAN = True  # the Reason look: no per-pixel jitter on the sheets
 from gen_tomb_undead import Builder, anim, add_animations, bone_uuids_of, shade  # noqa: E402
 
 ROOT = kit.ROOT

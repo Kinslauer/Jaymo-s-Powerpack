@@ -299,6 +299,19 @@ final class WebLineRenderer {
 			for (com.jaymospowers.power.web.WebBridges.Span span : spans) {
 				if (span.from().distanceToSqr(camera) < 128.0 * 128.0 || span.to().distanceToSqr(camera) < 128.0 * 128.0) {
 					Vec3 from = span.from().subtract(camera), to = span.to().subtract(camera);
+					// a line you stand on and are bending to fling off is drawn pushed down under you (WebLineRideClient)
+					Vec3 dip = WebPowerClient.INSTANCE.swing.lineRide.dip(span);
+					if (dip != null && span.style() != com.jaymospowers.power.web.WebBridgeBlock.TENDRIL) {
+						Vec3 low = dip.subtract(camera);
+						if (span.style() == com.jaymospowers.power.web.WebBridgeBlock.ROPE) {
+							bundle(context, from, low, width);
+							bundle(context, low, to, width);
+						} else {
+							draw(context.poseStack(), context, from, low, width, false);
+							draw(context.poseStack(), context, low, to, width, false);
+						}
+						continue;
+					}
 					switch (span.style()) {
 						case com.jaymospowers.power.web.WebBridgeBlock.ROPE -> {
 							// the suit's: a black corded rope, the black web splayed at both ends

@@ -11,6 +11,8 @@ import com.jaymoskitchen.ragdoll.RagdollShapes;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.minecraft.core.Registry;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -58,6 +60,8 @@ public final class Corpses {
 	public static final TagKey<EntityType<?>> COMES_APART = tag("comes_apart");
 	/** Animals too big for one butcher block: they need a 2x2 table, and are heavier to carry. */
 	public static final TagKey<EntityType<?>> BIG_CARCASSES = tag("big_carcasses");
+	/** Giants and sea beasts: their big bones are left when they are cut up (see {@code CorpseEntity.GIANT_BONES}). */
+	public static final TagKey<EntityType<?>> GIANT_CARCASSES = tag("giant_carcasses");
 	/**
 	 * Bodies too heavy to lift by hand (iron golems): no carrying, no pocketing, no butchering. A power can still
 	 * take one ({@link CorpseEntity#takeBy}: Jaymo's Powers lets only Gravity do it).
@@ -125,7 +129,22 @@ public final class Corpses {
 		return TagKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id(name));
 	}
 
+	/**
+	 * Where Jaymo's Powers' context hints ask what a tap does to a body ({@link CorpseEntity#tapDoes}): a
+	 * {@code ToIntFunction<Entity>} in Fabric Loader's object share (Powers compiles against an older Kitchen jar).
+	 */
+	public static final String SHARE_TAP = "jaymoskitchen:corpse_tap";
+	/**
+	 * Where Powers' context hints ask whether a body is small enough to be picked up like an item
+	 * ({@link CorpseEntity#handSized}): a {@code Predicate<Entity>}, shared the same way.
+	 */
+	public static final String SHARE_HAND_SIZED = "jaymoskitchen:corpse_hand_sized";
+
 	public static void register() {
+		net.fabricmc.loader.api.FabricLoader.getInstance().getObjectShare().put(SHARE_TAP,
+			(java.util.function.ToIntFunction<net.minecraft.world.entity.Entity>) e -> e instanceof CorpseEntity corpse ? corpse.tapDoes() : CorpseEntity.TAP_LOOT);
+		net.fabricmc.loader.api.FabricLoader.getInstance().getObjectShare().put(SHARE_HAND_SIZED,
+			(java.util.function.Predicate<net.minecraft.world.entity.Entity>) e -> e instanceof CorpseEntity corpse && corpse.handSized());
 		ResourceKey<EntityType<?>> corpseKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id("corpse"));
 		CORPSE = Registry.register(BuiltInRegistries.ENTITY_TYPE, corpseKey,
 			EntityType.Builder.<CorpseEntity>of(CorpseEntity::new, MobCategory.MISC)
@@ -372,11 +391,23 @@ public final class Corpses {
 				kept.add(stack);
 			}
 		}
+		// an enderman fades out where it died: what it carried drops loose, there's no body to search
+		boolean fades = mob.getType().builtInRegistryHolder().is(Passing.FADES_OUT);
+		if (fades) {
+			for (ItemStack stack : kept) {
+				level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, mob.getX(), mob.getY() + 0.3, mob.getZ(), stack));
+			}
+			kept = new ArrayList<>();
+		}
+		// one that dies in powder snow, or frozen through, is an ice statue
+		boolean frozen = !fades && !mob.isOnFire() && !isMachine(mob.getType()) && (mob.isFullyFrozen() || mob.isInPowderSnow
+			|| mob.wasInPowderSnow);
 		String death = kind == CorpseKind.ANIMAL ? CleanKill.of(mob) : CleanKill.CLEAN;
 		// how it died costs it hide or meat (a wolf's kill, a burnt one, one beaten to death)
 		List<ItemStack> spoiled = CleanKill.spoil(death, kept);
 		corpse.setUp(look(mob), kind, kept, level.getRandom().nextInt(3) + 1);
 		corpse.setDeath(death, spoiled);
+		corpse.setWear(Wear.withFlag(Wear.withFlag(0, Wear.FADING_BIT, fades), Wear.FROZEN_BIT, frozen));
 		corpse.setMissing(missingParts(mob));
 		// (0.5.23) the arrows it died with stay in it
 		corpse.setArrows(com.jaymoskitchen.archery.StuckArrows.of(mob));
@@ -408,8 +439,19 @@ public final class Corpses {
 		pinFrom(mob, corpse);
 		// a skeleton drops in pieces: skull and arms loose, ribs and legs together
 		corpse.fallToPieces(level);
-		tellBody(mob, corpse);
+		if (!frozen) {
+			tellBody(mob, corpse);
+		}
 		level.addFreshEntity(corpse);
+		if (frozen) {
+			// stiff in the pose it died in
+			corpse.stiffen(1.0F);
+		}
+		DamageSource last = mob.getLastDamageSource();
+		if (last != null && (last.is(DamageTypes.FALLING_ANVIL) || last.is(DamageTypes.FALLING_BLOCK) || last.is(DamageTypes.FALLING_STALACTITE))) {
+			// killed by something falling on it: it lies squashed
+			corpse.crush(level);
+		}
 	}
 
 	/**

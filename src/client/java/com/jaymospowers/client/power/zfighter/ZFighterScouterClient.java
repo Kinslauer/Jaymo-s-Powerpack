@@ -118,7 +118,7 @@ public final class ZFighterScouterClient {
 	}
 
 	/** The living thing under the crosshair out to {@link #RANGE} blocks, if nothing solid is in the way. */
-	private static LivingEntity lookedAt(Minecraft minecraft, LocalPlayer player) {
+	static LivingEntity lookedAt(Minecraft minecraft, LocalPlayer player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 end = eye.add(look.scale(RANGE));
@@ -153,6 +153,9 @@ public final class ZFighterScouterClient {
 		if (glitching) {
 			number = scramble(now, 5);
 			color = 0xFFFF4A3A;
+		} else if ((readFlags & ZFighterSensesNet.NO_LEVEL) != 0) {
+			// no ki to read a power level with: the name and the kind only
+			number = "";
 		} else if ((readFlags & ZFighterSensesNet.HIDDEN) != 0 || readLevel < 0) {
 			number = "???";
 			color = 0xFFA8A8B8;
@@ -163,7 +166,8 @@ public final class ZFighterScouterClient {
 		} else {
 			number = Integer.toString(readLevel);
 		}
-		String line = Component.translatable("hud.jaymospowers.zfighter_scouter.level", number).getString();
+		boolean noLevel = !glitching && (readFlags & ZFighterSensesNet.NO_LEVEL) != 0;
+		String line = noLevel ? "" : Component.translatable("hud.jaymospowers.zfighter_scouter.level", number).getString();
 		String kind = glitching || readKind.isEmpty() ? "" : readKind;
 		int kindW = kind.isEmpty() ? 0 : UiStyle.pillWidth(font, kind, "") + 3;
 		int w = Math.max(Math.max(font.width(name), font.width(line) + kindW), 78) + 8;
@@ -192,7 +196,9 @@ public final class ZFighterScouterClient {
 			UiStyle.pill(graphics, font, x + w - kindW - 1, y + 12, kind, "", color);
 		}
 		boolean unread = glitching || (readFlags & ZFighterSensesNet.HIDDEN) != 0 || readLevel < 0;
-		HudStyle.bar(graphics, x + 4, y + PANEL_H - 7, w - 8, HudStyle.BAR_H, unread ? 0.0F : readLevel / (float)ZFighterScouter.CAP, color);
+		if (!noLevel) {
+			HudStyle.bar(graphics, x + 4, y + PANEL_H - 7, w - 8, HudStyle.BAR_H, unread ? 0.0F : readLevel / (float)ZFighterScouter.CAP, color);
+		}
 		ZFighterHudLayout.end(graphics);
 	}
 

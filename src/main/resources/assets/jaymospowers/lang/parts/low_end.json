@@ -3,5 +3,6 @@
 	"message.jaymospowers.low_end.on": "Low-end mode on: shaders off, Fast graphics. /lowend off puts your settings back.",
 	"message.jaymospowers.low_end.off": "Low-end mode off: your graphics settings and shaders are back as they were.",
 	"message.jaymospowers.low_end.is_on": "Low-end mode is on. /lowend off to switch it off.",
+	"message.jaymospowers.new_player_defaults": "You start with low-end mode on (shaders off, Fast graphics) and the vanilla texture look. For the full look: /lowend off brings back shaders and your graphics settings, /texturelook reason the pack's textures.",
 	"message.jaymospowers.low_end.is_off": "Low-end mode is off. /lowend on for shaders off and Fast graphics."
 }

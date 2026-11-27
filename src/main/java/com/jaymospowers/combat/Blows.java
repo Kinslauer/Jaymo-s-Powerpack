@@ -2,6 +2,8 @@ package com.jaymospowers.combat;
 
 import com.jaymospowers.armory.WarArms;
 import com.jaymospowers.compat.BetterCombatWeapons;
+import com.jaymospowers.core.ArmourFace;
+import com.jaymospowers.core.ArmourHoles;
 import com.jaymospowers.core.ArmourKind;
 import com.jaymospowers.core.LockOnRegions;
 import com.jaymospowers.core.wounds.BodyPart;
@@ -78,6 +80,12 @@ public final class Blows {
 	static final float BITES = 1.2F, TURNED = 0.8F;
 	/** An arrow whose head has no way of its own with armour does this share of its damage against mail. */
 	static final float ARROW_VS_MAIL = 0.75F;
+	/**
+	 * ...and this share against a body in mail from head to foot (every piece mail and whole): the rings turn it wherever
+	 * it lands (Just Better Chainmail's idea, CC0: there a full set stopped arrows outright; here the bodkin still finds the
+	 * rings, {@link HeadFx#againstArmour}, and the blow that gets through still wears the mail).
+	 */
+	static final float ARROW_VS_FULL_MAIL = 0.35F;
 	// ================================================================================================================
 
 	/**
@@ -176,7 +184,7 @@ public final class Blows {
 		measured = null;
 		if (source.getDirectEntity() instanceof AbstractArrow missile) {
 			return damage <= 0.0F || source.is(DamageTypeTags.BYPASSES_ARMOR) ? damage
-				: damage * missile(missile, source.is(DamageTypes.ARROW), ArmourKind.worn(victim, struck(victim, source)));
+				: damage * missile(victim, missile, source.is(DamageTypes.ARROW), ArmourKind.worn(victim, struck(victim, source)));
 		}
 		if (damage <= 0.0F || !(victim.level() instanceof ServerLevel level) || !(source.getDirectEntity() instanceof LivingEntity attacker)
 			|| source.getEntity() != attacker || attacker == victim) {
@@ -190,12 +198,18 @@ public final class Blows {
 		}
 		ItemStack weapon = source.getWeaponItem();
 		WeaponKind kind = weapon == null ? null : WeaponKind.of(weapon);
-		if (kind == null) {
-			return damage;
-		}
 		BodyPlan plan = BodyPlan.of(victim);
 		BodyPart part = plan == null ? null : LockOnRegions.aimedPart(victim, plan, source);
 		EquipmentSlot slot = slot(part);
+		// a blow on the face skips an open helmet (its armour points are added back, it guards nothing against severing)
+		ArmourFace.Aim aim = ArmourFace.aim(victim, attacker, part);
+		boolean bare = ArmourFace.bare(victim, aim);
+		if (bare) {
+			damage *= ArmourFace.bypass(victim);
+		}
+		if (kind == null) {
+			return landed(level, victim, attacker, aim, bare, part, slot, damage);
+		}
 		List<ArmourKind> layers = new ArrayList<>();
 		// the worn piece beside each layer (a mailed or studded piece meets a blow its own way); harness layers have none
 		List<ItemStack> pieces = new ArrayList<>();
@@ -209,7 +223,7 @@ public final class Blows {
 			while (pieces.size() < layers.size()) {
 				pieces.add(ItemStack.EMPTY);
 			}
-			layers.add(ArmourKind.worn(victim, slot));
+			layers.add(bare && slot == EquipmentSlot.HEAD ? ArmourKind.NONE : ArmourKind.worn(victim, slot));
 			pieces.add(victim.getItemBySlot(slot));
 			if (slot == EquipmentSlot.CHEST) {
 				layers.addAll(ArmourKind.layers(victim, "torso"));
@@ -225,7 +239,7 @@ public final class Blows {
 			}
 		}
 		ArmourKind armour = layers.isEmpty() ? ArmourKind.NONE : layers.get(0);
-		float factor = layers.isEmpty() ? kind.against(armour) : kind.against(armour, pieces.get(0));
+		float factor = layers.isEmpty() ? kind.against(armour) : kind.against(armour, pieces.get(0)) * kind.deflect(pieces.get(0));
 		for (int i = 1; i < layers.size(); i++) {
 			float under = kind.against(layers.get(i), pieces.get(i));
 			if (under < factor) {
@@ -235,20 +249,49 @@ public final class Blows {
 		if (factor >= BITES || factor <= TURNED) {
 			tellArmour(level, victim, attacker, armour, factor >= BITES);
 		}
-		return damage * factor;
+		return landed(level, victim, attacker, aim, bare, part, slot, damage * factor);
+	}
+
+	/**
+	 * A blow of {@code damage} (after the armour's turn of it) has landed: it may wear a hole in the piece it struck
+	 * ({@link ArmourHoles}; not in a helmet it skipped) and a blow on the head may knock the helmet off ({@link ArmourFace#knock}).
+	 */
+	private static float landed(ServerLevel level, LivingEntity victim, LivingEntity attacker, ArmourFace.Aim aim, boolean bare, @Nullable BodyPart part,
+		EquipmentSlot slot, float damage) {
+		if (aim.head()) {
+			ArmourFace.knock(level, victim, damage);
+		}
+		EquipmentSlot struck = aim.head() ? EquipmentSlot.HEAD : slot;
+		if (!(bare && struck == EquipmentSlot.HEAD)) {
+			ArmourHoles.strike(victim, attacker, struck, place(part).equals("arms"), damage);
+		}
+		return damage;
 	}
 
 	/**
 	 * The share of its damage an arrow or a thrown weapon does against {@code armour}: an arrowhead's own way with it (a
 	 * bodkin, a swallowtail: {@link HeadFx#againstArmour}), a war dart's thrust, {@link #ARROW_VS_MAIL} for a plain arrow
-	 * meeting mail, and 1 for the rest (a trident, a thrown blade).
+	 * meeting mail ({@link #ARROW_VS_FULL_MAIL} when the whole body is in it), and 1 for the rest (a trident, a thrown blade).
 	 */
-	private static float missile(AbstractArrow missile, boolean arrow, ArmourKind armour) {
+	private static float missile(LivingEntity victim, AbstractArrow missile, boolean arrow, ArmourKind armour) {
 		if (missile instanceof ItemSupplier thrown && thrown.getItem().is(WarArms.WAR_DART)) {
 			return WeaponKind.Blow.THRUST.against(armour);
 		}
 		float head = HeadFx.againstArmour(missile, armour);
-		return arrow && armour == ArmourKind.MAIL && head == 1.0F ? ARROW_VS_MAIL : head;
+		if (arrow && armour == ArmourKind.MAIL && head == 1.0F) {
+			return fullMail(victim) ? ARROW_VS_FULL_MAIL : ARROW_VS_MAIL;
+		}
+		return head;
+	}
+
+	/** Whether {@code body} wears whole mail in all four slots (mailed leather counts: it is mail over padding). */
+	static boolean fullMail(LivingEntity body) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			if (ArmourKind.worn(body, slot) != ArmourKind.MAIL) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** The armour slot over where this blow lands: the lock-on's region when the striker aims through one, else the chest. */

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "ingredients": [
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:gold_nugget"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:pleated_base"
+  }
+}

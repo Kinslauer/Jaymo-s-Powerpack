@@ -59,10 +59,44 @@ public record WebPose(int kind, long start, int side) {
 	 * Not tricks, so nothing cuts them short and they hold off the next trick while they play.
 	 */
 	public static final int RISING_BLOW = 28, DIVE_KICK = 29, SPIN_STRIKE = 30;
+	/**
+	 * More ways off a released web, the loop over an anchor and the barrel roll (Legends patch 1, our own hand-made poses):
+	 * a swan dive laid out with the arms wide, a pike (legs straight, folded at the hips) over forwards, a tucked
+	 * sideways roll, a back flip with a half twist, and a handspring over the hands. {@link #LOOP_FLIP} is the whole body
+	 * going round over the hand on a swing that loops its anchor ({@code WebLoop}); {@link #DIVE_ROLL} is one turn of the
+	 * barrel roll of a dive (sent again, with a side of 2 or -2, to keep it going). All of them are tricks, numbered past
+	 * the strikes so nothing saved moves.
+	 */
+	public static final int SWAN_DIVE = 31, PIKE_FLIP = 32, SIDE_ROLL = 33, TWIST_FLIP = 34, HANDSPRING = 35, DIVE_ROLL = 36, LOOP_FLIP = 37;
+	public static final int FIRST_EXTRA_TRICK = SWAN_DIVE, LAST_EXTRA_TRICK = LOOP_FLIP;
+	/**
+	 * Hanging by the hands under a webline ({@link WebLineRide}); not a trick: it lasts as long as the attachment
+	 * {@link WebLineRide#RIDE} says so.
+	 */
+	public static final int LINE_HANG = 38;
+	/**
+	 * Web attacks (Legends patch 2, our own hand-made poses), all started by the server and none of them tricks, numbered past
+	 * the webline hang so nothing saved moves. {@link #ZIP_KICK}: flying feet first down a zip line at a webbed foe, the
+	 * kick landing on arrival ({@link WebZipStrike}). {@link #SWING_UP_KICK}, {@link #PENDULUM_KICK} and {@link #WEB_YANK_UP}:
+	 * the web air launchers ({@link WebUptilt}). {@link #DIVE_SLAM}: both lines in the ground, hauled down head first
+	 * ({@link WebDiveSlam}). {@link #PIN_THROW}: a foe yanked sideways onto a wall ({@link WebPin}). {@link #DROP_KICK}: the
+	 * flip into a drop kick ({@link WebRisingKick}). {@link #SHOCK_HOLD}: braced with both lines taut ({@link WebShock}).
+	 * {@link #WRECK_SWING}: whirling a ball of rubble on both lines ({@link WebWreck}). {@link #WEB_STORM}: arms spinning out a
+	 * dome of lines ({@link WebStorm}). {@link #FIST_JAB} to {@link #FIST_CRUSH}: the five webbed fist blows
+	 * ({@link WebFistCombo}). {@link #SENSE_TURN}: spinning round to answer an arrow ({@link WebZipStrike#answer}).
+	 * {@link #HUNT_DIVE}: one pass of the hunting dive ({@link WebHunt}). {@link #SURF}: standing on a launched foe's back
+	 * ({@link WebSurf}).
+	 */
+	public static final int ZIP_KICK = 39, SWING_UP_KICK = 40, PENDULUM_KICK = 41, WEB_YANK_UP = 42, DIVE_SLAM = 43, PIN_THROW = 44,
+		DROP_KICK = 45, SHOCK_HOLD = 46, WRECK_SWING = 47, WEB_STORM = 48, FIST_JAB = 49, FIST_KICK = 50, FIST_UPPER = 51, FIST_TWIST = 52,
+		FIST_CRUSH = 53, SENSE_TURN = 54, HUNT_DIVE = 55, SURF = 56;
+	public static final int FIRST_ATTACK = ZIP_KICK, LAST_ATTACK = SURF;
 
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
 	public static final int RAGDOLL_TICKS = 40;
+	/** The loop over the anchor lasts as long as the loop does, between these (ticks). */
+	public static final int LOOP_MIN_TICKS = 20, LOOP_MAX_TICKS = 140;
 
 	public static final StreamCodec<ByteBuf, WebPose> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_INT, WebPose::kind,
@@ -85,7 +119,23 @@ public record WebPose(int kind, long start, int side) {
 			case DOUBLE_FRONT, DOUBLE_BACK -> 22;
 			case BUTTERFLY -> 16;
 			case RISING_BLOW, SPIN_STRIKE -> 14;
+			case SWAN_DIVE, TWIST_FLIP -> 18;
+			case PIKE_FLIP, SIDE_ROLL -> 14;
+			case HANDSPRING, DIVE_ROLL -> 16;
+			// (the loop says how long it will take, in the side; see WebTricks)
+			case LOOP_FLIP -> Math.max(LOOP_MIN_TICKS, Math.min(LOOP_MAX_TICKS, Math.abs(side)));
 			case DIVE_KICK -> 40;
+			case ZIP_KICK, PENDULUM_KICK, SWING_UP_KICK -> 20;
+			case WEB_YANK_UP, SENSE_TURN -> 16;
+			case DIVE_SLAM -> 100;
+			case PIN_THROW -> 12;
+			case DROP_KICK -> 22;
+			case SHOCK_HOLD -> 44;
+			case WRECK_SWING -> 130;
+			case WEB_STORM -> 30;
+			case FIST_JAB, FIST_KICK, FIST_UPPER, FIST_TWIST, FIST_CRUSH -> 8;
+			case HUNT_DIVE -> 24;
+			case SURF -> 70;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
 			case SPIKES -> WebSymbiote.SPIKE_POSE_TICKS;
 			default -> DODGE_TICKS;
@@ -93,7 +143,7 @@ public record WebPose(int kind, long start, int side) {
 	}
 
 	public static boolean trick(int kind) {
-		return kind >= FIRST_TRICK && kind <= LAST_TRICK || kind == BACK_FLIP || acro(kind);
+		return kind >= FIRST_TRICK && kind <= LAST_TRICK || kind == BACK_FLIP || acro(kind) || kind >= FIRST_EXTRA_TRICK && kind <= LAST_EXTRA_TRICK;
 	}
 
 	/** The acrobatics' own kinds: the standing backflip and the mid-air tricks that are new with it. */

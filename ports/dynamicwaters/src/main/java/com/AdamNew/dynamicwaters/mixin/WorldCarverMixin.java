@@ -34,6 +34,8 @@ public class WorldCarverMixin {
         final int x0 = chunk.getPos().getMinBlockX(), z0 = chunk.getPos().getMinBlockZ();
         final CarvingMask.Filter rivers = (x, y, z) -> (filter == null || filter.test(x, y, z))
                 && !HydrologyManager.isRiverOrWallBlock(x0 + x, y, z0 + z);
+        com.AdamNew.dynamicwaters.ColumnWatch.stage(chunk, "before carving mask");
         original.call(chunk, mask, randomState, materialRule, context, noiseChunk, biomeGetter, rivers);
+        com.AdamNew.dynamicwaters.ColumnWatch.stage(chunk, "after carving mask");
     }
 }

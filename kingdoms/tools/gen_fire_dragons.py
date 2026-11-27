@@ -12,6 +12,9 @@ import colorsys
 import os
 
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import reason_fold  # noqa: E402
 
 ASSETS = 'src/main/resources/assets/jaymoskingdoms/textures/entity/'
 SOURCE = ASSETS + 'bb/fire_dragon.png'
@@ -61,7 +64,7 @@ def main():
 		folder = ASSETS + 'dragon/' + species + '/'
 		os.makedirs(folder, exist_ok=True)
 		for i, fn in enumerate(hides):
-			recolour(src, fn).save(folder + 'hide_%d.png' % i)
+			reason_fold.save(recolour(src, fn), folder + 'hide_%d.png' % i)
 		for i, fn in enumerate(glows):
 			halves(recolour(src, fn))[1].save(folder + 'marks_%d.png' % i)
 	print('notus and boreas: 4 hides, 4 markings each')

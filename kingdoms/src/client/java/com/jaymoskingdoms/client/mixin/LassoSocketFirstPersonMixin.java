@@ -13,11 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 abstract class LassoSocketFirstPersonMixin {
 	@Inject(method = "submitArmWithItem", at = @At("HEAD"))
-	private void jaymoskingdoms$lassoSocket(CallbackInfo ci, @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) InteractionHand hand,
-		@com.llamalad7.mixinextras.sugar.Local(argsOnly = true) ItemStack stack) {
-		if (hand == InteractionHand.MAIN_HAND) {
-			LassoSockets.firstPerson(stack);
-		}
+	private void jaymoskingdoms$lassoSocket(CallbackInfo ci, @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) ItemStack stack) {
+		// (either hand: a lasso kept in the off hand leads too)
+		LassoSockets.firstPerson(stack);
 	}
 
 	/** Whirling the lasso: your hand goes up over your head, circling with the loop (LassoPose). */

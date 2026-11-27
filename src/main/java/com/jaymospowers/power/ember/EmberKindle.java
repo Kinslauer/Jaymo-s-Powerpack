@@ -227,8 +227,7 @@ public final class EmberKindle {
 			return;
 		}
 		live.heard = now;
-		// (Andy's skill-tree locks) a blood's hold is learned: Blood Awakening
-		if (!live.on && usable(player) && com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.BLOOD)) {
+		if (!live.on && usable(player)) {
 			// (Backdraft) sneaking as it starts, the air is drawn in instead (once for the whole held click)
 			if (player.isShiftKeyDown()) {
 				if (!live.drawing) {
@@ -299,7 +298,9 @@ public final class EmberKindle {
 		boolean wet = player.isInWaterOrRain() || com.jaymospowers.core.wet.Wet.soaked(player);
 		if (live.on) {
 			if (!wet) {
-				live.heat = Math.min(1.0F, live.heat + (chilled ? CHILL_HEAT : 1.0F) / STAGE_HEAT_TICKS[stage(player)]);
+				// (Blood Awakening) awakened, the heat builds in half the time
+				live.heat = Math.min(1.0F, live.heat + (chilled ? CHILL_HEAT : 1.0F)
+					/ com.jaymospowers.core.TreeLocks.wait(player, STAGE_HEAT_TICKS[stage(player)]));
 			}
 			flame(player, live, level, now, chilled, wet);
 		} else {

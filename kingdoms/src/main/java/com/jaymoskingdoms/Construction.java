@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -16,7 +15,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -82,8 +80,6 @@ public final class Construction {
 	static final int FILL_MAX = 4, CLEAR_ABOVE = 2;
 	/** A builder hurt this recently is left to run (ticks). */
 	static final int FLEE_TICKS = 100;
-	/** Players this close to the seat hear a building finished. */
-	static final double ANNOUNCE_RANGE = 128.0;
 
 	/** A builder's phases. */
 	static final int IDLE = 0, FETCH = 1, LOAD = 2, HAUL = 3, WORK = 4, STAKE = 5;
@@ -625,6 +621,9 @@ public final class Construction {
 
 	/** Column {@code i} has something to dig out or fill. */
 	private static boolean needsPrep(ServerLevel level, Planner.Layout l, int i) {
+		if (i >= l.footprint()) {
+			return wreckTop(level, l, i) != Integer.MIN_VALUE;
+		}
 		if (fill(level, l, i) > 0) {
 			return true;
 		}
@@ -632,25 +631,70 @@ public final class Construction {
 		for (int y = column.getY(), top = clearTop(level, l, column); y <= top; y++) {
 			BlockPos at = column.atY(y);
 			BlockState state = level.getBlockState(at);
-			if (!state.isAir() && !l.filled().contains(at) && inWay(level, l, at, state)) {
+			if (!state.isAir() && digs(level, l, at, state)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
+	/**
+	 * A block readying the ground takes out: one in the way ({@link #inWay}) where the building has none of its own;
+	 * but at floor height, where the building has nothing, the land's own soil and stone stay (the yard round it, not a
+	 * trench).
+	 */
+	private static boolean digs(ServerLevel level, Planner.Layout l, BlockPos at, BlockState state) {
+		if (l.filled().contains(at) || at.getY() == l.min().getY() && Storehouse.ground(state)) {
+			return false;
+		}
+		return inWay(level, l, at, state);
+	}
+
+	/**
+	 * The highest block of the old structure left in wreck column {@code i} (round the footprint: {@link Ruins#wreck}),
+	 * from the floor up to as high as its pieces reach there; {@code Integer.MIN_VALUE} if none is left.
+	 */
+	private static int wreckTop(ServerLevel level, Planner.Layout l, int i) {
+		BlockPos column = l.column(i);
+		int top = Math.min(Ruins.pieceTop(level, column.getX(), column.getZ()), column.getY() + Ruins.TEAR_HEIGHT);
+		for (int y = top; y >= column.getY(); y--) {
+			BlockPos at = column.atY(y);
+			if (Ruins.wreckable(level, at, level.getBlockState(at))) {
+				return y;
+			}
+		}
+		return Integer.MIN_VALUE;
+	}
+
 	/** Readies column {@code i}: digs out what's in the building's way above the floor, fills any hollow under it. */
 	private static boolean prep(ServerLevel level, Faction f, Planner.Layout l, int i) {
 		BlockPos column = l.column(i);
 		int floor = column.getY();
+		if (i >= l.footprint()) {
+			// round the footprint: what's left of the old structure comes down (into storage), the land stays as it is
+			for (int y = wreckTop(level, l, i); y >= floor; y--) {
+				BlockPos at = column.atY(y);
+				BlockState state = level.getBlockState(at);
+				if (Ruins.wreckable(level, at, state)) {
+					remove(level, f, at, state, true, true);
+					if (y == floor) {
+						patch(level, at);
+					}
+				}
+			}
+			return true;
+		}
 		for (int y = clearTop(level, l, column); y >= floor; y--) {
 			BlockPos at = column.atY(y);
 			BlockState state = level.getBlockState(at);
-			if (state.isAir() || l.filled().contains(at)) {
+			if (state.isAir()) {
 				continue;
 			}
-			if (inWay(level, l, at, state)) {
+			if (digs(level, l, at, state)) {
 				remove(level, f, at, state, salvaged(l, state), !l.plot());
+				if (y == floor && l.ruins() && !Storehouse.ground(state)) {
+					patch(level, at);
+				}
 			}
 		}
 		int fill = fill(level, l, i);
@@ -660,6 +704,15 @@ public final class Construction {
 			effects(level, column.atY(y), stone);
 		}
 		return true;
+	}
+
+	/** Where an old structure's floor came out at floor height (and there's ground under it), soil goes back: no pits. */
+	private static void patch(ServerLevel level, BlockPos at) {
+		if (level.getBlockState(at).isAir() && level.getBlockState(at.below()).isSolid()) {
+			BlockState dirt = Blocks.DIRT.defaultBlockState();
+			level.setBlock(at, dirt, Block.UPDATE_CLIENTS);
+			effects(level, at, dirt);
+		}
 	}
 
 	/**
@@ -762,7 +815,10 @@ public final class Construction {
 		}
 	}
 
-	/** The building's done: stakes pulled, recorded among the faction's buildings, the news told round the seat. */
+	/**
+	 * The building's done: stakes pulled, recorded among the faction's buildings (with when), a cheer. Nobody is told in chat
+	 * (Andy, 2026-11-27): the crier cries it, and folk near it say so to whoever walks by ({@link BuildNews}).
+	 */
 	private static void finish(ServerLevel level, Faction f, Works.Project p, Planner.Layout l) {
 		MinecraftServer server = level.getServer();
 		for (BlockPos stake : p.stakes()) {
@@ -778,7 +834,7 @@ public final class Construction {
 			List<Works.Built> built = new ArrayList<>(s.built());
 			// (0.5.7) with its full height, so beds and job sites upstairs count as its own
 			built.add(new Works.Built(p.entry(), l.min(), l.max().above(Math.max(0, l.height() - 1)), java.util.Optional.of(p.rotation()),
-				p.variant(), 0L));
+				p.variant(), 0L, level.getGameTime()));
 			List<Works.Plot> plots = new ArrayList<>(s.plots());
 			plots.replaceAll(plot -> plot.id() == p.plot() ? plot.withBuilding(plot.building(), true) : plot);
 			return s.withProjects(projects).withBuilt(built).withPlots(plots);
@@ -786,16 +842,11 @@ public final class Construction {
 		LAYOUTS.values().removeIf(x -> x == l);
 		Planner.forget(f.id());
 		level.playSound(null, l.center(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 1.0F, 1.0F);
-		Component news = Component.translatable("message.jaymoskingdoms.build.finished", f.name(),
-			Component.translatableWithFallback("building.jaymoskingdoms." + p.entry(), p.entry())).withStyle(ChatFormatting.GRAY);
-		for (ServerPlayer player : level.players()) {
-			if (player.distanceToSqr(f.seat().getX(), f.seat().getY(), f.seat().getZ()) <= ANNOUNCE_RANGE * ANNOUNCE_RANGE) {
-				player.sendSystemMessage(news);
-			}
-		}
+		BuildNews.finished(level, f, p.entry(), l.min(), l.max());
 		JaymosKingdoms.LOGGER.info("{} finished its {} at {}", f.name(), p.entry(), p.origin());
 		Gatherers.built(level, f, p.entry(), l.min(), l.max());
 		Homes.built(level, f, p.entry(), l.min(), l.max());
+		RainBarrels.built(level, f, p.entry(), l.min(), l.max());
 		Displays.built(level, f, p.entry(), l.min(), l.max().above(Math.max(0, l.height() - 1)));
 	}
 

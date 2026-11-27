@@ -1,19 +1,14 @@
-# Instructions for AI assistants
+# Jaymo's Powers, Kingdoms and Kitchen
 
-Follow `CLAUDE.md` (the project rules; they apply to every assistant, not only Claude), then read
-`docs/AI-HANDBOOK.md` (Andy's standing rulings, build setup, version and merge workflow, pbdr) and `docs/HANDOFF.md`.
-Project memory, reference notes and the modpack readout are in `docs/ai-bundle/` (start with its README).
+- Andy's words for things, and their names in the code, are in `docs/vault/Context/Glossary.md`.
+- Find code through `docs/codemap/<powers|kingdoms|kitchen>.md` (one line per class, rebuilt at every release) before grepping.
+- Not Claude Code? Before editing, open every `.claude/rules/*.md` whose `paths:` match the files you'll touch.
+- Build to check your work. Don't start dev client or server runs unless Andy asks.
+- No version numbers in code comments (`(0.21.62)`): say what the code does. Leave the old ones as they are.
 
-Before you start, read `docs/vault/Home.md` (current versions, open PRs, what's next) and follow
-`docs/vault/How agents use this vault.md`: make or join a note in `E:/Jaymo Vault Live/Agents/` (the live
-folder outside git, not your worktree) listing your branch, PR and the
-files you own, never edit a file another running agent owns, and append each of Andy's decisions to
-`E:/Jaymo Vault Live/Decisions.md`. Sharing a PR with another assistant (Claude, Hermes, ...): see that note's
-"Two agents on one PR" section. Run `python tools/vault_sync.py` when you start and after you change a live note
-(it syncs the live folder with the `vault-live` branch), and check `E:/Jaymo Vault Live/Inbox/` for tasks the
-coordinator posted for you. The pick-up and review loop, with the exact commands, is in `docs/vault/Pipeline.md`.
-
-Before editing, read every `.claude/rules/*.md` whose `paths:` list matches the files you'll touch (Claude Code loads
-them by itself; you have to open them). Andy's words for things, and their names in the code, are in
-`docs/vault/Context/Glossary.md`. What waits on Andy and what's stuck is on `Live/Dashboard.md`; problems in the live
-notes are on `Live/Health.md`.
+## Check, don't assume (every task)
+1. Prove "done" with a check (build, grep, test, codemap), then go through the ask line by line against what you
+   built. No part of an ask is left out, cut down or swapped for something easier without saying so.
+2. Never invent a class, method, file, number, mod, PR or ruling you haven't seen. Say "unknown" instead.
+3. Never say something is missing until you've searched every likely name (codemap, grep, Decisions.md, task notes).
+4. Say what you couldn't check.

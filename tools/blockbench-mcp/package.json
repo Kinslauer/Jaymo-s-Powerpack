@@ -1,0 +1,6 @@
+{
+  "name": "blockbench-mcp-tools",
+  "private": true,
+  "description": "Test client for the headless Blockbench MCP server (setup.sh)",
+  "dependencies": { "@modelcontextprotocol/sdk": "1.32.2" }
+}

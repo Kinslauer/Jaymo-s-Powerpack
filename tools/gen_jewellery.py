@@ -4,8 +4,7 @@ greyscale: the game tints them with the gem's colour (custom_model_data colour 0
 
     python -I tools/gen_jewellery.py [preview.png]
 
-With a path it also writes an 8x preview sheet there. Source textures stay ungraded: run
-`python -I tools/excalibur_style/grade.py` afterwards for the optional excalibur_style pack.
+With a path it also writes an 8x preview sheet there.
 """
 import importlib.util
 import json

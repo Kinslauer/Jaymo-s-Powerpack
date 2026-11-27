@@ -1,0 +1,20 @@
+{
+ "values": [
+  {
+   "id": "cubeanimals:eagle",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:bald_eagle",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:seagull",
+   "required": false
+  },
+  {
+   "id": "naturalist:duck",
+   "required": false
+  }
+ ]
+}

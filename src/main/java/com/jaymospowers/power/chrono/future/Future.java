@@ -154,6 +154,8 @@ public final class Future {
 		FutureFlashlights.init();
 		FutureMachines.init();
 		FutureOmens.init();
+		FutureRigs.init();
+		FutureCars.init();
 		FutureOmenPilots.init();
 		FutureCities.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));
@@ -163,33 +165,55 @@ public final class Future {
 
 	/** Sneak+B: into the future, or back from it, with everyone close by. */
 	public static void leap(ServerPlayer player) {
+		if (allowed(player)) {
+			go(player, companions(player));
+		}
+	}
+
+	/**
+	 * Whether {@code player} could leap at all, with nothing said and nothing started: in the future (where a leap brings
+	 * you home), or with their echo slain. The wormhole only tears open for someone who can ({@code ChronoWormhole}).
+	 */
+	public static boolean mayLeap(ServerPlayer player) {
+		return player.level().dimension() == FUTURE || Boolean.TRUE.equals(player.getAttached(ECHO_SLAIN));
+	}
+
+	/**
+	 * The wormhole's way into {@link #leap}: the same rules (recharge, echo slain, the city in place), told to the player
+	 * as they are for Sneak+B. True if the leap would go now; nothing has moved yet.
+	 */
+	public static boolean allowed(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();
 		long now = server.getTickCount();
 		long ready = READY_AT.getOrDefault(player.getUUID(), 0L);
 		if (now < ready) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.recharging", (ready - now + 19) / 20)
 				.withStyle(ChatFormatting.GOLD));
-			return;
+			return false;
 		}
 		if (player.level().dimension() != FUTURE && !Boolean.TRUE.equals(player.getAttached(ECHO_SLAIN))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.echo_first").withStyle(ChatFormatting.GOLD));
-			return;
+			return false;
 		}
-		if (player.level().dimension() == FUTURE) {
-			for (ServerPlayer other : companions(player)) {
+		return player.level().dimension() == FUTURE || ready(player);
+	}
+
+	/**
+	 * The wormhole's arrival: {@code going} (the runner and those who ran in close behind) leap together, forward into the
+	 * future or, from it, home, and the runner's recharge starts. Call {@link #allowed} first.
+	 */
+	public static void go(ServerPlayer leader, List<ServerPlayer> going) {
+		long now = leader.level().getServer().getTickCount();
+		if (leader.level().dimension() == FUTURE) {
+			for (ServerPlayer other : going) {
 				goBack(other);
 			}
-			READY_AT.put(player.getUUID(), now + LEAP_COOLDOWN);
-			return;
+		} else {
+			for (int i = 0; i < going.size(); i++) {
+				goForward(going.get(i), i, going.size());
+			}
 		}
-		if (!ready(player)) {
-			return;
-		}
-		List<ServerPlayer> going = companions(player);
-		for (int i = 0; i < going.size(); i++) {
-			goForward(going.get(i), i, going.size());
-		}
-		READY_AT.put(player.getUUID(), now + LEAP_COOLDOWN);
+		READY_AT.put(leader.getUUID(), now + LEAP_COOLDOWN);
 	}
 
 	/**

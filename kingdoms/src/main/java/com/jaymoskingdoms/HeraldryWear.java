@@ -21,6 +21,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
@@ -59,9 +60,11 @@ public final class HeraldryWear {
 	/** Prices (emeralds): the tailor's cloth, and the armourer's crests. */
 	static final int DOUBLET_PRICE = 4, HOOD_PRICE = 3, CLOAK_PRICE = 6, GIORNEA_PRICE = 9, TORSE_PRICE = 5, CREST_PRICE = 14;
 	/** Prices (emeralds): a realm tailor's tabard in its arms, and a realm armourer's coat of plates (cheaper than plate). */
-	static final int TABARD_PRICE = 8, COAT_PRICE = 16;
+	static final int TABARD_PRICE = 8, COAT_PRICE = 16, SURCOAT_PRICE = 9, AILETTES_PRICE = 12;
 	/** The makes of cuirass a realm's knights may wear, one to a realm. */
 	static final List<String> CUIRASSES = List.of("plate_cuirass", "fluted_cuirass", "rounded_breastplate");
+	/** The kettle hat, the helm that comes in each realm's own cut ({@link #KETTLE_CUTS}). */
+	static final String KETTLE = "kettle_hat";
 	static final int USES = 3, XP = 5;
 	static final float PRICE_MULT = 0.05F;
 	/** The lands whose realms field knights in the harness (the others keep their own land's gear). */
@@ -73,6 +76,7 @@ public final class HeraldryWear {
 	}
 
 	static void register() {
+		Everyday.register();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof Mob mob && source.getEntity() instanceof ServerPlayer && mob.level() instanceof ServerLevel level
 				&& level.getRandom().nextFloat() < KNIGHT_PATTERN_CHANCE) {
@@ -542,8 +546,13 @@ public final class HeraldryWear {
 				}
 			}
 			harness(folk, faction, finish);
-		} else if (folk.hasAttached(Harness.WORN)) {
-			Harness.clear(folk);
+		} else {
+			if (folk.hasAttached(Harness.WORN)) {
+				Harness.clear(folk);
+			}
+			// (Andy: "most people should opt for harness gear": a working person's own shirt, hose, hood and cloak; a place someone
+			// took a piece from stays bare, Harness#dress)
+			Everyday.folk(folk, climate);
 		}
 	}
 
@@ -563,6 +572,8 @@ public final class HeraldryWear {
 				mob.setItemSlot(slot, piece);
 			}
 		}
+		// (a new recruit's issue, once: what was taken from them as a villager does not keep their knight's harness bare)
+		Harness.issued(mob);
 		harness(mob, f, finish);
 		return true;
 	}
@@ -632,10 +643,11 @@ public final class HeraldryWear {
 			}
 		}
 		for (Villager v : seen) {
-			// (a guard kitted by GuardKit keeps his harness over whatever chest piece was bought him, and puts it by with his armour)
+			// (a guard kitted by GuardKit keeps his harness over whatever chest piece was bought him, and puts it by with his armour:
+			// the heavy pieces, not the padding and mail under them, which he stays in)
 			ItemStack chest = v.getItemBySlot(EquipmentSlot.CHEST);
 			if (!Harness.get(v, Harness.Slot.ARMS).isEmpty() && HeraldryArmour.of(chest) == null && (!v.hasAttached(GuardKit.KIT) || chest.isEmpty())) {
-				Harness.clear(v);
+				Harness.putByHeavy(v);
 			}
 		}
 	}
@@ -650,9 +662,27 @@ public final class HeraldryWear {
 
 	// ---- (medieval picks) a realm's own designs ------------------------------------------------------------------------
 
-	/** The helm {@code realm}'s knights wear (an item name of {@link HeraldryArmour#HELMS}). */
+	/** The helm {@code realm}'s knights wear (an item name of {@link HeraldryArmour#HELMS}; a kettle in the realm's own cut). */
 	private static String helm(int realm) {
-		return pick(HeraldryArmour.HELMS, hash(realm) >>> 8);
+		String helm = pick(HeraldryArmour.HELMS, hash(realm) >>> 8);
+		return helm.equals(KETTLE) ? kettle(realm) : helm;
+	}
+
+	/**
+	 * (Andy, on the kettle hat: "different cuts for different realms") The kettle hat's cut for each way of arming a
+	 * realm's guards ({@code Outfits.PLATE}, {@code TABARD}, {@code HALF_PLATE}, by index): the plate realms' tall German
+	 * cut, the tabard realms' round one, the half-plate realms' broad brim.
+	 */
+	static final List<String> KETTLE_CUTS = List.of("tall_kettle", KETTLE, "broad_kettle");
+
+	/** The kettle hat in {@code realm}'s cut (its arms' way of arming its guards; a village or haven by its own arms). */
+	private static String kettle(int realm) {
+		return KETTLE_CUTS.get(Outfits.Heraldry.of(realm, DyeColor.WHITE, false).harness());
+	}
+
+	/** (GuardKit) The kettle hat in {@code f}'s cut: a fiefdom wears its overlord's. */
+	static String kettle(Faction f) {
+		return kettle(realm(f));
 	}
 
 	/** The war arm {@code realm}'s knights carry (a Powers weapon head, of those in the game), or null without Powers. */
@@ -787,9 +817,13 @@ public final class HeraldryWear {
 				offer(offers, "giornea", GIORNEA_PRICE);
 				offer(offers, "torse", TORSE_PRICE);
 				offer(offers, tabard(level.getServer(), f), TABARD_PRICE);
+				// (Mordhau harness 3) the long surcoat in the realm's colour
+				offer(offers, dyed(HeraldryArmour.stack("surcoat"), Outfits.rgb(Outfits.heraldry(f, level.getServer()).field())), SURCOAT_PRICE);
 			}
 		} else if (job.equals("armorer") && f.type().isRealm()) {
 			offer(offers, coatOfPlates(level.getServer(), f), COAT_PRICE);
+			// (Mordhau harness 3) ailettes bearing the realm's arms
+			offer(offers, withArms(dyed(HeraldryArmour.stack("ailettes"), Outfits.rgb(Outfits.heraldry(f, level.getServer()).field())), level.getServer(), f), AILETTES_PRICE);
 			if (f.type() == FactionType.KINGDOM) {
 				offer(offers, "crest_horns", CREST_PRICE);
 				offer(offers, "crest_wings", CREST_PRICE);

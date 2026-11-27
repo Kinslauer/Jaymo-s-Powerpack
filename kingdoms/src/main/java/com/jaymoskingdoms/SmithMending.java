@@ -142,7 +142,7 @@ public final class SmithMending {
 		// a sexton sees to the golems only; the guards' gear is the smiths'
 		boolean sexton = Sextons.is(smith);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, smith.getBoundingBox().inflate(REACH),
-			e -> e != smith && e.isAlive() && (!sexton && Downed.isGuard(e) || e instanceof AbstractGolem) && !Downed.isDowned(e) && !claimed(e))) {
+			e -> e != smith && e.isAlive() && (!sexton && (Downed.isGuard(e) || Company.soldier(e)) || e instanceof AbstractGolem) && !Downed.isDowned(e) && !claimed(e))) {
 			if (e instanceof AbstractGolem) {
 				float lost = 1.0F - e.getHealth() / e.getMaxHealth();
 				if (lost > 1.0F - GOLEM_BELOW && lost > worst) {

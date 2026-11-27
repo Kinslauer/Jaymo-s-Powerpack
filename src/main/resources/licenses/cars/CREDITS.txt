@@ -1,0 +1,4 @@
+The future's four cars (runabout, hauler, bruiser, dasher) are ported from the Cars mod by Pokato (MIT, LICENSE beside this file;
+cars-fabric-26.3 1.16.2). tools/car_port.py converts four of its meshes and textures; the glass and the roof are left off, and
+the doors and the wheels are placed by our own code. Names, behaviour and fuel are ours.
+The Frostborn and Tinkerer rigs are our own android-mech model scaled up; they use nothing from Rim.

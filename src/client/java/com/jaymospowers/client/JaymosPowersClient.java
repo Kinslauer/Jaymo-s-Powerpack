@@ -67,24 +67,30 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.TitleCard.init();
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
+		com.jaymospowers.client.hud.AdvancementPins.init();
+		com.jaymospowers.client.hud.PackWeightClient.init();
 		// (Andy, 2026-11-23) what the keys do to whoever's under the crosshair: stealth kill, a body, Kingdoms' lines
 		com.jaymospowers.client.hud.ContextHints.init();
 		// (Andy, 2026-11-20) a tap of use on a body: the body menu
 		com.jaymospowers.client.bodymenu.BodyMenuClient.init();
 		// (Andy, 2026-11-20) first-time cards for the body menu, executions, the lasso, being downed and the wall sit
 		com.jaymospowers.client.hud.BodyTips.init();
+		// (Andy, 2026-11-26) first-time cards for loading the Ship's Cannon and the Field Mortar
+		com.jaymospowers.client.hud.GunTips.init();
 		// biome name, use bar, chat mentions and Shift+T item sharing (client/bits)
 		com.jaymospowers.client.bits.BiomeTitle.init();
 		com.jaymospowers.client.bits.UseBar.init();
 		AfkCinematicFishing.init();
 		com.jaymospowers.client.bits.Mentions.init();
 		com.jaymospowers.client.bits.ItemShareClient.init();
+		com.jaymospowers.client.bits.PullApartClient.init();
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
 		com.jaymospowers.client.eden.EdenPlantsClient.init();
 		com.jaymospowers.client.eden.EdenChestClient.init();
 		com.jaymospowers.client.eden.DiskwingClient.init();
+		com.jaymospowers.client.dino.DinoClient.init();
 		// (0.21.60) the character menu's tabs (Kingdoms adds its own through com.jaymoskingdoms.client.MenuCompat)
 		com.jaymospowers.client.menu.MenuTabs.init();
 		for (PowerKey key : PowerKey.values()) {
@@ -115,10 +121,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.web.WebbedLook.register();
 		com.jaymospowers.client.power.web.WebbedView.register();
 		com.jaymospowers.client.blood.Flies.register();
+		com.jaymospowers.client.blood.BloodScreen.init();
 		com.jaymospowers.client.blood.WeaponDrips.register();
 		com.jaymospowers.client.sound.SpotSounds.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
 		com.jaymospowers.client.wet.WetClient.init();
+		com.jaymospowers.client.air.AirClient.init();
 		com.jaymospowers.client.wet.ArmourGrimeTextures.init();
 		com.jaymospowers.client.wounds.DressingsLayer.register();
 		com.jaymospowers.client.armory.LodgedLayer.register();
@@ -139,6 +147,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.tundra.SnowMote.register();
 		com.jaymospowers.client.tundra.TundraGrass.register();
 		com.jaymospowers.client.combat.ShieldBangClient.init();
+		com.jaymospowers.client.body.BodyClient.init();
 		com.jaymospowers.client.combat.ShoveClient.init();
 		com.jaymospowers.client.combat.NetheriteShieldRenderer.init(); // (medieval picks) the netherite shield and its trims
 		com.jaymospowers.client.collide.CollisionsClient.init();
@@ -150,6 +159,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.ember.RunningHotClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
+		// (Visceral track 8) the ops-only gore reader
+		com.jaymospowers.client.reader.GoreReaderScreen.register();
 		// mixed slabs: the two slabs of one block, drawn by their block entity
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.buildblocks.MixedSlabs.ENTITY,
 			com.jaymospowers.client.buildblocks.MixedSlabRenderer::new);
@@ -176,11 +187,16 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.armory.FangGauntletsClient.init();
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
+		// a new install starts with low-end mode on and the vanilla texture look; registered first, so it runs before
+		// the pack's resource packs are switched on and before low-end mode's own first-launch check
+		NewPlayerDefaults.init();
 		// once per install: switch on the pack's resource packs (medieval MCA villagers, Fresh Animations' player) the
 		// CurseForge import downloaded
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(PackResourcePacks::enableOnce);
 		// (0.17.56) shaders off and Fast graphics on weak PCs, once per install; /lowend on|off
 		LowEndMode.init();
+		// /texturelook vanilla|reason: the pack's retexture packs off for vanilla's own look, or back on
+		TextureLook.init();
 		com.jaymospowers.client.packlook.DarkPanels.init();
 		// (0.15.124) Iris (with a shader pack on) first asks for the enchantment glint textures while a render pass is
 		// open, and loading them then crashes the game ("Close the existing render pass"). Load them up front instead.
@@ -195,11 +211,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D guns"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.ALWAYS_ENABLED);
-		// modded items redrawn in vanilla's style (tools/vanilla_style, docs/Vanilla-Style.md); on by default, and
-		// switching it off in Resource Packs shows each mod's own art again
+		// the Reason look: the pack's own art style, clean vanilla-plus, over our mods and other mods' script-made or
+		// off-style textures (tools/vanilla_style, docs/Vanilla-Style.md). Its id stays vanilla_style so players' choice
+		// carries over; on by default, and switching it off in Resource Packs shows each mod's own art again
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("vanilla_style"),
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
-			net.minecraft.network.chat.Component.literal("Jaymo's Powers: vanilla-style items"),
+			net.minecraft.network.chat.Component.literal("Reason look"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		// (Motion patch 5) vanilla tools, bow, compass, clock, totem, brush, saddle and bottles solid in hand, 3D mushrooms
 		// and dripstone (tools/gen_held_3d.py); on by default, switched off in Resource Packs for the flat look
@@ -219,15 +236,6 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Klei_Wright's Tundra art"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
-		// (0.19.72) the optional Excalibur look (ExcaliburLook, docs/Excalibur-Style.md): our own textures graded toward
-		// Excalibur's colours (tools/excalibur_style) and calmer leaves (Excalibur's leaves hang fringes off every leaf
-		// block that repeat like a hall of mirrors inside a canopy; plain leaf cubes turned at random instead). Off by
-		// default; /excalibur on switches it on with Excalibur and its Fresh Animations patch, in the right order.
-		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("excalibur_style"),
-			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
-			net.minecraft.network.chat.Component.literal("Jaymo's Powers: Excalibur colours and leaves"),
-			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
-		ExcaliburLook.init();
 		// the Medieval Music pack empties the warped forest's music: this gives it three Nether tracks of the pack's. Not on by
 		// default: PackResourcePacks puts it just above the music pack when that is switched on (it points at that pack's files)
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("medieval_music_gaps"),
@@ -290,12 +298,14 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.armory.GunHandling.init();
 		com.jaymospowers.client.armory.MusketSights.init();
 		com.jaymospowers.client.armory.BodyWeaponsLayer.init();
+		com.jaymospowers.client.armory.WeaponWheelScreen.register();
 		com.jaymospowers.client.armory.guns.AnimatedGunModel.init();
 		com.jaymospowers.client.armory.HeldItems.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
 		com.jaymospowers.client.moving.LateJumps.init();
+		com.jaymospowers.client.moving.BodyWeight.init();
 		com.jaymospowers.client.jump.PowerJumpClient.init();
 		com.jaymospowers.client.moving.AutoWalk.init();
 		StanceScroll.init();
@@ -305,6 +315,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.wounds.DownedHud.init();
 		com.jaymospowers.client.wounds.BlackoutHush.init();
 		com.jaymospowers.client.wounds.LimboHud.init();
+		com.jaymospowers.client.wounds.ReincarnateLink.init();
 		com.jaymospowers.client.wounds.RevivalClient.init();
 		com.jaymospowers.client.wounds.OutOfBodyClient.init();
 		com.jaymospowers.client.wounds.MedicineHud.init();
@@ -321,6 +332,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.costume.CorpseCostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
 		HitStopClient.init();
+		HitReactionsClient.init();
+		KillMomentClient.init();
 		com.jaymospowers.client.hud.HudArrange.register();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.gear.GearClient.init();
@@ -354,6 +367,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.fishing.FishingRealClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
 		com.jaymospowers.client.freerun.FreerunClient.init();
+		com.jaymospowers.client.freerun.CoreMotionClient.init();
+		com.jaymospowers.client.combat.KatanaFormsClient.init();
 		com.jaymospowers.client.freerun.moves.RunMovesClient.init();
 		com.jaymospowers.client.freerun.CameraFollow.init();
 		// (0.19.24) campfire embers and hot spring steam

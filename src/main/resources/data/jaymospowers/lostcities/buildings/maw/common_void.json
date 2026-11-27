@@ -1,0 +1,12 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "maxcellars": 0,
+  "maxfloors": 0,
+  "parts": [
+    {
+      "part": "jaymospowers:maw/common_void"
+    }
+  ]
+}

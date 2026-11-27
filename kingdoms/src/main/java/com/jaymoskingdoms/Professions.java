@@ -44,6 +44,8 @@ public final class Professions {
 	public static VillagerProfession RUIN_KEEPER;
 	/** A town's sexton, at the lych lantern ({@link Sextons}): a real job site, so anyone without a trade may take it up; the town takes one on too. */
 	public static VillagerProfession SEXTON;
+	/** A realm's dragon tamer ({@code dragons.RealmDragons}). */
+	public static VillagerProfession DRAGON_TAMER;
 
 	private Professions() {
 	}
@@ -77,6 +79,7 @@ public final class Professions {
 		AERONAUT = register("aeronaut", SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
 		RUIN_KEEPER = register("ruin_keeper", SoundEvents.VILLAGER_WORK_MASON);
 		SEXTON = Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, JaymosKingdoms.id("sexton"), Sextons.profession());
+		DRAGON_TAMER = register("dragon_tamer", SoundEvents.VILLAGER_WORK_LEATHERWORKER);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {
@@ -142,6 +145,7 @@ public final class Professions {
 			case "jaymoskingdoms:engineer" -> "minecraft:armorer";
 			case "jaymoskingdoms:aeronaut" -> "minecraft:cartographer";
 			case "jaymoskingdoms:sexton" -> "minecraft:leatherworker";
+			case "jaymoskingdoms:dragon_tamer" -> "minecraft:leatherworker";
 			default -> null;
 		};
 	}

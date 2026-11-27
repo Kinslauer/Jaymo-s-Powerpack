@@ -14,21 +14,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 abstract class LanternItemBarMixin {
 	@Inject(method = "isBarVisible", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$lanternBar(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-		if (stack.is(Items.LANTERN) && Lanterns.barVisible(stack)) {
+		if ((stack.is(Items.LANTERN) || stack.is(Lanterns.BURNT_LANTERN_ITEM)) && Lanterns.barVisible(stack)) {
 			cir.setReturnValue(true);
 		}
 	}
 
 	@Inject(method = "getBarWidth", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$lanternBarWidth(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-		if (stack.is(Items.LANTERN) && Lanterns.barVisible(stack)) {
+		if ((stack.is(Items.LANTERN) || stack.is(Lanterns.BURNT_LANTERN_ITEM)) && Lanterns.barVisible(stack)) {
 			cir.setReturnValue(Lanterns.barWidth(stack));
 		}
 	}
 
 	@Inject(method = "getBarColor", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$lanternBarColor(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-		if (stack.is(Items.LANTERN) && Lanterns.barVisible(stack)) {
+		if ((stack.is(Items.LANTERN) || stack.is(Lanterns.BURNT_LANTERN_ITEM)) && Lanterns.barVisible(stack)) {
 			cir.setReturnValue(Lanterns.barColor(stack));
 		}
 	}

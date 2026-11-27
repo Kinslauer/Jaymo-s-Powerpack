@@ -69,17 +69,20 @@ import net.minecraft.world.phys.HitResult;
  */
 public final class Thirst {
 	public static final int MAX = 20;
-	/** Points of water lost a second at rest (one every 75 s: a full bar lasts most of a day). */
-	static final float DRAIN = 1.0F / 75.0F;
+	/**
+	 * Points of water lost a second at rest (one every 150 s: a full bar lasts over two days). Andy: thirst "was too
+	 * brutal", so it lasts twice as long as it did, as do the costs below ({@link #EXHAUSTION_POINT}).
+	 */
+	static final float DRAIN = 1.0F / 150.0F;
 	/** On top of that, as a share of {@link #DRAIN}: swimming, being in the Nether. */
 	static final float SWIM_DRAIN = 0.5F, NETHER_DRAIN = 0.5F;
 	/**
-	 * What things cost, after Legendary Survival Overhaul's thirst (ideas and numbers only): its exhaustion, of which 4
-	 * make a point of water as with hunger ({@link #EXHAUSTION_POINT}). A jump, a block broken, an attack, a second of
+	 * What things cost, after Legendary Survival Overhaul's thirst (ideas and numbers only): its exhaustion, of which 8
+	 * make a point of water (twice hunger's 4: {@link #EXHAUSTION_POINT}). A jump, a block broken, an attack, a second of
 	 * sprinting. All of it goes faster the hotter you are ({@link BodyHeat#thirstFactor}).
 	 */
 	static final float JUMP = 0.15F, BREAK = 0.07F, ATTACK = 0.3F, SPRINT = 0.1F;
-	static final float EXHAUSTION_POINT = 4.0F;
+	static final float EXHAUSTION_POINT = 8.0F;
 	/** At or below this you can't sprint, and at or below this you're parched (weakness). */
 	public static final int NO_SPRINT = 6, PARCHED = 3;
 	/** Seconds between hurts at no water, and how much each takes. */
@@ -93,6 +96,8 @@ public final class Thirst {
 	static final int DIRTY_BOTTLE = 5, CLEAN_BOTTLE = 7, POTION = 3, MILK = 6, HONEY = 1, BREW = 4, SPIRITS = -2, LEMONADE = 6;
 	/** Water from a bucket of cactus water ({@link Climate#CACTUS_WATER}), bitter or boiled. */
 	static final int CACTUS_BUCKET = 8;
+	/** Water from a bowl of water, murky or boiled (a bowl holds less than a bottle). */
+	static final int DIRTY_BOWL = 3, CLEAN_BOWL = 4;
 	/** Water from food: a stew or soup, a melon slice, a berry or apple. */
 	static final int STEW = 3, MELON = 2, FRUIT = 1;
 	/** Clean water and a fresh sip cool you this much (body heat points). */
@@ -154,6 +159,11 @@ public final class Thirst {
 		return player.getAttachedOrElse(WATER, MAX);
 	}
 
+	/** For other mods (by reflection): a salty bite's thirst (Kingdoms' salted food): {@code by} off the water, with no drink told of. */
+	public static void parch(ServerPlayer player, int by) {
+		set(player, water(player) - by);
+	}
+
 	static void set(ServerPlayer player, int water) {
 		water = Mth.clamp(water, 0, MAX);
 		if (water == MAX) {
@@ -211,7 +221,8 @@ public final class Thirst {
 			// (0.5.48) the core soaks it up
 			set(player, water(player) + 1);
 		}
-		float drained = DRAINED.getOrDefault(id, 0.0F) + (DRAIN * rate + exerted / EXHAUSTION_POINT) * BodyHeat.thirstFactor(player);
+		float drained = DRAINED.getOrDefault(id, 0.0F) + (DRAIN * rate + exerted / EXHAUSTION_POINT) * BodyHeat.thirstFactor(player)
+			* com.jaymoskitchen.season.Tropics.thirstFactor(player);
 		if (drained >= 1.0F) {
 			set(player, water(player) - 1);
 			drained -= 1.0F;
@@ -275,6 +286,19 @@ public final class Thirst {
 		if (stack.is(Climate.CLEAN_WATER)) {
 			drink(player, CLEAN_BOTTLE, true, 0.0F);
 			BodyHeat.cool(player, CLEAN_COOL);
+			return;
+		}
+		if (stack.is(WaterBowls.WATER_BOWL) || stack.is(WaterBowls.CLEAN_WATER_BOWL)) {
+			// scooped from a pond: unpurified like a pond bottle, until it's been boiled
+			boolean boiled = stack.is(WaterBowls.CLEAN_WATER_BOWL);
+			if (fireDrinker(player)) {
+				hiss(player);
+				return;
+			}
+			drink(player, boiled ? CLEAN_BOWL : DIRTY_BOWL, boiled, SICK_CHANCE);
+			if (boiled) {
+				BodyHeat.cool(player, CLEAN_COOL / 2.0F);
+			}
 			return;
 		}
 		if (stack.is(Climate.CACTUS_WATER)) {

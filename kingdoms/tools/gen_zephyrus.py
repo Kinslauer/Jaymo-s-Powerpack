@@ -10,6 +10,9 @@ import os, random, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import reason_fold  # noqa: E402
 import gen_dragons as g
 from gen_dragons import rgb, jitter, mix, shade, write, entry, egg, ASSETS, DATA, ITEM, SIZE
 
@@ -337,7 +340,7 @@ def species():
     folder = ASSETS + 'textures/entity/dragon/zephyrus/'
     os.makedirs(folder, exist_ok=True)
     for i in range(len(HIDES)):
-        hide_texture(i).save(folder + 'hide_%d.png' % i)
+        reason_fold.save(hide_texture(i), folder + 'hide_%d.png' % i)
     for i in range(len(MARKS)):
         marks_texture(i).save(folder + 'marks_%d.png' % i)
 

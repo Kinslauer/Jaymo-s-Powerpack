@@ -8,7 +8,7 @@ import net.minecraft.world.item.Items;
 
 /**
  * Food from optional mods that goes into our dishes: Pantry for Blockheads' fruit and vegetables, Naturalist's game and
- * fish, Jaymo's Powers' Aether fruit and meat, and the great beasts' cuts from Jaymo's Powers and Jaymo's Kingdoms. Without the mod those items are air, the dishes that need them stay
+ * fish, Enderscape's End fruit, mushrooms and jelly, Psithurism's rice, soybeans and fugu, Jaymo's Powers' Aether fruit and meat, and the great beasts' cuts from Jaymo's Powers and Jaymo's Kingdoms. Without the mod those items are air, the dishes that need them stay
  * off the stations, and their recipes don't load (each names the items it needs under fabric:load_conditions).
  */
 public final class OptionalItems {
@@ -16,6 +16,9 @@ public final class OptionalItems {
 	public static final String NATURALIST = "naturalist";
 	public static final String POWERS = "jaymospowers";
 	public static final String KINGDOMS = "jaymoskingdoms";
+	public static final String ENDERSCAPE = "enderscape";
+	/** Psithurism: its rice, soybeans and fugu go into our dishes. */
+	public static final String PSITHURISM = "psithurism";
 	/** This mod itself, for items another part of it adds (looked up by id, with no link to the class that registers them). */
 	public static final String KITCHEN = "jaymoskitchen";
 

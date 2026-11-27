@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:withered_bracelet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:vampiric_glove",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:obsidian_skull",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:thorn_pendant",
+      "required": false
+    }
+  ]
+}

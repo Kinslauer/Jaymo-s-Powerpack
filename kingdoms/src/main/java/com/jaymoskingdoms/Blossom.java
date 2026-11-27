@@ -67,6 +67,9 @@ final class Blossom {
 	 * futons when it's 9 wide (sometimes when it's 7), an engawa along the front half the time when it's 9 deep.
 	 */
 	static Blueprint minka(Buildings.Kit k) {
+		// Psithurism's blocks where it's in the pack
+		BlockState paper = PsithurismCompat.paper(PAPER), tatami = PsithurismCompat.tatami(TATAMI);
+		BlockState timber = PsithurismCompat.timber(TIMBER), beam = PsithurismCompat.beam(BEAM), deck = PsithurismCompat.deck(k.p.planks());
 		int w = k.pickInt(7, 9, 7), d = k.pickInt(7, 9, 9);
 		boolean engawa = d == 9 && k.chance(0.5);
 		// the house's walls run x 1..w, z front..d; the roof covers 0..w+1, 0..d+1
@@ -78,40 +81,40 @@ final class Blossom {
 			for (int z = front; z <= d; z++) {
 				boolean alongX = z == front || z == d;
 				boolean edge = x == 1 || x == w || alongX;
-				s.set(x, 0, z, edge ? footing : TATAMI);
+				s.set(x, 0, z, edge ? footing : tatami);
 				if (!edge) {
 					continue;
 				}
 				// posts at the corners, framing the door (and the middle of the back), and halfway along each side
 				boolean post = (x == 1 || x == w) && alongX || (alongX ? Math.abs(x - mid) == 1 : z == zm);
 				for (int y = 1; y <= 3; y++) {
-					s.set(x, y, z, post ? TIMBER : y == 1 ? k.p.planks() : k.infill);
+					s.set(x, y, z, post ? timber : y == 1 ? k.p.planks() : k.infill);
 				}
 				// the top plate the rafters sit on
-				s.set(x, 4, z, post ? TIMBER : Buildings.Sketch.lying(BEAM, alongX ? Direction.Axis.X : Direction.Axis.Z));
+				s.set(x, 4, z, post ? timber : Buildings.Sketch.lying(beam, alongX ? Direction.Axis.X : Direction.Axis.Z));
 			}
 		}
 		s.door(mid, 1, front, Direction.NORTH, BlossomFurnishings.SLIDING_DOOR);
 		// paper windows: either side of the door, either side of each side's middle post, the back
 		for (int z : new int[] {front, d}) {
-			s.set(mid - 2, 2, z, PAPER);
-			s.set(mid + 2, 2, z, PAPER);
+			s.set(mid - 2, 2, z, paper);
+			s.set(mid + 2, 2, z, paper);
 		}
 		for (int x : new int[] {1, w}) {
-			s.set(x, 2, zm - 1, PAPER);
-			s.set(x, 2, zm + 1, PAPER);
+			s.set(x, 2, zm - 1, paper);
+			s.set(x, 2, zm + 1, paper);
 		}
 		// the engawa: a plank deck under the roof's front, two posts and a beam
 		if (engawa) {
 			for (int x = 1; x <= w; x++) {
 				for (int z = 1; z < front; z++) {
-					s.set(x, 0, z, k.p.planks());
+					s.set(x, 0, z, deck);
 				}
-				s.set(x, 4, 1, Buildings.Sketch.lying(BEAM, Direction.Axis.X));
+				s.set(x, 4, 1, Buildings.Sketch.lying(beam, Direction.Axis.X));
 			}
 			for (int y = 1; y <= 3; y++) {
-				s.set(1, y, 1, TIMBER);
-				s.set(w, y, 1, TIMBER);
+				s.set(1, y, 1, timber);
+				s.set(w, y, 1, timber);
 			}
 		}
 		// the roof: hipped, dark tile, overhanging all round

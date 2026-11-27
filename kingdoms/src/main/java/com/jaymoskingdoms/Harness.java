@@ -2,6 +2,7 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -10,6 +11,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -18,6 +20,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -69,12 +72,19 @@ public final class Harness {
 	 * a list in this order, and an older, shorter one is read with its new places bare ({@link #worn}).
 	 */
 	public enum Slot {
-		PADDING, MAIL, SHOULDERS, ARMS, HANDS, THIGHS, SHINS, OVER, HOOD, CREST, NECK, WAIST;
+		PADDING, MAIL, SHOULDERS, ARMS, HANDS, THIGHS, SHINS, OVER, HOOD, CREST, NECK, WAIST, HOSE;
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);
 		}
 	}
+
+	/**
+	 * The places that hold what a body wears under its armour. A guard who puts his armour by keeps these on (Andy, on the slashed
+	 * doublet: "you will see guards opt to remove their armor and stay within the harness gear, as it is too much to remove and
+	 * store"), read as: off duty or in town the heavy pieces come off and the under-layers stay.
+	 */
+	public static final java.util.Set<Slot> UNDER_LAYERS = EnumSet.of(Slot.PADDING, Slot.MAIL, Slot.HOSE);
 
 	public static final int SLOTS = Slot.values().length;
 	private static final List<ItemStack> NONE = Collections.nCopies(SLOTS, ItemStack.EMPTY);
@@ -85,6 +95,16 @@ public final class Harness {
 			.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	public static MenuType<HarnessMenu> MENU;
+	/** The screen for the harness of someone alive and down ({@link DownedHarnessMenu}), opened with the body's network id. */
+	public static ExtendedMenuType<DownedHarnessMenu, Integer> LOOT_MENU;
+	/**
+	 * On a mob, one tag for each place someone took a piece from ({@code TAKEN_TAG + place key}). Nothing that dresses a body
+	 * puts a piece back in a place so marked: not {@link #dress}, not a guard's kit put on again or looked over ({@code GuardKit}),
+	 * not a restyle. A stripped person is therefore never re-made by being got up and stripped again, while the places nobody took
+	 * from are put on again as ever (a guard's heavy pieces after he has been off duty). Only a deliberate new issue wipes
+	 * the marks ({@link #issued}).
+	 */
+	public static final String TAKEN_TAG = "jaymoskingdoms.harness_taken.";
 
 	/** Player → server: open the harness. */
 	public record Open() implements CustomPacketPayload {
@@ -124,6 +144,7 @@ public final class Harness {
 
 	static void register() {
 		MENU = Registry.register(BuiltInRegistries.MENU, JaymosKingdoms.id("harness"), new MenuType<>(HarnessMenu::new, FeatureFlags.VANILLA_SET));
+		LOOT_MENU = Registry.register(BuiltInRegistries.MENU, JaymosKingdoms.id("downed_harness"), new ExtendedMenuType<>(DownedHarnessMenu::new, ByteBufCodecs.VAR_INT));
 		PayloadTypeRegistry.serverboundPlay().register(Open.TYPE, Open.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Open.TYPE, (payload, context) -> context.server().execute(() -> {
 			ServerPlayer player = context.player();
@@ -190,11 +211,36 @@ public final class Harness {
 		List<ItemStack> now = new ArrayList<>(worn(wearer));
 		for (ItemStack piece : pieces) {
 			Slot slot = slotOf(piece);
-			if (slot != null) {
+			// (a place someone took a piece from stays bare: see TAKEN_TAG)
+			if (slot != null && !wasTaken(wearer, slot)) {
 				now.set(slot.ordinal(), piece);
 			}
 		}
 		put(wearer, now);
+	}
+
+	/** Whether a piece of {@code place} was taken off {@code wearer} and nothing has been issued to them since ({@link #TAKEN_TAG}). */
+	public static boolean wasTaken(LivingEntity wearer, Slot place) {
+		return wearer.entityTags().contains(TAKEN_TAG + place.key());
+	}
+
+	/** A piece of {@code place} was taken off {@code wearer} (a loot screen): the place is marked so nothing dresses it again, and a guard's kit forgets the piece. */
+	static void taken(LivingEntity wearer, Slot place) {
+		wearer.addTag(TAKEN_TAG + place.key());
+		GuardKit.forget(wearer, place);
+	}
+
+	/**
+	 * {@code wearer} is deliberately issued equipment for a new part, once: a guard's first kit, or his kit on being enlisted to
+	 * another settlement (bought from the stores and treasury, {@code GuardKit}), a new recruit put into a realm's knights' harness
+	 * once ({@code HeraldryWear#knight}), a ruler crowned or given a new title ({@code Rulers}). What was taken from them in their old
+	 * part no longer marks the places: the new part's pieces are paid or given for as a new issue, which the routine dressing
+	 * (putting the kit on again after duty, a restyle, the daily look-over) never is.
+	 */
+	static void issued(LivingEntity wearer) {
+		for (Slot slot : Slot.values()) {
+			wearer.removeTag(TAKEN_TAG + slot.key());
+		}
 	}
 
 	private static void put(LivingEntity wearer, List<ItemStack> worn) {
@@ -211,6 +257,17 @@ public final class Harness {
 		put(wearer, new ArrayList<>(worn(wearer)));
 	}
 
+	/** Takes the heavy pieces off {@code wearer} and leaves the {@link #UNDER_LAYERS} on (nothing is dropped). */
+	public static void putByHeavy(LivingEntity wearer) {
+		List<ItemStack> now = new ArrayList<>(worn(wearer));
+		for (Slot slot : Slot.values()) {
+			if (!UNDER_LAYERS.contains(slot)) {
+				now.set(slot.ordinal(), ItemStack.EMPTY);
+			}
+		}
+		put(wearer, now);
+	}
+
 	/** Takes everything off {@code wearer} (nothing is dropped). */
 	public static void clear(LivingEntity wearer) {
 		put(wearer, NONE);
@@ -218,6 +275,9 @@ public final class Harness {
 
 	/** The place {@code stack} goes in, or null if it isn't a piece of the harness. */
 	public static @Nullable Slot slotOf(ItemStack stack) {
+		if (HeraldryArmour.regaliaCrown(stack)) {
+			return Slot.CREST;
+		}
 		HeraldryArmour.Piece piece = HeraldryArmour.of(stack);
 		return piece == null ? null : piece.slot();
 	}
@@ -262,7 +322,7 @@ public final class Harness {
 					out.add(limb);
 				}
 			}
-			case "all" -> add(out, worn, Slot.PADDING, Slot.MAIL, Slot.NECK, Slot.SHOULDERS, Slot.ARMS, Slot.HANDS, Slot.WAIST, Slot.THIGHS, Slot.SHINS);
+			case "all" -> add(out, worn, Slot.PADDING, Slot.MAIL, Slot.NECK, Slot.SHOULDERS, Slot.ARMS, Slot.HANDS, Slot.WAIST, Slot.HOSE, Slot.THIGHS, Slot.SHINS);
 			default -> {
 			}
 		}
@@ -362,7 +422,7 @@ public final class Harness {
 	private static int partsOf(Slot slot) {
 		return switch (slot) {
 			case ARMS, HANDS -> 2 | 4;
-			case THIGHS, SHINS -> 8 | 16;
+			case THIGHS, SHINS, HOSE -> 8 | 16;
 			case HOOD, CREST -> 1;
 			default -> 0;
 		};

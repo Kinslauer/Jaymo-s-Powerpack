@@ -40,6 +40,14 @@ public final class FallingStars {
 	/** Each player under the open night sky is rolled this often (ticks), with this chance of a star. */
 	public static final int CHECK_EVERY = 200;
 	public static final float STAR_CHANCE = 0.002F;
+	/**
+	 * (Reference Mods patch 14, X6) On the peak night of a meteor shower stars come down this many times as often. The
+	 * peak nights of the year (counted from dusk, 1 January's night 0) are Kingdoms' showers' ({@code client.astronomy.Meteors}:
+	 * Quadrantids, Lyrids, Eta Aquariids, Perseids, Orionids, Leonids, Geminids), kept the same here.
+	 */
+	public static final float SHOWER_BOOST = 4.0F;
+	static final int[] SHOWER_NIGHTS = {2, 111, 125, 223, 293, 320, 347};
+	static final int YEAR = 365;
 	/** No two stars in one world closer in time than this (ticks: a day). */
 	public static final int GAP_TICKS = 24000;
 	/** It lands this far from the player (blocks), from this high, over this many ticks. */
@@ -86,6 +94,17 @@ public final class FallingStars {
 	}
 
 	/** A great star: growing in the sky over {@code to} from {@code start}; its rock, once it falls (-1 till then). */
+	/** {@link #SHOWER_BOOST} on a meteor shower's peak night, else 1. */
+	static float shower(ServerLevel level) {
+		int night = Math.floorMod(Math.floorDiv(level.getOverworldClockTime() + 12000L, 24000L), YEAR);
+		for (int peak : SHOWER_NIGHTS) {
+			if (peak == night) {
+				return SHOWER_BOOST;
+			}
+		}
+		return 1.0F;
+	}
+
 	private static final class GreatStar {
 		final ResourceKey<Level> dimension;
 		final Vec3 to, from;
@@ -167,7 +186,7 @@ public final class FallingStars {
 			}
 			RandomSource random = level.getRandom();
 			for (ServerPlayer player : level.players()) {
-				if (player.isSpectator() || !level.canSeeSky(player.blockPosition()) || random.nextFloat() >= STAR_CHANCE) {
+				if (player.isSpectator() || !level.canSeeSky(player.blockPosition()) || random.nextFloat() >= STAR_CHANCE * shower(level)) {
 					continue;
 				}
 				double a = random.nextDouble() * Math.PI * 2.0;
@@ -291,7 +310,7 @@ public final class FallingStars {
 		}
 		RandomSource random = level.getRandom();
 		for (ServerPlayer player : level.players()) {
-			if (player.isSpectator() || random.nextFloat() >= GREAT_CHANCE) {
+			if (player.isSpectator() || random.nextFloat() >= GREAT_CHANCE * shower(level)) {
 				continue;
 			}
 			double a = random.nextDouble() * Math.PI * 2.0;
@@ -409,6 +428,8 @@ public final class FallingStars {
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.AMBIENT, 16.0F, 0.6F);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, to.x, to.y + 1.0, to.z, 8, CRATER_RADIUS * 0.4, 1.5, CRATER_RADIUS * 0.4, 0.0);
 		level.sendParticles(MagicFx.LIGHT, to.x, to.y + 1.0, to.z, 160, 3.0, 2.0, 3.0, 0.4);
+		// whoever watched it come down with a glass bottle in hand catches its dust
+		com.jaymospowers.power.zfighter.pod.PodStardust.caught(level, to, com.jaymospowers.power.zfighter.pod.PodStardust.GREAT_PINCHES);
 		level.sendParticles(ParticleTypes.LAVA, to.x, to.y + 1.0, to.z, 60, 3.0, 1.0, 3.0, 0.0);
 		// the shockwave: everyone near is thrown back and hurt, the less the further off
 		for (net.minecraft.world.entity.LivingEntity e : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
@@ -579,6 +600,7 @@ public final class FallingStars {
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.AMBIENT, 10.0F, 0.9F);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, to.x, to.y + 1.0, to.z, 2, 1.0, 0.5, 1.0, 0.0);
 		level.sendParticles(MagicFx.LIGHT, to.x, to.y + 1.0, to.z, 60, 1.5, 1.0, 1.5, 0.25);
+		com.jaymospowers.power.zfighter.pod.PodStardust.caught(level, to, 1);
 		level.sendParticles(ParticleTypes.LAVA, to.x, to.y + 1.0, to.z, 20, 1.0, 0.5, 1.0, 0.0);
 		BlockPos ground = BlockPos.containing(to).below();
 		BlockPos seat = ground.below(WebCraterFeature.DEPTH - 1);

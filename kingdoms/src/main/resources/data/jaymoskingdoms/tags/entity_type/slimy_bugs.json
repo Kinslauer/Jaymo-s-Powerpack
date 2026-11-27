@@ -1,0 +1,9 @@
+{
+	"replace": false,
+	"values": [
+		"jaymoskingdoms:snail",
+		{"id": "naturalist:snail", "required": false},
+		{"id": "cubeanimals:snail", "required": false},
+		{"id": "alexsmobs:banana_slug", "required": false}
+	]
+}

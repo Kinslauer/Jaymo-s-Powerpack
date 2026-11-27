@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:spotted_iron_door",
+            "state": {
+              "half": "lower"
+            }
+          },
+          "name": "jaymospowers:spotted_iron_door"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/spotted_iron_door"
+}

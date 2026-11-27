@@ -232,6 +232,14 @@ public final class StoryHard {
 		Shackles.tie(player, at, player.getRandom());
 	}
 
+	/** (CaptiveLeads) {@code player}'s chain now hangs from {@code at} (led on a rope, or tied off on a post). */
+	static void moveAnchor(ServerPlayer player, BlockPos at) {
+		Shackle s = player.getAttached(SHACKLE);
+		if (s != null) {
+			player.setAttached(SHACKLE, new Shackle(at, s.camp()));
+		}
+	}
+
 	/** {@code e} is a player still in a shackle: a camp's raiders let them be. */
 	static boolean shackled(Entity e) {
 		return e instanceof Player && e.hasAttached(SHACKLE);
@@ -257,6 +265,10 @@ public final class StoryHard {
 			// drag them back from it. Quietly, as for one put to death: no camp hunts the dead.
 			release(player);
 			JaymosKingdoms.LOGGER.info("{} was weighed and taken from {}'s chains", player.getScoreboardName(), shackle.camp());
+			return;
+		}
+		if (com.jaymoskingdoms.forms.Lasso.holderOf(player) != null) {
+			// (led on a rope: the chain goes where they're led, CaptiveLeads)
 			return;
 		}
 		Vec3 anchor = Vec3.atBottomCenterOf(shackle.at());

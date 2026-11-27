@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "#jaymospowers:saddle_leather",
+    "I": "minecraft:iron_ingot",
+    "S": "minecraft:string",
+    "B": "minecraft:iron_block"
+  },
+  "pattern": [
+    "LLL",
+    "LBL",
+    "ISI"
+  ],
+  "result": {
+    "id": "jaymospowers:brachiosaurus_saddle"
+  }
+}

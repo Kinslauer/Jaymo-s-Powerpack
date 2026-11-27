@@ -88,6 +88,9 @@ public final class HeritageKits {
 	static final double BREATH_RANGE = 8.0, BREATH_CONE = 0.7;
 	static final float FIRE_BREATH_DAMAGE = 5.0F, FROST_BREATH_DAMAGE = 4.0F;
 	static final int FIRE_BREATH_BURN = 6, FROST_BREATH_SECONDS = 5;
+	/** The storm and acid breaths: harm, and seconds of slowing or poison. A storm-blooded body takes this share of lightning. */
+	static final float STORM_BREATH_DAMAGE = 5.0F, ACID_BREATH_DAMAGE = 3.0F, STORM_SCALES_TAKEN = 0.4F;
+	static final int STORM_BREATH_SECONDS = 3, ACID_BREATH_SECONDS = 6;
 	static final double QUAKE_RANGE = 5.0;
 	static final float QUAKE_DAMAGE = 4.0F;
 	static final float TIDAL_HEAL = 4.0F;
@@ -168,7 +171,7 @@ public final class HeritageKits {
 		FERAL_SPRINT(30), WEB_SNARE(25), WIND_BURST(25), HOWL(60), POUNCE(15), FOXFIRE(40), SHED_SKIN(60),
 		GRAVE_CHILL(35), UNDYING_HUNGER(40), CONSCRIPT_THE_DEAD(60), SPECTRAL_PHASE(60), SOUL_HARVEST(30),
 		VERDANT_BLOOM(45), MIRROR_SHIFT(20), PHASE_SHIFT(30), SIRENS_CHARM(45), FAERIE_BARGAIN(45),
-		ARCANE_REFLEX(25), MOONLIT_VEIL(40), BLOOD_FRENZY(60);
+		ARCANE_REFLEX(25), MOONLIT_VEIL(40), BLOOD_FRENZY(60), STORM_BREATH(30), ACID_BREATH(30);
 
 		public final int cooldown;
 
@@ -200,7 +203,7 @@ public final class HeritageKits {
 		NIGHT_EYES, DEEP_EYES, MOONSIGHT, GLACIAL, ICE_SCALES, POISON_PROOF, VENOM, ARCHER, BLOODSCENT, SOUL_TAKER, NINE_LIVES, PHOTOSYNTH, AQUATIC,
 		GOSSAMER, WARDED, UNDEAD_STOMACH,
 		FIRE_FRAIL, TRIPLE_FIRE, COLD_IRON, SUN_WEAK, SUN_HOLY, SUN_DECAY, HATES_WATER, COLD_BLOODED, BOUND_TO_WATER, LANDBOUND, HEAVY_WATER,
-		WET_GROUNDED, HALF_HEALING, LESS_HEALING, RAVENOUS, HUNGRY;
+		WET_GROUNDED, HALF_HEALING, LESS_HEALING, RAVENOUS, HUNGRY, STORM_SCALES;
 
 		public final Mod[] mods;
 
@@ -264,6 +267,9 @@ public final class HeritageKits {
 		// (0.7.490) the Terra drake's matching weakness: earth-heavy, slow on its feet
 		look(HeritageVariants.Variant.GOLDSCALE, Move.TERRA_QUAKE, Perk.STURDY, Perk.HEAVY_FOOTED);
 		look(HeritageVariants.Variant.RIMEWYRM, Move.FROST_BREATH, Perk.ICE_SCALES, Perk.FIRE_FRAIL);
+		// a dragon's blood: its breath, its resistance and its weakness (fire's is the base; frost, storm and acid have their own)
+		look(HeritageVariants.Variant.STORMWYRM, Move.STORM_BREATH, Perk.STORM_SCALES, Perk.WET_GROUNDED);
+		look(HeritageVariants.Variant.VENOMSCALE, Move.ACID_BREATH, Perk.POISON_PROOF, Perk.COLD_BLOODED);
 		look(HeritageVariants.Variant.INKMARKED, Move.ARCANE_OVERFLOW, Perk.WARDED, Perk.FRAIL);
 		look(HeritageVariants.Variant.DRYAD, Move.VERDANT_BLOOM, Perk.PHOTOSYNTH, Perk.TRIPLE_FIRE);
 		look(HeritageVariants.Variant.CHANGELING, Move.MIRROR_SHIFT, Perk.SNEAKY, Perk.HOLLOW_SELF);
@@ -279,6 +285,8 @@ public final class HeritageKits {
 		look(HeritageVariants.Variant.FELINE, Move.POUNCE, Perk.NINE_LIVES, Perk.HATES_WATER);
 		look(HeritageVariants.Variant.KITSUNE, Move.FOXFIRE, Perk.LUCKY, Perk.SPIRIT_FRAIL);
 		look(HeritageVariants.Variant.SERPEN, Move.SHED_SKIN, Perk.POISON_PROOF, Perk.COLD_BLOODED);
+		// the Scalebound, the sellswords' kin: a lizard's shed skin, a bowman's aim, a lizard's cold blood
+		look(HeritageVariants.Variant.SCALEBOUND, Move.SHED_SKIN, Perk.ARCHER, Perk.COLD_BLOODED);
 		look(HeritageVariants.Variant.ZOMBIE, Move.UNDYING_HUNGER, Perk.TOUGH, Perk.SUN_DECAY);
 		look(HeritageVariants.Variant.SKELETON, Move.CONSCRIPT_THE_DEAD, Perk.ARCHER, Perk.BRITTLE);
 		look(HeritageVariants.Variant.WRAITH, Move.SPECTRAL_PHASE, Perk.GHOSTLY, Perk.SUN_HOLY);
@@ -675,6 +683,11 @@ public final class HeritageKits {
 	// ---- blows -------------------------------------------------------------------------------------------------------------
 
 	/** What {@code target} takes from {@code source} given its kit's flaws and gifts (from {@code Heritage.dealt}). */
+	/** Whether a Dragonblood look breathes a breath of its own kind of dragon (frost, storm or acid), not the fire its blood began with. */
+	public static boolean ownBreath(HeritageVariants.@org.jspecify.annotations.Nullable Variant v) {
+		return v == HeritageVariants.Variant.RIMEWYRM || v == HeritageVariants.Variant.STORMWYRM || v == HeritageVariants.Variant.VENOMSCALE;
+	}
+
 	static float taken(LivingEntity target, DamageSource source, float amount) {
 		Kit kit = kit(target);
 		if (kit == null) {
@@ -687,6 +700,9 @@ public final class HeritageKits {
 		}
 		if (fire && kit.has(Perk.TRIPLE_FIRE)) {
 			amount *= TRIPLE_FIRE_TAKEN;
+		}
+		if (kit.has(Perk.STORM_SCALES) && source.is(DamageTypeTags.IS_LIGHTNING)) {
+			amount *= STORM_SCALES_TAKEN;
 		}
 		if (kit.has(Perk.COLD_IRON) && ironBlow(source)) {
 			amount *= COLD_IRON_TAKEN;
@@ -844,19 +860,25 @@ public final class HeritageKits {
 				.withStyle(ChatFormatting.GRAY), true);
 			return;
 		}
-		if (!TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
-			// (Andy's skill-tree locks) a blood's own move is learned: Blood Awakening, on Survival's Heritage page
-			return;
-		}
 		long now = level.getGameTime();
 		Long ready = READY.get(player.getUUID());
+		// (Blood Awakening) every blood has its move from the start; awakened, it comes back in half the time and what it gives lasts longer
+		boolean awakened = TreeLocks.awakened(player);
+		long cooldown = awakened ? Math.round(move.cooldown * 20L * TreeLocks.AWAKENED_WAIT) : move.cooldown * 20L;
 		if (ready != null && now < ready && ready - now <= move.cooldown * 20L) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.kit.cooldown", Component.translatable("kit.jaymoskingdoms.move." + move.key()),
 				(ready - now + 19) / 20).withStyle(ChatFormatting.GRAY), true);
 			return;
 		}
-		if (cast(player, level, move, now)) {
-			READY.put(player.getUUID(), now + move.cooldown * 20L);
+		longer = awakened ? TreeLocks.AWAKENED_LONGER : 1.0F;
+		boolean cast;
+		try {
+			cast = cast(player, level, move, now);
+		} finally {
+			longer = 1.0F;
+		}
+		if (cast) {
+			READY.put(player.getUUID(), now + cooldown);
 			settle(player);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.kit.cast", Component.translatable("kit.jaymoskingdoms.move." + move.key()))
 				.withStyle(ChatFormatting.GOLD), true);
@@ -922,6 +944,17 @@ public final class HeritageKits {
 					e.setTicksFrozen(e.getTicksRequiredToFreeze() + 40);
 				});
 				sound(p, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), 1.0F, 0.6F);
+			}
+			case STORM_BREATH -> {
+				breath(p, level, ParticleTypes.ELECTRIC_SPARK, STORM_BREATH_DAMAGE, e -> {
+					fx(e, MobEffects.SLOWNESS, STORM_BREATH_SECONDS, 1);
+					level.sendParticles(ParticleTypes.CRIT, e.getX(), e.getY(0.5), e.getZ(), 6, 0.3, 0.4, 0.3, 0.1);
+				});
+				sound(p, SoundEvents.LIGHTNING_BOLT_THUNDER, 0.6F, 1.6F);
+			}
+			case ACID_BREATH -> {
+				breath(p, level, ParticleTypes.SNEEZE, ACID_BREATH_DAMAGE, e -> fx(e, MobEffects.POISON, ACID_BREATH_SECONDS, 1));
+				sound(p, SoundEvents.SPIDER_HURT, 1.0F, 0.5F);
 			}
 			case TERRA_QUAKE -> {
 				for (LivingEntity e : around(p, QUAKE_RANGE, e -> foe(p, e))) {
@@ -1224,8 +1257,11 @@ public final class HeritageKits {
 
 	// ---- the helpers of the abilities ----------------------------------------------------------------------------------------
 
+	/** While a heritage-key move is cast: how many times as long what it gives lasts ({@link TreeLocks#AWAKENED_LONGER} once awakened). */
+	private static float longer = 1.0F;
+
 	private static void fx(LivingEntity e, Holder<MobEffect> effect, int seconds, int amplifier) {
-		e.addEffect(new MobEffectInstance(effect, seconds * 20, amplifier));
+		e.addEffect(new MobEffectInstance(effect, Math.round(seconds * 20 * longer), amplifier));
 	}
 
 	private static void sound(Entity e, SoundEvent sound, float volume, float pitch) {

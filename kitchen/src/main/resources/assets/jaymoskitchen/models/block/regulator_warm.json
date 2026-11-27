@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "front": "jaymoskitchen:block/regulator_front_warm",
+    "side": "jaymoskitchen:block/regulator_side",
+    "top": "jaymoskitchen:block/regulator_top_warm",
+    "bottom": "jaymoskitchen:block/regulator_side",
+    "particle": "jaymoskitchen:block/regulator_side"
+  }
+}

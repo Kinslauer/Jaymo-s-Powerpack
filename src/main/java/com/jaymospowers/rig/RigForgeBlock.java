@@ -241,7 +241,7 @@ public class RigForgeBlock extends Block implements EntityBlock {
 			take(player, cost.second(), cost.secondCount());
 		}
 		ItemStack made = new ItemStack(piece != null ? piece.item() : forge.limb() == RigForgeEntity.ARM ? Prosthetics.RIG_ARM_ITEM : Prosthetics.RIG_LEG_ITEM);
-		made.set(Rig.FRAME, forge.frame().id());
+		Rig.stamp(made, forge.frame());
 		if (piece != null && forge.plates() != RigForgeEntity.NO_PAINT) {
 			made.set(DataComponents.DYED_COLOR, new DyedItemColor(forge.plates()));
 		}

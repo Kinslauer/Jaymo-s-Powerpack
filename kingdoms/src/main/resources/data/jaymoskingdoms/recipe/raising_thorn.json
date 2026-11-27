@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:leech_kit",
+  "ingredients": [
+    "jaymoskingdoms:empty_thorn",
+    "minecraft:wither_rose",
+    "minecraft:soul_sand"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:raising_thorn"
+  }
+}

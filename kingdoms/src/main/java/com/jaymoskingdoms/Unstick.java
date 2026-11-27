@@ -15,7 +15,8 @@ import org.jspecify.annotations.Nullable;
  * (0.5.36) Every walking mob (vanilla, MCA villagers, our folk) that has a path but makes no headway along it works
  * itself loose: first a hop toward its next step (a slab, a carpet, a fence post's corner), then a step back to the
  * middle of its block and a fresh path, and at last the walk is dropped so its AI picks something else. Our own folk,
- * out of a fight, turn up where they were going in a puff instead, as builders always have.
+ * out of a fight, turn up where they were going in a puff instead, as builders always have. One swimming against a bank
+ * its path climbs is heaved up onto it ({@link #WADE_HEAVE}).
  *
  * <p>Vanilla's own check can't see this: it resets every time a goal asks for the path again, and chasing or
  * wandering goals ask every few ticks, so a mob snagged on a corner stays snagged.
@@ -35,6 +36,12 @@ public final class Unstick {
 	static final double ARRIVED = 1.5;
 	/** The sideways push of a hop, and of the step back to the middle of its block. */
 	static final double HOP_PUSH = 0.18, CENTRE_PUSH = 0.12;
+	/**
+	 * Climbing out of water (Andy, 2026-11-24: "they get stuck in water"): a walker swimming against a bank its path climbs
+	 * is lifted at this upward speed (blocks a tick) while it's in the water, and pushed this hard onto the bank. The
+	 * game's own lift out of water only clears a bank level with the surface; one a block up held them bobbing forever.
+	 */
+	static final double WADE_HEAVE = 0.42, WADE_FORWARD = 0.1;
 
 	/** One mob's headway, kept on its navigation. */
 	public static final class State {
@@ -62,13 +69,17 @@ public final class Unstick {
 			s.reset();
 			return;
 		}
-		if (s.from == null || horizontal(here, s.from) > HEADWAY) {
+		boolean ground = nav instanceof GroundPathNavigation;
+		if (ground && mob.isInWater() && mob.horizontalCollision) {
+			wadeOut(level, mob, nav, here);
+		}
+		// (up or down a ladder counts as headway too: Climbing)
+		if (s.from == null || horizontal(here, s.from) > HEADWAY || mob.onClimbable() && Math.abs(here.y - s.from.y) > HEADWAY) {
 			s.from = here;
 			s.still = 0;
 			return;
 		}
 		s.still++;
-		boolean ground = nav instanceof GroundPathNavigation;
 		if (mob instanceof Folk folk && s.still >= PUFF_TICKS && puff(level, folk, target)) {
 			s.reset();
 			return;
@@ -92,6 +103,28 @@ public final class Unstick {
 				push(mob, next(path, here).subtract(here), HOP_PUSH, true);
 			}
 		}
+	}
+
+	/**
+	 * Swimming against a bank its path climbs onto ({@link #WADE_HEAVE}): heaved up and over it, as long as there's room
+	 * on top for its body. A bank too high for that is left to the rest of this class (a fresh path, then giving up).
+	 */
+	private static void wadeOut(ServerLevel level, Mob mob, PathNavigation nav, Vec3 here) {
+		Path path = nav.getPath();
+		if (path == null || path.isDone()) {
+			return;
+		}
+		Vec3 step = next(path, here);
+		if (step.y <= here.y) {
+			return;
+		}
+		if (!level.noCollision(mob, mob.getBoundingBox().move(step.x - here.x, step.y - here.y + 0.01, step.z - here.z))) {
+			return;
+		}
+		Vec3 across = new Vec3(step.x - here.x, 0.0, step.z - here.z);
+		across = across.lengthSqr() < 1.0E-4 ? Vec3.ZERO : across.normalize().scale(WADE_FORWARD);
+		Vec3 v = mob.getDeltaMovement();
+		mob.setDeltaMovement(v.x + across.x, Math.max(v.y, WADE_HEAVE), v.z + across.z);
 	}
 
 	/** The next step it should be heading for (the one after, if it's standing on the next). */

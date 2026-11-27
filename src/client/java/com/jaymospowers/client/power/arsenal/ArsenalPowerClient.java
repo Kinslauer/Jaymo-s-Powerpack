@@ -43,6 +43,13 @@ public final class ArsenalPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		PowerClients.register(ArsenalPower.ID, INSTANCE);
+		// the thrown axe (ArsenalAxeThrow): whether it's in the throwing grip, and how to change it
+		net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+			if (com.jaymospowers.power.arsenal.ArsenalAxeThrow.throwable(stack)) {
+				lines.add(net.minecraft.network.chat.Component.translatable(com.jaymospowers.power.arsenal.ArsenalAxeThrow.gripped(stack)
+					? "tooltip.jaymospowers.axe_throw.gripped" : "tooltip.jaymospowers.axe_throw.loose").withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
+		});
 		EntityRendererRegistry.register(ArsenalEntities.RIFT_BLADE, RiftBladeRenderer::new);
 		EntityRendererRegistry.register(ArsenalEntities.FROST_LANCE, FrostLanceRenderer::new);
 		// Reach Through: the portal and the weapon coming out of it, for everyone in view

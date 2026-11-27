@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.jaymoskingdoms.Classes.PlayerClass;
 import com.jaymoskingdoms.Patron;
 import com.jaymoskingdoms.VowBook;
@@ -181,7 +182,7 @@ final class VowBookScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() == 1) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
 			int x = left();
 			// right click a sworn term: struck out
 			int ty = termsY();

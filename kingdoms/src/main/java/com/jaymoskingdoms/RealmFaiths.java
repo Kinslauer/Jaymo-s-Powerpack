@@ -19,8 +19,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.513) What each realm holds (docs/Patrons-B-Plan.md section 7). Andy: The Truth "usually is the faith among humans".
- * A Faith-creed realm holds The Truth; any other holds the patron most of its folk do (counted once a day); a realm with
- * too few counted takes its blood's patron. Realms of rival patrons grow tense each day, and a war between them is a holy
+ * A Faith-creed realm holds The Truth; any other holds the one of the seven most of its folk do (counted once a day), or,
+ * when they hold none of the seven between them, its blood's patron or the one its creed and land make its own
+ * ({@link #reasoned}). Realms of rival patrons grow tense each day, and a war between them is a holy
  * war ({@link GreatWars}). Saved on the Overworld.
  */
 public final class RealmFaiths {
@@ -66,14 +67,43 @@ public final class RealmFaiths {
 			return Patron.TRUTH;
 		}
 		Patron stored = Patron.byKey(holdings(server).patrons().get(Integer.toString(f.id())));
-		return stored != null ? stored : fallback(server, f);
+		// (Andy, 2026-11-26: "Realms should have their own ... patrons") only a Faith realm holds The Truth as a realm; a count
+		// kept from before, when most realms did, gives way to the realm's own
+		return stored != null && stored != Patron.TRUTH ? stored : fallback(server, f);
 	}
 
-	/** A haven of one blood takes that blood's patron; an orc-ruled mixed haven the Anvil-Father; another mixed one one of four; any other realm The Truth. */
+	/**
+	 * (Andy, 2026-11-26) The patron a realm of men keeps when its own folk don't hold one of the seven between them, reasoned
+	 * from what it is: its creed and its land each name the patrons that fit (a crown the Sun, a market the Anvil-Father, the
+	 * Deep Mother or the Hearthkeeper, the long northern nights the Lantern Warden, the forests the Huntsman), and the realm
+	 * keeps one of them, the same one every time. Never the Ash Whisperer: the crown's men hang her followers.
+	 */
+	private static Patron reasoned(MinecraftServer server, Faction f) {
+		List<Patron> fit = new ArrayList<>(List.of(switch (GreatWars.creed(server, f)) {
+			case CROWN -> new Patron[] {Patron.CROWNED_SUN, Patron.CROWNED_SUN, Patron.HEARTHKEEPER};
+			case CHIVALRY -> new Patron[] {Patron.CROWNED_SUN, Patron.HEARTHKEEPER, Patron.LANTERN_WARDEN};
+			case CONQUEST -> new Patron[] {Patron.CROWNED_SUN, Patron.ANVIL_FATHER, Patron.GREEN_HUNTSMAN};
+			case COIN -> new Patron[] {Patron.ANVIL_FATHER, Patron.DEEP_MOTHER, Patron.HEARTHKEEPER};
+			case BLOOD -> new Patron[] {Patron.GREEN_HUNTSMAN, Patron.ANVIL_FATHER, Patron.LANTERN_WARDEN};
+			case FAITH -> new Patron[] {Patron.TRUTH};
+		}));
+		fit.addAll(List.of(switch (Climate.at(Factions.level(server), f.seat())) {
+			case PLAINS, CHERRY -> new Patron[] {Patron.HEARTHKEEPER};
+			case TAIGA -> new Patron[] {Patron.GREEN_HUNTSMAN, Patron.LANTERN_WARDEN};
+			case SNOWY, SWAMP -> new Patron[] {Patron.LANTERN_WARDEN};
+			case SAVANNA -> new Patron[] {Patron.GREEN_HUNTSMAN, Patron.CROWNED_SUN};
+			case DESERT -> new Patron[] {Patron.CROWNED_SUN};
+			case BADLANDS -> new Patron[] {Patron.ANVIL_FATHER};
+			case JUNGLE -> new Patron[] {Patron.GREEN_HUNTSMAN};
+		}));
+		return fit.get(Math.floorMod(f.id() * 31 + f.seat().hashCode(), fit.size()));
+	}
+
+	/** A haven of one blood takes that blood's patron; an orc-ruled mixed haven the Anvil-Father; another mixed one one of four; any other realm its {@link #reasoned} one. */
 	private static Patron fallback(MinecraftServer server, Faction f) {
 		String haven = Havens.of(server, f);
 		if (haven.isEmpty()) {
-			return Patron.TRUTH;
+			return reasoned(server, f);
 		}
 		if (Havens.MIXED.equals(haven)) {
 			if (Havens.orcRuled(server, f)) {
@@ -122,7 +152,8 @@ public final class RealmFaiths {
 					best = entry.getKey();
 				}
 			}
-			Patron state = best != null && counts.get(best) >= STATE_SHARE * total ? best : fallback(server, f);
+			// (a realm whose folk mostly hold The Truth, outside a Faith realm, keeps its own patron: the Truth is a realm's only by its creed)
+			Patron state = best != null && best != Patron.TRUTH && counts.get(best) >= STATE_SHARE * total ? best : fallback(server, f);
 			patrons.put(Integer.toString(f.id()), state.key);
 			counted.put(Integer.toString(f.id()), day);
 			changed = true;

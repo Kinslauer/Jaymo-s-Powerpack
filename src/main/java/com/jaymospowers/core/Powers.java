@@ -376,6 +376,19 @@ public final class Powers {
 	/** The ascended ability's key: only an ascended power answers it (anyone else's press does nothing at all). */
 	static void ultimate(ServerPlayer player, boolean down) {
 		Power power = of(player);
+		// (hold, wait, release) a single-press ultimate can be held charged and loosed on release
+		if (power != null && power.ultimateHeld(player) && power.ultimateAnswers(player) && player.isAlive() && !player.isSpectator()
+			&& !(down && silenced(player)) && UltimateHold.key(player, down, () -> {
+				ultimateNow(player, true);
+				ultimateNow(player, false);
+			})) {
+			return;
+		}
+		ultimateNow(player, down);
+	}
+
+	private static void ultimateNow(ServerPlayer player, boolean down) {
+		Power power = of(player);
 		if (down && power != null && silenced(player)) {
 			return;
 		}

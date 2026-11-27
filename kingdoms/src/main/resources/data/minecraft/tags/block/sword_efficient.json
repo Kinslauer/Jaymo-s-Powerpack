@@ -2,6 +2,11 @@
   "replace": false,
   "values": [
     "jaymoskingdoms:wisteria",
-    "jaymoskingdoms:pale_wisteria"
+    "jaymoskingdoms:pale_wisteria",
+    "jaymoskingdoms:glowcap",
+    "jaymoskingdoms:bouncecap",
+    "jaymoskingdoms:inkcap",
+    "jaymoskingdoms:glowcap_gills",
+    "jaymoskingdoms:umbrella_leaf"
   ]
 }

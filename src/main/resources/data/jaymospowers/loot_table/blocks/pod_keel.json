@@ -16,7 +16,9 @@
               "block": "jaymospowers:pod_keel",
               "properties": [
                 "damaged",
-                "grade"
+                "grade",
+                "forged",
+                "sockets"
               ]
             }
           ]

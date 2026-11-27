@@ -104,7 +104,8 @@ public final class Frights {
 			// (a guard whose band broke runs with the rest)
 			return false;
 		}
-		if (BlastFright.standsGround(v)) {
+		if (BlastFright.standsGround(v) || Temperaments.fearless(v)) {
+			// (a guard, or one of the brave: TakeCover has the brave go at the monster)
 			return true;
 		}
 		if (!(v instanceof Worker w) || w.factionId() < 0 || Temperaments.runs(v)) {
@@ -120,7 +121,7 @@ public final class Frights {
 	 * the symbiote's suit or walking as a shade, and a mob the symbiote has taken ({@link Oddities#monstrous}); (0.7.10) and a Z Fighter
 	 * with a tail out, unless they have explained it to {@code v} ({@link Tails}).
 	 */
-	private static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
+	static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
 		LivingEntity best = null;
 		// ((0.7.186) the brave hardly at all, the timid from farther: Temperaments)
 		double range = Temperaments.frightRange(v, FRIGHT);
@@ -139,7 +140,8 @@ public final class Frights {
 
 	/** {@code m} is one of {@code v}'s own faction's people (a camp's raiders don't frighten its crew). */
 	private static boolean sameSide(Villager v, LivingEntity m) {
-		return v instanceof Worker a && m instanceof Worker b && a.factionId() >= 0 && a.factionId() == b.factionId();
+		// (and a sellsword or creature its camp keeps: CampBeasts)
+		return v instanceof Worker a && m instanceof Worker b && a.factionId() >= 0 && a.factionId() == b.factionId() || CampBeasts.spares(v, m);
 	}
 
 	private static boolean frightful(Mob m) {
@@ -198,6 +200,21 @@ public final class Frights {
 			return;
 		}
 		Fright fright = new Fright(had != null ? had.to() : to, had != null ? had.child() : null, until);
+		FRIGHTS.put(v.getUUID(), fright);
+		flee(level, v, fright);
+	}
+
+	/**
+	 * It runs for cover at {@code to} and stays there until {@code until}: a tornado bearing down ({@code Tornadoes}).
+	 * Unlike {@link #shelter} the place is always the new one (whatever it was running from before, this is worse), and a
+	 * child it was taking along still comes too.
+	 */
+	public static void takeCover(ServerLevel level, Villager v, BlockPos to, long until) {
+		Fright had = FRIGHTS.get(v.getUUID());
+		if (had == null) {
+			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);
+		}
+		Fright fright = new Fright(to, had != null ? had.child() : null, Math.max(until, had != null ? had.until() : 0L));
 		FRIGHTS.put(v.getUUID(), fright);
 		flee(level, v, fright);
 	}

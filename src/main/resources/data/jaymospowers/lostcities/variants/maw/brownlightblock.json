@@ -1,0 +1,24 @@
+{
+  "blocks": [
+    {
+      "random": 48,
+      "block": "minecraft:light_gray_terracotta"
+    },
+    {
+      "random": 48,
+      "block": "minecraft:brown_mushroom_block"
+    },
+    {
+      "random": 48,
+      "block": "minecraft:packed_mud"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:iron_bars"
+    },
+    {
+      "random": 10,
+      "block": "minecraft:air"
+    }
+  ]
+}

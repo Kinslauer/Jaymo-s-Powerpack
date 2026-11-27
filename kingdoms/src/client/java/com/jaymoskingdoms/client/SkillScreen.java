@@ -1050,6 +1050,10 @@ final class SkillScreen extends Screen {
 				? Component.translatable("gui.jaymoskingdoms.skills.blood.none")
 				: Component.translatable("gui.jaymoskingdoms.skills.blood.yours", Component.translatable("kit.jaymoskingdoms.move." + kit.move().key()),
 					Component.translatable("kit.jaymoskingdoms.move." + kit.move().key() + ".desc"))).withColor(Ui.GOLD));
+			if (com.jaymoskingdoms.Heritage.is(player, com.jaymoskingdoms.Heritage.Kind.VERDANT)) {
+				// (Andy, 2026-11-23) and a Verdant's push-button regrowth
+				text.add(Component.translatable("gui.jaymoskingdoms.skills.blood.verdant").withColor(Ui.GOLD));
+			}
 		}
 		Component cost = Component.translatable("gui.jaymoskingdoms.skills.cost", perk.cost);
 		if (perk.minLevel > 0) {
@@ -1266,6 +1270,13 @@ final class SkillScreen extends Screen {
 			name = Component.translatable("stat.jaymoskingdoms." + hovered.key()).append("  " + value + "/" + Stats.MAX);
 			text.add(Component.translatable("stat.jaymoskingdoms." + hovered.key() + ".desc").withColor(Ui.TEXT));
 			text.add(Stats.now(hovered, value).copy().withColor(accent));
+			if (hovered == Stats.Stat.GRIT) {
+				// the whole toughness: the base, Grit and worn armour's, and what it does
+				double toughness = com.jaymoskingdoms.Toughness.of(player);
+				text.add(Component.translatable("gui.jaymoskingdoms.stats.toughness", Math.round(toughness), Math.round(com.jaymoskingdoms.Toughness.gear(player)),
+					Math.round(com.jaymoskingdoms.Toughness.shrug(toughness) * 100.0),
+					String.format(java.util.Locale.ROOT, "%.1f", com.jaymoskingdoms.Toughness.poise(toughness))).withColor(accent));
+			}
 			if (hovered == Stats.Stat.ARCANA) {
 				// (0.7.212) the mana itself: how much now, the most, how fast it comes back
 				text.add(Component.translatable("gui.jaymoskingdoms.stats.mana", Math.round(com.jaymoskingdoms.Mana.current(player)),

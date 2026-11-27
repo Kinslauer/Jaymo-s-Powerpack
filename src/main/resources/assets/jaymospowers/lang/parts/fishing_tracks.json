@@ -75,5 +75,6 @@
   "tooltip.jaymospowers.keepnet": "Set it in water. Fish inside stay alive",
   "tooltip.jaymospowers.trophy_plaque": "Hang it on a wall and mount a landed fish or a shark jaw on it",
   "tooltip.jaymospowers.fishers_journal": "Every fish you've caught, your bests, and where and when they bite",
-  "tooltip.jaymospowers.release": "Use on water to let it go. Sneak and use to look it over"
+  "tooltip.jaymospowers.release": "Use on water to let it go. Sneak and use to look it over",
+  "gui.jaymospowers.journal.clean": "Landed: %s"
 }

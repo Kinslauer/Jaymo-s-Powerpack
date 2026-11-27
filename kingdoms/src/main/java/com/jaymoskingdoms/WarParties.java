@@ -485,6 +485,7 @@ final class WarParties {
 				Faction target = Factions.get(server, out.target);
 				Entity lead = out.soldiers.stream().map(level::getEntity).filter(e -> e instanceof Worker).findFirst().orElse(null);
 				BlockPos at = lead != null ? lead.blockPosition() : out.lastAt != null ? out.lastAt : target != null ? target.seat() : player.blockPosition();
+				Company.march(level, player);
 				return new Joined(true, Component.translatable("message.jaymoskingdoms.war.joined", name(Factions.get(server, out.faction)), name(target), at.getX(), at.getZ()));
 			}
 			if (out != null) {
@@ -512,6 +513,7 @@ final class WarParties {
 				continue;
 			}
 			party.players.add(player.getUUID());
+			Company.march(level, player);
 			return new Joined(true, Component.translatable("message.jaymoskingdoms.war.called", mine.name(), target.name(), target.seat().getX(), target.seat().getZ()));
 		}
 		return new Joined(false, Component.translatable("message.jaymoskingdoms.war.join_none", mine.name()));
@@ -1040,13 +1042,13 @@ final class WarParties {
 		}
 	}
 
-	/** The squad's soldiers in the field, its leader first; those holding a banner, working an engine or out of reach left out. */
+	/** The squad's soldiers in the field, its leader first; those holding a banner, working an engine, out of reach or fallen back ({@link BreakOff}) left out. */
 	private static List<PathfinderMob> squadIn(ServerLevel level, Party party, List<UUID> squad, boolean fightingToo) {
 		List<PathfinderMob> out = new ArrayList<>();
 		for (UUID id : squad) {
 			if (level.getEntity(id) instanceof PathfinderMob m && m.isAlive() && m instanceof Worker && !party.holders.contains(id)
 				&& !party.crew.contains(id) && SiegeTrain.serving(level, party, m) == null && !Sappers.busy(party, m)
-				&& (fightingToo || Rulers.target(m) == null)) {
+				&& (fightingToo || Rulers.target(m) == null) && !BreakOff.away(m)) {
 				out.add(m);
 			}
 		}

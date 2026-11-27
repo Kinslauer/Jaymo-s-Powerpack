@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/coat_of_plates_skirt",
+    "layer1": "jaymoskingdoms:item/coat_of_plates_skirt_trim"
+  }
+}

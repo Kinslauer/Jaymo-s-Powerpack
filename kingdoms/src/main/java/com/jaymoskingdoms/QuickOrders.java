@@ -131,7 +131,7 @@ public final class QuickOrders {
 		List<Villager> yours = new ArrayList<>();
 		// (class trees: a Commander's orders reach twice as far, Discipline)
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Followers.ALL_RANGE * Discipline.orderReach(player)),
-			v -> !v.isBaby() && !v.isSleeping() && !Downed.isDowned(v) && Followers.takesOrders(v, player))) {
+			v -> !v.isBaby() && !v.isSleeping() && !Downed.isDowned(v) && Followers.takesOrders(v, player) && Company.heeds(v, player))) {
 			if (!Languages.understands(player, v) && !Discipline.commands(player, v)) {
 				Languages.shrug(player, v);
 				continue;

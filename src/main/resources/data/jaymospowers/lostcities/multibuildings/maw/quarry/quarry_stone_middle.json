@@ -1,0 +1,14 @@
+{
+  "dimx": 2,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/quarry/quarry_stone_middle00",
+      "jaymospowers:maw/quarry/quarry_stone_middle01"
+    ],
+    [
+      "jaymospowers:maw/quarry/quarry_stone_middle10",
+      "jaymospowers:maw/quarry/quarry_stone_middle11"
+    ]
+  ]
+}

@@ -15,6 +15,12 @@ public final class FreshTooltip {
 	public static void register() {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> Freshness.clientToday = client.level == null ? -1L : Freshness.today(client.level));
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+			if (com.jaymoskitchen.farm.RawMilk.milk(stack)) {
+				// (Raw Milk's idea) raw from the animal, or heated safe
+				boolean raw = com.jaymoskitchen.farm.RawMilk.raw(stack);
+				lines.add(Component.translatable(raw ? "tooltip.jaymoskitchen.milk.raw" : "tooltip.jaymoskitchen.milk.pasteurised")
+					.withStyle(raw ? ChatFormatting.YELLOW : ChatFormatting.GREEN));
+			}
 			if (Freshness.clientToday < 0 || !Freshness.perishable(stack)) {
 				return;
 			}

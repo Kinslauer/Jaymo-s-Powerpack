@@ -132,6 +132,8 @@ public final class Monsters {
 		// the witches' mud golems at their huts
 		WitchHuts.register();
 		WitchThralls.register();
+		// the beasts of Mo' Creatures: Nether scorpion, manticore, big golem
+		MocBeasts.register();
 		// the Gaunt of the snowy woods, its heart and the curse of the hungry
 		com.jaymoskingdoms.hunger.Hunger.register();
 

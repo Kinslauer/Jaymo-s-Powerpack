@@ -90,7 +90,9 @@ final class Seats {
 	static boolean village(Holder<Structure> holder) {
 		return holder.is(StructureTags.VILLAGE)
 			|| holder.unwrapKey().map(k -> k.identifier().getNamespace().equals("minecraft") && k.identifier().getPath().startsWith("village_")
-				|| k.identifier().toString().startsWith(SKY_TOWN)).orElse(false);
+				|| k.identifier().toString().startsWith(SKY_TOWN)).orElse(false)
+			// (village mods patch 7) and Tidal Towns' raft villages, which no tag names
+			|| TidalTowns.is(holder);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.smoke;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Fate;
@@ -111,6 +112,8 @@ final class SmokeAshStorm {
 		}
 		STORMS.put(player.getUUID(), now);
 		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, AbilityPower.size(player, RADIUS) * 2.0);
+		MagicFx.spectacle(level, player.position(), "pierre01/flame", 0.12F, SmokePower.COLOR, FILM_TICKS,
+			MagicFx.BLAST, Vec3.ZERO, 4.0F);
 		SmokePower.cooldown(player, SmokeState.ASH, COOLDOWN);
 		SmokeMoves.begin(player, SmokeMoves.ASH);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 1.5F, 0.5F);

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskingdoms:block/umbrella_leaf"
+      },
+      {
+        "model": "jaymoskingdoms:block/umbrella_leaf",
+        "y": 90
+      }
+    ]
+  }
+}

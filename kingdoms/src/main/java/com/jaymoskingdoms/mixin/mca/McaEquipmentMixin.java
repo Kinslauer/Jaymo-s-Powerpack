@@ -58,7 +58,10 @@ abstract class McaEquipmentMixin {
 	@Redirect(method = {"equipBestWeapon", "equipBestRanged"}, at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$gunStays(VillagerEntityMCA villager, EquipmentSlot slot, ItemStack stack) {
 		// (and a ranked recruit's issue, a soldier's shield or standard: Ranks)
-		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)) {
+		// (and the pack's blade or bow it took in hand for this fight: WeaponSense)
+		// (and a dodger's hands while it has gear on its back: never a second shield, DualBlades)
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)
+			&& !com.jaymoskingdoms.WeaponSense.keeps(villager, slot) && !com.jaymoskingdoms.DualBlades.keeps(villager, slot, stack)) {
 			// (a recruit is armed only from their pack: Ranks; a settlement's guard with the blade it paid for: GuardKit)
 			// (and one a player disarmed only from their pack too: Downed)
 			villager.setItemSlot(slot, Downed.owned(villager, slot, com.jaymoskingdoms.Ranks.owned(villager, com.jaymoskingdoms.GuardKit.weapon(villager, slot, stack))));
@@ -68,7 +71,9 @@ abstract class McaEquipmentMixin {
 	/** Nor is it put away with a guard's off-duty hands, and what a carter, a fence or a wizard was dressed in isn't taken off them. */
 	@Redirect(method = "start(Lnet/minecraft/server/level/ServerLevel;Lnet/conczin/mca/entity/VillagerEntityMCA;J)V", at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$issueStays(VillagerEntityMCA villager, EquipmentSlot slot, ItemStack stack) {
-		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)) {
+		// (nor is a new shield handed to one with a shield on its back: DualBlades)
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)
+			&& !com.jaymoskingdoms.DualBlades.keeps(villager, slot, stack)) {
 			villager.setItemSlot(slot, Downed.owned(villager, slot, com.jaymoskingdoms.Ranks.owned(villager, stack)));
 		}
 	}
@@ -76,7 +81,8 @@ abstract class McaEquipmentMixin {
 	@Redirect(method = "start(Lnet/minecraft/server/level/ServerLevel;Lnet/conczin/mca/entity/VillagerEntityMCA;J)V", at = @At(value = "INVOKE", target = "Lnet/conczin/mca/entity/VillagerEntityMCA;setItemInHand(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;)V"))
 	private void jaymoskingdoms$handStays(VillagerEntityMCA villager, InteractionHand hand, ItemStack stack) {
 		EquipmentSlot slot = hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
-		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)) {
+		if (!FrontierWear.keeps(villager, slot, villager.isGuard()) && !com.jaymoskingdoms.Ranks.keeps(villager, slot, stack)
+			&& !com.jaymoskingdoms.DualBlades.keeps(villager, slot, stack)) {
 			villager.setItemInHand(hand, stack);
 		}
 	}

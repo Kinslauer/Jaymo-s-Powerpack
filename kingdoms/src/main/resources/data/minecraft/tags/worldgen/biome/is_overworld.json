@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "jaymoskingdoms:silk_deeps"
+    "jaymoskingdoms:silk_deeps",
+    "jaymoskingdoms:steam_valley",
+    "jaymoskingdoms:ashlands",
+    "jaymoskingdoms:salt_desert",
+    "jaymoskingdoms:steppe_plains"
   ]
 }

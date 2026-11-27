@@ -387,7 +387,8 @@ final class Castle {
 		for (int dy = -CELLAR_DEPTH; dy <= -1; dy++) {
 			f.set(level, lx, y + dy, lz, f.turn(Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.NORTH)));
 		}
-		f.set(level, lx, y, lz, f.turn(p.trapdoor().setValue(TrapDoorBlock.HALF, Half.TOP)));
+		f.set(level, lx, y, lz, f.turn(Blocks.IRON_TRAPDOOR.defaultBlockState().setValue(TrapDoorBlock.HALF, Half.TOP)));
+		hiddenSwitch(level, f.at(lx, y, lz));
 		f.set(level, -2, y - CELLAR_DEPTH, cz - 2, Blocks.LANTERN.defaultBlockState());
 		BlockPos chest = f.at(-CELLAR_HALF, y - CELLAR_DEPTH, cz + CELLAR_HALF);
 		level.setBlock(chest, f.turn(Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH)), Block.UPDATE_ALL);
@@ -395,6 +396,28 @@ final class Castle {
 			box.setLootTable(BuiltInLootTables.VILLAGE_WEAPONSMITH, random.nextLong());
 		}
 		return f.at(0, y - CELLAR_DEPTH, cz);
+	}
+
+	/**
+	 * The hatch is iron, worked by a hidden switch beside it (HiddenSwitches): a stone brick of the wall next to it comes
+	 * loose, or, with no stone brick to hide in, a bookshelf stands by the hatch with a book that pulls.
+	 */
+	private static void hiddenSwitch(ServerLevel level, BlockPos hatch) {
+		BlockPos free = null;
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			BlockPos at = hatch.relative(side);
+			BlockState there = level.getBlockState(at);
+			if (there.is(Blocks.STONE_BRICKS)) {
+				level.setBlock(at, HiddenSwitches.LOOSE_STONE.defaultBlockState(), Block.UPDATE_ALL);
+				return;
+			}
+			if (free == null && there.isAir() && !level.getBlockState(at.below()).isAir()) {
+				free = at;
+			}
+		}
+		if (free != null) {
+			level.setBlock(free, HiddenSwitches.BOOKSHELF_LEVER.defaultBlockState(), Block.UPDATE_ALL);
+		}
 	}
 
 	// ---- the castle -----------------------------------------------------------------------------------------------

@@ -142,6 +142,23 @@ public final class BloodParticles {
 		}
 	}
 
+	/**
+	 * A big hit close to a player ({@code BladeBlood}): sent to that player alone, from where the body stood, so their client
+	 * can spatter its own screen ({@code BloodScreen}) if the hit is in view. {@code size} is the blow's weight (1 = a heavy blunt blow).
+	 */
+	public record Screen(int color, float size) implements ParticleOptions {
+		public static final MapCodec<Screen> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+			Codec.INT.fieldOf("color").forGetter(Screen::color),
+			Codec.FLOAT.optionalFieldOf("size", 1.0F).forGetter(Screen::size)).apply(i, Screen::new));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Screen> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.INT, Screen::color, ByteBufCodecs.FLOAT, Screen::size, Screen::new);
+
+		@Override
+		public ParticleType<?> getType() {
+			return SCREEN;
+		}
+	}
+
 	public static final ParticleType<Spray> SPRAY = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_spray"),
 		FabricParticleTypes.complex(true, Spray.CODEC, Spray.STREAM_CODEC));
 	public static final ParticleType<Puddle> PUDDLE = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_puddle"),
@@ -151,6 +168,8 @@ public final class BloodParticles {
 		FabricParticleTypes.complex(false, Fleck.CODEC, Fleck.STREAM_CODEC));
 	public static final ParticleType<Wipe> WIPE = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_wipe"),
 		FabricParticleTypes.complex(true, Wipe.CODEC, Wipe.STREAM_CODEC));
+	public static final ParticleType<Screen> SCREEN = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_screen"),
+		FabricParticleTypes.complex(true, Screen.CODEC, Screen.STREAM_CODEC));
 	/** (0.15.109) A plain red {@link Fleck}, by id for mods that can't build one (Jaymo's Kingdoms looks it up). */
 	public static final SimpleParticleType RED_FLECK = simple("blood_fleck_red");
 

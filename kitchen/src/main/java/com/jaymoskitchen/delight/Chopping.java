@@ -49,6 +49,8 @@ public final class Chopping {
 	static final int PUMPKIN_SLICES = 4;
 	static final int MELON_SLICES = 9;
 	static final int KELP_ROLL_SLICES = 3;
+	/** Shards from an ender pearl, fragments from an enderman's eye, filets from a shulker's mollusk. */
+	static final int END_CUTS = 2;
 
 	private Chopping() {
 	}
@@ -136,6 +138,16 @@ public final class Chopping {
 		}
 		if (item == DelightDishes.HAM) {
 			return List.of(new ItemStack(Items.PORKCHOP, MEAT_CUTS), new ItemStack(Items.BONE));
+		}
+		// (Ender's Delight's cuts) an ender pearl into shards, an enderman's eye into fragments, a shulker's mollusk into filets
+		if (item == Items.ENDER_PEARL) {
+			return List.of(new ItemStack(EnderDelight.ENDER_SHARD, END_CUTS));
+		}
+		if (item == EnderDelight.ENDERMAN_SIGHT) {
+			return List.of(new ItemStack(EnderDelight.SIGHT_FRAGMENTS, END_CUTS));
+		}
+		if (item == EnderDelight.SHULKER_MOLLUSK) {
+			return List.of(new ItemStack(EnderDelight.SHULKER_FILET, END_CUTS));
 		}
 		Dish dish = ModItems.dishOf(item);
 		if (dish == Dish.SMOKED_HAM) {

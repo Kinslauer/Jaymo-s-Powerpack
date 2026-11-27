@@ -1,0 +1,26 @@
+{
+  "dimx": 5,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/base/base_missile_large00",
+      "jaymospowers:maw/base/base_missile_large01"
+    ],
+    [
+      "jaymospowers:maw/base/base_missile_large00",
+      "jaymospowers:maw/base/base_missile_large01"
+    ],
+    [
+      "jaymospowers:maw/base/base_missile_large00",
+      "jaymospowers:maw/base/base_missile_large01"
+    ],
+    [
+      "jaymospowers:maw/base/base_missile_large00",
+      "jaymospowers:maw/base/base_missile_large01"
+    ],
+    [
+      "jaymospowers:maw/base/base_missile_large00",
+      "jaymospowers:maw/base/base_missile_large01"
+    ]
+  ]
+}

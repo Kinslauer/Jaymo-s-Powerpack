@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "ingredients": [
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "minecraft:iron_ingot",
+    "minecraft:iron_ingot",
+    "minecraft:string"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:coat_of_plates_skirt"
+  }
+}

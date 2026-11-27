@@ -1,0 +1,39 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "allowFillers": false,
+  "minfloors": 12,
+  "maxcellars": 0,
+  "parts": [
+    {
+      "floor": 0,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_chimney_0"
+    },
+    {
+      "floor": 1,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_chimney_1"
+    },
+    {
+      "floor": 2,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_chimney_2"
+    },
+    {
+      "range": "3,100",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_chimney_3"
+    },
+    {
+      "range": "3,100",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_chimney_4"
+    },
+    {
+      "top": true,
+      "part": "jaymospowers:maw/factory/factory_chimney_5"
+    }
+  ]
+}

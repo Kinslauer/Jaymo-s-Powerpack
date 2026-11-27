@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
  * shoulders and down the legs and swallows the head last, hugging the body, then every mass swells out into the brute
  * while the wearer grows inside it. The jaw hangs open
  * and breathes, now and then drawing back in a snarl; a long red tongue stays in the mouth and flicks out quickly every
- * {@code TONGUE_EVERY} ticks, and once just after a meal ({@link #submitTongue}; the maw's own tongue lashes out for
+ * {@code TONGUE_EVERY} ticks, and once just after a meal ({@link WebBigHead}'s tongue; the maw's own tongue lashes out for
  * the last bite, WebMouthLayer). The forearms and shins hang off elbows and knees of their own ({@link Model#limbs}):
  * they bend with the stride, the forearms trailing the swing, the knees folding as each leg comes through, and sway a
  * little standing. Everything keeps the player model's pivots, so every pose drives it; on top of them the
@@ -56,11 +56,28 @@ final class WebHulk {
 	 * {@code TORSO / 12}, the legs by {@code LEG / 12} (the player model's are 12 long).
 	 */
 	static final float TORSO_STRETCH = WebHulkMesh.TORSO / 12.0F, LEG_STRETCH = WebHulkMesh.LEG / 12.0F;
+	/**
+	 * Its tendrils (Andy, after the red body's: "black should get a similar treatment"): the slender body's crown off the
+	 * back and shoulders ({@link WebSlender#TENDRIL_REST}, its strands too), grown to this frame: the roots
+	 * {@code TENDRIL_WIDE} times as far out and {@code TENDRIL_DEEP} pixels further back, each tendril {@code TENDRIL_THICK}
+	 * times as thick and {@code TENDRIL_LONG} times as long.
+	 */
+	static final float TENDRIL_WIDE = 1.6F, TENDRIL_DEEP = 1.5F, TENDRIL_THICK = 1.3F, TENDRIL_LONG = 1.15F;
+	static final float[][] TENDRIL_REST = WebSlender.grown(WebSlender.TENDRIL_REST, TENDRIL_WIDE, TENDRIL_DEEP, TENDRIL_THICK, TENDRIL_LONG);
+	static final float[][] STRANDS = WebSlender.grown(WebSlender.STRANDS, TENDRIL_WIDE, TENDRIL_DEEP, TENDRIL_THICK, TENDRIL_LONG);
+	/**
+	 * Its stance (Andy's still of it in the second film: crouched wide and low, the arms hanging, the claws near the ground):
+	 * bent {@code CROUCH} from the hips standing ({@code CROUCH_WORKING} with its tendrils at work, {@code CROUCH_MOVING} of
+	 * that on the move), the head craned back up {@code CROUCH_HEAD_UP} of it, the arms let hang {@code CROUCH_ARMS} forward,
+	 * the thighs raised {@code CROUCH_THIGHS} and spread {@code CROUCH_APART} (radians), sunk {@code CROUCH_DROP} pixels on its
+	 * knees, the elbows crooked {@code CROUCH_ELBOWS} more (WebSlender#hunch).
+	 */
+	static final float CROUCH = 0.35F, CROUCH_WORKING = 0.5F, CROUCH_MOVING = 0.6F, CROUCH_HEAD_UP = 0.9F, CROUCH_ARMS = 0.1F, CROUCH_THIGHS = 0.5F,
+		CROUCH_APART = 0.18F, CROUCH_DROP = 2.0F, CROUCH_ELBOWS = 0.3F;
+	static final WebSlender.Stance STANCE = new WebSlender.Stance(CROUCH, CROUCH_WORKING, CROUCH_MOVING, CROUCH_HEAD_UP, CROUCH_ARMS, CROUCH_THIGHS,
+		CROUCH_DROP, CROUCH_ELBOWS, CROUCH_APART);
 	/** The jaw: how far it hangs open at rest (radians), how much it breathes, and a snarl's gape. */
 	static final float JAW_REST = 0.22F, JAW_BREATH = 0.08F, JAW_SNARL = 0.5F;
-	/** The tongue: pieces, each one's length (pixels), its width and thickness at the root (tapering to the tip). */
-	static final int TONGUE_PIECES = 12;
-	static final float TONGUE_PIECE = 1.7F, TONGUE_WIDTH = 1.6F, TONGUE_THICK = 0.55F;
 	/** How it moves: drooping this much more each piece, rippling this hard, swaying, and its tip fluttering in a flick. */
 	static final float TONGUE_DROOP = 0.1F, TONGUE_RIPPLE = 0.28F, TONGUE_SWAY = 0.22F, TONGUE_FLUTTER = 0.35F;
 	/**
@@ -187,30 +204,17 @@ final class WebHulk {
 		 * swells out (see {@code FLOW_FROM}).
 		 */
 		void build(float g, float hold, float k, float age, float bare) {
-			float cover = Mth.clamp((hold - (1.0F - WebSuitGrowth.HULK_PEEL)) / WebSuitGrowth.HULK_PEEL, 0.0F, 1.0F);
-			float flowed = Math.min(g, Mth.lerp(Mth.lerp(cover, PEEL_KEEP, 1.0F), FLOW_FROM, FLOW_TO));
+			float flowed = flowed(g, hold);
 			for (int i = 0; i < this.muscles.length; i++) {
-				float share = this.order[i] / (float)WebHulkMesh.LAST_ORDER;
-				// flowing over the body from where it grows
-				float flow = ease((flowed - FLOW_FROM - (FLOW_TO - FLOW_EACH - FLOW_FROM) * share) / FLOW_EACH);
-				// then swelling out into the brute, gradually, heaving as it goes: every mass full as the change ends
-				float from = SWELL_FROM + SWELL_STAGGER * share;
-				float s = Mth.clamp((g - from) / (1.0F - from), 0.0F, 1.0F);
-				float swollen;
-				if (s >= 1.0F) {
-					swollen = 1.0F;
-				} else if (this.onHead[i]) {
-					// (in step and never past full: the fang rows must stay together)
-					swollen = ease(s) + Mth.sin(age * HEAVE_RATE + this.firstOnHead * 1.7F) * HEAVE * Mth.sin(s * Mth.PI) * (1.0F - s);
-				} else {
-					swollen = swell(s) + Mth.sin(age * HEAVE_RATE + i * 1.7F) * HEAVE * Mth.sin(s * Mth.PI);
-				}
-				float thick = Mth.lerp(swollen, this.onHead[i] ? HEAD_THIN : THIN, 1.0F) * (0.35F + 0.65F * flow);
+				float flow = flow(this.order[i], flowed);
+				// (in step and never past full: the head's masses heave together, the fang rows with them)
+				float thick = thick(this.order[i], this.onHead[i], this.onHead[i] ? this.firstOnHead : i, g, age, flow);
 				ModelPart part = this.muscles[i];
 				part.xScale = thick;
 				part.yScale = this.fang[i] ? flow * bare : flow;
 				part.zScale = thick;
-				part.visible = flow > 0.02F && (!this.fang[i] || bare > 0.02F);
+				// (the head's masses stay hidden: WebBigHead draws the head)
+				part.visible = flow > 0.02F && !this.onHead[i] && (!this.fang[i] || bare > 0.02F);
 			}
 			// the lower fangs slide up out of the chin (shrunk toward their root in it)
 			for (ModelPart fang : this.jawFangs) {
@@ -238,51 +242,59 @@ final class WebHulk {
 		 * standing, the elbows hang a little bent and breathe while the arms rock. A raised thigh folds its shin back.
 		 */
 		void limbs(AvatarRenderState s) {
-			float pos = s.walkAnimationPos;
-			float speed = Mth.clamp(s.walkAnimationSpeed, 0.0F, 1.0F);
-			float age = s.ageInTicks;
-			float idle = 1.0F - speed;
-			// the beast's own walk (WebFeral) swings each arm with the leg on its side, the game's with the other one; worn
-			// alone (its tendrils drawn in) it walks upright, the game's way, with a stride of its own (WebFeral.brute)
-			// (eased between the two as the tendrils draw in or come out, WebFeral.uprightness)
-			float up = WebFeral.uprightness(s);
-			boolean still = s.isCrouching || s.isPassenger || s.isFallFlying || s.swimAmount > 0.0F;
-			float beast = still ? 0.0F : 1.0F - up;
-			float legSwing = Mth.lerp(up, 1.4F, WebFeral.stride(s));
-			WebSymbioteClient.Tendrils tendrils = s.getData(WebSymbioteClient.TENDRILS);
-			float run = beast > 0.0F && tendrils != null && tendrils.armor() ? beast * tendrils.run() * Mth.clamp(0.4F + speed, 0.0F, 1.0F) : 0.0F;
-			float walk = pos * 0.6662F, gallop = pos * 0.45F;
-			for (int side = 0; side < 2; side++) {
-				boolean right = side == 0;
-				ModelPart arm = right ? this.rightArm : this.leftArm;
-				// where the arm is in its swing (cos 1 at the back of it): the forearm bends most a little after the front
-				float armPhase = walk + (right ? 0.0F : Mth.PI);
-				float stride = Mth.lerp(beast, 0.5F - 0.5F * Mth.cos(armPhase + Mth.PI - ELBOW_LAG), 0.5F - 0.5F * Mth.cos(armPhase - ELBOW_LAG));
-				float galloping = 0.5F - 0.5F * Mth.cos(gallop - Mth.HALF_PI - ELBOW_LAG);
-				float bend = ELBOW_REST + ELBOW_SWING * speed * Mth.lerp(run, stride, galloping)
-					+ ELBOW_IDLE * idle * (0.5F + 0.5F * Mth.sin(age * IDLE_RATE * 1.3F + side * 1.7F));
-				if (busy(s, right)) {
-					bend *= ELBOW_HOLDING;
-				} else {
-					arm.xRot += IDLE_SWAY * idle * Mth.sin(age * IDLE_RATE + side * 2.1F);
-				}
-				// forward (and up): the forearm's bottom swings ahead
-				(right ? this.elbowRight : this.elbowLeft).xRot = -bend;
+			WebHulk.limbs(s, this, this.elbowRight, this.elbowLeft, this.kneeRight, this.kneeLeft);
+		}
+	}
 
-				ModelPart leg = right ? this.rightLeg : this.leftLeg;
-				// the game's walk: each leg cos(phase), back at 1, swinging forward while sin(phase) > 0
-				float legPhase = walk + (right ? 0.0F : Mth.PI);
-				float through = (float)Math.pow(Math.max(0.0F, Mth.sin(legPhase + KNEE_LEAD)), 1.5);
-				// the gallop drives both legs together, -sin(gallop): forward while cos(gallop) > 0
-				float gallopThrough = (float)Math.pow(Math.max(0.0F, Mth.cos(gallop + KNEE_LEAD)), 1.5);
-				float knee = speed * (KNEE_WALK + KNEE_SWING * Mth.lerp(run, through, gallopThrough));
-				// how far the thigh is raised forward beyond its stride: a crouch, the coil, knees drawn up, a seat
-				float swing = Mth.lerp(run, Mth.cos(legPhase) * legSwing * speed, -Mth.sin(gallop) * 0.95F * speed + 0.2F);
-				float raised = Math.max(0.0F, swing - leg.xRot);
-				knee = Math.max(knee, raised * (s.isPassenger ? KNEE_SIT : KNEE_CROUCH));
-				// back: the shin's bottom swings behind
-				(right ? this.kneeRight : this.kneeLeft).xRot = Math.min(knee, KNEE_MAX);
+	/**
+	 * The elbows and knees of a body whose forearms and shins hang off their own parts ({@link Model#limbs}; the slender
+	 * body's too, {@link WebSlender}): set outright from the render state after {@code m}'s limbs are posed.
+	 */
+	static void limbs(AvatarRenderState s, HumanoidModel<?> m, ModelPart elbowRight, ModelPart elbowLeft, ModelPart kneeRight, ModelPart kneeLeft) {
+		float pos = s.walkAnimationPos;
+		float speed = Mth.clamp(s.walkAnimationSpeed, 0.0F, 1.0F);
+		float age = s.ageInTicks;
+		float idle = 1.0F - speed;
+		// the beast's own walk (WebFeral) swings each arm with the leg on its side, the game's with the other one; worn
+		// alone (its tendrils drawn in) it walks upright, the game's way, with a stride of its own (WebFeral.brute)
+		// (eased between the two as the tendrils draw in or come out, WebFeral.uprightness)
+		float up = WebFeral.uprightness(s);
+		boolean still = s.isCrouching || s.isPassenger || s.isFallFlying || s.swimAmount > 0.0F;
+		float beast = still ? 0.0F : 1.0F - up;
+		float legSwing = Mth.lerp(up, 1.4F, WebFeral.stride(s));
+		WebSymbioteClient.Tendrils tendrils = s.getData(WebSymbioteClient.TENDRILS);
+		float run = beast > 0.0F && tendrils != null && tendrils.armor() ? beast * tendrils.run() * Mth.clamp(0.4F + speed, 0.0F, 1.0F) : 0.0F;
+		float walk = pos * 0.6662F, gallop = pos * 0.45F;
+		for (int side = 0; side < 2; side++) {
+			boolean right = side == 0;
+			ModelPart arm = right ? m.rightArm : m.leftArm;
+			// where the arm is in its swing (cos 1 at the back of it): the forearm bends most a little after the front
+			float armPhase = walk + (right ? 0.0F : Mth.PI);
+			float stride = Mth.lerp(beast, 0.5F - 0.5F * Mth.cos(armPhase + Mth.PI - ELBOW_LAG), 0.5F - 0.5F * Mth.cos(armPhase - ELBOW_LAG));
+			float galloping = 0.5F - 0.5F * Mth.cos(gallop - Mth.HALF_PI - ELBOW_LAG);
+			float bend = ELBOW_REST + ELBOW_SWING * speed * Mth.lerp(run, stride, galloping)
+				+ ELBOW_IDLE * idle * (0.5F + 0.5F * Mth.sin(age * IDLE_RATE * 1.3F + side * 1.7F));
+			if (busy(s, right)) {
+				bend *= ELBOW_HOLDING;
+			} else {
+				arm.xRot += IDLE_SWAY * idle * Mth.sin(age * IDLE_RATE + side * 2.1F);
 			}
+			// forward (and up): the forearm's bottom swings ahead
+			(right ? elbowRight : elbowLeft).xRot = -bend;
+
+			ModelPart leg = right ? m.rightLeg : m.leftLeg;
+			// the game's walk: each leg cos(phase), back at 1, swinging forward while sin(phase) > 0
+			float legPhase = walk + (right ? 0.0F : Mth.PI);
+			float through = (float)Math.pow(Math.max(0.0F, Mth.sin(legPhase + KNEE_LEAD)), 1.5);
+			// the gallop drives both legs together, -sin(gallop): forward while cos(gallop) > 0
+			float gallopThrough = (float)Math.pow(Math.max(0.0F, Mth.cos(gallop + KNEE_LEAD)), 1.5);
+			float knee = speed * (KNEE_WALK + KNEE_SWING * Mth.lerp(run, through, gallopThrough));
+			// how far the thigh is raised forward beyond its stride: a crouch, the coil, knees drawn up, a seat
+			float swing = Mth.lerp(run, Mth.cos(legPhase) * legSwing * speed, -Mth.sin(gallop) * 0.95F * speed + 0.2F);
+			float raised = Math.max(0.0F, swing - leg.xRot);
+			knee = Math.max(knee, raised * (s.isPassenger ? KNEE_SIT : KNEE_CROUCH));
+			// back: the shin's bottom swings behind
+			(right ? kneeRight : kneeLeft).xRot = Math.min(knee, KNEE_MAX);
 		}
 	}
 
@@ -339,6 +351,38 @@ final class WebHulk {
 	private static float ease(float x) {
 		x = Mth.clamp(x, 0.0F, 1.0F);
 		return x * x * (3.0F - 2.0F * x);
+	}
+
+	/** How far the goo has flowed over the body when it's been built {@code g} of the way and {@code hold} of it still holds. */
+	static float flowed(float g, float hold) {
+		float cover = Mth.clamp((hold - (1.0F - WebSuitGrowth.HULK_PEEL)) / WebSuitGrowth.HULK_PEEL, 0.0F, 1.0F);
+		return Math.min(g, Mth.lerp(Mth.lerp(cover, PEEL_KEEP, 1.0F), FLOW_FROM, FLOW_TO));
+	}
+
+	/** How far the muscle that flows on at {@code order} has flowed on (0-1), flowing over the body from where it grows. */
+	static float flow(int order, float flowed) {
+		float share = order / (float)WebHulkMesh.LAST_ORDER;
+		return ease((flowed - FLOW_FROM - (FLOW_TO - FLOW_EACH - FLOW_FROM) * share) / FLOW_EACH);
+	}
+
+	/**
+	 * How thick a muscle is (its scale across), swelling out into the brute gradually, heaving as it goes: every mass full as
+	 * the change ends. {@code phase} is where it is in the heave (the head's masses share one).
+	 */
+	static float thick(int order, boolean head, int phase, float g, float age, float flow) {
+		float share = order / (float)WebHulkMesh.LAST_ORDER;
+		float from = SWELL_FROM + SWELL_STAGGER * share;
+		float s = Mth.clamp((g - from) / (1.0F - from), 0.0F, 1.0F);
+		float swollen;
+		if (s >= 1.0F) {
+			swollen = 1.0F;
+		} else if (head) {
+			// (in step and never past full: the fang rows must stay together)
+			swollen = ease(s) + Mth.sin(age * HEAVE_RATE + phase * 1.7F) * HEAVE * Mth.sin(s * Mth.PI) * (1.0F - s);
+		} else {
+			swollen = swell(s) + Mth.sin(age * HEAVE_RATE + phase * 1.7F) * HEAVE * Mth.sin(s * Mth.PI);
+		}
+		return Mth.lerp(swollen, head ? HEAD_THIN : THIN, 1.0F) * (0.35F + 0.65F * flow);
 	}
 
 	/** How far the body inside is spread to the big body's frame (0-1) when it's been built {@code g} of the way: it grows as the goo swells. */
@@ -511,7 +555,7 @@ final class WebHulk {
 		stretch(h.leftLeg, Mth.lerp(k, 1.0F, LEG_STRETCH), frame);
 	}
 
-	private static void stretch(ModelPart part, float by, float frame) {
+	static void stretch(ModelPart part, float by, float frame) {
 		float[] was = STRETCHED.get(part);
 		if (was != null && was[0] == frame && was[1] == part.yScale) {
 			return;
@@ -520,7 +564,13 @@ final class WebHulk {
 		STRETCHED.put(part, new float[] {frame, part.yScale});
 	}
 
-	private static void move(ModelPart part, float dx, float dy, float dz) {
+	/** This part is where the frame shift last moved it (it's been shifted this pose). */
+	static boolean moved(ModelPart part) {
+		float[] was = MOVED.get(part);
+		return was != null && was[0] == part.x && was[1] == part.y && was[2] == part.z;
+	}
+
+	static void move(ModelPart part, float dx, float dy, float dz) {
 		float[] was = MOVED.get(part);
 		if (was != null && was[0] == part.x && was[1] == part.y && was[2] == part.z) {
 			return;
@@ -529,31 +579,6 @@ final class WebHulk {
 		part.y += dy;
 		part.z += dz;
 		MOVED.put(part, new float[] {part.x, part.y, part.z});
-	}
-
-	/**
-	 * The tongue: in the mouth, and every so often ({@link #flick}) flicked out between the jaws over the fangs, its tip
-	 * fluttering, and drawn back in. Drawn off the head ({@code head}, already posed and moved to the big body's frame),
-	 * {@code grown} of its length (it comes in with the head as the big body is built).
-	 */
-	static void submitTongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, PlayerModel parent, float grown) {
-		float flick = flick(state);
-		float out = flickOut(flick) * grown;
-		if (out <= 0.02F) {
-			// in the mouth
-			return;
-		}
-		float age = state.ageInTicks;
-		float jawAngle = jaw(state);
-		float whip = Mth.sin(flick * Mth.PI);
-		poseStack.pushPose();
-		parent.root().translateAndRotate(poseStack);
-		parent.head.translateAndRotate(poseStack);
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) ->
-			// out from between the jaws, riding down with the lower one (sliding back into the mouth as it's drawn in)
-			tongue(buffer, pose, new Vec3(0.0, 0.9 + Mth.sin(jawAngle) * 2.0, -3.0 + (1.0F - out) * 3.0), 0.15F + jawAngle * 0.6F, TONGUE_PIECES,
-				TONGUE_PIECE, TONGUE_WIDTH, TONGUE_THICK, age, out, whip, TONGUE_DROOP, state.lightCoords));
-		poseStack.popPose();
 	}
 
 	/**

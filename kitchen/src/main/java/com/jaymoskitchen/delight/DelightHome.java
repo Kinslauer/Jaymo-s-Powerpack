@@ -61,7 +61,7 @@ public final class DelightHome {
 
 	public static SoundEvent SKILLET_SIZZLE, SKILLET_ADD_FOOD, SKILLET_ATTACK_STRONG, SKILLET_ATTACK_WEAK;
 
-	public static StoveBlock STOVE;
+	public static StoveBlock STOVE, ENDSTONE_STOVE;
 		public static Block COOKING_BLOCK;
 		public static BasketBlock WOODEN_BASKET, BAMBOO_BASKET;
 	public static final List<CabinetBlock> CABINETS = new ArrayList<>();
@@ -96,8 +96,12 @@ public final class DelightHome {
 		// the stove
 				STOVE = block("stove", StoveBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BRICKS)
 					.lightLevel(state -> state.getValue(StoveBlock.LIT) ? STOVE_LIGHT : 0));
-				STOVE_ENTITY = blockEntity("stove", new BlockEntityType<>(StoveBlockEntity::new, Set.of(STOVE)));
+				// (Ender's Delight's end stone stove: the same stove, built of the End's stone)
+				ENDSTONE_STOVE = block("endstone_stove", StoveBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BRICKS)
+					.lightLevel(state -> state.getValue(StoveBlock.LIT) ? STOVE_LIGHT : 0));
+				STOVE_ENTITY = blockEntity("stove", new BlockEntityType<>(StoveBlockEntity::new, Set.of(STOVE, ENDSTONE_STOVE)));
 				item("stove", STOVE, new Item.Properties(), FUNCTIONAL, 0);
+				item("endstone_stove", ENDSTONE_STOVE, new Item.Properties(), FUNCTIONAL, 0);
 
 				// cooking block
 				COOKING_BLOCK = block("cooking_block", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)

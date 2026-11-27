@@ -18,6 +18,9 @@ import os
 import random
 
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 RES = os.path.join(ROOT, "kingdoms", "src", "main", "resources")
@@ -249,13 +252,20 @@ def skin(people, ruler, seed):
 # ---- icons ----------------------------------------------------------------------------------------------------------
 
 def icon(draw, seed):
-    r = random.Random(seed)
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    """An icon on the Reason look's few shades (docs/Vanilla-Style.md): the drawn colours, lit from the top-left and shaded
+    to the lower-right, each edge pixel its colour's outline shade. No per-pixel noise."""
+    cells = {}
     for y in range(16):
         for x in range(16):
             c = draw(x, y)
             if c is not None:
-                img.putpixel((x, y), shade(c, 0.9 + r.random() * 0.15) + (255,))
+                cells[x, y] = c
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for (x, y), c in cells.items():
+        lit = (x - 1, y) not in cells or (x, y - 1) not in cells
+        dark = (x + 1, y) not in cells or (x, y + 1) not in cells
+        k = 0.45 if dark else 0.7 if lit else 1.12 if x + y < 14 else 1.0
+        img.putpixel((x, y), shade(c, k) + (255,))
     return img
 
 
@@ -266,7 +276,7 @@ def scarab(x, y):
             return (120, 80, 30)
         if y <= 4:
             return (60, 100, 180)
-        return (220, 170, 60) if (x + y) % 5 else (255, 220, 120)
+        return (220, 170, 60)
     if (x in (2, 13) and 6 <= y <= 11 and y % 2 == 0) or (y == 2 and 6 <= x <= 9):
         return (170, 120, 40)
     return None
@@ -290,7 +300,7 @@ def bust(x, y):
 def brooch(x, y):
     d = ((x - 7.5) ** 2 + (y - 8.0) ** 2) ** 0.5
     if 3.6 <= d <= 5.4:
-        return (190, 196, 206) if (x + y) % 3 else (130, 136, 146)
+        return (190, 196, 206)
     if abs((x - 7.5) - (y - 8.0) * -0.2) < 0.8 and 2 <= y <= 14:
         return (160, 120, 60)
     if d <= 1.2:
@@ -302,21 +312,14 @@ def seal(x, y):
     if 3 <= x <= 12 and 6 <= y <= 14:
         if 5 <= x <= 10 and 8 <= y <= 12 and (x == 5 or x == 10 or y == 8 or y == 12 or x == 7 and y == 10):
             return (40, 90, 60)
-        return (80, 170, 110) if (x * 3 + y) % 7 else (130, 210, 150)
+        return (80, 170, 110)
     if 6 <= x <= 9 and 2 <= y <= 5:
         return (70, 150, 100)
     return None
 
 
 def egg(shell, spot, seed):
-    r = random.Random(seed)
-
-    def draw(x, y):
-        dx, dy = (x - 7.5) / 5.2, (y - 8.0) / 7.2
-        if dx * dx * (1.0 + 0.3 * (8.0 - y) / 7.2) + dy * dy <= 1.0:
-            return spot if r.random() < 0.18 else shell
-        return None
-    return icon(draw, seed)
+    return vanilla_egg.egg(shell, spot)
 
 
 # ---- blocks ---------------------------------------------------------------------------------------------------------

@@ -52,6 +52,12 @@ import net.minecraft.world.phys.Vec3;
  * (0.21.30) Andy: vampires "should also get an eye laser that blasts for a second but otherwise functions exactly like
  * frostborn". Kingdoms' skill bar puts {@link #GAZE_TAG} on a vampire; the same beam then comes out of both eyes, blood red,
  * for {@link #GAZE_TICKS}: the same reach, damage, pace of hits and wound roll. Being no frost, it freezes no water.
+ * <p>
+ * Andy (2026-11-25), on the heat vision of the Hand of God mod (ideas only; it is All Rights Reserved): "the heat vision
+ * beam works for frostborn's beams intended effect". So it is drawn the way that beam is: a white-hot core in a glow and
+ * a haze ({@code ZFighterBeams}), and where it rests on a block it leaves a frost burn ({@link MagicFx#scorch}, white
+ * cooling to rime, {@link #MARK_TICKS}) with ice thrown off the surface; a vampire's leaves a burn that cools to char,
+ * with embers. Still no blocks broken.
  */
 public final class FrostBeam {
 	/** Damage (1.5 hearts), reach (blocks), the wait between beams (ticks), and the beam's width and life on screen. */
@@ -84,6 +90,16 @@ public final class FrostBeam {
 	/** (0.21.30) How long the eye laser blasts (ticks), its colour, and where the eyes are (out along the look, to each side, blocks). */
 	public static final int GAZE_TICKS = 20, GAZE_COLOR = 0xD0101C;
 	public static final double EYE_OUT = 0.3, EYE_SIDE = 0.11;
+	/**
+	 * The mark it leaves where it rests on a block: one every {@code MARK_EVERY} ticks (sooner if it has moved
+	 * {@code MARK_MOVE} blocks), {@code MARK_RADIUS} across, lying there {@code MARK_TICKS}; the frost's colours (white
+	 * cooling to rime) and the vampire's (glow cooling to char); the ice or embers thrown off the surface each tick.
+	 */
+	static final int MARK_EVERY = 4, MARK_TICKS = 120;
+	static final double MARK_MOVE = 0.35;
+	static final float MARK_RADIUS = 0.3F;
+	static final int FROST_GLOW = 0xE8FBFF, FROST_RIME = 0xB8DCF0, BURN_GLOW = 0xFF7A2A, BURN_CHAR = 0x1C1412;
+	static final int SPRAY = 2;
 
 	/**
 	 * On a Frost-born while their beam is out, for every client: the arm the beam leaves points along it (Andy,
@@ -100,6 +116,9 @@ public final class FrostBeam {
 	private static final Map<UUID, Long> ON = new HashMap<>();
 	/** (0.21.30) Whose eye laser is out, and until when (game time). */
 	private static final Map<UUID, Long> GAZING = new HashMap<>();
+	/** Where and when each beam last left its mark. */
+	private static final Map<UUID, Vec3> MARKED_AT = new HashMap<>();
+	private static final Map<UUID, Long> MARKED_WHEN = new HashMap<>();
 
 	/** Client → server: the Frost-born's left mouse is still held (the beam stays out). */
 	public record Keep() implements CustomPacketPayload {
@@ -225,6 +244,9 @@ public final class FrostBeam {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.5F, gaze ? 0.9F : 1.9F);
 		}
 		if (target == null) {
+			if (wall instanceof BlockHitResult block && wall.getType() == HitResult.Type.BLOCK) {
+				mark(player, level, end, block, gaze, now);
+			}
 			if (!gaze) {
 				frost(player, level, eye, end, wall);
 			}
@@ -232,13 +254,30 @@ public final class FrostBeam {
 		}
 		boolean fighter = com.jaymospowers.core.Powers.has(player, ZFighterPower.INSTANCE);
 		Long last = LAST.get(player.getUUID());
-		if (last != null && now - last < (fighter ? Z_COOLDOWN : COOLDOWN) && now >= last) {
+		// (Blood Awakening) awakened, a Frost-born's beam bites in half the time (a Z Fighter's has its own pace)
+		if (last != null && now - last < (fighter ? Z_COOLDOWN : com.jaymospowers.core.TreeLocks.wait(player, COOLDOWN)) && now >= last) {
 			return;
 		}
 		LAST.put(player.getUUID(), now);
 		level.playSound(null, end.x, end.y, end.z, gaze ? SoundEvents.PLAYER_HURT_ON_FIRE : SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.8F, 1.4F);
 		level.sendParticles(gaze ? GAZE_DUST : ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 12, 0.15, 0.15, 0.15, 0.05);
 		strike(player, target, fighter ? Z_DAMAGE + Z_PER_MASTERY * com.jaymospowers.core.Mastery.unlocked(player) : DAMAGE);
+	}
+
+	/** Where it rests on a block: ice (or embers) thrown off the face, and now and then a mark left on it. */
+	private static void mark(ServerPlayer player, ServerLevel level, Vec3 end, BlockHitResult block, boolean gaze, long now) {
+		Vec3 n = Vec3.atLowerCornerOf(block.getDirection().getUnitVec3i());
+		level.sendParticles(gaze ? MagicFx.EMBER : MagicFx.mote(FROST_GLOW, 0.8F), end.x + n.x * 0.05, end.y + n.y * 0.05, end.z + n.z * 0.05, SPRAY,
+			0.05 + n.x * 0.1, 0.05 + n.y * 0.1, 0.05 + n.z * 0.1, 0.04);
+		UUID id = player.getUUID();
+		Vec3 last = MARKED_AT.get(id);
+		Long when = MARKED_WHEN.get(id);
+		if (last != null && when != null && now - when < MARK_EVERY && now >= when && last.distanceToSqr(end) < MARK_MOVE * MARK_MOVE) {
+			return;
+		}
+		MARKED_AT.put(id, end);
+		MARKED_WHEN.put(id, now);
+		MagicFx.scorch(level, end, n, MARK_RADIUS, gaze ? BURN_GLOW : FROST_GLOW, gaze ? BURN_CHAR : FROST_RIME, MARK_TICKS);
 	}
 
 	/** Still water the beam crosses freezes for a moment (frosted ice, which melts away), and fire where it lands goes out. */

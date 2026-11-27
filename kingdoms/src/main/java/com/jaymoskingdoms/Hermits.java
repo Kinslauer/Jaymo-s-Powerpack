@@ -34,8 +34,9 @@ import org.jspecify.annotations.Nullable;
  * (0.7.384) They watch the sky, and sell the star charts a pod pilot needs, one at a time ({@link StarFolk}).
  * <p>
  * Which structures make hermits is the structure tag {@code jaymoskingdoms:sky_hermitage}, and at sea
- * {@code jaymoskingdoms:sea_hermitage} (a tower on an island; their stories are the sea's). MCA's villagers only (the
- * pack always has MCA; a plain villager is left as it is).
+ * {@code jaymoskingdoms:sea_hermitage} (a tower on an island; their stories are the sea's), and in a hollow oak
+ * {@code jaymoskingdoms:oak_hermitage} (the woods' own; {@link TreeSites} sends one to live there). MCA's villagers only
+ * (the pack always has MCA; a plain villager is left as it is).
  */
 public final class Hermits {
 	/** A hermit's faction: none (a court wizard's is their kingdom's). */
@@ -43,8 +44,12 @@ public final class Hermits {
 	public static final TagKey<Structure> SKY = TagKey.create(Registries.STRUCTURE, JaymosKingdoms.id("sky_hermitage"));
 	/** The sea hermit's towers, out on islands only a boat reaches ({@code seas.IslandStructure}): the same wizard, at sea. */
 	public static final TagKey<Structure> SEA = TagKey.create(Registries.STRUCTURE, JaymosKingdoms.id("sea_hermitage"));
+	/** The hollow oak's room in the woods ({@code smalls/hollow_oak}): the same wizard, among trees. */
+	public static final TagKey<Structure> OAK = TagKey.create(Registries.STRUCTURE, JaymosKingdoms.id("oak_hermitage"));
 	/** On a hermit who lives out at sea: their stories are the sea's ({@code sea_<story>}). */
 	static final String SEA_HERMIT = "jaymoskingdoms.sea_hermit";
+	/** On a hermit who lives in a hollow oak: their stories are the woods' ({@code oak_<story>}). */
+	static final String OAK_HERMIT = "jaymoskingdoms.oak_hermit";
 	/** How often a villager with no work is checked for standing on a floating island (ticks). */
 	static final int CHECK_TICKS = 1200;
 	/** How far a hermit wanders from where they were found. */
@@ -93,7 +98,12 @@ public final class Hermits {
 
 	/** {@code pos} (or the block under it) is in a piece of a floating island. */
 	static boolean onSkyIsland(ServerLevel level, BlockPos pos) {
-		return in(level, pos, SKY) || atSea(level, pos);
+		return in(level, pos, SKY) || atSea(level, pos) || atOak(level, pos);
+	}
+
+	/** {@code pos} (or the block under it) is in a hollow oak's piece. */
+	static boolean atOak(ServerLevel level, BlockPos pos) {
+		return in(level, pos, OAK);
 	}
 
 	/** {@code pos} (or the block under it) is in a sea hermit's tower on an island. */
@@ -109,7 +119,7 @@ public final class Hermits {
 	/** The story {@code mob} tells (the same every time, from who they are). */
 	public static String story(Entity mob) {
 		String story = STORY[Math.floorMod(mob.getUUID().hashCode(), STORY.length)];
-		return mob.entityTags().contains(SEA_HERMIT) ? "sea_" + story : story;
+		return mob.entityTags().contains(SEA_HERMIT) ? "sea_" + story : mob.entityTags().contains(OAK_HERMIT) ? "oak_" + story : story;
 	}
 
 	/** {@code mob} just became a hermit: their home where they stand, a shimmer. */
@@ -117,6 +127,8 @@ public final class Hermits {
 		mob.setPersistenceRequired();
 		if (atSea(level, mob.blockPosition())) {
 			mob.addTag(SEA_HERMIT);
+		} else if (atOak(level, mob.blockPosition())) {
+			mob.addTag(OAK_HERMIT);
 		}
 		level.sendParticles(Fx.GLYPH, mob.getX(), mob.getY() + 1.2, mob.getZ(), 30, 0.4, 0.8, 0.4, 0.6);
 		JaymosKingdoms.LOGGER.debug("{} is a hermit on a floating island ({})", mob.getName().getString(), story(mob));

@@ -425,6 +425,18 @@ public final class ZFighterDemonRealm {
 		return masterAt(village);
 	}
 
+	/**
+	 * A master's post that isn't one of the built villages (the Forbidden Castle's throne hall, for the demon start): kept with
+	 * the villages, so his master is put back there as theirs are. {@code anchor} is the spot {@link #masterSpot} is worked from.
+	 */
+	static void keepPost(ServerLevel level, BlockPos anchor) {
+		List<BlockPos> villages = new ArrayList<>(level.getAttachedOrElse(VILLAGES, List.of()));
+		if (!villages.contains(anchor)) {
+			villages.add(anchor);
+			level.setAttached(VILLAGES, villages);
+		}
+	}
+
 	/** (0.17.198) Puts a village's master back at his post now, if he's gone (a player must be near). */
 	static void master(ServerLevel level, BlockPos village) {
 		ensureMaster(level, village);

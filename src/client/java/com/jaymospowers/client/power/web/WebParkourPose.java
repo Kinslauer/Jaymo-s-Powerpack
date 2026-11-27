@@ -169,6 +169,10 @@ public final class WebParkourPose {
 			return;
 		}
 		int kind = WebParkour.kind(move);
+		if (kind == WebParkour.VAULT && entity instanceof Player player && com.jaymospowers.client.freerun.CoreMotionClient.playing(player, "motion")) {
+			state.setData(KEY, null);
+			return;
+		}
 		float time = entity.level().getGameTime() + partialTicks;
 		float[] started = STARTED.get(entity.getId());
 		if (started == null || started[0] != move) {

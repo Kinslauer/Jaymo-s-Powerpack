@@ -236,6 +236,8 @@ public final class Wars {
 		int army = 0;
 		for (Faction f : members(server, principal)) {
 			army += f.holdings().count(Folk.GUARD) + f.holdings().count(Folk.ARCHER) + (f.leader().isPresent() ? LEADER_ARMY_WORTH : 0);
+			// (village mods rc2_war) and its lords' own companies
+			army += Company.strength(server, f);
 		}
 		// (0.7.224) and the sellswords in its war chests
 		return army + GreatWars.mercs(server, principal);
@@ -891,6 +893,8 @@ public final class Wars {
 		for (Component line : said) {
 			KingdomEvents.announce(server, Component.literal("  ").append(line).withStyle(ChatFormatting.YELLOW));
 		}
+		// the winner's city lights its sky that night
+		Celebrations.hold(level, w, Celebrations.VICTORY_TICKS);
 		// (0.7.224) allies' spoils and reparations, conversions, pledges and wagers settled
 		GreatWars.ended(server, war, winner, t);
 		syncRelations(server);

@@ -1,0 +1,64 @@
+{
+  "filler": "#",
+  "rubble": "}",
+  "allowDoors": false,
+  "allowFillers": false,
+  "minfloors": 12,
+  "maxcellars": 0,
+  "parts": [
+    {
+      "floor": 0,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_0"
+    },
+    {
+      "range": "1,5",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_1"
+    },
+    {
+      "range": "1,5",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_2"
+    },
+    {
+      "range": "1,5",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_3"
+    },
+    {
+      "range": "1,5",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_4"
+    },
+    {
+      "range": "1,5",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_5"
+    },
+    {
+      "floor": 6,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_6"
+    },
+    {
+      "floor": 6,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_7"
+    },
+    {
+      "floor": 6,
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_8"
+    },
+    {
+      "range": "7,100",
+      "top": false,
+      "part": "jaymospowers:maw/factory/factory_building_main_9"
+    },
+    {
+      "top": true,
+      "part": "jaymospowers:maw/factory/factory_building_main_10"
+    }
+  ]
+}

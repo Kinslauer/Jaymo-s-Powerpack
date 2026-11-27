@@ -10,10 +10,11 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 
-/** The Armory's entities: a thrown weapon, and the bomb glider (with its hold's menu). */
+/** The Armory's entities: a thrown weapon, the bomb glider (with its hold's menu) and the hoverboard. */
 public final class ArmoryEntities {
 	public static EntityType<ThrownWeapon> THROWN_WEAPON;
 	public static EntityType<BombGlider> BOMB_GLIDER;
+	public static EntityType<Hoverboard> HOVERBOARD;
 	public static MenuType<BombGliderMenu> BOMB_GLIDER_MENU;
 
 	private ArmoryEntities() {
@@ -37,6 +38,14 @@ public final class ArmoryEntities {
 				.clientTrackingRange(10)
 				.updateInterval(1)
 				.build(glider));
+		ResourceKey<EntityType<?>> board = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("hoverboard"));
+		HOVERBOARD = Registry.register(BuiltInRegistries.ENTITY_TYPE, board,
+			EntityType.Builder.<Hoverboard>of(Hoverboard::new, MobCategory.MISC)
+				.noLootTable()
+				.sized(1.2F, 0.5F)
+				.clientTrackingRange(10)
+				.updateInterval(1)
+				.build(board));
 		BOMB_GLIDER_MENU = Registry.register(BuiltInRegistries.MENU, JaymosPowers.id("bomb_glider"),
 			new MenuType<>(BombGliderMenu::new, FeatureFlags.VANILLA_SET));
 	}

@@ -81,7 +81,13 @@ public final class FieldForge {
 				return InteractionResult.PASS;
 			}
 			BlockState state = level.getBlockState(hit.getBlockPos());
-			if (!(state.getBlock() instanceof CampfireBlock) || !state.getValue(CampfireBlock.LIT) || Careers.heldRank(sp, Careers.Job.SMITH) < RANK) {
+			if (!(state.getBlock() instanceof CampfireBlock) || !state.getValue(CampfireBlock.LIT)) {
+				return InteractionResult.PASS;
+			}
+			if (Careers.heldRank(sp, Careers.Job.SMITH) < RANK) {
+				// a hammer at a lit fire, but not smith enough to raise a forge: say what's missing
+				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.station.field_forge",
+					Component.translatable("job.jaymoskingdoms.rank." + RANK)).withStyle(net.minecraft.ChatFormatting.GRAY));
 				return InteractionResult.PASS;
 			}
 			raise(level, sp, hit.getBlockPos());

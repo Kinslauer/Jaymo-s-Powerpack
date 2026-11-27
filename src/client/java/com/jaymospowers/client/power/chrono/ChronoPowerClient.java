@@ -94,6 +94,9 @@ public final class ChronoPowerClient implements PowerClient {
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.ANDROID, FutureAndroidRenderer::new);
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.MECH, FutureMechRenderer::war);
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.ANDROID_MECH, FutureMechRenderer::android);
+		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureRigs.FROSTBORN, FutureMechRenderer::rig);
+		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureRigs.TINKERER, FutureMechRenderer::rig);
+		FutureCarRenderer.register();
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.OMEN_RED, OmenRenderer::red);
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.OMEN_BLUE, OmenRenderer::blue);
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.WORKY, WorkyRenderer::new);
@@ -101,9 +104,13 @@ public final class ChronoPowerClient implements PowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
 		ChronoTimeStopClient.init();
+		ChronoSlowLook.init();
 		ChronoCheatDeathClient.init();
 		ChronoStreak.init();
 		ChronoDecoyClient.init();
+		ChronoWormholeClient.init();
+		ChronoSkipClient.init();
+		ChronoFlickerClient.init();
 		MuzzleFlashParticle.register();
 		FutureDeadLooks.register();
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ChronoSpaceCue::render);

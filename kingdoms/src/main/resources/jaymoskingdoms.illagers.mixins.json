@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.mixin.illagers",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"AreaEffectCloudAccessor",
+		"EvokerFangsAccessor",
+		"EvokerFangsBiteMixin",
+		"RangedAttackGoalAccessor",
+		"RangedBowAttackGoalAccessor",
+		"ThrownTridentAccessor",
+		"VexAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

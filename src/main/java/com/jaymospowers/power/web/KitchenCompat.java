@@ -18,6 +18,39 @@ public final class KitchenCompat {
 	private KitchenCompat() {
 	}
 
+	/** Kitchen's {@code Gnawing.feed}: what a mob eating at a body is doing, so it's drawn down over it ({@code GnawPose}). */
+	private static java.lang.invoke.@Nullable MethodHandle gnawFeed;
+	private static boolean gnawLooked;
+	/** {@link #gnaw}: up off the body; down over it; a bite starting now (Kitchen's {@code Gnawing.UP}, {@code DOWN}, {@code BITE}). */
+	public static final int GNAW_UP = 0, GNAW_DOWN = 1, GNAW_BITE = 2;
+
+	/**
+	 * Andy (2026-11-24): "zombies should also bend over and down to gnaw on bodies". {@code mob} eating at {@code body} (one
+	 * of the downed, LimbEaters): drawn by Kitchen bent down over them, each bite from the lunge to the rip back. Nothing
+	 * without Kitchen (or with one too old to know it).
+	 */
+	public static void gnaw(net.minecraft.world.entity.Mob mob, @Nullable Entity body, int what) {
+		if (!LOADED) {
+			return;
+		}
+		if (!gnawLooked) {
+			gnawLooked = true;
+			try {
+				gnawFeed = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymoskitchen.corpse.Gnawing"), "feed",
+					java.lang.invoke.MethodType.methodType(void.class, net.minecraft.world.entity.Mob.class, Entity.class, int.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				gnawFeed = null;
+			}
+		}
+		if (gnawFeed != null) {
+			try {
+				gnawFeed.invoke(mob, body, what);
+			} catch (Throwable e) {
+				gnawFeed = null;
+			}
+		}
+	}
+
 	static @Nullable Entity carriedCorpse(Player player) {
 		return LOADED ? Kitchen.carried(player) : null;
 	}
@@ -702,6 +735,22 @@ public final class KitchenCompat {
 		}
 	}
 
+	/**
+	 * Floors {@code mob} into Kitchen's limp ragdoll, toppled away from {@code from} (a takedown). Reached by reflection, as
+	 * this build may compile against a Kitchen without it; false if Kitchen isn't here, is older, or the mob can't go limp.
+	 */
+	public static boolean floorMob(net.minecraft.world.entity.Mob mob, net.minecraft.world.phys.Vec3 from) {
+		if (!LOADED) {
+			return false;
+		}
+		try {
+			return (Boolean) Class.forName("com.jaymoskitchen.ragdoll.MobRagdolls")
+				.getMethod("floor", net.minecraft.world.entity.Mob.class, net.minecraft.world.phys.Vec3.class).invoke(null, mob, from);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** Whether {@code entity} is a player lying limp in Kitchen's ragdoll (drawn by Kitchen, so our own poses keep off). */
 	public static boolean limp(Entity entity) {
 		if (!LOADED || !(entity instanceof Player)) {
@@ -785,6 +834,10 @@ public final class KitchenCompat {
 					: com.jaymospowers.core.BladeBlood.NO_BLOOD;
 				com.jaymospowers.core.SeveredPart severed = com.jaymospowers.core.SeveredPart.drop(level, look, part, type.getDimensions().height(),
 					corpse.getYRot(), at.add(0.0, 0.1, 0.0), fling, blood);
+				// drawn as the body lies now: its rot and char (Kitchen's wear) and the blood on it
+				int dressed = what.length >= 6 && what[4] instanceof Integer d ? d : 0;
+				int wear = what.length >= 6 && what[5] instanceof Integer w ? w : 0;
+				severed.lookedAs(dressed, wear, com.jaymospowers.core.blood.Bloodied.corpseBlood(corpse));
 				if (toHand && by instanceof net.minecraft.server.level.ServerPlayer player) {
 					com.jaymospowers.core.Carry.takePart(player, severed);
 				}
@@ -792,6 +845,15 @@ public final class KitchenCompat {
 			Class.forName("com.jaymoskitchen.corpse.CorpseEntity").getMethod("setOnPart", java.util.function.BiConsumer.class).invoke(null, off);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen whose dead stay in one piece
+		}
+		try {
+			// Andy: "they dont drop because they are attached to the user. they must be ripped off like other limbs": the Rig
+			// bolted onto a trooper or an android stays on its body, and comes away only with the part under it
+			java.util.function.BiFunction<net.minecraft.world.entity.EntityType<?>, net.minecraft.world.item.ItemStack, Integer> bolted =
+				(type, stack) -> com.jaymospowers.rig.Rig.boltedOn(type, stack);
+			Class.forName("com.jaymoskitchen.corpse.CorpseEntity").getMethod("setAttachedGear", java.util.function.BiFunction.class).invoke(null, bolted);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen: a body's gear all comes off it
 		}
 		try {
 			// (0.15.128) a body blown apart by a blast (Kitchen 0.5.21 throws its chunks): its blood bursts

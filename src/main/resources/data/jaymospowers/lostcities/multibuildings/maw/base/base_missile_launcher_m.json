@@ -1,0 +1,10 @@
+{
+  "dimx": 1,
+  "dimz": 2,
+  "buildings": [
+    [
+      "jaymospowers:maw/base/base_missile_launcher_m00",
+      "jaymospowers:maw/base/base_missile_launcher_m01"
+    ]
+  ]
+}

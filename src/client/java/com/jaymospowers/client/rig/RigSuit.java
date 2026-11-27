@@ -129,9 +129,11 @@ public final class RigSuit {
 
 	/** The suit texture and its glow pass for each frame ({@link RigFrame} order), and the trim plates alone. */
 	static final Identifier[] TEXTURES = {JaymosPowers.id("textures/entity/rig/suit.png"), JaymosPowers.id("textures/entity/rig/suit_scrap.png"),
-		JaymosPowers.id("textures/entity/rig/suit_shade.png"), JaymosPowers.id("textures/entity/rig/suit_siege.png")};
+		JaymosPowers.id("textures/entity/rig/suit_shade.png"), JaymosPowers.id("textures/entity/rig/suit_siege.png"),
+		JaymosPowers.id("textures/entity/rig/suit_hail.png"), JaymosPowers.id("textures/entity/rig/suit_tinker.png")};
 	static final Identifier[] GLOW_TEXTURES = {JaymosPowers.id("textures/entity/rig/suit_glow.png"), JaymosPowers.id("textures/entity/rig/suit_glow_scrap.png"),
-		JaymosPowers.id("textures/entity/rig/suit_glow_shade.png"), JaymosPowers.id("textures/entity/rig/suit_glow_siege.png")};
+		JaymosPowers.id("textures/entity/rig/suit_glow_shade.png"), JaymosPowers.id("textures/entity/rig/suit_glow_siege.png"),
+		JaymosPowers.id("textures/entity/rig/suit_glow_hail.png"), JaymosPowers.id("textures/entity/rig/suit_glow_tinker.png")};
 	/** A finish's painted layer ({@link RigFinish}'s order; none for the first), and which of them are drawn lit. */
 	static final Identifier[] FINISH_TEXTURES = {null, JaymosPowers.id("textures/entity/rig/finish_deepwalker.png"),
 		JaymosPowers.id("textures/entity/rig/finish_skybreaker.png"), JaymosPowers.id("textures/entity/rig/finish_last_stand.png")};

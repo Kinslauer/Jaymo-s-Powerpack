@@ -95,6 +95,14 @@ public final class QuestClient {
 
 	// ---- marks ---------------------------------------------------------------------------------------------------------
 
+	/** The mark over {@code entity}'s head: '?' (they gave you one of your quests), '!' (work on offer), or 0 (none). */
+	public static char mark(Entity entity) {
+		if (GIVERS.containsKey(entity.getUUID())) {
+			return '?';
+		}
+		return Boolean.TRUE.equals(entity.getAttached(Quests.MARK)) ? '!' : 0;
+	}
+
 	public static void extract(Entity entity, EntityRenderState state, float partialTicks) {
 		if (!(entity instanceof LivingEntity) || entity.isInvisible()) {
 			state.setData(KEY, null);

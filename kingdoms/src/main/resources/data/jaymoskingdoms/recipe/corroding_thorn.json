@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:leech_kit",
+  "ingredients": [
+    "jaymoskingdoms:empty_thorn",
+    "minecraft:fermented_spider_eye",
+    "minecraft:gunpowder"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:corroding_thorn"
+  }
+}

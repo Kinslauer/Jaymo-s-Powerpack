@@ -14,7 +14,8 @@ import net.minecraft.resources.Identifier;
  * the Warden, Bulwark, Strider or Reclaimer build. Its visor, core and lights keep the original full-bright overlays.
  */
 public class AndroidMechModel extends DefaultedEntityGeoModel<FutureMech> {
-	static final String[] BUILDS = {"warden", "bulwark", "strider", "reclaimer"};
+	/** The four mech builds, then the two giant rigs' own skins (Frostborn, Tinkerer: {@link #partsOf} says whose parts they wear). */
+	static final String[] BUILDS = {"warden", "bulwark", "strider", "reclaimer", "frostborn", "tinkerer"};
 	static final Identifier[] SKINS = new Identifier[BUILDS.length];
 	static final Identifier[] GLOW = new Identifier[BUILDS.length];
 	static final DataTicket<Integer> BUILD = DataTicket.create("jaymospowers_android_mech_build", Integer.class);
@@ -26,6 +27,11 @@ public class AndroidMechModel extends DefaultedEntityGeoModel<FutureMech> {
 			SKINS[i] = JaymosPowers.id("textures/entity/future/android_mech_" + BUILDS[i] + ".png");
 			GLOW[i] = JaymosPowers.id("textures/entity/future/android_mech_" + BUILDS[i] + "_eyes.png");
 		}
+	}
+
+	/** The build whose optional parts a skin shows: the Frostborn rig wears the Bulwark's, the Tinkerer's the Reclaimer's. */
+	static int partsOf(int build) {
+		return build == 4 ? 1 : build == 5 ? 3 : build;
 	}
 
 	public AndroidMechModel() {

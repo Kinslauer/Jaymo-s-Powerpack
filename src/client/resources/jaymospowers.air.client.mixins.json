@@ -1,0 +1,9 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.client.air.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"LightTintMixin"
+	],
+	"injectors": { "defaultRequire": 1 }
+}

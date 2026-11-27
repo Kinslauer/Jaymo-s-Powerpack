@@ -61,6 +61,11 @@ public final class Gatherers {
 	static final int STONE_TICKS = 30, ORE_TICKS = 50, LOG_TICKS = 16, FELL_START_TICKS = 30, FELL_WAIT_TICKS = 40;
 	/** (0.5.25) A woodcutter's chops at a tree come this far apart (ticks). */
 	static final int CHOP_TICKS = 12;
+	/** Felling: how far through the trunk the notch goes before he walks round to back-cut it, the most ticks he spends
+	 * walking round to a side, his warning's pause (ticks) and how far it carries, and how many warnings he has. */
+	static final float NOTCH_SHARE = 0.4F;
+	static final int ROUND_MOST = 160, WARN_TICKS = 30, WARNINGS = 3;
+	static final double WARN_RANGE = 24.0;
 	static final double REACH = 4.5, STAND_REACH = 1.5, DEPOT_REACH = 2.5, VERTICAL_SLACK = 3.0;
 	/** With nothing else to dig, a miner quarries the rock this far round the mine's end. */
 	static final int QUARRY_REACH = 6;
@@ -188,6 +193,10 @@ public final class Gatherers {
 		@Nullable BlockState sapling;
 		boolean felled;
 		long actAt;
+		/** Felling: the side he cuts the notch on (the way it's to fall), whether he's on to the back-cut, how long he's walked round, and whether he's called out. */
+		@Nullable Direction notch;
+		boolean backCut, warned;
+		int rounding;
 	}
 
 	private static final Map<UUID, Job> JOBS = new HashMap<>();
@@ -718,6 +727,12 @@ public final class Gatherers {
 			job.logs.addAll(trunk(level, base));
 			job.sapling = sapling(ChoppedLog.real(level, base, level.getBlockState(base)));
 			job.actAt = now + FELL_START_TICKS;
+			// he picks the way it's to fall (the most open ground, clear of roofs) and cuts the notch on that side first
+			job.notch = Felling.clearSide(level, base, Math.max(4, Math.min(12, job.logs.size())));
+			job.backCut = Felling.share(level, base) >= NOTCH_SHARE;
+			job.warned = false;
+			job.rounding = 0;
+			job.trip.reset(now);
 			folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			return;
 		}
@@ -728,12 +743,32 @@ public final class Gatherers {
 			}
 			return;
 		}
-		// (0.5.25) he chops at its foot as a player would (Trees.chop: the log narrows), a chop every CHOP_TICKS, until the
-		// whole tree comes down (its logs from the foot up, then the leaves no other tree holds), into his bag
+		// (0.5.25) he chops at its foot as a player would (Trees.chop), a chop every CHOP_TICKS: the notch from the side
+		// it's to fall to, then round to the far side for the back-cut, and a shout before the stroke that brings it
+		// down (its logs from the foot up, then the leaves no other tree holds), into his bag
 		if (!job.felled) {
-			int logs = Trees.chop(level, base, folk.mob(), new ItemStack(Items.IRON_AXE), d -> job.bag.add(folk, d));
+			Direction side = job.notch == null ? null : job.backCut ? job.notch.getOpposite() : job.notch;
+			if (side != null && !onSide(folk, base, side) && job.rounding < ROUND_MOST) {
+				job.rounding++;
+				walk(folk, job.trip, base.relative(side), STAND_REACH, WALK_SPEED, now);
+				return;
+			}
+			folk.getNavigation().stop();
+			if (!job.warned && Felling.nextFells(level, base, 1)) {
+				job.warned = true;
+				Speech.say(level, folk.mob(), net.minecraft.network.chat.Component.translatable("felling.jaymoskingdoms.warn." + level.getRandom().nextInt(WARNINGS)),
+					Speech.YELLOW, WARN_RANGE);
+				job.actAt = now + WARN_TICKS;
+				return;
+			}
+			int logs = Trees.chop(level, base, folk.mob(), new ItemStack(Items.IRON_AXE), d -> job.bag.add(folk, d), side);
 			folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			if (logs == 0) {
+				if (!job.backCut && job.notch != null && Felling.share(level, base) >= NOTCH_SHARE) {
+					job.backCut = true;
+					job.rounding = 0;
+					job.trip.reset(now);
+				}
 				job.actAt = now + CHOP_TICKS;
 				return;
 			}
@@ -749,13 +784,23 @@ public final class Gatherers {
 		}
 		job.logs.clear();
 		job.felled = false;
-		// and a sapling where it stood
+		// he grubs out the stump (its few sticks into his bag), and puts a sapling where it stood
+		if (level.getBlockState(base).is(TreeStump.BLOCK)) {
+			level.destroyBlock(base, false, folk.mob());
+			job.bag.add(folk, new ItemStack(Items.STICK, TreeStump.STICKS));
+		}
 		if (job.sapling != null && level.getBlockState(base).isAir() && job.sapling.canSurvive(level, base)) {
 			level.setBlock(base, job.sapling, Block.UPDATE_ALL);
 			level.playSound(null, base, SoundEvents.GRASS_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
 		}
 		folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		job.phase = IDLE;
+	}
+
+	/** Whether {@code folk} stands on the {@code side} of the trunk at {@code base} (a little out that way). */
+	private static boolean onSide(Worker folk, BlockPos base, Direction side) {
+		double along = (folk.getX() - (base.getX() + 0.5)) * side.getStepX() + (folk.getZ() - (base.getZ() + 0.5)) * side.getStepZ();
+		return along >= 0.6;
 	}
 
 	/** A tree's logs (joined to its foot, not far from it), lowest first. */

@@ -6,7 +6,7 @@
     "first": {
       "type": "minecraft:lerp",
       "alpha": "jaymoskingdoms:mohknee/climate",
-      "first": "jaymoskingdoms:mohknee/home_erosion",
+      "first": "jaymoskingdoms:continents/erosion",
       "second": {
         "type": "minecraft:clamp",
         "input": {

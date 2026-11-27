@@ -188,7 +188,10 @@ final class ChatTalk {
 		}
 		switch (topic) {
 			case NEWS -> {
-				Component said = Suspicion.gossip(v, player, random);
+				Component said = Takers.gossip(v, player, random);
+				if (said == null) {
+					said = Suspicion.gossip(v, player, random);
+				}
 				if (said == null) {
 					said = Recollections.gossipLine(v, player, random);
 				}

@@ -50,6 +50,8 @@ import org.jspecify.annotations.Nullable;
 public final class WebCounter {
 	/** Ticks after a dodge that right click counters. */
 	public static final int WINDOW = 30;
+	/** After dodging an arrow, a click this soon (two seconds) turns, zips at whoever shot it and hits them ({@link WebZipStrike#answer}). */
+	public static final int ANSWER_WINDOW = 40;
 	/** The dodged attacker is countered if it's this close (else whatever's under the crosshair, this far). */
 	public static final double REACH = 7.0, AIM_REACH = 10.0;
 
@@ -190,6 +192,8 @@ public final class WebCounter {
 		int lastKind = -1;
 		/** The window was opened by a melee hit taken in the big suit, not by a dodge: no feathers, and only the catch. */
 		boolean fromHit;
+		/** The dodge was of a missile from far off (an arrow): the click answers the shooter ({@link WebZipStrike#answer}). */
+		boolean ranged;
 		/** The haul under way: from where, through what high point, to where (feet), and whether it's being hauled at all. */
 		Vec3 haulFrom = Vec3.ZERO, haulApex = Vec3.ZERO, haulTo = Vec3.ZERO;
 		boolean hauling;
@@ -277,7 +281,7 @@ public final class WebCounter {
 	}
 
 	/** A sense dodge just happened: right click counters for a moment (if there are the feathers to spend on it). */
-	static void opened(ServerPlayer player, Entity attacker) {
+	static void opened(ServerPlayer player, Entity attacker, @Nullable Entity direct) {
 		if (!WebRolls.has(player)) {
 			// out of feathers: the dodge still happens, but no counter
 			return;
@@ -285,7 +289,9 @@ public final class WebCounter {
 		Live live = live(player);
 		live.attacker = attacker.getId();
 		live.fromHit = false;
-		player.setAttached(READY, player.level().getGameTime() + WINDOW);
+		// an arrow (or the like) from far off: the click answers it, for two seconds
+		live.ranged = direct instanceof net.minecraft.world.entity.projectile.Projectile && direct != attacker;
+		player.setAttached(READY, player.level().getGameTime() + (live.ranged ? ANSWER_WINDOW : WINDOW));
 	}
 
 	/** Whether the big suit's catch could take this: a mob (not a player) no bigger than the hand's limit. */
@@ -307,6 +313,7 @@ public final class WebCounter {
 		Live live = live(player);
 		live.attacker = attacker.getId();
 		live.fromHit = true;
+		live.ranged = false;
 		player.setAttached(READY, player.level().getGameTime() + WINDOW);
 	}
 
@@ -330,6 +337,11 @@ public final class WebCounter {
 		Live live = live(player);
 		if (!live.fromHit && !WebRolls.has(player)) {
 			// the feathers went on dodging since: no counter
+			player.removeAttached(READY);
+			return;
+		}
+		if (live.ranged && !live.fromHit && level.getEntity(live.attacker) instanceof LivingEntity shooter && WebZipStrike.answer(player, shooter)) {
+			WebRolls.spend(player);
 			player.removeAttached(READY);
 			return;
 		}
@@ -369,7 +381,22 @@ public final class WebCounter {
 		begin(player, level, kind, target);
 	}
 
-	/** Every tick, for a web slinger: the counter under way plays out. */
+	/**
+	 * The symbiote's own seizing during a takeover (WebSymbiote): {@code kind} played at {@code target} with no dodge, no
+	 * window and no feathers spent, in any host's body (a host who isn't a web slinger plays it out through
+	 * WebSymbioteInfection's tick). Refused (false) if a counter is already running.
+	 */
+	static boolean seize(ServerPlayer player, LivingEntity target, int kind) {
+		if (player.getAttached(ACTIVE) != null || !target.isAlive()) {
+			return false;
+		}
+		live(player).lastKind = kind;
+		player.setAttached(ACTIVE, new Active(kind, target.getId(), player.level().getGameTime()));
+		begin(player, player.level(), kind, target);
+		return true;
+	}
+
+	/** Every tick, for a web slinger (WebAscension) or a host (WebSymbioteInfection): the counter under way plays out. */
 	static void tick(ServerPlayer player) {
 		Active active = player.getAttached(ACTIVE);
 		if (active == null) {

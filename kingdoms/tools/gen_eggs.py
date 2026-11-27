@@ -6,6 +6,9 @@ import os, random, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image
+import sys as _sys
+_sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import vanilla_egg  # noqa: E402
 from gen_dragons import rgb, jitter, mix, write, ASSETS, ITEM
 
 # species -> (shell, dark speckle, bright speckle)
@@ -18,26 +21,8 @@ EGGS = {
 
 
 def egg(name, shell, dark, bright, seed):
-    rnd = random.Random(seed)
-    shell, dark, bright = rgb(shell), rgb(dark), rgb(bright)
-    img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    px = img.load()
-    for y in range(16):
-        for x in range(16):
-            dx, dy = (x - 7.5) / 5.2, (y - 8.0) / 7.2
-            # an egg: narrower at the top
-            if dx * dx * (1.0 + 0.3 * (8.0 - y) / 7.2) + dy * dy <= 1.0:
-                c = shell
-                r = rnd.random()
-                if r < 0.12:
-                    c = dark
-                elif r < 0.2:
-                    c = bright
-                # light from the top-left, shade at the lower right
-                light = 0.3 * (1.0 - (x + y) / 22.0)
-                c = mix(c, rgb(0xFFFFFF) if light > 0.12 else rgb(0x000000), abs(light - 0.12) * 0.9)
-                px[x, y] = jitter(c, 5, rnd)
-    img.save(ITEM + name + '.png')
+    """The Reason look's egg: vanilla's spotted egg (vanilla_egg.py) in the shell and its bright speckle."""
+    vanilla_egg.save(ITEM + name + '.png', rgb(shell)[:3], rgb(bright)[:3])
 
 
 if __name__ == '__main__':

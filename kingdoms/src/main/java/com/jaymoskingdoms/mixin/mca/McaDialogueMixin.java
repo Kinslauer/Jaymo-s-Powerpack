@@ -62,6 +62,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.246) Opening the menu on a shipmate, or on one who knows how your story started ({@link com.jaymoskingdoms.StoryTalk}): they say so, never MCA's stranger's greeting.
  * (0.7.332) "Accuse someone here" with a priest ({@link com.jaymoskingdoms.Accusations}).
  * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
+ * Andy (2026-11-27): the talk wheel's first spoke answers what they just said ({@link com.jaymoskingdoms.Replies}); they answer back.
  * (0.7.397) Opening the menu on an outlaw ({@link com.jaymoskingdoms.Outlaws}): a curt word, never MCA's stranger's welcome.
  * (0.7.424) Held down on the execution hold for questioning ({@link com.jaymoskingdoms.Questioning}): the questions only.
  * (0.7.405) Opening it on a Z Fighter character ({@link com.jaymoskingdoms.ZFighterFolk}): a line of their own, likewise.
@@ -71,6 +72,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * asking again ({@link Introductions#shuns}): it closes, and costs hearts ({@link Introductions#shunned}).
  * (0.7.380) Opening the menu just after something passed between you (carried out, got up, a monster drawn off, a blow):
  * they open with that ({@link Recollections#opening}).
+ * Opening it on one still shaken from crying out ({@link com.jaymoskingdoms.Outcry}): they bring that up first.
  * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}): a guard of a town that owes you says what it means.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  * (0.7.270) Asked of a ship's crew ({@link ShipTalk#talk}): your berth aboard, her voyage, your lay.
@@ -108,12 +110,14 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
-		if ("root".equals(question) && (McaCompat.dealingOpening(villager, player) || McaCompat.storyOpening(villager, player)
+		if ("root".equals(question) && (McaCompat.keeperOpening(villager, player) || McaCompat.dealingOpening(villager, player) || McaCompat.outcryOpening(villager, player)
+			|| McaCompat.storyOpening(villager, player)
 			|| McaCompat.outlawOpening(villager, player) || McaCompat.zfighterOpening(villager, player)
 			|| McaCompat.druidOpening(villager, player) || McaCompat.waryOpening(villager, player))) {
 			// (0.7.380) just after something passed between you: they open with that; (0.7.246) a shipmate, or one who knows
 			// how your story started: they open with that, and never as to a stranger; (0.7.397) an outlaw: a curt word;
-			// (0.7.405) a Z Fighter character: a line of their own; (0.7.597) one wary of you: the same cold word as for your name
+			// (0.7.405) a Z Fighter character: a line of their own; (0.7.597) one wary of you: the same cold word as for your name;
+			// a ruin keeper: the next tale of their city; one still shaken from crying out: what it was (Outcry)
 			ci.cancel();
 			return;
 		}
@@ -189,10 +193,19 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
-		if ("main".equals(question) && SOCIAL.contains(answer) && Recollections.refuses(villager, player)) {
+		if ("main".equals(question) && (SOCIAL.contains(answer) || com.jaymoskingdoms.Replies.is(answer)) && Recollections.refuses(villager, player)) {
 			// (0.7.109) they remember too much ill of you for that
 			villager.sendChatMessage(Component.translatable("recall.jaymoskingdoms.refuse." + villager.getRandom().nextInt(Recollections.REFUSALS),
 				Recollections.nameTo(player, villager)), player);
+			// (refusal hints) and the worst of it, or what they bear you
+			com.jaymoskingdoms.RefusalHints.hintStanding(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Replies.is(answer)) {
+			// (Andy 2026-11-27) the first spoke: an answer to what they just said, and theirs back; the talk ends there as a chat does
+			villager.sendChatMessage(com.jaymoskingdoms.Replies.reply(player, villager, answer), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
@@ -378,6 +391,20 @@ abstract class McaDialogueMixin {
 			// (Andy, 2026-11-12) a horse raised from its mane lock
 			villager.getInteractions().stopInteracting();
 			com.jaymoskingdoms.equestrian.HorseRevival.open(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.RubberNewborns.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-24) a newborn Rubber-folk's request: take it to a town, or point the way
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.RubberNewborns.open(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Banks.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-23) banking at the counter
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.Banks.open(player, villager);
 			ci.cancel();
 			return;
 		}

@@ -1,0 +1,79 @@
+{
+  "speaker": "story.jaymoskingdoms.midnight_bargain.speaker",
+  "color": "8A4FD0",
+  "start": "open",
+  "nodes": {
+    "open": {
+      "shot": "wide", "outcome": "midnight.dark",
+      "say": "story.jaymoskingdoms.midnight_bargain.open",
+      "replies": [
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.who", "to": "who"},
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.want", "to": "want"},
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.bargain", "to": "terms"}
+      ]
+    },
+    "who": {
+      "shot": "shoulder", "say": "story.jaymoskingdoms.midnight_bargain.who",
+      "replies": [
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.want", "to": "want"},
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.bargain", "to": "terms"}
+      ]
+    },
+    "want": {
+      "shot": "shoulder", "say": "story.jaymoskingdoms.midnight_bargain.want",
+      "replies": [
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.who", "to": "who"},
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.bargain", "to": "terms"}
+      ]
+    },
+    "terms": {
+      "shot": "shoulder", "say": "story.jaymoskingdoms.midnight_bargain.terms",
+      "replies": [
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.cost", "to": "cost"},
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.take", "to": "ask"}
+      ]
+    },
+    "cost": {
+      "shot": "high", "say": "story.jaymoskingdoms.midnight_bargain.cost",
+      "replies": [
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.no_answer", "to": "cost_again"},
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.take", "to": "ask"}
+      ]
+    },
+    "cost_again": {
+      "shot": "shoulder", "say": "story.jaymoskingdoms.midnight_bargain.cost_again",
+      "replies": [
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.take", "to": "ask"},
+        {"text": "story.jaymoskingdoms.midnight_bargain.r.not_tonight", "to": "leave"}
+      ]
+    },
+    "ask": {
+      "shot": "face",
+      "ask": {"question": "story.jaymoskingdoms.midnight_bargain.question", "yes": "kneel", "no": "leave"}
+    },
+    "leave": {
+      "shot": "wide", "say": "story.jaymoskingdoms.midnight_bargain.leave", "end": true
+    },
+    "kneel": {
+      "shot": "shoulder", "say": "story.jaymoskingdoms.midnight_bargain.kneel", "next": "rite"
+    },
+    "rite": {
+      "shot": "orbit", "outcome": "midnight.kneel",
+      "rite": {
+        "words": [
+          "story.jaymoskingdoms.midnight_bargain.words.1",
+          "story.jaymoskingdoms.midnight_bargain.words.2",
+          "story.jaymoskingdoms.midnight_bargain.words.3",
+          "story.jaymoskingdoms.midnight_bargain.words.4"
+        ],
+        "seconds": 60, "to": "sealed", "fail": "late"
+      }
+    },
+    "late": {
+      "shot": "wide", "outcome": "midnight.rise", "say": "story.jaymoskingdoms.midnight_bargain.late", "end": true
+    },
+    "sealed": {
+      "shot": "low", "outcome": "midnight.sealed", "say": "story.jaymoskingdoms.midnight_bargain.sealed", "end": true
+    }
+  }
+}

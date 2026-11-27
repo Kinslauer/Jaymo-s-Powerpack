@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/monks_robe",
+    "layer1": "jaymoskingdoms:item/monks_robe_trim"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskitchen:salt_trail_bread",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:glacia_salt_broth",
+      "required": false
+    }
+  ]
+}

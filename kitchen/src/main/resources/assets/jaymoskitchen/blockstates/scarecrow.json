@@ -1,32 +1,62 @@
 {
   "variants": {
-    "facing=north,pumpkin=false": {
+    "facing=north,pumpkin=false,woken=false": {
       "model": "jaymoskitchen:block/scarecrow"
     },
-    "facing=east,pumpkin=false": {
+    "facing=east,pumpkin=false,woken=false": {
       "model": "jaymoskitchen:block/scarecrow",
       "y": 90
     },
-    "facing=south,pumpkin=false": {
+    "facing=south,pumpkin=false,woken=false": {
       "model": "jaymoskitchen:block/scarecrow",
       "y": 180
     },
-    "facing=west,pumpkin=false": {
+    "facing=west,pumpkin=false,woken=false": {
       "model": "jaymoskitchen:block/scarecrow",
       "y": 270
     },
-    "facing=north,pumpkin=true": {
+    "facing=north,pumpkin=true,woken=false": {
       "model": "jaymoskitchen:block/scarecrow_pumpkin"
     },
-    "facing=east,pumpkin=true": {
+    "facing=east,pumpkin=true,woken=false": {
       "model": "jaymoskitchen:block/scarecrow_pumpkin",
       "y": 90
     },
-    "facing=south,pumpkin=true": {
+    "facing=south,pumpkin=true,woken=false": {
       "model": "jaymoskitchen:block/scarecrow_pumpkin",
       "y": 180
     },
-    "facing=west,pumpkin=true": {
+    "facing=west,pumpkin=true,woken=false": {
+      "model": "jaymoskitchen:block/scarecrow_pumpkin",
+      "y": 270
+    },
+    "facing=north,pumpkin=false,woken=true": {
+      "model": "jaymoskitchen:block/scarecrow"
+    },
+    "facing=east,pumpkin=false,woken=true": {
+      "model": "jaymoskitchen:block/scarecrow",
+      "y": 90
+    },
+    "facing=south,pumpkin=false,woken=true": {
+      "model": "jaymoskitchen:block/scarecrow",
+      "y": 180
+    },
+    "facing=west,pumpkin=false,woken=true": {
+      "model": "jaymoskitchen:block/scarecrow",
+      "y": 270
+    },
+    "facing=north,pumpkin=true,woken=true": {
+      "model": "jaymoskitchen:block/scarecrow_pumpkin"
+    },
+    "facing=east,pumpkin=true,woken=true": {
+      "model": "jaymoskitchen:block/scarecrow_pumpkin",
+      "y": 90
+    },
+    "facing=south,pumpkin=true,woken=true": {
+      "model": "jaymoskitchen:block/scarecrow_pumpkin",
+      "y": 180
+    },
+    "facing=west,pumpkin=true,woken=true": {
       "model": "jaymoskitchen:block/scarecrow_pumpkin",
       "y": 270
     }

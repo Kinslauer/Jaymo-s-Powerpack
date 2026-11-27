@@ -1,0 +1,47 @@
+{
+ "values": [
+  "jaymoskingdoms:moose",
+  "jaymoskingdoms:muskox",
+  "jaymoskingdoms:wild_boar",
+  {
+   "id": "naturalist:bison",
+   "required": false
+  },
+  {
+   "id": "naturalist:boar",
+   "required": false
+  },
+  {
+   "id": "naturalist:hippo",
+   "required": false
+  },
+  {
+   "id": "naturalist:rhino",
+   "required": false
+  },
+  {
+   "id": "naturalist:elephant",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:moose",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:bison",
+   "required": false
+  },
+  {
+   "id": "cubeanimals:elephant",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:bison",
+   "required": false
+  },
+  {
+   "id": "alexsmobs:moose",
+   "required": false
+  }
+ ]
+}

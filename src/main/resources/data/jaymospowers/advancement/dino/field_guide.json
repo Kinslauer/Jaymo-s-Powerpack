@@ -1,0 +1,20 @@
+{
+  "criteria": {
+    "entered_verdant": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "jaymospowers:verdant_world"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "entered_verdant"
+    ]
+  ],
+  "rewards": {
+    "loot": [
+      "jaymospowers:gameplay/dino_field_guide"
+    ]
+  }
+}

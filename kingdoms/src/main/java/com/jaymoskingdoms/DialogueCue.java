@@ -61,6 +61,9 @@ public record DialogueCue(int villager, @Nullable Speaker speaker) implements Cu
 		ServerPlayNetworking.registerGlobalReceiver(Done.TYPE, (payload, context) -> Conversations.done(context.player(), payload.villager()));
 		Conversations.register();
 		TalkBusy.register();
+		// (and who is busy, told to the players near them for the talk line by the crosshair)
+		ContextBusy.register();
+		RefusalHints.register();
 	}
 
 	/** Tell {@code player}'s client that {@code villager}'s turn is {@code speaker}; the talk holds them both still till it's over. */

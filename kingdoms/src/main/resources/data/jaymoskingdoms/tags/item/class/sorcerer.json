@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:water_tome",
+    "jaymoskingdoms:fire_tome",
+    "jaymoskingdoms:earth_tome",
+    "jaymoskingdoms:air_tome",
+    "jaymoskingdoms:lightning_tome",
+    "jaymoskingdoms:ice_tome",
+    "jaymoskingdoms:restoration_tome",
+    "jaymoskingdoms:death_tome",
+    "jaymoskingdoms:blood_tome",
+    {
+      "id": "#minecraft:swords",
+      "required": false
+    },
+    "#jaymoskingdoms:light_blades"
+  ]
+}

@@ -17,6 +17,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -67,11 +70,21 @@ public final class LegShots {
 	/** (0.5.13) The tags Powers' Wounds puts on a body for each broken leg (any of its legs). */
 	public static final List<String> BROKEN_LEG_TAGS = List.of("jaymoskitchen.broken.left_leg", "jaymoskitchen.broken.right_leg",
 		"jaymoskitchen.broken.front_legs", "jaymoskitchen.broken.hind_legs", "jaymoskitchen.broken.legs");
+	/**
+	 * A low leg cut (the lower leg or foot, under this share of its height) hobbles instead of crawling: slow (Slowness II),
+	 * no sprint and no jump, for {@link #HOBBLE_TICKS}, and it needs no broken bone.
+	 */
+	public static final double HOBBLE_FRACTION = 0.2;
+	public static final int HOBBLE_TICKS = 240, HOBBLE_AMPLIFIER = 1;
+	private static final net.minecraft.resources.Identifier HOBBLE_JUMP = JaymosKitchen.id("hobble_jump");
+	/** Who is hobbled, and the game time it ends. */
+	private static final java.util.Map<LivingEntity, Long> HOBBLED = new java.util.WeakHashMap<>();
 	/** (0.5.13) Leg hits waiting for the end of the tick, when the blow's damage (and any break) has landed. */
 	private static final List<Runnable> PENDING = new ArrayList<>();
 
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			tickHobbles();
 			if (!PENDING.isEmpty()) {
 				List<Runnable> due = new ArrayList<>(PENDING);
 				PENDING.clear();
@@ -108,7 +121,49 @@ public final class LegShots {
 		if (height > LEG_FRACTION) {
 			return;
 		}
-		PENDING.add(() -> cripple(target, attacker, hit, crit));
+		if (height <= HOBBLE_FRACTION) {
+			PENDING.add(() -> hobble(target, attacker, hit));
+		} else {
+			PENDING.add(() -> cripple(target, attacker, hit, crit));
+		}
+	}
+
+	/** A low leg cut: slowed, no sprint, no jump for a while. */
+	private static void hobble(LivingEntity target, Player attacker, Vec3 hit) {
+		if (!target.isAlive() || target.isRemoved() || !(target.level() instanceof ServerLevel level) || isCrawling(target)) {
+			return;
+		}
+		MobEffectInstance current = target.getEffect(MobEffects.SLOWNESS);
+		int ticks = Math.max(HOBBLE_TICKS, current == null ? 0 : current.getDuration());
+		int amplifier = Math.max(HOBBLE_AMPLIFIER, current == null ? 0 : current.getAmplifier());
+		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, amplifier), attacker);
+		AttributeInstance jump = target.getAttribute(Attributes.JUMP_STRENGTH);
+		if (jump != null) {
+			jump.addOrUpdateTransientModifier(new AttributeModifier(HOBBLE_JUMP, -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
+		HOBBLED.put(target, level.getGameTime() + ticks);
+		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, 6, 0.1, 0.05, 0.1, 0.2);
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.HOSTILE, 0.4F, 1.2F);
+	}
+
+	/** Every tick: the hobbled don't sprint; when it ends they jump again. */
+	private static void tickHobbles() {
+		if (HOBBLED.isEmpty()) {
+			return;
+		}
+		for (java.util.Iterator<java.util.Map.Entry<LivingEntity, Long>> it = HOBBLED.entrySet().iterator(); it.hasNext();) {
+			java.util.Map.Entry<LivingEntity, Long> entry = it.next();
+			LivingEntity who = entry.getKey();
+			if (who.isRemoved() || !who.isAlive() || who.level().getGameTime() >= entry.getValue()) {
+				AttributeInstance jump = who.getAttribute(Attributes.JUMP_STRENGTH);
+				if (jump != null) {
+					jump.removeModifier(HOBBLE_JUMP);
+				}
+				it.remove();
+			} else if (who.isSprinting()) {
+				who.setSprinting(false);
+			}
+		}
 	}
 
 	/** Whether any of its legs is broken (Powers' Wounds). */

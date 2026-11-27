@@ -14,7 +14,7 @@ keyframes, so the Omen is animated by GeckoLib instead of posed in code (the old
 
 Red and blue have the same bones, so they share one animation file (omen.animation.json); each keeps its own geometry
 (omen_red.geo.json, omen_blue.geo.json) and is drawn with its existing skin, textures/entity/bb/omen_<build>.png
-(so the excalibur_style resource pack still reskins it). The stacked textures the converter writes are deleted.
+(so a resource pack can still reskin it). The stacked textures the converter writes are deleted.
 
 Keyframes are the game's way (degrees, rotations as ModelPart angles; positions with +y up), as the project's "free"
 format stores them. Every bone rests at 0, so a key is the old code's ModelPart angle in degrees.

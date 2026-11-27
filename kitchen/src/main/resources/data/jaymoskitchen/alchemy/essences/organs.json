@@ -1,0 +1,13 @@
+{
+  "items": {
+    "jaymoskitchen:heart": {"life": 4, "beast": 2, "spirit": 1},
+    "jaymoskitchen:liver": {"life": 3, "beast": 2, "venom": 1},
+    "jaymoskitchen:kidney": {"water": 3, "salt": 2, "beast": 1},
+    "jaymoskitchen:lung": {"air": 4, "beast": 1, "life": 1},
+    "jaymoskitchen:tripe": {"beast": 2, "earth": 2, "rot": 1},
+    "jaymoskitchen:silk_gland": {"beast": 2, "craft": 2, "motion": 1},
+    "jaymoskitchen:venom_gland": {"venom": 6, "beast": 1},
+    "jaymoskitchen:gas_bladder": {"air": 6, "fire": 2, "spirit": 1},
+    "jaymoskitchen:powder_gland": {"spark": 6, "sulphur": 2, "beast": 1}
+  }
+}

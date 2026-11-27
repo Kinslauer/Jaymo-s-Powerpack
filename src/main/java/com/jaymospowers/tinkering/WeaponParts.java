@@ -270,6 +270,12 @@ public final class WeaponParts {
 		add(new Kind("pod_plate_blank", "jaymospowers:pod_plate", Scheme.SINGLE, 4 * INGOT, Assembly.ALONE, 1));
 		add(new Kind("pod_mast_blank", "jaymospowers:pod_mast", Scheme.SINGLE, 2 * INGOT, Assembly.ALONE, 1));
 		add(new Kind("pod_tank_blank", "jaymospowers:pod_tank", Scheme.SINGLE_COPPER, 5 * INGOT, Assembly.ALONE, 1));
+		// the pod's iron modules (power/zfighter/pod/PodModules): the landing legs and the flight modules are forged too
+		add(new Kind("pod_module_legs_blank", "jaymospowers:pod_module_legs", Scheme.SINGLE, 4 * INGOT, Assembly.ALONE, 1));
+		add(new Kind("pod_module_ki_cannon_blank", "jaymospowers:pod_module_ki_cannon", Scheme.SINGLE, 6 * INGOT, Assembly.ALONE, 1));
+		add(new Kind("pod_module_shield_blank", "jaymospowers:pod_module_shield", Scheme.SINGLE, 5 * INGOT, Assembly.ALONE, 1));
+		add(new Kind("pod_module_mining_beam_blank", "jaymospowers:pod_module_mining_beam", Scheme.SINGLE, 5 * INGOT, Assembly.ALONE, 1));
+		add(new Kind("pod_module_tow_line_blank", "jaymospowers:pod_module_tow_line", Scheme.SINGLE, 3 * INGOT, Assembly.ALONE, 1));
 		// (0.18.50) the Sealed Helm (power/zfighter/breath/Breath): an iron seal, finished with a glass block at the Tool Station
 		add(new Kind("helm_seal", "jaymospowers:sealed_helm", Scheme.SINGLE, 2 * INGOT, Assembly.GLASS, 1));
 		// (RPG Series) Rogues & Warriors' and Archers' weapons are forged like the rest (Andy's rule: iron tools come

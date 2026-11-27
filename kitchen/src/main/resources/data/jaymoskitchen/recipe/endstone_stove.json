@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "o": "minecraft:obsidian",
+    "e": "minecraft:end_stone_bricks",
+    "d": "minecraft:dragon_breath",
+    "s": "minecraft:campfire"
+  },
+  "pattern": [
+    "ooo",
+    "ede",
+    "ese"
+  ],
+  "result": {
+    "id": "jaymoskitchen:endstone_stove"
+  }
+}

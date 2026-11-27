@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "jaymoskingdoms:inkcap_planks"
+  },
+  "result": {
+    "id": "jaymoskingdoms:inkcap_trapdoor",
+    "count": 2
+  },
+  "group": "wooden_trapdoor"
+}

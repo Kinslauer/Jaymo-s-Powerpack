@@ -1,0 +1,31 @@
+{
+  "type": "jaymoskingdoms:fairy_ring",
+  "fungus": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "weight": 4,
+        "data": {
+          "id": "jaymoskingdoms:bouncecap"
+        }
+      },
+      {
+        "weight": 2,
+        "data": {
+          "id": "jaymoskingdoms:glowcap"
+        }
+      },
+      {
+        "weight": 2,
+        "data": {
+          "id": "jaymoskingdoms:inkcap"
+        }
+      }
+    ]
+  },
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 3,
+    "max_inclusive": 5
+  }
+}

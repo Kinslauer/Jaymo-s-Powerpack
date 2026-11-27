@@ -1,8 +1,11 @@
 package com.jaymoskingdoms.client.mixin.mca;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.jaymoskingdoms.client.DialogueCinematic;
+import com.jaymoskingdoms.client.TalkFirst;
 import com.jaymoskingdoms.client.TalkWheel;
 import com.jaymoskingdoms.client.Ui;
+import com.jaymoskingdoms.client.hud.HudStyle;
 import java.util.List;
 import net.conczin.mca.client.gui.InteractScreen;
 import net.conczin.mca.entity.VillagerLike;
@@ -42,6 +45,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * turning to the next ones. Each arm shows the answer's short label; pointing at it (its label, or its direction from
  * the middle) shows under the wheel the line your character says ({@link TalkWheel#line}), and picking it says that line
  * on camera. Clicking works as before: MCA sends the answer under the mouse.
+ *
+ * <p>Andy (2026-11-25): "I want all interactions accessible through talk". The wheel also carries a spoke for each of MCA's
+ * buttons on the page laid out ({@link TalkFirst}): Family Tree and Ask of them... ahead of the talk's answers, and on Ask
+ * of them... and the pages under it their buttons and Back. The column above holds Gift and Trade only.
  */
 @Mixin(InteractScreen.class)
 abstract class McaDialogueBoxMixin extends Screen {
@@ -76,6 +83,9 @@ abstract class McaDialogueBoxMixin extends Screen {
 	/** Which page of answers the wheel is on, how many there are, and where its middle and rim were last drawn. */
 	@Unique
 	private int jaymoskingdoms$page, jaymoskingdoms$pages, jaymoskingdoms$cx, jaymoskingdoms$cy, jaymoskingdoms$radius;
+	/** The ring (MCA's page) the wheel last showed: a new one starts on its first spokes. */
+	@Unique
+	private String jaymoskingdoms$ring = "";
 
 	protected McaDialogueBoxMixin(Component title) {
 		super(title);
@@ -94,6 +104,8 @@ abstract class McaDialogueBoxMixin extends Screen {
 	private FormattedText jaymoskingdoms$toBox(FormattedText text) {
 		if (text instanceof Component said) {
 			DialogueCinematic.said(this.villager.asEntity().getId(), said);
+			// (Andy 2026-11-27) the wheel's first spoke answers it
+			TalkFirst.said((InteractScreen)(Object)this, said);
 		}
 		return text;
 	}
@@ -102,6 +114,27 @@ abstract class McaDialogueBoxMixin extends Screen {
 	@Inject(method = "setDialogue", at = @At("TAIL"))
 	private void jaymoskingdoms$newQuestion(String question, List<String> answers, CallbackInfo ci) {
 		this.jaymoskingdoms$page = 0;
+	}
+
+	/**
+	 * (Andy, 2026-11-25) A spoke that stands for one of MCA's buttons (Family Tree, Ask of them..., Back...) is done here,
+	 * as the button would be: nothing goes to the villager's talk for it, and nothing is said on camera.
+	 */
+	@Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+	private void jaymoskingdoms$spoke(MouseButtonEvent event, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && TalkFirst.local(this.dialogAnswerHover)) {
+			String spoke = this.dialogAnswerHover;
+			this.dialogAnswerHover = null;
+			TalkFirst.pick((InteractScreen)(Object)this, spoke);
+			cir.setReturnValue(true);
+		}
+	}
+
+	/** (Andy, 2026-11-25) Putting a gift away goes back to the talk, not to MCA's Interact page (a ring of the wheel now). */
+	@ModifyArg(method = "keyPressed", at = @At(value = "INVOKE",
+		target = "Lnet/conczin/mca/client/gui/InteractScreen;setLayout(Ljava/lang/String;)V"), index = 0)
+	private String jaymoskingdoms$giftAway(String layout) {
+		return "interact".equals(layout) ? "main" : layout;
 	}
 
 	/** The answer picked: your line for it is what you say on camera. */
@@ -133,12 +166,20 @@ abstract class McaDialogueBoxMixin extends Screen {
 	private void jaymoskingdoms$answers(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
 		this.dialogAnswerHover = null;
 		this.jaymoskingdoms$pages = 0;
-		if (this.dialogQuestionText == null || this.dialogAnswers == null || this.dialogAnswers.isEmpty() || !DialogueCinematic.answersUp()) {
+		InteractScreen self = (InteractScreen)(Object)this;
+		boolean talking = this.dialogQuestionText != null;
+		// (Andy, 2026-11-25: every interaction through talk) MCA's answers, and the spokes that stand for its buttons
+		List<String> spokes = TalkFirst.spokes(self, talking ? this.dialogQuestionId : null, talking ? this.dialogAnswers : null);
+		if (!self.getActiveScreen().equals(this.jaymoskingdoms$ring)) {
+			this.jaymoskingdoms$ring = self.getActiveScreen();
+			this.jaymoskingdoms$page = 0;
+		}
+		if (spokes.isEmpty() || !DialogueCinematic.answersUp()) {
 			return;
 		}
-		int pages = (this.dialogAnswers.size() + PER_PAGE - 1) / PER_PAGE;
+		int pages = (spokes.size() + PER_PAGE - 1) / PER_PAGE;
 		int page = Math.floorMod(this.jaymoskingdoms$page, pages);
-		List<String> shown = this.dialogAnswers.subList(page * PER_PAGE, Math.min(this.dialogAnswers.size(), (page + 1) * PER_PAGE));
+		List<String> shown = spokes.subList(page * PER_PAGE, Math.min(spokes.size(), (page + 1) * PER_PAGE));
 		int n = shown.size();
 		// up to four on the four arms (up, right, down, left), more spaced evenly from the top
 		int slots = Math.max(n, 4);
@@ -233,10 +274,12 @@ abstract class McaDialogueBoxMixin extends Screen {
 
 		// the line you'd say, under the wheel
 		Component line = lit < 0 ? null : TalkWheel.line(shown.get(lit));
-		if (line != null && Minecraft.getInstance().player != null) {
-			List<FormattedCharSequence> rows = this.font.split(line, LINE_WIDTH - DialogueCinematic.BOX_PAD * 2);
+		// (Andy 2026-11-27) nothing pointed at, with one who has a quest for you: the tip in its place, how to get to it
+		Component tip = line == null ? TalkFirst.questTip(self) : null;
+		if ((line != null || tip != null) && Minecraft.getInstance().player != null) {
+			List<FormattedCharSequence> rows = this.font.split(line != null ? line : tip, LINE_WIDTH - DialogueCinematic.BOX_PAD * 2);
 			rows = rows.subList(0, Math.min(LINE_ROWS, rows.size()));
-			Component name = Minecraft.getInstance().player.getDisplayName();
+			Component name = line != null ? Minecraft.getInstance().player.getDisplayName() : Component.translatable("gui.jaymoskingdoms.talk.tip");
 			int wide = this.font.width(name);
 			for (FormattedCharSequence row : rows) {
 				wide = Math.max(wide, this.font.width(row));
@@ -246,7 +289,7 @@ abstract class McaDialogueBoxMixin extends Screen {
 			int y1 = this.height - bar - GAP, y0 = y1 - DialogueCinematic.BOX_PAD * 2 - (rows.size() + 1) * rowHigh - 2;
 			jaymoskingdoms$frame(g, x0, y0, x1, y1);
 			int y = y0 + DialogueCinematic.BOX_PAD;
-			g.text(this.font, name.getVisualOrderText(), x0 + DialogueCinematic.BOX_PAD, y, DialogueCinematic.NAME_COLOR);
+			g.text(this.font, name.getVisualOrderText(), x0 + DialogueCinematic.BOX_PAD, y, line != null ? DialogueCinematic.NAME_COLOR : HudStyle.GOLD);
 			y += rowHigh + 2;
 			for (FormattedCharSequence row : rows) {
 				g.text(this.font, row, x0 + DialogueCinematic.BOX_PAD, y, 0xFFFFFFFF);
@@ -267,6 +310,9 @@ abstract class McaDialogueBoxMixin extends Screen {
 
 	@Unique
 	private Component jaymoskingdoms$text(String answer) {
+		if (TalkFirst.local(answer)) {
+			return TalkFirst.label(answer);
+		}
 		return Component.translatable(Question.getTranslationKey(this.dialogQuestionId, answer));
 	}
 }

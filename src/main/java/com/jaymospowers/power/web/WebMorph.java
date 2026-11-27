@@ -185,6 +185,8 @@ public final class WebMorph {
 		long readyAt;
 		/** Let go before the weapon formed: strike at this creature (-1 the air) once it has; NONE: not let go. */
 		int pending = NONE;
+		/** This arm is the symbiote's own, during a takeover (see {@link #drivenStrike}): the driving guard lets it through. */
+		boolean driven;
 		/** Creatures the hook claw left bleeding: {id, game time of the next drop, drops left}. */
 		final java.util.List<long[]> bleeds = new java.util.ArrayList<>();
 	}
@@ -318,15 +320,24 @@ public final class WebMorph {
 
 	/** Pressed: the symbiote starts gathering into the arm, a weapon picked (never the same twice running), the other arm from last time. */
 	static void gather(ServerPlayer player) {
-		if (!usable(player) || WebSymbiote.driving(player) || player.getAttached(CHARGE) != null) {
-			return;
+		gather(player, false);
+	}
+
+	/**
+	 * {@code driven}: the symbiote's own arm during a takeover, which the driving guard (a host's own clicks stay blocked)
+	 * lets through. True if the weapon began to form.
+	 */
+	private static boolean gather(ServerPlayer player, boolean driven) {
+		if (!usable(player) || WebSymbiote.driving(player) && !driven || player.getAttached(CHARGE) != null) {
+			return false;
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Live live = live(player);
 		if (now < live.readyAt) {
-			return;
+			return false;
 		}
+		live.driven = driven;
 		int[] pool = switch (WebSymbioteStrains.of(player)) {
 			case WHITE -> WHITE_WEAPONS;
 			case RED -> RED_WEAPONS;
@@ -350,6 +361,38 @@ public final class WebMorph {
 		// it stirs under the skin (or a tendril rears back and coils)
 		sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 0.8F, tendril ? 0.7F : 0.5F);
 		sound(level, player, SoundEvents.SLIME_SQUISH, armor ? 0.9F : 0.7F, armor ? 0.4F : 0.5F);
+		return true;
+	}
+
+	/**
+	 * A takeover's strike (WebSymbiote at its prey): the symbiote forms a weapon on its own and lets go at {@code target}.
+	 * False if it can't (nothing to form from, a hand full, still forming or cooling down, a counter running). Any host's
+	 * symbiote does it, web slinger or not (Andy, 2026-11-25: takeovers should use "the charged weapon m1s").
+	 */
+	static boolean drivenStrike(ServerPlayer player, LivingEntity target) {
+		if (!gather(player, true)) {
+			return false;
+		}
+		release(player, target.getId());
+		return true;
+	}
+
+	/** The weapon arm is busy: forming, swinging, or not yet ready to form again. */
+	static boolean drivenBusy(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		return player.getAttached(CHARGE) != null || player.getAttached(MORPH) != null
+			|| live != null && player.level().getGameTime() < live.readyAt;
+	}
+
+	/** The takeover's over: a weapon the symbiote was forming on its own ({@link #drivenStrike}) melts back, unstruck. */
+	static void endDriven(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		if (live == null || !live.driven) {
+			return;
+		}
+		live.driven = false;
+		live.pending = NONE;
+		player.removeAttached(CHARGE);
 	}
 
 	/** Let go: strikes now if the weapon has formed, else as soon as it has. */
@@ -370,7 +413,9 @@ public final class WebMorph {
 		player.removeAttached(CHARGE);
 		Live live = live(player);
 		live.pending = NONE;
-		if (!usable(player) || WebSymbiote.driving(player)) {
+		boolean driven = live.driven;
+		live.driven = false;
+		if (!usable(player) || WebSymbiote.driving(player) && !driven) {
 			return;
 		}
 		ServerLevel level = player.level();
@@ -391,7 +436,7 @@ public final class WebMorph {
 		sound(level, player, SoundEvents.HONEY_BLOCK_SLIDE, 0.8F, 0.6F);
 	}
 
-	/** Every tick, for a web slinger: the gathering, held, then the strike under way lands, then ends. */
+	/** Every tick, for a web slinger (WebPower) or a host (WebSymbioteInfection): the gathering, held, then the strike under way lands, then ends. */
 	static void tick(ServerPlayer player) {
 		tickCharge(player);
 		tickBleeds(player);

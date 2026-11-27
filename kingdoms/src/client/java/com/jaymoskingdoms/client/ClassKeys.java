@@ -7,6 +7,7 @@ import com.jaymoskingdoms.SecondClass;
 import com.jaymoskingdoms.BloodBlasts;
 import com.jaymoskingdoms.Hemomancy;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.ShapeWheel;
 import com.jaymoskingdoms.Spellcraft;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -27,6 +28,9 @@ final class ClassKeys {
 	private static boolean elementHeld;
 	/** Sneak and the class key (0) or the second class's (1) is down: the ticks so far ({@link Abilities#HOLD_TICKS}: the hold went); -1 when not. */
 	private static final int[] sneakHeld = {-1, -1};
+	/** A Druid's class key is down (not sneaking): the ticks so far; a tap takes the shape, held {@link #WHEEL_HOLD} the wheel of shapes opens. -1 when not. */
+	private static int druidHeld = -1;
+	private static final int WHEEL_HOLD = 8;
 
 	/** The "classes" key category; 26.3 throws if a category id is registered twice, so every class key shares this one. */
 	private static KeyMapping.Category category;
@@ -82,6 +86,9 @@ final class ClassKeys {
 							elementHeld = true;
 							ClientPlayNetworking.send(new Absorption.Hold(true));
 						}
+					} else if (!minecraft.player.isShiftKeyDown() && Classes.is(minecraft.player, Classes.PlayerClass.DRUID) && !com.jaymoskingdoms.Druids.shaped(minecraft.player)) {
+						// a Druid's tap takes the shape (sent as it's let go); held, the wheel of shapes opens
+						druidHeld = 0;
 					} else if (minecraft.player.isShiftKeyDown() && !elementHeld && Abilities.holds(minecraft.player, false)) {
 						// sneak and the key: a Druid's and a Sorcerer's is told apart, a tap from a hold, as it's let go
 						sneakHeld[0] = 0;
@@ -90,6 +97,7 @@ final class ClassKeys {
 					}
 				}
 			}
+			druidHold(minecraft);
 			sneakHold(minecraft, 0, imbue);
 			sneakHold(minecraft, 1, second);
 			if (bloodHeld && (!imbue.isDown() || minecraft.player == null || minecraft.gui.screen() != null)) {
@@ -103,6 +111,14 @@ final class ClassKeys {
 				if (minecraft.getConnection() != null) {
 					ClientPlayNetworking.send(new Absorption.Hold(false));
 				}
+			}
+		});
+		ClientPlayNetworking.registerGlobalReceiver(ShapeWheel.Data.TYPE, (payload, context) -> {
+			Minecraft minecraft = context.client();
+			if (minecraft.gui.screen() instanceof ShapeWheelScreen screen) {
+				screen.refresh(payload.slices());
+			} else if (payload.open() && imbue.isDown() && minecraft.gui.screen() == null && minecraft.player != null) {
+				minecraft.gui.setScreen(new ShapeWheelScreen(imbue, payload.slices()));
 			}
 		});
 		// (0.7.49) an imbued blade says whose element it carries and for how long, in anyone's hands
@@ -120,6 +136,24 @@ final class ClassKeys {
 				Component.translatable("class.jaymoskingdoms.option." + charge.element()), charge.name(), left / 20)
 				.withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
 		});
+	}
+
+	/** A Druid's class key: let go early it is a tap (take the shape); held, the server is asked for the wheel. */
+	private static void druidHold(Minecraft minecraft) {
+		if (druidHeld < 0) {
+			return;
+		}
+		if (minecraft.player == null || minecraft.gui.screen() != null || minecraft.getConnection() == null) {
+			druidHeld = -1;
+		} else if (!imbue.isDown()) {
+			if (druidHeld < WHEEL_HOLD) {
+				ClientPlayNetworking.send(new Spellcraft.Imbue(false));
+			}
+			druidHeld = -1;
+		} else if (druidHeld < WHEEL_HOLD && ++druidHeld >= WHEEL_HOLD) {
+			// it stays at the full count until the key is let go, so the hold isn't followed by a tap
+			ClientPlayNetworking.send(new ShapeWheel.Ask());
+		}
 	}
 
 	/**

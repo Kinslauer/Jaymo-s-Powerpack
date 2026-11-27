@@ -52,6 +52,9 @@ public final class WebInhabit {
 	// ---- tuning ----
 	/** How long a peaceful mob holds it before it's rejected, and a hostile one before it dies (ticks). */
 	static final int CALM_MIN = 400, CALM_MAX = 800, HOSTILE_MIN = 1200, HOSTILE_MAX = 1800;
+	/** The black and the white look for a web slinger to go to every {@code SEEK_EVERY} ticks, this far (blocks). */
+	static final int SEEK_EVERY = 40;
+	static final double SEEK_RANGE = 16.0;
 	/** A hostile host: extra health, melee damage, speed (share), knockback resistance. */
 	static final double HEALTH_BONUS = 20.0, DAMAGE_BONUS = 4.0, SPEED_BONUS = 0.25, KNOCKBACK_RESIST = 0.4;
 	/** A hostile host wastes away: this share of its max health every second, more as it nears its end (up to x3). */
@@ -126,8 +129,11 @@ public final class WebInhabit {
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (isHost(entity) && entity.level() instanceof ServerLevel level) {
+				if (entity instanceof Mob mob) {
+					WebRedHunt.end(level, mob);
+				}
 				entity.removeAttached(HOST);
-				com.jaymospowers.core.Oddities.unmark(entity, com.jaymospowers.core.Oddities.SYMBIOTE);
+				WebSymbioteStrains.oddUnmark(entity);
 				// (out comes the same strain it went in as)
 				WebSymbioteStrains.mark(WebSymbioteBlob.release(level, entity.position()), WebSymbioteStrains.of(entity)).spurn(entity);
 			}
@@ -148,7 +154,7 @@ public final class WebInhabit {
 		int stay = hostile ? HOSTILE_MIN + mob.getRandom().nextInt(HOSTILE_MAX - HOSTILE_MIN + 1)
 			: CALM_MIN + mob.getRandom().nextInt(CALM_MAX - CALM_MIN + 1);
 		mob.setAttached(HOST, now + stay);
-		com.jaymospowers.core.Oddities.mark(mob, com.jaymospowers.core.Oddities.SYMBIOTE);
+		WebSymbioteStrains.oddMark(mob, strain);
 		if (hostile) {
 			boost(mob, Attributes.MAX_HEALTH, "inhabit_health", HEALTH_BONUS, AttributeModifier.Operation.ADD_VALUE);
 			boost(mob, Attributes.ATTACK_DAMAGE, "inhabit_damage", DAMAGE_BONUS, AttributeModifier.Operation.ADD_VALUE);
@@ -181,23 +187,48 @@ public final class WebInhabit {
 		long now = level.getGameTime();
 		long until = host.getAttachedOrElse(HOST, now);
 		if (fierce(host)) {
-			// lashing at everything near, and wasting away, faster toward the end
+			// lashing at everything near (the black only for its needs, WebBehemoth#needs), and wasting away, faster toward the end
+			// (and, as it weakens, the frenzy, the roar and the Shroud: WebBehemoth#HURT_HASTE)
 			WebBehemoth.lash(level, host, now);
+			WebBehemoth.fury(level, host, host.getTarget(), now);
+			boolean hunting = false;
+			if (WebSymbioteStrains.of(host) == WebSymbioteStrain.RED && humanoid(host)) {
+				// the red one in a humanoid hunts all it can find (WebRedHunt), and wastes slower while it does
+				WebRedHunt.tick(level, host);
+				hunting = WebRedHunt.hunting(host);
+				if (hunting && host.tickCount % 20 == 0) {
+					// its time runs at the same slower pace while it hunts (once a second: the end time is synced)
+					host.setAttached(HOST, host.getAttachedOrElse(HOST, until) + Math.round(20 * (1.0F - WebRedHunt.HUNT_DECAY_SHARE)));
+				}
+				until = host.getAttachedOrElse(HOST, until);
+			}
 			if (now >= until) {
-				host.kill(level);
+				if (webUser(host)) {
+					// a host made for it lives through it: it's let go, not killed
+					reject(level, host);
+				} else {
+					host.kill(level);
+				}
 				return;
 			}
-			if (host.tickCount % 20 == 0) {
+			if (host.tickCount % 20 == 0 && !webUser(host)) {
 				long left = until - now;
 				float urgency = 1.0F + 2.0F * (1.0F - Math.min(1.0F, left / (float)HOSTILE_MIN));
-				host.hurtServer(level, level.damageSources().magic(), host.getMaxHealth() * DECAY * FOREIGN_HOST_DPS_MULT * urgency);
+				host.hurtServer(level, level.damageSources().magic(), host.getMaxHealth() * DECAY * FOREIGN_HOST_DPS_MULT * urgency
+					* (hunting ? WebRedHunt.HUNT_DECAY_SHARE : 1.0F));
 			}
 		} else if (now >= until) {
 			reject(level, host);
 			return;
-		} else if (host.tickCount % 20 == 0) {
+		} else if (host.tickCount % 20 == 0 && !webUser(host)) {
 			// it isn't made for this either: it wastes as it waits to be spat out
 			host.hurtServer(level, level.damageSources().magic(), host.getMaxHealth() * DECAY * FOREIGN_HOST_DPS_MULT * CALM_DECAY_SHARE);
+		}
+		if (WebSymbioteStrains.of(host) != WebSymbioteStrain.RED && !webUser(host) && host.tickCount % SEEK_EVERY == 0 && webHostNear(level, host)) {
+			// the black (and the white) only make do with a mob: a web slinger near with no symbiote of their own is the host
+			// it wants, and it drops off to go to them (WebSymbioteBlob goes for a web slinger first)
+			reject(level, host);
+			return;
 		}
 		if (host.getRandom().nextInt(5) == 0) {
 			level.sendParticles(WebSymbioteStrains.dust(host, 0.9F), host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), 1,
@@ -208,12 +239,35 @@ public final class WebInhabit {
 		}
 	}
 
+	/**
+	 * (Andy, 2026-11-25: "the symbiote should sap health from its host unless it is a player or web using npc".) Gifted
+	 * folk with the Web (com.jaymospowers.core.gifted.Gifted) are made for it: it never wastes them, and at the end it
+	 * lets them go alive.
+	 */
+	static boolean webUser(Mob host) {
+		return "web".equals(com.jaymospowers.core.gifted.Gifted.power(host));
+	}
+
+	/** A web slinger within {@code SEEK_RANGE} without a symbiote of their own. */
+	private static boolean webHostNear(ServerLevel level, Mob host) {
+		return !level.getEntitiesOfClass(net.minecraft.world.entity.player.Player.class, host.getBoundingBox().inflate(SEEK_RANGE),
+			p -> p.isAlive() && !p.isSpectator() && com.jaymospowers.core.Powers.has(p, WebPower.INSTANCE) && !WebSymbiote.state(p).bonded()).isEmpty();
+	}
+
+	/** A two-legged one (a villager, a zombie, a skeleton, an illager, a witch, a piglin): it fights in the strain's own body. */
+	public static boolean humanoid(Entity entity) {
+		return entity instanceof net.minecraft.world.entity.npc.villager.AbstractVillager || entity instanceof net.minecraft.world.entity.monster.zombie.Zombie
+			|| entity instanceof net.minecraft.world.entity.monster.skeleton.AbstractSkeleton || entity instanceof net.minecraft.world.entity.monster.illager.AbstractIllager
+			|| entity instanceof net.minecraft.world.entity.monster.Witch || entity instanceof net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+	}
+
 	/** Not good enough: it spits the mob out (reeling, but alive) and drops off to look again. */
 	static void reject(ServerLevel level, Mob host) {
 		WebSymbioteStrain strain = WebSymbioteStrains.of(host);
 		host.removeAttached(HOST);
 		host.removeAttached(WebSymbioteStrains.KIND);
-		com.jaymospowers.core.Oddities.unmark(host, com.jaymospowers.core.Oddities.SYMBIOTE);
+		WebRedHunt.end(level, host);
+		WebSymbioteStrains.oddUnmark(host);
 		host.removeAttached(WebBehemoth.STRIKE);
 		host.removeAttached(WebBehemoth.SLAM);
 		HOSTS.remove(host);

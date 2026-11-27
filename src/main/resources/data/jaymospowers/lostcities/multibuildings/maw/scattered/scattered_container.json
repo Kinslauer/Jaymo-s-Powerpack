@@ -1,0 +1,21 @@
+{
+  "dimx": 3,
+  "dimz": 3,
+  "buildings": [
+    [
+      "jaymospowers:maw/scattered/scattered_container00",
+      "jaymospowers:maw/scattered/scattered_container01",
+      "jaymospowers:maw/scattered/scattered_container02"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_container10",
+      "jaymospowers:maw/scattered/scattered_container11",
+      "jaymospowers:maw/scattered/scattered_container12"
+    ],
+    [
+      "jaymospowers:maw/scattered/scattered_container20",
+      "jaymospowers:maw/scattered/scattered_container21",
+      "jaymospowers:maw/scattered/scattered_container22"
+    ]
+  ]
+}

@@ -97,6 +97,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		com.jaymospowers.client.power.zfighter.sky.SkyPlanets.init();
 		com.jaymospowers.client.power.zfighter.sky.HighSkyClient.init();
 		ZFighterFlightScreen.register();
+		FlightClient.init();
 		// (0.17.60) the tournament bracket
 		ZFighterBracketScreen.register();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);

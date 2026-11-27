@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jaymoskingdoms:item/leg_wraps",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": -4675464
+      }
+    ]
+  }
+}

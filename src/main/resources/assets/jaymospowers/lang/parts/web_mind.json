@@ -286,6 +286,9 @@
 	"message.jaymospowers.web_symbiote.order.sulk.1": "No. We're still angry with you.",
 	"message.jaymospowers.web_symbiote.order.sulk.2": "Not now. We're sore.",
 	"message.jaymospowers.web_symbiote.order.defy": "We don't take orders from you any more.",
+	"message.jaymospowers.web_symbiote.order.red.locked.protect": "Guard you? HA. We hunt. Trust us more (%s) and maybe we'll stand by you.",
+	"message.jaymospowers.web_symbiote.order.red.locked.none": "Sit still? Us? Only for a host we trust (%s). You're not there.",
+	"message.jaymospowers.web_symbiote.order.red.revert": "Enough of that. We hunt again.",
 	"message.jaymospowers.web_symbiote.order.protect.shield.1": "Behind us.",
 	"message.jaymospowers.web_symbiote.order.protect.shield.2": "Hardening. Stay close.",
 	"message.jaymospowers.web_symbiote.req.meat.ask.1": "Meat. Raw. Feed us, and we'll love you.",
@@ -371,5 +374,10 @@
 	"gui.jaymospowers.web_symbiote.order.protect.tip": "It guards you early: it fights for you well before you're low, and shields you when something's on you.",
 	"gui.jaymospowers.web_symbiote.order.hunt.tip": "It hunts freely: kills first, then feeds, on a lighter appetite.",
 	"gui.jaymospowers.web_symbiote.order.hide.tip": "It holds back: suit and tendrils drawn in, far fewer takeovers, no gifts, no requests.",
+	"gui.jaymospowers.web_symbiote.order.none.red_tip": "It rests, and lets you drive: no fight to pull back to the suit, no hunting on its own. The red one only allows it at high trust.",
+	"gui.jaymospowers.web_symbiote.order.protect.red_tip": "It stands by you instead of chasing blood: fights for you early, shields you. The red one only allows it once it trusts you.",
+	"gui.jaymospowers.web_symbiote.order.hunt.red_tip": "The red one's own way: it hunts freely, takes over often and swells into its big body to kill.",
+	"gui.jaymospowers.web_symbiote.order.hide.red_tip": "It holds back: suit and tendrils drawn in, far fewer takeovers, no gifts, no requests.",
+	"gui.jaymospowers.web_symbiote.order.red_locked": "The red one won't take this yet: it opens at trust %s.",
 	"gui.jaymospowers.web_symbiote.order.needs_trust": "Obeys by trust: %s/%s"
 }

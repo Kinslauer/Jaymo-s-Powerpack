@@ -16,6 +16,7 @@ abstract class LivingEntitySwingMixin {
 	private void jaymoskingdoms$swung(InteractionHand hand, SwingAnimation animation, boolean sendToSwingingEntity, CallbackInfoReturnable<Boolean> cir) {
 		if (hand == InteractionHand.MAIN_HAND) {
 			BladeClash.swung((LivingEntity) (Object) this);
+			com.jaymoskingdoms.ArmedFright.swung((LivingEntity) (Object) this);
 		}
 	}
 }

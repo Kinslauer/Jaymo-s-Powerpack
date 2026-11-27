@@ -12,7 +12,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * A treasure rumour that points at a real place: the nearest buried treasure, or failing that a ruin, within
  * {@link #SEARCH_CHUNKS} chunks of the teller. What is said is vague on purpose (a direction and a distance rounded to
- * {@link #ROUND} blocks). Told by a drunk's whisper ({@link Carousing}) and by folk who pass on news ({@link StartPerks}).
+ * {@link #ROUND} blocks). Told by a drunk's whisper ({@link Carousing}) and by folk who pass on news ({@link StartPerks});
+ * now and then it's the nearest illager hold ({@link IllagerHolds#hint}) or cairn ({@link Cairns#hint}) instead.
  */
 final class Rumours {
 	/**
@@ -79,6 +80,12 @@ final class Rumours {
 		Component named = IllagerHolds.hint(level, teller, hold);
 		if (named != null) {
 			Speech.tell(level, teller, player, named, Speech.GOLD);
+			return hold[0];
+		}
+		// (village mods 6) now and then, the nearest cairn and what folk leave under it
+		Component cairn = Cairns.hint(level, teller, hold);
+		if (cairn != null) {
+			Speech.tell(level, teller, player, cairn, Speech.GOLD);
 			return hold[0];
 		}
 		BlockPos at = place(level, teller.blockPosition());
