@@ -18358,3 +18358,16 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Elder's Blood any time**: it can be drunk whatever the moon, and is always used up. They are bitten, and turn at the next new moon's nightfall that is still ahead (`OldBlood.WILLING`, `OldBlood.due`); a night they were away for still counts. Until then the bitten rules hold: the priest's rite clears it, a golden apple still makes them wake a dhampir, a death that rises them turned does so at once. The Elder's lines, the gossip, the hunter's ledger and loading hint 274 no longer say to drink it under a new moon.
 - **Bitten start**: a new road, "Bitten at dusk" (`Start.BITTEN`), built like the moon's mark: same landing (the wild or a village's edge), same kind of card, perk, aim and fate odds. The bite is laid on them (no saving throw) and they turn at the first nightfall. Locked like it: a deed (bitten or turned) or a secret past (Nightborn from the moors and a hunted youth, or the caves and a bargain).
 - Built; not played.
+
+## 0.13.95 (2026-11-27): Night's Blood 4: new gifts (#2305)
+
+- **True Shape** (fifth shape, Blood page gift, 4 points, needs old blood): a winged horror (GeckoLib puppet `NightHorror`, five skins, glowing eyes). Hits harder, takes more, one jump in the air, tears blocks softer than stone by hand (faster, with drops), no armour or tools by the werewolf beast's rules, each pact makes it a little stronger, drains 25 mB every 10 ticks and ends with the reserve. Folk scream, are frightened and run, guards go for it, and those who see it suspect the player (`Bloodshed.alarm`, `Frights`, `Suspicion`). Costs 500 mB.
+- **Blood Barrier** (2 points, 350 mB): three rings soak a blow each, a heavy blow breaks two.
+- **Batstep** (2 points, 250 mB): an eight-block blink along the look in a burst of bats, hurting and staggering what is passed.
+- **Blood Flechettes** (2 points): a fan of up to five shards, 40 mB each, never free; a hit stops healing for 8 s and the next blow gives 60 mB back. Players only where PvP is allowed.
+- **Hungry Colony** (1 point, needs Colony): five escort bats latch onto what you hit or what hits you and drink, giving the blood back.
+- **Long Hold** (1 point, needs Stare): the stare holds up to two minutes (less on a strong will) and the held fight at your side.
+- **Slipping Mist** (1 point, needs Mist): mist passes doors, gates, trapdoors, bars and panes, no fall damage, and the first blow out of it lands double.
+- Gifts with a prerequisite or an age show "Needs ..." on the Blood page and cannot be learned until met. Four new skill-bar moves (full vampires only), icons, lang part `nights-blood-4.json`, loading hints 290-296.
+- Classes: `NightHorrors`, `NightHorror`, `NightTargets`, `BloodBarrier`, `Batstep`, `BloodShards`, `HungryColony`, `NightGaze`, `NightForms`, `BloodPage`, `NightGifts`, mixins `PlayerHorrorMixin`, `MistSlipMixin`, `LivingEntityHealMixin`, client `NightHorrorRenderer`, `NightFormsClient`.
+- Built; not played.
