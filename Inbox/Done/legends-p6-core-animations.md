@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: codex
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes, 2026-11-26)
 asked: 2026-11-26
@@ -25,5 +25,6 @@ Power: core/combat, shared.
 ## Notes
 - 2026-11-26 21:03 codex's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-26 claimed again (codex thread, continued by Claude after Codex/Antigravity hit usage limits). Work is in worktree E:\legends-p6-core-animations, branch codex/legends-p6-core-animations; build passed, reviewing before the PR.
+- 2026-11-26 Andy said "Merge": PR #2258 squash-merged after all 5 CI checks passed, before the Legends thread's review. Still open for that thread: whether katana_forms.json's arm/torso poses are our own, and an in-game look.
 - 2026-11-26 PR #2258 opened (branch codex/legends-p6-core-animations). Pre-PR review fixed 3 bugs (katana charge release, slide clip held too long, Air Step stacking on PowerJump) and credited katana_forms.json's blade tracks in CREDITS. Not played in game; CI builds it.
 - 2026-11-26 20:39 codex's claim had no sign of work for 30 min: handed back as open.

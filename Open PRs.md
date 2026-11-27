@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 20:47
+updated: 2026-11-26 21:00
 ---
 # Open PRs
 
-14 open, as of 2026-11-26 20:47. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-26 21:00. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -68,10 +68,5 @@ Andy merges only on "merge", one at a time.
 
 ## [#2257](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2257) Legends: web swinging, web attacks and uptilt, Chrono wormhole
 - **Branch:** `claude/project-thread-aaw9tm` · **Updated:** 2026-11-27 (today)
-- **Checks:** ⏳ 1 of 5 running
-- **Agent:** no agent note
-
-## [#2258](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2258) Legends Core animation library, landings by height, shared movement set, katana stance set
-- **Branch:** `codex/legends-p6-core-animations` · **Updated:** 2026-11-27 (today)
-- **Checks:** ⏳ 4 of 4 running
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note

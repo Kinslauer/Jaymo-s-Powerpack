@@ -1197,3 +1197,12 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - **Decided:** Add HD Effekseer effects for ultimates first. Everyday effects use the existing MagicFx art. Big moves come later.
 - **Applies to:** Powers and the pack's client renderer.
 - **Agent:** [[Agents/effekseer-hd]]
+
+### 2026-11-26: Legends patch 6 merged before review
+- **Decided:** Andy said "Merge" on PR #2258 (Legends Core animation library, landings, movement set, katana stance) once CI passed, without waiting for the Legends thread's review.
+- **Applies to:** Powers.
+- **Task:** [[Inbox/Done/legends-p6-core-animations]]
+
+### 2026-11-26: HD Effekseer effects merged
+- **Decided:** Andy said "Merge" on PR #2256 (HD Effekseer effects for eight ultimates, AAA Particles' loader vendored into the Powers client) once CI passed, before anyone saw the effects in game.
+- **Applies to:** Powers.
