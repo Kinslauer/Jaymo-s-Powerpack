@@ -105,6 +105,31 @@ SKINS = {
 }
 
 
+# Wing rest pose (right side; the left mirrors y and z): both wings fold back and down flat against the back, the
+# inner wing swept back from a shoulder root set behind the ribcage and spine ridge, the outer wing folded onto it.
+# WING_OLD_* is the earlier half-spread rest the unfurl keyframes were authored around: their absolute poses are kept.
+WING_Z = 1.8
+OUTER_OFFSET = 0.25  # the folded outer membrane lies just outboard of the inner one, so the two planes never share depth
+WING_REST_IN = (0.0, -72.0, 4.0)
+WING_REST_OUT = (0.0, 0.0, -165.0)
+WING_OLD_IN = (8.0, -58.0, 54.0)
+WING_OLD_OUT = (-6.0, 28.0, -132.0)
+
+# ---------------------------------------------------------------- digitigrade leg constants
+# Absolute segment angles in degrees from straight down (positive = lower end swings forward, toward -z): thigh forward to the
+# knee, shin back to the hock, metatarsal forward and down to the toe joint. Toes lie flat on the ground.
+HIP_Y = 17.5
+LEG_X = 2.3
+L_THIGH, L_SHIN = 7.0, 8.0
+LEG_ABS = (35.0, -40.0, 22.0)
+TOE_H = 0.6  # half thickness of the toe pads: the toe joint sits this high when the sole is on the ground
+L_META = (HIP_Y - TOE_H - L_THIGH * math.cos(math.radians(LEG_ABS[0])) - L_SHIN * math.cos(math.radians(LEG_ABS[1]))) \
+	/ math.cos(math.radians(LEG_ABS[2]))
+# Blockbench's x rotation swings the lower end of a limb toward -z (forward), so bone rotations are these angles as is.
+ROT_SIGN = 1.0
+LEG_REST_REL = tuple(ROT_SIGN * v for v in (LEG_ABS[0], LEG_ABS[1] - LEG_ABS[0], LEG_ABS[2] - LEG_ABS[1]))
+
+
 def uid(tag):
 	"""Deterministic UUID5 per bone/cube/animation name so re-running produces clean diffs."""
 	return str(uuid.uuid5(uuid.NAMESPACE_OID, f"jaymoskingdoms.{NAME}.{tag}"))
@@ -366,10 +391,33 @@ def paint_claw_details(sheet, rects):
 			sheet.put(x, y, "bone", 6)
 
 
+def line_cells(a, b):
+	"""Clean 1px Bresenham line between two integer cells (inclusive)."""
+	(x0, y0), (x1, y1) = a, b
+	cells = []
+	dx, dy = abs(x1 - x0), -abs(y1 - y0)
+	sx, sy = (1 if x0 < x1 else -1), (1 if y0 < y1 else -1)
+	err = dx + dy
+	while True:
+		cells.append((x0, y0))
+		if (x0, y0) == (x1, y1):
+			break
+		e2 = 2 * err
+		if e2 >= dy:
+			err += dy
+			x0 += sx
+		if e2 <= dx:
+			err += dx
+			y0 += sy
+	return cells
+
+
 def paint_wing_membrane(sheet, rects, inner=True):
-	"""Paints a thin leathery membrane with clean finger-bone struts, subtle dark blood-vessels and scalloped trailing edge.
-	Note on UV horizontal orientation: in Blockbench free-format north faces, lx=0 is the outer +x end and lx=w-1 is the
-	inner root (+x0) end."""
+	"""Paints a leathery membrane as flat shapes: a 1px lighter bone strut along the arm and down each finger, broad
+	horizontal shade bands (lightest beside the arm bone, darker toward the trailing edge, lit from above) and a
+	continuous 1px dark rim along the scalloped trailing edge. No dots, no veins, no gradients.
+	UV orientation: lx=0 is the outer +x end of the north face (the wrist on the inner wing, the wingtip on the outer
+	wing) and lx=w-1 is the root end (the body on the inner wing, the wrist on the outer wing)."""
 	for fn, (x0, y0, x1, y1) in rects.items():
 		for y in range(y0, y1):
 			for x in range(x0, x1):
@@ -381,60 +429,67 @@ def paint_wing_membrane(sheet, rects, inner=True):
 
 	def depth_at(lx):
 		if inner:
-			# Inner arm membrane (w=9, h=12): deep at wrist (lx=0, d=12) and flank (lx=w-1, d=11), arched scallop between
 			t = lx / max(1, w - 1)
 			arch = round(3.0 * math.sin(math.pi * t))
 			return max(5, h - arch - (1 if lx > w // 2 else 0))
-		else:
-			# Outer hand membrane (w=12, h=15): sharp wingtip at lx=0 (d=2), 3 scalloped finger tips down to wrist (lx=w-1, d=12)
-			pts = [(0, 2), (4, 8), (8, 14), (w - 1, 12)]
-			for (xa, ya), (xb, yb) in zip(pts, pts[1:]):
-				if xa <= lx <= xb:
-					t = (lx - xa) / max(1, xb - xa)
-					straight = ya + (yb - ya) * t
-					scallop = 2.6 * math.sin(math.pi * t)
-					return max(2, min(h, round(straight - scallop)))
-			return 12
+		pts = [(0, 2), (4, 8), (8, 14), (w - 1, 12)]
+		for (xa, ya), (xb, yb) in zip(pts, pts[1:]):
+			if xa <= lx <= xb:
+				t = (lx - xa) / max(1, xb - xa)
+				straight = ya + (yb - ya) * t
+				scallop = 2.6 * math.sin(math.pi * t)
+				return max(2, min(h, round(straight - scallop)))
+		return 12
 
-	struts = set()
-	veins = set()
+	depth = [depth_at(lx) for lx in range(w)]
+	mask = {(lx, ly) for lx in range(w) for ly in range(depth[lx])}
+
+	# finger struts: from the wrist down to the lowest point of each scallop
 	if inner:
-		# Wrist is at (lx=0, ly=0): one patagium strut down from wrist, one along flank
-		rays = [((0, 0), (2, h - 3))]
-		vein_rays = [((1, 2), (5, 7)), ((3, 2), (7, 5))]
+		wrist = (0, 0)
+		ends = [(3, depth[3] - 1), (7, depth[7] - 1)]
 	else:
-		# Wrist is at (lx=w-1, ly=0): three long chiropteran finger bones fanning to the scalloped points!
-		rays = [((w - 1, 0), (4, 7)), ((w - 1, 0), (8, 13)), ((w - 1, 0), (w - 1, 11))]
-		vein_rays = [((w - 3, 2), (3, 4)), ((w - 3, 4), (6, 8))]
+		wrist = (w - 1, 0)
+		ends = [(4, depth[4] - 1), (8, depth[8] - 1), (w - 1, depth[w - 1] - 1)]
+	strut = set()
+	for e in ends:
+		for c in line_cells(wrist, e):
+			if c in mask:
+				strut.add(c)
+	strut.update((lx, 0) for lx in range(w))
 
-	for (ax, ay), (bx, by) in rays:
-		for i in range(33):
-			t = i / 32
-			struts.add((round(ax + (bx - ax) * t), round(ay + (by - ay) * t)))
+	def band(ly):
+		return 4 if ly <= 3 else (3 if ly <= 7 else 2)
 
-	for (ax, ay), (bx, by) in vein_rays:
-		for i in range(17):
-			t = i / 16
-			veins.add((round(ax + (bx - ax) * t), round(ay + (by - ay) * t)))
+	cell = {}
+	for (lx, ly) in mask:
+		edge = any(
+			0 <= lx + dx < w and 0 <= ly + dy < h and (lx + dx, ly + dy) not in mask
+			for dx, dy in ((1, 0), (-1, 0), (0, 1))
+		) or ly == h - 1
+		if (lx, ly) in strut:
+			cell[(lx, ly)] = 5
+		elif edge:
+			cell[(lx, ly)] = 1
+		else:
+			cell[(lx, ly)] = band(ly)
 
-	for lx in range(w):
-		d = depth_at(lx)
-		for ly in range(d):
-			rim = (ly == d - 1) or (lx == 0 and not inner)
-			if ly == 0:
-				slot, step = "membrane", 5
-			elif (lx, ly) in struts:
-				slot, step = "membrane", 5 if ly < 5 else 4
-			elif rim:
-				slot, step = "membrane", 0
-			elif (lx, ly) in veins and 1 < ly < d - 1:
-				# Subtle dark wine vein, never bright red blotches
-				slot, step = "crimson", 0
-			else:
-				step = 3 if ly < d // 3 else (2 if ly < (2 * d) // 3 else 1)
-				slot = "membrane"
-			sheet.put(nx0 + lx, ny0 + ly, slot, step)
-			sheet.put(sx0 + (w - 1 - lx), sy0 + ly, slot, step)
+	# fold any one-pixel island into its neighbours so the shapes stay broad and flat
+	for _ in range(3):
+		for (lx, ly), step in list(cell.items()):
+			if step in (5, 1):
+				continue
+			same = sum(cell.get((lx + dx, ly + dy)) == step for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+			if same == 0:
+				for dx, dy in ((0, -1), (-1, 0), (1, 0), (0, 1)):
+					nb = cell.get((lx + dx, ly + dy))
+					if nb not in (None, 5, 1):
+						cell[(lx, ly)] = nb
+						break
+
+	for (lx, ly), step in cell.items():
+		sheet.put(nx0 + lx, ny0 + ly, "membrane", step)
+		sheet.put(sx0 + (w - 1 - lx), sy0 + ly, "membrane", step)
 
 
 # ---------------------------------------------------------------- model builder
@@ -529,21 +584,19 @@ def build_rig():
 	uv_arm = b.uv_box("arm", 0, 24, 2, 9, 2, "hide", detail_fn=paint_limb_sinew, hi=5, mid=4, side=3, back=3, lo=2, dark=1)
 	uv_forearm = b.uv_box("forearm", 8, 24, 2, 10, 2, "hide", detail_fn=paint_limb_sinew, hi=4, mid=3, side=3, back=2, lo=2, dark=1)
 	uv_hand = b.uv_box("hand", 16, 24, 2, 3, 2, "hide", hi=4, mid=3, side=2, back=2, lo=2, dark=1)
-	uv_leg = b.uv_box("leg", 24, 24, 2, 9, 3, "hide", detail_fn=paint_limb_sinew, hi=5, mid=4, side=3, back=3, lo=2, dark=1)
+	uv_leg = b.uv_box("leg", 24, 24, 2, 7, 3, "hide", detail_fn=paint_limb_sinew, hi=5, mid=4, side=3, back=3, lo=2, dark=1)
 	uv_shin = b.uv_box("shin", 34, 24, 2, 8, 2, "hide", detail_fn=paint_limb_sinew, hi=4, mid=3, side=3, back=2, lo=2, dark=1)
 	uv_foot = b.uv_box("foot", 42, 24, 2, 2, 4, "hide", hi=4, mid=3, side=3, back=2, lo=2, dark=1)
+	uv_meta = b.uv_box("meta", 54, 24, 2, 5, 2, "hide", detail_fn=paint_limb_sinew, hi=4, mid=3, side=3, back=2, lo=2, dark=1)
 
 	# Band 3 (y = 36..52): inner (9x12x1 -> 20x13) & outer (12x15x1 -> 26x16) wing membranes
 	uv_wing_in = b.uv_box("wing_in", 0, 36, 11, 15, 1, "membrane", detail_fn=lambda s, r: paint_wing_membrane(s, r, inner=True))
 	uv_wing_out = b.uv_box("wing_out", 24, 36, 15, 18, 1, "membrane", detail_fn=lambda s, r: paint_wing_membrane(s, r, inner=False))
 
 	# Band 4 (y = 53..55): wing arm & finger leading bones
-	uv_wing_arm = b.uv_box("wing_arm", 0, 57, 11, 1, 1, "membrane", hi=5, mid=4, side=4, back=3, lo=2, dark=1)
+	uv_wing_arm = b.uv_box("wing_arm", 0, 57, 11, 1, 1, "bone", hi=5, mid=4, side=4, back=4, lo=4, dark=3)
 	
 	# ---- Skeleton & Geometry (Blockbench space: y up, feet at 0, front at -z, right at +x) ----
-	HIP_Y = 17.5
-	KNEE_Y = 9.0
-	ANKLE_Y = 1.6
 	ABDOMEN_Y = 19.2
 	CHEST_Y = 23.6
 	NECK_Y = 30.0
@@ -557,34 +610,42 @@ def build_rig():
 	b.cube("waist", "crest_r", (2.1, 17.6, -1.3), (2.9, 19.2, 0.7), uv_spur)
 	b.cube("waist", "crest_l", (-2.9, 17.6, -1.3), (-2.1, 19.2, 0.7), uv_spur, mirror=True)
 
-	# Digitigrade gaunt legs: thigh angles forward to knee, shin sweeps back to hock/ankle, taloned foot flat on y=0
+	# Digitigrade legs. The rest pose is carried by the bone rotations (a straight stack of hip, knee, hock and toe
+	# joints, bent by LEG_REST_REL): thigh angled forward to the knee, shin angled back to the raised hock, a long
+	# metatarsal angled forward and down to the toe joint, and only the toes and talons on the ground (y = 0).
 	for side, sx, mir in (("right", 1, False), ("left", -1, True)):
-		x_in, x_out = sorted((1.2 * sx, 3.4 * sx))
-		b.bone(f"{side}_leg", "waist", (2.3 * sx, HIP_Y, 0.4))
-		b.cube(
-			f"{side}_leg", "thigh",
-			(x_in, KNEE_Y, -1.2), (x_out, HIP_Y + 0.3, 1.4),
-			uv_leg, mirror=mir, rotation=(14, 0, 0), origin=(2.3 * sx, HIP_Y, 0.4),
-		)
-		k_in, k_out = sorted((1.8 * sx, 2.8 * sx))
-		b.cube(f"{side}_leg", "knee", (k_in, KNEE_Y - 0.2, -2.5), (k_out, KNEE_Y + 1.4, -1.4), uv_spur, mirror=mir)
+		cx = LEG_X * sx
+		z0 = 0.4
+		hip_y, knee_y, hock_y, toe_y = HIP_Y, HIP_Y - L_THIGH, HIP_Y - L_THIGH - L_SHIN, HIP_Y - L_THIGH - L_SHIN - L_META
+		b.bone(f"{side}_leg", "waist", (cx, hip_y, z0), (LEG_REST_REL[0], 0, 0))
+		b.cube(f"{side}_leg", "thigh", (cx - 1.2, knee_y - 0.3, z0 - 1.5), (cx + 1.2, hip_y + 0.5, z0 + 1.5), uv_leg, mirror=mir)
+		b.cube(f"{side}_leg", "knee", (cx - 0.5, knee_y - 0.6, z0 - 2.4), (cx + 0.5, knee_y + 0.8, z0 - 1.3), uv_spur, mirror=mir)
 
-		sx_in, sx_out = sorted((1.4 * sx, 3.2 * sx))
-		b.bone(f"{side}_shin", f"{side}_leg", (2.3 * sx, KNEE_Y, -1.6))
-		b.cube(
-			f"{side}_shin", "calf",
-			(sx_in, ANKLE_Y, -2.5), (sx_out, KNEE_Y + 0.2, -0.6),
-			uv_shin, mirror=mir, rotation=(-19, 0, 0), origin=(2.3 * sx, KNEE_Y, -1.6),
-		)
+		b.bone(f"{side}_shin", f"{side}_leg", (cx, knee_y, z0), (LEG_REST_REL[1], 0, 0))
+		b.cube(f"{side}_shin", "calf", (cx - 0.9, hock_y - 0.3, z0 - 1.0), (cx + 0.9, knee_y + 0.4, z0 + 1.0), uv_shin, mirror=mir)
+		b.cube(f"{side}_shin", "hock_spur", (cx - 0.5, hock_y - 0.3, z0 + 0.9), (cx + 0.5, hock_y + 1.7, z0 + 2.2), uv_spur, mirror=mir)
 
-		fx_in, fx_out = sorted((1.2 * sx, 3.4 * sx))
-		b.bone(f"{side}_foot", f"{side}_shin", (2.3 * sx, ANKLE_Y, 0.9))
-		b.cube(f"{side}_foot", "tarsus", (fx_in, 0.0, -2.6), (fx_out, 1.6, 1.6), uv_foot, mirror=mir)
-		for ti, tx_off in enumerate((1.55, 2.75)):
-			tx0, tx1 = sorted(((tx_off - 0.35) * sx, (tx_off + 0.35) * sx))
-			b.cube(f"{side}_foot", f"talon_{ti}", (tx0, 0.0, -4.0), (tx1, 1.0, -2.5), uv_fang, mirror=mir)
-		hx0, hx1 = sorted((1.95 * sx, 2.65 * sx))
-		b.cube(f"{side}_foot", "hallux", (hx0, 0.0, 1.5), (hx1, 1.0, 2.7), uv_spur, mirror=mir)
+		b.bone(f"{side}_foot", f"{side}_shin", (cx, hock_y, z0), (LEG_REST_REL[2], 0, 0))
+		b.cube(f"{side}_foot", "metatarsal", (cx - 0.7, toe_y + 0.2, z0 - 0.9), (cx + 0.7, hock_y + 0.4, z0 + 0.9), uv_meta, mirror=mir)
+		# toes and talons are levelled back to the ground against the foot bone's tilt (toe joint is the pivot)
+		level = (-ROT_SIGN * LEG_ABS[2], 0, 0)
+		for ti, tx_off in enumerate((-0.6, 0.6)):
+			tx0, tx1 = sorted(((tx_off - 0.4) * sx + cx, (tx_off + 0.4) * sx + cx))
+			b.cube(
+				f"{side}_foot", f"toe_{ti}",
+				(tx0, toe_y - TOE_H, z0 - 3.6), (tx1, toe_y + TOE_H, z0 + 0.5),
+				uv_foot, mirror=mir, rotation=level, origin=(cx, toe_y, z0),
+			)
+			b.cube(
+				f"{side}_foot", f"talon_{ti}",
+				(tx0 + 0.15 * sx, toe_y - TOE_H, z0 - 4.8), (tx1 - 0.15 * sx, toe_y + 0.3, z0 - 3.5),
+				uv_fang, mirror=mir, rotation=level, origin=(cx, toe_y, z0),
+			)
+		b.cube(
+			f"{side}_foot", "hallux",
+			(cx - 0.35, toe_y - TOE_H, z0 + 0.4), (cx + 0.35, toe_y + 0.4, z0 + 2.0),
+			uv_spur, mirror=mir, rotation=level, origin=(cx, toe_y, z0),
+		)
 
 	# Predatory hunched torso: narrow starved abdomen curving forward into a broad, hollow-ribbed chest
 	b.bone("body", "waist", (0, ABDOMEN_Y, 0.4))
@@ -685,20 +746,20 @@ def build_rig():
 	# Modeled extending outward along +x / -x, and folded tightly onto the back in the resting pose:
 	# - Inner wing rises steeply up & back (+54 deg z, -58 deg y) so its hooked wrist-claw crests behind the shoulder!
 	# - Outer wing folds sharply down (-132 deg z, net -78 deg) along the spine/flanks like a folded gargoyle cloak!
-	WING_Y, WING_Z = 28.2, 0.2
+	WING_Y = 28.2
 	INNER_SPAN, OUTER_SPAN = 11.0, 15.0
 	for side, sx, mir in (("right", 1, False), ("left", -1, True)):
 		root_x = 1.6 * sx
 		wrist_x = (1.6 + INNER_SPAN) * sx
 		tip_x = (1.6 + INNER_SPAN + OUTER_SPAN) * sx
 
-		b.bone(f"{side}_wing", "chest", (root_x, WING_Y, WING_Z), (8, -58 * sx, 54 * sx))
+		b.bone(f"{side}_wing", "chest", (root_x, WING_Y, WING_Z), (WING_REST_IN[0], WING_REST_IN[1] * sx, WING_REST_IN[2] * sx))
 		wx0, wx1 = sorted((root_x, wrist_x))
 		b.cube(f"{side}_wing", "arm_bone", (wx0, WING_Y - 0.45, WING_Z - 0.45), (wx1, WING_Y + 0.45, WING_Z + 0.45), uv_wing_arm, mirror=mir)
 		b.cube(f"{side}_wing", "membrane_in", (wx0, WING_Y - 15.0, WING_Z - 0.05), (wx1, WING_Y - 0.15, WING_Z + 0.05), uv_wing_in, mirror=mir)
-		b.bone(f"{side}_wing_outer", f"{side}_wing", (wrist_x, WING_Y, WING_Z), (-6, 28 * sx, -132 * sx))
+		b.bone(f"{side}_wing_outer", f"{side}_wing", (wrist_x, WING_Y, WING_Z - OUTER_OFFSET), (WING_REST_OUT[0], WING_REST_OUT[1] * sx, WING_REST_OUT[2] * sx))
 		ox0, ox1 = sorted((wrist_x, tip_x))
-		b.cube(f"{side}_wing_outer", "membrane_out", (ox0, WING_Y - 18.0, WING_Z - 0.05), (ox1, WING_Y - 0.15, WING_Z + 0.05), uv_wing_out, mirror=mir)
+		b.cube(f"{side}_wing_outer", "membrane_out", (ox0, WING_Y - 18.0, WING_Z - OUTER_OFFSET - 0.05), (ox1, WING_Y - 0.15, WING_Z - OUTER_OFFSET + 0.05), uv_wing_out, mirror=mir)
 
 	return b
 
@@ -721,6 +782,111 @@ def make_anim(short_name, length, loop_mode, tracks, interp="catmullrom"):
 	return {"name": f"animation.{NAME}.{short_name}", "length": length, "loop": loop_mode, "tracks": tracks, "interp": interp}
 
 
+# ---------------------------------------------------------------- digitigrade leg solver
+# Every moving animation plants the toe joint with a small two-bone solver (thigh + shin reach the hock, the metatarsal
+# hangs from it at a chosen angle), so the toes stay on the ground through the stance and lift in the swing with the
+# knee always bent forward and the hock back. Animation rotations are deltas on the rest bend (LEG_REST_REL).
+
+_RAD = math.pi / 180.0
+REST_TOE_F = sum(L * math.sin(a * _RAD) for L, a in zip((L_THIGH, L_SHIN, L_META), LEG_ABS))
+LEG_SAMPLE_STEP = 0.05
+
+
+def smooth(a, b, u):
+	k = u * u * (3 - 2 * u)
+	return a + (b - a) * k
+
+
+def curve(keys, t):
+	"""Smoothstep through [(time, value)] keys; value is a float or a tuple."""
+	if t <= keys[0][0]:
+		return keys[0][1]
+	for (ta, va), (tb, vb) in zip(keys, keys[1:]):
+		if ta <= t <= tb:
+			u = 0.0 if tb - ta < 1e-9 else (t - ta) / (tb - ta)
+			if isinstance(va, tuple):
+				return tuple(smooth(x, y, u) for x, y in zip(va, vb))
+			return smooth(va, vb, u)
+	return keys[-1][1]
+
+
+def solve_leg(hip_y, toe_f, toe_y, meta_abs, waist_x=0.0):
+	"""Keyframe deltas (leg, shin, foot) in degrees from the rest bend, written the game's way (x turned round). toe_f is the toe joint's forward distance from the hip."""
+	hock_f = toe_f - L_META * math.sin(meta_abs * _RAD)
+	hock_y = toe_y + L_META * math.cos(meta_abs * _RAD)
+	df, dy = hock_f, hock_y - hip_y
+	d = math.hypot(df, dy)
+	lo, hi = abs(L_THIGH - L_SHIN) + 0.5, L_THIGH + L_SHIN - 0.05
+	if not lo <= d <= hi:
+		print(f"  warning: leg reach {d:.2f} outside {lo:.2f}..{hi:.2f} (hip {hip_y:.2f}, toe {toe_f:.2f},{toe_y:.2f})")
+		d = max(lo, min(hi, d))
+	phi = math.atan2(df, -dy)
+	alpha = math.acos(max(-1.0, min(1.0, (L_THIGH ** 2 + d ** 2 - L_SHIN ** 2) / (2 * L_THIGH * d))))
+	a1 = phi + alpha
+	knee_f, knee_y = L_THIGH * math.sin(a1), hip_y - L_THIGH * math.cos(a1)
+	a2 = math.atan2(hock_f - knee_f, -(hock_y - knee_y))
+	a1d, a2d = a1 / _RAD, a2 / _RAD
+	rel = (ROT_SIGN * (a1d - waist_x), ROT_SIGN * (a2d - a1d), ROT_SIGN * (meta_abs - a2d))
+	return tuple(round(rest - r, 3) + 0.0 for r, rest in zip(rel, LEG_REST_REL))
+
+
+def plant_legs(tracks, length, foot_fn, step=LEG_SAMPLE_STEP):
+	"""Adds right/left leg, shin and foot tracks to `tracks`. foot_fn(side, t) -> (world forward, height, metatarsal
+	angle) of the toe joint. The root's position and the waist's rotation are re-keyed at the same dense times so the
+	hip the legs solve for is exactly the hip the game draws."""
+	n = max(1, round(length / step))
+	times = [round(length * i / n, 4) for i in range(n + 1)]
+	root_keys = tracks.get("root", {}).get("position") or [(0.0, Z)]
+	waist_keys = tracks.get("waist", {}).get("rotation") or [(0.0, Z)]
+	out = {f"{s}_{p}": {"rotation": []} for s in ("right", "left") for p in ("leg", "shin", "foot")}
+	for t in times:
+		rx, ry, rz = curve(root_keys, t)
+		wx = -curve(waist_keys, t)[0]  # keys are the game's way; the solver works in Blockbench angles
+		for side in ("right", "left"):
+			f, y, meta = foot_fn(side, t)
+			d = solve_leg(HIP_Y + ry, f + rz, y, meta, wx)
+			for part, v in zip(("leg", "shin", "foot"), d):
+				out[f"{side}_{part}"]["rotation"].append((t, (v, 0, 0)))
+	if "root" in tracks:
+		tracks["root"]["position"] = [(t, tuple(round(c, 4) for c in curve(root_keys, t))) for t in times]
+	if "waist" in tracks:
+		tracks["waist"]["rotation"] = [(t, tuple(round(c, 4) for c in curve(waist_keys, t))) for t in times]
+	tracks.update(out)
+
+
+def stride_feet(length, stance, center, reach, lift, toe_up, f0=None):
+	"""Feet that alternate: planted while the body passes over (sliding back), then swung forward in an arc.
+	The right foot's stance is centred on cycle phase `center` and spans `stance` of the cycle."""
+	f0 = REST_TOE_F if f0 is None else f0
+
+	def foot(side, t):
+		p = (t / length + (0.0 if side == "right" else 0.5) - center + stance / 2) % 1.0
+		if p < stance:
+			u = p / stance
+			return f0 + reach - 2 * reach * u, TOE_H, LEG_ABS[2]
+		u = (p - stance) / (1 - stance)
+		return (f0 - reach + 2 * reach * smooth(0, 1, u), TOE_H + lift * math.sin(math.pi * u),
+				LEG_ABS[2] + toe_up * math.sin(math.pi * u))
+	return foot
+
+
+def rebase_wings(anim, threshold=0.0):
+	"""Wing keyframes are deltas on the rest pose. Re-key those that spread the wings (any component over `threshold`)
+	so they reach the same absolute pose as before the wings were folded; small keys and rest keys stay as they are."""
+	for name, old, new in (("wing", WING_OLD_IN, WING_REST_IN), ("wing_outer", WING_OLD_OUT, WING_REST_OUT)):
+		shift = (-(old[0] - new[0]), -(old[1] - new[1]), old[2] - new[2])
+		for side, sg in (("right", 1), ("left", -1)):
+			track = anim["tracks"].get(f"{side}_{name}")
+			if not track:
+				continue
+			fixed = []
+			for t, v in track["rotation"]:
+				if max(abs(c) for c in v) > threshold:
+					v = (v[0] + shift[0], v[1] + sg * shift[1], v[2] + sg * shift[2])
+				fixed.append((t, tuple(round(c, 4) for c in v)))
+			track["rotation"] = fixed
+
+
 def build_animations():
 	# Wing unfold reference (added to rest pose right_wing=[8, -58, 54] -> model [-8, +58, +54], right_wing_outer=[-6, 28, -132] -> model [+6, -28, -132]):
 	# Full open wingspan: right_wing += (-6, -46, -24), right_wing_outer += (-4, +24, +116) -> inner at +30 deg z, outer at -16 deg z, wide open!
@@ -741,6 +907,8 @@ def build_animations():
 		**mirror_tracks("wing_outer", closed_loop(3.2, (0.0, (0, 0, 0)), (0.5, (0, 4, 10)))),
 	})
 
+	plant_legs(idle["tracks"], 3.2, lambda side, t: (REST_TOE_F, TOE_H, LEG_ABS[2]), step=0.2)
+
 	# 2. walk (0.8s, loop): stalking digitigrade stride, low hunched ribcage, counter-swinging clawed arms, folded wings swaying
 	walk = make_anim("walk", 0.8, "loop", {
 		"root": {"position": closed_loop(0.8, (0.0, (0, 0.0, 0)), (0.25, (0, 0.65, 0)), (0.5, (0, 0.0, 0)), (0.75, (0, 0.65, 0)))},
@@ -750,12 +918,6 @@ def build_animations():
 		"neck": {"rotation": closed_loop(0.8, (0.0, (-4, -3, 0)), (0.5, (-4, 3, 0)))},
 		"head": {"rotation": closed_loop(0.8, (0.0, (-6, -3, -1)), (0.25, (-4, 0, 0)), (0.5, (-6, 3, 1)), (0.75, (-4, 0, 0)))},
 		"jaw": {"rotation": closed_loop(0.8, (0.0, (5, 0, 0)), (0.5, (9, 0, 0)))},
-		"right_leg": {"rotation": closed_loop(0.8, (0.0, (-28, 0, 0)), (0.25, (-6, 0, 0)), (0.5, (24, 0, 0)), (0.75, (-12, 0, 0)))},
-		"left_leg": {"rotation": closed_loop(0.8, (0.0, (24, 0, 0)), (0.25, (-12, 0, 0)), (0.5, (-28, 0, 0)), (0.75, (-6, 0, 0)))},
-		"right_shin": {"rotation": closed_loop(0.8, (0.0, (10, 0, 0)), (0.25, (4, 0, 0)), (0.5, (18, 0, 0)), (0.75, (32, 0, 0)))},
-		"left_shin": {"rotation": closed_loop(0.8, (0.0, (18, 0, 0)), (0.25, (32, 0, 0)), (0.5, (10, 0, 0)), (0.75, (4, 0, 0)))},
-		"right_foot": {"rotation": closed_loop(0.8, (0.0, (16, 0, 0)), (0.25, (2, 0, 0)), (0.5, (-22, 0, 0)), (0.75, (-14, 0, 0)))},
-		"left_foot": {"rotation": closed_loop(0.8, (0.0, (-22, 0, 0)), (0.25, (-14, 0, 0)), (0.5, (16, 0, 0)), (0.75, (2, 0, 0)))},
 		"right_arm": {"rotation": closed_loop(0.8, (0.0, (22, 0, 6)), (0.5, (-28, 0, 4)))},
 		"left_arm": {"rotation": closed_loop(0.8, (0.0, (-28, 0, -4)), (0.5, (22, 0, -6)))},
 		"right_forearm": {"rotation": closed_loop(0.8, (0.0, (-6, 0, 0)), (0.5, (-22, 0, 0)))},
@@ -766,6 +928,8 @@ def build_animations():
 		"left_wing_outer": {"rotation": closed_loop(0.8, (0.0, (0, 2, 4)), (0.5, (0, -4, -10)))},
 	})
 
+	plant_legs(walk["tracks"], 0.8, stride_feet(0.8, 0.55, 0.25, 4.0, 3.5, 10.0))
+
 	# 3. run (0.5s, loop): low predatory sprint, deep forward hunch, bounding stride, claws cocked to rend
 	run = make_anim("run", 0.5, "loop", {
 		"root": {"position": closed_loop(0.5, (0.0, (0, 0.0, 0)), (0.25, (0, 1.8, 0)), (0.5, (0, 0.0, 0)), (0.75, (0, 1.8, 0)))},
@@ -775,18 +939,14 @@ def build_animations():
 		"neck": {"rotation": closed_loop(0.5, (0.0, (-10, 0, 0)), (0.5, (-12, 0, 0)))},
 		"head": {"rotation": closed_loop(0.5, (0.0, (-14, -4, 0)), (0.5, (-14, 4, 0)))},
 		"jaw": {"rotation": closed_loop(0.5, (0.0, (14, 0, 0)), (0.5, (18, 0, 0)))},
-		"right_leg": {"rotation": closed_loop(0.5, (0.0, (-44, 0, 0)), (0.5, (36, 0, 0)))},
-		"left_leg": {"rotation": closed_loop(0.5, (0.0, (36, 0, 0)), (0.5, (-44, 0, 0)))},
-		"right_shin": {"rotation": closed_loop(0.5, (0.0, (14, 0, 0)), (0.5, (26, 0, 0)), (0.75, (44, 0, 0)))},
-		"left_shin": {"rotation": closed_loop(0.5, (0.0, (26, 0, 0)), (0.25, (44, 0, 0)), (0.5, (14, 0, 0)))},
-		"right_foot": {"rotation": closed_loop(0.5, (0.0, (24, 0, 0)), (0.5, (-30, 0, 0)))},
-		"left_foot": {"rotation": closed_loop(0.5, (0.0, (-30, 0, 0)), (0.5, (24, 0, 0)))},
 		"right_arm": {"rotation": closed_loop(0.5, (0.0, (34, 0, 12)), (0.5, (-48, 0, 8)))},
 		"left_arm": {"rotation": closed_loop(0.5, (0.0, (-48, 0, -8)), (0.5, (34, 0, -12)))},
 		**mirror_tracks("forearm", closed_loop(0.5, (0.0, (-26, 0, 0)), (0.5, (-34, 0, 0)))),
 		**mirror_tracks("wing", closed_loop(0.5, (0.0, (4, -14, -6)), (0.5, (-2, -8, -2)))),
 		**mirror_tracks("wing_outer", closed_loop(0.5, (0.0, (0, 10, 26)), (0.5, (0, 6, 14)))),
 	})
+
+	plant_legs(run["tracks"], 0.5, stride_feet(0.5, 0.32, 0.0, 6.0, 7.0, 10.0))
 
 	# 4. leap (0.9s, once): grounded coil (0.16s), explosive wing-unfurling bound into the air (0.38s-0.58s), fold on landing (0.9s)
 	leap = make_anim("leap", 0.9, "once", {
@@ -797,9 +957,6 @@ def build_animations():
 		"chest": {"rotation": [(0.0, Z), (0.16, (20, 0, 0)), (0.38, (-18, 0, 0)), (0.58, (12, 0, 0)), (0.78, (8, 0, 0)), (0.9, Z)]},
 		"head": {"rotation": [(0.0, Z), (0.16, (-20, 0, 0)), (0.38, (-6, 0, 0)), (0.58, (-12, 0, 0)), (0.9, Z)]},
 		"jaw": {"rotation": [(0.0, Z), (0.16, (8, 0, 0)), (0.38, (30, 0, 0)), (0.58, (24, 0, 0)), (0.9, Z)]},
-		**mirror_tracks("leg", [(0.0, Z), (0.16, (-34, 0, 4)), (0.38, (40, 0, 4)), (0.58, (-24, 0, 4)), (0.78, (-16, 0, 2)), (0.9, Z)]),
-		**mirror_tracks("shin", [(0.0, Z), (0.16, (44, 0, 0)), (0.38, (-12, 0, 0)), (0.58, (36, 0, 0)), (0.78, (22, 0, 0)), (0.9, Z)]),
-		**mirror_tracks("foot", [(0.0, Z), (0.16, (-10, 0, 0)), (0.38, (34, 0, 0)), (0.58, (-12, 0, 0)), (0.9, Z)]),
 		# Arms sweep wide & forward with splayed claws ready to seize prey (angled apart so they frame the face instead of hiding it!)
 		**mirror_tracks("arm", [(0.0, Z), (0.16, (28, 0, 14)), (0.38, (-92, 16, 32)), (0.58, (-76, 12, 24)), (0.78, (-18, 0, 10)), (0.9, Z)]),
 		**mirror_tracks("forearm", [(0.0, Z), (0.16, (-24, 0, 0)), (0.38, (-14, 0, 8)), (0.58, (-10, 0, 6)), (0.9, Z)]),
@@ -808,6 +965,15 @@ def build_animations():
 		**mirror_tracks("wing", [(0.0, Z), (0.16, (4, 6, 4)), (0.34, (-6, -48, -22)), (0.54, (8, -42, -38)), (0.76, (2, -16, -6)), (0.9, Z)]),
 		**mirror_tracks("wing_outer", [(0.0, Z), (0.16, (0, -4, -8)), (0.34, (-4, 24, 116)), (0.54, (6, 20, 104)), (0.76, (0, 8, 36)), (0.9, Z)]),
 	})
+
+	# The grounded toes stay put through the coil, push off with the hips, trail and tuck in the air, then land flat.
+	leap_feet = [
+		(0.0, (REST_TOE_F, TOE_H, LEG_ABS[2])), (0.16, (REST_TOE_F, TOE_H, LEG_ABS[2])),
+		(0.30, (REST_TOE_F - 0.5, 2.0, LEG_ABS[2])), (0.38, (REST_TOE_F - 4.5, 6.5, LEG_ABS[2] - 25)),
+		(0.58, (REST_TOE_F + 0.5, 8.5, LEG_ABS[2] - 20)), (0.70, (REST_TOE_F + 2.5, 4.0, LEG_ABS[2] - 5)),
+		(0.78, (REST_TOE_F + 2.5, TOE_H, LEG_ABS[2])), (0.9, (REST_TOE_F, TOE_H, LEG_ABS[2])),
+	]
+	plant_legs(leap["tracks"], 0.9, lambda side, t: curve(leap_feet, t), step=0.045)
 
 	# 5. strike (0.55s, once): upper-body-only raking claw slash + jaw snap + menacing wing flare (legs keep walking!)
 	strike = make_anim("strike", 0.55, "once", {
@@ -841,6 +1007,10 @@ def build_animations():
 		**mirror_tracks("wing_outer", [(0.0, Z), (0.22, (0, -4, -8)), (0.45, (-4, 24, 118)), (0.82, (-2, 22, 112)), (1.1, Z)]),
 	})
 
+	rebase_wings(run, -1.0)
+	for anim in (leap, strike, roar):
+		rebase_wings(anim, 11.0)
+
 	return [idle, walk, run, leap, strike, roar]
 
 
@@ -859,9 +1029,10 @@ def to_bbmodel(rig, anims):
 			kfs = []
 			for ch, frames in channels.items():
 				for fi, (t, v) in enumerate(frames):
+					sx_, sy_ = (-1, -1) if ch == "rotation" else (1, 1)
 					kfs.append({
 						"channel": ch,
-						"data_points": [{"x": round(v[0], 4), "y": round(v[1], 4), "z": round(v[2], 4)}],
+						"data_points": [{"x": round(sx_ * v[0], 4) + 0.0, "y": round(sy_ * v[1], 4) + 0.0, "z": round(v[2], 4)}],
 						"uuid": uid(f"kf.{a['name']}.{bone}.{ch}.{fi}"),
 						"time": round(t, 4),
 						"color": -1,
@@ -917,7 +1088,21 @@ def render_previews(preview_dir):
 	os.makedirs(preview_dir, exist_ok=True)
 	tex_dir = os.path.join(ASSETS, "textures", "entity")
 	with tempfile.TemporaryDirectory() as tmp:
-		subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "bbmodel_bake.py"), ART_PATH, tmp, NAME], check=True)
+		# bbmodel_bake reads keyframe rotations the game's way, but this free-format project stores them Blockbench's way
+		# (bbmodel_geckolib turns x and y round on export), so turn them round here too: the previews then pose the
+		# model exactly as the exported animations do in game.
+		with open(ART_PATH, encoding="utf-8") as f:
+			preview_bb = json.load(f)
+		for anim in preview_bb["animations"]:
+			for animator in anim["animators"].values():
+				for kf in animator["keyframes"]:
+					if kf["channel"] == "rotation":
+						for dp in kf["data_points"]:
+							dp["x"], dp["y"] = -dp["x"], -dp["y"]
+		preview_bb_path = os.path.join(tmp, f"{NAME}_preview.bbmodel")
+		with open(preview_bb_path, "w", encoding="utf-8") as f:
+			json.dump(preview_bb, f)
+		subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "bbmodel_bake.py"), preview_bb_path, tmp, NAME], check=True)
 		frames = [
 			("rest", "-", 0.0, f"{NAME}_rest.png", None),
 			("idle", "idle", 1.5, f"{NAME}_idle.png", None),

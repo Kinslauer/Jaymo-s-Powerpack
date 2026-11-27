@@ -404,11 +404,16 @@ public final class ZFighterAndroid {
 		ZFighterNpcs.Option filings = ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.filings", true, () -> ZFighterNpcs.ask(player, scientist,
 			Component.translatable("talk.jaymospowers.tinkerer.filings.1"),
 			java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back))));
+		// (the Octo Core) the four-armed Rig Core was his, and he tells anyone who asks
+		ZFighterNpcs.Option octo = ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.octo", true, () -> ZFighterNpcs.ask(player, scientist,
+			Component.translatable("talk.jaymospowers.tinkerer.octo." + (1 + player.getRandom().nextInt(2))),
+			java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back))));
 		if (!ZFighterBranchForms.fighter(player) || OPERATIONS.containsKey(player.getUUID())) {
 			java.util.List<ZFighterNpcs.Option> bare = new java.util.ArrayList<>();
 			if (gadgets != null) {
 				bare.add(gadgets);
 			}
+			bare.add(octo);
 			bare.add(filings);
 			ZFighterNpcs.ask(player, scientist, Component.translatable(OPERATIONS.containsKey(player.getUUID())
 				? "message.jaymospowers.zfighter_scientist_operating" : gadgets != null ? "talk.jaymospowers.tinkerer.gadgets.greet"
@@ -436,6 +441,7 @@ public final class ZFighterAndroid {
 		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.pod", true, () -> ZFighterNpcs.ask(player, scientist,
 			Component.translatable("talk.jaymospowers.tinkerer.pod." + (1 + player.getRandom().nextInt(3))),
 			java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
+		options.add(octo);
 		options.add(filings);
 		// (Andy, 2026-11-11: the bug that turned Los Perrito's androids was his, and he will never tell you)
 		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.turned", true, () -> ZFighterNpcs.ask(player, scientist,
