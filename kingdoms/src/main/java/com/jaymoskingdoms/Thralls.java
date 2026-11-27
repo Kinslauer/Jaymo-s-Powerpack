@@ -79,7 +79,7 @@ public final class Thralls {
 	 * (no thinking, no falling, not caught in the earth) while the soil breaks round it. Fliers (a vex, a phantom) and
 	 * anything raised where there is no ground under it just appear, as before.
 	 */
-	static final int RISE_TICKS = 24;
+	static final int RISE_TICKS = 60;
 	/** The height it stands at when it's out (saved, so one caught half-risen when the world stops is out on load). */
 	static final AttachmentType<Double> RISE_TOP = AttachmentRegistry.create(JaymosKingdoms.id("thrall_rise"), builder -> builder.persistent(Codec.DOUBLE));
 	/** What's climbing out now, and how many ticks it has been at it. */
