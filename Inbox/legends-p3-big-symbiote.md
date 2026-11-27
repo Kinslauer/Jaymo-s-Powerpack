@@ -1,6 +1,6 @@
 ---
 status: open
-for: apollo
+for: bacchus
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
 claimed_by: 
