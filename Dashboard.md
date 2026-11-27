@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:54). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -59,6 +59,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
 - [ ] #2333 Lance couch works with a shield; locked-on swings hit only the locked foe (Powers, Kingdoms, 2026-11-27)
+- [ ] #2330 country speech - most townsfolk talk rough, as few could read (Kingdoms, 2026-11-27)
 - [ ] #2329 Freerun.onWall for Kingdoms' quips (Powers, Kingdoms, 2026-11-27)
 - [ ] #2328 Rig suit-down - parking the suit plays the wrap backwards (Powers, 2026-11-27)
 - [ ] #2327 Rig wrap suit-up - arms out, the suit closes on piece by piece, filmed from the front (Powers, Kingdoms, 2026-11-27)
@@ -117,8 +118,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2269 Tables say what's missing; /hints off (Powers, Kingdoms, Kitchen, 2026-11-27)
 - [ ] #2268 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
 - [ ] #2267 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
-- [ ] #2266 no lift prompt on tiny bodies (Powers, Kitchen, 2026-11-27)
-- …and 688 older ones.
+- …and 689 older ones.
 
 ## Health
 
