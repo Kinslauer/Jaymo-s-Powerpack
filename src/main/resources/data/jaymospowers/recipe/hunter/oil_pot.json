@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "T T",
+    "TBT",
+    "TTT"
+  ],
+  "key": {
+    "T": "minecraft:terracotta",
+    "B": "minecraft:glass_bottle"
+  },
+  "result": {
+    "id": "jaymospowers:oil_pot",
+    "count": 1
+  }
+}

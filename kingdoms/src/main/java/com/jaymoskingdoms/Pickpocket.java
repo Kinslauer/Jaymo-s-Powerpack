@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -35,12 +34,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
-import com.jaymoskingdoms.money.MoneyItems;
-import com.jaymoskingdoms.money.PurseContents;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -49,13 +44,21 @@ import org.jspecify.annotations.Nullable;
  * for a while ({@link #holdTicks}): up to {@value #BASE_MAX_TICKS} ticks to start with, longer in bright light, the
  * more armour they wear, and the better their mood (an MCA villager's; a sad or crying one notices less, so does one
  * running scared), shorter in the dark or asleep. Stay behind them, matching their pace, and keep holding till it's done,
- * and you lift something: some of what they carry (a farmer's wheat and bread), or else a little purse, a few coppers, nuggets or a
- * snack. Let go early and you just draw your hand back; fall out of reach and they slip away from you.
+ * and you lift some of what is really in their pockets ({@link NpcPockets}: a purse, a bite to eat, their trade's things)
+ * or else of what a villager carries (a farmer's wheat and bread). Andy: "nothing comes from nothing": with nothing on them
+ * you're told their pockets are empty. Let go early and you just draw your hand back; fall out of reach and they slip away
+ * from you.
  *
  * <p>If they turn round on you while your hand's in their pocket, you're caught: they cry thief, and where a faction's
  * law holds it's a theft seen ({@link Theft.Crime#PICKPOCKET}): reputation, and its guards after you. Done clean, anyone
  * else who sees you still counts as a witness; with no one, the mark may miss their purse later
- * ({@link Theft#NOTICE_CHANCE}). A pocket picked is empty for a day. A sleeping mark can be robbed from any side.
+ * ({@link Theft#NOTICE_CHANCE}). A sleeping mark can be robbed from any side.
+ *
+ * <p>Andy (2026-11-27): "you should be able to steal as much as they have, it just becomes easier and easier to get caught
+ * as you continue on the same person. stealth level will reduce it further". A mark can be picked again and again till
+ * their pockets are bare, but each lift they've already lost that day ({@link #LIFTS}) makes the next hold longer
+ * ({@link #AGAIN_HOLD}) and gives them a chance to feel the hand as it comes out ({@link #feelChance}), which Stealth
+ * levels take off.
  *
  * <p>(0.5.52) Every pocket picked clean is Stealth experience ({@link Skills}): the more you do it, the shorter the hold,
  * and Stealth's perks take more and reach in from the side.
@@ -81,33 +84,23 @@ public final class Pickpocket {
 	static final double ATTACH_RANGE = 2.0, HOLD_RANGE = 2.75;
 	/** Holding use repeats every 4 ticks: no repeat for this long and you've let go. */
 	static final int HOLD_GRACE = 8;
-	/** How long a picked pocket stays empty (ticks); how soon after one try a player may try again (ticks). */
-	static final long EMPTY_TICKS = 24000L, TRY_TICKS = 20L;
+	/** How soon after one try a player may try again (ticks). */
+	static final long TRY_TICKS = 20L;
+	/** A mark forgets the lifts they've lost after this long with no more (ticks: a day). */
+	static final long LIFTS_FORGOTTEN = 24000L;
+	/** Each lift a mark has already lost makes the next hold this share longer. */
+	static final float AGAIN_HOLD = 0.2F;
+	/** Each lift a mark has already lost: this chance they feel the next hand come out (at most {@link #FEEL_MAX}). */
+	static final float FEEL_PER_LIFT = 0.15F, FEEL_MAX = 0.9F;
+	/** Each Stealth level takes this share off that chance (the first page's 15 levels: 60% off at the top). */
+	static final float FEEL_STEALTH = 0.04F;
 	/** From what a mark carries, take this share of a stack (at least one). */
 	static final float CARRIED_SHARE = 0.5F;
 
-	/** (0.7.498) The little purse in a pocket holds this many copper bits' worth (least, most), twice that on a guard or a merchant. */
-	static final int PURSE_MIN_BITS = 4, PURSE_MAX_BITS = 30, RICH_FACTOR = 2;
+	/** (0.7.498) A guard's or a merchant's purse holds this many times a farmer's ({@link NpcPockets#fill}). */
+	static final int RICH_FACTOR = 2;
 	/** (0.7.498) Villagers in these jobs carry a fuller purse (the money changer, and the trades that sell for coin). */
 	private static final Set<String> MERCHANTS = Set.of("changer", "cartographer", "librarian", "butcher", "leatherworker");
-
-	/**
-	 * What's in a pocket that holds nothing they carry: item, least, most, weight. (0.7.498) The item is a supplier, since
-	 * the coin items are registered after this class loads. A pocket whose item is the coin purse holds a filled purse in
-	 * the victim's own coin, least..most being copper bits' worth (see {@link #PURSE_MIN_BITS}).
-	 */
-	private record Pocket(Supplier<Item> item, int least, int most, int weight) {
-		Pocket(Item item, int least, int most, int weight) {
-			this(() -> item, least, most, weight);
-		}
-	}
-
-	private static final List<Pocket> POCKETS = List.of(new Pocket(() -> MoneyItems.COIN_PURSE, PURSE_MIN_BITS, PURSE_MAX_BITS, 6),
-		new Pocket(() -> MoneyItems.COPPER_BIT, 1, 6, 3), new Pocket(Items.GOLD_NUGGET, 1, 4, 3),
-		new Pocket(Items.IRON_NUGGET, 1, 5, 3), new Pocket(Items.BREAD, 1, 2, 3), new Pocket(Items.APPLE, 1, 2, 2),
-		new Pocket(Items.STRING, 1, 3, 1), new Pocket(Items.PAPER, 1, 2, 1), new Pocket(Items.FLINT, 1, 1, 1));
-	/** Out of all the weights plus this, the pocket is empty. */
-	static final int NOTHING_WEIGHT = 3;
 
 	/**
 	 * Server → players who can see them: {@code playerId}'s hand is in {@code markId}'s pocket (-1: drawn back).
@@ -152,8 +145,12 @@ public final class Pickpocket {
 
 	/** Player → the pocket their hand is in. */
 	private static final Map<UUID, Lift> LIFTING = new HashMap<>();
-	/** Mark → game time their pocket fills again. */
-	static final Map<UUID, Long> PICKED = new HashMap<>();
+	/** How many lifts a mark has lost, and when the last was (game time). */
+	record Lifts(int count, long last) {
+	}
+
+	/** Mark → the lifts they've lost lately ({@link #liftsOn}). */
+	private static final Map<UUID, Lifts> LIFTS = new HashMap<>();
 	/** Player → their last try. */
 	private static final Map<UUID, Rest> RESTING = new HashMap<>();
 
@@ -213,7 +210,7 @@ public final class Pickpocket {
 		ServerTickEvents.END_SERVER_TICK.register(Pickpocket::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LIFTING.clear();
-			PICKED.clear();
+			LIFTS.clear();
 			RESTING.clear();
 			KEPT.clear();
 		});
@@ -276,6 +273,8 @@ public final class Pickpocket {
 		if (RogueExtras.wary(mark, level.getGameTime())) {
 			ticks *= RogueExtras.WARY_FACTOR;
 		}
+		// (Andy) each lift they've already lost today, they keep a hand nearer their pockets
+		ticks *= 1.0F + AGAIN_HOLD * liftsOn(mark, level.getGameTime());
 		if (Renown.knownRogue(player, law(level, mark))) {
 			ticks *= Renown.ROGUE_WARY;
 		}
@@ -355,7 +354,12 @@ public final class Pickpocket {
 			} else if (now >= lift.until) {
 				it.remove();
 				end(player, mark, now);
-				pick(player, level, mark, now);
+				if (!lift.helpless && !mark.isSleeping() && level.getRandom().nextFloat() < feelChance(player, mark, now)) {
+					// (Andy) picked again and again, they feel the hand come out this time
+					caught(player, level, mark, law(level, mark));
+				} else {
+					pick(player, level, mark, now);
+				}
 			} else if ((now - lift.start) % 2 == 0) {
 				HudBars.hold(player, "pickpocket", (now - lift.start) / (float)(lift.until - lift.start), HudBars.GREY,
 					Component.translatable("bar.jaymoskingdoms.pickpocket", mark.getDisplayName()), true);
@@ -383,15 +387,44 @@ public final class Pickpocket {
 		return f == null || f.fallen() || f.type() == FactionType.BARBARIAN ? null : f;
 	}
 
-	/** Held long enough and never seen by the mark: something lifted. */
-	private static void pick(ServerPlayer player, ServerLevel level, LivingEntity mark, long now) {
+	/** How many lifts {@code mark} has lost lately (forgotten a day after the last). */
+	static int liftsOn(LivingEntity mark, long now) {
+		Lifts lifts = LIFTS.get(mark.getUUID());
+		return lifts == null || now - lifts.last() > LIFTS_FORGOTTEN || now < lifts.last() ? 0 : lifts.count();
+	}
+
+	/**
+	 * The chance {@code mark} feels {@code player}'s hand come out of their pocket: nothing the first time, more with each lift
+	 * they've already lost, less the higher {@code player}'s Stealth.
+	 */
+	static float feelChance(ServerPlayer player, LivingEntity mark, long now) {
+		int lifts = liftsOn(mark, now);
+		if (lifts <= 0) {
+			return 0.0F;
+		}
+		int stealth = Skills.level(Skills.of(player).xp(Skills.Pillar.STEALTH), Skills.MAX_LEVEL);
+		return Math.min(FEEL_MAX, FEEL_PER_LIFT * lifts) * Math.max(0.0F, 1.0F - FEEL_STEALTH * stealth);
+	}
+
+	/** Whether anything is left to lift from {@code mark}: their pockets, or what a villager carries. */
+	static boolean hasAnything(ServerLevel level, LivingEntity mark) {
+		if (mark instanceof net.minecraft.world.entity.Mob mob && NpcPockets.pockets(level, mob).stream().anyMatch(s -> !s.isEmpty())) {
+			return true;
+		}
+		return mark instanceof Villager v && !v.getInventory().isEmpty();
+	}
+
+	/** Held long enough and never seen by the mark: something lifted (or told they have nothing). Returns whether anything was. */
+	private static boolean pick(ServerPlayer player, ServerLevel level, LivingEntity mark, long now) {
 		RandomSource random = level.getRandom();
 		Faction f = law(level, mark);
-		boolean fresh = PICKED.getOrDefault(mark.getUUID(), 0L) <= now;
-		ItemStack loot = fresh ? loot(player, mark, random, f != null ? Currencies.of(level.getServer(), f) : Currencies.at(level, mark.blockPosition())) : ItemStack.EMPTY;
-		PICKED.put(mark.getUUID(), now + EMPTY_TICKS);
-		// (0.5.52) a pocket picked clean is Stealth practice (one already emptied teaches nothing)
-		int xp = fresh ? Skills.pickedClean(player, !loot.isEmpty(), mark instanceof Folk folk && folk.combatant(), mark.isSleeping()) : 0;
+		int before = liftsOn(mark, now);
+		ItemStack loot = loot(player, mark, random);
+		if (!loot.isEmpty()) {
+			LIFTS.put(mark.getUUID(), new Lifts(before + 1, now));
+		}
+		// (0.5.52) a pocket picked is Stealth practice: one found empty teaches only the first time
+		int xp = !loot.isEmpty() || before == 0 ? Skills.pickedClean(player, !loot.isEmpty(), mark instanceof Folk folk && folk.combatant(), mark.isSleeping()) : 0;
 		Component gained = xp > 0 ? Component.translatable("message.jaymoskingdoms.pickpocket.xp", xp).withStyle(ChatFormatting.DARK_GREEN) : Component.empty();
 		if (loot.isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.empty", mark.getDisplayName()).withStyle(ChatFormatting.GRAY).append(gained));
@@ -414,22 +447,18 @@ public final class Pickpocket {
 			seen.remove(mark);
 			Theft.commit(player, level, f, Theft.Crime.PICKPOCKET, null, true, seen);
 		}
+		return !loot.isEmpty();
 	}
 
 	/**
 	 * (0.7.245) A mana spirit's hand in {@code mark}'s pocket (Thessaly's unseen hand): the mark never feels it, so it is as a
-	 * pocket picked clean. A villager or a settlement's folk (not its ruler) whose pockets are not already empty; false if not.
+	 * pocket picked clean. A villager or a settlement's folk (not its ruler) with something on them; false if not.
 	 */
 	public static boolean liftBySpirit(ServerPlayer player, LivingEntity mark) {
-		if (!markable(mark) || !(player.level() instanceof ServerLevel level)) {
+		if (!markable(mark) || !(player.level() instanceof ServerLevel level) || !hasAnything(level, mark)) {
 			return false;
 		}
-		long now = level.getGameTime();
-		if (PICKED.getOrDefault(mark.getUUID(), 0L) > now) {
-			return false;
-		}
-		pick(player, level, mark, now);
-		return true;
+		return pick(player, level, mark, level.getGameTime());
 	}
 
 	/** The mark turned and saw: they round on {@code player}, and where a faction's law holds, it's a theft they saw. */
@@ -471,8 +500,11 @@ public final class Pickpocket {
 			net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath());
 	}
 
-	/** What {@code mark} has on them: a share of something they carry, or else a pocket's worth (or nothing). */
-	private static ItemStack loot(ServerPlayer player, LivingEntity mark, RandomSource random, Currency coin) {
+	/**
+	 * What {@code mark} has on them: their held weapon (Lift Weapon), a share of a stack from their pockets, or else of what a
+	 * villager carries; nothing if they have nothing (Andy: "nothing comes from nothing").
+	 */
+	private static ItemStack loot(ServerPlayer player, LivingEntity mark, RandomSource random) {
 		// (Lift Weapon: what they hold in their hand comes first)
 		ItemStack weapon = RogueGambits.lifted(player, mark);
 		if (!weapon.isEmpty()) {
@@ -498,27 +530,6 @@ public final class Pickpocket {
 				int take = Math.max(1, Math.round(stack.getCount() * Skills.carriedShare(player, CARRIED_SHARE)));
 				bag.setChanged();
 				return stack.split(take);
-			}
-		}
-		int total = NOTHING_WEIGHT;
-		for (Pocket p : POCKETS) {
-			total += p.weight();
-		}
-		// (0.5.52, Deep Pockets) another try for each rank at a pocket that turns up empty (the first try was at their real
-		// pockets, NpcPockets: what more turns up is a coin or a crust in a seam)
-		boolean real = mark instanceof net.minecraft.world.entity.Mob mob && NpcPockets.has(mob);
-		for (int tries = Skills.pocketTries(player) - (real ? 1 : 0); tries > 0; tries--) {
-			int roll = random.nextInt(total);
-			for (Pocket p : POCKETS) {
-				roll -= p.weight();
-				if (roll < 0) {
-					int n = p.least() + random.nextInt(p.most() - p.least() + 1);
-					Item item = p.item().get();
-					if (item == MoneyItems.COIN_PURSE) {
-						return PurseContents.filled(coin, (long)n * Currency.BIT.base * (rich(mark) ? RICH_FACTOR : 1));
-					}
-					return new ItemStack(item, n);
-				}
 			}
 		}
 		return ItemStack.EMPTY;

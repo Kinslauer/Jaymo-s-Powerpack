@@ -1,0 +1,79 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:valerian",
+              "modifier": {
+                "type": "minecraft:set_count",
+                "count": {
+                  "type": "minecraft:uniform",
+                  "min": 1,
+                  "max": 2
+                }
+              },
+              "condition": {
+                "type": "minecraft:any_of",
+                "terms": [
+                  {
+                    "type": "minecraft:match_block",
+                    "blocks": "jaymospowers:valerian_crop",
+                    "state": {
+                      "age": "7"
+                    }
+                  },
+                  {
+                    "type": "minecraft:match_block",
+                    "blocks": "jaymospowers:valerian_crop",
+                    "state": {
+                      "wild": "true"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:valerian_seeds"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:any_of",
+        "terms": [
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:valerian_crop",
+            "state": {
+              "age": "7"
+            }
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:valerian_crop",
+            "state": {
+              "wild": "true"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:valerian_seeds"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/valerian_crop"
+}

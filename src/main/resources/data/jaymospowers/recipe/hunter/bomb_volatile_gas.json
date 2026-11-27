@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:gunpowder",
+    "jaymoskitchen:gas_bladder"
+  ],
+  "result": {
+    "id": "jaymospowers:bomb_volatile_gas",
+    "count": 1
+  }
+}

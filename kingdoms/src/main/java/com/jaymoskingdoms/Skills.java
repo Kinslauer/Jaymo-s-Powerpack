@@ -133,7 +133,7 @@ public final class Skills {
 	static final float PRACTICE_PER_LEVEL = 0.03F;
 	/** Light Fingers: this share off the hold per rank. */
 	static final float LIGHT_FINGERS_PER_RANK = 0.08F;
-	/** Deep Pockets: per rank, this much more of what a mark carries, and one more try at a pocket that turns up empty. */
+	/** Deep Pockets: per rank, this much more of what a mark carries. */
 	static final float DEEP_POCKETS_SHARE = 0.15F;
 	/** Soft Step: per rank, sneaking witnesses see you this much less far (a share of their full sight). */
 	static final double SOFT_STEP_PER_RANK = 0.1;
@@ -1121,11 +1121,6 @@ public final class Skills {
 	/** The share of a carried stack {@code player} takes (Deep Pockets). */
 	static float carriedShare(Player player, float base) {
 		return Math.min(1.0F, base + DEEP_POCKETS_SHARE * rank(player, Perk.DEEP_POCKETS));
-	}
-
-	/** How many tries {@code player} gets at a pocket that turns up empty (Deep Pockets). */
-	static int pocketTries(Player player) {
-		return 1 + rank(player, Perk.DEEP_POCKETS);
 	}
 
 	/** The share of their sight sneaking hides {@code player} by (Soft Step). */

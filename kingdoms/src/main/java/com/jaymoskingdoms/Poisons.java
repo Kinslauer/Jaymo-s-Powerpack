@@ -83,6 +83,8 @@ public final class Poisons {
 	static final int TOXIN_TICKS = 20 * 10, ACID_TICKS = 20 * 45, FLAMMABLE_TICKS = 20 * 60, CRIPPLE_TICKS = 20 * 45, HUNT_TICKS = 20 * 90;
 	/** The truth draught lasts this long (ticks). */
 	static final int TRUTH_TICKS = 20 * 180;
+	/** Ergot's fits: the sickness and the burning limbs last this long (ticks). */
+	static final int ERGOT_TICKS = 20 * 40;
 	/** Midnight in the day's clock (ticks), and a day's length. */
 	static final long MIDNIGHT = 18000L, DAY = 24000L;
 	/** A midnight-poisoned body is sick now and then (ticks between), for this long (ticks). */
@@ -99,7 +101,9 @@ public final class Poisons {
 		TRUTH("truth_draught", 0x9ADCE8), MIDNIGHT("midnight_poison", 0x3A2A52),
 		/** The five harms of Jaymo's Powers ({@code Harms}), delivered by the same four ways. */
 		TOXIN("toxin_vial", 0x7FB020), ACID("acid_vial", 0xB8D030), FLAMMABLE("flammable_vial", 0xE88020), CRIPPLE("crippling_vial", 0x907060),
-		HUNT("hunting_vial", 0xB02828);
+		HUNT("hunting_vial", 0xB02828),
+		/** Hunter's Road, patch 7: ergot, the wheat's blight (Powers' ergot), a poison of the mind and the limbs. */
+		ERGOT("ergot_vial", 0x6A2A3A);
 
 		public final String item;
 		public final int color;
@@ -234,6 +238,13 @@ public final class Poisons {
 			case FLAMMABLE -> harm(victim, "flammable", FLAMMABLE_TICKS, turned);
 			case CRIPPLE -> harm(victim, "cripple", CRIPPLE_TICKS, turned);
 			case HUNT -> harm(victim, "hunt", HUNT_TICKS, turned);
+			case ERGOT -> {
+				victim.addEffect(new MobEffectInstance(MobEffects.NAUSEA, turned ? ERGOT_TICKS / 3 : ERGOT_TICKS, 0));
+				if (!turned) {
+					victim.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, ERGOT_TICKS, 1));
+					victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ERGOT_TICKS, 0));
+				}
+			}
 			case MIDNIGHT -> {
 				if (turned) {
 					victim.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SICK_TICKS, 0));

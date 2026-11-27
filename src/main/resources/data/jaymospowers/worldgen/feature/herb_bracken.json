@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "id": "jaymospowers:bracken",
+    "properties": {
+      "half": "lower"
+    }
+  }
+}

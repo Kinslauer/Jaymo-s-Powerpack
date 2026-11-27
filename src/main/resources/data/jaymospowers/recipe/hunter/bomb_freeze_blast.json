@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:gunpowder",
+    "minecraft:packed_ice"
+  ],
+  "result": {
+    "id": "jaymospowers:bomb_freeze_blast",
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "block.jaymoskingdoms.herbalist_table": "Herbalist's Table",
+  "item.jaymoskingdoms.herbalist_table": "Herbalist's Table",
+  "item.jaymoskingdoms.herbal_tonic": "Herbal Tonic",
+  "item.jaymoskingdoms.herbal_tonic.of": "Tonic of %s",
+  "item.jaymoskingdoms.herbal_tonic.good": "%s (%ss)",
+  "item.jaymoskingdoms.herbal_tonic.bad": "%s (%ss)",
+  "item.jaymoskingdoms.herbal_tonic.herbs": "%s of %s herbs",
+  "item.jaymoskingdoms.ergot_vial": "Vial of Ergot",
+  "entity.minecraft.villager.jaymoskingdoms.herbalist": "Herbalist",
+  "message.jaymoskingdoms.herbalist_table.how": "Water bottle in one hand, a stack of one herb in the other: up to five herbs go in.",
+  "building.jaymoskingdoms.herbalist_stall": "Herbalist's Stall",
+  "gui.jaymoskingdoms.story.hint.240": "An herbalist's table turns a water bottle and a stack of one herb into a tonic. It feeds a little and gives a good effect and a bad one; each herb you add makes both last longer, up to five.",
+  "gui.jaymoskingdoms.story.hint.241": "A town's herbalist sells herbs, formulas, spirits and empty phials, and buys the fangs, sacs and bones cut from poisoned beasts.",
+  "gui.jaymoskingdoms.story.hint.242": "Ergot grows on wheat in wet weather. Two of it in a bottle make a poison that sickens and slows the limbs."
+}

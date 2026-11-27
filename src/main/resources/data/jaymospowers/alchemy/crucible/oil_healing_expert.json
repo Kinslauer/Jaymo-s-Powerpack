@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:folk_grease",
+  "essences": {
+    "life": 15,
+    "light": 7,
+    "water": 7
+  },
+  "result": {
+    "item": "jaymospowers:oil_healing",
+    "count": 1,
+    "grade": "expert"
+  },
+  "research": "hunters_oils"
+}

@@ -48,6 +48,36 @@ public final class PowersCompat {
 		return soakedEffect != null && body.hasEffect(soakedEffect);
 	}
 
+	/** Powers' effects by their path ({@code snuffed}, {@code unhealing}), looked up once; absent without Powers. */
+	private static final java.util.Map<String, java.util.Optional<net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect>>> EFFECTS = new java.util.HashMap<>();
+
+	/** Whether {@code body} carries Powers' effect {@code jaymospowers:<path>}; false without Powers. */
+	private static boolean has(net.minecraft.world.entity.Entity body, String path) {
+		if (!(body instanceof LivingEntity living)) {
+			return false;
+		}
+		return EFFECTS.computeIfAbsent(path, p -> net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT
+			.get(Identifier.fromNamespaceAndPath("jaymospowers", p)).map(h -> (net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect>) h))
+			.map(living::hasEffect).orElse(false);
+	}
+
+	/**
+	 * (Hunter's Road 7) Whether {@code body} is snuffed by Powers' magic snuffer bomb (the {@code jaymospowers:snuffed} effect): it
+	 * can't cast a spell, take a shape, leap or use a forbidden art. False without Powers.
+	 */
+	public static boolean snuffed(net.minecraft.world.entity.Entity body) {
+		return has(body, "snuffed");
+	}
+
+	/**
+	 * (Hunter's Road 7) Whether {@code body} is under Powers' healing-stopper dust (the {@code jaymospowers:unhealing} effect): it
+	 * can't change its body (a vampire's shapes, a werewolf's turning). Healing and invisibility are stopped in Powers itself.
+	 * False without Powers.
+	 */
+	public static boolean unhealed(net.minecraft.world.entity.Entity body) {
+		return has(body, "unhealing");
+	}
+
 	/** (medieval picks) Powers' Webbed effect (or null before it's looked up, or without Powers). */
 	private static net.minecraft.core.@Nullable Holder<net.minecraft.world.effect.MobEffect> webbedEffect;
 	private static boolean lookedForWebbed;
@@ -3904,6 +3934,39 @@ public final class PowersCompat {
 			layStain.invoke(level, bleeder.getUUID(), colour, x, bleeder.getY() + 0.5, z, size, 6);
 		} catch (Throwable e) {
 			// no drop
+		}
+	}
+
+	/**
+	 * The colour (RGB) of {@code creature}'s blood as Powers' bleeding picks it ({@code BladeBlood.color}, heritage and kind), or
+	 * -1 if it has none to show (no Powers, or it doesn't bleed). Read on either side.
+	 */
+	public static int bloodColour(LivingEntity creature) {
+		lookForBlood();
+		if (bleedsHandle == null || bloodColorHandle == null) {
+			return -1;
+		}
+		try {
+			return (boolean)bleedsHandle.invoke(creature) ? (int)bloodColorHandle.invoke(creature) & 0xFFFFFF : -1;
+		} catch (Throwable e) {
+			return -1;
+		}
+	}
+
+	private static void lookForBlood() {
+		if (lookedForBlood2) {
+			return;
+		}
+		lookedForBlood2 = true;
+		if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			try {
+				Class<?> blood = Class.forName("com.jaymospowers.core.BladeBlood");
+				var lookup = java.lang.invoke.MethodHandles.publicLookup();
+				bleedsHandle = lookup.findStatic(blood, "bleeds", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+				bloodColorHandle = lookup.findStatic(blood, "color", java.lang.invoke.MethodType.methodType(int.class, LivingEntity.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blade blood (older Powers?)", e);
+			}
 		}
 	}
 

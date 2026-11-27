@@ -181,7 +181,7 @@ public final class HolyDread {
 		return patron == null ? 0.0F : weight(Patron.byKey(patron));
 	}
 
-	private static void suffer(ServerPlayer player, float dread) {
+	static void suffer(ServerPlayer player, float dread) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		HALLOWED.put(player.getUUID(), now + HALLOW_TICKS);

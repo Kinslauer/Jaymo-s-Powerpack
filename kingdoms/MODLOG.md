@@ -18252,3 +18252,51 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - The five poison vials are now made from Jaymo's Powers' pastes (pure toxin, toxic paste, poison paste) when Powers is loaded; the old vanilla recipes stay only when it is not.
 - Loading hints 218 to 223.
 - Built; not played.
+
+## 0.13.82 (2026-11-27): Hunter's Road 7A: snuffed and unhealing in Kingdoms, hints 224 to 229 (#2290)
+
+- Kingdoms reads Powers' `snuffed` and `unhealing` effects (`PowersCompat.snuffed/unhealed`): a snuffed caster cannot cast Mana spells, forbidden arts, night forms, blood leaps or the werewolf leap; an unhealing one cannot turn into a night form, a werewolf, or a vampire.
+- Loading hints 224 to 229 (`HINTS` is 229) tell of fat, oils, the pot, the slick, acid and the snuffer.
+- Built; not played.
+
+## 0.13.83 (2026-11-27): Hunter's Road 7b: the town herbalist, herbal tonics, ergot (#2290)
+
+- **Herbalist**: a town trade at an herbalist's table, with a stall building. Sells herbs, formulas, spirits and empty phials; buys the parts cut from poisoned beasts and monsters. The order herbalist (`HerbalistWares`) is unchanged.
+- **Herbal tonics**: at the table, a water bottle in one hand and a stack of one herb in the other makes a tonic (up to five herbs). It feeds a little, gives a good and a bad effect, each longer per herb.
+- **Ergot**: a new Poisons kind (vial of ergot: sickness, slowed hands, weakness).
+- Classes: `Herbalists`, `Poisons`, `Professions`, `JobHalls#herbalistStall`.
+- Built; not played. Trades with Powers or Kitchen items carry load conditions; the formula trades' item components were not checked in game.
+
+## 0.13.84 (2026-11-27): spectate viewcone label trimmed - no coordinates, no Running line (#2292)
+
+- **Spectate view label** (`NpcFocus`): the label over an NPC you spectate no longer shows coordinates or the "Running: ..." list of goals and behaviours. Path reads "Path: 4.7 m away, 10 steps left" (or "can't reach, ends X m short"), the walk target and a "walking" focus give only how far. Focus/Thinking/Stuck, Alert, Task, Activity, Target and suspicion lines stay; the path line drawing is unchanged.
+- Start the game with `-Djaymoskingdoms.eyesDetail=true` to get the coordinates and the Running line back for AI debugging.
+- Built; not played.
+
+## 0.13.85 (2026-11-27): Villagers going in at night aren't "Running scared" (#2293)
+
+- Andy's clip: a villager walking home at night showed "Running scared" with its activity "rest" and no foe anywhere. It
+  wasn't frightened: being out under the open sky at night (or in heavy rain) sends people in (`TakeCover`), and that
+  was handled as a fright (`Frights.shelter`), so Jade and the spectate label called it running scared, and it hurried.
+- Going in is now its own kind (`Frights.cover`): at night they walk in at an ordinary pace (in rain they still hurry),
+  don't yelp, and Jade says "Going home", "Resting at home" or "Sheltering" (`NpcTasks`). A monster that turns up while
+  they're going in frightens them at once, with the cry, and they run from it; before, being on their way in held off
+  the fright (and the cry) for up to 15 seconds. War alarms and twisters are real frights, as before.
+- Built; not played.
+
+## 0.13.86 (2026-11-27): Night's Blood 3 - blood worth drinking (#2291)
+
+- **Fill your own bottles**: a vampire holding someone by the throat with a glass bottle in the off hand fills it (the gulps go into the bottle, 250 mB to a bottle, not into the vampire; a Kitchen blood bottle named for the donor). A glass bottle used (main hand) on a person with an open cut is held under the wound and fills much slower. Drinking a bottle gives its mB.
+- **Every blood tastes of its people**: Frostborn (cold can't touch you), Emberborn (fire resistance), Tideborn (dolphin's grace), Stoneborn (knockback resistance, slower step), Verdant (half the mB), Divine-born (it burns, as holy dread), Nightborn (a long, deep fill: half again, a little a second). A king's or lord's blood gives double mB. Bottles carry the taste and greatness. A favourite blood can now be the blood's ask ("Drink the blood you favour"; kept by a bite or a bottle of theirs).
+- **Ask to drink**: new MCA talk option for vampires with a villager who knows or half-knows (Suspicion, Exposure). Paid in emeralds or in what they want (OwnWants), or as a friend's favour; no alarm, no struggle. A refusal is remembered (new memories let_drink / refused_drink), a timid or devout villager may report it.
+- **Read your prey**: blood vision's outline takes the colour of the creature's blood (as BleedOut picks it) and dims as its health runs low.
+- Classes: BloodTaste, BloodBottling, BloodAsk; KitchenCompat (bottle donors, cold-proof), Hemomancy#drankBottle, BloodRequests (FAVOURITE), BloodVision, PowersCompat#bloodColour. Needs the Kitchen change (bottle memory) from the same patch. Loading hints 250-251.
+- Built; not played. Not tested in game: every taste's effect, the wound catch, the talk option.
+
+## 0.13.87 (2026-11-27): Pickpocketing: nothing from nothing, pick a mark bare, the steel blueprint in the smith's pocket (#2295)
+
+- Andy: "nothing comes from nothing, if they have nothing it should say so." A lift now takes only what is really on the mark: their held weapon (Lift Weapon), a share of a stack from their pockets (`NpcPockets`), or else of what a villager carries. The made-up pocket table (a purse, coppers, nuggets, bread out of nowhere) is gone; with nothing on them you're told their pockets are empty. Deep Pockets keeps its +15% share per rank; its extra tries at an empty pocket went with the table (perk text updated).
+- Andy: "you should be able to steal as much as they have, it just becomes easier and easier to get caught as you continue on the same person. stealth level will reduce it further." No more day's lockout after one lift (`Pickpocket.PICKED` gone). Each lift a mark has already lost (forgotten a day after the last) makes the next hold 20% longer, and gives a 15% chance per lift (at most 90%) that they feel the hand come out and catch you, the usual caught: thief cry, theft where law holds, remembered. Each Stealth level takes 4% off that chance (the first 15 levels: 60% off at the top). Not on a sleeping, downed or hogtied mark. Stealth experience: every lift that takes something, and the first try that finds them empty.
+- **The steel blueprint** now sits in the smith's real pockets, not the villager's hidden inventory (`SteelRealms.keep` checks and gives through `NpcPockets.holds`/`give`). Since #2278 a lift reached that inventory only when the pockets were bare, and the body menu's search never showed it, so in practice only killing the smith got it. Now it can be lifted, shows on "Search them", drops with the pockets at death, and stays through the daily pocket roll like the house key (`NpcPockets.keeps`; kept things go first so a full roll never pushes them out). The old death drop from the villager inventory is gone.
+- Thessaly's unseen hand lifts only from a mark with something on them. The Rogue's casing "worth it" check now means "not picked bare".
+- Built; not played.

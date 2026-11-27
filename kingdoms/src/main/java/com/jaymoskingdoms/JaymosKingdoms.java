@@ -321,6 +321,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		BloodChores.register();
 		// a town's sexton: the lych lantern, the dead and what's left lying, the golems, blood and grime (Sextons)
 		Sextons.register();
+		// a town's herbalist: the table, the tonics (Herbalists)
+		Herbalists.register();
 		ToolGrades.register();
 		SteelRealms.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
@@ -1127,6 +1129,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.nightforms.NightForms.register();
 		LOGGER.debug("blood grab attachment: {}", BloodGrab.GRABBING);
 		BloodGrab.register();
+		BloodTaste.register();
+		BloodBottling.register();
 		BloodLeap.register();
 		HolyDread.register();
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)

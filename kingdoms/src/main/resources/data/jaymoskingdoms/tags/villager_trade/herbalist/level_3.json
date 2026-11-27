@@ -1,0 +1,28 @@
+{
+  "values": [
+    {
+      "id": "jaymoskingdoms:herbalist/3/sell_cave_ivy",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/3/sell_bracken",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/3/sell_formula_slow_mending",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/3/sell_formula_deep_breath",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/3/buy_brittle_bone",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/3/buy_poison_jelly",
+      "required": false
+    }
+  ]
+}
