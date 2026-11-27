@@ -30,7 +30,8 @@ def box(frm, size, role, pattern='plain', inflate=0.0, fit=False, open_front=Fal
 
 def part(bone, pivot, boxes, rot=(0, 0, 0), swing=None, sides='right', armour=None, children=()):
     """`swing`: (axis, amplitude, phase, kind); kind 'stride' rocks with each step, 'cape' also lifts as you speed up,
-    'hang' rocks less and mostly at a walk. `sides`: 'right' (as given), 'left' (mirrored), 'both', or 'slot' (a ring:
+    'hang' rocks less and mostly at a walk, 'tucked' rocks as 'stride' but only a little under a chestplate (a thing worn
+    under armour, which must not swing out through it). `sides`: 'right' (as given), 'left' (mirrored), 'both', or 'slot' (a ring:
     right hand for the first ring slot, left for the second). `armour`: the armour slot that, when worn, pushes this
     part out over it (head, chest, legs, feet), by scaling it about its pivot: so a part with `armour` sits on the bone's
     middle (the arm's middle for arms) and carries anything off-centre as children."""
@@ -161,6 +162,20 @@ pendant('flame_pendant', dict(cord='d8d8d8', flame='f07a1e', cap='9a9aa0'),
         [box((-0.5, 0, -0.5), (1, 1, 1), 'cap', 'metal'), box((-1, 1, -0.5), (2, 2, 1), 'flame', 'gem')])
 pendant('thorn_pendant', dict(cord='d8d8d8', thorn='3aa83a', cap='9a9aa0'),
         [box((-0.5, 0, -0.5), (1, 1, 1), 'cap', 'metal'), box((-0.5, 1, -0.5), (1, 2, 1), 'thorn', 'gem')])
+# (Andy, 2026-11-27: "you should also be able to wear the holy symbol as a medallion. and make it animate on the player,
+# under armor") Jaymo's Kingdoms' holy symbol, a gold cross with an iron heart and a loop at the top, as its icon is. It
+# has no `armour`, so it stays against the chest and a chestplate covers it; it swings 'tucked', so it barely moves under one.
+look('jaymoskingdoms:holy_symbol', dict(cord='8a6a3a', gold='e9be40', iron='9696a0'),
+     part('body', (0, 0, 0), [],
+          children=cords('cord') + [part('body', (0, 4.6, -2.0),
+                                         [box((-0.5, 0, -0.5), (1, 1, 0.5), 'gold', 'metal'),
+                                          box((-0.5, 1, -0.5), (1, 1, 0.5), 'gold', 'metal'),
+                                          box((-1.5, 2, -0.5), (1, 1, 0.5), 'gold', 'metal'),
+                                          box((-0.5, 2, -0.6), (1, 1, 0.6), 'iron', 'metal'),
+                                          box((0.5, 2, -0.5), (1, 1, 0.5), 'gold', 'metal'),
+                                          box((-0.5, 3, -0.5), (1, 2, 0.5), 'gold', 'metal')],
+                                         swing=('x', 0.2, 0.0, 'tucked'))]))
+
 pendant('heartstone_amulet', dict(cord='d6a83a', heart='e0485a', gold='e6b83a'),
         [box((-0.5, 0, -0.5), (1, 1, 1), 'gold', 'metal'), box((-1.5, 1, -0.6), (3, 2.5, 1.2), 'heart', 'gem'),
          box((-1.8, 0.8, -0.4), (3.6, 3, 0.8), 'gold', 'metal')])
@@ -468,9 +483,13 @@ def main():
     out = {}
     for item, spec in LOOKS.items():
         width, height = pack(item, spec)
-        paint(item, spec, width, height).save(os.path.join(OUT_TEX, item + '.png'))
-        out['jaymospowers:' + item] = dict(texture=f'jaymospowers:textures/entity/worn/{item}.png', width=width, height=height,
-                                           hide_cape=spec['hide_cape'], parts=strip(spec['parts']))
+        # another mod's item ('jaymoskingdoms:holy_symbol') keeps its own id; its texture goes in a folder of that name
+        namespace, path = item.split(':') if ':' in item else ('jaymospowers', item)
+        name = path if namespace == 'jaymospowers' else f'{namespace}/{path}'
+        os.makedirs(os.path.dirname(os.path.join(OUT_TEX, name + '.png')), exist_ok=True)
+        paint(item, spec, width, height).save(os.path.join(OUT_TEX, name + '.png'))
+        out[f'{namespace}:{path}'] = dict(texture=f'jaymospowers:textures/entity/worn/{name}.png', width=width, height=height,
+                                          hide_cape=spec['hide_cape'], parts=strip(spec['parts']))
     with open(os.path.join(RES, 'worn_looks.json'), 'w') as f:
         json.dump(out, f, indent=1)
         f.write('\n')

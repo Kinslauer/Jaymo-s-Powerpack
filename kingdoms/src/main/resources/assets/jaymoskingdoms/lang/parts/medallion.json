@@ -21,5 +21,7 @@
   "message.jaymoskingdoms.medallion.cooling": "The medallion is still warm from the last prayer",
   "message.jaymoskingdoms.medallion.fizzle": "The marks fade: no prayer you know begins so",
   "message.jaymoskingdoms.medallion.none": "You know no prayer that has a pattern yet",
-  "message.jaymoskingdoms.medallion.no_target": "No one before you to judge"
+  "message.jaymoskingdoms.medallion.no_target": "No one before you to judge",
+  "gui.jaymoskingdoms.story.hint.297": "No numpad? While a Cleric's medallion board is up, the number keys 1 to 9 lay its marks too, and pick no hotbar slot.",
+  "gui.jaymoskingdoms.story.hint.298": "A holy symbol can be worn at the neck in the amulet slot. Worn there it still raises the medallion board and blesses the band, but casting with a tap and turning the dead want it in hand."
 }

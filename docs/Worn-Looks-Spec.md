@@ -52,3 +52,10 @@ The same script writes `worn_looks.json` (the boxes, packed UVs, swings), which 
 - Looks are blocky approximations of our icons, not Artifacts' shapes; some items (the hip bottles) are still sprites.
 - No glowing overlays (Artifacts' goggles/gauntlet glow): every look is drawn with the entity cutout render type.
 - Not checked in game; previews in project files `art-overhaul/worn-baubles/worn-looks-preview.png`.
+
+## 6. Kingdoms' holy symbol
+
+Andy (2026-11-27): "you should also be able to wear the holy symbol as a medallion. and make it animate on the player,
+under armor". The look `jaymoskingdoms:holy_symbol` (texture `worn/jaymoskingdoms/holy_symbol.png`) follows Kingdoms'
+own item icon: a gold cross with an iron heart and a loop, on a brown cord. It has no `armour`, so it stays against the
+chest and a chestplate covers it, and it swings `tucked`: as `stride` bare-chested, a third as far under a chestplate.

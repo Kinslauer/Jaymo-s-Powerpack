@@ -50,7 +50,8 @@ import org.jspecify.annotations.Nullable;
  * {@code textures/entity/worn/}; see docs/Worn-Looks-Spec.md): Artifacts' worn models were looked at, not copied. Each
  * look is a player model with only its own parts, built on the player's bones so it follows every pose. Scarf tails,
  * pendants, charms, hanging pouches, hat feathers and the cloak swing with the stride; parts sit out over armour when the
- * matching piece is worn. Lanterns, the coin purse, the bottles at the hip, the lantern pole, fairies and quivers keep
+ * matching piece is worn. A thing worn under armour (Jaymo's Kingdoms' holy symbol, a look keyed by its own id) stays
+ * against the body, so a chestplate covers it, and swings only a little there ({@link #TUCKED}). Lanterns, the coin purse, the bottles at the hip, the lantern pole, fairies and quivers keep
  * their own drawing.
  * <p>(0.21.37) Andy: "Can we not port their looks too?" The baubles that kept their Artifacts look now use Artifacts' own
  * worn models ({@code artifacts/worn/WornArtifacts}); the looks here are for our starters and the sixteen we repainted.
@@ -64,6 +65,8 @@ public final class WornLooks {
 	static final float IDLE = 0.15F, IDLE_SPEED = 0.09F;
 	/** A cape-like part lifts back by this many of its amplitudes at a run. */
 	static final float CAPE_LIFT = 3.0F;
+	/** A thing worn under armour (the holy symbol) swings this share as far under a chestplate, so it never shows through it. */
+	static final float TUCKED = 0.35F;
 	// ================================================================================================================
 
 	private static final String JSON = "/assets/jaymospowers/worn_looks.json";
@@ -357,6 +360,7 @@ public final class WornLooks {
 					float angle = switch (swing.kind) {
 						case "cape" -> swing.amp * (CAPE_LIFT * pace + 0.6F * Mth.sin(stride * 2.0F + phase) * pace + idle);
 						case "hang" -> swing.amp * (0.6F * Mth.sin(stride + phase) * pace + idle);
+						case "tucked" -> swing.amp * (state.chestEquipment.isEmpty() ? 1.0F : TUCKED) * (Mth.sin(stride + phase) * pace + idle);
 						default -> swing.amp * (Mth.sin(stride + phase) * pace + idle);
 					};
 					float sign = m.mirrored && swing.axis != 'x' ? -1.0F : 1.0F;

@@ -363,7 +363,7 @@ public final class Paths {
 		if (strength(hurt, PlayerClass.BRUTE, "juggernaut") > 0.0F && heavyPieces(hurt) >= 2) {
 			amount = less(amount, JUGGERNAUT_LEFT, strength(hurt, PlayerClass.BRUTE, "juggernaut"));
 		}
-		if (strength(hurt, PlayerClass.CLERIC, "warden") > 0.0F && (Clerics.isSymbol(hurt.getMainHandItem()) || Clerics.isSymbol(hurt.getOffhandItem()))) {
+		if (strength(hurt, PlayerClass.CLERIC, "warden") > 0.0F && Clerics.hasSymbol(hurt)) {
 			amount = less(amount, WARDEN_LEFT, strength(hurt, PlayerClass.CLERIC, "warden"));
 		}
 		if (hurt.level() instanceof ServerLevel level) {

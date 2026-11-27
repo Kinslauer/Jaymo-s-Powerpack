@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * the gesture cannot be made. A staff, tome or holy symbol in a hand is a focus ({@link #FOCI}): that hand can still
  * gesture. The scroll being read counts as one.</li>
  * <li><b>A thing used up</b>: the great spells spend diamond dust, a pearl or a bone ({@link #PARTS}); the smaller ones
- * want a trifle, which a focus in hand stands in for. Reading a scroll spends none (the magic is in the scroll), and a
+ * want a trifle, which a focus in hand (or a holy symbol worn at the neck) stands in for. Reading a scroll spends none (the magic is in the scroll), and a
  * creative player never does.</li>
  * </ul>
  * Counterspell is the one spell with gestures only; it is cast through a gag and in silence.
@@ -157,9 +157,12 @@ public final class SpellParts {
 		}
 	}
 
-	/** Whether a focus in hand stands in for this part (only for the cheap ones). */
+	/**
+	 * Whether a focus in hand stands in for this part (only for the cheap ones). A holy symbol worn at the neck does too, as
+	 * fifth edition lets one be worn as an amulet ({@link Clerics#worn}).
+	 */
 	private static boolean covered(Player player, Part part) {
-		return !part.costly() && (focus(player.getMainHandItem()) || focus(player.getOffhandItem()));
+		return !part.costly() && (focus(player.getMainHandItem()) || focus(player.getOffhandItem()) || Clerics.worn(player) != null);
 	}
 
 	private static int have(Player player, Item bit) {
