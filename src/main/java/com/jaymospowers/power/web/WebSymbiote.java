@@ -4796,7 +4796,6 @@ public final class WebSymbiote {
 		return false;
 	}
 
-	/**
 	/** Spending the big body leaves its bonded armour on. */
 	static void exhaustBulk(ServerPlayer player) {
 		Live live = live(player);
