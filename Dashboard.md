@@ -51,6 +51,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2265 Building news is found out, not told in chat (Kingdoms, 2026-11-27)
 - [ ] #2264 crows over a body no longer hang flapping in one spot in the sky (Kingdoms, 2026-11-27)
 - [ ] #2263 Arrows stuck in you are real arrows, not tools on your back (Powers, 2026-11-27)
+- [ ] #2262 Sunflare unmakes Kingdoms' shadows (Powers, Kingdoms, 2026-11-27)
 - [ ] #2261 Nothing drops on its own unless a player is near (Kingdoms, 2026-11-27)
 - [ ] #2260 New players start with low-end mode on and the vanilla texture look (Powers, 2026-11-27)
 - [ ] #2258 Legends Core animation library, landings by height, shared movement set and katana stance set (Powers, 2026-11-27)
