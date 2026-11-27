@@ -2313,7 +2313,8 @@ public class CorpseEntity extends Entity {
 			if (!(level() instanceof ServerLevel level)) {
 				return InteractionResult.SUCCESS;
 			}
-			return carry(level, player);
+			// (a tiny one is caught in the hand and pocketed)
+			return handSized() ? pickUp(level, player) : carry(level, player);
 		}
 		if (!(level() instanceof ServerLevel level)) {
 			return InteractionResult.SUCCESS;
@@ -2329,6 +2330,10 @@ public class CorpseEntity extends Entity {
 		if (dragger() != null) {
 			// (0.5.31) being dragged: let go of first
 			return InteractionResult.SUCCESS_SERVER;
+		}
+		// Andy (2026-11-27): something this small is picked up like any other item, sneaking or not, tapped or held
+		if (held.isEmpty() && hook() == null && handSized()) {
+			return pickUp(level, player);
 		}
 		// Andy (2026-11-20): "right click hold should always be drag, tap can loot". A plain empty hand on a body lying
 		// loose: held, it's taken hold of (dragged, or a small one taken up by the neck); a tap is the search, the arrows or
@@ -3541,6 +3546,36 @@ public class CorpseEntity extends Entity {
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
+	/**
+	 * Andy (2026-11-27): a {@link #handSized} body taken up in an empty hand, into the pack like any other item (dropped at
+	 * your feet if there's no room). Arrows still in it come out first, one a click, as from any body. A fish or a critter
+	 * with something in it gives that (a cod gives its raw cod); an animal's carcass, or anything with nothing in it, goes in
+	 * whole as its corpse item ({@link CorpseItem}: "Fly Corpse"), to be put down again, cracked open, roasted or butchered.
+	 */
+	private InteractionResult pickUp(ServerLevel level, Player player) {
+		if (com.jaymoskitchen.archery.StuckArrows.total(arrows()) > 0) {
+			return pullArrow(level, player);
+		}
+		List<ItemStack> taken = new ArrayList<>();
+		if (kind != CorpseKind.ANIMAL && !loot.isEmpty()) {
+			for (ItemStack stack : loot) {
+				if (!stack.isEmpty()) {
+					taken.add(stack.copy());
+				}
+			}
+			loot.clear();
+		} else {
+			taken.add(CorpseItem.of(this));
+		}
+		for (ItemStack stack : taken) {
+			player.getInventory().placeItemBackInInventory(stack, net.minecraft.util.Prediction.SERVER_ONLY);
+		}
+		level.playSound(null, getX(), getY(), getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F,
+			(random.nextFloat() - random.nextFloat()) * 1.4F + 2.0F);
+		discard();
+		return InteractionResult.SUCCESS_SERVER;
+	}
+
 	/** (0.4.29) A fish corpse: its loot drops and it's gone, in one click. */
 	private InteractionResult lootFish(ServerLevel level) {
 		dropLoot(level);
@@ -4077,6 +4112,38 @@ public class CorpseEntity extends Entity {
 	public boolean oneHanded() {
 		return fitsInPocket();
 	}
+
+	/**
+	 * Andy (2026-11-27, of a dead fly): "Things this small should be picked up as items, there shouldnt be a lift prompt
+	 * for something so light you could grab in hand like any other item". A fish, or a body under {@link #HAND_SIZE} both
+	 * ways (a fly, a cricket, a mouse, a mole, a maggot, a chick), goes straight into your pack on a click of an empty hand
+	 * ({@link #pickUp}): no hold, no drag, no lift. A rabbit, a frog, a chicken or a snake is still taken by the neck. Never
+	 * a player's body, a machine, or a zombie's or skeleton's (those get up again). Worked out once, on either side.
+	 */
+	public boolean handSized() {
+		if (handCache == null) {
+			if (kind == CorpseKind.PLAYER || kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON || isPlayerCorpse() || isMachine()) {
+				handCache = false;
+			} else if (isFish()) {
+				handCache = true;
+			} else {
+				Entity body = level().isClientSide() ? clientBody() : rebuild();
+				if (body == null) {
+					return false;
+				}
+				handCache = body.getBbWidth() <= HAND_SIZE && body.getBbHeight() < HAND_SIZE;
+			}
+		}
+		return handCache;
+	}
+
+	/**
+	 * A body narrower than this or as narrow, and shorter, is {@link #handSized}: the critters' line (Corpses'
+	 * {@code SMALL_CRITTER_SIZE}), so a maggot (0.5 long) and a mole count and a rabbit (0.5 tall) doesn't.
+	 */
+	private static final float HAND_SIZE = Corpses.SMALL_CRITTER_SIZE;
+
+	private @Nullable Boolean handCache;
 
 	private @Nullable Boolean smallCache;
 
