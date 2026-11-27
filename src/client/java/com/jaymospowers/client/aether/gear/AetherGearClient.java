@@ -39,7 +39,7 @@ public final class AetherGearClient {
 		if (landed) {
 			spent = false;
 		} else if (jump && !wasJump && !spent && !player.isSpectator() && !player.isPassenger() && !player.isFallFlying() && !player.onClimbable()
-			&& ArmorAbilities.gravitite(player)) {
+			&& ArmorAbilities.gravitite(player) && !com.jaymospowers.client.jump.EnemyStepClient.takes(player)) {
 			spent = true;
 			double yaw = Math.toRadians(player.getYRot());
 			double dx = -Math.sin(yaw) * player.zza + Math.cos(yaw) * player.xxa;

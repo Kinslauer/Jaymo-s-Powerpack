@@ -27,7 +27,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * The fall is counted from the top of the jump, as vanilla counts it (the server clears it with the packet), so fall
  * damage still applies outside creative. A power's own flight, a web line or a ride keeps its own Jump. With a cloud in a
- * bottle, its jump goes first and this one is a second press: one each, never three on a press.
+ * bottle, its jump goes first and this one is a second press: one each, never three on a press. A press that kicks off
+ * a foe in an air combo is the enemy step's ({@link EnemyStepClient}), and this one waits for the next.
  * <p>
  * Someone with no power can have the lift too: a draught registers itself with {@link #mortal} (the Draught of Mettle's
  * extra jump), which kicks like it always did (straight up, {@link #MORTAL_LIFT}).
@@ -120,7 +121,7 @@ public final class PowerJumpClient {
 			return;
 		}
 		air++;
-		if (!pressed || spent || air < AIR_TICKS || busy(player) || ArtifactBaublesClient.cloudJump(player)
+		if (!pressed || spent || air < AIR_TICKS || busy(player) || EnemyStepClient.takes(player) || ArtifactBaublesClient.cloudJump(player)
 			|| com.jaymospowers.client.freerun.moves.CoyoteTimeClient.justTook(player)) {
 			return;
 		}
