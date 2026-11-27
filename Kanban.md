@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,7 +29,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · t3 · #2325 · changes · fixing review notes
+- [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · t3 · claimed
 
 
 ## In review
