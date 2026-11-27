@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
  * A goblin's line ({@link Dialects#broken}: our prefix before the line's own key) is looked up here in this client's
  * own language (MCA's lines too), in the goblin dialect where the line has one, and broken into goblin English
  * ({@link GoblinTalk}) before its names are put in. A line not found here keeps the server's broken English. An
- * old-tongued knight's line ({@link Dialects#olden}) the same way, into the old tongue.
+ * old-tongued knight's line ({@link Dialects#olden}) the same way, into the old tongue, and plain folk's
+ * ({@link Dialects#rustic}) into country speech.
  */
 @Mixin(TranslatableContents.class)
 abstract class GoblinTalkMixin {
@@ -29,16 +30,18 @@ abstract class GoblinTalkMixin {
 	@ModifyArg(method = "decompose", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/network/chat/contents/TranslatableContents;decomposeTemplate(Ljava/lang/String;Ljava/util/function/Consumer;)V"), index = 0)
 	private String jaymoskingdoms$goblin(String template) {
-		if (this.key.startsWith(Dialects.OLDEN)) {
-			// an old-tongued knight's (Dialects#olden): his own line where it's written, else the line put into the old tongue
-			String line = this.key.substring(Dialects.OLDEN.length());
+		// an old-tongued knight's (Dialects#olden) or plain folk's (Dialects#rustic): the speaker's own line where it's
+		// written, else the line put into their way of talking
+		String prefix = this.key.startsWith(Dialects.OLDEN) ? Dialects.OLDEN : this.key.startsWith(Dialects.RUSTIC) ? Dialects.RUSTIC : null;
+		if (prefix != null) {
+			String line = this.key.substring(prefix.length());
 			Language language = Language.getInstance();
-			String own = language.getOrDefault("dialect.jaymoskingdoms.olden." + line, JAYMOSKINGDOMS$NONE);
+			String own = language.getOrDefault("dialect.jaymoskingdoms." + (prefix.equals(Dialects.OLDEN) ? "olden." : "rustic.") + line, JAYMOSKINGDOMS$NONE);
 			if (!own.equals(JAYMOSKINGDOMS$NONE)) {
 				return own;
 			}
 			String plain = language.getOrDefault(line, JAYMOSKINGDOMS$NONE);
-			return plain.equals(JAYMOSKINGDOMS$NONE) ? template : com.jaymoskingdoms.OldenTalk.speak(plain);
+			return plain.equals(JAYMOSKINGDOMS$NONE) ? template : Dialects.speak(prefix, plain);
 		}
 		if (!this.key.startsWith(Dialects.BROKEN)) {
 			return template;

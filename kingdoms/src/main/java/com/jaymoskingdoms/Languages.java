@@ -442,7 +442,8 @@ public final class Languages {
 			return IllagerTongue.heard(player, speaker, words);
 		}
 		if (understands(player, speaker)) {
-			return words;
+			// (most townsfolk never learned their letters, and talk country: Dialects.rustic)
+			return Dialects.rustic(speaker) ? Dialects.rustic(words) : words;
 		}
 		remind(player, speaker, false);
 		return garble(of(speaker), speaker.getUUID().hashCode() * 31L + words.toString().hashCode());

@@ -31,6 +31,16 @@ public final class Dialects {
 	public static final String OLDEN = "olden_talk.jaymoskingdoms:";
 	/** The old tongue's dialect name, under {@link #PREFIX}. */
 	static final String OLD = "olden";
+	/**
+	 * Plain folk's line ({@link #rustic(Entity)}) goes as this before the line's own key ({@link #rustic(Component)}); the
+	 * client finds the line (its hand-written {@code dialect.jaymoskingdoms.rustic.<key>} where it has one) and puts it
+	 * into country speech ({@link RusticTalk}, client {@code GoblinTalkMixin}).
+	 */
+	public static final String RUSTIC = "rustic_talk.jaymoskingdoms:";
+	/** Country speech's dialect name, under {@link #PREFIX}. */
+	static final String COUNTRY = "rustic";
+	/** Out of a hundred plain folk, this many learned their letters anyway and speak plainly. */
+	static final int LETTERED = 15;
 
 	private Dialects() {
 	}
@@ -152,7 +162,38 @@ public final class Dialects {
 		if (goblin(speaker) || goblinLine(words)) {
 			return broken(words);
 		}
-		return old(speaker) ? olden(words) : words;
+		if (old(speaker)) {
+			return olden(words);
+		}
+		return rustic(speaker) ? rustic(words) : words;
+	}
+
+	/**
+	 * (Andy, 2026-11-27: "literacy was rare") {@code e} is one of the plain folk who never learned their letters and
+	 * talk country ({@link RusticTalk}): most townsfolk and their guards. Not those whose work is reading or rule (a
+	 * cleric, a librarian, a cartographer, a ruler, a knight or better, a hermit wizard, the Z Fighter characters), not
+	 * a goblin, an orc or an old-tongued knight, and not the one in {@link #LETTERED} who learned anyway.
+	 */
+	public static boolean rustic(@Nullable Entity e) {
+		if (!(e instanceof net.minecraft.world.entity.npc.villager.Villager v) || of(e) != null || old(e) || goblin(e)) {
+			return false;
+		}
+		if (Math.floorMod(v.getUUID().hashCode() * 31 + 7, 100) < LETTERED || Rulers.is(v) || Hermits.is(v) || ZFighterFolk.is(v)) {
+			return false;
+		}
+		int rank = Ranks.of(v);
+		if (rank >= 0 && Ranks.step(rank) >= Ranks.KNIGHT) {
+			return false;
+		}
+		var job = v.getVillagerData().profession();
+		return !job.is(net.minecraft.world.entity.npc.villager.VillagerProfession.CLERIC)
+			&& !job.is(net.minecraft.world.entity.npc.villager.VillagerProfession.LIBRARIAN)
+			&& !job.is(net.minecraft.world.entity.npc.villager.VillagerProfession.CARTOGRAPHER);
+	}
+
+	/** {@code words} as plain folk say them: as {@link #olden}, into country speech ({@link RusticTalk}). */
+	public static Component rustic(Component words) {
+		return dialected(words, RUSTIC, COUNTRY);
 	}
 
 	/**
@@ -161,25 +202,36 @@ public final class Dialects {
 	 * put into it here. Names and things put into a line are left whole.
 	 */
 	public static Component olden(Component words) {
+		return dialected(words, OLDEN, OLD);
+	}
+
+	/** {@code words} put into a dialect: {@code prefix} before a lang line's key for the client, plain text here. */
+	private static Component dialected(Component words, String prefix, String dialect) {
 		MutableComponent out;
 		if (words.getContents() instanceof TranslatableContents t) {
-			if (t.getKey().startsWith(OLDEN) || t.getKey().startsWith(BROKEN)) {
+			if (t.getKey().startsWith(OLDEN) || t.getKey().startsWith(BROKEN) || t.getKey().startsWith(RUSTIC)) {
 				return words;
 			}
 			net.minecraft.locale.Language lang = net.minecraft.locale.Language.getInstance();
-			String dialect = PREFIX + OLD + "." + t.getKey();
-			String plain = t.getFallback() != null ? t.getFallback() : lang.has(dialect) ? lang.getOrDefault(dialect) : lang.getOrDefault(t.getKey());
-			boolean own = lang.has(dialect);
-			out = Component.translatableWithFallback(OLDEN + t.getKey(), plain.equals(t.getKey()) || own ? plain : OldenTalk.speak(plain), t.getArgs());
+			String own = PREFIX + dialect + "." + t.getKey();
+			boolean written = lang.has(own);
+			String plain = t.getFallback() != null ? t.getFallback() : lang.getOrDefault(written ? own : t.getKey());
+			out = Component.translatableWithFallback(prefix + t.getKey(), plain.equals(t.getKey()) || written ? plain : speak(prefix, plain), t.getArgs());
 		} else if (words.getContents() instanceof PlainTextContents p) {
-			out = Component.literal(OldenTalk.speak(p.text()));
+			out = Component.literal(speak(prefix, p.text()));
 		} else {
 			return words;
 		}
 		out.setStyle(words.getStyle());
 		for (Component sibling : words.getSiblings()) {
-			out.append(olden(sibling));
+			out.append(dialected(sibling, prefix, dialect));
 		}
 		return out;
 	}
+
+	/** {@code line} in the dialect {@code prefix} stands for. */
+	public static String speak(String prefix, String line) {
+		return RUSTIC.equals(prefix) ? RusticTalk.speak(line) : OldenTalk.speak(line);
+	}
+
 }
