@@ -1,15 +1,19 @@
 package com.jaymospowers.client.rig;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.power.web.FirstPersonCompat;
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigMoves;
 import com.jaymospowers.rig.RigOcto;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -24,18 +28,25 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The Octo Core's four arms as everyone sees them ({@link RigOcto}): jointed gunmetal arms on the Core's spine, each a
@@ -75,6 +86,8 @@ public final class RigOctoClient {
 	static final float SPIN_RATE = 0.9F;
 	/** How far the rods may run out (times the struts' own length): walking, and reaching for something far off (a grab, the anchor, a punch). */
 	static final float EXT_WALK = 3.5F, EXT_FAR = 16.0F;
+	/** Your own first person, at rest: where the upper claws hover (body model pixels: out to the side, up, ahead). */
+	static final float[] FP_HOVER = {8.0F, -8.0F, -15.0F};
 	/** The jab and cross: how far down the look they punch with nothing in reach (blocks). */
 	static final double PUNCH_EMPTY = 3.0;
 
@@ -93,6 +106,8 @@ public final class RigOctoClient {
 	/** How much each strut grows (pixels) for every unit of reach past 1: the rods sliding out. */
 	private static final float UPPER_ROD = 9.0F, FORE_ROD = 8.0F;
 	private static final int VALUES = 7;
+	/** As the avatar renderer draws a player: the model shrunk this much, lifted this high (blocks), and dropped this far crouching. */
+	private static final double MODEL_SCALE = 0.9375, MODEL_LIFT = 1.501, CROUCH_DROP = -2.0 / 16.0;
 	/** The longest the shoulder strut runs out to its elbow (pixels), however far the claw is going. */
 	private static final float ELBOW_MAX = 26.0F;
 
@@ -113,6 +128,7 @@ public final class RigOctoClient {
 
 	public static void init() {
 		ClientTickEvents.END_CLIENT_TICK.register(RigOctoClient::move);
+		LevelRenderEvents.COLLECT_SUBMITS.register(RigOctoClient::firstPerson);
 	}
 
 	private static LayerDefinition mesh() {
@@ -288,16 +304,27 @@ public final class RigOctoClient {
 		return new Vec3(MOUNT[i][0], MOUNT[i][1], MOUNT[i][2]).add(z.scale(a)).add(w.scale(b));
 	}
 
+	/** {@code player} is you, seen from your own eyes. */
+	private static boolean ownView(Player player) {
+		Minecraft minecraft = Minecraft.getInstance();
+		return player == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
+	}
+
 	/** A point in the world, in the body's model space (pixels: +X the wearer's left, +Y down from the neck, +Z back). */
 	private static Vec3 model(Player player, float partial, Vec3 world) {
 		double yaw = Mth.rotLerp(partial, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
 		Vec3 ahead = new Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
 		Vec3 left = new Vec3(ahead.z, 0.0, -ahead.x);
-		float scale = player.getScale();
-		Vec3 neck = player.getPosition(partial).add(0.0, 24.0 / 16.0 * scale, 0.0);
-		Vec3 c = world.subtract(neck);
-		double px = 16.0 / scale;
+		Vec3 c = world.subtract(neck(player, partial));
+		double px = 16.0 / (player.getScale() * MODEL_SCALE);
 		return new Vec3(c.dot(left) * px, -c.y * px, -c.dot(ahead) * px);
+	}
+
+	/** Where the body model's origin (the neck) is in the world, as the avatar renderer places it. */
+	private static Vec3 neck(Player player, float partial) {
+		double scale = player.getScale();
+		double crouch = player.isCrouching() ? CROUCH_DROP * scale : 0.0;
+		return player.getPosition(partial).add(0.0, MODEL_LIFT * MODEL_SCALE * scale + crouch, 0.0);
 	}
 
 	/** Where a punch lands: the first living thing down the look within the combo's reach, else a little way out. */
@@ -370,6 +397,14 @@ public final class RigOctoClient {
 			double side = (hold.getBbWidth() * 0.5 + 0.1) * 16.0 / player.getScale();
 			flags |= at(t, 0, point.add(-side, 0.0, 0.0), reaching ? 0.9F : 0.0F);
 			flags |= at(t, 1, point.add(side, 0.0, 0.0), reaching ? 0.9F : 0.0F);
+		} else if (kind == 0 && held < 0 && ownView(player)) {
+			// your own first person, at rest: the upper claws hover at the top corners of your view, so you see they're out
+			float bob = Mth.sin(now * 0.08F) * 0.6F;
+			for (int i = 0; i < 2; i++) {
+				if (claws == null || claws[i] == null) {
+					reach(t, i, v(side(i) * FP_HOVER[0], FP_HOVER[1] + (i == 0 ? bob : -bob), FP_HOVER[2]), 0.3F, EXT_FAR);
+				}
+			}
 		} else if (held >= 0 || kind == RigOcto.MOVE_GRAB || kind == RigOcto.MOVE_HOLD) {
 			// reaching out ahead, then drawn in close
 			boolean reaching = kind == RigOcto.MOVE_GRAB && k < 0.5F;
@@ -491,13 +526,17 @@ public final class RigOctoClient {
 
 	/** (From {@link RigSuit#extract}) what the arms are doing on {@code player} this frame. */
 	static void extract(Player player, AvatarRenderState state, float partialTicks) {
+		state.setData(ARMS, pose(player, partialTicks));
+	}
+
+	/** The arms' pose on {@code player} this frame, eased on from the last; null when they aren't worn. */
+	private static float @Nullable [] pose(Player player, float partialTicks) {
 		UUID id = player.getUUID();
 		if (!RigOcto.wears(player)) {
-			state.setData(ARMS, null);
 			POSE.remove(id);
 			UNFOLD.remove(id);
 			ANCHORS.remove(id);
-			return;
+			return null;
 		}
 		float now = player.level().getGameTime() + partialTicks;
 		boolean out = RigOcto.out(player);
@@ -527,7 +566,7 @@ public final class RigOctoClient {
 				pose[i] += (i % VALUES < 3 ? turn(pose[i], want[i]) : want[i] - pose[i]) * ease;
 			}
 		}
-		state.setData(ARMS, pose.clone());
+		return pose.clone();
 	}
 
 	/** The short way round from angle {@code from} to {@code to} (radians). */
@@ -541,6 +580,19 @@ public final class RigOctoClient {
 		if (p == null) {
 			return;
 		}
+		poseStack.pushPose();
+		parent.body.translateAndRotate(poseStack);
+		// painted at the Forge: the arms take the trim's paint (else the Core's plates'), and the lights' colour
+		Integer trim = state.getData(RigSuit.TRIM);
+		int[] plates = state.getData(RigSuit.COLORS);
+		int paint = trim != null ? trim : plates != null ? plates[Rig.Piece.CORE.ordinal()] : -1;
+		Integer lights = state.getData(RigSuit.LIGHTS);
+		draw(poseStack, collector, light, p, paint, lights == null ? -1 : lights);
+		poseStack.popPose();
+	}
+
+	/** The arms in pose {@code p}, from the body's model space, in {@code paint} with lights in {@code lights} (-1 for their own). */
+	private static void draw(PoseStack poseStack, SubmitNodeCollector collector, int light, float[] p, int paint, int lights) {
 		bake();
 		for (int i = 0; i < 4; i++) {
 			int o = i * VALUES;
@@ -565,17 +617,65 @@ public final class RigOctoClient {
 			PRONG_C[i].xRot = open * 0.5F;
 			PRONG_C[i].yRot = open;
 		}
-		poseStack.pushPose();
-		parent.body.translateAndRotate(poseStack);
-		// painted at the Forge: the arms take the trim's paint (else the Core's plates'), and the lights' colour
-		Integer trim = state.getData(RigSuit.TRIM);
-		int[] plates = state.getData(RigSuit.COLORS);
-		int paint = trim != null ? trim : plates != null ? plates[Rig.Piece.CORE.ordinal()] : -1;
-		Integer lights = state.getData(RigSuit.LIGHTS);
 		collector.submitModelPart(root, poseStack, RenderTypes.entityCutout(paint < 0 ? TEXTURE : PAINT), light, OverlayTexture.NO_OVERLAY, null,
 			RigSuit.tint(paint));
-		collector.submitModelPart(root, poseStack, RenderTypes.eyes(lights == null ? GLOW : LIGHTS), light, OverlayTexture.NO_OVERLAY, null,
-			lights == null ? 0xFFFFFFFF : RigSuit.tint(lights));
+		collector.submitModelPart(root, poseStack, RenderTypes.eyes(lights < 0 ? GLOW : LIGHTS), light, OverlayTexture.NO_OVERLAY, null,
+			lights < 0 ? 0xFFFFFFFF : RigSuit.tint(lights));
+	}
+
+	/**
+	 * Your own arms in first person (Andy's pick: "First-person arms", high priority): the game doesn't draw your body from
+	 * your eyes, so the arms are drawn here, in the world where your body would be, posed just as everyone else sees them.
+	 * So they come over your shoulders into view, a jab's claw lands on what it hits, and a climb's claws sit on the wall.
+	 * With First-person Model drawing your body, its layer already draws them.
+	 */
+	private static void firstPerson(LevelRenderContext context) {
+		Minecraft minecraft = Minecraft.getInstance();
+		LocalPlayer player = minecraft.player;
+		if (player == null || !minecraft.options.getCameraType().isFirstPerson() || player.isInvisible() || player.isSpectator()
+			|| FirstPersonCompat.bodyShown()) {
+			return;
+		}
+		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		float[] p = pose(player, partial);
+		if (p == null) {
+			return;
+		}
+		int paint = -1, lights = -1;
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			if (piece.item() == null) {
+				continue;
+			}
+			ItemStack stack = player.getItemBySlot(piece.slot);
+			if (!stack.is(piece.item())) {
+				continue;
+			}
+			// as the suit takes them (RigSuit.extract): the Core's first, else any piece's
+			Integer trim = stack.get(Rig.TRIM);
+			if (trim != null && (paint < 0 || piece == Rig.Piece.CORE)) {
+				paint = trim & 0xFFFFFF;
+			}
+			Integer lit = stack.get(Rig.LIGHTS);
+			if (lit != null && (lights < 0 || piece == Rig.Piece.CORE)) {
+				lights = lit & 0xFFFFFF;
+			}
+		}
+		if (paint < 0) {
+			DyedItemColor dye = player.getItemBySlot(Rig.Piece.CORE.slot).get(DataComponents.DYED_COLOR);
+			paint = dye == null ? -1 : dye.rgb() & 0xFFFFFF;
+		}
+		Vec3 camera = context.levelState().cameraRenderState.pos;
+		Vec3 at = neck(player, partial).subtract(camera);
+		float scale = (float)(player.getScale() * MODEL_SCALE);
+		BlockPos pos = BlockPos.containing(player.getEyePosition(partial));
+		int light = LightCoordsUtil.pack(player.level().getBrightness(LightLayer.BLOCK, pos), player.level().getBrightness(LightLayer.SKY, pos));
+		PoseStack poseStack = context.poseStack();
+		poseStack.pushPose();
+		// as the avatar renderer turns and flips a player's model, from the neck
+		poseStack.translate(at.x, at.y, at.z);
+		poseStack.rotate(Axis.YP.rotationDegrees(180.0F - Mth.rotLerp(partial, player.yBodyRotO, player.yBodyRot)));
+		poseStack.scale(-scale, -scale, scale);
+		draw(poseStack, context.submitNodeCollector(), light, p, paint, lights);
 		poseStack.popPose();
 	}
 
