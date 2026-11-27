@@ -19,7 +19,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
-- [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
 
 
 ## Being built
@@ -27,6 +26,7 @@ kanban-plugin: board
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 🍇 Bacchus · #2281 · claimed
 - [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · 💻 Odysseus · claimed
+- [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · 💻 Odysseus · claimed
 
 
 ## In review
