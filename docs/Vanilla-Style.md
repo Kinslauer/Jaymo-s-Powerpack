@@ -137,6 +137,16 @@ https://claude.ai/artifact/DJgp8W4XAaLJPyuTMVxBED). The game fetches each one fr
 | Red Bricks 1.0.5 | Lobster Project | MIT | on top |
 | Medieval Tactical Shield 1.1 | its Modrinth author (project pwDKTTxF) | MIT | on top |
 
+**Back to vanilla** (Andy, 2026-11-26): `/texturelook vanilla` (client, `client/TextureLook`) switches off the Reason
+look, `held_3d`, `living_world` and every downloaded retexture or model pack (the five above plus Re-covered, Fancy
+Crops, 3D ladders and doors, Fabulous Fences, Armored Legacy, Canoe boats, Better Horses) and keeps them off across
+launches; `/texturelook reason` puts them back. A new retexture pack of vanilla or another mod goes into
+`TextureLook.FILE_PACKS` (or `BUILT_IN`) too. Our mods' own textures, the medieval MCA villagers, Tissou's zombies,
+KSPACK, music and Fresh Animations stay on.
+
+New installs start on the vanilla look (Andy, 2026-11-27): `client/NewPlayerDefaults` picks it, with low-end mode, on an
+install's first launch (no `config/jaymospowers-low-end.properties` yet). Installs that launched before keep their choice.
+
 Don't copy pixels from Pixel Perfection Fidelity into our own textures: share-alike would then cover them. New art for our
 own items goes to an art agent, starting from the CC0 and MIT sources Andy picked (OpenGameArt weapon, RPG item, block
 and ship sets; Computercraft Greentech, CC Industrialized, Militech, Wares Recalibration, Vanilla Military, Starlight 16x).
@@ -152,6 +162,8 @@ licence; `python3 tools/open_art/apply.py` copies them onto our textures and mus
 | Powers far-world moon, Glacia and Verdant rock | 16x16 Block Texture Set (stone_generic, ice_glacier, serpentine) | aroachifoundonmypillow (OpenGameArt) | CC0 |
 | Powers Space Pod icon; the flight screen's raider pod and derelict pod (`textures/gui/pod_raider.png`, `pod_wreck.png`) | 16x16 Ship Collection (yellow row 9, red row 1, yellow row 9; black ground made clear) | Master484 (OpenGameArt) | CC0 |
 | Powers Gravity Machine (all faces, on and off), Fuel Works sides and top, Landing Beacon base | Militech (Oritech retexture) | LutherDev (Modrinth) | MIT, notice in `sources/militech/LICENSE.txt` |
+| Powers Rig suits Hail (`textures/entity/rig/suit_hail.png` + glow) | Power Armor: Renostalgized's worn layers, laid onto the Rig's plates by `tools/open_art/rig_suits.py` | Thepigcat76 (Modrinth) | MIT, notice in `sources/power_armor/LICENSE.txt` |
+| Powers Rig suit Tinker (`textures/entity/rig/suit_tinker.png` + glow) | Netherite Armor (resource pack) worn layers, the same way | ItsSory (Modrinth) | MIT, notice in `sources/netherite_armor/LICENSE.txt` |
 
 Tried and dropped: Shade's sword and dagger on the silver sword and hidden blade (Andy, 2026-11-26), the block set's slate tiles and bricks on the mason table (they lose the table's plan and tools) and
 Militech's steel block on the landing beacon (soft diagonal gradient). The hammer keeps Shade's black outline,

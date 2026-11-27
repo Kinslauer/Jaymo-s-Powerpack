@@ -89,7 +89,7 @@ Every agent, Hermes included, works only in **its own git worktree** on its own 
 0. Sync the live folder (`python tools/vault_sync.py`; Claude Code's hook does it for you), then check `Live/Inbox/`
    for a task meant for you (see above). Bots: `python tools/vault_sync.py --next <your name>` does the sync, the
    claim (your own claimed task first) and prints the steps for it in one go.
-1. Read [[Home]] (versions, guides) and [[Dashboard]] (what waits on Andy, what's stuck), then `CLAUDE.md`, the
+1. Read [[Home]] (versions, guides) and [[Dashboard]] (what waits on Andy, what's stuck), then `AGENTS.md`, the
    `.claude/rules/*.md` whose `paths:` match the files you'll edit, and [[Glossary]] when Andy's words for something
    don't match a name in the code.
 2. Read every note in `E:/Jaymo Vault Live/Agents/` whose `status` is `running`, `in-review` or

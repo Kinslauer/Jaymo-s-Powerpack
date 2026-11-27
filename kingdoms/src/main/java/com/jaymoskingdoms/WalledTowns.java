@@ -519,11 +519,8 @@ final class WalledTowns {
 			if (next >= 3) {
 				KingdomEvents.announce(server, message);
 			} else {
-				for (ServerPlayer player : level.players()) {
-					if (player.blockPosition().distSqr(f.seat()) < 192.0 * 192.0) {
-						player.sendSystemMessage(message);
-					}
-				}
+				// (not in chat, Andy 2026-11-27: the crier cries it)
+				TownCrier.town(level, f, "word", message);
 			}
 		}
 		JaymosKingdoms.LOGGER.info("{} grew to tier {}", f.name(), next);

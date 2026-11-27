@@ -23,5 +23,7 @@ abstract class LevelNehemothPartsMixin {
 		at = @At("RETURN"))
 	private void jaymoskingdoms$nehemothParts(@Nullable Entity except, AABB box, Predicate<? super Entity> selector, CallbackInfoReturnable<List<Entity>> cir) {
 		NehemothPart.addNear((Level)(Object)this, except, box, selector, cir.getReturnValue());
+		// the dragons' parts too (their heads, necks, tails and wings), the same way
+		com.jaymoskingdoms.dragons.DragonPart.addNear((Level)(Object)this, except, box, selector, cir.getReturnValue());
 	}
 }

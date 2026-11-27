@@ -38,6 +38,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		// (Andy, 2026-11-23) greeting, bowing, talking and pickpocketing in Powers' list of keys by the crosshair
 		com.jaymoskingdoms.ContextLines.register();
+		// (Andy, 2026-11-26) and who is too busy to talk just now, as the server tells it
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.ContextBusy.Busy.TYPE,
+			(payload, context) -> com.jaymoskingdoms.ContextBusy.heard(payload));
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> com.jaymoskingdoms.ContextBusy.clear());
 		// and lines naming someone they don't know call them what they are
 		IntroNames.register();
 		// great foes' themes, and the trophy stand's item
@@ -383,6 +387,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		FrostTechLayer.register();
 		// (0.7.486) the sea-blooded Tideborn's parts (players and villagers)
 		SeaParts.register();
+		// snouts, beaks, fangs and horns on the looks whose faces were only painted (players and villagers)
+		FaceParts.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		GreenskinLooks.register();
 		// (0.7.616, Rivals patch 1) the marks captains carry back

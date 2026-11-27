@@ -155,6 +155,9 @@ public final class HundredBlades {
 		player.setAttached(SKY, sky);
 		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.SKYWARD, FILM_TICKS, point, null, FILM_WITNESSES);
 
+		MagicFx.spectacle(level, point, "pierre02/sword_lightning", 0.018F, MagicFx.CRACKLE_COLOR, FILM_TICKS,
+			MagicFx.SIGIL, Vec3.ZERO, 4.0F);
+
 		boolean corrupted = Fate.isCorrupted(player);
 		float damage = BLADE_DAMAGE * (corrupted ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F);
 		List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class,

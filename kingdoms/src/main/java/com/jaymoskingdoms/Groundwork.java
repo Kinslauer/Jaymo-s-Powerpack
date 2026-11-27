@@ -34,7 +34,10 @@ import org.jspecify.annotations.Nullable;
  * {@link #CLIFF_MAX} high (a one-wide earth ramp every {@link #RAMP_SPACING} blocks along the ledge; stairs in the
  * settlement's stone where it's a road), and lays plank bridges in the settlement's wood where a road runs into a gap
  * up to {@link #BRIDGE_MAX} wide. Only open ground and roads are touched (never a building's piece, never water), over
- * the settlement's village (or round its seat, with none). The ground is read a few passes a day; a builder with
+ * the settlement's village (or round its seat, with none). He also clears the overgrowth folk get boxed in by
+ * ({@link Overgrowth#inTheWay}): cobwebs, and leaves indoors, where folk would walk (through the buildings' floors, up to
+ * {@link #GROWTH_DEPTH} below the top of each column), and wild leaves at foot or head height in the streets. The
+ * ground is read a few passes a day; a builder with
  * groundwork does it before anything else, the rest of the crew go on building. Wraps the builders' brain
  * ({@link Builders#brain}).
  */
@@ -58,9 +61,21 @@ final class Groundwork {
 	static final int REPATH_TICKS = 20, STUCK_TICKS = 200, LEG = 20;
 	/** A builder hurt this recently is left to run (ticks). */
 	static final int FLEE_TICKS = 100;
+	/** Overgrowth is looked for this far down from the top of each column (through a house's floors). */
+	static final int GROWTH_DEPTH = 24;
 
-	/** One fix: blocks set upward from {@code at} (a pit or ramp column from its old surface up, or a bridge's plank). */
-	record Fix(BlockPos at, BlockState[] column, boolean bridge) {
+	/**
+	 * One fix: blocks set upward from {@code at} (a pit or ramp column from its old surface up, or a bridge's plank), or
+	 * ({@code clear}) the overgrowth at {@code at} taken out.
+	 */
+	record Fix(BlockPos at, BlockState[] column, boolean bridge, boolean clear) {
+		Fix(BlockPos at, BlockState[] column, boolean bridge) {
+			this(at, column, bridge, false);
+		}
+
+		static Fix clearing(BlockPos at) {
+			return new Fix(at, new BlockState[] {Blocks.AIR.defaultBlockState()}, false, true);
+		}
 	}
 
 	/** A settlement's ground: where it is, its buildings (left alone), how far the reading has got, what's queued. */
@@ -186,6 +201,7 @@ final class Groundwork {
 				break;
 			}
 			int x = a.minX() + w.column % a.getXSpan(), z = a.minZ() + w.column / a.getXSpan();
+			overgrowth(level, w, x, z);
 			if (!walkable(level, w, x, z)) {
 				continue;
 			}
@@ -367,6 +383,20 @@ final class Groundwork {
 		}
 	}
 
+	/** The overgrowth on column x/z in folk's way ({@link Overgrowth#inTheWay}): in its rooms, and wild leaves outside. */
+	private static void overgrowth(ServerLevel level, Work w, int x, int z) {
+		if (!w.area.isInside(x, w.area.minY(), z) || height(level, x, z) == Integer.MIN_VALUE) {
+			return;
+		}
+		int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+		for (int y = top; y > Math.max(level.getMinY(), top - GROWTH_DEPTH); y--) {
+			if (Overgrowth.inTheWay(level, at.set(x, y, z), level.getBlockState(at), true)) {
+				queue(w, Fix.clearing(at.immutable()));
+			}
+		}
+	}
+
 	private static void queue(Work w, Fix fix) {
 		if (w.fixes.size() < QUEUE_MAX) {
 			w.fixes.putIfAbsent(fix.at(), fix);
@@ -403,7 +433,7 @@ final class Groundwork {
 			job.improvedAt = now;
 			job.repathAt = 0;
 			b.setHomeTo(Builders.depot(f), Construction.WORK_RADIUS);
-			b.setTask(job.target.bridge() ? "bridging a gap" : "levelling the ground");
+			b.setTask(job.target.clear() ? "clearing the overgrowth" : job.target.bridge() ? "bridging a gap" : "levelling the ground");
 		}
 		Fix fix = job.target;
 		b.setSite(fix.at());
@@ -417,6 +447,10 @@ final class Groundwork {
 			return true;
 		}
 		b.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		if (fix.clear()) {
+			Overgrowth.clear(level, fix.at(), level.getBlockState(fix.at()));
+			return true;
+		}
 		for (int i = 0; i < fix.column().length; i++) {
 			level.setBlock(fix.at().above(i), fix.column()[i], Block.UPDATE_ALL);
 		}
@@ -434,6 +468,10 @@ final class Groundwork {
 	/** The fix is still wanted: a bridge's spot still open; a column's old surface still there, and nothing built over it since. */
 	private static boolean still(ServerLevel level, Fix fix) {
 		BlockPos at = fix.at();
+		if (fix.clear()) {
+			BlockState s = level.getBlockState(at);
+			return Overgrowth.inTheWay(level, at, s, true);
+		}
 		if (fix.bridge()) {
 			BlockState s = level.getBlockState(at);
 			return s.isAir() || (s.canBeReplaced() && s.getFluidState().isEmpty());

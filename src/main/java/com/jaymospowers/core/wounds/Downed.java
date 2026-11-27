@@ -1581,7 +1581,8 @@ public final class Downed {
 	 */
 	private static void rise(ServerLevel level, ServerPlayer player, long now) {
 		Rise r = RISES.get(player.getUUID());
-		if (!player.isShiftKeyDown()) {
+		// (Andy, 2026-11-26: an execution should finish) pinned under an executioner's blow, they can't get up either
+		if (!player.isShiftKeyDown() || MobExecutions.pinned(player)) {
 			if (r != null && r.ticks > 0 && !r.knocked && !DownedLie.satAgainst(player)) {
 				// (0.21.39) the body drops back down (up a wall, it slides back down it instead); it lands (the thud and the dust) as the drawing does
 				SINKING.put(player.getUUID(), now + SINK_TICKS);

@@ -1504,6 +1504,40 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- an NPC's weapons on its body: Powers' BodyWeapons (its homes, and the layer that draws them) ----------------------
+
+	/** Powers' {@code BodyWeapons.carry(LivingEntity, List)}. */
+	private static java.lang.invoke.@Nullable MethodHandle bodyWeapons;
+	private static boolean lookedForBodyWeapons;
+
+	/**
+	 * What the NPC {@code mob} carries off its hands, in the order it should show ({@link Sidearms#show}): Powers gives up to
+	 * three of them their places on the body (a blade at the hip, a bow or gun slung on the back) and draws them as it does a
+	 * player's. Nothing without Powers.
+	 */
+	static void carry(LivingEntity mob, java.util.List<net.minecraft.world.item.ItemStack> carried) {
+		if (!lookedForBodyWeapons) {
+			lookedForBodyWeapons = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					bodyWeapons = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.armory.BodyWeapons"), "carry",
+						java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class, java.util.List.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Powers can't show NPCs' weapons on their bodies (older Powers?)", e);
+				}
+			}
+		}
+		if (bodyWeapons == null) {
+			return;
+		}
+		try {
+			bodyWeapons.invoke(mob, carried);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't show {}'s weapons", mob, e);
+			bodyWeapons = null;
+		}
+	}
+
 	// ---- (0.7.268) a film: Powers' UltimateFilm (letterbox bars, and one player's camera) ------------------------------
 
 	/** Powers' {@code UltimateFilm.play(ServerPlayer, int, int, Vec3, Entity, double)} and {@code witnessed(Entity, int, int, Vec3, Entity, double)}. */
@@ -3605,6 +3639,9 @@ public final class PowersCompat {
 			realms.getField("keeps").set(null, keeps);
 			java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, String> knows = PowersCompat::knowsSteel;
 			Class.forName("com.jaymospowers.tinkering.smithing.RealmSteels").getField("knows").set(null, knows);
+			// and who knows steelmaking (RealmSteels.steelKnown): the realm's steel blueprint, SteelRealms
+			java.util.function.Predicate<net.minecraft.server.level.ServerPlayer> steel = SteelRealms::knows;
+			Class.forName("com.jaymospowers.tinkering.smithing.RealmSteels").getField("steelKnown").set(null, steel);
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the realm designs and steels (older Powers?)", e);
 		}
@@ -5404,6 +5441,66 @@ public final class PowersCompat {
 		lookForMagic();
 		try {
 			return washBlood != null && (boolean)washBlood.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Powers' {@code ArmourGrime.washAll(LivingEntity, int)} and {@code SeveredPart} with its {@code litter()}. */
+	private static java.lang.invoke.@Nullable MethodHandle washAllOf, litterOf;
+	private static @Nullable Class<?> severedPart;
+	private static boolean lookedForSexton;
+
+	private static void lookForSexton() {
+		if (lookedForSexton) {
+			return;
+		}
+		lookedForSexton = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			washAllOf = lookup.findStatic(Class.forName("com.jaymospowers.core.wet.ArmourGrime"), "washAll",
+				java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' washing (older Powers?)", e);
+		}
+		try {
+			severedPart = Class.forName("com.jaymospowers.core.SeveredPart");
+			litterOf = lookup.findVirtual(severedPart, "litter", java.lang.invoke.MethodType.methodType(boolean.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' severed parts for sextons (older Powers?)", e);
+			severedPart = null;
+		}
+	}
+
+	/**
+	 * Washes {@code amount} of blood and grime off {@code body}: its coat, its own clothes and every piece it wears (Powers'
+	 * {@code ArmourGrime.washAll}), what it holds too ({@link #washBlood}), and any zombie's rotten blood. True if any was on it;
+	 * false without Powers.
+	 */
+	public static boolean washAll(LivingEntity body, int amount) {
+		lookForSexton();
+		boolean any = false;
+		try {
+			any = washAllOf != null && (boolean)washAllOf.invoke(body, amount);
+		} catch (Throwable e) {
+			// nothing to wash without Powers
+		}
+		any |= washBlood(body);
+		any |= washZombieBlood(body);
+		return any;
+	}
+
+	/** Whether {@code entity} is a severed head or limb lying loose for a sexton to bury (Powers' {@code SeveredPart.litter}). */
+	public static boolean litterPart(net.minecraft.world.entity.Entity entity) {
+		lookForSexton();
+		if (severedPart == null || litterOf == null || !severedPart.isInstance(entity)) {
+			return false;
+		}
+		try {
+			return (boolean)litterOf.invoke(entity);
 		} catch (Throwable e) {
 			return false;
 		}

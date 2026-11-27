@@ -14,6 +14,9 @@ import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -78,7 +81,28 @@ public final class DragonBreath {
 				if (hit.getType() == HitResult.Type.BLOCK) {
 					light(level, hit.getBlockPos().relative(hit.getDirection()));
 				}
+				// (by outline: thin snow has no collider) it melts snow and ice and lights campfires (after Dragonforge)
+				BlockHitResult touch = level.clip(new ClipContext(mouth, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, dragon));
+				if (touch.getType() == HitResult.Type.BLOCK) {
+					melt(level, touch.getBlockPos());
+				}
 			}
+		}
+	}
+
+	/** Fire's heat on {@code pos}: snow and powder snow go, ice runs to water, an unlit campfire catches. */
+	static void melt(ServerLevel level, BlockPos pos) {
+		BlockState state = level.getBlockState(pos);
+		if (state.is(Blocks.SNOW) || state.is(Blocks.SNOW_BLOCK) || state.is(Blocks.POWDER_SNOW)) {
+			level.removeBlock(pos, false);
+			level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4F, 1.6F);
+		} else if (state.is(Blocks.ICE) || state.is(Blocks.FROSTED_ICE)) {
+			level.setBlockAndUpdate(pos, level.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.WATER_EVAPORATES, pos)
+				? Blocks.AIR.defaultBlockState() : Blocks.WATER.defaultBlockState());
+			level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 1.4F);
+		} else if (state.getBlock() instanceof CampfireBlock && state.hasProperty(CampfireBlock.LIT) && !state.getValue(CampfireBlock.LIT)
+			&& !state.getValue(CampfireBlock.WATERLOGGED)) {
+			level.setBlockAndUpdate(pos, state.setValue(CampfireBlock.LIT, true));
 		}
 	}
 
@@ -89,6 +113,10 @@ public final class DragonBreath {
 			return true;
 		}
 		if (kindred(dragon, target)) {
+			return true;
+		}
+		if (dragon instanceof WindDragon realm && realm.realmGuard() && target instanceof net.minecraft.world.entity.npc.villager.AbstractVillager) {
+			// a realm's dragon spares the realm's folk
 			return true;
 		}
 		if (!(dragon instanceof OwnableEntity ownable)) {

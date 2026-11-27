@@ -319,6 +319,7 @@ public final class Freerun {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player.getUUID()));
 		FastRun.init();
 		Slide.init();
+		CoreMotion.init();
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			DOING.clear();
 			KICKED.clear();
@@ -604,6 +605,17 @@ public final class Freerun {
 
 	// ---- server -----------------------------------------------------------------------------------------------------
 
+	/** Whether {@code player} may sprint-slide (any power user, or someone who learned Slide in the skill tree). */
+	public static boolean canSlide(Player player) {
+		return com.jaymospowers.core.Powers.of(player) != null
+			|| com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SLIDE);
+	}
+
+	/** Whether {@code player} may cat-leap / vault a waist-high block (any power user, or Freerunner rank 1+). */
+	public static boolean canVault(Player player) {
+		return com.jaymospowers.core.Powers.of(player) != null || perk(player, Perk.FREERUNNER) >= 1;
+	}
+
 	private static void move(ServerPlayer player, Move move) {
 		int kind = move.kind();
 		Doing current = DOING.get(player.getUUID());
@@ -613,8 +625,8 @@ public final class Freerun {
 			return;
 		}
 		if (kind == SLIDE) {
-			// (Andy's skill-tree locks) learned: Slide
-			if (Slide.valid(player) && !Ledge.powerMoving(player) && com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SLIDE)) {
+			// (Andy's skill-tree locks) learned: Slide, or shared movement set for any power user
+			if (Slide.valid(player) && !Ledge.powerMoving(player) && canSlide(player)) {
 				stop(player);
 				Slide.start(player);
 			} else {
@@ -659,6 +671,7 @@ public final class Freerun {
 			case VAULT -> {
 				int variant = vaultStyle(level, player);
 				player.setAttached(MOVE, (variant * 8 + VAULT) * 8);
+				CoreMotion.play(player, "animation.player.catleap", 15);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.3F, 1.6F);
 				WebParkour.dust(level, player, null, 4);
 			}
@@ -711,7 +724,7 @@ public final class Freerun {
 	private static boolean valid(ServerLevel level, ServerPlayer player, int kind, @Nullable Direction side, BlockPos pos, @Nullable Doing current) {
 		switch (kind) {
 			case VAULT:
-				return rank(player, Perk.FREERUNNER) >= 1
+				return (com.jaymospowers.core.Powers.of(player) != null || rank(player, Perk.FREERUNNER) >= 1)
 					&& vaultHeight(level, player, Vec3.directionFromRotation(0.0F, player.getYRot()), VAULT_REACH + SERVER_REACH) > 0.0;
 			case CLING:
 				return side != null && GRIPPED.getOrDefault(player.getUUID(), 0) < grip(player)

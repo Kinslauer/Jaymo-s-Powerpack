@@ -319,6 +319,11 @@ public final class NightLights {
 		}
 		boolean night = level.isDarkOutside();
 		boolean resting = mob.isSleeping() || Downed.isDowned(mob) || PowersCompat.helpless(mob);
+		if (!resting && GuardWatch.investigating(mob)) {
+			// (GuardWatch) a guard going to look keeps the light he lit for it, day or night, till he's done
+			FETCHING.remove(mob.getUUID());
+			return;
+		}
 		boolean watch = night && !resting && onWatch(level, mob);
 		if (!night || resting || !watch && seesInDark(mob)) {
 			FETCHING.remove(mob.getUUID());
@@ -355,6 +360,24 @@ public final class NightLights {
 			return;
 		}
 		fetch(level, mob, now);
+	}
+
+	/**
+	 * (GuardWatch) A guard going to look into something in the dark lights up first: a light in hand now, the quickest way
+	 * (the one he kept, one in his pocket, else the watch's issue from the stores, else a torch). Nothing if he has one in hand.
+	 */
+	static void lightUp(ServerLevel level, PathfinderMob mob) {
+		if (seesInDark(mob) || mob.getAttached(CARRYING) != null || isLight(mob.getMainHandItem()) || isLight(mob.getOffhandItem())) {
+			return;
+		}
+		ItemStack kept = mob.getAttached(KEPT);
+		if (kept != null && !kept.isEmpty()) {
+			mob.removeAttached(KEPT);
+			take(mob, kept.copy());
+			return;
+		}
+		ItemStack pocket = fromPocket(mob);
+		take(mob, pocket.isEmpty() ? issue(level, mob) : pocket);
 	}
 
 	/** A light {@code mob} has about them: one from a villager's or pillager's own inventory (taken out of it), or empty. */

@@ -216,7 +216,7 @@ public final class FreerunClient {
 			return;
 		}
 		// (the jump off the ground has already happened this tick: airborne one tick)
-		if (jumpPressed && airTicks <= 1 && player.isSprinting() && input.forward() && Freerun.perk(player, Freerun.Perk.FREERUNNER) >= 1
+		if (jumpPressed && airTicks <= 1 && player.isSprinting() && input.forward() && Freerun.canVault(player)
 			&& tryVault(player)) {
 			return;
 		}
@@ -553,7 +553,7 @@ public final class FreerunClient {
 	 */
 	private static boolean trySlide(LocalPlayer player, Input input) {
 		boolean sneak = Minecraft.getInstance().options.keyShift.isDown();
-		if (!com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SLIDE)) {
+		if (!Freerun.canSlide(player)) {
 			// (Andy's skill-tree locks) learned: Slide. Without it Sneak in a run is a plain sneak; held as long as a slide
 			// wants, you're told so, once a hold
 			if (running(player) && sneak && !input.jump() && player.onGround() && Freerun.canMove(player, Freerun.SLIDE)) {
@@ -590,7 +590,7 @@ public final class FreerunClient {
 	 */
 	public static boolean slideOutOf(LocalPlayer player, Vec3 dir, double speed) {
 		if (kind != Freerun.NONE || cooldown > 0 || !player.onGround() || player.isSpectator() || !Freerun.canMove(player, Freerun.SLIDE)
-			|| !com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SLIDE) || LedgeClient.active() || com.jaymospowers.client.power.web.WebPowerClient.parkourBusy() || dir.lengthSqr() < 1.0E-4) {
+			|| !Freerun.canSlide(player) || LedgeClient.active() || com.jaymospowers.client.power.web.WebPowerClient.parkourBusy() || dir.lengthSqr() < 1.0E-4) {
 			return false;
 		}
 		sneakTicks = 0;
@@ -606,7 +606,7 @@ public final class FreerunClient {
 	/** (0.21.36) Whether Sneak held now counts toward a slide: running on the ground, no move under way, free to slide. */
 	private static boolean slideHoldable(LocalPlayer player, boolean sneak, boolean jump) {
 		return sneak && !jump && player.onGround() && running(player) && Freerun.canMove(player, Freerun.SLIDE)
-			&& com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SLIDE);
+			&& Freerun.canSlide(player);
 	}
 
 	/** Running enough to slide: a fast run, a sprint, or a sprint just let go. */

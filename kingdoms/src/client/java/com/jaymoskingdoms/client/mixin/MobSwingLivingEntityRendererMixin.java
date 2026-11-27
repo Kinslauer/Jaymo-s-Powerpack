@@ -57,6 +57,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.CapeLayer.extract(entity, state, partialTicks);
 		// (fighting AI patch 7) a shield or blade carried on the back
 		com.jaymoskingdoms.client.BackGearLayer.extract(entity, state);
+		// and an NPC archer's quiver (Sidearms)
+		com.jaymoskingdoms.client.QuiverLayer.extract(entity, state);
 		// (0.7.641) a stake in a vampire
 		com.jaymoskingdoms.client.StakeLayer.extract(entity, state);
 		com.jaymoskingdoms.client.StakeStruggle.extract(entity, state, partialTicks);
@@ -75,6 +77,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.FrostTechLayer.extract(entity, state);
 		// (0.7.486) the sea-blooded Tideborn's fins, tentacles, shells and spines
 		com.jaymoskingdoms.client.SeaParts.extract(entity, state);
+		// the snouts, beaks, fangs and horns of the looks whose faces were only painted
+		com.jaymoskingdoms.client.FaceParts.extract(entity, state);
 		com.jaymoskingdoms.client.TinkererOutfit.extract(entity, state);
 		// what they wear in the harness (HeraldryLayer, UnderArmourLayer)
 		com.jaymoskingdoms.client.HeraldryLayer.extract(entity, state);

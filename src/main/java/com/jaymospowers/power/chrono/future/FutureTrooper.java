@@ -1,6 +1,7 @@
 package com.jaymospowers.power.chrono.future;
 
 import com.jaymospowers.rig.Rig;
+import com.jaymospowers.rig.RigFrame;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -43,6 +44,8 @@ public class FutureTrooper extends PathfinderMob implements RangedAttackMob {
 	static final int BLAST_MIN = 30, BLAST_MAX = 50;
 	/** The thrusters catch a fall faster than this (blocks a tick). */
 	static final double FALL_CAP = -0.28;
+	/** The share of troopers in Hail plate. */
+	static final float HAIL_SHARE = 0.8F;
 	/** What a beaten trooper leaves: Rig Salvage, this many at most, this often. */
 	static final float SALVAGE_CHANCE = 0.35F;
 	static final int SALVAGE_MAX = 2;
@@ -84,10 +87,16 @@ public class FutureTrooper extends PathfinderMob implements RangedAttackMob {
 			(target, level) -> hostileTo(target)));
 	}
 
-	/** Sent out by {@link FutureMachines}: the whole Rig, worn and kept. */
+	/**
+	 * Sent out by {@link FutureMachines}: the whole Rig, worn and kept. Most wear the Frostborn's own white Hail plate
+	 * (Andy: "the future frostborn should primarily use Hail Rigs"); the rest the standard suit.
+	 */
 	public void outfit() {
+		RigFrame frame = getRandom().nextFloat() < HAIL_SHARE ? RigFrame.HAIL : RigFrame.STANDARD;
 		for (Rig.Piece piece : Rig.Piece.values()) {
-			setItemSlot(piece.slot, new ItemStack(piece.item()));
+			ItemStack worn = new ItemStack(piece.item());
+			Rig.stamp(worn, frame);
+			setItemSlot(piece.slot, worn);
 			setDropChance(piece.slot, 0.0F);
 		}
 	}

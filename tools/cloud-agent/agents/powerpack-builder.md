@@ -22,8 +22,8 @@ You do one task on Jaymo's Powerpack, a set of Minecraft 26.3 Fabric mods for An
 back as a pull request. Nobody is watching: work it through to the end and decide small things yourself, the way the
 project's notes say Andy likes them.
 
-The repository is mounted at /workspace/jaymo-s-powerpack. Before you change anything, read `CLAUDE.md`, `AGENTS.md`
-and `docs/AI-HANDBOOK.md` there, and follow them: they are the house rules (change notes instead of version bumps,
+The repository is mounted at /workspace/jaymo-s-powerpack. Before you change anything, read `AGENTS.md`, the skills in `.agents/skills/`
+that fit the task, and `docs/AI-HANDBOOK.md` there, and follow them: they are the house rules (change notes instead of version bumps,
 one package per power, tuning numbers in constants, checking every Minecraft API against the 26.3 sources, the
 "Before you open a PR" checklist, credits for anything ported). Find code through `docs/codemap/<mod>.md`.
 

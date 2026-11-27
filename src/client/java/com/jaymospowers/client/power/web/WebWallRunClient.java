@@ -56,7 +56,7 @@ final class WebWallRunClient {
 		}
 		boolean free = !player.onGround() && !player.isInWater() && !player.isInLava() && !player.onClimbable() && !player.isFallFlying()
 			&& !player.getAbilities().flying && !player.isPassenger() && !player.isSpectator() && player.isAlive()
-			&& !swing.attached() && swing.pull == null && swing.wingsTicks == 0 && !WebSymbioteClient.driving()
+			&& !swing.attached() && swing.pull == null && swing.wingsTicks == 0 && !swing.lineRide.active() && !WebSymbioteClient.driving()
 			&& !WebPower.ragdolled(player) && !com.jaymospowers.client.freerun.FreerunClient.active();
 		if (face == null) {
 			if (free && input.forward() && !input.shift()) {
@@ -71,6 +71,14 @@ final class WebWallRunClient {
 		}
 		if (jumpPressed) {
 			kick(player);
+			return;
+		}
+		// use held with an open ledge up the wall: leap for it and pull over (WebEdgeHint)
+		WebEdgeHint.glint(player, face);
+		if (WebEdgeHint.leap(player, face)) {
+			Direction wall = face;
+			stop();
+			lastFace = wall;
 			return;
 		}
 		Vec3 moved = new Vec3(player.getX() - player.xo, 0.0, player.getZ() - player.zo);

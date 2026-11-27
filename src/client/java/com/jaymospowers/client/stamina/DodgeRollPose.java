@@ -118,7 +118,6 @@ public final class DodgeRollPose {
 	/** From the avatar renderer's extractRenderState. */
 	public static void extract(Entity entity, AvatarRenderState state, float partialTicks) {
 		Roll roll = roll(entity, partialTicks);
-		state.setData(KEY, roll);
 		if (roll != null && !roll.flip() && !roll.stretch() && !roll.dash()) {
 			// the body is the low one for a roll (so it goes under a gap); the tumble draws it standing, not laid flat as a crawl is
 			state.pose = Pose.STANDING;
@@ -126,6 +125,7 @@ public final class DodgeRollPose {
 			state.swimAmount = 0.0F;
 			state.isCrouching = false;
 		}
+		state.setData(KEY, entity instanceof Player player && com.jaymospowers.client.freerun.CoreMotionClient.playing(player, "dodge") ? null : roll);
 	}
 
 	private static @Nullable Roll roll(Entity entity, float partialTicks) {

@@ -11,9 +11,9 @@ public final class ChronoHooks {
 	private ChronoHooks() {
 	}
 
-	/** True while a Stasis Field holds this entity still. Server side only. */
+	/** True while a Stasis Field, or a wormhole drag's film, holds this entity still. Server side only. */
 	public static boolean isFrozen(Entity entity) {
-		return StasisField.isFrozen(entity);
+		return StasisField.isFrozen(entity) || ChronoWormhole.held(entity);
 	}
 
 	/** A player placed a block (server side). Chrono players' habits are remembered for their echoes. */

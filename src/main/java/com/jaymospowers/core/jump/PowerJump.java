@@ -117,6 +117,7 @@ public final class PowerJump {
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(EXHAUSTION);
 		}
+		com.jaymospowers.freerun.CoreMotion.play(player, "animation.player.double_jump", 11);
 		show(level, player.position(), player.getBbHeight(), kind);
 	}
 

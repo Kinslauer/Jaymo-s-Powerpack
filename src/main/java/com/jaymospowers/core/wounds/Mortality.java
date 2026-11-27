@@ -421,6 +421,7 @@ public final class Mortality {
 		Scars.register();
 		DeathToll.register();
 		Karma.register();
+		Reincarnate.register();
 	}
 
 	// ---- told by the downed state -----------------------------------------------------------------------------------------
@@ -1631,6 +1632,24 @@ public final class Mortality {
 		if (Karma.below(player) || Karma.weigh(player) == Karma.Verdict.EVEN) {
 			player.setAttached(FINAL, cause.key());
 		}
+	}
+
+	/**
+	 * {@code player} chose to end this character ({@link Reincarnate}), alive: as a final death that has them back on their
+	 * feet, black at once and at the world's spawn, then born again from nothing ({@link #tick}, {@link #endLife}).
+	 */
+	static void chooseToEnd(ServerPlayer player) {
+		MinecraftServer server = player.level().getServer();
+		player.closeContainer();
+		if (player.isPassenger()) {
+			player.stopRiding();
+		}
+		player.setAttached(REBORNING, (long)server.getTickCount());
+		player.setAttached(FINAL, Reincarnate.CHOSEN);
+		ServerLevel overworld = server.overworld();
+		BlockPos spawn = safe(overworld, overworld.getRespawnData().pos());
+		player.teleportTo(overworld, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, Set.of(), player.getYRot(), 0.0F, true);
+		JaymosPowers.LOGGER.info("{} chose to reincarnate", player.getScoreboardName());
 	}
 
 	/**

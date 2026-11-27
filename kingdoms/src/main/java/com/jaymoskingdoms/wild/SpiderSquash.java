@@ -50,6 +50,8 @@ import net.minecraft.world.phys.AABB;
  * (Powers' {@code BladeBlood.squashed}). A squashed spider spatters the same, beside its legs.
  * <p>Andy: snails "should squash into slime and you should be able to collect it." A squashed snail or slug's ({@link #SLIMY})
  * splat can be scraped up with a right click, as Kingdoms' snail slime ({@link SnailSlime}; four make a slimeball).
+ * <p>Andy: maggots "should also splat if you walk on them." A bug is splatted by any part of a foot that comes down on
+ * it ({@link #BUG_FOOT}), not only the middle of one, and monsters' feet splat bugs too ({@link #bugStomper}).
  */
 public final class SpiderSquash {
 	// ================================================================================================================
@@ -65,6 +67,9 @@ public final class SpiderSquash {
 	/** Walking over: the walker's middle must be over the spider (its footprint widened by this, blocks), and moving at
 	 * least this fast (blocks a tick; sneaking is about 0.04). */
 	static final double WALK_REACH = 0.15, WALK_SPEED = 0.02;
+	/** A bug is splatted by any part of a foot coming down on it: the walker's footprint (this share of its width, each
+	 * side of its middle) need only reach the bug's, not its middle. */
+	static final double BUG_FOOT = 0.4;
 	/** A landing's feet may be this far below the spider's bottom or above it (blocks). */
 	static final double LAND_BELOW = 0.6, LAND_ABOVE = 0.3;
 	/** Who squashes: at least this tall (blocks; a player sneaking is 1.5, a sheep 1.3, a wolf 0.85). */
@@ -176,15 +181,17 @@ public final class SpiderSquash {
 	/** A small spider: anyone walking with their middle over it squashes it. */
 	private static void walkedOver(ServerLevel level, LivingEntity spider) {
 		AABB box = spider.getBoundingBox();
+		boolean bug = bug(spider);
 		for (LivingEntity walker : level.getEntitiesOfClass(LivingEntity.class, box.inflate(1.0, 0.0, 1.0).expandTowards(0.0, 0.6, 0.0),
 			e -> e != spider && e.isAlive() && !e.isSpectator())) {
-			if (!walker.onGround() || !stomper(walker)) {
+			if (!walker.onGround() || !(bug ? bugStomper(walker) : stomper(walker))) {
 				continue;
 			}
 			double feet = walker.getY();
+			double reach = bug ? WALK_REACH + walker.getBbWidth() * BUG_FOOT : WALK_REACH;
 			if (feet < box.minY - 0.1 || feet > box.maxY + 0.1
-				|| walker.getX() < box.minX - WALK_REACH || walker.getX() > box.maxX + WALK_REACH
-				|| walker.getZ() < box.minZ - WALK_REACH || walker.getZ() > box.maxZ + WALK_REACH) {
+				|| walker.getX() < box.minX - reach || walker.getX() > box.maxX + reach
+				|| walker.getZ() < box.minZ - reach || walker.getZ() > box.maxZ + reach) {
 				continue;
 			}
 			// (only someone walking onto it: one standing still that a spider runs under isn't stamping)
@@ -240,6 +247,16 @@ public final class SpiderSquash {
 		return !spiderKind(who) && !(who instanceof Enemy) && !who.isSpectator() && who.getBbHeight() >= FOOT_HEIGHT
 			&& !who.isPassenger() && (who.getPose() == Pose.STANDING || who.getPose() == Pose.CROUCHING)
 			&& !(who instanceof Player player && player.getAbilities().flying)
+			&& !Downed.isDowned(who) && !PowersCompat.outOfPlay(who);
+	}
+
+	/**
+	 * Whether {@code who} splats a bug underfoot: anyone who would squash a spider, and the monsters too (a zombie
+	 * shambling through a heap of maggots bursts them as surely as a farmer's boot; only spiders spare their own kind).
+	 */
+	static boolean bugStomper(LivingEntity who) {
+		return stomper(who) || who instanceof Enemy && !spiderKind(who) && !who.isSpectator() && who.getBbHeight() >= FOOT_HEIGHT
+			&& !who.isPassenger() && (who.getPose() == Pose.STANDING || who.getPose() == Pose.CROUCHING)
 			&& !Downed.isDowned(who) && !PowersCompat.outOfPlay(who);
 	}
 

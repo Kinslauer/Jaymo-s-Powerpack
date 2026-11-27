@@ -59,18 +59,24 @@ public interface Worker {
 	/** Its tool (back in hand when it isn't carrying). */
 	ItemStack tool();
 
-	/** The tool for {@code role} (a camp's builders have stone ones). */
-	static ItemStack toolFor(int role, boolean wild) {
+	/**
+	 * The tool for {@code role} (a camp's builders have stone ones), made of the best its settlement's smiths have forged
+	 * ({@code grade}, {@link ToolGrades}).
+	 */
+	static ItemStack toolFor(int role, boolean wild, ToolGrades.Kit grade) {
+		if (wild) {
+			grade = ToolGrades.Kit.STONE;
+		}
 		if (role == Folk.FARMER) {
 			// (Jaymo's Powers' pitchfork when it is here: farmers carry one)
 			net.minecraft.world.item.Item fork = Careers.pitchfork();
-			return new ItemStack(fork != null ? fork : Items.IRON_HOE);
+			return new ItemStack(fork != null ? fork : ToolGrades.hoe(grade));
 		}
 		if (role == Folk.MINER) {
-			return new ItemStack(Items.IRON_PICKAXE);
+			return new ItemStack(ToolGrades.pickaxe(grade));
 		}
 		if (role == Folk.WOODCUTTER) {
-			return new ItemStack(Items.IRON_AXE);
+			return new ItemStack(ToolGrades.axe(grade));
 		}
 		if (role == Folk.PULLER) {
 			// (both hands on the shafts)
@@ -83,9 +89,9 @@ public interface Worker {
 			return new ItemStack(com.jaymoskingdoms.equestrian.Tackroom.HORSESHOES);
 		}
 		if (role == Folk.FOREMAN) {
-			return new ItemStack(wild ? Items.STONE_AXE : Items.WOODEN_AXE);
+			return new ItemStack(ToolGrades.axe(grade));
 		}
-		return new ItemStack(wild ? Items.STONE_SHOVEL : Items.IRON_SHOVEL);
+		return new ItemStack(ToolGrades.shovel(grade));
 	}
 
 	/** Whether {@code role} is one a worker does (and goes home to bed after). */

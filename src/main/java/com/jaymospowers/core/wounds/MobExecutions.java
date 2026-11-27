@@ -66,7 +66,9 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * <b>Stopping it:</b> hit the executioner. Any blow on it (yours, a friend's, a golem's) before the last breaks it off; it
  * turns on whoever hit it and won't try again for {@link #SHAKEN_TICKS}. It also stops if the victim is brought round,
- * rises, is carried off or crawls away (it follows), or the executioner is downed or dies. While it walks over and stands
+ * rises or is carried off, or the executioner is downed or dies. Crawling off works only while it walks over: Andy
+ * (2026-11-26), "the finisher cutscenes should really finish too", after crawling out from under the blow many times.
+ * Once it stands over them the scene is theirs to the end ({@link #HELD_ID}: it has them pinned, they can't crawl). While it walks over and stands
  * there, its own AI is set aside ({@code DownedMobMixin} calls {@link #step}), so it does nothing else.
  * <p>
  * (0.20.51) Andy (2026-11-05), on a guard standing over a downed zombie swinging and never finishing it: downed mobs are
@@ -87,6 +89,8 @@ public final class MobExecutions {
 	public static final int WINDUP = 18, STRIKE = 40, SCENE_TICKS = 56;
 	/** The film after the blow, round the killer over the body, before the death screen (ticks). */
 	public static final int AFTER_TICKS = 50;
+	/** Pinned under the executioner from the scene's start to its blow: no crawling out from under it. */
+	static final net.minecraft.resources.Identifier HELD_ID = com.jaymospowers.JaymosPowers.id("executed_held");
 	/** Players this near the executioner see the bars too (blocks). */
 	public static final double WITNESSES = 24.0;
 	/** An executioner hit or thwarted won't try again this long (ticks). */
@@ -449,10 +453,12 @@ public final class MobExecutions {
 		}
 		int t = (int)(now - e.at);
 		if (t < STRIKE && flat > SLIP + bulk) {
-			// they crawled off: after them, and it begins again when it's there
+			// (pinned, they can't crawl off) knocked or dragged clear of it: after them, and it begins again when it's there
 			e.at = 0L;
+			hold(victim, false);
 			return;
 		}
+		hold(victim, t <= STRIKE);
 		mob.getNavigation().stop();
 		face(mob, victim);
 		if (t == WINDUP) {
@@ -475,6 +481,7 @@ public final class MobExecutions {
 		mob.getNavigation().stop();
 		face(mob, victim);
 		mob.playAmbientSound();
+		hold(victim, true);
 		if (victim instanceof ServerPlayer player) {
 			UltimateFilm.play(player, UltimateFilm.DUTCH, SCENE_TICKS, mob.getEyePosition(), mob, 0.0);
 			UltimateFilm.witnessed(mob, UltimateFilm.DUTCH, SCENE_TICKS, mob.getEyePosition(), mob, WITNESSES);
@@ -565,6 +572,10 @@ public final class MobExecutions {
 		if (e.move == Move.CHOP && Dismember.canLoseParts(victim)) {
 			Dismember.sever(victim, Dismember.HEAD, mob);
 		}
+		if (e.move == Move.CRUSH) {
+			// (a ravager or the warden brings its whole weight down: that death may burst them; no other execution does)
+			com.jaymospowers.core.BlastGore.crushes(victim);
+		}
 		Downed.execute(level, victim, mob);
 		if (e.move == Move.CRUSH) {
 			com.jaymospowers.core.Crushing.mark(victim);
@@ -580,6 +591,31 @@ public final class MobExecutions {
 		if (victim instanceof ServerPlayer player) {
 			Shakes.send(player, WINDUP_SHAKE, victim.position());
 		}
+	}
+
+	/**
+	 * {@code victim} pinned where they lie ({@code held}), or let go: their speed taken to nothing, so a player's crawl
+	 * and a downed mob's both stop. Speed is synced, so a player's own client holds them too.
+	 */
+	private static void hold(LivingEntity victim, boolean held) {
+		net.minecraft.world.entity.ai.attributes.AttributeInstance speed =
+			victim.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+		if (speed == null) {
+			return;
+		}
+		if (!held) {
+			speed.removeModifier(HELD_ID);
+		} else if (speed.getModifier(HELD_ID) == null) {
+			speed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(HELD_ID, -1.0,
+				net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
+	}
+
+	/** Whether {@code victim} lies pinned under an executioner's coming blow ({@link #hold}). */
+	public static boolean pinned(LivingEntity victim) {
+		net.minecraft.world.entity.ai.attributes.AttributeInstance speed =
+			victim.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+		return speed != null && speed.getModifier(HELD_ID) != null;
 	}
 
 	/** Turned to look down at them. */
@@ -598,6 +634,11 @@ public final class MobExecutions {
 	private static void stop(Execution e, boolean thwarted) {
 		BY_VICTIM.remove(e.victim, e);
 		BY_MOB.remove(e.mob, e);
+		LivingEntity victim = e.body != null ? e.body
+			: e.mob.level().getServer() == null ? null : e.mob.level().getServer().getPlayerList().getPlayer(e.victim);
+		if (victim != null) {
+			hold(victim, false);
+		}
 		e.mob.getNavigation().stop();
 		if (thwarted) {
 			SHAKEN.put(e.mob, e.mob.level().getGameTime() + SHAKEN_TICKS);

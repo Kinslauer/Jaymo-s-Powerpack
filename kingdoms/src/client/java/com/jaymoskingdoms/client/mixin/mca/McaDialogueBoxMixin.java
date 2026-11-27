@@ -5,6 +5,7 @@ import com.jaymoskingdoms.client.DialogueCinematic;
 import com.jaymoskingdoms.client.TalkFirst;
 import com.jaymoskingdoms.client.TalkWheel;
 import com.jaymoskingdoms.client.Ui;
+import com.jaymoskingdoms.client.hud.HudStyle;
 import java.util.List;
 import net.conczin.mca.client.gui.InteractScreen;
 import net.conczin.mca.entity.VillagerLike;
@@ -103,6 +104,8 @@ abstract class McaDialogueBoxMixin extends Screen {
 	private FormattedText jaymoskingdoms$toBox(FormattedText text) {
 		if (text instanceof Component said) {
 			DialogueCinematic.said(this.villager.asEntity().getId(), said);
+			// (Andy 2026-11-27) the wheel's first spoke answers it
+			TalkFirst.said((InteractScreen)(Object)this, said);
 		}
 		return text;
 	}
@@ -271,10 +274,12 @@ abstract class McaDialogueBoxMixin extends Screen {
 
 		// the line you'd say, under the wheel
 		Component line = lit < 0 ? null : TalkWheel.line(shown.get(lit));
-		if (line != null && Minecraft.getInstance().player != null) {
-			List<FormattedCharSequence> rows = this.font.split(line, LINE_WIDTH - DialogueCinematic.BOX_PAD * 2);
+		// (Andy 2026-11-27) nothing pointed at, with one who has a quest for you: the tip in its place, how to get to it
+		Component tip = line == null ? TalkFirst.questTip(self) : null;
+		if ((line != null || tip != null) && Minecraft.getInstance().player != null) {
+			List<FormattedCharSequence> rows = this.font.split(line != null ? line : tip, LINE_WIDTH - DialogueCinematic.BOX_PAD * 2);
 			rows = rows.subList(0, Math.min(LINE_ROWS, rows.size()));
-			Component name = Minecraft.getInstance().player.getDisplayName();
+			Component name = line != null ? Minecraft.getInstance().player.getDisplayName() : Component.translatable("gui.jaymoskingdoms.talk.tip");
 			int wide = this.font.width(name);
 			for (FormattedCharSequence row : rows) {
 				wide = Math.max(wide, this.font.width(row));
@@ -284,7 +289,7 @@ abstract class McaDialogueBoxMixin extends Screen {
 			int y1 = this.height - bar - GAP, y0 = y1 - DialogueCinematic.BOX_PAD * 2 - (rows.size() + 1) * rowHigh - 2;
 			jaymoskingdoms$frame(g, x0, y0, x1, y1);
 			int y = y0 + DialogueCinematic.BOX_PAD;
-			g.text(this.font, name.getVisualOrderText(), x0 + DialogueCinematic.BOX_PAD, y, DialogueCinematic.NAME_COLOR);
+			g.text(this.font, name.getVisualOrderText(), x0 + DialogueCinematic.BOX_PAD, y, line != null ? DialogueCinematic.NAME_COLOR : HudStyle.GOLD);
 			y += rowHigh + 2;
 			for (FormattedCharSequence row : rows) {
 				g.text(this.font, row, x0 + DialogueCinematic.BOX_PAD, y, 0xFFFFFFFF);

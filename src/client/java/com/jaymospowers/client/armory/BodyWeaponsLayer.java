@@ -3,6 +3,7 @@ package com.jaymospowers.client.armory;
 import com.jaymospowers.armory.BodyWeapons;
 import com.jaymospowers.armory.BodyWeapons.Home;
 import com.jaymospowers.client.BodyCover;
+import com.jaymospowers.client.Dismembered;
 import com.jaymospowers.client.backpack.BackpackClient;
 import com.jaymospowers.client.menu.MenuTabs;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -12,16 +13,20 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.player.PlayerModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Avatar;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +38,8 @@ import org.jspecify.annotations.Nullable;
  * blade, then roll across the body) and the item drawn as the game draws it in that hand, so every weapon's own held model
  * is used (WeaponMod's guns, our flintlocks, swords). Over a chestplate, leggings or a costume each item sits further out
  * from the body; back items sit out over a worn backpack. The Character page (H) has the toggle for free placement.
+ * <p>NPCs the same way, on any humanoid body (an MCA villager's, a guard's): what Jaymo's Kingdoms says they carry
+ * ({@link BodyWeapons#carry}), extracted from the living renderer's state.
  */
 public final class BodyWeaponsLayer {
 	// ===== the knobs ================================================================================================
@@ -72,8 +79,9 @@ public final class BodyWeaponsLayer {
 
 	public static void init() {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
-			if (renderer instanceof AvatarRenderer<?> avatar) {
-				helper.register(new Layer(avatar));
+			// (players' bodies, and every humanoid NPC's)
+			if (renderer instanceof AvatarRenderer<?> || renderer.getModel() instanceof HumanoidModel<?>) {
+				helper.register(layer(renderer));
 			}
 		});
 		MenuTabs.characterLink(() -> {
@@ -83,9 +91,25 @@ public final class BodyWeaponsLayer {
 		}, () -> ClientPlayNetworking.send(new BodyWeapons.Toggle()));
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static Layer<?> layer(LivingEntityRenderer<?, ?, ?> renderer) {
+		return new Layer((RenderLayerParent) renderer);
+	}
+
 	/** From the avatar renderer's extractRenderState: each home's item model. */
 	public static void extract(Avatar entity, AvatarRenderState state) {
-		List<ItemStack> homes = entity instanceof Player player ? BodyWeapons.shown(player) : List.of();
+		extractBody(entity, state);
+	}
+
+	/** From the living renderer's extractRenderState, for an NPC's body (a player's is {@link #extract}'s). */
+	public static void extractNpc(LivingEntity entity, LivingEntityRenderState state) {
+		if (!(entity instanceof Avatar) && state instanceof HumanoidRenderState) {
+			extractBody(entity, state);
+		}
+	}
+
+	private static void extractBody(LivingEntity entity, LivingEntityRenderState state) {
+		List<ItemStack> homes = BodyWeapons.shown(entity);
 		if (homes.isEmpty()) {
 			state.setData(KEY, null);
 			return;
@@ -98,7 +122,7 @@ public final class BodyWeaponsLayer {
 				continue;
 			}
 			ItemStackRenderState item = new ItemStackRenderState();
-			Minecraft.getInstance().getItemModelResolver().updateForLiving(item, stack, context(i), (Player)entity);
+			Minecraft.getInstance().getItemModelResolver().updateForLiving(item, stack, context(i), entity);
 			if (!item.isEmpty()) {
 				items[i] = item;
 				any = true;
@@ -112,20 +136,21 @@ public final class BodyWeaponsLayer {
 		return HOMES[home][0] > 0.0F ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
 	}
 
-	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
-		Layer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
+	static final class Layer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
+		Layer(RenderLayerParent<S, HumanoidModel<S>> renderer) {
 			super(renderer);
 		}
 
 		@Override
-		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
+		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
 			Shown shown = state.getData(KEY);
-			if (shown == null || state.isInvisible) {
+			// (nor on a severed head or limb, drawn as the whole body with only that part showing)
+			if (shown == null || state.isInvisible || state.getData(Dismembered.ONLY) != null) {
 				return;
 			}
-			PlayerModel body = this.getParentModel();
+			HumanoidModel<S> body = this.getParentModel();
 			boolean costume = BodyCover.body(state);
-			boolean backpack = BackpackClient.worn(state);
+			boolean backpack = state instanceof AvatarRenderState avatar && BackpackClient.worn(avatar);
 			poseStack.pushPose();
 			body.root().translateAndRotate(poseStack);
 			body.body.translateAndRotate(poseStack);

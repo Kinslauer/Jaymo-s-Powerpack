@@ -247,6 +247,10 @@ public final class HavenGates {
 		if (Prejudice.degree(player) > 0 || Reputation.get(player, f.id()) >= GOOD_NAME || carriesToken(player, f)) {
 			return true;
 		}
+		// one who has freed enough of the caged allays is known at every Sylvan gate (Allays)
+		if (Allays.friend(player) && Allays.sylvanHaven(level.getServer(), f)) {
+			return true;
+		}
 		// an escort: a non-human player, or one of its own who thinks well of them
 		for (Player other : level.getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(ESCORT_RANGE),
 			p -> p != player && p.isAlive() && !p.isSpectator() && Prejudice.degree(p) > 0)) {

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,9 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
@@ -57,7 +61,7 @@ import org.jspecify.annotations.Nullable;
  * side within {@link #SHARE_RANGE} blocks; they know where it is for {@link #SHARE_TICKS} ({@link Senses#knows}), and the
  * idle ones go to look; they never pass it on.</li>
  * <li><b>The dev view</b> ({@link View}): a spectator who is an operator (or in a dev game) and looks at an NPC is sent what it
- * sees and why it acts, drawn on their own screen by {@code SensesClient}. No command, nothing for players.</li>
+ * sees, why it acts and what its AI is focused on or thinking over ({@link NpcFocus}), drawn on their own screen by {@code NpcEyesClient}. No command, nothing for players.</li>
  * </ul>
  */
 public final class NpcEyes {
@@ -86,14 +90,23 @@ public final class NpcEyes {
 	/** A dev game (the Gradle run configs set it, as for {@code DevCommands}) shows the view to any spectator. */
 	private static final String DEV_PROPERTY = "jaymoskingdoms.devCommands";
 
+	/** The most label lines a view carries (the focus's are fewer). */
+	static final int LINES_MAX = 16;
+
 	/** Why a mob is doing what it does, for the dev view. */
 	public static final int IDLE = 0, FIGHTING = 1, BLIND = 2, SEARCHING = 3, HEEDING = 4, TURNING = 5, TOLD = 6, RETURNING = 7;
 
-	/** Server → a spectating operator: the NPC they look at. {@code mob} -1: none. */
+	/**
+	 * Server → a spectating operator: the NPC they look at. {@code mob} -1: none. {@code state}, {@code lines}, {@code path},
+	 * {@code reaches} and {@code walk} are its focus ({@link NpcFocus}): the top line's state, the label's lines from the top, the
+	 * path's nodes still ahead, whether that path gets where it's going, and its brain's walk target.
+	 */
 	public record View(int mob, int foe, int why, float cos, float range, boolean sees, int blind, @Nullable Vec3 seen, @Nullable Vec3 spot,
-		@Nullable Vec3 heard, @Nullable Vec3 told) implements CustomPacketPayload {
+		@Nullable Vec3 heard, @Nullable Vec3 told, int state, List<Component> lines, List<BlockPos> path, boolean reaches,
+		@Nullable Vec3 walk) implements CustomPacketPayload {
 		public static final Type<View> TYPE = new Type<>(JaymosKingdoms.id("eyes_view"));
-		public static final View NONE = new View(-1, -1, IDLE, 0.0F, 0.0F, false, 0, null, null, null, null);
+		public static final View NONE = new View(-1, -1, IDLE, 0.0F, 0.0F, false, 0, null, null, null, null, NpcFocus.STEADY, List.of(), List.of(),
+			true, null);
 		public static final StreamCodec<RegistryFriendlyByteBuf, View> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeVarInt(p.mob + 1);
@@ -105,13 +118,23 @@ public final class NpcEyes {
 				buf.writeFloat(p.cos);
 				buf.writeFloat(p.range);
 				buf.writeVarInt(p.blind);
-				buf.writeByte((p.sees ? 1 : 0) | (p.seen != null ? 2 : 0) | (p.spot != null ? 4 : 0) | (p.heard != null ? 8 : 0) | (p.told != null ? 16 : 0));
-				for (Vec3 at : new Vec3[] {p.seen, p.spot, p.heard, p.told}) {
+				buf.writeByte((p.sees ? 1 : 0) | (p.seen != null ? 2 : 0) | (p.spot != null ? 4 : 0) | (p.heard != null ? 8 : 0) | (p.told != null ? 16 : 0)
+					| (p.walk != null ? 32 : 0) | (p.reaches ? 64 : 0));
+				for (Vec3 at : new Vec3[] {p.seen, p.spot, p.heard, p.told, p.walk}) {
 					if (at != null) {
 						buf.writeDouble(at.x);
 						buf.writeDouble(at.y);
 						buf.writeDouble(at.z);
 					}
+				}
+				buf.writeByte(p.state);
+				buf.writeVarInt(p.lines.size());
+				for (Component line : p.lines) {
+					ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, line);
+				}
+				buf.writeVarInt(p.path.size());
+				for (BlockPos node : p.path) {
+					buf.writeBlockPos(node);
 				}
 			},
 			buf -> {
@@ -122,13 +145,24 @@ public final class NpcEyes {
 				int foe = buf.readVarInt() - 1, why = buf.readByte();
 				float cos = buf.readFloat(), range = buf.readFloat();
 				int blind = buf.readVarInt(), flags = buf.readByte();
-				Vec3[] at = new Vec3[4];
+				Vec3[] at = new Vec3[5];
 				for (int i = 0; i < at.length; i++) {
 					if ((flags & (2 << i)) != 0) {
 						at[i] = new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble());
 					}
 				}
-				return new View(mob, foe, why, cos, range, (flags & 1) != 0, blind, at[0], at[1], at[2], at[3]);
+				int state = buf.readByte();
+				int count = Math.min(buf.readVarInt(), LINES_MAX);
+				List<Component> lines = new ArrayList<>(count);
+				for (int i = 0; i < count; i++) {
+					lines.add(ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf));
+				}
+				int nodes = Math.min(buf.readVarInt(), NpcFocus.PATH_MAX);
+				List<BlockPos> path = new ArrayList<>(nodes);
+				for (int i = 0; i < nodes; i++) {
+					path.add(buf.readBlockPos());
+				}
+				return new View(mob, foe, why, cos, range, (flags & 1) != 0, blind, at[0], at[1], at[2], at[3], state, lines, path, (flags & 64) != 0, at[4]);
 			});
 
 		@Override
@@ -456,7 +490,7 @@ public final class NpcEyes {
 		return hit != null && hit.getEntity() instanceof Mob mob ? mob : null;
 	}
 
-	/** What {@code mob} sees and why it acts as it does. */
+	/** What {@code mob} sees, why it acts as it does, and what it's focused on ({@link NpcFocus}). */
 	private static View view(Mob mob) {
 		Senses.Track track = Senses.track(mob);
 		LivingEntity foe = Senses.foeOf(mob);
@@ -476,9 +510,16 @@ public final class NpcEyes {
 			why = sees ? FIGHTING : BLIND;
 		}
 		float range = (float) (mob.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE) ? mob.getAttributeValue(Attributes.FOLLOW_RANGE) : 16.0);
+		int blind = track == null ? 0 : track.blind;
+		MutableComponent alert = Component.translatable("gui.jaymoskingdoms.eyes.why." + why);
+		if (blind > 0) {
+			alert = Component.translatable("gui.jaymoskingdoms.eyes.blind", alert, String.format("%.1f", blind / 20.0));
+		}
+		NpcFocus.Focus focus = NpcFocus.of(mob, alert);
 		return new View(mob.getId(), foe == null ? -1 : foe.getId(), why, (float) (Senses.boss(mob) ? Senses.BOSS_VIEW_COS : Senses.VIEW_COS), range, sees,
-			track == null ? 0 : track.blind, track != null && (foe != null || track.searching) ? track.seen : null,
+			blind, track != null && (foe != null || track.searching) ? track.seen : null,
 			track != null && (track.searching || track.returning) ? (track.returning ? track.home : track.spot) : null,
-			track != null && track.heedLeft > 0 ? track.heedAt : null, told ? track.toldAt : null);
+			track != null && track.heedLeft > 0 ? track.heedAt : null, told ? track.toldAt : null,
+			focus.state(), focus.lines(), focus.path(), focus.reaches(), focus.walk());
 	}
 }
