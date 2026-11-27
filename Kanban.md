@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:23). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:26). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -17,11 +17,11 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
+- [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for codex · open
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
 - [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · for codex · open
-- [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
-- [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 
 
 ## Being built
@@ -47,6 +47,9 @@ kanban-plugin: board
 
 ## Needs Andy
 
+- [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
+- [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
+- [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/hunters-road-10|hunters-road-10]] · for any · blocked
 - [ ] [[Inbox/hunters-road-11|hunters-road-11]] · for any · blocked
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for any · blocked
@@ -56,16 +59,13 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · for any · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
-- [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
-- [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/nycto-2|nycto-2]] · for any · blocked
 - [ ] [[Inbox/nycto-3|nycto-3]] · for any · blocked
-- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · for 🔥 Prometheus · blocked
 - [ ] [[Inbox/nycto-4|nycto-4]] · for any · blocked
+- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · for 🔥 Prometheus · blocked
 - [ ] [[Inbox/nycto-5|nycto-5]] · for any · blocked
 - [ ] [[Inbox/nycto-6|nycto-6]] · for any · blocked
 - [ ] [[Inbox/nycto-7|nycto-7]] · for any · blocked
-- [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 
@@ -73,6 +73,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/legends-p6-core-animations|legends-p6-core-animations]]
 - [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
 - [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
 - [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
@@ -80,7 +81,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/zfighter-gaps-5-training|zfighter-gaps-5-training]]
 - [x] [[Inbox/Done/zfighter-gaps-4-forms|zfighter-gaps-4-forms]]
 - [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
-- [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
 
 
 %% kanban:settings
