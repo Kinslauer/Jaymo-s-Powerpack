@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 15:19). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -45,7 +45,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -58,6 +58,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2322 carry more before the pack weighs you down (Powers, Kingdoms, Kitchen, 2026-11-27)
+- [ ] #2321 Ideal, bond and flaw get their own page in the life story (Kingdoms, 2026-11-27)
+- [ ] #2320 Why you're hurt, every time: a line under the crosshair and a mark on the side it came from (Powers, Kingdoms, 2026-11-27)
 - [ ] #2319 Seat compound castles no longer float (Kingdoms, 2026-11-27)
 - [ ] #2318 Holy symbol drawn worn at the neck, under armour (Powers, Kingdoms, 2026-11-27)
 - [ ] #2317 Abilities window grows with the screen (Powers, Kingdoms, 2026-11-27)
@@ -115,14 +118,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2262 Sunflare unmakes Kingdoms' shadows (Powers, Kingdoms, 2026-11-27)
 - [ ] #2261 Nothing drops on its own unless a player is near (Kingdoms, 2026-11-27)
 - [ ] #2260 New players start with low-end mode on and the vanilla texture look (Powers, 2026-11-27)
-- [ ] #2258 Legends Core animation library, landings by height, shared movement set and katana stance set (Powers, 2026-11-27)
-- [ ] #2257 Chrono: the wormhole, time skip, blitz poses, a fighting afterimage, blur steps (Powers, 2026-11-27)
-- [ ] #2254 swamp fire lag - fallen trees drawn lighter, windfall goes in a minute (Kingdoms, 2026-11-26)
-- …and 679 older ones.
+- …and 682 older ones.
 
 ## Health
 
-27 problems in the notes: [[Health]].
+26 problems in the notes: [[Health]].
 
 ## Last week
 
