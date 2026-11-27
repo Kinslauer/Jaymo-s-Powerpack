@@ -60,12 +60,12 @@ public interface Worker {
 	ItemStack tool();
 
 	/**
-	 * The tool for {@code role} (a camp's builders have stone ones), made of what its settlement can afford ({@code grade},
-	 * {@link ToolGrades}).
+	 * The tool for {@code role} (a camp's builders have stone ones), made of the best its settlement's smiths have forged
+	 * ({@code grade}, {@link ToolGrades}).
 	 */
-	static ItemStack toolFor(int role, boolean wild, ToolGrades.Grade grade) {
+	static ItemStack toolFor(int role, boolean wild, ToolGrades.Kit grade) {
 		if (wild) {
-			grade = ToolGrades.Grade.STONE;
+			grade = ToolGrades.Kit.STONE;
 		}
 		if (role == Folk.FARMER) {
 			// (Jaymo's Powers' pitchfork when it is here: farmers carry one)

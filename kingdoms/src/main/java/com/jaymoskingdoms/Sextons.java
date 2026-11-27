@@ -136,7 +136,7 @@ public final class Sextons {
 		/** A part already in the sack. */
 		boolean bagged;
 		/** What their tools are made of. */
-		ToolGrades.Grade grade = ToolGrades.Grade.STONE;
+		ToolGrades.Kit grade = ToolGrades.Kit.STONE;
 
 		Task(Kind kind, @Nullable UUID target, @Nullable BlockPos at, long until) {
 			this.kind = kind;
@@ -306,7 +306,7 @@ public final class Sextons {
 
 	private static void start(ServerLevel level, Faction f, Villager v, Task task, @Nullable String family) {
 		TASKS.put(v.getUUID(), task);
-		// (made of what the town can afford: ToolGrades)
+		// (the best the town's smiths have forged: ToolGrades)
 		task.grade = ToolGrades.of(level, f);
 		v.setItemSlot(EquipmentSlot.MAINHAND, switch (task.kind) {
 			case BURY, SWEEP, SETUP -> new ItemStack(ToolGrades.shovel(task.grade));
