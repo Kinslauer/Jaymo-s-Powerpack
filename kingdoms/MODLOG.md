@@ -18065,3 +18065,11 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Disasters**: when a quake, flood, storm (sandstorm, blizzard, hail, hurricane), tornado touchdown, fire from the sky (volcano, meteor, ash), great wave or slide strikes, up to three guards near a player shout the townsfolk to safety. Fires keep their own alarm.
 - **No repeats**: a line anyone said in the last 45 seconds is passed over while fresh ones are left, so a squad doesn't shout the same words. All speech bubbles, nothing in chat.
 - Built; not played.
+
+## 0.13.65 (2026-11-27): hoods and over-garments fit what is under them (#2271)
+
+- Andy (2026-11-27): "insane amount of space on these armor pieces. can you make it conform to the piece underneath?" (a villager in the everyday hood and cloak).
+- The harness's hoods (hood, torn hood, fur hood, cowl, mantle, coifs) and over-garments (cloak, giornea, tabard, surcoat, kaftan, monk's robe, motley, sash) were cut to go over a helm and a cuirass, so on a bare head or a shirt they stood 1-2 pixels off all round and the cloak's cape hung far out behind.
+- New `HarnessFit`: as `HeraldryLayer` draws a wearer's pieces innermost first, it keeps a box of what is on so far (the bare body with MCA's clothes and the suit, then each piece). A hood or over-garment is drawn smaller about its bone until it sits 0.3 (head) or 0.4 (body, legs) past that box, never larger than made. The cloak's cape keeps 40% of its 7 degree swing back when fitted. Over a harness helm or cuirass the piece fits that piece's box; over armour from anywhere else (vanilla, Armory, Fantasy Armor) it is left as made. Hats and sleeves are left as they are.
+- `BbModel.bounds(bone)`: each bone's box round its cubes and its children's.
+- Built (compileClientJava); not played. Walking legs can show through the front of long fitted skirts (tabard, robe, giornea) more than before.

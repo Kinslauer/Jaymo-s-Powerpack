@@ -1,6 +1,0 @@
-# hoods and over-garments fit what is under them
-- Andy (2026-11-27): "insane amount of space on these armor pieces. can you make it conform to the piece underneath?" (a villager in the everyday hood and cloak).
-- The harness's hoods (hood, torn hood, fur hood, cowl, mantle, coifs) and over-garments (cloak, giornea, tabard, surcoat, kaftan, monk's robe, motley, sash) were cut to go over a helm and a cuirass, so on a bare head or a shirt they stood 1-2 pixels off all round and the cloak's cape hung far out behind.
-- New `HarnessFit`: as `HeraldryLayer` draws a wearer's pieces innermost first, it keeps a box of what is on so far (the bare body with MCA's clothes and the suit, then each piece). A hood or over-garment is drawn smaller about its bone until it sits 0.3 (head) or 0.4 (body, legs) past that box, never larger than made. The cloak's cape keeps 40% of its 7 degree swing back when fitted. Over a harness helm or cuirass the piece fits that piece's box; over armour from anywhere else (vanilla, Armory, Fantasy Armor) it is left as made. Hats and sleeves are left as they are.
-- `BbModel.bounds(bone)`: each bone's box round its cubes and its children's.
-- Built (compileClientJava); not played. Walking legs can show through the front of long fitted skirts (tabard, robe, giornea) more than before.
