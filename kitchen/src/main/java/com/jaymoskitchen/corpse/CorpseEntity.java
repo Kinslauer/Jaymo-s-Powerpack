@@ -341,8 +341,6 @@ public class CorpseEntity extends Entity {
 	private boolean deathTold;
 	/** What dying that way cost it, for a practised butcher to save ({@link Hanging#SKILL_SAVES}). */
 	private List<ItemStack> spoiled = new ArrayList<>();
-	/** (0.5.32) Fires this body has started around it while burning (see {@link #MAX_FIRES}). */
-	private int firesLit;
 	private int age;
 	/** Ticks since it started falling apart (both sides count; see {@link #CRUMBLING}). */
 	private int crumbleTicks;
@@ -1870,79 +1868,14 @@ public class CorpseEntity extends Entity {
 		}
 	}
 
-	/** (0.4.28) A burning corpse tries to set what it lies by alight this often (ticks). */
-	private static final int SPREAD_EVERY = 20;
-	/** (0.5.32) It only tries over the last this many ticks of its burn, when it's nearly ash, not the whole time. */
-	private static final int SPREAD_WINDOW = 80;
-	/** (0.5.32) Chance each try (after the first) lights something. */
-	private static final float SPREAD_CHANCE = 0.4F;
-	/** (0.5.32) At most this many fires from one body over its whole burn. */
-	private static final int MAX_FIRES = 2;
+	/*
+	 * A burning body no longer sets anything around it alight (Andy, 2026-11-27: "bodies that catch fire should no longer
+	 * spread the flame. it gets far too rampant far too quickly and often burns loot"). It burns away on its own; fire
+	 * from anything else spreads as before.
+	 */
 	/** After a body is patted out (a right click), how long before the daylight can set it alight again (ticks; 10 s). */
 	private static final int PAT_GRACE = 200;
 	private int patGrace;
-
-	/**
-	 * (0.5.32) Near the end of its burn a body lights one or two things beside it, then goes out: an empty spot in or
-	 * around it (a block out, a block up) next to something that really burns (planks, logs, wool, hay; not grass or
-	 * flowers) takes fire. Only the first try is sure; the rest are chances. Follows the fire-spread game rules.
-	 * Andy: fire from a burning body should "no longer catch non flammable blocks like dirt on fire, it should only spread
-	 * if they are burning on wood". So a body only spreads fire while it lies on something that burns, and only onto
-	 * spots that sit on something that burns: one burning on dirt, grass or stone lights nothing.
-	 */
-	private void spreadFire(ServerLevel level) {
-		if (firesLit >= MAX_FIRES || firesLit > 0 && random.nextFloat() >= SPREAD_CHANCE) {
-			return;
-		}
-		BlockPos at = blockPosition();
-		if (!level.canSpreadFireAround(at) || !burnable(level, at.below()) && !burnable(level, at)) {
-			return;
-		}
-		for (int i = 0; i < 4; i++) {
-			BlockPos pos = at.offset(random.nextInt(3) - 1, random.nextInt(2), random.nextInt(3) - 1);
-			if (com.jaymoskitchen.Loaded.made(level, pos) && level.getBlockState(pos).isAir() && burnable(level, pos.below())
-				&& flammableBeside(level, pos)) {
-				level.setBlockAndUpdate(pos, net.minecraft.world.level.block.BaseFireBlock.getState(level, pos));
-				firesLit++;
-				return;
-			}
-		}
-	}
-
-	/** A whole block that burns under the game's fire rules (planks, logs, wool, hay), not a plant or carpet. */
-	private static boolean burnable(ServerLevel level, BlockPos pos) {
-		if (!com.jaymoskitchen.Loaded.made(level, pos)) {
-			return false;
-		}
-		net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
-		if (state.canBeReplaced() || !state.isCollisionShapeFullBlock(level, pos)) {
-			return false;
-		}
-		net.fabricmc.fabric.api.registry.FlammableBlockRegistry.Entry burn
-			= net.fabricmc.fabric.api.registry.FlammableBlockRegistry.getDefaultInstance().get(state.getBlock());
-		return burn != null && burn.getIgniteOdds() > 0;
-	}
-
-	/** Beside a block that burns: catches fire in the game's fire rules, and isn't a plant or carpet you'd walk through. */
-	private static boolean flammableBeside(ServerLevel level, BlockPos pos) {
-		for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
-			BlockPos next = pos.relative(d);
-			if (!com.jaymoskitchen.Loaded.made(level, next)) {
-				continue;
-			}
-			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(next);
-			if (state.canBeReplaced() || !state.isCollisionShapeFullBlock(level, next)) {
-				continue;
-			}
-			net.fabricmc.fabric.api.registry.FlammableBlockRegistry.Entry burn
-				= net.fabricmc.fabric.api.registry.FlammableBlockRegistry.getDefaultInstance().get(state.getBlock());
-			if (burn != null && burn.getIgniteOdds() > 0) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 
 	/** How often a corpse looks for a flame it's lying in or on (lava, fire, a lit campfire). */
 	private static final int FLAME_CHECK_TICKS = 10;
@@ -2134,9 +2067,6 @@ public class CorpseEntity extends Entity {
 		}
 		if (isOnFire() && burns()) {
 			burnTicks++;
-			if (burnTicks >= BURN_TICKS - SPREAD_WINDOW && burnTicks % SPREAD_EVERY == 0 && carrier() == null) {
-				spreadFire(level);
-			}
 			if (isCreeper()) {
 				if (burnTicks == 1 || burnTicks == CREEPER_FUSE - 30) {
 					// hisses when it catches, and again just before it goes
@@ -5157,7 +5087,6 @@ public class CorpseEntity extends Entity {
 		this.gearWorn = input.getBooleanOr("GearWorn", false);
 		this.chops = input.getIntOr("Chops", 0);
 		this.burnTicks = input.getIntOr("Burned", 0);
-		this.firesLit = input.getIntOr("FiresLit", 0);
 		this.age = input.getIntOr("Age", 0);
 		this.entityData.set(OWNER, input.getStringOr("Owner", ""));
 		this.entityData.set(OWNER_NAME, input.getStringOr("OwnerName", ""));
@@ -5245,7 +5174,6 @@ public class CorpseEntity extends Entity {
 		output.putBoolean("GearWorn", gearWorn);
 		output.putInt("Chops", chops);
 		output.putInt("Burned", burnTicks);
-		output.putInt("FiresLit", firesLit);
 		output.putInt("Age", age);
 		output.putString("Owner", ownerId());
 		output.putString("OwnerName", ownerName());
