@@ -1206,3 +1206,5 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 ### 2026-11-26: HD Effekseer effects merged
 - **Decided:** Andy said "Merge" on PR #2256 (HD Effekseer effects for eight ultimates, AAA Particles' loader vendored into the Powers client) once CI passed, before anyone saw the effects in game.
 - **Applies to:** Powers.
+
+- 2026-11-26: Great Ape keeps R = charge ki (Sneak+R = hold back power); Patch 7's roar moves to another key. Andy: "R should still charge ki" (PR #2255 review).
