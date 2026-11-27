@@ -9027,3 +9027,8 @@ Deviations from the plan:
 - A blow part way, leaving, or a low-health failsafe parks the rest at once. Parking while moving or hurt, the sentry post and evac still park instantly as before.
 - Classes: `RigCall` (suitDown, the staged take-off), `RigSuitUp` (DOWN style, stillAndCalm, sounds), `RigMoves.SUITDOWN`, `RigSentry` (waits for a suit-down), `RigSuit` (plates flying off), `RigPose`, `RigSuitUpCamera`.
 - Built; not played.
+
+## 0.28.40 (2026-11-27): Freerun.onWall for Kingdoms' quips (#2329)
+
+- `Freerun#onWall(Player)`: clinging to, climbing or running up a wall, as last synced. Kingdoms' guards and townsfolk remark on it (Quips).
+- Built (compileJava); not played.
