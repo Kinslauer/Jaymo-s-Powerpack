@@ -18073,3 +18073,10 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - New `HarnessFit`: as `HeraldryLayer` draws a wearer's pieces innermost first, it keeps a box of what is on so far (the bare body with MCA's clothes and the suit, then each piece). A hood or over-garment is drawn smaller about its bone until it sits 0.3 (head) or 0.4 (body, legs) past that box, never larger than made. The cloak's cape keeps 40% of its 7 degree swing back when fitted. Over a harness helm or cuirass the piece fits that piece's box; over armour from anywhere else (vanilla, Armory, Fantasy Armor) it is left as made. Hats and sleeves are left as they are.
 - `BbModel.bounds(bone)`: each bone's box round its cubes and its children's.
 - Built (compileClientJava); not played. Walking legs can show through the front of long fitted skirts (tabard, robe, giornea) more than before.
+
+## 0.13.66 (2026-11-27): Quests on the talk wheel's first ring, with a tip (#2275)
+
+- Talking to a villager or king with a gold **!** (work on offer) or a **?** (one of your quests) over their head, **Quests** is now on the talk wheel's first ring, right after the reply spoke. It is still under Ask of Them... as well.
+- A tip sits where your line goes (bottom right, while you're not pointing at a spoke): "They have work for you. Pick Quests on the wheel to hear it", or for a ? "Pick Quests on the wheel to check on it or hand it in". It stops after you've picked Quests from the wheel 3 times (kept in `config/jaymoskingdoms-tips.properties`), and never shows with `/hints off` (or `/tips off`).
+- `TalkFirst` (Quests spoke, `questTip`), new `QuestTip`, `QuestClient.mark`, `McaDialogueBoxMixin` (draws the tip).
+- Built (compileJava); not played.
