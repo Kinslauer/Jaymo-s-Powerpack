@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 18:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -58,6 +58,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2311 climbs onto Icy's horses land in its saddle; Icy's horse tab no longer hidden in the inventory (Powers, Kingdoms, 2026-11-27)
+- [ ] #2309 /autohud command to turn Auto HUD off and on (Powers, 2026-11-27)
+- [ ] #2308 The fair's acrobats and ringmaster dress in the fool's motley (Kingdoms, 2026-11-27)
+- [ ] #2307 Clouds soft like leaves: fall and punch through, see-through, drop nothing (Powers, 2026-11-27)
+- [ ] #2306 Squelch-the-narrator button on the life story (Kingdoms, 2026-11-27)
 - [ ] #2305 Night's Blood 4: new gifts (Kingdoms, 2026-11-27)
 - [ ] #2304 how a player turns - a far crypt, the Elder's blood at any time, a bitten start (Kingdoms, 2026-11-27)
 - [ ] #2302 Night's Blood 4 - the true shape of the night (Kingdoms, 2026-11-27)
@@ -113,12 +118,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2243 Youth's ears unpack the voice model on the server (Kingdoms, 2026-11-26)
 - [ ] #2242 Realm dragons and their dragon tamers (Kingdoms, 2026-11-26)
 - [ ] #2241 Dragon nests and dragon domains (Dragonforge picks, part 2) (Kingdoms, 2026-11-26)
-- [ ] #2240 Allays and the Sylvan: freeing caged allays, haven allays, a Sylvan's fall caught (Kingdoms, 2026-11-26)
-- [ ] #2239 fire alarm runs through town, everyone fights fires, twisters send people running, no stray Templar plate (Kingdoms, 2026-11-26)
-- [ ] #2238 Town crier: listeners who don't like the news shout, fight him or hire a blade (Kingdoms, 2026-11-26)
-- [ ] #2236 Town crier: verdicts are cried by the seat, not sent to chat (Kingdoms, 2026-11-26)
-- [ ] #2235 fire smoke settles low too, and makes you sick (Kingdoms, 2026-11-26)
-- …and 666 older ones.
+- …and 671 older ones.
 
 ## Health
 
