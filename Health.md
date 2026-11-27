@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:58). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 10:09). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**27 problems.**
+**26 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -41,7 +41,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/hunters-road-4-models|hunters-road-4-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/hunters-road-5-models|hunters-road-5-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/hunters-road-8-models|hunters-road-8-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
-- [[Inbox/nycto-4-models|nycto-4-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]]: `for: any (needs Andy's PC: the folder is local)` matches no bot or agent, so no one will claim it.
 - [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]]: `for: coordinator` matches no bot or agent, so no one will claim it.
 - [[Inbox/structures-4-mohknee|structures-4-mohknee]]: `for: gemini` matches no bot or agent, so no one will claim it.

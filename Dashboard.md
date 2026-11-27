@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:58). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 10:09). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -33,12 +33,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-9 waiting for a bot, 1 being built, 12 in review: see [[Kanban]].
+14 waiting for a bot, 2 being built, 12 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2300 Air combo: ragdolls, enemy step, Yank and tendril pull-ups, slam spares friends (Powers, Kingdoms, Kitchen, 2026-11-27)
 - [ ] #2297 mounted guards tie up their horses; villagers ask whoever's in the way to move (Kingdoms, 2026-11-27)
 - [ ] #2295 Pickpocketing: nothing from nothing, pick a mark bare, the steel blueprint in the smith's pocket (Kingdoms, 2026-11-27)
 - [ ] #2294 Rotting bodies bare bone in patches, not checks (Kitchen, 2026-11-27)
@@ -98,12 +99,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2230 /texturelook vanilla|reason - switch the pack's retexture packs off and back on (Powers, 2026-11-26)
 - [ ] #2229 cannon loading tip cards (Powers, 2026-11-26)
 - [ ] #2228 face parts - snouts, beaks, fangs and horns on the painted faces (Kingdoms, 2026-11-26)
-- [ ] #2227 Dragonforge mechanics for our dragons (parts, bite, dive slam, sprint flight, tremor, horn, home patrols, realm wyverns) (Kingdoms, 2026-11-26)
-- …and 658 older ones.
+- …and 659 older ones.
 
 ## Health
 
-27 problems in the notes: [[Health]].
+26 problems in the notes: [[Health]].
 
 ## Last week
 
