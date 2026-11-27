@@ -133,7 +133,7 @@ public final class OldenTalk {
 				said = lower;
 			}
 			lastWord = lower;
-			out.add(GoblinTalk.cased(t.text(), said, up));
+			out.add(said.equals("i") ? "I" : GoblinTalk.cased(t.text(), said, up));
 		}
 		String spoken = GoblinTalk.join(out);
 		long seed = line.hashCode() * 2654435761L;
