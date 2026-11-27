@@ -37,6 +37,12 @@ public final class RigMoves {
 		ARM_MIMIC = 19;
 	/** The Rig's gun actives ({@link RigGuns}): palm charge, gatling, railgun, sonic, twin beam, siege mode. */
 	public static final int PALM_CHARGE = 20, GATLING = 21, RAILGUN = 22, SONIC = 23, TWIN = 24, SIEGE = 25;
+	/**
+	 * The suit-ups ({@link RigSuitUp}): plates slamming on while standing, the step-in that folds shut, the flight-in that
+	 * locks on midair, the falling assembly and the thrusters' brake that ends it.
+	 */
+	public static final int SUITUP_SLAM = 70, SUITUP_STEP = 71, SUITUP_FLIGHT = 72, SUITUP_FALL = 73, SUITUP_BRAKE = 74;
+	public static final int SUITUP_SLAM_TICKS = 24, SUITUP_STEP_TICKS = 44, SUITUP_FLIGHT_TICKS = 30, SUITUP_FALL_TICKS = 400, SUITUP_BRAKE_TICKS = 400;
 	/** Their lengths (ticks); the wind-up before the effect fires. */
 	public static final int ARM_BLADE_TICKS = 10, ARM_BLADE_FIRE = 2;
 	public static final int ARM_MACE_TICKS = 10, ARM_MACE_FIRE = 2;
@@ -89,6 +95,11 @@ public final class RigMoves {
 			case TAKEOFF -> TAKEOFF_TICKS;
 			case SCAN -> SCAN_TICKS;
 			case CALL -> CALL_TICKS;
+			case SUITUP_SLAM -> SUITUP_SLAM_TICKS;
+			case SUITUP_STEP -> SUITUP_STEP_TICKS;
+			case SUITUP_FLIGHT -> SUITUP_FLIGHT_TICKS;
+			case SUITUP_FALL -> SUITUP_FALL_TICKS;
+			case SUITUP_BRAKE -> SUITUP_BRAKE_TICKS;
 			case TABLE -> TABLE_TICKS;
 			case DASH -> DASH_TICKS;
 			case PUNCH -> PUNCH_TICKS;

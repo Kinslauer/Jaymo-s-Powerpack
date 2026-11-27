@@ -1576,6 +1576,11 @@ public final class WebSymbiote {
 			state = state.withFlag(WebSymbioteState.CRAWL, false);
 		}
 		if (!state.equals(was)) {
+			// the suit forming over you: the suit-up pose (the big body and the roar have their own forming)
+			if (state.bonded() && state.has(WebSymbioteState.SUIT) && (was == null || !was.has(WebSymbioteState.SUIT))
+				&& !state.has(WebSymbioteState.BULK)) {
+				WebSuitUp.suit(player);
+			}
 			player.setAttached(STATE, state);
 			int shape = WebSymbioteState.SUIT | WebSymbioteState.BULK;
 			if ((was == null || was.bonded() != state.bonded() || (was.flags() & shape) != (state.flags() & shape))
@@ -2037,7 +2042,12 @@ public final class WebSymbiote {
 			tickWall(player, live, wall, now);
 		}
 		if (player.tickCount % FLEE_CHECK_TICKS == 0 && now >= live.fleeReadyAt && live.bondTicks <= 0 && !player.isCreative()) {
-			fleeFire(player, live, now);
+			// a tendril puts out the fire at your feet if it can bear to; if not, it shoves you clear
+			if (WebSymbioteSnuff.smother(player)) {
+				live.fleeReadyAt = now + FLEE_TICKS;
+			} else {
+				fleeFire(player, live, now);
+			}
 		}
 		// it speaks up as it gets more wound up
 		int band = Math.min(4, next.stress() / 25);

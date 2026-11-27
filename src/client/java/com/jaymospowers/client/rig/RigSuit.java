@@ -122,6 +122,8 @@ public final class RigSuit {
 	static final RenderStateDataKey<Integer> TRIM = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_trim");
 	static final RenderStateDataKey<Integer> FINISH = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_finish");
 	static final RenderStateDataKey<Boolean> FLY = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_fly");
+	/** Which suit-up the plates fly in as ({@link com.jaymospowers.rig.RigSuitUp}'s styles; 0 for the plain call). */
+	static final RenderStateDataKey<Integer> STYLE = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_style");
 	/** A called suit: how far (pixels) each plate starts from its place, how high above, and how much it tumbles on the way. */
 	static final float FLY_SPREAD = 110.0F, FLY_HEIGHT = 70.0F, FLY_TUMBLE = 4.0F;
 	/** The shortest a plate's flight takes (ticks). */
@@ -297,6 +299,7 @@ public final class RigSuit {
 		state.setData(TRIM, null);
 		state.setData(FINISH, null);
 		state.setData(FLY, null);
+		state.setData(STYLE, null);
 		state.setData(BODY, null);
 		state.setData(PARENT, null);
 		state.setData(RigBackClient.BACK, null);
@@ -377,6 +380,7 @@ public final class RigSuit {
 		state.setData(TRIM, ages == null || trim < 0 ? null : trim);
 		state.setData(FINISH, ages == null || finish == RigFinish.NONE ? null : finish);
 		state.setData(FLY, ages == null || !player.getAttachedOrElse(RigCall.FLYING_IN, false) ? null : Boolean.TRUE);
+		state.setData(STYLE, ages == null ? null : player.getAttachedOrElse(com.jaymospowers.rig.RigSuitUp.STYLE, 0));
 		state.setData(COLORS, ages == null ? null : colors);
 		state.setData(POD, ages == null ? null : RigPose.pods(player, partialTicks));
 		state.setData(FACE, ages == null ? null : face(player, (float)time));
@@ -498,15 +502,26 @@ public final class RigSuit {
 		return cube.maxX - cube.minX < SLIM_BELOW;
 	}
 
-	/** Where each plate is scattered to before a call brings it in: {x, y, z (pixels), xRot, yRot}, spread round the wearer and above. */
-	private static final float[][] SCATTER = new float[64][];
+	/**
+	 * Where each plate is scattered to before a call brings it in, per suit-up style (0 the plain call, then slam, step,
+	 * flight, fall): {x, y, z (pixels), xRot, yRot}. The plain call spreads them round the wearer and above; the slam drops
+	 * them from straight overhead; the step opens them out to the sides, like a shell standing open; the flight streams them
+	 * in from behind; the fall spreads them far above and about.
+	 */
+	private static final float[][][] SCATTER = new float[5][64][];
 
 	static {
-		for (int i = 0; i < SCATTER.length; i++) {
+		for (int i = 0; i < 64; i++) {
 			double angle = i * 2.399963;
 			double radius = FLY_SPREAD * (0.45 + 0.55 * ((i * 37) % 11) / 10.0);
-			SCATTER[i] = new float[] {(float)(Math.cos(angle) * radius), -FLY_HEIGHT * (0.3F + ((i * 17) % 7) / 7.0F), (float)(Math.sin(angle) * radius),
-				FLY_TUMBLE * Mth.sin(i * 1.7F), FLY_TUMBLE * Mth.cos(i * 2.3F)};
+			float high = -FLY_HEIGHT * (0.3F + ((i * 17) % 7) / 7.0F);
+			float tx = FLY_TUMBLE * Mth.sin(i * 1.7F), ty = FLY_TUMBLE * Mth.cos(i * 2.3F);
+			float cx = (float)Math.cos(angle), sz = (float)Math.sin(angle);
+			SCATTER[0][i] = new float[] {(float)(cx * radius), high, (float)(sz * radius), tx, ty};
+			SCATTER[1][i] = new float[] {cx * 12.0F, high * 1.6F, sz * 12.0F, tx * 0.3F, ty * 0.3F};
+			SCATTER[2][i] = new float[] {(cx >= 0.0F ? 1.0F : -1.0F) * (50.0F + 40.0F * Math.abs(cx)), -6.0F + 14.0F * sz, sz * 24.0F, tx * 0.5F, ty * 2.0F};
+			SCATTER[3][i] = new float[] {cx * 18.0F, -10.0F + sz * 14.0F, 120.0F + 70.0F * Math.abs(sz), tx, ty * 0.5F};
+			SCATTER[4][i] = new float[] {(float)(cx * radius * 1.4), high * 2.2F, (float)(sz * radius * 1.4), tx * 3.0F, ty * 3.0F};
 		}
 	}
 
@@ -676,6 +691,8 @@ public final class RigSuit {
 		private final boolean[] face;
 		/** (0.12.2) The one piece (Rig.Piece's ordinal) this draws, or -1 for the whole suit. */
 		private final int only;
+		/** The suit-up the plates fly in as this frame (see {@link #STYLE}). */
+		private int style;
 
 		Suit(boolean slim, Supplier<PlayerModel> wearer, int only) {
 			super(RigSuitMesh.create(slim).bakeRoot(), slim);
@@ -718,6 +735,7 @@ public final class RigSuit {
 				}
 			}
 			hideSkinLayers();
+			this.style = state.getData(STYLE) == null ? 0 : Math.min(4, Math.max(0, state.getData(STYLE)));
 			assemble(state.getData(AGES), Boolean.TRUE.equals(state.getData(FLY)));
 			Float face = state.getData(FACE);
 			if (face != null && face > 0.0F) {
@@ -765,8 +783,10 @@ public final class RigSuit {
 				if (fly && age > 0.0F && age < time[0] + time[1]) {
 					// a called suit: the plate flies in from where it was scattered, locking on at its time
 					float q = age / Math.max(MIN_FLIGHT, time[0] + time[1]);
-					float k = 1.0F - backOut(Math.min(1.0F, q));
-					float[] from = SCATTER[i % SCATTER.length];
+					float qq = Math.min(1.0F, q);
+					// the slam's plates accelerate onto the body and hit; the rest settle in with a little overshoot
+					float k = this.style == 1 ? 1.0F - qq * qq * qq : 1.0F - backOut(qq);
+					float[] from = SCATTER[this.style][i % 64];
 					part.x += from[0] * k;
 					part.y += from[1] * k;
 					part.z += from[2] * k;

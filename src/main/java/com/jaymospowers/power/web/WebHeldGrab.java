@@ -326,7 +326,7 @@ public final class WebHeldGrab {
 			}
 			return;
 		}
-		if (!WebSymbiote.tendrilKeys(player)) {
+		if (!WebSymbiote.tendrilKeys(player) || WebGrind.active(player)) {
 			return;
 		}
 		if (held.attack() >= 0 && now - held.attackStart() < Math.max(ATTACK_TICKS, animTicks(held.attack())) || now - held.since() < 2) {
@@ -377,6 +377,13 @@ public final class WebHeldGrab {
 		flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : flat.normalize();
 		Vec3 right = new Vec3(-flat.z, 0.0, flat.x);
 		double scale = player.getScale();
+		if (!held.carried()) {
+			// Grind: dragged along the ground behind you, then heaved overhead and slammed
+			Vec3 grind = WebGrind.point(player, target, now);
+			if (grind != null) {
+				return grind;
+			}
+		}
 		if (held.carried()) {
 			// over the shoulders: their feet at your shoulders, a little behind you
 			return player.position().add(flat.scale(-CARRY_BACK * scale)).add(0.0, CARRY_RISE * scale + target.getBbHeight() * 0.5, 0.0);

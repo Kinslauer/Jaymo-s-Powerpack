@@ -65,6 +65,13 @@ import net.minecraft.world.phys.Vec3;
  * 20%. and the windup should be longer so players can react". A heavy hitter's blow ({@link #HEAVY_DAMAGE}) is red only
  * {@link #RED_CHANCE} of the time ({@link #red}; a body {@link #HEAVY_WIDTH} wide still always is), and a red blow
  * winds up {@link #HEAVY_WINDUP} ticks instead of {@link #WINDUP}, its star held as long.
+ * <p>
+ * Andy (2026-11-26): "i really like the lunge the necrophages do, that should extend to our zombies and husks, and they
+ * should be telegraphed with a yellow indicator spark, meaning you should dodge or parry, but you cant block. so now
+ * there will be three teirs of attack, white, yellow and red". The third tier is yellow ({@link #YELLOW_TELL_COLOR}, a gold
+ * star, and a ping between the white bell and the red drum): a blow that can't be blocked ({@link Guard#UNBLOCKABLE_TAG}),
+ * only parried in its window or dodged. Mobs throw yellow blows in their leaps ({@link Pounce}, {@link LungeGoal}); other
+ * code calls {@link #yellow} or {@link #tellYellow} for the star and the ping.
  */
 public final class AttackTells {
 	/** Ticks from the glint to the blow; for a red blow, longer, so there's time to see it and roll, step or block. */
@@ -80,12 +87,14 @@ public final class AttackTells {
 	static final double LUNGE_SPEED = 0.25;
 	/** A blow this heavy (attack damage), or from a body this wide (blocks), can't be parried. */
 	public static final double HEAVY_DAMAGE = 10.0, HEAVY_WIDTH = 1.35;
-	public static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
+	public static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020, YELLOW_TELL_COLOR = 0xF2C230;
 	public static final float TELL_SIZE = 1.2F;
 	/** (0.20.4) The star's size (1 = about a block across), a heavy blow's, and its white heart's share. */
-	public static final float GLINT_SIZE = 0.8F, HEAVY_GLINT_SIZE = 1.1F, CORE_SHARE = 0.45F;
+	public static final float GLINT_SIZE = 0.8F, HEAVY_GLINT_SIZE = 1.1F, YELLOW_GLINT_SIZE = 0.95F, CORE_SHARE = 0.45F;
 	/** (0.20.4) The warning ping: Time Flow's bell (volume, pitch), and a heavy blow's lower bell and drum. */
 	public static final float PING_VOLUME = 0.9F, PING_PITCH = 1.9F, HEAVY_PING_PITCH = 1.1F, DRUM_VOLUME = 0.8F, DRUM_PITCH = 0.7F;
+	/** A yellow tell's ping: the bell pitched between the white and the red, with a soft drum under it (lighter and higher than the red one). */
+	public static final float YELLOW_PING_PITCH = 1.45F, YELLOW_DRUM_VOLUME = 0.4F, YELLOW_DRUM_PITCH = 1.0F;
 	/** (0.20.4) Players further than this (blocks) don't get the star (the vanilla particle range). */
 	static final double GLINT_RANGE = 48.0;
 	/** Reach slack (blocks) for a target that stepped a little since the wind-up began. */
@@ -193,6 +202,15 @@ public final class AttackTells {
 
 	/** {@link #tell(ServerLevel, LivingEntity, boolean)}, the star held through a {@code windup} of this many ticks (0: {@link #WINDUP}). */
 	public static void tell(ServerLevel level, LivingEntity mob, boolean heavy, int windup) {
+		glint(level, tellAt(mob), heavy, windup);
+	}
+
+	/** A yellow tell (a blow that can't be blocked) at {@code mob}, the star held through {@code windup} ticks (0: {@link #WINDUP}). */
+	public static void tellYellow(ServerLevel level, LivingEntity mob, int windup) {
+		yellow(level, tellAt(mob), windup);
+	}
+
+	private static Vec3 tellAt(LivingEntity mob) {
 		Vec3 facing = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
 		Vec3 at;
 		if (!mob.getMainHandItem().isEmpty()) {
@@ -201,7 +219,7 @@ public final class AttackTells {
 		} else {
 			at = mob.getEyePosition().add(facing.scale(mob.getBbWidth() * 0.5 + 0.15));
 		}
-		glint(level, at, heavy, windup);
+		return at;
 	}
 
 	/**
@@ -231,6 +249,27 @@ public final class AttackTells {
 		if (heavy) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, DRUM_VOLUME, DRUM_PITCH);
 		}
+	}
+
+	/**
+	 * A yellow tell at {@code at}: a gold star, its white heart, a ring of gold dust, and the ping (a bell between the
+	 * white's and the red's with a soft drum under it). Public for the monsters whose blows can't be blocked
+	 * ({@link Guard#UNBLOCKABLE_TAG}) and for Kingdoms.
+	 */
+	public static void yellow(ServerLevel level, Vec3 at, int windup) {
+		Glint star = new Glint(YELLOW_TELL_COLOR, YELLOW_GLINT_SIZE * (0.95F + level.getRandom().nextFloat() * 0.1F), false, windup);
+		Glint core = new Glint(0xFFFFFF, YELLOW_GLINT_SIZE * CORE_SHARE, true, windup);
+		for (ServerPlayer player : level.players()) {
+			if (player.distanceToSqr(at) > GLINT_RANGE * GLINT_RANGE) {
+				continue;
+			}
+			level.sendParticles(player, star, true, true, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(player, core, true, true, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		}
+		level.sendParticles(new DustParticleOptions(YELLOW_TELL_COLOR, TELL_SIZE), at.x, at.y, at.z, 6, 0.12, 0.12, 0.12, 0.0);
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.05);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.HOSTILE, PING_VOLUME, YELLOW_PING_PITCH);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, YELLOW_DRUM_VOLUME, YELLOW_DRUM_PITCH);
 	}
 
 	private static void tick(MinecraftServer server) {

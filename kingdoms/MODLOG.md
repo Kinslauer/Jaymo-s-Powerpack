@@ -18199,3 +18199,8 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 ## 0.13.75 (2026-11-27): Cross Slash blade form (#2255)
 
 - Cross Slash: new Blade Weapon Form art (taught by the Blade school) that dashes through foes drawing a glowing X across each, bursting a moment later for bonus damage.
+
+## 0.13.76 (2026-11-27): Hunter's Road 1 - yellow tells (#2284)
+
+- Kingdoms mirrors Powers' new `UNBLOCKABLE_TAG` (`PowersCompat`, `MobCombat`), and adds a loading hint for the gold glint (hint 209).
+- Built; not played.

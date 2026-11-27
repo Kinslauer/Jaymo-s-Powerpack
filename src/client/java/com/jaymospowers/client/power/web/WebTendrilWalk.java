@@ -184,6 +184,9 @@ final class WebTendrilWalk {
 	 * the chord in blocks). Zero for the ones that aren't walking.
 	 */
 	static float @Nullable [] legs(Player player, float partial, float[][] roots) {
+		if (com.jaymospowers.power.web.WebStilts.up(player)) {
+			return stilts(player, partial, roots);
+		}
 		if (!climbing(player)) {
 			WALKS.remove(player.getId());
 			return null;
@@ -299,6 +302,66 @@ final class WebTendrilWalk {
 			out[index * 6 + 2] = (float)-chord.dot(ahead);
 			// the way it bows: off the surface (striding, up and out to its own side)
 			Vec3 bow = stride ? away.add(legOut.multiply(1.0, 0.0, 1.0)).normalize() : normal;
+			out[index * 6 + 3] = (float)bow.dot(left);
+			out[index * 6 + 4] = (float)-bow.y;
+			out[index * 6 + 5] = (float)-bow.dot(ahead);
+		}
+		return out;
+	}
+
+	/** How far (blocks) the third stilt looks sideways for a wall to brace on. */
+	private static final double BRACE_REACH = 2.2;
+
+	/**
+	 * Up on the tendril stilts ({@link com.jaymospowers.power.web.WebStilts}): the first two walkers reach straight down from
+	 * the back to the ground at each side and take turns stepping with the stride; the third braces against a wall within
+	 * {@link #BRACE_REACH} of you, if there is one. Same layout as {@link #legs}: chords and bows in the body's model space.
+	 */
+	private static float @Nullable [] stilts(Player player, float partial, float[][] roots) {
+		float scale = player.getScale();
+		float bodyYaw = Mth.rotLerp(partial, player.yBodyRotO, player.yBodyRot);
+		double yaw = bodyYaw * Mth.DEG_TO_RAD;
+		Vec3 ahead = new Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
+		Vec3 left = new Vec3(ahead.z, 0.0, -ahead.x);
+		Vec3 feet = player.getPosition(partial);
+		float time = player.level().getGameTime() + partial;
+		double speed = Math.min(0.4, Math.hypot(player.getX() - player.xo, player.getZ() - player.zo));
+		float phase = time * (float)speed * 4.0F;
+		float[] out = new float[roots.length * 6];
+		for (int i = 0; i < 3; i++) {
+			int index = WALKERS[i];
+			float[] r = roots[index];
+			Vec3 root = feet.add(left.scale(r[0] / 16.0F * scale)).add(0.0, (24.0F - r[1]) / 16.0F * scale, 0.0).subtract(ahead.scale(r[2] / 16.0F * scale));
+			Vec3 tip;
+			Vec3 bow;
+			if (i < 2) {
+				float side = i == 0 ? 1.0F : -1.0F;
+				float swing = (float)Math.sin(phase + (i == 0 ? 0.0F : Mth.PI)) * (float)Math.min(1.0, speed * 9.0);
+				float lift = Math.max(0.0F, (float)Math.cos(phase + (i == 0 ? 0.0F : Mth.PI))) * (float)Math.min(1.0, speed * 9.0);
+				tip = feet.add(left.scale(side * 0.55 * scale)).add(ahead.scale(swing * 0.55 * scale)).add(0.0, lift * 0.35 * scale, 0.0);
+				bow = left.scale(side * 0.8).add(0.0, 0.3, 0.0).normalize();
+			} else {
+				// the third: braced against a wall to either side, if there is one
+				Vec3 middle = feet.add(0.0, player.getBbHeight() * 0.5, 0.0);
+				Vec3 found = null;
+				for (Vec3 way : new Vec3[] {left, left.reverse(), ahead}) {
+					BlockHitResult hit = player.level().clip(new ClipContext(middle, middle.add(way.scale(BRACE_REACH * scale)), ClipContext.Block.COLLIDER,
+						ClipContext.Fluid.NONE, player));
+					if (hit.getType() == HitResult.Type.BLOCK) {
+						found = hit.getLocation();
+						break;
+					}
+				}
+				if (found == null) {
+					continue;
+				}
+				tip = found;
+				bow = new Vec3(0.0, 1.0, 0.0);
+			}
+			Vec3 chord = tip.subtract(root);
+			out[index * 6] = (float)chord.dot(left);
+			out[index * 6 + 1] = (float)-chord.y;
+			out[index * 6 + 2] = (float)-chord.dot(ahead);
 			out[index * 6 + 3] = (float)bow.dot(left);
 			out[index * 6 + 4] = (float)-bow.y;
 			out[index * 6 + 5] = (float)-bow.dot(ahead);
