@@ -287,6 +287,10 @@ public final class NightForms {
 			end(p, false);
 			return false;
 		}
+		// (Hunter's Road 7) snuffed, or under the healing-stopper dust: no shape, no stare, no colony
+		if (com.jaymoskingdoms.PowersCompat.snuffed(p) || com.jaymoskingdoms.PowersCompat.unhealed(p)) {
+			return false;
+		}
 		if (!open(p, level, kind)) {
 			why(p, level, kind);
 			return false;

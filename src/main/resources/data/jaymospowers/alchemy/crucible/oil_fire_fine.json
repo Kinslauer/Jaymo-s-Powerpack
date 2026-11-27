@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:beast_grease",
+  "essences": {
+    "fire": 9,
+    "sulphur": 6,
+    "spark": 3
+  },
+  "result": {
+    "item": "jaymospowers:oil_fire",
+    "count": 1,
+    "grade": "fine"
+  },
+  "research": "hunters_oils"
+}

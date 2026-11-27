@@ -1,0 +1,54 @@
+{
+  "items": {
+    "jaymoskitchen:venom_fang": {
+      "venom": 5,
+      "beast": 3,
+      "death": 1,
+      "war": 1
+    },
+    "jaymoskitchen:green_spit": {
+      "venom": 4,
+      "water": 3,
+      "beast": 2,
+      "rot": 1
+    },
+    "jaymoskitchen:poison_sac": {
+      "venom": 6,
+      "water": 3,
+      "shadow": 2,
+      "beast": 1
+    },
+    "jaymoskitchen:brittle_bone": {
+      "venom": 3,
+      "death": 3,
+      "rot": 2,
+      "earth": 1
+    },
+    "jaymoskitchen:poison_jelly": {
+      "venom": 4,
+      "water": 2,
+      "life": 2,
+      "earth": 1
+    },
+    "jaymoskitchen:milk_chocolate": {
+      "venom": 2,
+      "life": 1,
+      "plant": 1
+    },
+    "jaymoskitchen:mint_chocolate": {
+      "venom": 2,
+      "plant": 2,
+      "frost": 1
+    },
+    "jaymoskitchen:dark_chocolate": {
+      "venom": 3,
+      "shadow": 1,
+      "plant": 1
+    },
+    "jaymoskitchen:toxic_cake": {
+      "venom": 5,
+      "life": 1,
+      "plant": 2
+    }
+  }
+}

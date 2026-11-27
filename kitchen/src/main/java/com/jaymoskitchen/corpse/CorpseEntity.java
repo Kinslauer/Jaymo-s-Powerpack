@@ -2331,6 +2331,11 @@ public class CorpseEntity extends Entity {
 			// (0.5.31) being dragged: let go of first
 			return InteractionResult.SUCCESS_SERVER;
 		}
+		// a scalpel on a body that died poisoned takes its part (carved, never dropped)
+		InteractionResult carved = PoisonedParts.use(this, level, player, held);
+		if (carved != null) {
+			return carved;
+		}
 		// Andy (2026-11-27): something this small is picked up like any other item, sneaking or not, tapped or held
 		if (held.isEmpty() && hook() == null && handSized()) {
 			return pickUp(level, player);
@@ -3603,6 +3608,20 @@ public class CorpseEntity extends Entity {
 		// (0.5.66) and small critters left from before as an animal's or a thing's body
 		EntityType<?> type = kind == CorpseKind.OTHER || kind == CorpseKind.ANIMAL ? sourceType() : null;
 		return type != null && (type.builtInRegistryHolder().is(Corpses.FISH_CORPSES) || Corpses.isSmallCritter(type));
+	}
+
+	/** Whether it died poisoned and no scalpel has taken its part yet ({@link PoisonedParts}). */
+	boolean poisonedBody() {
+		return look().contains(PoisonedParts.POISONED_KEY);
+	}
+
+	/** A scalpel has taken its part: it is no longer a poisoned body. */
+	void partTaken() {
+		CompoundTag tag = parse(look());
+		if (tag != null) {
+			tag.remove(PoisonedParts.POISONED_KEY);
+			this.entityData.set(LOOK, tag.toString());
+		}
 	}
 
 	/** Whether the mob was full grown (not a baby); true if it can't be told. A young monster has no organ worth carving. */

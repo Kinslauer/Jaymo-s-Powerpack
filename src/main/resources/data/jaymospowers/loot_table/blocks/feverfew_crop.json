@@ -1,0 +1,79 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:feverfew",
+              "modifier": {
+                "type": "minecraft:set_count",
+                "count": {
+                  "type": "minecraft:uniform",
+                  "min": 1,
+                  "max": 2
+                }
+              },
+              "condition": {
+                "type": "minecraft:any_of",
+                "terms": [
+                  {
+                    "type": "minecraft:match_block",
+                    "blocks": "jaymospowers:feverfew_crop",
+                    "state": {
+                      "age": "7"
+                    }
+                  },
+                  {
+                    "type": "minecraft:match_block",
+                    "blocks": "jaymospowers:feverfew_crop",
+                    "state": {
+                      "wild": "true"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:feverfew_seeds"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:any_of",
+        "terms": [
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:feverfew_crop",
+            "state": {
+              "age": "7"
+            }
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:feverfew_crop",
+            "state": {
+              "wild": "true"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:feverfew_seeds"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/feverfew_crop"
+}

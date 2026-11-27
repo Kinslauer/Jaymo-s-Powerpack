@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "jaymospowers:block/bracken_bottom"
+    },
+    "half=upper": {
+      "model": "jaymospowers:block/bracken_top"
+    }
+  }
+}

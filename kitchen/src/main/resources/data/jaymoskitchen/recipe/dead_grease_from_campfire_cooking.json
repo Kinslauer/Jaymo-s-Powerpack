@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "misc",
+  "cookingtime": 600,
+  "experience": 0.1,
+  "ingredient": "jaymoskitchen:dead_fat",
+  "result": {
+    "id": "jaymoskitchen:dead_grease"
+  }
+}

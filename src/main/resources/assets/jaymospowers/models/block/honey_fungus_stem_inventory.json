@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "jaymospowers:block/herbs/honey_fungus_stem"
+  }
+}

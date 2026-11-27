@@ -1,0 +1,17 @@
+{
+  "item.jaymoskitchen.scalpel": "Scalpel",
+  "item.jaymoskitchen.venom_fang": "Venom Fang",
+  "item.jaymoskitchen.green_spit": "Green Spit",
+  "item.jaymoskitchen.poison_sac": "Poison Sac",
+  "item.jaymoskitchen.brittle_bone": "Brittle Poison Bone",
+  "item.jaymoskitchen.poison_jelly": "Poison Jelly",
+  "item.jaymoskitchen.toxic_cake": "Toxic Cake",
+  "block.jaymoskitchen.toxic_cake": "Toxic Cake",
+  "item.jaymoskitchen.milk_chocolate": "Milk Chocolate",
+  "item.jaymoskitchen.mint_chocolate": "Mint Chocolate",
+  "item.jaymoskitchen.dark_chocolate": "Dark Chocolate",
+  "item.jaymoskitchen.gift_box": "Gift Box",
+  "item.jaymoskitchen.gift_box.of": "Gift Box of %s",
+  "tooltip.jaymoskitchen.gift_box": "Open it to take out the sweets",
+  "entity.jaymoskitchen.toxic_cake": "Thrown Cake"
+}

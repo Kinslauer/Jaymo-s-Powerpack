@@ -1,0 +1,36 @@
+{
+  "feature": "jaymospowers:herb_cave_ivy",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": {
+        "type": "minecraft:uniform",
+        "min_inclusive": 30,
+        "max_inclusive": 60
+      }
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": {
+          "above_bottom": 0
+        },
+        "max_inclusive": {
+          "absolute": 60
+        }
+      }
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:surface_relative_threshold_filter",
+      "heightmap": "OCEAN_FLOOR_WG",
+      "max_inclusive": -10
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

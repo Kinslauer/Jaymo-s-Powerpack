@@ -104,7 +104,7 @@ public final class BloodLeap {
 		long now = level.getGameTime();
 		if (!Vampires.isVampire(player) || !player.isAlive() || player.isSpectator() || Downed.isDowned(player) || player.isPassenger()
 			|| !player.getMainHandItem().isEmpty() || BloodGrab.holding(player) || POUNCING.containsKey(player.getUUID())
-			|| now < READY.getOrDefault(player.getUUID(), 0L)) {
+			|| now < READY.getOrDefault(player.getUUID(), 0L) || PowersCompat.snuffed(player)) {
 			return;
 		}
 		// (mist ending in a leap: the leap takes its place, stronger, for half the blood, in the air too)

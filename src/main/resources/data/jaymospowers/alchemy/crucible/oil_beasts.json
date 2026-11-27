@@ -1,0 +1,14 @@
+{
+  "catalyst": "jaymoskitchen:beast_grease",
+  "essences": {
+    "beast": 6,
+    "life": 3,
+    "metal": 2
+  },
+  "result": {
+    "item": "jaymospowers:oil_beasts",
+    "count": 1,
+    "grade": "plain"
+  },
+  "research": "hunters_oils"
+}

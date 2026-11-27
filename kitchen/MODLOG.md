@@ -2998,3 +2998,16 @@ Andy: "there should be a way to dismember them from the inventory screen so you 
 - **Monster organs** (`butchery/MonsterOrgans`, `Organs`): six new organs (mire gall, grave tongue, pack marrow, wight sac, imp gizzard, troll liver) that a skinning knife carves from a grown monster's body, the way a spider's silk is taken. Which monster gives which organ is a data table (`data/<ns>/monster_organs/*.json`, `entity` and `organ`); a baby gives nothing, and nothing is ever added to a loot table. The troll is in the table now (troll liver); the hag, gnawer leader, fog-wight and imp warrior are filled in by their own patches adding a file each.
 - Each organ has essences, so the Scrying Lens reads them; Jaymo's Powers' monster brews are made from them.
 - Built; not played.
+
+## 0.7.8 (2026-11-27): Hunter's Road 7A: monster fat and grease (#2290)
+
+- A grown monster of the four kinds the oils bite (the dead, beasts, brutes, people) gives 1 to 2 lumps of its kind's fat when gutted with a knife; villagers and players give none (`jaymoskitchen:no_fat`).
+- Fat renders to grease on a campfire, in a furnace or in a cooking pot; Jaymo's Powers' crucible turns grease into blade oils. Items `dead_fat`, `beast_fat`, `brute_fat`, `folk_fat` and the four greases (`MonsterFat`).
+- Built; not played.
+
+## 0.7.9 (2026-11-27): Hunter's Road 7b: scalpel, parts of poisoned beasts, poisoned sweets (#2290)
+
+- **Scalpel**: cuts one part from a body that died poisoned: a venom fang (wolf), green spit (llama), poison sac (squid), brittle bone (bogged, always poisoned) or poison jelly (slime). Carved, never dropped; one cut a body; babies have none. Which beast gives which part is data (`poisoned_parts`).
+- **Poisoned sweets**: a toxic cake (placed, or thrown and spent), milk, mint and dark chocolates, and a gift box.
+- Classes: `corpse/PoisonedParts`, `cooking/PoisonedSweets`.
+- Built; not played.
