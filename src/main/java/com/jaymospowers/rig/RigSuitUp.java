@@ -59,6 +59,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class RigSuitUp {
 	public static final int NONE = 0, SLAM = 1, STEP = 2, FLIGHT = 3, FALL = 4, WRAP = 5;
+	/** Not a suit-up: the suit-down ({@link RigCall#suitDown}), the wrap played backwards as the suit is parked. */
+	public static final int DOWN = 6;
 	/** The wrap needs you still (horizontal speed under this, blocks/tick) and unhurt for this long (ticks). */
 	static final double WRAP_STILL = 0.08;
 	static final int WRAP_CALM = 100;
@@ -170,10 +172,48 @@ public final class RigSuitUp {
 		if (post != null && post.distanceToSqr(player.position()) <= STEP_RANGE * STEP_RANGE) {
 			return STEP;
 		}
+		return stillAndCalm(player) ? WRAP : SLAM;
+	}
+
+	/** On the ground, standing still and unhurt a while: the moment for the wrap, or the suit-down. */
+	static boolean stillAndCalm(ServerPlayer player) {
 		Vec3 moving = player.getKnownMovement();
 		boolean still = moving.x * moving.x + moving.z * moving.z < WRAP_STILL * WRAP_STILL && !player.isSprinting() && !player.isShiftKeyDown();
 		boolean calm = player.hurtTime == 0 && player.tickCount - player.getLastHurtByMobTimestamp() > WRAP_CALM;
-		return still && calm && player.onGround() ? WRAP : SLAM;
+		return still && calm && player.onGround() && !player.isInWater() && !player.isPassenger() && !player.getAbilities().flying
+			&& RigMoves.thrust(player) == RigMoves.THRUST_NONE;
+	}
+
+	/** A suit-down begins: the arms go out, the plates (synced style) come off as the wrap's in reverse. */
+	static void beginDown(ServerPlayer player) {
+		player.setAttached(STYLE, DOWN);
+		RigMoves.start(player, RigMoves.SUITDOWN);
+		Vec3 at = player.position();
+		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.6F);
+	}
+
+	/** A suit-down's piece {@code index} (helm, legs, chest, arms) comes off: its own unlocking sound. */
+	static void tookOff(ServerPlayer player, int index) {
+		ServerLevel level = player.level();
+		Vec3 at = player.position();
+		switch (index) {
+			case 0 -> {
+				// the eyes go dark, the faceplate lifts, the helm folds back off the head
+				level.playSound(null, at.x, at.y + 1.6, at.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 2.0F);
+				level.playSound(null, at.x, at.y + 1.6, at.z, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.PLAYERS, 0.9F, 0.8F);
+			}
+			case 1 -> level.playSound(null, at.x, at.y, at.z, SoundEvents.PISTON_EXTEND, SoundSource.PLAYERS, 0.8F, 1.2F);
+			case 2 -> {
+				// the chest opens off the reactor
+				level.playSound(null, at.x, at.y + 1.2, at.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.PLAYERS, 0.8F, 1.1F);
+				MagicFx.blast(level, at.add(0.0, 1.2, 0.0), 0.5F, RigActives.FLAME_COLOR);
+			}
+			default -> {
+				// the gauntlets ratchet off past the hands
+				level.playSound(null, at.x, at.y + 1.4, at.z, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.PLAYERS, 0.7F, 1.6F);
+				level.playSound(null, at.x, at.y + 1.4, at.z, SoundEvents.CROSSBOW_LOADING_START.value(), SoundSource.PLAYERS, 0.8F, 1.3F);
+			}
+		}
 	}
 
 	/** A suit-up of {@code style} begins for this player: its pose, its plates' manner (synced) and its first sounds. */

@@ -46,6 +46,8 @@ public final class RigMoves {
 	public static final int SUITUP_SLAM_TICKS = 24, SUITUP_STEP_TICKS = 44, SUITUP_FLIGHT_TICKS = 30, SUITUP_FALL_TICKS = 400, SUITUP_BRAKE_TICKS = 400;
 	/** The wrap: the shell's way in, the helm's landing after the first piece, and the beat after it (RigSuitUp's WRAP timings). */
 	public static final int SUITUP_WRAP_TICKS = 16 + 44 + 30;
+	/** The suit-down (RigCall's): arms out while the pieces come off, the last 52 ticks in, then down. */
+	public static final int SUITDOWN = 76, SUITDOWN_TICKS = 80;
 	/** Their lengths (ticks); the wind-up before the effect fires. */
 	public static final int ARM_BLADE_TICKS = 10, ARM_BLADE_FIRE = 2;
 	public static final int ARM_MACE_TICKS = 10, ARM_MACE_FIRE = 2;
@@ -104,6 +106,7 @@ public final class RigMoves {
 			case SUITUP_FALL -> SUITUP_FALL_TICKS;
 			case SUITUP_BRAKE -> SUITUP_BRAKE_TICKS;
 			case SUITUP_WRAP -> SUITUP_WRAP_TICKS;
+			case SUITDOWN -> SUITDOWN_TICKS;
 			case TABLE -> TABLE_TICKS;
 			case DASH -> DASH_TICKS;
 			case PUNCH -> PUNCH_TICKS;

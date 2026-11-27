@@ -29,6 +29,12 @@ import net.minecraft.world.phys.Vec3;
  * plate by plate), each with a clank and a jolt on the wearer's screen. Only Rig pieces park, and only with the Core
  * worn at level 3 (the Mind flies them). Armour already in a slot when its piece comes back goes to the inventory (or
  * drops, if that's full).
+ * <p>
+ * Parked by the key while standing still and out of a fight, it comes off as a <b>suit-down</b> (Andy: "parking the suit
+ * should show a suit down like the clip", the Iron Man 2 suit-down): the arms go out as the suit-up's wrap, and the
+ * pieces come off one at a time in the wrap's reverse, the helm first (the faceplate lifts, the helm folds back off the
+ * head), then the legs, the chest, and last the gauntlets sliding off past the hands; each plate swings open and flies
+ * off. A blow part way, leaving or a sentry post parks the rest at once.
  */
 public final class RigCall {
 	/** The pieces parked: one stack per {@link Rig.Piece}, in order (empty where none is). */
@@ -75,6 +81,18 @@ public final class RigCall {
 		return CALLING.containsKey(player.getUUID());
 	}
 
+	/** Players whose suit is coming off in a suit-down: ticks since it began. */
+	private static final Map<UUID, int[]> PARKING = new HashMap<>();
+	/** The suit-down's order (the wrap's backwards: helm, legs, chest, arms), when each comes off (ticks in), and how long the last one's plates take to fly. */
+	private static final Rig.Piece[] DOWN_ORDER = {Rig.Piece.HELM, Rig.Piece.THRUSTERS, Rig.Piece.CORE, Rig.Piece.ARMS};
+	static final int[] DOWN_AT = {10, 24, 38, 52};
+	static final int DOWN_SETTLE = 24;
+
+	/** Whether this player's suit is coming off in a suit-down right now (server). */
+	static boolean parking(Player player) {
+		return PARKING.containsKey(player.getUUID());
+	}
+
 	/** The order the pieces lock on: (0.11.104) the Core's big spine unit first, the Helm last. */
 	private static final Rig.Piece[] ORDER = {Rig.Piece.CORE, Rig.Piece.ARMS, Rig.Piece.THRUSTERS, Rig.Piece.HELM};
 
@@ -82,7 +100,12 @@ public final class RigCall {
 	}
 
 	static void init() {
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> CALLING.remove(handler.player.getUUID()));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			CALLING.remove(handler.player.getUUID());
+			if (PARKING.containsKey(handler.player.getUUID())) {
+				downRest(handler.player);
+			}
+		});
 		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> {
 			if (victim instanceof ServerPlayer player && taken > 0.0F && player.isAlive() && player.getHealth() <= FAILSAFE_HEALTH) {
 				failsafe(player);
@@ -105,6 +128,10 @@ public final class RigCall {
 	}
 
 	private static void failsafe(ServerPlayer player) {
+		if (PARKING.containsKey(player.getUUID())) {
+			// hurt part way through a suit-down: the rest parks now, and the failsafe may bring it straight back
+			downRest(player);
+		}
 		if (!failsafeOn(player) || CALLING.containsKey(player.getUUID()) || !parked(player)) {
 			return;
 		}
@@ -139,14 +166,91 @@ public final class RigCall {
 
 	/** The call key: call the parked suit, else park the worn one. */
 	static void use(ServerPlayer player) {
-		if (CALLING.containsKey(player.getUUID())) {
+		if (CALLING.containsKey(player.getUUID()) || PARKING.containsKey(player.getUUID())) {
 			return;
 		}
 		if (parked(player)) {
 			call(player);
 		} else if (Rig.wearsAny(player)) {
-			park(player);
+			if (RigSuitUp.stillAndCalm(player)) {
+				suitDown(player);
+			} else {
+				park(player);
+			}
 		}
+	}
+
+	/** The suit-down begins (the same needs as parking): the arms go out, and {@link #tick} takes the pieces off one by one. */
+	static boolean suitDown(ServerPlayer player) {
+		if (Rig.core(player).isEmpty()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.park_needs_core"));
+			return false;
+		}
+		if (!RigActives.needs(player, Rig.CALL_LEVEL)) {
+			return false;
+		}
+		RigMind.sayAlways(player, "park", 1.0F);
+		List<ItemStack> parked = new ArrayList<>();
+		for (int i = 0; i < Rig.Piece.values().length; i++) {
+			parked.add(ItemStack.EMPTY);
+		}
+		player.setAttached(PARKED, parked);
+		PARKING.put(player.getUUID(), new int[] {0});
+		RigSuitUp.beginDown(player);
+		return true;
+	}
+
+	/** One step of a suit-down. */
+	private static void tickDown(ServerPlayer player, int[] parking) {
+		if (!player.isAlive() || player.isSpectator() || player.hurtTime > 0) {
+			downRest(player);
+			return;
+		}
+		int t = parking[0]++;
+		for (int i = 0; i < DOWN_AT.length; i++) {
+			if (t == DOWN_AT[i]) {
+				takeOff(player, DOWN_ORDER[i], i);
+				if (i == DOWN_AT.length - 1) {
+					parkFx(player);
+				}
+			}
+		}
+		if (t > DOWN_AT[DOWN_AT.length - 1] + DOWN_SETTLE) {
+			PARKING.remove(player.getUUID());
+			RigSuitUp.end(player);
+		}
+	}
+
+	/** A suit-down cut short: what is still on parks now (the plates still come apart as the plain park's do). */
+	private static void downRest(ServerPlayer player) {
+		PARKING.remove(player.getUUID());
+		RigSuitUp.end(player);
+		boolean any = false;
+		for (Rig.Piece piece : DOWN_ORDER) {
+			any |= takeOff(player, piece, -1);
+		}
+		if (any) {
+			parkFx(player);
+		}
+	}
+
+	/** One piece comes off into the parked suit; {@code index} its place in the suit-down (-1: no sound of its own). */
+	private static boolean takeOff(ServerPlayer player, Rig.Piece piece, int index) {
+		ItemStack worn = player.getItemBySlot(piece.slot);
+		if (piece.item() == null || !worn.is(piece.item())) {
+			return false;
+		}
+		List<ItemStack> parked = new ArrayList<>(player.getAttachedOrElse(PARKED, List.of()));
+		while (parked.size() < Rig.Piece.values().length) {
+			parked.add(ItemStack.EMPTY);
+		}
+		parked.set(piece.ordinal(), worn.copy());
+		player.setItemSlot(piece.slot, ItemStack.EMPTY);
+		player.setAttached(PARKED, parked);
+		if (index >= 0) {
+			RigSuitUp.tookOff(player, index);
+		}
+		return true;
 	}
 
 	/** Parks the worn suit (the Core and the Mind's level 3 needed); false if it did not. */
@@ -171,6 +275,12 @@ public final class RigCall {
 			}
 		}
 		player.setAttached(PARKED, parked);
+		parkFx(player);
+		return true;
+	}
+
+	/** The pieces blast off to wherever the Mind keeps them. */
+	private static void parkFx(ServerPlayer player) {
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.2, player.getZ(), 20, 0.3, 0.1, 0.3, 0.06);
 		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 0, 0.0, 1.0, 0.0, 1.2);
@@ -179,7 +289,6 @@ public final class RigCall {
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
-		return true;
 	}
 
 	static void call(ServerPlayer player) {
@@ -206,6 +315,10 @@ public final class RigCall {
 
 	/** Every tick, for everyone: a suit flying in. */
 	static void tick(ServerPlayer player) {
+		int[] parking = PARKING.get(player.getUUID());
+		if (parking != null) {
+			tickDown(player, parking);
+		}
 		int[] calling = CALLING.get(player.getUUID());
 		if (calling == null) {
 			return;
