@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:41). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,13 +14,13 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
+- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for antigravity · open
+- [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · t3 · claimed
-- [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · t3 · claimed
 - [ ] [[Inbox/nycto-5|nycto-5]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/nycto-4-models|nycto-4-models]] · 🔥 Prometheus · claimed
 
