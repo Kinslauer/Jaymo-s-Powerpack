@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: bacchus
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 ---
 
