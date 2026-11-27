@@ -61,9 +61,10 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Andy (2026-11-26): "having a torch should dissipate them too, any light should so that includes dawnborn, and lanterns".
  * So any light unmakes it the same way ({@link #lit}): a lamp's light where it stands (a torch, a lantern, anything that
- * shines at least {@link #LAMP_LIGHT}), anyone within {@link #CARRIED_REACH} blocks holding a light in either hand (as
- * bright as a torch: torches, lanterns, glowstone and the like), and a Dawnborn within that reach, who carries the sun in
- * their blood. Its owner's own light never unmakes a peeled shadow (they cast it).
+ * shines at least {@link #LAMP_LIGHT}), and anyone within {@link #CARRIED_REACH} blocks holding a light in either hand (as
+ * bright as a torch: torches, lanterns, glowstone and the like). Its owner's own light never unmakes a peeled shadow (they
+ * cast it). Andy, then: "i meant the dawnborn heritage ability": a Dawnborn's Sunflare (Powers' HeritageMoves) unmakes
+ * every shadow its flash reaches ({@link #flare}).
  */
 public class Shadow extends Beast {
 	static final double HEALTH = 14.0, SPEED = 0.3, DAMAGE = 1.0;
@@ -71,8 +72,8 @@ public class Shadow extends Beast {
 	static final float PLAIN_SHARE = 0.6F;
 	/**
 	 * A lamp's light (0-15) where it stands that unmakes it (it is only ever found where it is dimmer: Haunts), the least
-	 * light a held thing must give to count, how near a carried light or a Dawnborn unmakes it (blocks), and how often it
-	 * looks for one (ticks).
+	 * light a held thing must give to count, how near a carried light unmakes it (blocks), and how often it looks for one
+	 * (ticks).
 	 */
 	static final int LAMP_LIGHT = 8, CARRIED_LIGHT = 10, LOOKS_EVERY = 4;
 	static final double CARRIED_REACH = 6.0;
@@ -226,7 +227,7 @@ public class Shadow extends Beast {
 		return level.getBrightness(LightLayer.SKY, BlockPos.containing(this.getX(), this.getEyeY(), this.getZ())) >= SUN_SKY;
 	}
 
-	/** A light has found it: a lamp's where it stands, or a light carried near, or a Dawnborn near. */
+	/** A light has found it: a lamp's where it stands, or a light carried near. */
 	private boolean lit(ServerLevel level) {
 		if (level.getBrightness(LightLayer.BLOCK, BlockPos.containing(this.getX(), this.getY(0.5), this.getZ())) >= LAMP_LIGHT) {
 			return true;
@@ -239,8 +240,7 @@ public class Shadow extends Beast {
 			if (this.distanceToSqr(near) > CARRIED_REACH * CARRIED_REACH) {
 				continue;
 			}
-			if (carriesLight(near.getMainHandItem()) || carriesLight(near.getOffhandItem())
-				|| near instanceof Player player && com.jaymoskingdoms.Heritage.of(player) == com.jaymoskingdoms.Heritage.Kind.DAWNBORN) {
+			if (carriesLight(near.getMainHandItem()) || carriesLight(near.getOffhandItem())) {
 				return true;
 			}
 		}
@@ -250,6 +250,17 @@ public class Shadow extends Beast {
 	/** A thing held that gives light: one whose block shines at least as a torch nearly does. */
 	private static boolean carriesLight(net.minecraft.world.item.ItemStack stack) {
 		return !stack.isEmpty() && net.minecraft.world.level.block.Block.byItem(stack.getItem()).defaultBlockState().getLightEmission() >= CARRIED_LIGHT;
+	}
+
+	/**
+	 * A Sunflare goes off at {@code at}: every shadow within {@code radius} blocks is unmade, its owner's own among them (it
+	 * is a flash of the sun, not a lamp). Called by Powers' HeritageMoves through its KingdomsCompat.
+	 */
+	public static void flare(ServerLevel level, net.minecraft.world.phys.Vec3 at, double radius) {
+		for (Shadow s : level.getEntitiesOfClass(Shadow.class, new net.minecraft.world.phys.AABB(at, at).inflate(radius),
+			s -> s.isAlive() && s.position().distanceToSqr(at) <= radius * radius)) {
+			s.dissipate(level);
+		}
 	}
 
 	/** The sun or a light has it: it comes apart into smoke at once and is gone, giving back any Might it carried. */

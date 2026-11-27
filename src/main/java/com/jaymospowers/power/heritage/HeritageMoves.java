@@ -57,7 +57,8 @@ import net.minecraft.world.phys.Vec3;
  * open sky only. Lightning never hurts a Stormborn and charges them (Kingdoms), so it can be called on yourself in melee.
  * Every {@link #CLAP_COOLDOWN} ticks, {@link #CLAP_STORM_COOLDOWN} in a thunderstorm.</li>
  * <li><b>Sunflare</b> (Dawnborn): a flash of sunlight, by day only: the undead within {@link #FLARE_RADIUS} blocks are
- * set alight, other mobs blinded, and friends (other players, your own pets) healed a little. Every
+ * set alight, other mobs blinded, and friends (other players, your own pets) healed a little. Kingdoms' shadows in reach are
+ * unmade outright (Andy, 2026-11-26: any light dissipates them, "i meant the dawnborn heritage ability"). Every
  * {@link #FLARE_COOLDOWN} ticks.</li>
  * </ul>
  * The client asks through {@code RaceHoldClient} like Kindle (sneak + left hold beside another power): it sends
@@ -298,6 +299,9 @@ public final class HeritageMoves {
 	private static boolean sunflare(ServerPlayer player, ServerLevel level) {
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.6, 0.0);
 		AABB box = player.getBoundingBox().inflate(AbilityPower.size(player, FLARE_RADIUS));
+		// shadows come apart in it, before anything else is touched
+		com.jaymospowers.compat.KingdomsCompat.call("creatures.Shadow", "flare", new Class<?>[] {ServerLevel.class, Vec3.class, double.class}, null,
+			level, player.position(), AbilityPower.size(player, FLARE_RADIUS) + 1.0);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box,
 			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= AbilityPower.size(player, FLARE_RADIUS) * AbilityPower.size(player, FLARE_RADIUS))) {
 			if (e.is(EntityTypeTags.UNDEAD)) {
