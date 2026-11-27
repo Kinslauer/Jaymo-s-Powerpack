@@ -19,7 +19,6 @@ kanban-plugin: board
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
-- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for ☀️ Apollo · open
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
 - [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · for codex · open
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for ☀️ Apollo · open
@@ -41,6 +40,7 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
+- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
