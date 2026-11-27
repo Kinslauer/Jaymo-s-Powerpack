@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: apollo
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
@@ -7,6 +7,7 @@ claimed_by: hermes-a
 pr: 2280
 claim_handbacks: 3
 writer: hermes-writer
+text_pass: done
 ---
 
 # Small armies pick list: build Andy's 4 picks
