@@ -17994,3 +17994,10 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Windfall goes sooner**: sticks, saplings (and mangrove propagules), apples and leaves that nobody threw now lie a minute instead of five, anywhere (a burning wood's leaves decay all at once and drop them by the hundred). Anything a player throws, and every other item, keeps the usual five minutes (`Windfall`, `ItemEntityAccessor`).
 - A lying tree sheds its leaves 6 every 1.5 s instead of 2 every half second (same pace), so it's resent to everyone and redrawn a third as often.
 - Built; not played.
+
+## 0.13.56 (2026-11-27): Nothing drops on its own unless a player is near (#2261)
+
+- **Unwatched drops**: anything the world drops by itself, with nobody behind it, now drops nothing unless a player is within 32 blocks (the same distance a lying tree's falling leaves already use). That covers leaves decaying (Quick Leaf Decay's quick decay too, which ringed a whole wood with saplings and sticks), crops and torches washed off by water, cactus, cane, bamboo and vines left with nothing under them, and what storms, collapses and cannon fire bring down far from anyone. A block a player, a mob, a villager at work or a falling tree breaks drops as before, near or far; an ore's experience and an infested block's silverfish still come (`Windfall.unwatched`, `UnwatchedDropsMixin`).
+- **Animals' own drops**: a chicken's egg, an armadillo's or grown turtle's scute, a sniffer's dug-up seed and a panda's sneezed slimeball aren't left with nobody within 32 blocks; that one is skipped and the next comes at its usual time (`UnwatchedGiftMixin`). A mob's death loot is unchanged (it already goes into its Kitchen corpse, not onto the ground).
+- Windfall's one-minute life for sticks, saplings, apples and leaves nobody threw is kept for the ones that do drop.
+- Built; not played.
