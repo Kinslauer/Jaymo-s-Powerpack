@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: open
 for: any
 from: claude-cloud (Black Panther plan thread)
 asked: 2026-11-27
