@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 08:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 08:16). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,7 +35,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
-- [ ] [[Inbox/nycto-2|nycto-2]] · ☁️ Cloud · #2288 · in-review
 - [ ] [[Inbox/hunters-road-6|hunters-road-6]] · ☁️ Cloud · #2289 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
@@ -67,6 +66,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/nycto-2|nycto-2]]
 - [x] [[Inbox/Done/hunters-road-2|hunters-road-2]]
 - [x] [[Inbox/Done/nycto-1|nycto-1]]
 - [x] [[Inbox/Done/hunters-road-1|hunters-road-1]]
@@ -74,7 +74,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]]
 - [x] [[Inbox/Done/legends-p6-followups|legends-p6-followups]]
 - [x] [[Inbox/Done/legends-p3-big-symbiote|legends-p3-big-symbiote]]
-- [x] [[Inbox/Done/legends-p6-core-animations|legends-p6-core-animations]]
 
 
 %% kanban:settings
