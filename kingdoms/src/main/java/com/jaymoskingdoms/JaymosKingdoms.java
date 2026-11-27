@@ -180,7 +180,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Buildings.register();
 		Construction.register();
 		// 0.7.202: the world weathers (moss, cracks, mud, leaf litter, tufts); a settlement's builders keep up its upkeep
-		Upkeep.register();
+				Upkeep.register();
+				// (0.7.x) Court wizard creeper ward: prevents, rewinds, weakens and repels creepers over a kingdom's plot
+				CreeperWard.register();
 		Weathering.register();
 		// 0.5.58: a builder of every crew levels the settlement's ground (pits, ledges, gaps) before anything else
 		Groundwork.register();

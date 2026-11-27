@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -123,31 +124,41 @@ public final class CourtWizards {
 	// ---- their day ---------------------------------------------------------------------------------------------------
 
 	/**
-	 * A court wizard's step (from {@link Workers#step}): their timers run down; they mend their side and ward those
-	 * fighting; true while they have a foe (their fight in place of their brain), false to live as a villager.
-	 */
-	static boolean step(ServerLevel level, Enlisted w) {
-		int[] timers = w.spellTimers();
-		for (int i = 0; i < timers.length; i++) {
-			if (timers[i] > 0) {
-				timers[i]--;
+		 * A court wizard's step (from {@link Workers#step}): their timers run down; they mend their side and ward those
+		 * fighting; true while they have a foe (their fight in place of their brain), false to live as a villager.
+		 */
+		static boolean step(ServerLevel level, Enlisted w) {
+			int[] timers = w.spellTimers();
+			for (int i = 0; i < timers.length; i++) {
+				if (timers[i] > 0) {
+					timers[i]--;
+				}
 			}
-		}
-		PathfinderMob mob = w.mob();
-		LivingEntity foe = FOES.get(mob);
-		if (mob.tickCount % 10 != 0) {
+			PathfinderMob mob = w.mob();
+			LivingEntity foe = FOES.get(mob);
+			if (mob.tickCount % 10 != 0) {
+				return foe != null;
+			}
+			foe = pickFoe(level, w, foe);
+			if (foe == null) {
+				FOES.remove(mob);
+			} else {
+				FOES.put(mob, foe);
+				fight(level, w, foe);
+			}
+			support(level, w, foe);
+		
+			// Court wizard creeper ward: maintain the ward while the wizard is alive and at home
+			Faction f = Factions.get(level.getServer(), w.factionId());
+			if (f != null && w.role() == Sorcery.WIZARD) {
+				boolean atHome = f.claims(ChunkPos.containing(mob.blockPosition()));
+				if (atHome != CreeperWard.isWarded(level.getServer(), f.id())) {
+					CreeperWard.reevalWard(level.getServer(), f);
+				}
+			}
+		
 			return foe != null;
 		}
-		foe = pickFoe(level, w, foe);
-		if (foe == null) {
-			FOES.remove(mob);
-		} else {
-			FOES.put(mob, foe);
-			fight(level, w, foe);
-		}
-		support(level, w, foe);
-		return foe != null;
-	}
 
 	/** Who they fight: the one they have while it's still a foe in reach, else the nearest foe they can see. */
 	private static @Nullable LivingEntity pickFoe(ServerLevel level, Enlisted w, @Nullable LivingEntity current) {
@@ -301,20 +312,25 @@ public final class CourtWizards {
 	}
 
 	/** A court wizard died: a player who killed them takes a scroll from the body, as from any caster. */
-	static void died(ServerLevel level, Worker w, DamageSource source) {
-		if (w.role() == Sorcery.WIZARD && source.getEntity() instanceof ServerPlayer) {
-			w.mob().spawnAtLocation(level, Arcana.scrollFor(Sorcery.WIZARD, level.getRandom()));
-			// (0.6.0) and, as often as not, his staff: a Mage's "find one"
-			if (level.getRandom().nextFloat() < Classes.STAFF_DROP_CHANCE) {
-				w.mob().spawnAtLocation(level, new ItemStack(Arcana.WIZARD_STAFF));
+		static void died(ServerLevel level, Worker w, DamageSource source) {
+			if (w.role() == Sorcery.WIZARD && source.getEntity() instanceof ServerPlayer) {
+				w.mob().spawnAtLocation(level, Arcana.scrollFor(Sorcery.WIZARD, level.getRandom()));
+				// (0.6.0) and, as often as not, his staff: a Mage's "find one"
+				if (level.getRandom().nextFloat() < Classes.STAFF_DROP_CHANCE) {
+					w.mob().spawnAtLocation(level, new ItemStack(Arcana.WIZARD_STAFF));
+				}
+				// (0.7.520) and now and then the wand of their school (Wizards)
+				if (level.getRandom().nextFloat() < RpgKit.WIZARD_WAND_DROP) {
+					RpgKit.randomWand(level.getRandom()).ifPresent(wand -> w.mob().spawnAtLocation(level, new ItemStack(wand)));
+				}
 			}
-			// (0.7.520) and now and then the wand of their school (Wizards)
-			if (level.getRandom().nextFloat() < RpgKit.WIZARD_WAND_DROP) {
-				RpgKit.randomWand(level.getRandom()).ifPresent(wand -> w.mob().spawnAtLocation(level, new ItemStack(wand)));
+			// Court wizard creeper ward: re-evaluate the ward when the wizard dies
+			Faction f = Factions.get(level.getServer(), w.factionId());
+			if (f != null) {
+				CreeperWard.reevalWard(level.getServer(), f);
 			}
+			FOES.remove(w.mob());
 		}
-		FOES.remove(w.mob());
-	}
 
 	/** {@code entity} is a court wizard: a standalone one, or (with MCA) a villager in the office. */
 	public static boolean is(@Nullable Entity entity) {
