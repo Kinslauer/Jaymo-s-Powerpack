@@ -234,9 +234,9 @@ def stale(live, task, path, props):
     who = (props.get("claimed_by") or "").strip().lower()
     if not who and props.get("status") == "writing":  # a text pass: the writer holds it
         who = (props.get("writer") or "").strip().lower()
-    if who.startswith("hermes") and not os.path.isdir(WORKTREES):
-        # A Hermes bot builds in E:/wt on Andy's PC. A cloud VM can't see that worktree, so it would hand back a claim
-        # the bot is still building (and the bot then gives up). Only the PC judges Hermes claims.
+    if who != CLOUD_AGENT and not os.path.isdir(WORKTREES):
+        # Hermes bots, T3 (Codex, Antigravity) and PC Claude build on Andy's PC. A cloud VM can't see their worktrees,
+        # so it would hand back a claim that is still being built. Only the PC judges claims other than claude-cloud's.
         return False
     limit = CLOUD_STALE_MINUTES if who == "claude-cloud" else STALE_MINUTES
     return time.time() - last_activity(live, task, path) > limit * 60
