@@ -4,12 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 12:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:17). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
+- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for antigravity · open
@@ -30,7 +30,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · 🪶 Quill · #2302 · writing
 
 
 ## In review
@@ -38,12 +37,14 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · #2248 · in-review
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
-- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
+- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
-- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
+- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
+- [ ] [[Inbox/nycto-4|nycto-4]] · ☁️ Cloud · #2305 · in-review
+- [ ] [[Inbox/nycto-turning|nycto-turning]] · ☁️ Cloud · #2304 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -60,7 +61,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-5|hunters-road-5]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/nycto-4|nycto-4]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/black-panther-k2|black-panther-k2]] · for any · blocked
 - [ ] [[Inbox/black-panther-k3|black-panther-k3]] · for any · blocked
 - [ ] [[Inbox/black-panther-k4|black-panther-k4]] · for any · blocked
@@ -94,9 +94,9 @@ kanban-plugin: board
 - [x] [[Inbox/Done/nycto-7|nycto-7]]
 - [x] [[Inbox/Done/nycto-3|nycto-3]]
 - [x] [[Inbox/Done/hunters-road-7|hunters-road-7]]
+- [x] [[Inbox/Done/hunters-road-6|hunters-road-6]]
 - [x] [[Inbox/Done/nycto-2|nycto-2]]
 - [x] [[Inbox/Done/nycto-1|nycto-1]]
-- [x] [[Inbox/Done/hunters-road-2|hunters-road-2]]
 
 
 %% kanban:settings
