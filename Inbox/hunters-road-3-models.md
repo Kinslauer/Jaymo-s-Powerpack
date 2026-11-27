@@ -21,3 +21,4 @@ thread: t3 mcp:e9a08d03-2d67-4051-ad0f-184501082034
 - 2026-11-27 08:55 Codex out of usage (weekly limit, resets Dec 1 10:47 AM); moved to Antigravity gemini-4-carbon, T3 thread mcp:178d133d-ee7b-43d2-98b4-36b1b8cd5d97
 - 2026-11-27 09:06 Antigravity quota reached 2026-11-27 9:05 AM (resets about 1:30 PM); thread failed with no work done. Still claimed by t3, waiting on Andy: retry on Antigravity after the reset, or hand to Hermes.
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-27 15:25 Andy 2026-11-27 3:16 PM: start Codex on one model task at a time, HR 3 first. Codex (gpt-6-astra) started in T3 thread mcp:e9a08d03, branch t3/hunters-road-3-models off origin/master.
