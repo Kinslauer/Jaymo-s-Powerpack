@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 14:00). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,19 +27,22 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-4 waiting for a bot, 8 being built, 11 in review: see [[Kanban]].
+4 waiting for a bot, 8 being built, 10 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2293 Villagers going in at night aren't "Running scared" (Kingdoms, 2026-11-27)
+- [ ] #2292 spectate viewcone label trimmed - no coordinates, no Running line (Kingdoms, 2026-11-27)
+- [ ] #2290 Hunter's Road 7A: oils, oil pot, sash, bombs, acid, slick (Powers, Kingdoms, Kitchen, 2026-11-27)
 - [ ] #2289 Hunter's Road 6, part A: toxicity, tolerance, the gauge, five harms, hunter's eyes (Powers, Kingdoms, Kitchen, 2026-11-27)
 - [ ] #2288 Night's Blood 2 - the Blood page, the shrine and the pacts (Kingdoms, 2026-11-27)
 - [ ] #2287 silver and steel by monster kind (Powers, Kingdoms, 2026-11-27)
@@ -97,14 +100,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
 - [ ] #2221 wide flat plains and bigger biomes (open country) (Kingdoms, 2026-11-26)
 - [ ] #2219 world gen no longer freezes on Enderscape's "not in a structure" check (Powers, 2026-11-26)
-- [ ] #2215 Two new Rig suits: Hail and Tinker (Powers, Kitchen, 2026-11-26)
-- [ ] #2214 Open art sets, batch 1: machines and far-world rock (Powers, Kingdoms, 2026-11-26)
-- [ ] #2213 Maw ruins from Pomkot's World (Powers, 2026-11-26)
-- …and 651 older ones.
+- …and 654 older ones.
 
 ## Health
 
-28 problems in the notes: [[Health]].
+27 problems in the notes: [[Health]].
 
 ## Last week
 

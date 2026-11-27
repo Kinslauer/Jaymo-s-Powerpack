@@ -5,7 +5,7 @@ from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
 claimed_by: t3
 pr: 
-thread: 
+thread: t3 mcp:e2a61563-bcd8-489e-8ec6-f7c8488757d5
 ---
 
 # Night's Blood 4 models: the true shape of the night
@@ -20,3 +20,5 @@ thread:
 - 2026-11-27 11:41 Back to the modeller (Hunter's Road thread, 2026-11-27): models are Prometheus' job; that thread builds the patch once each model lands.
 - 2026-11-27 11:43 Opened: nycto-2 is in review (#2288), as the wave plan says.
 - 2026-11-27 08:35 Andy 2026-11-27: models to Codex and Antigravity through T3
+- 2026-11-27 09:06 t3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-27 09:07 Antigravity quota reached 2026-11-27 (resets about 1:30 PM) partway through. Uncommitted work kept in T3 worktree C:\Users\toopo\.t3\worktrees\Origins Mod\t3-nycto-4-models-17459abb230bddb0 (night_horror bbmodel, geo, animation, 6 textures, gen_night_horror.py, previews). Resume with t3 thread send to mcp:e2a61563 after the reset.
