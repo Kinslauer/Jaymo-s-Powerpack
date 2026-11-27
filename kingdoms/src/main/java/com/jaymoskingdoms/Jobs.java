@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
  * (0.5.5) A settlement's villagers at work. One without a trade is sent to a free job site in one of the settlement's
  * own buildings (its smithy, mason's yard, farm, stall, stable...), and takes that trade. By day, one at its job site
  * is seen working there (its trade's sound, smoke from a forge) and turns what's in the storehouse into goods: smiths
- * smelt the miners' raw ore with coal, the butcher cooks the farmer's meat, the mason cuts spare cobblestone into
+ * forge the town's working tools ({@link ToolGrades}), make a steel realm's steel ({@link SteelRealms}) and smelt the miners' raw ore with coal, the butcher cooks the farmer's meat, the mason cuts spare cobblestone into
  * bricks, the fletcher makes arrows, the fisherman fishes the water by their barrel (none near, no fish), and a farmer hands over the harvest it doesn't need.
  */
 final class Jobs {
@@ -179,6 +179,14 @@ final class Jobs {
 			return true;
 		}
 		if (trade.is(VillagerProfession.ARMORER) || trade.is(VillagerProfession.TOOLSMITH) || trade.is(VillagerProfession.WEAPONSMITH)) {
+			// the town's working tools forged first, as the stores run short of them (ToolGrades)
+			if (ToolGrades.forge(level, f, v)) {
+				return true;
+			}
+			// a steel realm's iron made steel (SteelRealms)
+			if (SteelRealms.smelt(level, f, v)) {
+				return true;
+			}
 			// raw ore smelted, a coal a batch
 			for (Item[] smelt : SMELTS) {
 				if (Storage.count(level, f, smelt[0]) == 0) {

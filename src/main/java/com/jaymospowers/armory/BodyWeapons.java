@@ -20,6 +20,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -44,10 +45,16 @@ import org.jspecify.annotations.Nullable;
  * it, the two side by side ({@link Home#TWIN_OUTER}, {@link Home#TWIN_INNER}) instead of at the hips.
  * <p>The toggle ({@link #FREE}, on the Character page): free placement hands the body back to YDM's Weapon Master as
  * before (up to 3 items by hotbar slot, all of them with a tool belt), and this shows nothing.
+ * <p>NPCs (Andy, 2026-11-27: "you should be able to see what npcs have equipped"): Jaymo's Kingdoms hands over what one
+ * carries off its hands ({@link #carry}: a guard's belt sidearm, the bow or gun slung while it fights with that, the
+ * weapons in an MCA villager's pack) and up to {@link #NPC_SHOWN} of them take their homes the same way, drawn by the same
+ * layer.
  */
 public final class BodyWeapons {
 	/** How many items a body shows in set places without a worn tool belt (a Kenway: two swords, four pistols). */
 	public static final int MAX_SHOWN = 6;
+	/** How many carried weapons an NPC shows on its body (Andy's ruling for bodies without a tool belt: up to 3). */
+	public static final int NPC_SHOWN = 3;
 
 	/** The places on the body. The client draws each one ({@code BodyWeaponsLayer}). */
 	public enum Home {
@@ -114,10 +121,55 @@ public final class BodyWeapons {
 		return Boolean.TRUE.equals(player.getAttached(FREE));
 	}
 
-	/** What {@code player}'s homes show, one per {@link Home} (empty list when nothing shows); client and server. */
-	public static List<ItemStack> shown(Player player) {
-		List<ItemStack> shown = player.getAttached(SHOWN);
+	/** What {@code body}'s homes show (a player's or an NPC's), one per {@link Home} (empty list when nothing shows); client and server. */
+	public static List<ItemStack> shown(LivingEntity body) {
+		List<ItemStack> shown = body.getAttached(SHOWN);
 		return shown == null ? List.of() : shown;
+	}
+
+	/**
+	 * From Jaymo's Kingdoms (by reflection, on the server): what the NPC {@code mob} carries but doesn't hold, in the order it
+	 * should show. The first {@link #NPC_SHOWN} that are weapons or shields take their kind's first free homes; synced to
+	 * everyone when that changes. Never a player's ({@link #tick} works those out from the hotbar).
+	 */
+	public static void carry(LivingEntity mob, List<ItemStack> carried) {
+		if (mob instanceof Player || mob.level().isClientSide()) {
+			return;
+		}
+		List<ItemStack> homes = npcHomes(carried);
+		if (homes == null) {
+			if (mob.getAttached(SHOWN) != null) {
+				mob.removeAttached(SHOWN);
+			}
+		} else if (!ItemStack.listMatches(homes, shown(mob))) {
+			mob.setAttached(SHOWN, Collections.unmodifiableList(homes));
+		}
+	}
+
+	/** Each home's item for an NPC carrying {@code carried}, or null when none shows. Tools aren't shown on NPCs. */
+	private static @Nullable List<ItemStack> npcHomes(List<ItemStack> carried) {
+		boolean[] used = new boolean[Home.values().length];
+		used[Home.TWIN_OUTER.ordinal()] = used[Home.TWIN_INNER.ordinal()] = true;
+		List<ItemStack> homes = new ArrayList<>(Collections.nCopies(Home.values().length, ItemStack.EMPTY));
+		int shown = 0;
+		for (ItemStack stack : carried) {
+			Kind kind = kind(stack);
+			if (shown >= NPC_SHOWN) {
+				break;
+			}
+			if (kind == null || kind == Kind.TOOL) {
+				continue;
+			}
+			for (Home home : kind.homes) {
+				if (!used[home.ordinal()]) {
+					used[home.ordinal()] = true;
+					homes.set(home.ordinal(), stack.copyWithCount(1));
+					shown++;
+					break;
+				}
+			}
+		}
+		return shown == 0 ? null : homes;
 	}
 
 	private static void tick(MinecraftServer server) {

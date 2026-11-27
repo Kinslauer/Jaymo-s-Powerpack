@@ -319,6 +319,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("dealings attachment: {}", Dealings.DEALINGS);
 		Strays.register();
 		BloodChores.register();
+		// a town's sexton: the lych lantern, the dead and what's left lying, the golems, blood and grime (Sextons)
+		Sextons.register();
+		ToolGrades.register();
+		SteelRealms.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
@@ -404,6 +408,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		GradedTrades.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground
 		Rearm.register();
+		// ranged NPCs' sidearms, and what they carry shown on their bodies
+		Sidearms.register();
+		// NPCs' pockets: a search screen on the downed, dropped when they die
+		NpcPockets.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
 		Casting.register();
@@ -702,6 +710,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Lamplight.register();
 		// NPCs need light to see by: they fetch a torch or lantern for the dark, and the night watch always carries one
 		NightLights.register();
+		// guards grow suspicious of a player they half make out or hear, and go to look (lit up in the dark)
+		GuardWatch.register();
 		// medieval picks: lamps gutter in abandoned places, and the court wizards' everburning mote lantern
 		GutteringLamps.register();
 		MoteLanterns.register();

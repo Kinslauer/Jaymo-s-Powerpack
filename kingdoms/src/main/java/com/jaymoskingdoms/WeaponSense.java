@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -111,8 +112,11 @@ public final class WeaponSense {
 	 */
 	public static final float CROSSBOW_STOP = 26.0F;
 
-	/** Where a weapon to pick is: in the main hand already, nowhere, the off hand, a folk's belt sidearm; 0 and up, a pack slot. */
-	private static final int MAIN = -4, NONE = -2, OFF = -1, BELT = -3;
+	/**
+	 * Where a weapon to pick is: in the main hand already, nowhere, the off hand, the belt's sidearm ({@link Sidearms}, else a
+	 * folk's {@link Rearm#SIDEARM}), the bow or gun slung at the belt while the sidearm is out; 0 and up, a pack slot.
+	 */
+	private static final int MAIN = -4, NONE = -2, OFF = -1, BELT = -3, SLUNG = -5;
 
 	private static final class State {
 		/** Holding its blade because a foe rushed it (worked out from its hands each look). */
@@ -270,6 +274,15 @@ public final class WeaponSense {
 			&& Rearm.isMelee(mob.getMainHandItem()) && drawn(mob.getOffhandItem()) && MobAmmo.has(mob, MobAmmo.Kind.ARROWS)) {
 			exchange(level, mob, OFF, level.getGameTime());
 		}
+		// (anyone's sidearm goes back to the belt, the bow or gun slung there back to hand; an MCA archer's bow is the pack's
+		// own, so the sidearm goes back to the empty belt and MCA arms the hand again)
+		if (mob.isAlive() && !swapping(mob)) {
+			if (Sidearms.drawn(mob)) {
+				exchange(level, mob, SLUNG, level.getGameTime());
+			} else if (mob instanceof Villager && Sidearms.stow(mob, mob.getMainHandItem())) {
+				mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+			}
+		}
 	}
 
 	// ---- blade or bow ----------------------------------------------------------------------------------------------------
@@ -279,9 +292,19 @@ public final class WeaponSense {
 		return stack.getItem() instanceof BowItem || stack.getItem() instanceof CrossbowItem && !stack.is(Muskets.musket());
 	}
 
-	/** A gun: an early gun's rung, or a musket. */
+	/** A gun: an early gun's rung, a musket, or a caravan's musketoon. */
 	private static boolean gun(ItemStack stack) {
-		return !stack.isEmpty() && (EarlyGuns.Rung.of(stack) != null || stack.is(Muskets.musket()));
+		return Sidearms.gun(stack);
+	}
+
+	/** A gun with a bayonet fixed (WeaponMod's): it fights hand to hand with that, so it keeps it when rushed. */
+	private static boolean bayonet(ItemStack stack) {
+		return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("bayonet");
+	}
+
+	/** {@code mob} has what {@code gun} fires: a musketoon's cannonballs, any other gun's shot. */
+	private static boolean shot(Mob mob, ItemStack gun) {
+		return MobAmmo.has(mob, Musketoon.ITEM != null && gun.is(Musketoon.ITEM) ? MobAmmo.Kind.BALLS : MobAmmo.Kind.SHOT);
 	}
 
 	/** The stack at {@code at} (as {@link #MAIN}, {@link #OFF} or a pack slot), or empty. */
@@ -292,11 +315,20 @@ public final class WeaponSense {
 		if (at == OFF) {
 			return mob.getOffhandItem();
 		}
+		if (at == SLUNG || at == BELT) {
+			return Sidearms.belt(mob);
+		}
 		return at >= 0 && mob instanceof Villager v && at < v.getInventory().getContainerSize() ? v.getInventory().getItem(at) : ItemStack.EMPTY;
 	}
 
-	/** Where else than the main hand {@code mob} has a weapon {@code kind} likes: the off hand, else an MCA villager's pack; {@link #NONE} if nowhere. */
+	/**
+	 * Where else than the main hand {@code mob} has a weapon {@code kind} likes: slung at its belt, the off hand, else an MCA
+	 * villager's pack; {@link #NONE} if nowhere.
+	 */
 	private static int find(Mob mob, java.util.function.Predicate<ItemStack> kind) {
+		if (Sidearms.drawn(mob) && kind.test(Sidearms.belt(mob))) {
+			return SLUNG;
+		}
 		if (kind.test(mob.getOffhandItem())) {
 			return OFF;
 		}
@@ -311,7 +343,10 @@ public final class WeaponSense {
 		return NONE;
 	}
 
-	/** Its best blade other than the main hand's: the hardest-hitting in the off hand or the pack, else a folk shooter's belt sidearm ({@link #BELT}) while it has it. */
+	/**
+	 * Its best blade other than the main hand's: the hardest-hitting in the off hand or the pack, else its belt's sidearm
+	 * ({@link #BELT}: {@link Sidearms}', else a folk shooter's {@link Rearm#SIDEARM} while it has it).
+	 */
 	private static int bestBlade(Mob mob) {
 		int best = NONE;
 		double most = -1.0;
@@ -324,6 +359,9 @@ public final class WeaponSense {
 				most = hits;
 				best = i;
 			}
+		}
+		if (best == NONE && Sidearms.ready(mob)) {
+			best = BELT;
 		}
 		if (best == NONE && mob instanceof Folk f && f.ranged() && mob.getOffhandItem().isEmpty() && Rearm.sidearmLeft(mob)) {
 			best = BELT;
@@ -341,24 +379,27 @@ public final class WeaponSense {
 	}
 
 	/**
-	 * ws-pick and ws-swap: the weapon {@code mob} should hold just now, from its hands (and an MCA villager's pack): a gun with shot,
-	 * else a bow or crossbow with arrows, else (thrown from what it carries) whatever it holds, else its best blade; and its blade
-	 * in place of the bow while a foe is on top of it. Into the hand it goes. Ammo is only asked of a kind it has the weapon for.
+	 * ws-pick and ws-swap: the weapon {@code mob} should hold just now, from its hands (and its belt, and an MCA villager's pack): a
+	 * gun with shot, else a bow or crossbow with arrows, else (thrown from what it carries) whatever it holds, else its best blade;
+	 * and its blade in place of the bow or gun while a foe is on top of it (a gun only for the sidearm at its belt, which takes the
+	 * gun's place there, and never a gun with a bayonet fixed). Into the hand it goes. Ammo is only asked of a kind it has the
+	 * weapon for.
 	 */
 	private static void pick(ServerLevel level, Mob mob, LivingEntity foe, State s, double d, long now) {
 		s.rushed = false;
-		if (mob instanceof Pillager) {
-			// (one weapon: the crossbow)
+		if (mob instanceof Pillager && !Sidearms.ready(mob) && !Sidearms.drawn(mob)) {
+			// (one weapon: the crossbow, unless it carries a backup at its belt: Sidearms)
 			return;
 		}
 		ItemStack main = mob.getMainHandItem();
-		if (gun(main) && MobAmmo.has(mob, MobAmmo.Kind.SHOT)) {
+		// (a gun with a bayonet, or one with no sidearm to change it for, is kept in hand while it has shot, as before)
+		if (gun(main) && shot(mob, main) && (bayonet(main) || !Sidearms.ready(mob))) {
 			return;
 		}
 		boolean shooting = !RangedTactics.melee(mob);
 		int ranged = NONE;
-		int gunAt = find(mob, WeaponSense::gun);
-		if (gunAt != NONE && MobAmmo.has(mob, MobAmmo.Kind.SHOT)) {
+		int gunAt = gun(main) ? MAIN : find(mob, WeaponSense::gun);
+		if (gunAt != NONE && shot(mob, at(mob, gunAt))) {
 			ranged = gunAt;
 		} else if (shooting && drawn(main) && MobAmmo.has(mob, MobAmmo.Kind.ARROWS)) {
 			ranged = MAIN;
@@ -369,10 +410,18 @@ public final class WeaponSense {
 			}
 		}
 		int blade = Rearm.isMelee(main) ? MAIN : bestBlade(mob);
+		boolean gunInHand = gun(main) || gunAt == SLUNG;
+		if (gunInHand && blade != MAIN && !Sidearms.ready(mob)) {
+			// (a gun is changed only for the belt's sidearm: into the pack it would be two guns once the realm issues another)
+			blade = NONE;
+		} else if (gunInHand && blade != MAIN) {
+			blade = BELT;
+		}
 		int want;
-		if (ranged != NONE && drawn(at(mob, ranged))) {
+		if (ranged != NONE && (drawn(at(mob, ranged)) || gun(at(mob, ranged)) && !bayonet(at(mob, ranged)))) {
 			ItemStack bow = at(mob, ranged);
-			double near = bow.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(bow) ? RUSHED_LOADED : RUSHED;
+			// (a gun fires from nearer than a bow, and a crossbow already loaded too: it changes when the foe is nearer)
+			double near = gun(bow) || bow.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(bow) ? RUSHED_LOADED : RUSHED;
 			// (holding its blade already it keeps it till the foe is past the clear range or it has stepped clear)
 			boolean onTop = d < near || blade == MAIN && d <= CLEAR && !steppedClear(mob, foe, d);
 			s.rushed = onTop && blade != NONE;
@@ -383,6 +432,10 @@ public final class WeaponSense {
 			want = MAIN;
 		} else {
 			want = blade;
+			// (a gunner out of shot never clubs with the gun: the sidearm comes out)
+			if (gun(main) && want == NONE && Sidearms.ready(mob)) {
+				want = BELT;
+			}
 		}
 		if (want != MAIN && want != NONE) {
 			exchange(level, mob, want, now);
@@ -395,11 +448,13 @@ public final class WeaponSense {
 	}
 
 	/**
-	 * Takes the weapon at {@code from} ({@link #OFF}, {@link #BELT}, or a pack slot) into the main hand. Hands change places, each
-	 * with the drop chance it had (a weapon picked up off the ground always drops, {@link Rearm}); the belt sidearm is drawn once a
-	 * life, the bow going to the empty off hand. An MCA villager's hand takes the pack's own stack, as MCA's own arming does: what
-	 * it held stays in the pack (or goes into it, if it came from nowhere), so nothing is copied or lost. False, nothing changed, if
-	 * there is no room.
+	 * Takes the weapon at {@code from} ({@link #OFF}, {@link #BELT}, {@link #SLUNG}, or a pack slot) into the main hand. Hands change
+	 * places, each with the drop chance it had (a weapon picked up off the ground always drops, {@link Rearm}). The belt's sidearm
+	 * ({@link Sidearms}) and what the hand held trade places, the bow or gun slung at the belt till it comes back ({@link #SLUNG});
+	 * a pack's own bow stays in the pack, the belt left empty. A folk's {@link Rearm#SIDEARM} is drawn once a life, the bow going to
+	 * the empty off hand. An MCA villager's hand takes the pack's own stack, as MCA's own arming does: what it held stays in the pack
+	 * (or goes into it, if it came from nowhere; the belt's sidearm back to the belt), so nothing is copied or lost. False, nothing
+	 * changed, if there is no room.
 	 */
 	private static boolean exchange(ServerLevel level, Mob mob, int from, long now) {
 		ItemStack main = mob.getMainHandItem(), off = mob.getOffhandItem();
@@ -409,6 +464,10 @@ public final class WeaponSense {
 			mob.setItemSlot(EquipmentSlot.OFFHAND, main);
 			mob.setDropChance(EquipmentSlot.MAINHAND, offDrop);
 			mob.setDropChance(EquipmentSlot.OFFHAND, mainDrop);
+		} else if (from == BELT && Sidearms.ready(mob) || from == SLUNG && Sidearms.drawn(mob)) {
+			ItemStack belt = Sidearms.belt(mob);
+			Sidearms.setBelt(mob, Sidearms.packed(mob, main) ? ItemStack.EMPTY : main);
+			mob.setItemSlot(EquipmentSlot.MAINHAND, belt);
 		} else if (from == BELT) {
 			if (!off.isEmpty() || !Rearm.drawSidearm(mob)) {
 				return false;
@@ -424,7 +483,7 @@ public final class WeaponSense {
 			if (take.isEmpty()) {
 				return false;
 			}
-			if (!main.isEmpty() && !inPack(pack, main)) {
+			if (!main.isEmpty() && !inPack(pack, main) && !Sidearms.stow(mob, main)) {
 				if (!pack.canAddItem(main)) {
 					return false;
 				}

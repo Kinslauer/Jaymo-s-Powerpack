@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "minecraft:sponge"
+  },
+  "max_uses": 4,
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": 6,
+    "id": "minecraft:emerald"
+  },
+  "xp": 15
+}

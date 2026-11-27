@@ -468,7 +468,8 @@ public final class ArmourGrime {
 		return clean(body.getItemBySlot(slot), amount);
 	}
 
-	static boolean washAll(LivingEntity body, int amount) {
+	/** Washes {@code amount} off {@code body}'s coat, its own clothes and what it wears (Jaymo's Kingdoms' sextons, by name); true if any was dirty. */
+	public static boolean washAll(LivingEntity body, int amount) {
 		boolean any = com.jaymospowers.core.blood.Bloodied.cleanCoat(body, amount);
 		any |= washBody(body, amount);
 		for (EquipmentSlot slot : SLOTS) {

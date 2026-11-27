@@ -18123,3 +18123,75 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Stuck walkers push through** (`Unstick`, `Overgrowth.pushThrough`): a villager or one of our folk whose fresh path still can't get there brushes aside that overgrowth round where the path gives out and round itself, then paths again. The stall watcher's "sent on" step does the same round the villager, next to opening a shut door.
 - Not changed: two of Haldale's street pieces lie underground (`straight_05`/`straight_06` at y 55 to 62; a guard was stuck at y 51), and the buildings that never generated are another thread's.
 - Built; not played.
+
+## 0.13.71 (2026-11-27): Guards grow suspicious of what they half see or hear, light up and go to look (#2279)
+
+- **Suspicion** (Andy: "guards should also react and investigate based on your concealment. it should factor in light
+  level, (guards will have to get closer or turn on lights and approach) sounds, and other factors"): a guard (a realm's,
+  a camp's, an MCA guard) no longer either sees you at once or not at all. How hidden you are uses the same reckoning as a
+  monster's eyes: the light on you and any light he carries, sneaking, standing still, the slow pace, cover, a hood,
+  weather and mist, smell, being lit or on fire, and the rest. Within that reach he sees you. Out to 2.5 times it, in
+  front of him with nothing solid between, he catches a glimpse and grows suspicious, faster the nearer you are to being
+  seen. Your footsteps and other noises he hears raise it too, by how loud they come through the walls.
+- **What he does**: at a quarter suspicion he stops and looks where he last glimpsed or heard you. At 60% he goes to look,
+  following fresher glimpses. If it's dark there or where he stands and he has nothing lit in hand, he lights one first
+  (his kept lantern, one from his pocket, else one from the stores, else a torch), day or night, and keeps it lit till
+  he's done. With the light he sees farther, so he closes in until he can make you out. Once he sees you properly he
+  stops, looks you over for 3 s and goes back to his post. What he then makes of you is up to the law as before. He
+  won't suspect you again for 30 s. Suspicion fades by itself.
+- **You can see it**: the awareness eye fills with a guard's suspicion and shows searching while he investigates. The
+  spectate view lists "Suspicious of <player>: 45%" or "Investigating <player>".
+- `GuardWatch` (new), `Footsteps.heard`, `NightLights.lightUp` (new) and keeping the light while investigating,
+  `Senses` (gauge, `sight` opened to the package), `NpcFocus`, lang part `npc-eyes`.
+- Built; not played.
+
+## 0.13.72 (2026-11-27): NPCs take a second to think before setting on a player they've just picked out (#2279)
+
+- **The extra second** (Andy: "npcs across the board should think for an extra second to give stealth users the required
+  time to close in for a stealth takedown"): every mob that picks out a player it would fight (any target goal or brain
+  attack sensor, through `TargetingConditions.test`) now spends 1 s sizing them up before it can take them as its foe.
+  This includes monsters, animals, the folk, MCA's guards and bosses. All that second it isn't after them, so it still
+  counts as unaware for a stealth kill, a sneak attack or an assassination. It doesn't turn round either: the takedown
+  from behind still works. If it still has them after the second, it sets on them as before. Not picked out for 2 s,
+  they're sized up afresh next time.
+- **No second when**: it's already after them, a friend just told it where they are, or they just hurt it (a blow is
+  answered at once). Creative and spectator players are untouched.
+- **You can see it**: the awareness eye fills over the second, and the spectate dev view's top line reads "Thinking:
+  sizing up <player> (0.6 s left)" in yellow.
+- `ThinkFirst` (new), `mixin.TargetingThinkMixin` (new, combat mixins), `Senses` (gauge), `NpcFocus`, lang part `npc-eyes`.
+- Built; not played.
+
+## 0.13.73 (2026-11-27): ranged NPCs carry a sidearm and switch to it up close; NPCs carry real pockets you can search; their carried weapons show on the body (#2278)
+
+- **A sidearm at the belt** (`Sidearms`): every guard, archer and gunner, camp or ship fighter, forest ranger, folk fighter and pillager who carries a bow, crossbow or gun is given one sidearm, once (one a player takes is not made again): an iron dagger if they wear any metal (mail, plate, a gunner's Templar legs), a stone dagger in leather or cloth, a flint dagger for a camp raider or a pirate (Powers' daggers, else the Rogues' ones, else a sword). Gunners get a sword instead (iron in metal, stone otherwise), pillagers an iron axe. A player's recruits get none: they carry what the player gives them.
+- **Switching** (`WeaponSense.pick`): a foe inside 4 blocks of a gunner (handgonne, arquebus, plain musket, caravan musketoon) or 6 of an archer (4 for a crossbow already loaded) and the sidearm comes out; the gun or bow goes onto the belt and comes back once the foe is past 9 blocks, after someone else, or the fight is over. A gunner out of shot fights with the sidearm, never with the gun as a club. A musket with a bayonet fixed keeps its bayonet. Each swap trades the two stacks between the hand and the belt, so nothing is made or lost, and an MCA archer's bow (the pack's own stack) stays in the pack. While the sidearm is out the gunner still counts as a gunner: his kit (tassets and sabatons only), his hands and his place on the gun roll stay as they were, and the realm never hands him a second gun.
+- **Pillagers** switch to their axe up close and fight with it using the vindicator's swing (`Sidearms.BackupMelee`, a melee goal that only runs with a melee weapon in hand).
+- **Gunners** carry no shields (one in the off hand goes into the pack or is dropped) and, with no foe within 16 blocks and no sword at the belt (theirs taken or lost), walk to a weapon lying within 12 blocks they can see and take it onto the belt (a sword first; anything else only for an empty belt; the old belt weapon goes into the pack or is dropped).
+- **Pockets** (`NpcPockets`, saved on the NPC): every grown villager (MCA's too), settlement folk and illager carries a few real things, rolled the first time anyone looks and again each day: most a purse of their land's coin (fuller on a guard or merchant), a bite to eat, odds and ends, and what their trade would have (farmer seeds, fletcher feathers and flint, librarian paper and ink, smith coal and nuggets, guard a bandage; a camp raider bones and flint, a pirate gold and kelp, a ranger berries and arrows, an illager spare arrows and plunder). A realm villager with a door that locks carries their house key, once.
+- **Searching them**: the body menu's "Search them" (in place of the old pickpocket row) on anyone downed or hogtied opens a screen with their belt (the sidearm, or the gun or bow slung there) and pockets above your inventory. It reads and writes the body's own belt and pockets. Where a realm's law holds, taking from them is a theft anyone watching sees, and what you take is marked stolen. A pickpocket's lift now comes out of these same pockets. On dying, the belt and pockets drop with the body's gear, so they show up on its loot screen.
+- **On the body**: what an NPC carries but doesn't hold (the belt's sidearm or slung gun, then the weapons and shield in an MCA villager's pack; a gunner's pack shield is not shown) is hung on them by Powers' body-weapons layer, up to three (`Sidearms.show` -> `PowersCompat.carry`). NPC archers with arrows left wear a real quiver over the left shoulder (Archers' medium or small quiver, or Kitchen's quiver; drawn as the item, not lootable).
+- Not covered: a pillager's belt isn't drawn on the body (the illager model isn't a humanoid one); posted wall archers and cannon gunners don't switch to the sidearm.
+- Built; not played.
+
+## 0.13.74 (2026-11-27): The sexton: a town job for the dead, the golems and the blood (#2273)
+
+- Andy: "there should be a groundskeeper job or something similar that buries / disposes of dead bodies / limbs, repairs golems, and washes blood/grime". It's the **sexton** (Lore.md, "The sexton", new for Andy to approve): the Lantern Warden's keeper in a town. ("Groundskeeping" was already the builders' levelling of a town's ground, `Groundwork`, so the name stays theirs.)
+- **Job site: the lych lantern**, a lamp hung from the arm of a dark oak post on a mossy stone foot (vanilla textures, the out lamp is the burnt lantern). A real job site: a villager without a trade takes it up as the game's own are taken. Recipe: a lantern beside two stripped dark oak logs over mossy cobblestone. Light 14 when lit.
+- **Every town keeps one** (`TownTrades`, like the cook and the healer): an idle townsperson, a nitwit or a spare tradesman takes it up, or one moves in, with a line each way. A town with a sexton and a burying ground but no lantern gets one: the sexton sets it up beside the first headstone.
+- **The day** (`Sextons`): at dusk the sexton walks to the lantern and lights it, after dawn puts it out (flint, smoke, a word now and then). In the working day:
+  - **The dead**: a free sexton is sent for a body before anyone else, to bury the town's own and burn the enemy's (`Bearers`) and to carry monsters to the fire (`Undertakers`), so the guards keep their posts.
+  - **Limbs and heads** (Powers' severed parts) left lying a minute (yours first) are buried, spade in hand: where they lie if the ground takes a spade, else into a sack (a bundle in hand) and buried on the nearest open ground. Never a kept trophy (hook or wall), nothing carried, nor a dead player's head they still see through. **Blast mess** (Kitchen's gibs) is shovelled up too.
+  - **Golems** are mended with an iron ingot from the storehouse, as a smith does (`SmithMending`; the guards' gear stays the smiths').
+  - **Washing**: a guard or golem with blood, grime or a zombie's rotten blood on them is washed down, bucket in hand, splashing and brushing (Powers' `ArmourGrime.washAll` + `MagicWash` + zombie blood); each body at most once every two minutes.
+  - **Blood in the streets** is scrubbed out by the sexton (`BloodChores`: indoors anyone still minds it; outdoors, only a sexton).
+- **Tools are forged by the town's smiths** (`ToolGrades`). Andy: "all item materials should change dependent on the availability and realm wealth. only the richer kingdoms spend materials on iron shovels, otherwise they are wooden or stone", then "they should only gain access once a blacksmith is built and actually forges the items".
+  - A smith (toolsmith, armourer or weaponsmith) at their workstation in working hours (`Jobs`) forges the town's working tools out of the storehouse into it, before smelting: two of each pickaxe, axe, shovel and hoe. Iron (3/3/1/2 ingots) only in a wealthy realm (a fiefdom by its overlord's) with the ingots to hand, else stone out of cobblestone; the handle is two sticks, or a plank cut into sticks. An anvil's ring and sparks as each is made. In a wealthy realm a smith forges a bucket too.
+  - Folk work with the best of each kind in the stores; with none (no smith, or nothing to forge with) a wooden one they whittled. The sexton's water bucket is iron only if the stores have a bucket, else Powers' fired clay one.
+  - Tools wear out by what they're made of (Andy: "they should have varying durability. iron lasting the longest"): each kind in use loses one from the stores every two days if stone, every four if iron, so the smith keeps spending, and a town out of iron goes back to stone as its last iron ones wear out.
+  - It covers the sexton's spade and bucket, the hammer a smith or sexton mends with, every worker's hoe, pick, axe and shovel (Kingdoms folk, MCA villagers at work, the foreman's axe) and the mineshaft miners' picks. Camp builders keep stone. Weapons already work this way (`GuardKit` pays ingots, stone floor).
+- **Steel realms** (`SteelRealms`; Andy: "some kingdoms should even have acess to steel armor and weaponry. only the absolute richest and warmongers", his pick: wealthy, and the richest or warlike). A steel realm is a wealthy kingdom that is the richest in the world, or of the Conquest creed, or waging a war it declared; a fiefdom goes by its overlord.
+  - Only its smiths make steel (`Jobs`): two iron ingots and a coal into a steel ingot, keeping 16 iron back and up to 24 steel in the stores (needs Jaymo's Powers' steel).
+  - Only its guards wear and carry steel (`GuardKit`), paid in steel ingots or emeralds: the Armory's steel plate for its knights, veterans and leaders (and soldiers on the heavy lean; Templar realms keep their own plate), the Grim Templars' blackened plate, the gunners' steel Ranger pieces, and steel blades for soldiers and up (the iron sword, spear or axe forged of steel: "Steel Sword", 60% more uses, +1 damage). Steel ingots no longer pay for iron pieces.
+- **The steel blueprint** (Andy: "it can be written into lore as a specific crafting blueprint gatekept by the kingdom who has it. it is very valuable and closely kept so the information is highly sought after"). A new item, kept by one smith of each steel realm, with the realm named on it. Never sold or copied: a player gets one by pickpocketing that smith or off the smith's body, and the realm draws up a new one three days after it was given. With Jaymo's Powers, the anvil hammers plain steel only for a player who carries one or is sworn to a steel realm (anyone else gets the dull clank). Steel ingots still come from the smeltery and blast furnace for anyone; folded steel and the peoples' steels keep their own rules. Lore.md: "The steel blueprint" and "A town's tools" (new, for Andy to approve).
+- Trades (data pack `trade_set/sexton`, four levels): wheat and iron and coal bought; candles, bone meal, the lych lantern, a sponge and an iron shovel sold. Own wants (`OwnWants`): candles, a sponge, iron. MCA dresses them as a leatherworker and keeps the trade (`IS_IMPORTANT`).
+- Speech bubbles only, never chat (lang part `sextons`). Built; not played.
