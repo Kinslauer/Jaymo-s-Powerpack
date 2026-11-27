@@ -1,0 +1,9 @@
+{
+	"power.jaymospowers.handofgod": "Hand of God",
+	"power.jaymospowers.handofgod.desc": "A patron god's favour: a fragment of divine authority. The sky itself answers.",
+	"power.jaymospowers.handofgod.key.ability_1": "Celestial Hold: freeze the Sun and Moon for 5 s",
+	"power.jaymospowers.handofgod.key.ability_2": "Celestial Turn: the Sun and Moon jump to where you look",
+	"message.jaymospowers.handofgod.hold_taken": "The sky is already held.",
+	"message.jaymospowers.handofgod.hold_cooldown": "The sky stirs again in %s s.",
+	"message.jaymospowers.handofgod.turn_cooldown": "The sky turns again in %s s."
+}
