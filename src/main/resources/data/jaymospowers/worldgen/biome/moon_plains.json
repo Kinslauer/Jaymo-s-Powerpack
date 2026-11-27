@@ -39,7 +39,9 @@
     "water_color": "#8a8a9a"
   },
   "features": [
-    [],
+    [
+      "jaymospowers:moon_craters"
+    ],
     [],
     [],
     [],

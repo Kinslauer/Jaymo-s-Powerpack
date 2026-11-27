@@ -122,6 +122,8 @@ public final class RigPose {
 	/** Barrage: the deep brace's drop and lean, the fists planted low and wide, the feet apart, the head up to watch them go; each missile's thump. */
 	static final float BARRAGE_DROP = 2.4F, BARRAGE_LEAN = 0.3F, BARRAGE_ARM_BACK = 0.2F, BARRAGE_ARM_OUT = 0.5F, BARRAGE_SPREAD = 0.2F, BARRAGE_CHIN = 0.3F,
 		BARRAGE_THUMP = 0.5F, BARRAGE_POD_DOWN_AT = 28.0F;
+	/** The suit-ups: the slam's crouch (drop, lean), the fists' reach down, the arms thrown wide as it finishes. */
+	static final float SUITUP_SLAM_DROP = 3.0F, SUITUP_SLAM_LEAN = 0.5F, SUITUP_FIST_X = -0.1F, SUITUP_OPEN = 1.5F;
 	/** Walking at this share of full pace or more, a move leaves the legs to the walk. */
 	static final float STILL_PACE = 0.35F;
 
@@ -376,6 +378,66 @@ public final class RigPose {
 				set(h.leftArm, CALL_ARM_FORWARD, 0.0F, -CALL_ARM_OUT, amount);
 				spread(h, CALL_SPREAD * amount * still);
 				h.head.xRot -= CALL_CHIN * amount;
+			}
+			case RigMoves.SUITUP_SLAM -> {
+				// down into a crouch, fists to the ground, the plates thudding on one by one; then up out of it, arms flung wide
+				float down = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 4.0F, 1.0F, OUT, 14.0F, 1.0F, LINEAR, 18.0F, 0.0F, SINE);
+				float open = RigBeats.at(t, 13.0F, 0.0F, LINEAR, 17.0F, 1.0F, BACK, RigMoves.SUITUP_SLAM_TICKS, 0.0F, SINE);
+				float thud = 0.5F * Mth.abs(Mth.sin(t * 1.3F)) * down * (1.0F - open);
+				crouch(h, SUITUP_SLAM_DROP * down + thud, SUITUP_SLAM_LEAN * down);
+				set(h.rightArm, SUITUP_FIST_X, 0.0F, 0.3F, down);
+				set(h.leftArm, SUITUP_FIST_X, 0.0F, -0.3F, down);
+				spread(h, 0.2F * down * still);
+				h.head.xRot += 0.35F * down - 0.5F * open;
+				set(h.rightArm, 0.2F, 0.0F, SUITUP_OPEN, open);
+				set(h.leftArm, 0.2F, 0.0F, -SUITUP_OPEN, open);
+			}
+			case RigMoves.SUITUP_STEP -> {
+				// arms held out wide while the shell stands open round you; then drawn in across the chest as it folds shut;
+				// then the arms fall and the chin comes up
+				float wide = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 6.0F, 1.0F, OUT, 24.0F, 1.0F, LINEAR, 30.0F, 0.0F, SINE);
+				float fold = RigBeats.at(t, 24.0F, 0.0F, LINEAR, 32.0F, 1.0F, OUT, 38.0F, 1.0F, LINEAR, RigMoves.SUITUP_STEP_TICKS, 0.0F, SINE);
+				set(h.rightArm, -0.2F, 0.0F, 1.25F, wide);
+				set(h.leftArm, -0.2F, 0.0F, -1.25F, wide);
+				spread(h, 0.1F * wide * still);
+				set(h.rightArm, -1.3F, -0.8F, 0.1F, fold);
+				set(h.leftArm, -1.3F, 0.8F, -0.1F, fold);
+				h.head.xRot += 0.2F * fold - 0.15F * wide;
+				brace(front, rear, side, 0.25F * Math.min(1.0F, wide + fold) * still);
+			}
+			case RigMoves.SUITUP_FLIGHT -> {
+				// laid out like a dive, fists thrown out ahead, legs trailing; at the lock the arms snap back and out
+				float dive = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 4.0F, 1.0F, OUT, 16.0F, 1.0F, LINEAR, 20.0F, 0.0F, BACK);
+				float lock = RigBeats.at(t, 15.0F, 0.0F, LINEAR, 19.0F, 1.0F, BACK, RigMoves.SUITUP_FLIGHT_TICKS, 0.0F, SINE);
+				crouch(h, 0.0F, 0.55F * dive);
+				set(h.rightArm, -3.0F, 0.0F, 0.12F, dive);
+				set(h.leftArm, -3.0F, 0.0F, -0.12F, dive);
+				set(h.rightLeg, 0.45F, 0.0F, 0.05F, dive);
+				set(h.leftLeg, 0.45F, 0.0F, -0.05F, dive);
+				h.head.xRot -= 0.5F * dive;
+				set(h.rightArm, 0.15F, 0.0F, 0.9F, lock);
+				set(h.leftArm, 0.15F, 0.0F, -0.9F, lock);
+				h.head.xRot += 0.2F * lock;
+			}
+			case RigMoves.SUITUP_FALL -> {
+				// a skydiver's spread: arms up and out, legs apart, head back, the wind working them; the plates lock on round it
+				float catchIn = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 6.0F, 1.0F, OUT, RigMoves.SUITUP_FALL_TICKS, 1.0F, LINEAR);
+				float flutter = Mth.sin(pose.time() * 0.9F) * 0.12F;
+				set(h.rightArm, -2.5F + flutter, 0.0F, 0.95F, catchIn);
+				set(h.leftArm, -2.5F - flutter, 0.0F, -0.95F, catchIn);
+				set(h.rightLeg, 0.2F + flutter, 0.0F, 0.5F, catchIn);
+				set(h.leftLeg, 0.2F - flutter, 0.0F, -0.5F, catchIn);
+				h.head.xRot -= 0.45F * catchIn;
+			}
+			case RigMoves.SUITUP_BRAKE -> {
+				// the thrusters roar: arms down and out, palms to the ground, legs together and hanging, the chin up
+				float amount = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 4.0F, 1.0F, BACK, RigMoves.SUITUP_BRAKE_TICKS, 1.0F, LINEAR);
+				float sway = Mth.sin(pose.time() * 0.3F) * 0.05F;
+				set(h.rightArm, 0.1F + sway, 0.0F, 0.7F, amount);
+				set(h.leftArm, 0.1F - sway, 0.0F, -0.7F, amount);
+				set(h.rightLeg, 0.08F, 0.0F, 0.06F, amount);
+				set(h.leftLeg, -0.03F, 0.0F, -0.06F, amount);
+				h.head.xRot -= 0.18F * amount;
 			}
 			case RigMoves.TABLE -> {
 				// the forearm brought up across the chest and a look down at it

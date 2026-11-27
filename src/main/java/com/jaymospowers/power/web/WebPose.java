@@ -98,6 +98,16 @@ public record WebPose(int kind, long start, int side) {
 		BRUTE_HOOK = 66, BRUTE_HOOK_LUNGE = 67, BRUTE_WALL_GRAB = 68, BRUTE_WALL_HOLD = 69,
 		BRUTE_WALL_HEAVE = 70, BRUTE_WALL_SIDE = 71, BRUTE_WALL_LEAP = 72, BRUTE_WALL_LEDGE = 73;
 
+	/**
+	 * The symbiote's suit moves and the suit-up pose (Legends patch 4, our own hand-made poses), numbered past the big suit's so
+	 * nothing saved moves. {@link #SUIT_UP}: arms crossed while a suit forms, thrown out as it finishes ({@link WebSuitUp}).
+	 * {@link #GRIND_RUSH} and {@link #GRIND_LIFT}: dragging a foe along the ground and heaving it overhead ({@link WebGrind}).
+	 * {@link #LUNGE}: thrown at a foe ({@link WebLunge}). {@link #TEMPEST}: the tendrils snatch a crowd and fling it
+	 * ({@link WebTempest}). {@link #SNUFF}: a tendril stamping out ground fire ({@link WebSymbioteSnuff}). {@link #STILTS}: up on
+	 * two tendrils, lasting as long as {@link WebStilts#LEVEL} does.
+	 */
+	public static final int SUIT_UP = 74, GRIND_RUSH = 75, GRIND_LIFT = 76, LUNGE = 77, TEMPEST = 78, SNUFF = 79, STILTS = 80;
+
 	public static boolean brute(int kind) {
 		return kind >= BRUTE_CLAP && kind <= BRUTE_WALL_LEDGE;
 	}
@@ -156,6 +166,12 @@ public record WebPose(int kind, long start, int side) {
 			case BRUTE_LAND, BRUTE_HOOK, BRUTE_WALL_LEAP -> 12;
 			case BRUTE_HOOK_LUNGE, BRUTE_WALL_LEDGE -> 17;
 			case BRUTE_WALL_GRAB, BRUTE_WALL_HOLD, BRUTE_WALL_HEAVE, BRUTE_WALL_SIDE -> 9;
+			case SUIT_UP -> 26;
+			case GRIND_RUSH -> 12;
+			case GRIND_LIFT -> WebGrind.LIFT_TICKS;
+			case LUNGE -> 14;
+			case TEMPEST -> 22;
+			case SNUFF -> 12;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
 			case SPIKES -> WebSymbiote.SPIKE_POSE_TICKS;
 			default -> DODGE_TICKS;

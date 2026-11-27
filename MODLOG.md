@@ -8770,3 +8770,54 @@ Deviations from `docs/Legends-Plan.md` Patch 7:
 - **Short landings**: the held-weapon pose and body weight stay on during the quick landing clips of small drops.
 - **Katana forms**: the combo now steps on the swing (a miss too, so misses chain and the clip leads the hit); only a main-hand swing in the air or at a creature counts (mining, clicks on blocks, right-clicks and off-hand swings do not, so a charged draw is never spent on a block); a hit adds that cut's launch, spike or push. The charged draw (hold, let go, 4 Feathers) now makes the next swing a draw slash with 1.5 blocks more reach and an extra hit of about three quarters of the damage (armour and Resistance apply to it again).
 - Built (compileClientJava); not played.
+
+## 0.28.14 (2026-11-27): Symbiote suit moves and the suit-up pose (#2283)
+
+Built; not played.
+
+Legends Patch 4 adds six rows. Ideas only: our own code, poses and names, no painted textures.
+
+- Grind across the ground (`sy_grind`): with a foe pinned in the close tendril hold (G), press Tendril Grind and you rush along the ground, steering by where you look, dragging it behind you for up to about three seconds (press again to end it early), then both tendrils heave it overhead and slam it down. The drag tears plants, turns grass to bare earth and hurts a little every few ticks; the slam breaks the ground by the same rules as the heavy landing (build permission, mob griefing on, blocks you may touch). Only what the tendrils can haul is dragged: bosses and big things are never taken. Costs a little satiety.
+- Tendril stilts (`sy_stilts`): with the tendrils out, double-tap Jump to rise up on two tendrils from your back; hold Jump to go higher, Sneak to come down, and Sneak once you are down puts them away. The body is really taller (so doors, ceilings and reach follow, and it will not rise where your head would not fit), steps longer, and jumping is replaced by the rise. A third tendril braces on a wall beside you. Wears the symbiote a little (satiety).
+- Feeding lunge (`sy_lunge`): in a surge (the symbiote has lent you everything it has, or Spike Burst has just gone off), click at a foe you have not hit yet within 14 blocks and the symbiote throws you at it, a blow where you land. Each foe counts once per surge.
+- Tendril tempest (`sy_tempest`): press Tendril Tempest and the tendrils snatch every foe near you that is in the fight, reel them in and fling them all up at once. Bosses and things too big to haul are left. Costs satiety.
+- Puts out the ground fire (`sy_snuff`): fire (ordinary and soul fire) burning on the ground near you is stamped out by a tendril before the symbiote's flinch-away shove. It costs it satiety and winds it up; it will not when it is too wound up, hungry, sulking, or when lava or your own burning is involved, and then the shove is what you get as before.
+- Suit-up pose (`ot_suitup`): arms crossed while a suit forms, thrown out as it finishes. The symbiote suit forming plays it, and so does putting on a costume (any power or none).
+- The Rig's suit-ups (Andy's "rig too", "a few different suit ups" and the falling one): four, picked from the moment the suit is called (or put on by hand). Plates slam on while standing: they drop from overhead one piece after another with a thud each and a ring of force on the last. Step-in: called while you stand within three blocks of your parked Rig (the sentry post), its shell opens round you and folds shut. Flight-in: called in the air, flying or falling a short way, the plates stream in from behind and lock on midair. Falling assembly: called while falling from a height (seven blocks or more) with the Thrusters on you or parked, the suit assembles piece by piece through the fall (spread over about three and a half seconds), then the thrusters fire and kill the momentum (no fall damage) and set you down in a landing burst that throws back and does not hurt what it touches. It costs 50 Core charge; with less, or without the Thrusters, they cough and the fall is a fall. A fall too short for the whole assembly locks the rest on at once.
+
+Keys: Tendril Grind Numpad -, Tendril Tempest Numpad * (both remappable in Controls; chosen because no bind in Powers, Kingdoms, Kitchen or vanilla uses them. KeyGuide lists none of the big suit's or these keys, so nothing was added there). Stilts are double-tap Jump, Jump, Sneak; the lunge is the attack click in a surge. Snuff and the suit-ups have no key.
+
+Deviations from the plan:
+
+- The lunge's heal follows the symbiote's rule that it never feeds on anything living: the blow draws nothing, and if a foe the lunge struck dies within ten seconds the symbiote feeds from the body (a little satiety and 3 health). So a new foe is a bite only once it is a corpse.
+- Grind and Tempest have their own keys rather than a combo, so they cannot shadow the big suit's keys (F6, F8, F10, F12, Pause, Num Lock, Scroll Lock), Kingdoms' keys or the combos already on C. The numpad keys may be missing on a small keyboard: rebind them in Controls.
+- The stilts double-tap shares Jump with the freerun double-tap (the zoom's) and charged leaps; the stilts only listen with the tendrils out, and the ground test is for the first tap (the jump): the client remembers it and the server accepts the toggle if you were on the ground within the last 14 ticks. A toggling tap also cancels the air flip's pending tap.
+- Snuff puts out soul fire as well as ordinary fire (it is a fire block either way); lava, magma and campfires are left, and lava sends it back to the flinch.
+- The step-in plays when called within three blocks of the parked Rig's post; further off, a call is the slam, whatever the standing. By hand, a suit put on while standing is the slam; the step-in is for the call.
+- The Rig's suit-ups are drawn with poses, the plates' flight (each style scatters them differently) and our own effects; nothing is painted.
+- Bosses (`Mortality.boss`) are never dragged, snatched or thrown by the tendrils. The falling landing burst only throws what is in the fight, by the same rule as the web blossom (no pets, villagers, bystanders or bosses). The lunge picks only foes in the fight by that rule too.
+- The falling assembly reads the speed you really fall at, starts its brake from the distance that speed needs, slows the fall over several ticks, and never lets the last blocks exceed a gentle speed. If the brake gives out in the air, the fall counts from there. Changing world no longer replays the suit-up.
+- Snuff also needs build permission.
+
+## 0.28.15 (2026-11-27): Hunter's Road 1 - yellow tells, zombie and husk lunges, buried husks (#2284)
+
+- **Yellow tells**: a third kind of blow, shown with a gold star and its own cue. It can be parried or dodged but not blocked: a raised guard or shield is knocked aside and the blow lands (`Guard.UNBLOCKABLE_TAG`, `AttackTells.tellYellow`, `UnblockableMixin`). White blows can still be blocked, parried or dodged, and red blows blocked or dodged.
+- **Lunges**: zombies and husks 4 to 6 blocks from their target crouch for 14 ticks under a yellow star and leap (`LungeGoal`, `ZombieLungeMixin`). If parried, they land sprawled at your feet for 30 ticks, or 60 after a perfect parry. If dodged, they sprawl past for 25 ticks (`Pounce`). Spiders, wolves, cats and every other vanilla leap at a player now wait 12 ticks under a yellow star first, and their blow is yellow (`LeapTellMixin`).
+- **Husks in the sand**: once the world has reached Dread, half of the husks that spawn on sand after dark lie buried. A buried husk is invisible, silent and can't be targeted. It digs out in a spray of sand when someone comes within 7 blocks or it is hurt, and digs back under after losing its target (`HuskBurrow`, `BuriedPickMixin`).
+- Ideas after LungeAttackGoal and the Excavator goals in The Conjunction of the Spheres by Tenebris Mors (MIT; `licenses/conjunction-of-the-spheres/`).
+- Built; not played.
+
+## 0.28.16 (2026-11-27): FastNoiseLite worldgen: Pale Moon craters, softer Aether clouds (#2286)
+
+- **Pale Moon craters**: the moon's grey dust is now pocked with craters in two sizes, big bowls about every hundred blocks
+  (up to ~13 deep with a raised lip) and small ones peppered between and inside them; a younger crater cuts into an
+  older one's wall. Floors keep the dust, rims are heaped from it. Only chunks generated from now on get them, so a moon
+  already explored keeps its ground (a crater can stop short at the edge of old chunks).
+  (`power/zfighter/farworld/MoonCraterFeature`, `worldgen/placed_feature/moon_craters.json`, first in `moon_plains`.)
+- **Aether cloudbed and cloud lanes**: their shape noise is FastNoiseLite OpenSimplex2 with a domain warp instead of our
+  square-grid value noise, so the banks curl at the edges and lose the blocky lumps. Coverage is kept about as before
+  (cloudbed ~71% vs 73%, lanes threshold 0.58 -> 0.66 for ~31%). New chunks only.
+- FastNoiseLite 1.1.1 (Jordan Peck, MIT) vendored as `noise/FastNoiseLite` (only the package line added and positions
+  switched from float to double, as its own notes describe), licence in `licenses/fastnoiselite/`; `noise/Noises` hands
+  out one per world seed.
+- Built (Gradle compileJava); shapes checked by rendering the noise to images in the cloud. Not played in game.

@@ -34,7 +34,7 @@ public final class WebHaul {
 
 	/** Whether the tendrils can lift it (not a boss, not too big). */
 	static boolean haulable(Entity entity) {
-		return entity.getBbWidth() <= MAX_WIDTH && entity.getBbHeight() <= MAX_HEIGHT
+		return !com.jaymospowers.core.wounds.Mortality.boss(entity) && entity.getBbWidth() <= MAX_WIDTH && entity.getBbHeight() <= MAX_HEIGHT
 			&& !(entity instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon)
 			&& !(entity instanceof net.minecraft.world.entity.boss.wither.WitherBoss);
 	}

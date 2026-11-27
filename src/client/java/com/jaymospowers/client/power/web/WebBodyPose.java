@@ -74,6 +74,11 @@ public final class WebBodyPose {
 			return;
 		}
 		RIDE_SINCE.remove(entity.getId());
+		if (entity instanceof net.minecraft.world.entity.player.Player stilted && com.jaymospowers.power.web.WebStilts.up(stilted)) {
+			// up on two tendrils: the legs hang (p is how high)
+			state.setData(KEY, new Pose(WebPose.STILTS, 0, com.jaymospowers.power.web.WebStilts.height(stilted), entity.level().getGameTime() + partialTicks));
+			return;
+		}
 		WebPose pose = entity.getAttached(WebPower.POSE);
 		if (pose == null) {
 			state.setData(KEY, null);
@@ -410,7 +415,10 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, -90.0F * fall);
 				poseStack.rotateDegrees(Axis.ZP, twitch);
 			}
-			default -> WebAttackPoses.rotate(pose, poseStack, middle);
+			default -> {
+				WebAttackPoses.rotate(pose, poseStack, middle);
+				WebSuitPoses.rotate(pose, poseStack, middle);
+			}
 		}
 	}
 
@@ -731,7 +739,10 @@ public final class WebBodyPose {
 				h.leftLeg.zRot = -0.3F;
 				h.head.xRot = 0.3F;
 			}
-			default -> WebAttackPoses.applyModel(h, pose);
+			default -> {
+				WebAttackPoses.applyModel(h, pose);
+				WebSuitPoses.applyModel(h, pose);
+			}
 		}
 	}
 
