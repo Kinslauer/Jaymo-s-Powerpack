@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 23:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 00:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,13 +22,12 @@ kanban-plugin: board
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for ☀️ Apollo · open
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
 - [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · for codex · open
-- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for ☀️ Apollo · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · #2255 · changes · fixing review notes
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · changes · fixing review notes
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · changes · fixing review notes
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · changes · fixing review notes
@@ -66,6 +65,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · for any · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
+- [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · #2255 · ready
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 
