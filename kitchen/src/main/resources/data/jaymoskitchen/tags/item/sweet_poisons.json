@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:spider_eye",
+    "jaymoskitchen:venom_gland",
+    {
+      "id": "jaymospowers:poison_paste",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:toxic_paste",
+      "required": false
+    }
+  ]
+}

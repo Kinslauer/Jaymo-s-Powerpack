@@ -126,6 +126,8 @@ public final class Butchery {
 		Spoilage.register();
 		// the organs gutting takes out of a body (Chest Cavity's organ sets)
 		Organs.register();
+		// a scalpel and the parts it carves from poisoned beasts
+		com.jaymoskitchen.corpse.PoisonedParts.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(new ItemStack(MEAT_HOOK));
 			output.accept(new ItemStack(BLOOD_GRATE));
