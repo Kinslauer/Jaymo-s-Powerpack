@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: apollo
 from: coordinator
 asked: 2026-11-24
@@ -10,7 +10,7 @@ suggested_owns:
   - kingdoms FactionType.java, Relation.java
   - kingdoms lang/parts/factions.json
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 # Structures 5: faction table and relations
 
