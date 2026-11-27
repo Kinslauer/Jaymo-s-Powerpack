@@ -23,3 +23,4 @@ suggested_owns:
 ## Notes
 - 2026-11-27 ON HOLD until PR #2301 (Octo Core) merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - 2026-11-27 16:55 N2 (claw heads) dropped by Andy 2026-11-27; nothing in r1 needs to leave room for it. Octo thread's E3/N1 don't touch the Forge files.
+- 2026-11-27 17:02 Hold lifted: PR #2301 merged (a5763b9e5). First of track R.
