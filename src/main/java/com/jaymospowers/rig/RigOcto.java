@@ -7,9 +7,11 @@ import com.jaymospowers.core.fx.MagicFx;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -28,6 +30,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -62,7 +65,10 @@ import org.jspecify.annotations.Nullable;
  * arms ({@link #flurry}: lance, crescent, clamp, launch in turn, the tendril whip's combo).</li>
  * <li><b>Arm grab</b> ({@link #GRAB}): the upper arms snatch what you look at (a creature, a player, an item, a corpse) and
  * hold it up in front of you; pressed again, they hurl it, and it hurts what it hits. With Sneak, aimed at a wall or the
- * ground, they tear a chunk loose to hold and throw instead (the symbiote's rip).</li>
+ * ground, they tear a chunk loose to hold and throw instead (the symbiote's rip). Someone downed (Andy's pick from the
+ * Black Panther list: "Octo arms carry a downed body") is slung on your back instead, held there by the upper arms with
+ * your hands free, for as long as you like: pressed again, they lay them down behind you (with Sneak, they're hurled).
+ * They let go if whoever it is comes to.</li>
  * <li><b>Skewer and hoist</b> ({@link #SKEWER}): the lower arms run the foe through, lift it over your head and slam it
  * down.</li>
  * <li><b>Pinwheel</b> ({@link #PINWHEEL}): all four spin round you: arrows and other shots are batted back at whoever sent
@@ -101,6 +107,10 @@ public final class RigOcto {
 		FLURRY_COST = 4, WATCH_COST = 3, COMBO_COST = 50;
 	/** Arm grab: reach (blocks), how far ahead it is held and how far down, the steer toward that spot, the hurl's speed; the rip. */
 	static final double GRAB_RANGE = 14.0, HOLD_FORWARD = 2.1, HOLD_DROP = 0.4, HOLD_STEER = 0.45, HOLD_MAX_SPEED = 1.4, HURL_SPEED = 2.2;
+	/** Someone downed carried on your back: this far behind you and this high (blocks, at your size), steered there this hard. */
+	static final double BACK_BEHIND = 0.6, BACK_UP = 1.2, BACK_STEER = 0.7;
+	/** Who can be slung on your back: no wider or taller than this (blocks), a person's size. */
+	static final double BACK_WIDEST = 1.0, BACK_TALLEST = 2.2;
 	static final int RIP_PIECES = 6;
 	static final float RIP_HARDEST = 4.0F;
 	/** What the arms can't lift: anything with more health than this. */
@@ -182,6 +192,8 @@ public final class RigOcto {
 	private static final Map<UUID, Long> VAULTED = new HashMap<>(), DIVING = new HashMap<>();
 	private static final Map<UUID, Chain> CHAINS = new HashMap<>();
 	private static final Map<UUID, Long> HOLD_SINCE = new HashMap<>();
+	/** Wearers carrying someone downed on their back (not held up ahead). */
+	private static final Set<UUID> ON_BACK = new HashSet<>();
 	private static final List<Thrown> THROWN = new ArrayList<>();
 	/** When each wearer's combo may go again (game time). */
 	private static final Map<UUID, Long> COMBO_READY = new HashMap<>();
@@ -207,6 +219,7 @@ public final class RigOcto {
 			DIVING.clear();
 			CHAINS.clear();
 			HOLD_SINCE.clear();
+			ON_BACK.clear();
 			THROWN.clear();
 		});
 	}
@@ -436,7 +449,11 @@ public final class RigOcto {
 	private static void grabOrHurl(ServerPlayer player) {
 		Entity held = held(player);
 		if (held != null) {
-			hurl(player, held);
+			if (ON_BACK.contains(player.getUUID()) && !player.isShiftKeyDown()) {
+				layDown(player, held);
+			} else {
+				hurl(player, held);
+			}
 			return;
 		}
 		if (player.isShiftKeyDown()) {
@@ -453,7 +470,29 @@ public final class RigOcto {
 			return;
 		}
 		take(player, target);
+		if (backCarried(target)) {
+			ON_BACK.add(player.getUUID());
+			RigMind.say(player, "octo_back", 1.0F);
+		}
 		player.level().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 1.0F, 1.4F);
+	}
+
+	/** Someone downed and person-sized, nobody else carrying them: slung on your back rather than held up ahead. */
+	private static boolean backCarried(Entity target) {
+		return target instanceof LivingEntity && com.jaymospowers.core.wounds.Downed.isDowned(target) && !com.jaymospowers.core.Carry.isCarried(target)
+			&& target.getBbWidth() <= BACK_WIDEST && target.getBbHeight() <= BACK_TALLEST;
+	}
+
+	/** Carrying someone on your back, the grab again: the arms lay them down behind you. */
+	private static void layDown(ServerPlayer player, Entity held) {
+		letGo(player, true);
+		RigMoves.start(player, MOVE_GRAB);
+		held.setDeltaMovement(0.0, -0.1, 0.0);
+		held.needsSync = true;
+		held.syncVelocity = true;
+		held.resetFallDistance();
+		player.level().playSound(null, held.getX(), held.getY(), held.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.8F, 0.7F);
+		servo(player, 0.8F);
 	}
 
 	private static void take(ServerPlayer player, Entity target) {
@@ -514,13 +553,16 @@ public final class RigOcto {
 			player.removeAttached(HELD);
 		}
 		HOLD_SINCE.remove(player.getUUID());
+		ON_BACK.remove(player.getUUID());
 	}
 
 	private static void tickHeld(ServerPlayer player, long now) {
 		Entity held = held(player);
 		Long since = HOLD_SINCE.get(player.getUUID());
-		if (held == null || held.level() != player.level() || held.distanceTo(player) > GRAB_RANGE * 2.0 || since == null || now - since > HOLD_TICKS
-			|| held instanceof Player p && p.isSpectator()) {
+		boolean back = ON_BACK.contains(player.getUUID());
+		// on your back there's no limit, but they're let go the moment they come to
+		if (held == null || held.level() != player.level() || held.distanceTo(player) > GRAB_RANGE * 2.0 || since == null
+			|| (back ? !com.jaymospowers.core.wounds.Downed.isDowned(held) : now - since > HOLD_TICKS) || held instanceof Player p && p.isSpectator()) {
 			letGo(player, true);
 			return;
 		}
@@ -532,8 +574,15 @@ public final class RigOcto {
 			// still reaching for it
 			return;
 		}
-		Vec3 point = player.getEyePosition().add(player.getLookAngle().scale(HOLD_FORWARD + held.getBbWidth() * 0.5)).subtract(0.0, HOLD_DROP, 0.0);
-		Vec3 v = point.subtract(held.getBoundingBox().getCenter()).scale(HOLD_STEER);
+		Vec3 point;
+		if (back) {
+			// across your shoulders, behind you whichever way you turn
+			double yaw = player.yBodyRot * Mth.DEG_TO_RAD, scale = player.getScale();
+			point = player.position().add(Math.sin(yaw) * BACK_BEHIND * scale, BACK_UP * scale, -Math.cos(yaw) * BACK_BEHIND * scale);
+		} else {
+			point = player.getEyePosition().add(player.getLookAngle().scale(HOLD_FORWARD + held.getBbWidth() * 0.5)).subtract(0.0, HOLD_DROP, 0.0);
+		}
+		Vec3 v = point.subtract(held.getBoundingBox().getCenter()).scale(back ? BACK_STEER : HOLD_STEER);
 		if (v.length() > HOLD_MAX_SPEED) {
 			v = v.normalize().scale(HOLD_MAX_SPEED);
 		}
