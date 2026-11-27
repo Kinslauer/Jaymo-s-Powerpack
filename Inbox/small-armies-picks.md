@@ -1,11 +1,11 @@
 ---
-status: open
+status: claimed
 for: apollo
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: hermes-a
 pr: 
-claim_handbacks: 1
+claim_handbacks: 2
 ---
 
 # Small armies pick list: build Andy's 4 picks
@@ -36,3 +36,4 @@ Not picked: clay soldiers, Clay Warfare colours/buffs/remote/book.
 - 2026-11-26 20:22 hermes-a's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-26 21:00 hermes-a's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-26 21:32 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-26 21:39 hermes-a's last run stopped before finishing; handed back as open.
