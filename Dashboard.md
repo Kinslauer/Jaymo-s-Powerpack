@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 14:19). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 14:25). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -17,7 +17,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
 - [[Inbox/nycto-4|nycto-4]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
-- [[Inbox/nycto-5|nycto-5]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · 2026-11-26 07:21 Design draft complete: Overworld aqueduct structure, SettlementCurse system, 4 board quests (Stem the Flow, Clear the Pillars, Purify the Ston…
 
 ## Stuck
@@ -34,12 +33,14 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-4 waiting for a bot, 7 being built, 10 in review: see [[Kanban]].
+4 waiting for a bot, 7 being built, 11 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2295 Pickpocketing: nothing from nothing, pick a mark bare, the steel blueprint in the smith's pocket (Kingdoms, 2026-11-27)
+- [ ] #2294 Rotting bodies bare bone in patches, not checks (Kitchen, 2026-11-27)
 - [ ] #2293 Villagers going in at night aren't "Running scared" (Kingdoms, 2026-11-27)
 - [ ] #2292 spectate viewcone label trimmed - no coordinates, no Running line (Kingdoms, 2026-11-27)
 - [ ] #2291 Night's Blood 3 - blood worth drinking (Kingdoms, Kitchen, 2026-11-27)
@@ -98,9 +99,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2228 face parts - snouts, beaks, fangs and horns on the painted faces (Kingdoms, 2026-11-26)
 - [ ] #2227 Dragonforge mechanics for our dragons (parts, bite, dive slam, sprint flight, tremor, horn, home patrols, realm wyverns) (Kingdoms, 2026-11-26)
 - [ ] #2226 lance couching from the saddle (Powers, Kingdoms, 2026-11-26)
-- [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
-- [ ] #2221 wide flat plains and bigger biomes (open country) (Kingdoms, 2026-11-26)
-- …and 655 older ones.
+- …and 657 older ones.
 
 ## Health
 
