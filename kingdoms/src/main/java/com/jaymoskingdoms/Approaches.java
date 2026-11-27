@@ -1006,6 +1006,10 @@ public final class Approaches {
 					said = NightGifts.gossip(level, player);
 				}
 				if (said == null) {
+					// (Night's Blood) half-heard tales of the old blood, never more than a hint
+					said = OldBlood.gossip(level, a.mob);
+				}
+				if (said == null) {
 					// the horn nobody was blowing (the Reaper's host), never more than a hint
 					said = ReapedHost.gossip(level, a.mob.blockPosition());
 				}

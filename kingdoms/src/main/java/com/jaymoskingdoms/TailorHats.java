@@ -27,14 +27,20 @@ public final class TailorHats {
 	public static final String COMMAND = "trade_hat";
 	/** The cheapest tailor's price for a hat (silver). */
 	static final int HAT_BASE = 4;
+	/** (Night's Blood, patch 6) The night-cloak, a deep-hooded cloak that only a tailor sells: its price is this many times a hat's. */
+	static final int CLOAK_BASE = 12;
 
 	/** A hat (its Powers item id) and the job (Careers) whose hat it is, or null for a trade no player job matches. */
-	record Hat(String id, Careers.@Nullable Job job) {
+	record Hat(String id, Careers.@Nullable Job job, int base) {
+		Hat(String id, Careers.@Nullable Job job) {
+			this(id, job, HAT_BASE);
+		}
 	}
 
 	static final List<Hat> HATS = List.of(new Hat("farmer_hat", Careers.Job.FARMER), new Hat("fletcher_hat", Careers.Job.HUNTER),
 		new Hat("fisherman_hat", Careers.Job.FISHER), new Hat("armorer_hat", Careers.Job.SMITH), new Hat("shepherd_hat", null),
-		new Hat("librarian_hat", null), new Hat("butcher_hat", Careers.Job.BUTCHER));
+		new Hat("librarian_hat", null), new Hat("butcher_hat", Careers.Job.BUTCHER),
+		new Hat("night_cloak", null, CLOAK_BASE));
 
 	private TailorHats() {
 	}
@@ -52,8 +58,13 @@ public final class TailorHats {
 			return;
 		}
 		List<Item> items = new ArrayList<>();
+		List<Integer> prices = new ArrayList<>();
 		for (Hat hat : HATS) {
-			item(hat).ifPresent(items::add);
+			Optional<Item> item = item(hat);
+			if (item.isPresent()) {
+				items.add(item.get());
+				prices.add(Tailors.price(villager, player, hat.base()));
+			}
 		}
 		if (items.isEmpty()) {
 			Speech.tell(level, villager, player, Component.translatable("tailor.jaymoskingdoms.no_hats"), Speech.WHITE);
@@ -62,15 +73,15 @@ public final class TailorHats {
 		int price = Tailors.price(villager, player, HAT_BASE);
 		List<Component> options = new ArrayList<>();
 		List<Boolean> enabled = new ArrayList<>();
-		for (Item item : items) {
-			options.add(Component.translatable("tailor.jaymoskingdoms.hat_option", new ItemStack(item).getHoverName(), price));
+		for (int i = 0; i < items.size(); i++) {
+			options.add(Component.translatable("tailor.jaymoskingdoms.hat_option", new ItemStack(items.get(i)).getHoverName(), prices.get(i)));
 			enabled.add(true);
 		}
 		options.add(Component.translatable("talk.jaymoskingdoms.errands.leave"));
 		enabled.add(true);
 		ZFighterFolk.ask(player, villager, Component.translatable("tailor.jaymoskingdoms.hat_fee", price), options, enabled, pick -> {
 			if (pick >= 0 && pick < items.size()) {
-				sell(player, villager, items.get(pick), price);
+				sell(player, villager, items.get(pick), prices.get(pick));
 			}
 		});
 	}

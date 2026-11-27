@@ -113,6 +113,7 @@ public final class Costume {
 		SecretIdentity.init();
 		CorpseCostume.init();
 		HoodedCloak.init();
+		NightCloak.init();
 		Rally.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(TABLE);

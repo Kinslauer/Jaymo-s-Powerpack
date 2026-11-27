@@ -136,7 +136,8 @@ public final class ClawArts {
 
 	/** {@code harm}, less in the sun or near a holy thing. */
 	private static float harm(ServerPlayer player, float harm) {
-		return BloodLeap.weak(player) ? harm * (float) BloodLeap.WEAK_SHARE : harm;
+		float base = NewMoon.on(player) ? harm * NewMoon.CLAW_SHARE : harm;
+		return BloodLeap.weak(player) ? base * (float) BloodLeap.WEAK_SHARE : base;
 	}
 
 	// ---- bleeding -------------------------------------------------------------------------------------------------------------

@@ -588,7 +588,7 @@ public final class Vampires {
 			speed(mob, false);
 			return;
 		}
-		if (prey == null && hungry(v, kind, nightNo, now)) {
+		if (prey == null && hungry(level, v, kind, nightNo, now)) {
 			prey = mob.hasAttached(Takers.TAKER) ? Takers.sleptOn(mob, nightNo) ? null : Takers.vampirePrey(level, mob) : findPrey(level, mob, kind);
 			if (prey != null) {
 				hunt = new Hunt(prey.getUUID(), now, TakersCellar.hasRoom(mob) ? Outcome.DRAG : outcome(level.getRandom(), kind));
@@ -712,9 +712,9 @@ public final class Vampires {
 			|| main.has(net.minecraft.core.component.DataComponents.WEAPON) || torch(main) || torch(e.getOffhandItem());
 	}
 
-	private static boolean hungry(Vampire v, Kind kind, long nightNo, long now) {
+	private static boolean hungry(ServerLevel level, Vampire v, Kind kind, long nightNo, long now) {
 		return switch (kind) {
-			case ELDER -> now - v.fedAt() >= ELDER_REST || now < v.fedAt();
+			case ELDER -> now - v.fedAt() >= NewMoon.elderRest(level.getServer()) || now < v.fedAt();
 			case FEEDER, HUNTER -> v.fedNight() < nightNo;
 			case ABSTAINER -> nightNo - v.fedNight() >= THIRST_NIGHTS;
 			case PLAYER, DHAMPIR -> false;

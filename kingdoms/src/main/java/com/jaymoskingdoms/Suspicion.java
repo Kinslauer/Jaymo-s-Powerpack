@@ -122,7 +122,7 @@ public final class Suspicion {
 		Map<UUID, Mark> marks = new HashMap<>(who.getAttachedOrElse(MARKS, Map.of()));
 		UUID key = Recollections.key(player, who);
 		Mark old = marks.get(key);
-		String name = Recollections.nameTo(player, who).getString();
+		String name = kind.equals(VAMPIRE) && NightCloaks.up(player) ? NightCloaks.name().getString() : Recollections.nameTo(player, who).getString();
 		if (old == null || old.now(now) <= 0 || !old.kind().equals(kind)) {
 			marks.put(key, new Mark(name, kind, Math.min(MAX, add), now, now));
 		} else if (now - old.added() >= ADD_GAP) {
@@ -131,6 +131,13 @@ public final class Suspicion {
 			marks.put(key, new Mark(name, kind, old.strength(), now, old.added()));
 		}
 		who.setAttached(MARKS, marks);
+		if (kind.equals(VAMPIRE) && (old == null || old.now(now) <= 0 || now - old.added() >= ADD_GAP)) {
+			// (Night's Blood) a realm's folk suspecting a vampire adds to the realm's own suspicion of them, which sends hunters to their lair
+			Faction realm = who.level().getServer() == null ? null : Aliens.factionOf(who.level().getServer(), who);
+			if (realm != null) {
+				LairHunts.suspect(player, realm, add, now);
+			}
+		}
 		// (0.7.581) a Truth follower who comes to suspect it, rightly, turns on them
 		CastOut.learned(who, player, false);
 	}

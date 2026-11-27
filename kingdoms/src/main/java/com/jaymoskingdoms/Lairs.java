@@ -85,6 +85,7 @@ final class Lairs {
 		level.setBlock(new BlockPos(floor.getX(), floor.getY() + CRYPT_HEIGHT, floor.getZ()), Blocks.SOUL_LANTERN.defaultBlockState()
 			.setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), Block.UPDATE_ALL);
 		ladder(level, floor, CRYPT_HALF, CRYPT_HEIGHT, player.blockPosition());
+		CoffinRest.claim(player, level, head);
 		wake(level, player, foot, head);
 		return true;
 	}

@@ -220,7 +220,11 @@ public final class VampirePlayers {
 				// kindling: the noon sun reaches further into the day and burns longer
 				boolean kindling = BloodPage.has(player, BloodPage.Pact.KINDLING);
 				long widen = kindling ? BloodPage.KINDLING_NOON_WIDEN : 0L;
-				if (t >= NOON_FROM - widen && t < NOON_TO + widen && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+				boolean noon = t >= NOON_FROM - widen && t < NOON_TO + widen;
+				if (noon && NightCloaks.up(player)) {
+					// a night-cloak's hood up: the sun stings instead of burning
+					NightCloaks.sting(player);
+				} else if (noon && (player.getItemBySlot(EquipmentSlot.HEAD).isEmpty() || NightCloaks.wears(player))) {
 					player.igniteForSeconds(kindling ? BURN_SECONDS * BloodPage.KINDLING_BURN_TIMES : BURN_SECONDS);
 				}
 			}

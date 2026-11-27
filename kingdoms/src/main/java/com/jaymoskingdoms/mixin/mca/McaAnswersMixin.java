@@ -130,6 +130,10 @@ abstract class McaAnswersMixin {
 			// (Andy, 2026-11-12) only one who buried a companion speaks of their old adventures
 			cir.getReturnValue().remove(com.jaymoskingdoms.Mourning.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.OldBlood.canAsk(player, villager)) {
+			// (Night's Blood) only the Elder, and only to one who has seen enough of the other side
+			cir.getReturnValue().remove(com.jaymoskingdoms.OldBlood.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.Accusations.canAccuse(player, villager)) {
 			// (0.7.332) only a priest, with someone here to accuse
 			cir.getReturnValue().remove(com.jaymoskingdoms.Accusations.ANSWER);
