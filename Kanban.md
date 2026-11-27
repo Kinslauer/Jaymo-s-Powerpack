@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,13 +12,13 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
+- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · for 🔥 Prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · t3 · claimed
-- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · t3 · claimed
