@@ -18123,3 +18123,40 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Stuck walkers push through** (`Unstick`, `Overgrowth.pushThrough`): a villager or one of our folk whose fresh path still can't get there brushes aside that overgrowth round where the path gives out and round itself, then paths again. The stall watcher's "sent on" step does the same round the villager, next to opening a shut door.
 - Not changed: two of Haldale's street pieces lie underground (`straight_05`/`straight_06` at y 55 to 62; a guard was stuck at y 51), and the buildings that never generated are another thread's.
 - Built; not played.
+
+## 0.13.71 (2026-11-27): Guards grow suspicious of what they half see or hear, light up and go to look (#2279)
+
+- **Suspicion** (Andy: "guards should also react and investigate based on your concealment. it should factor in light
+  level, (guards will have to get closer or turn on lights and approach) sounds, and other factors"): a guard (a realm's,
+  a camp's, an MCA guard) no longer either sees you at once or not at all. How hidden you are uses the same reckoning as a
+  monster's eyes: the light on you and any light he carries, sneaking, standing still, the slow pace, cover, a hood,
+  weather and mist, smell, being lit or on fire, and the rest. Within that reach he sees you. Out to 2.5 times it, in
+  front of him with nothing solid between, he catches a glimpse and grows suspicious, faster the nearer you are to being
+  seen. Your footsteps and other noises he hears raise it too, by how loud they come through the walls.
+- **What he does**: at a quarter suspicion he stops and looks where he last glimpsed or heard you. At 60% he goes to look,
+  following fresher glimpses. If it's dark there or where he stands and he has nothing lit in hand, he lights one first
+  (his kept lantern, one from his pocket, else one from the stores, else a torch), day or night, and keeps it lit till
+  he's done. With the light he sees farther, so he closes in until he can make you out. Once he sees you properly he
+  stops, looks you over for 3 s and goes back to his post. What he then makes of you is up to the law as before. He
+  won't suspect you again for 30 s. Suspicion fades by itself.
+- **You can see it**: the awareness eye fills with a guard's suspicion and shows searching while he investigates. The
+  spectate view lists "Suspicious of <player>: 45%" or "Investigating <player>".
+- `GuardWatch` (new), `Footsteps.heard`, `NightLights.lightUp` (new) and keeping the light while investigating,
+  `Senses` (gauge, `sight` opened to the package), `NpcFocus`, lang part `npc-eyes`.
+- Built; not played.
+
+## 0.13.72 (2026-11-27): NPCs take a second to think before setting on a player they've just picked out (#2279)
+
+- **The extra second** (Andy: "npcs across the board should think for an extra second to give stealth users the required
+  time to close in for a stealth takedown"): every mob that picks out a player it would fight (any target goal or brain
+  attack sensor, through `TargetingConditions.test`) now spends 1 s sizing them up before it can take them as its foe.
+  This includes monsters, animals, the folk, MCA's guards and bosses. All that second it isn't after them, so it still
+  counts as unaware for a stealth kill, a sneak attack or an assassination. It doesn't turn round either: the takedown
+  from behind still works. If it still has them after the second, it sets on them as before. Not picked out for 2 s,
+  they're sized up afresh next time.
+- **No second when**: it's already after them, a friend just told it where they are, or they just hurt it (a blow is
+  answered at once). Creative and spectator players are untouched.
+- **You can see it**: the awareness eye fills over the second, and the spectate dev view's top line reads "Thinking:
+  sizing up <player> (0.6 s left)" in yellow.
+- `ThinkFirst` (new), `mixin.TargetingThinkMixin` (new, combat mixins), `Senses` (gauge), `NpcFocus`, lang part `npc-eyes`.
+- Built; not played.
