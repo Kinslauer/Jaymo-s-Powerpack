@@ -1,10 +1,10 @@
 ---
-status: open
+status: in-review
 for: claude-cloud
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
 claimed_by: claude-cloud
-pr: 
+pr: 2287
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 ---
 
