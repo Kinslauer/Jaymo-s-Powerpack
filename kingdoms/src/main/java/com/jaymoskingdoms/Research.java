@@ -173,6 +173,9 @@ public final class Research {
 			public Component learn(ServerPlayer player, String subject) {
 				boolean fear = FoeStudy.fears(subject) != null && !FoeStudy.learned(player, subject);
 				FoeStudy.teach(player, subject);
+				// (a sage's lesson on a kind is also a line in the bestiary)
+				net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getOptional(net.minecraft.resources.Identifier.withDefaultNamespace(subject))
+					.ifPresent(type -> Bestiary.told(player, type));
 				Component kind = Component.translatable("entity.minecraft." + subject);
 				FoeStudy.Fears f = FoeStudy.fears(subject);
 				if (fear && f != null) {

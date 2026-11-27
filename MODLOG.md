@@ -8821,3 +8821,11 @@ Deviations from the plan:
   switched from float to double, as its own notes describe), licence in `licenses/fastnoiselite/`; `noise/Noises` hands
   out one per world seed.
 - Built (Gradle compileJava); shapes checked by rendering the noise to images in the cloud. Not played in game.
+
+## 0.28.17 (2026-11-27): silver and steel by monster kind (#2287)
+
+- **Silver sword** sears every monster of the kinds corpse-eaters, dead, spirits and cursed (read from Kingdoms' `MonsterKinds`), besides the old `silver_bane` tag.
+- **Steel sword** (iron, steel, or a tinker head of either) does 1 more damage to people and beasts that silver doesn't burn (`SilverSear.steelEdge`).
+- NPCs now show a carried silver blade on the back with the blade beside it (the twin harness a player gets); players already did.
+- Classes: SilverSear, BodyWeapons.
+- Built; not played.

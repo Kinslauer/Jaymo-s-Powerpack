@@ -1,0 +1,55 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:player",
+    "minecraft:villager",
+    "minecraft:wandering_trader",
+    "minecraft:pillager",
+    "minecraft:vindicator",
+    "minecraft:evoker",
+    "minecraft:illusioner",
+    "minecraft:witch",
+    "minecraft:piglin",
+    "minecraft:piglin_brute",
+    {
+      "id": "jaymoskingdoms:hornkin",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:hornkin_hurler",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:hornkin_warlord",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:looter",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:marauder",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:assassin",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:provoker",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:illager_inquisitor",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:loot_goblin",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:goblin_scout",
+      "required": false
+    }
+  ]
+}

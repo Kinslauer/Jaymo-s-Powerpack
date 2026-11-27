@@ -149,15 +149,33 @@ public final class BodyWeapons {
 	/** Each home's item for an NPC carrying {@code carried}, or null when none shows. Tools aren't shown on NPCs. */
 	private static @Nullable List<ItemStack> npcHomes(List<ItemStack> carried) {
 		boolean[] used = new boolean[Home.values().length];
-		used[Home.TWIN_OUTER.ordinal()] = used[Home.TWIN_INNER.ordinal()] = true;
 		List<ItemStack> homes = new ArrayList<>(Collections.nCopies(Home.values().length, ItemStack.EMPTY));
 		int shown = 0;
-		for (ItemStack stack : carried) {
-			Kind kind = kind(stack);
-			if (shown >= NPC_SHOWN) {
-				break;
+		// (the twin harness, as on a player) a silver blade rides on the back and the first other blade beside it
+		int silver = -1, partner = -1;
+		for (int i = 0; i < carried.size() && silver < 0; i++) {
+			if (kind(carried.get(i)) == Kind.BLADE && com.jaymospowers.combat.SilverSear.silver(carried.get(i))) {
+				silver = i;
 			}
-			if (kind == null || kind == Kind.TOOL) {
+		}
+		for (int i = 0; i < carried.size() && silver >= 0 && partner < 0; i++) {
+			if (i != silver && kind(carried.get(i)) == Kind.BLADE) {
+				partner = i;
+			}
+		}
+		if (silver >= 0) {
+			homes.set(Home.TWIN_OUTER.ordinal(), carried.get(silver).copyWithCount(1));
+			shown++;
+		}
+		if (partner >= 0) {
+			homes.set(Home.TWIN_INNER.ordinal(), carried.get(partner).copyWithCount(1));
+			shown++;
+		}
+		used[Home.TWIN_OUTER.ordinal()] = used[Home.TWIN_INNER.ordinal()] = true;
+		for (int i = 0; i < carried.size() && shown < NPC_SHOWN; i++) {
+			ItemStack stack = carried.get(i);
+			Kind kind = kind(stack);
+			if (kind == null || kind == Kind.TOOL || i == silver || i == partner) {
 				continue;
 			}
 			for (Home home : kind.homes) {

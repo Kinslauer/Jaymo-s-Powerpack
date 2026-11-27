@@ -51,13 +51,16 @@ public final class HerbalistWares {
 	public static void ask(ServerPlayer player, Villager villager) {
 		ServerLevel level = (ServerLevel)villager.level();
 		Optional<Item> pouch = BuiltInRegistries.ITEM.getOptional(POUCH), flask = BuiltInRegistries.ITEM.getOptional(FLASK);
-		if (!(villager instanceof Worker w) || w.role() != IllagerSites.HERBALIST || pouch.isEmpty() && flask.isEmpty()) {
+		if (!(villager instanceof Worker w) || w.role() != IllagerSites.HERBALIST) {
 			Speech.tell(level, villager, player, Component.translatable("speech.jaymoskingdoms.herbalist.none"), Speech.WHITE);
 			return;
 		}
 		List<Menus.Choice> choices = new ArrayList<>();
 		pouch.ifPresent(item -> choices.add(sale(player, item, POUCH_PRICE, "pouch")));
 		flask.ifPresent(item -> choices.add(sale(player, item, FLASK_PRICE, "flask")));
+		// (what the things out on the road fear: one met kind's fear a time, into the bestiary)
+		choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.herbalist.fears"), p -> Speech.tell(level, villager, p,
+			Component.translatable(Bestiary.toldOfAny(p) ? "speech.jaymoskingdoms.herbalist.fears.told" : "speech.jaymoskingdoms.herbalist.fears.none"), Speech.WHITE)));
 		choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.herbalist.leave"), p -> {
 		}));
 		Menus.ask(player, villager, Component.translatable("speech.jaymoskingdoms.herbalist.wares"), choices);
