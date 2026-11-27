@@ -8581,3 +8581,32 @@ Three belt-slot charms that count in Jaymo's Kitchen's body heat: the hot-stone 
 - `compat/AlexsMobsSpawnsPreset` (pre-launch, both sides) renames just those tags to the ones the new port's own files use, every start, before Alex's Mobs reads them. Fresh installs never had the bad files and are unchanged.
 - **Blobfish** spawn only below Alex's depth limit (25); with the land and sea 8 blocks higher than the game's, the deep sea floor sat above that almost everywhere. Once per install, while it's still 25, `amc.json`'s `blobfishSpawnHeight` goes to 33.
 - Built; not played. The Deck server's own `config/alexsmobs/` wasn't looked at; the fix runs there too.
+
+## 0.27.96 (2026-11-26): Two new Rig suits: Hail and Tinker (#2215)
+
+The Rig Forge has two more frames to pick: **Hail**, white plate with ice-cyan lights as the Frostborn build them, and **Tinker**, gunmetal with cyan, the Mad Tinkerer's copy. They're looks only and play like the standard frame. Their plates wear other artists' armour art (Power Armor: Renostalgized by Thepigcat76, and ItsSory's Netherite Armor pack, both MIT).
+- `RigFrame.HAIL`, `RigFrame.TINKER` (the standard frame's numbers), their suit textures and glow passes in `RigSuit`; `tools/open_art/rig_suits.py` lays the sources onto the plates `tools/gen_rig.py` defines.
+- Who wears which: Frostborn troopers in the future wear Hail (4 in 5; the rest the standard suit). The future's androids, the Dead Rig guards among them, wear Tinker plate on the chest, arms and legs (no helm, so their faces still show). It is real Rig armour bolted on: it never drops on death, only when the limb under it is ripped off. Androids can now lose limbs like other people (in sparks and torn metal, no blood); the Arms come away with the first arm, the Thrusters with a leg, and the Core stays on the torso.
+- Frostborn troopers can lose limbs now too, and their Rig is bolted on the same way: it never drops when they die. With Jaymo's Kitchen, a blade or an axe held on the body cuts a limb off (picked in its loot screen) to take it with its plate (`Rig.boltedOn`, told to Kitchen in `KitchenCompat`).
+- Any Rig wearer, players too: a Rig's Arms piece now comes off with a lost arm, not with the second leg as leggings do. Rigs you build from salvage you find are still the standard frame unless you pick another at the Forge.
+- `Rig.stamp` sets the frame and, for Hail and Tinker, their own armour layer (`equipment/rig_hail`, `rig_tinker`, the source artists' layers unchanged), so armour stands and mobs show the right suit too.
+- Built; previewed in Blockbench, not played. The Forge hologram and item icons are unchanged.
+
+## 0.27.97 (2026-11-26): NPC controls by the crosshair - downed and tied-up bodies (#2253)
+
+- Andy: "a similar box should appear when interacting with npcs, like corpses, that tells you all the controls, such as ... revive".
+- Someone alive and downed shows Shift + hold right click: revive, hold right click: drag, right click: more options (the body menu). Someone tied up or out cold shows the body menu line. Talk and trade lines are left off a body.
+- Andy: "make it all empty hand": the people and body lines only show with an empty main hand (the clicks still work with something held); with something in hand only the stealth kill line can show.
+- The list holds 5 lines now (was 4).
+- `ContextHints`.
+- Compile-checked; not played.
+
+## 0.27.98 (2026-11-26): pull apart - wool, rocks, leather and more come apart in the inventory (#2252)
+
+- **Deconstruct mode**: a small iron pick button (smaller than an item) sits in the survival inventory, under the crafting grid's result slot. Hovering it says what it does; clicking it turns deconstruct mode on (its rim goes gold, everything that can come apart is outlined in gold, and the same short explanation shows beside it for 6 seconds). In the mode a click on one of those pulls one apart, Shift-click the whole stack. Clicking the pick again or closing the screen turns it off.
+- **Pull apart**: without the mode, Ctrl + right-click a stack in any inventory or chest screen (nothing on the cursor) to pull one apart; Ctrl + Shift + right-click pulls the whole stack. The parts go back where it lay, then into your inventory (dropped if it's full), with the thing's own break sound.
+- What comes apart, each into exactly what its 2x2 grid recipe takes, so the grid puts it back together: any wool -> 4 string; cobblestone, mossy cobblestone, granite, diorite, andesite, cobbled deepslate, tuff, sandstone, red sandstone, netherrack, blackstone, basalt -> 4 of their loose rocks; leather -> 4 leather scraps (Kitchen; back to leather with resin, as before); snow block -> 4 snowballs; clay -> 4 clay balls; dripstone block -> 4 pointed dripstone; honeycomb block -> 4 honeycomb; glowstone -> 4 glowstone dust; quartz block -> 4 quartz; amethyst block -> 4 shards.
+- A gesture rather than grid recipes because one wool or one leather alone in the grid already makes rags. Bricks are left out (loose bricks come only from the brick kiln).
+- JEI has a Pull Apart page listing every row.
+- Classes: bits/PullApart (table, packet, server), client/bits/PullApartClient (the pick button, the mode and the clicks), client/jei/PullApartJei.
+- Built; not played.

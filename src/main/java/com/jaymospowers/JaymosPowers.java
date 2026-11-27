@@ -333,6 +333,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.HudBar.register();
 		// Shift+T shares the hovered item in chat; soul fire burns blue (bits.SoulBurn)
 		com.jaymospowers.bits.ItemShare.register();
+		// Ctrl + right-click pulls wool, cobblestone, leather... apart into their parts
+		com.jaymospowers.bits.PullApart.register();
 		// ground that powers tear out comes back (terrain return)
 		com.jaymospowers.core.TerrainReturn.init();
 		// umbrellas, parasols and the umbrella stand

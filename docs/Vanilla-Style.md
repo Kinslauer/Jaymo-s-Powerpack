@@ -159,6 +159,8 @@ licence; `python3 tools/open_art/apply.py` copies them onto our textures and mus
 | Powers far-world moon, Glacia and Verdant rock | 16x16 Block Texture Set (stone_generic, ice_glacier, serpentine) | aroachifoundonmypillow (OpenGameArt) | CC0 |
 | Powers Space Pod icon; the flight screen's raider pod and derelict pod (`textures/gui/pod_raider.png`, `pod_wreck.png`) | 16x16 Ship Collection (yellow row 9, red row 1, yellow row 9; black ground made clear) | Master484 (OpenGameArt) | CC0 |
 | Powers Gravity Machine (all faces, on and off), Fuel Works sides and top, Landing Beacon base | Militech (Oritech retexture) | LutherDev (Modrinth) | MIT, notice in `sources/militech/LICENSE.txt` |
+| Powers Rig suits Hail (`textures/entity/rig/suit_hail.png` + glow) | Power Armor: Renostalgized's worn layers, laid onto the Rig's plates by `tools/open_art/rig_suits.py` | Thepigcat76 (Modrinth) | MIT, notice in `sources/power_armor/LICENSE.txt` |
+| Powers Rig suit Tinker (`textures/entity/rig/suit_tinker.png` + glow) | Netherite Armor (resource pack) worn layers, the same way | ItsSory (Modrinth) | MIT, notice in `sources/netherite_armor/LICENSE.txt` |
 
 Tried and dropped: Shade's sword and dagger on the silver sword and hidden blade (Andy, 2026-11-26), the block set's slate tiles and bricks on the mason table (they lose the table's plan and tools) and
 Militech's steel block on the landing beacon (soft diagonal gradient). The hammer keeps Shade's black outline,

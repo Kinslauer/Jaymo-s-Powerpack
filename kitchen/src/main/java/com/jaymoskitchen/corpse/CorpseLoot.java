@@ -149,6 +149,15 @@ final class CorpseLoot implements Container {
 		look = corpse.look();
 	}
 
+	/** The body changed under it (a part cut off, the gear on it gone with the part): what's on it read again. */
+	void reload() {
+		if (!corpse.isPlayerCorpse()) {
+			ItemStack[] now = corpse.wornGear();
+			System.arraycopy(now, 0, gear, 0, Math.min(now.length, gear.length));
+		}
+		look = corpse.look();
+	}
+
 	@Override
 	public boolean stillValid(Player player) {
 		return !corpse.isRemoved() && corpse.look().equals(look) && corpse.carrier() == null && corpse.dragger() == null
