@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -24,6 +24,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/black-panther-p1|black-panther-p1]] · for any · open
 - [ ] [[Inbox/black-panther-k1|black-panther-k1]] · for any · open
+- [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · open
 
 
 ## Being built
@@ -80,7 +81,6 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-k5|black-panther-k5]] · for any · blocked
 - [ ] [[Inbox/black-panther-k6|black-panther-k6]] · for any · blocked
 - [ ] [[Inbox/black-panther-k7|black-panther-k7]] · for any · blocked
-- [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
