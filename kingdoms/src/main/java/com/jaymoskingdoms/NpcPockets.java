@@ -36,7 +36,8 @@ import com.mojang.serialization.Codec;
  * a farmer's seeds, a fletcher's feathers, a librarian's paper and ink, a smith's coal and nuggets, a guard's bandage); a
  * camp's raider bones, flint and a little gold, a pirate gold and kelp, an illager spare bolts and plunder. A realm's villager with a door to lock carries their
  * house key ({@code NightLocks#houseKeyOf}), given once: one taken isn't made again. What they spend or lose is gone; each
- * new day ({@link #RESTOCK_TICKS}) their pockets are rolled again, the key aside.</li>
+ * new day ({@link #RESTOCK_TICKS}) their pockets are rolled again, the key (and a steel realm smith's blueprint,
+ * {@link SteelRealms#BLUEPRINT}) aside.</li>
  * <li><b>Searching them</b> ({@link #open}, the body menu's "Search them" on anyone downed or hogtied): a screen of their belt
  * ({@link Sidearms#BELT}: the sidearm, or the bow or gun slung there) and their pockets, and your inventory below. Its slots
  * read and write the body's own belt and pockets, so two people looking see the same and nothing is taken twice. Where a
@@ -159,6 +160,13 @@ public final class NpcPockets {
 	static List<ItemStack> fill(ServerLevel level, Mob mob) {
 		RandomSource random = mob.getRandom();
 		List<ItemStack> out = new ArrayList<>();
+		// (a house key or a realm's steel blueprint still in their pocket stays there through the new roll, first, so no
+		// full roll pushes it out)
+		for (ItemStack kept : mob.getAttachedOrElse(POCKETS, List.<ItemStack>of())) {
+			if (keeps(kept)) {
+				out.add(kept);
+			}
+		}
 		if (random.nextFloat() < PURSE_CHANCE) {
 			Faction f = Pickpocket.law(level, mob);
 			Currency coin = f != null ? Currencies.of(level.getServer(), f) : Currencies.at(level, mob.blockPosition());
@@ -180,15 +188,8 @@ public final class NpcPockets {
 		if (!mob.entityTags().contains(KEY_TAG)) {
 			ItemStack key = NightLocks.houseKeyOf(level, mob);
 			if (!key.isEmpty()) {
-				out.add(key);
+				out.add(Math.min(out.size(), countKept(out)), key);
 				mob.addTag(KEY_TAG);
-			}
-		} else {
-			// (a key still in their pocket stays there through the new roll)
-			for (ItemStack kept : mob.getAttachedOrElse(POCKETS, List.<ItemStack>of())) {
-				if (kept.is(Locks.KEY)) {
-					out.add(kept);
-				}
 			}
 		}
 		while (out.size() > SLOTS) {
@@ -198,6 +199,39 @@ public final class NpcPockets {
 			out.add(ItemStack.EMPTY);
 		}
 		return Collections.unmodifiableList(out);
+	}
+
+	/** What stays in a pocket through a new roll: a house key, a realm's steel blueprint. */
+	static boolean keeps(ItemStack stack) {
+		return !stack.isEmpty() && (stack.is(Locks.KEY) || SteelRealms.BLUEPRINT != null && stack.is(SteelRealms.BLUEPRINT));
+	}
+
+	private static int countKept(List<ItemStack> out) {
+		int n = 0;
+		while (n < out.size() && keeps(out.get(n))) {
+			n++;
+		}
+		return n;
+	}
+
+	/** Whether {@code mob}'s pockets hold something {@code match}es. */
+	static boolean holds(ServerLevel level, Mob mob, java.util.function.Predicate<ItemStack> match) {
+		return pockets(level, mob).stream().anyMatch(s -> !s.isEmpty() && match.test(s));
+	}
+
+	/**
+	 * Puts {@code stack} into {@code mob}'s first empty pocket (rolling them first); false if they have no pockets or none is
+	 * free.
+	 */
+	static boolean give(ServerLevel level, Mob mob, ItemStack stack) {
+		List<ItemStack> pockets = pockets(level, mob);
+		for (int i = 0; i < pockets.size(); i++) {
+			if (pockets.get(i).isEmpty()) {
+				set(mob, i, stack);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** What {@code mob}'s trade or band has on them. */
