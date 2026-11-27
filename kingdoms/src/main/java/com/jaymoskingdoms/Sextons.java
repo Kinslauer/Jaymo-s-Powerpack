@@ -72,7 +72,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>What's left lying:</b> a severed head or limb (Powers' parts) left a while ({@link #PART_SETTLE}, so it's yours
  * first) is buried where it lies, spade in hand, if the ground there takes a spade; on a street or a floor it goes in a
  * sack and is buried on the nearest open ground. The mess a blast leaves (Kitchen's gibs) is shovelled up with it.
- * Never a kept trophy, nor anything a player is carrying.</li>
+ * Never a kept trophy, nor anything a player is carrying. The spade and the bucket are what the town can afford
+ * ({@link ToolGrades}): iron only in a rich realm with iron to spare, else stone or wood, and a clay bucket.</li>
  * <li><b>Golems:</b> mended with iron from the storehouse, as a smith does ({@link SmithMending}).</li>
  * <li><b>Blood and grime:</b> a guard or a golem who comes back bloody or filthy is washed down, bucket in hand
  * ({@link PowersCompat#washAll}); blood in the streets is scrubbed out as well as indoors ({@link BloodChores}).</li>
@@ -134,6 +135,8 @@ public final class Sextons {
 		long working = -1;
 		/** A part already in the sack. */
 		boolean bagged;
+		/** What their tools are made of. */
+		ToolGrades.Grade grade = ToolGrades.Grade.STONE;
 
 		Task(Kind kind, @Nullable UUID target, @Nullable BlockPos at, long until) {
 			this.kind = kind;
@@ -255,13 +258,13 @@ public final class Sextons {
 		BlockPos lantern = lanternOf(level, v);
 		if (t >= LIGHT_FROM && t < LIGHT_TO) {
 			if (lantern != null && !level.getBlockState(lantern).getValue(LychLanternBlock.LIT)) {
-				start(v, new Task(Kind.LIGHT, null, lantern, now + GIVE_UP), null);
+				start(level, f, v, new Task(Kind.LIGHT, null, lantern, now + GIVE_UP), null);
 			}
 			return;
 		}
 		if (t < SNUFF_TO || t >= 23000L) {
 			if (lantern != null && level.getBlockState(lantern).getValue(LychLanternBlock.LIT)) {
-				start(v, new Task(Kind.SNUFF, null, lantern, now + GIVE_UP), null);
+				start(level, f, v, new Task(Kind.SNUFF, null, lantern, now + GIVE_UP), null);
 			}
 			return;
 		}
@@ -273,12 +276,12 @@ public final class Sextons {
 		Entity part = nearest(v, level.getEntities((Entity)null, near, e -> PowersCompat.litterPart(e) && !LEFT.containsKey(e.getUUID())
 			&& now - SEEN.getOrDefault(e.getUUID(), now) >= PART_SETTLE && !claimed(e.getUUID()) && ours(level, f, e.blockPosition())));
 		if (part != null) {
-			start(v, new Task(Kind.BURY, part.getUUID(), null, now + GIVE_UP), "bury");
+			start(level, f, v, new Task(Kind.BURY, part.getUUID(), null, now + GIVE_UP), "bury");
 			return;
 		}
 		Entity mess = nearest(v, level.getEntities((Entity)null, near, e -> isGib(e) && ours(level, f, e.blockPosition())));
 		if (mess != null && !sweeping(mess.blockPosition())) {
-			start(v, new Task(Kind.SWEEP, null, mess.blockPosition(), now + GIVE_UP / 2), "bury");
+			start(level, f, v, new Task(Kind.SWEEP, null, mess.blockPosition(), now + GIVE_UP / 2), "bury");
 			return;
 		}
 		if (level.getRandom().nextFloat() < WASH_CHANCE) {
@@ -286,14 +289,14 @@ public final class Sextons {
 				&& !WASHED.containsKey(e.getUUID()) && !claimed(e.getUUID()) && ours(level, f, e.blockPosition())));
 			if (dirty != null) {
 				WASHED.put(dirty.getUUID(), now + WASHED_GAP);
-				start(v, new Task(Kind.WASH, dirty.getUUID(), null, now + GIVE_UP), "wash");
+				start(level, f, v, new Task(Kind.WASH, dirty.getUUID(), null, now + GIVE_UP), "wash");
 				return;
 			}
 		}
 		if (lantern == null && !LEFT.containsKey(v.getUUID())) {
 			BlockPos spot = lanternSpot(level, f);
 			if (spot != null) {
-				start(v, new Task(Kind.SETUP, null, spot, now + GIVE_UP), "setup");
+				start(level, f, v, new Task(Kind.SETUP, null, spot, now + GIVE_UP), "setup");
 			} else {
 				// no burying ground yet, or no room by it: looked at again later
 				LEFT.put(v.getUUID(), now + RETRY * 5L);
@@ -301,14 +304,16 @@ public final class Sextons {
 		}
 	}
 
-	private static void start(Villager v, Task task, @Nullable String family) {
+	private static void start(ServerLevel level, Faction f, Villager v, Task task, @Nullable String family) {
 		TASKS.put(v.getUUID(), task);
+		// (made of what the town can afford: ToolGrades)
+		task.grade = ToolGrades.of(level, f);
 		v.setItemSlot(EquipmentSlot.MAINHAND, switch (task.kind) {
-			case BURY, SWEEP, SETUP -> new ItemStack(Items.IRON_SHOVEL);
-			case WASH -> new ItemStack(Items.WATER_BUCKET);
+			case BURY, SWEEP, SETUP -> new ItemStack(ToolGrades.shovel(task.grade));
+			case WASH -> new ItemStack(ToolGrades.waterBucket(task.grade));
 			case LIGHT, SNUFF -> ItemStack.EMPTY;
 		});
-		if (family != null && v.level() instanceof ServerLevel level && level.getRandom().nextFloat() < TALK_CHANCE) {
+		if (family != null && level.getRandom().nextFloat() < TALK_CHANCE) {
 			say(level, v, family);
 		}
 	}
@@ -374,7 +379,7 @@ public final class Sextons {
 					walk(v, task.at);
 					return true;
 				}
-				v.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
+				v.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ToolGrades.shovel(task.grade)));
 				task.stage = Stage.WORK;
 			}
 			case WORK -> {

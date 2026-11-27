@@ -186,8 +186,8 @@ public final class SmithMending {
 				return false;
 			}
 			job.arrived = now;
-			// a hammer in hand as they work
-			smith.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
+			// a hammer in hand as they work, of what the town can afford (ToolGrades)
+			smith.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ToolGrades.pickaxe(ToolGrades.of(level, Theft.lawAt(level, smith.blockPosition())))));
 		}
 		smith.getNavigation().stop();
 		smith.getLookControl().setLookAt(patient, 30.0F, 30.0F);
