@@ -14,11 +14,7 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
-import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -45,6 +41,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -65,8 +62,9 @@ import org.jspecify.annotations.Nullable;
  * <li>when the thrall stands in a temple or under holy dread ({@link #THROW_DREAD}): thrown out, sick and weak, with a shake of the view.</li>
  * </ul>
  * The thrall's thinking is switched off while ridden ({@code NoAi}, marked {@link #RIDDEN} so a crash never leaves it so), and it
- * keeps within {@link #LEASH} of the coffin, as far as the client's view of the world reaches. Attacks, breaking blocks, using held
- * items and opening chests and the like are not the thrall's to do.
+ * keeps within {@link #LEASH} of the coffin, as far as the client's view of the world reaches. Its hands are wholly yours: you fight,
+ * dig, build, open chests and use what you hold from where it stands (reach from its eyes, {@code RideRangeMixin}), and what you
+ * shoot or throw leaves from its eyes.
  */
 public final class ThrallRide {
 	/** How far (blocks) from the coffin the thrall may walk. */
@@ -168,17 +166,19 @@ public final class ThrallRide {
 			}
 			return InteractionResult.PASS;
 		});
-		// the thrall's hands: no chests, no crafting, no held items, no blows, no breaking
-		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
-			if (riding(player) && !(level.getBlockState(hit.getBlockPos()).getMenuProvider(level, hit.getBlockPos()) == null)) {
-				return InteractionResult.FAIL;
+		// the thrall's hands are yours (Andy: "they should play completely as if you were they"): reach is measured from its eyes
+		// (RideRangeMixin), and what you shoot or throw leaves from its eyes along its look, not from the coffin
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof Projectile shot && shot.tickCount == 0 && shot.getOwner() instanceof ServerPlayer owner && riding(owner)
+				&& thrall(owner) instanceof Villager v) {
+				double speed = shot.getDeltaMovement().length();
+				Vec3 eye = v.getEyePosition();
+				shot.setPos(eye.x, eye.y - 0.1, eye.z);
+				shot.setDeltaMovement(v.getLookAngle().scale(speed));
+				shot.setYRot(v.getYHeadRot());
+				shot.setXRot(v.getXRot());
 			}
-			return InteractionResult.PASS;
 		});
-		UseItemCallback.EVENT.register((player, level, hand) -> riding(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> riding(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> riding(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, be) -> !riding(player));
 	}
 
 	// ---- asking -------------------------------------------------------------------------------------------------------
@@ -191,6 +191,15 @@ public final class ThrallRide {
 	/** Whether {@code player} has just sneak-used a coffin to ride from: the Blood page leaves the click alone. */
 	public static boolean willRide(ServerPlayer player) {
 		return PENDING.containsKey(player.getUUID());
+	}
+
+	/** The villager {@code player} is riding now, or null. */
+	public static @Nullable Villager thrall(Player player) {
+		Ride r = player.level().isClientSide() ? null : RIDES.get(player.getUUID());
+		if (r != null && player.level() instanceof ServerLevel level && level.getEntity(r.thrall) instanceof Villager v && v.isAlive()) {
+			return v;
+		}
+		return null;
 	}
 
 	/** Where the rider's eyes are for reach: the thrall's, if it is ridden by {@code player}; else null. */
