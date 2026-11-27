@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:00). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -41,7 +41,6 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · #2248 · in-review
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
-- [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · codex · #2258 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -66,12 +65,14 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-7|hunters-road-7]] · for any · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
+- [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/legends-p6-core-animations|legends-p6-core-animations]]
 - [x] [[Inbox/Done/mordhau-4-legs|mordhau-4-legs]]
 - [x] [[Inbox/Done/mordhau-3-body|mordhau-3-body]]
 - [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
@@ -79,7 +80,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
 - [x] [[Inbox/Done/mordhau-2-hoods-crests|mordhau-2-hoods-crests]]
 - [x] [[Inbox/Done/mordhau-1-helms|mordhau-1-helms]]
-- [x] [[Inbox/Done/wither-model|wither-model]]
 
 
 %% kanban:settings
