@@ -1,5 +1,6 @@
 package com.jaymospowers.power.resonance;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.AbilityPower;
 import java.util.HashMap;
 import java.util.List;
@@ -144,7 +145,8 @@ final class ResonanceBoom {
 		for (int i = 0; i < 10; i++) {
 			level.sendParticles(new ShriekParticleOption(i * 5), player.getX(), player.getEyeY() + 0.2, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		}
-		com.jaymospowers.core.fx.MagicFx.ring(level, player.position().add(0.0, 0.1, 0.0), (float)AbilityPower.size(player, SHRIEK_RADIUS), ResonancePower.COLOR);
+		MagicFx.spectacle(level, player.position().add(0.0, 0.1, 0.0), "pierre01/monsterroar", 0.5F, ResonancePower.COLOR,
+			SHRIEK_FILM_TICKS, MagicFx.RING, Vec3.ZERO, (float)AbilityPower.size(player, SHRIEK_RADIUS));
 		level.gameEvent(GameEvent.SHRIEK, player.position(), GameEvent.Context.of(player));
 		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.ORBIT, SHRIEK_FILM_TICKS, AbilityPower.size(player, SHRIEK_RADIUS));
 		return true;

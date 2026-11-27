@@ -1,5 +1,6 @@
 package com.jaymospowers.power.cryo;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.smoke.SmokeField;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -77,6 +78,8 @@ public final class CryoBlizzard {
 		long now = level.getGameTime();
 		player.setAttached(STORM, now);
 		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, RADIUS);
+		MagicFx.spectacle(level, player.position().add(0.0, 0.3, 0.0), "pierre01/atmosphere", 1.25F, CryoPower.COLOR, FILM_TICKS,
+			MagicFx.RING, Vec3.ZERO, (float)RADIUS);
 		CryoPower.set(player, CryoPower.state(player).withBlizzard(now));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 1.5F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.POWDER_SNOW_BREAK, SoundSource.PLAYERS, 1.5F, 0.5F);

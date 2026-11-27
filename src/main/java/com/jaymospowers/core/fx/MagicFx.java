@@ -162,12 +162,49 @@ public final class MagicFx {
 		}
 	}
 
+	/** A client-side effect with a regular shape to draw when the native renderer is unavailable. */
+	public record Spectacle(String id, float scale, Shape fallback) implements CustomPacketPayload {
+		public static final Type<Spectacle> TYPE = new Type<>(JaymosPowers.id("magic_fx_spectacle"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Spectacle> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeUtf(p.id, 128);
+				buf.writeFloat(p.scale);
+				Shape.CODEC.encode(buf, p.fallback);
+			},
+			buf -> new Spectacle(buf.readUtf(128), buf.readFloat(), Shape.CODEC.decode(buf)));
+
+		@Override
+		public Type<Spectacle> type() {
+			return TYPE;
+		}
+	}
+
+	/** Plays an Effekseer effect at a point, with a blast as its fallback. Reserved for ultimates and big moves. */
+	public static void spectacle(ServerLevel level, Vec3 at, String id, float scale, int color, int ticks) {
+		spectacle(level, at, id, scale, color, ticks, BLAST, Vec3.ZERO, scale);
+	}
+
+	/** Plays an effect with a particular MagicFx fallback. Reach and fallback size describe the fallback shape. */
+	public static void spectacle(ServerLevel level, Vec3 at, String id, float scale, int color, int ticks,
+		int fallbackKind, Vec3 reach, float fallbackSize) {
+		Shape fallback = new Shape(fallbackKind, at.x, at.y, at.z, (float)reach.x, (float)reach.y, (float)reach.z,
+			fallbackSize, color & 0xFFFFFF, Math.max(1, ticks),
+			fallbackKind == BOLT ? level.getRandom().nextInt(1 << 20) : 0.0F, 0.0F, 0.0F);
+		Spectacle effect = new Spectacle(id, scale, fallback);
+		for (ServerPlayer player : level.players()) {
+			if (player.distanceToSqr(at) <= RANGE * RANGE) {
+				ServerPlayNetworking.send(player, ServerPlayNetworking.canSend(player, Spectacle.TYPE) ? effect : fallback);
+			}
+		}
+	}
+
 	private MagicFx() {
 	}
 
 	/** Loads the class (the particle types) and registers the packet. */
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Shape.TYPE, Shape.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Spectacle.TYPE, Spectacle.CODEC);
 	}
 
 	/** A mote: loose power in the air. Drops in wherever a redstone dust of this colour and size was. */
