@@ -351,7 +351,7 @@ public final class VampirePlayers {
 		player.heal(DRINK_HEAL);
 		// fine palate: only people's blood feeds them; a great one fed upon ages the blood
 		if (!BloodPage.palateRefuses(player, target)) {
-			VampireBlood.feed(player, DRINK_FOOD, DRINK_SATURATION);
+			BloodTaste.gulp(player, target, DRINK_FOOD, DRINK_SATURATION);
 		}
 		BloodPage.fedOn(player, target);
 		KitchenCompat.drink(player, DRINK_WATER);

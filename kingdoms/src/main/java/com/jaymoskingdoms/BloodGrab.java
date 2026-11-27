@@ -296,6 +296,7 @@ public final class BloodGrab {
 	static void release(ServerPlayer player, boolean toss) {
 		Hold hold = HOLDS.remove(player.getUUID());
 		player.removeAttached(GRABBING);
+		BloodBottling.endHold(player);
 		if (hold == null) {
 			return;
 		}
@@ -334,6 +335,7 @@ public final class BloodGrab {
 				it.remove();
 				if (player != null) {
 					player.removeAttached(GRABBING);
+					BloodBottling.endHold(player);
 				}
 				if (target instanceof Mob mob) {
 					mob.setNoAi(hold.hadNoAi);
