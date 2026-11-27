@@ -8,7 +8,10 @@ started: 2026-11-26
 owns:
   - src/main/java/com/jaymospowers/power/web/ (Patch 3 brute, leap, fury, wall, pose and takeover files)
   - src/client/java/com/jaymospowers/client/power/web/ (Patch 3 brute inputs, poses and HUD)
-  - src/main/resources/assets/jaymospowers/lang/parts/web.json
+  - src/main/java/com/jaymospowers/core/UltimateFilm.java
+  - src/main/java/com/jaymospowers/core/Debris.java
+  - src/client/java/com/jaymospowers/client/UltimateCinematic.java
+  - src/main/resources/assets/jaymospowers/lang/parts/web_brute.json
   - changes/powers/legends-big-symbiote.md
 ---
 # Legends Patch 3
