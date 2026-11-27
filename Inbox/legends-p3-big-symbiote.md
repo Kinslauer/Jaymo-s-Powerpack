@@ -1,5 +1,5 @@
 ---
-status: changes
+status: claimed
 for: bacchus
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
