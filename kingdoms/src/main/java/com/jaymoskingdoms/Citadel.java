@@ -77,16 +77,19 @@ final class Citadel {
 		courtyard(level, f, p);
 		BlockPos[] keep = keep(level, f, p, kingdom, random);
 				List<BlockPos> posts = new ArrayList<>();
-				// Corner tower posts on the roof floor (TOWER_HIGH), not on battlements (TOWER_HIGH + 1)
-				for (int[] t : new int[][] {{-HALF, 0}, {HALF, 0}, {-HALF, DEPTH}, {HALF, DEPTH}}) {
-					posts.add(f.at(t[0], TOWER_HIGH, t[1]));
-				}
-				// Gatehouse tower posts on their roof floor (TOWER_HIGH - 1)
-				posts.add(f.at(-GATE_TOWER_X, TOWER_HIGH - 1, 0));
-				posts.add(f.at(GATE_TOWER_X, TOWER_HIGH - 1, 0));
-				// Keep posts on the roof floor (STOREY * STOREYS), not on battlements (STOREY * STOREYS + 1)
-				posts.add(f.at(-KEEP_HALF + 2, STOREY * STOREYS, KEEP_FRONT + 2));
-				posts.add(f.at(KEEP_HALF - 2 - 3, STOREY * STOREYS, KEEP_BACK - 2));
+						// Corner tower posts on the roof floor (TOWER_HIGH + 1), not on battlements (TOWER_HIGH + 2)
+						// Move posts sideways to open walk cells
+						for (int[] t : new int[][] {{-HALF, 0}, {HALF, 0}, {-HALF, DEPTH}, {HALF, DEPTH}}) {
+							posts.add(f.at(t[0] + (t[0] < 0 ? 1 : -1), TOWER_HIGH + 1, t[1] + (t[1] < DEPTH / 2 ? 1 : -1)));
+						}
+						// Gatehouse tower posts on their roof floor (TOWER_HIGH)
+						// Move posts sideways to open walk cells
+						posts.add(f.at(-GATE_TOWER_X + 1, TOWER_HIGH, 0));
+						posts.add(f.at(GATE_TOWER_X - 1, TOWER_HIGH, 0));
+						// Keep posts on the roof floor (STOREY * STOREYS + 1), not on battlements (STOREY * STOREYS + 2)
+						// Move posts sideways to open walk cells
+						posts.add(f.at(-KEEP_HALF + 2 + 1, STOREY * STOREYS + 1, KEEP_FRONT + 2));
+						posts.add(f.at(KEEP_HALF - 2 - 3 - 1, STOREY * STOREYS + 1, KEEP_BACK - 2));
 				return new Castle.Keep(keep[0], keep[1], f.at(0, 0, -2), f.at(0, 0, KEEP_FRONT + 6), List.copyOf(posts));
 	}
 

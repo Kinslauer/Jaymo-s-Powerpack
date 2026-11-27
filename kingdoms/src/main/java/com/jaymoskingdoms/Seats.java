@@ -589,34 +589,55 @@ final class Seats {
 		}
 
 		/**
-		 * Checks if a roof post is accessible from the seat building: either on the seat building itself
-		 * (within its bounding box), or has a climbable block (ladder, vine, scaffolding) within 2 blocks
-		 * horizontally leading downwards.
-		 */
-		private static boolean isPostAccessible(ServerLevel level, Room room, BlockPos post) {
-			BoundingBox box = room.box();
-			// On the seat building itself: accessible via interior stairs
-			if (box.isInside(post)) {
-				return true;
-			}
-			// Check for climbable blocks (ladder, vine, scaffolding) within 2 blocks horizontally, leading down
-			for (int dx = -2; dx <= 2; dx++) {
-				for (int dz = -2; dz <= 2; dz++) {
-					if (dx == 0 && dz == 0) continue;
-					BlockPos at = post.offset(dx, 0, dz);
-					BlockState state = level.getBlockState(at);
-					if (state.is(Blocks.LADDER) || state.is(Blocks.VINE) || state.is(Blocks.SCAFFOLDING)
+			 * Checks if a roof post is accessible from the seat building: either on the seat building itself
+			 * (within its bounding box), or has a climbable block (ladder, vine, scaffolding) within 2 blocks
+			 * horizontally leading downwards, or has a valid path from the seat's door to the roof.
+			 */
+			private static boolean isPostAccessible(ServerLevel level, Room room, BlockPos post) {
+				BoundingBox box = room.box();
+				// On the seat building itself: accessible via interior stairs
+				if (box.isInside(post)) {
+					return true;
+				}
+				// Check for climbable blocks (ladder, vine, scaffolding) within 2 blocks horizontally, leading down
+				for (int dx = -2; dx <= 2; dx++) {
+					for (int dz = -2; dz <= 2; dz++) {
+						if (dx == 0 && dz == 0) continue;
+						BlockPos at = post.offset(dx, 0, dz);
+						BlockState state = level.getBlockState(at);
+						if (state.is(Blocks.LADDER) || state.is(Blocks.VINE) || state.is(Blocks.SCAFFOLDING)
 							|| state.is(BlockTags.CLIMBABLE)) {
-						return true;
+							return true;
+						}
 					}
 				}
+				// Check if the post is reachable from the seat's door via pathfinding
+				// (simplified: if there's a clear vertical path of climbable blocks from ground to roof)
+				if (room.inside() != null) {
+					BlockPos door = room.inside();
+					// Check for a continuous ladder/vine column from door level up to roof
+					for (int y = door.getY(); y <= post.getY(); y++) {
+						boolean hasClimbable = false;
+						for (int dx = -1; dx <= 1; dx++) {
+							for (int dz = -1; dz <= 1; dz++) {
+								BlockPos at = post.offset(dx, y - post.getY(), dz);
+								BlockState state = level.getBlockState(at);
+								if (state.is(Blocks.LADDER) || state.is(Blocks.VINE) || state.is(Blocks.SCAFFOLDING)
+									|| state.is(BlockTags.CLIMBABLE)) {
+									hasClimbable = true;
+									break;
+								}
+							}
+							if (hasClimbable) break;
+						}
+						if (!hasClimbable && y > door.getY()) {
+							// Gap in climbable blocks - not accessible
+							return false;
+						}
+					}
+					// If we get here, there's a continuous climbable path
+					return true;
+				}
+				return false;
 			}
-			// Check if the post is on a building with a door at ground level (town building)
-			// Simplified: if the post's Y is not too high above the town's ground level, assume accessible
-			BlockPos townGround = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, room.outside());
-			if (post.getY() - townGround.getY() <= 12) {
-				return true;
-			}
-			return false;
-		}
 	}
