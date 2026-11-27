@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:08). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 09:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -40,6 +40,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2293 Villagers going in at night aren't "Running scared" (Kingdoms, 2026-11-27)
 - [ ] #2292 spectate viewcone label trimmed - no coordinates, no Running line (Kingdoms, 2026-11-27)
 - [ ] #2290 Hunter's Road 7A: oils, oil pot, sash, bombs, acid, slick (Powers, Kingdoms, Kitchen, 2026-11-27)
 - [ ] #2289 Hunter's Road 6, part A: toxicity, tolerance, the gauge, five harms, hunter's eyes (Powers, Kingdoms, Kitchen, 2026-11-27)
@@ -99,8 +100,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2224 Join hush - chat, toasts and advancements wait till you're in the world (Kingdoms, 2026-11-26)
 - [ ] #2221 wide flat plains and bigger biomes (open country) (Kingdoms, 2026-11-26)
 - [ ] #2219 world gen no longer freezes on Enderscape's "not in a structure" check (Powers, 2026-11-26)
-- [ ] #2215 Two new Rig suits: Hail and Tinker (Powers, Kitchen, 2026-11-26)
-- …and 653 older ones.
+- …and 654 older ones.
 
 ## Health
 
