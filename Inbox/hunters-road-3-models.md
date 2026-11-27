@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: prometheus
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: t3
+claimed_by: 
 pr: 
 thread: t3 mcp:e02bb8e9-0436-4a45-baef-82a67433c5f9
 ---
@@ -22,3 +22,4 @@ thread: t3 mcp:e02bb8e9-0436-4a45-baef-82a67433c5f9
 - 2026-11-27 09:06 Antigravity quota reached 2026-11-27 9:05 AM (resets about 1:30 PM); thread failed with no work done. Still claimed by t3, waiting on Andy: retry on Antigravity after the reset, or hand to Hermes.
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-27 15:25 Andy 2026-11-27 3:16 PM: start Codex on one model task at a time, HR 3 first. Codex (gpt-6-astra) started in T3 thread mcp:e9a08d03, branch t3/hunters-road-3-models off origin/master.
+- 2026-11-27 21:36 t3's claim had no sign of work for 30 min: handed back as open.
