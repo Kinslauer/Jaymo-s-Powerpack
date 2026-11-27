@@ -1029,6 +1029,38 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code BaublesQuickEquip.shiftClick(Player, Slot)}. */
+	private static java.lang.invoke.@Nullable MethodHandle baubleShiftClick;
+	private static boolean lookedForBaubleShiftClick;
+
+	/**
+	 * Shift-click on an inventory slot of the harness screen holding something wearable as a bauble: one goes on in a free
+	 * bauble slot that takes it, as from the survival inventory (Powers' {@code BaublesQuickEquip.shiftClick}). True when
+	 * one went on (or, on the client, will); false without Powers.
+	 */
+	public static boolean quickEquipBauble(Player player, net.minecraft.world.inventory.Slot slot) {
+		if (!lookedForBaubleShiftClick) {
+			lookedForBaubleShiftClick = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					baubleShiftClick = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.baubles.BaublesQuickEquip"),
+						"shiftClick", java.lang.invoke.MethodType.methodType(boolean.class, Player.class, net.minecraft.world.inventory.Slot.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' BaublesQuickEquip.shiftClick (older Powers?)", e);
+				}
+			}
+		}
+		if (baubleShiftClick == null) {
+			return false;
+		}
+		try {
+			return (boolean) baubleShiftClick.invokeExact(player, slot);
+		} catch (Throwable e) {
+			baubleShiftClick = null;
+			return false;
+		}
+	}
+
 	/** Powers' {@code PowerTrials.questDone(ServerPlayer)}. */
 	private static java.lang.invoke.@Nullable MethodHandle questDone;
 	private static boolean lookedForQuestDone;

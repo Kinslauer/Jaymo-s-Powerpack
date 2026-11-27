@@ -37,6 +37,13 @@ final class HeraldryClient {
 		MenuScreens.register(Harness.MENU, HarnessScreen::new);
 		MenuScreens.register(Harness.LOOT_MENU, DownedHarnessScreen::new);
 		HarnessTab.init();
+		// the creative inventory moves items on the client alone: a shift-click there that puts a harness piece on tells the server
+		com.jaymoskingdoms.HarnessQuickEquip.creativeSend = slot -> {
+			if (Minecraft.getInstance().gui.screen() instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
+				&& ClientPlayNetworking.canSend(com.jaymoskingdoms.HarnessQuickEquip.QuickEquip.TYPE)) {
+				ClientPlayNetworking.send(new com.jaymoskingdoms.HarnessQuickEquip.QuickEquip(slot));
+			}
+		};
 		visor = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.visor", InputConstants.KEY_HOME, ClassKeys.category()));
 		harness = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.harness", InputConstants.UNKNOWN.getValue(), ClassKeys.category()));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {

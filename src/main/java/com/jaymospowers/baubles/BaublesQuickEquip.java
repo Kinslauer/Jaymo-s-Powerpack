@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.IntConsumer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.network.chat.Component;
@@ -13,23 +14,32 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Shift-click a wearable item in the survival inventory (or sneak-use one in hand) to put it on: one of it goes in a
  * free bauble slot that takes it, and the bauble screen opens next tick so you see it on. With every such slot full,
  * shift-click moves it as vanilla does and a short message says so. Everything happens on the server; the client only
- * holds back its own guess of the vanilla move when it sees a free slot (the worn list syncs to its wearer).
+ * holds back its own guess of the vanilla move when it sees a free slot (the worn list syncs to its wearer). The creative
+ * inventory moves items on the client alone, so there the client tells the server ({@link BaublesNet.QuickEquip}).
  */
 public final class BaublesQuickEquip {
 	/** Players to show the bauble screen next tick, after their shift-click or sneak-use put something on. */
 	private static final Set<UUID> TO_OPEN = new LinkedHashSet<>();
 	/** Per item class: whether it has a use of its own (then sneak-use is left to it). */
 	private static final Map<Class<?>, Boolean> OWN_USE = new ConcurrentHashMap<>();
+
+	/**
+	 * Client side, set by the client: tells the server about a shift-click on this inventory menu slot index when it came
+	 * from the creative inventory screen (it does nothing for any other screen, whose clicks reach the server anyway).
+	 */
+	public static @Nullable IntConsumer creativeSend;
 
 	private BaublesQuickEquip() {
 	}
@@ -88,7 +98,11 @@ public final class BaublesQuickEquip {
 			return false;
 		}
 		if (!(player instanceof ServerPlayer server)) {
-			return hasFreeSlot(player, stack);
+			boolean free = hasFreeSlot(player, stack);
+			if (free && creativeSend != null && player.inventoryMenu.slots.contains(slot)) {
+				creativeSend.accept(slot.index);
+			}
+			return free;
 		}
 		if (!Baubles.equipFromHand(server, stack)) {
 			server.sendOverlayMessage(Component.translatable("message.jaymospowers.baubles.full"));
@@ -101,6 +115,18 @@ public final class BaublesQuickEquip {
 		}
 		openNextTick(server);
 		return true;
+	}
+
+	/**
+	 * A creative player shift-clicked inventory menu slot {@code index} in the creative inventory ({@link BaublesNet.QuickEquip}):
+	 * the same as {@link #shiftClick} there. Only from the creative inventory (no menu of the server's open) and only on the
+	 * inventory's own slots.
+	 */
+	static void creativeShiftClick(ServerPlayer player, int index) {
+		if (player.isCreative() && player.containerMenu == player.inventoryMenu && index >= InventoryMenu.INV_SLOT_START
+			&& index <= InventoryMenu.SHIELD_SLOT && index < player.inventoryMenu.slots.size()) {
+			shiftClick(player, player.inventoryMenu.getSlot(index));
+		}
 	}
 
 	/** After a sneak-use put a bauble on from the hand: show the bauble screen next tick. */
