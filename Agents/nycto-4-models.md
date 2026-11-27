@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: stalled
 task: nycto-4-models
 branch: claude/nycto-4-models
 with:
@@ -30,4 +30,4 @@ owns:
 - 2026-11-27 10:48 Addressed Andy's bigger-wings note: inner span 9→11, outer 12→15, taller membranes; removed wrist-claw/outer finger-bone cubes that looked like stray geometry in rest pose. PR #2302 updated.
 
 ## Done
-PR #2302 opened with the model, textures, animations, generator and previews; kingdoms builds cleanly.
+- 2026-11-27 16:22 No sign of work for 30 min: marked stalled (whoever ran it stopped).
