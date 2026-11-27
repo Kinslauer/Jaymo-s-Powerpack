@@ -41,6 +41,9 @@ import net.minecraft.world.entity.player.Player;
  * {@link Vampires.Kind#DHAMPIR dhampir}, with none of a vampire's weaknesses (no sun, no starving, fire burns them no
  * worse) and none of its night strength, but its gifts ({@link NightGifts}). Whoever turns wakes in a crypt dug beneath
  * where they stood ({@link Lairs#crypt}), their bed a coffin.</li>
+ * <li>Andy: "it should be dug under a random area within 1000 blocks": the crypt they wake in is dug under a random spot
+ * within 1000 blocks of where they turned ({@link Lairs#farCrypt}); they are carried there during the black of the
+ * turning ({@link #CRYPT_AHEAD} before they wake), so nothing shows.</li>
  * </ul>
  */
 public final class VampirePlayers {
@@ -99,6 +102,7 @@ public final class VampirePlayers {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LAST_DRINK.clear();
 			LAPPED.clear();
+			LAID.clear();
 		});
 	}
 
@@ -158,6 +162,17 @@ public final class VampirePlayers {
 		// (a strong enough Arcana throws the curse off: fifth edition's save)
 		if (!Vampires.isVampire(player) && !Lycans.cursed(player) && !player.hasAttached(Vampires.BITTEN) && !Saves.resist(player, Saves.Kind.CURSE)) {
 			player.setAttached(Vampires.BITTEN, player.level().getOverworldClockTime());
+			Deeds.done(player, RoadLocks.BITTEN_DEED);
+		}
+	}
+
+	/**
+	 * The bitten start ({@link LifeStory.Start#BITTEN}): the bite is already on them when they wake, no saving throw, and they
+	 * turn at the first nightfall. Not laid on a vampire, a cursed one, or one already bitten.
+	 */
+	static void laidBite(ServerPlayer player) {
+		if (!Vampires.isVampire(player) && !Lycans.cursed(player) && !player.hasAttached(Vampires.BITTEN)) {
+			player.setAttached(Vampires.BITTEN, player.level().getOverworldClockTime());
 		}
 	}
 
@@ -171,7 +186,19 @@ public final class VampirePlayers {
 				continue;
 			}
 			Long bitten = player.getAttached(Vampires.BITTEN);
-			if (bitten != null && night && (nightIndex(bitten) < nightNo || NightbornBlood.oldBlood(player, bitten, clock))) {
+			Long willing = player.getAttached(OldBlood.WILLING);
+			if (willing != null && bitten == null) {
+				// (the bite was lifted some other way, a priest's rite or a rebirth: so is the Elder's blood)
+				player.removeAttached(OldBlood.WILLING);
+				willing = null;
+			}
+			// the Elder's blood waits for its new moon; any other bitten one turns at the next nightfall
+			boolean due = willing != null ? OldBlood.due(overworld, willing, nightNo)
+				: bitten != null && night && (nightIndex(bitten) < nightNo || NightbornBlood.oldBlood(player, bitten, clock));
+			if (!due) {
+				LAID.remove(player.getUUID());
+			}
+			if (due) {
 				// (0.7.654) Andy: "you pass out and then turn as well": out cold first (the black edged in blood), then they
 				// wake turned; without Powers (or no knock-out), at once as before
 				Long out = TURNING_OUT.get(player.getUUID());
@@ -184,8 +211,11 @@ public final class VampirePlayers {
 				} else if (overworld.getGameTime() >= out || overworld.getGameTime() < out - TURN_OUT_TICKS) {
 					TURNING_OUT.remove(player.getUUID());
 					turn(player, nightNo);
+				} else if (overworld.getGameTime() >= out - CRYPT_AHEAD && !LAID.containsKey(player.getUUID())) {
+					// in the black, well before they wake: carried to the crypt that was dug for them (no visible teleport)
+					LAID.put(player.getUUID(), !player.isPassenger() && Lairs.farCrypt(player.level(), player));
 				}
-			} else if (bitten != null && night) {
+			} else if (bitten != null && willing == null && night) {
 				NightbornBlood.fever(player, bitten, clock);
 			}
 			Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
@@ -254,6 +284,7 @@ public final class VampirePlayers {
 	/** They wake changed (vaguely told: they find out the rest), in a crypt where there's room for one. */
 	private static void turn(ServerPlayer player, long nightNo) {
 		Commandments.act(player, "turned");
+		Deeds.done(player, RoadLocks.BITTEN_DEED);
 		player.removeAttached(Vampires.BITTEN);
 		boolean half = Boolean.TRUE.equals(player.removeAttached(HALF_TURN));
 		Vampires.Kind kind = half ? Vampires.Kind.DHAMPIR : Vampires.Kind.PLAYER;
@@ -264,7 +295,13 @@ public final class VampirePlayers {
 			.withStyle(ChatFormatting.DARK_RED));
 		player.level().playSound(null, player.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 0.6F, 0.5F);
 		NightbornBlood.woke(player, half);
-		if (!player.isPassenger() && Lairs.crypt(player.level(), player)) {
+		player.removeAttached(OldBlood.WILLING);
+		// (laid in it already during the black, or dug now: a death's rise, or no Powers to knock them out)
+		Boolean laid = LAID.remove(player.getUUID());
+		if (laid == null) {
+			laid = !player.isPassenger() && Lairs.farCrypt(player.level(), player);
+		}
+		if (laid) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vampire.crypt").withStyle(ChatFormatting.DARK_RED));
 		}
 	}
@@ -272,6 +309,9 @@ public final class VampirePlayers {
 	/** (0.7.654) How long the bitten lie out cold at nightfall before they wake turned (ticks), and who's out for it now. */
 	static final int TURN_OUT_TICKS = 20 * 14;
 	private static final java.util.Map<java.util.UUID, Long> TURNING_OUT = new java.util.HashMap<>();
+	/** How long before they wake (ticks) the crypt is dug and they are carried to it, still in the black; and who has been (true: laid in one). */
+	static final int CRYPT_AHEAD = 20 * 5;
+	private static final java.util.Map<java.util.UUID, Boolean> LAID = new java.util.HashMap<>();
 
 	/** (0.7.643) The colour at the edges of the black for one dying bitten (RGB). */
 	static final int BITTEN_TINT = 0xA0101C;

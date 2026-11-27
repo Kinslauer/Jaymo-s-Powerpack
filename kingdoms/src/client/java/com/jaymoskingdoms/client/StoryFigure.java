@@ -194,6 +194,7 @@ final class StoryFigure {
 		scene("road.lab", Act.LOOK_DOWN, Items.POTION);
 		scene("road.android", Act.STAND, Items.IRON_INGOT);
 		scene("road.moon_cursed", Act.LOOK_UP, null);
+		scene("road.bitten", Act.STAND, null);
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 		// (0.7.356) the other worlds' starts (0.7.349)
 		scene("road.moon", Act.WORK, Items.STONE_PICKAXE, null, null, null, null, null);

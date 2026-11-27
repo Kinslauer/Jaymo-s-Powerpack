@@ -271,6 +271,8 @@ public final class LifeStory {
 		HEIRLOOM(false), TRADER(false), PUP(false), NOBODIES(false),
 		// (0.7.417, the powered roads) a hermit alchemist's lab (Powers), the Mad Tinkerer's bench (Powers), the moon's curse
 		LAB(false), ANDROID(false), MOON_CURSED(false),
+		// a vampire's bite already on you: you turn at the first nightfall (the moon-cursed road's sibling)
+		BITTEN(false),
 		// (0.7.349, Andy: "new starts, involving the other worlds") woken off the overworld by Jaymo's Powers ({@link #OTHER_WORLDS})
 		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false),
 		// reborn a monster: the goblin people's forms (MonsterBorn), opened by naming a follower
@@ -344,6 +346,7 @@ public final class LifeStory {
 		TERMS.put(Start.LAB, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.ANDROID, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.MOON_CURSED, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.BITTEN, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.FATE, new Terms(Mark.VARIES, 0));
 	}
 
@@ -379,6 +382,7 @@ public final class LifeStory {
 		FATE_ODDS.put(Start.CHAINED, 2);
 		FATE_ODDS.put(Start.TIMELOST, 2);
 		FATE_ODDS.put(Start.MOON_CURSED, 2);
+		FATE_ODDS.put(Start.BITTEN, 2);
 		FATE_ODDS.put(Start.ANDROID, 2);
 		FATE_ODDS.put(Start.LAB, 2);
 		FATE_ODDS.put(Start.GREENSKIN, 2);
@@ -670,6 +674,7 @@ public final class LifeStory {
 				Answer.road(Start.LAB, Items.BREWING_STAND),
 				Answer.road(Start.ANDROID, Items.IRON_INGOT),
 				Answer.road(Start.MOON_CURSED, Items.GHAST_TEAR),
+				Answer.road(Start.BITTEN, Items.FERMENTED_SPIDER_EYE),
 				Answer.road(Start.MOON, Items.END_STONE),
 				Answer.road(Start.VERDANT, Items.VINE),
 				Answer.road(Start.RUSTFALL, Items.RAW_IRON),
@@ -2178,6 +2183,18 @@ public final class LifeStory {
 					MoonCurse.curse(player);
 				}
 			}
+			case BITTEN -> {
+				// the same landing as the moon's mark (the wild, or the edge of a village if one stands near), with the bite laid on
+				// them: they turn at the first nightfall like any bitten player ({@link VampirePlayers})
+				BlockPos village = mate == null && random.nextBoolean() ? Scout.nearest(level, StructureTags.VILLAGE, spawn, STRUCTURE_SEARCH) : null;
+				to = village != null ? spot(level, null, village, MOON_CURSED_VILLAGE_MIN, MOON_CURSED_VILLAGE_MAX, random, true) : null;
+				if (to == null) {
+					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
+				}
+				if (to != null) {
+					VampirePlayers.laidBite(player);
+				}
+			}
 			case LAB, ANDROID -> {
 				// (0.7.417) Powers builds the lab or the workshop a walk from where the player stands and wakes them in it: with a mate,
 				// stand them by the mate first, so the new one is raised in the same stretch of country (it builds its own room)
@@ -3181,7 +3198,7 @@ public final class LifeStory {
 	/** (0.7.412) The starts that tell you a line on waking (lang {@code message.jaymoskingdoms.story.<start>}). */
 	static final Set<Start> HARD_MESSAGES = Set.of(Start.CAPTIVE, Start.TIMELOST, Start.CHAINED, Start.ROCK_BOTTOM, Start.SENTENCED, Start.EVICTED,
 		Start.HIDEOUT, Start.CAST_OUT, Start.GREENSKIN, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES, Start.LAB, Start.ANDROID, Start.MOON_CURSED,
-		Start.MONSTERBORN);
+		Start.BITTEN, Start.MONSTERBORN);
 
 	/**
 	 * (0.7.417, Start Together) Where a player's road set them down: the start that came to pass, the realm it named (-1: none),
