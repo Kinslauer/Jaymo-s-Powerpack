@@ -1,12 +1,12 @@
 ---
-status: writing
+status: in-review
 for: apollo
 from: Andy (Claude chat, 2026-11-23)
 asked: 2026-11-23
 claimed_by: hermes-a
 pr: 2222
 writer: hermes-writer
-text_pass: 
+text_pass: done
 claim_handbacks: 1
 ---
 
