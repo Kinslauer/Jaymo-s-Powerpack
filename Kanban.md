@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 00:23). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 00:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,8 +31,8 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · changes · fixing review notes
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · changes · fixing review notes
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · changes · fixing review notes
-- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · 🪶 Quill · #2280 · writing
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · changes · fixing review notes
+- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · 🪶 Quill · #2280 · writing
 
 
 ## In review
