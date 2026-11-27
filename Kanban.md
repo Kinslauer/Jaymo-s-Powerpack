@@ -4,12 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 06:28). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:37). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
+- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/hunters-road-2|hunters-road-2]] · ☁️ Cloud · open
@@ -29,11 +29,11 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · #2248 · in-review
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
-- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
+- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
-- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
+- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · ☁️ Cloud · #2284 · in-review
 - [ ] [[Inbox/nycto-1|nycto-1]] · ☁️ Cloud · #2285 · in-review
@@ -70,14 +70,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]]
 - [x] [[Inbox/Done/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]]
 - [x] [[Inbox/Done/legends-p6-followups|legends-p6-followups]]
 - [x] [[Inbox/Done/legends-p3-big-symbiote|legends-p3-big-symbiote]]
+- [x] [[Inbox/Done/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]]
 - [x] [[Inbox/Done/legends-p6-core-animations|legends-p6-core-animations]]
-- [x] [[Inbox/Done/mordhau-4-legs|mordhau-4-legs]]
-- [x] [[Inbox/Done/mordhau-3-body|mordhau-3-body]]
-- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
+- [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
+- [x] [[Inbox/Done/village-mods-6-small-structures|village-mods-6-small-structures]]
+- [x] [[Inbox/Done/village-mods-5-town-life-hats|village-mods-5-town-life-hats]]
 
 
 %% kanban:settings
