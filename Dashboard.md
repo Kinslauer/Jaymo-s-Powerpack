@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:53). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:53). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -6,6 +6,27 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Questions for you:**
+- [[Inbox/black-panther-k2|black-panther-k2]] · 2026-11-27 ON HOLD until black-panther-k1 and black-panther-p2 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-k3|black-panther-k3]] · 2026-11-27 ON HOLD until black-panther-k2 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-k4|black-panther-k4]] · 2026-11-27 ON HOLD until black-panther-k3 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-k5|black-panther-k5]] · 2026-11-27 ON HOLD until black-panther-k4 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-k6|black-panther-k6]] · 2026-11-27 ON HOLD until black-panther-k5 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-k7|black-panther-k7]] · 2026-11-27 ON HOLD until black-panther-k6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-p2|black-panther-p2]] · 2026-11-27 ON HOLD until black-panther-p1 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-p3|black-panther-p3]] · 2026-11-27 ON HOLD until black-panther-p2 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-p4|black-panther-p4]] · 2026-11-27 ON HOLD until black-panther-p3 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-p5|black-panther-p5]] · 2026-11-27 ON HOLD until black-panther-p4 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-p6|black-panther-p6]] · 2026-11-27 ON HOLD until black-panther-p5 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-p7|black-panther-p7]] · 2026-11-27 ON HOLD until black-panther-p6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-p8|black-panther-p8]] · 2026-11-27 ON HOLD until black-panther-p7 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-p9|black-panther-p9]] · 2026-11-27 ON HOLD until black-panther-p6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-r1|black-panther-r1]] · 2026-11-27 ON HOLD until PR #2301 (Octo Core) merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-r2|black-panther-r2]] · 2026-11-27 ON HOLD until black-panther-r1 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-r3|black-panther-r3]] · 2026-11-27 ON HOLD until black-panther-r2 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-r4|black-panther-r4]] · 2026-11-27 ON HOLD until black-panther-r3 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-r5|black-panther-r5]] · 2026-11-27 ON HOLD until black-panther-r4 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-r6|black-panther-r6]] · 2026-11-27 ON HOLD until black-panther-r5 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-r7|black-panther-r7]] · 2026-11-27 ON HOLD until black-panther-r6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 2026-11-27 04:46 Text pass content is complete (reviewed captain-ground.json lang keys and changes/kingdoms/hollow-captains-fix.md; all player-facing, no rewri…
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
@@ -26,7 +47,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 - [[Agents/nycto-4-models|nycto-4-models]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -34,7 +55,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-14 waiting for a bot, 1 being built, 10 in review: see [[Kanban]].
+16 waiting for a bot, 1 being built, 10 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -104,7 +125,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-27 problems in the notes: [[Health]].
+28 problems in the notes: [[Health]].
 
 ## Last week
 
