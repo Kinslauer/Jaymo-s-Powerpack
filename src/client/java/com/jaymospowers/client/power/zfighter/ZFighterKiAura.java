@@ -7,6 +7,7 @@ import com.jaymospowers.power.zfighter.ZFighterAura;
 import com.jaymospowers.power.zfighter.ZFighterBranchForms;
 import com.jaymospowers.power.zfighter.ZFighterForms;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
+import com.jaymospowers.power.zfighter.ZFighterOverburn;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.jaymospowers.power.zfighter.ZFighterTraining;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -53,7 +54,12 @@ import org.jspecify.annotations.Nullable;
 public final class ZFighterKiAura {
 	/** On his render state: the aura's colour (RGB), strength (0-1), size, style and trail (0-1), or null for none. */
 	public static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ki_aura");
+	/** Overburn's crimson aura overlay: {color, strength, size, style, trail}, or null when inactive. */
+	public static final RenderStateDataKey<float[]> OVERBURN_KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_overburn_aura");
 	static final int FULL_BRIGHT = 0xF000F0;
+	/** Overburn aura growth per stage (1..4). */
+	static final float OVERBURN_STRENGTH_BASE = 0.55F, OVERBURN_STRENGTH_STEP = 0.12F;
+	static final float OVERBURN_SIZE_BASE = 1.05F, OVERBURN_SIZE_STEP = 0.16F;
 
 	/** Strength while charging, and held after a full charge; how fast it grows in and dies out (share a tick). */
 	static final float CHARGING = 1.0F, HOLDING = 0.85F, GROW = 0.35F, FADE = 0.12F;
@@ -84,7 +90,31 @@ public final class ZFighterKiAura {
 
 	static void extract(Avatar entity, AvatarRenderState state) {
 		// (0.19.70) only the attuned see ki (KiSight)
-		state.setData(KEY, entity instanceof Player player && KiSight.sees(player) ? aura(player, state.ageInTicks) : null);
+		boolean sees = entity instanceof Player player && KiSight.sees(player);
+		state.setData(KEY, sees ? aura((Player)entity, state.ageInTicks) : null);
+		state.setData(OVERBURN_KEY, sees ? overburnAura((Player)entity, state.ageInTicks) : null);
+	}
+
+	private static float @Nullable [] overburnAura(Player player, float age) {
+		int stage = ZFighterOverburn.stage(player);
+		if (stage <= 0 || !Powers.has(player, ZFighterPower.INSTANCE) || player.isInvisible() || player.isSpectator()
+			|| ZFighterLineage.ape(player) || ZFighterAndroid.android(player)) {
+			return null;
+		}
+		Minecraft minecraft = Minecraft.getInstance();
+		if (player == minecraft.player && minecraft.options.getCameraType().isFirstPerson()) {
+			return null;
+		}
+		float strength = Math.min(1.0F, OVERBURN_STRENGTH_BASE + OVERBURN_STRENGTH_STEP * (stage - 1));
+		float size = OVERBURN_SIZE_BASE + OVERBURN_SIZE_STEP * (stage - 1) + 0.04F * stage * Mth.sin(age * 1.4F);
+		float trail = 0.0F;
+		Integer flight = player.getAttached(ZFighterPower.FLIGHT);
+		if (flight != null && flight > 0) {
+			double dx = player.getX() - player.xo, dy = player.getY() - player.yo, dz = player.getZ() - player.zo;
+			double speed = Math.sqrt(dx * dx + dy * dy + dz * dz);
+			trail = (float)Mth.clamp((speed - TRAIL_FROM) / (TRAIL_FULL - TRAIL_FROM), 0.0, 1.0);
+		}
+		return new float[] {ZFighterOverburn.COLOR, strength, size, ZFighterAura.SPARKING, trail};
 	}
 
 	private static float @Nullable [] aura(Player player, float age) {
@@ -168,12 +198,20 @@ public final class ZFighterKiAura {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-			float[] aura = state.getData(KEY);
-			if (aura == null || state.isInvisible) {
+			if (state.isInvisible) {
 				return;
 			}
-			// (0.17.85) whichever style, wisps now; the style decides their look
-			ZFighterKiAuraStyles.draw(poseStack, collector, (int)aura[3], (int)aura[0], aura[1], aura[2], aura[4], state.ageInTicks);
+			float[] aura = state.getData(KEY);
+			if (aura != null) {
+				// (0.17.85) whichever style, wisps now; the style decides their look
+				ZFighterKiAuraStyles.draw(poseStack, collector, (int)aura[3], (int)aura[0], aura[1], aura[2], aura[4], state.ageInTicks);
+			}
+			float[] overburn = state.getData(OVERBURN_KEY);
+			if (overburn != null) {
+				// Overburn: crimson red aura growing by stage, layered slightly outside any form aura
+				float outer = aura != null ? Math.max(overburn[2], aura[2] + 0.12F) : overburn[2];
+				ZFighterKiAuraStyles.draw(poseStack, collector, (int)overburn[3], (int)overburn[0], overburn[1], outer, overburn[4], state.ageInTicks + 17.0F);
+			}
 		}
 
 		/** Additive: the colour's brightness is how strongly it shows. */
