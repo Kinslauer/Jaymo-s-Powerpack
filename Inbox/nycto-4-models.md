@@ -6,6 +6,7 @@ asked: 2026-11-26
 claimed_by: hermes-modeller
 pr: 
 thread: t3 mcp:e2a61563-bcd8-489e-8ec6-f7c8488757d5
+claim_handbacks: 1
 ---
 
 # Night's Blood 4 models: the true shape of the night
@@ -23,3 +24,4 @@ thread: t3 mcp:e2a61563-bcd8-489e-8ec6-f7c8488757d5
 - 2026-11-27 09:06 t3's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-27 09:07 Antigravity quota reached 2026-11-27 (resets about 1:30 PM) partway through. Uncommitted work kept in T3 worktree C:\Users\toopo\.t3\worktrees\Origins Mod\t3-nycto-4-models-17459abb230bddb0 (night_horror bbmodel, geo, animation, 6 textures, gen_night_horror.py, previews). Resume with t3 thread send to mcp:e2a61563 after the reset.
 - 2026-11-27 09:34 Andy 2026-11-27 9:21 AM: Antigravity hit its quota mid-task, so this goes to Prometheus (hermes-modeller), whose main model is now kimi-k2.7-code:cloud. Antigravity's uncommitted start (night_horror bbmodel, geo, animation, textures, previews) is in the T3 worktree named above; reuse what helps.
+- 2026-11-27 09:37 hermes-modeller's last run stopped before finishing; handed back as open.
