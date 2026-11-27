@@ -18502,3 +18502,10 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - While you're locked on (Powers' lock-on), forms and combat arts (Spear Lunge and its pierce, Couched Lance, blade sweeps and the rest) find and strike only the locked foe. With a flail or the chain axe in hand they still hit everyone in reach.
 - `CombatArts.strikesOnly` and `CombatArts.wide`, checked in `CombatArts.strike`; `Forms.targets` keeps only the locked foe.
 - Built; not played.
+
+## 0.14.14 (2026-11-27): country speech - most townsfolk talk rough, as few could read (#2330)
+
+- **Country speech** (Andy: "villagers to speak a more broken english like the goblins, but more grounded in most cases, as literacy was rare"): most townsfolk and their guards now talk country. Every line they say, whoever wrote it (our lines, MCA's talk, callouts, approaches), goes through RusticTalk on the way out: "is not" and "isn't" are "ain't", "them" "'em", "something" "summat", "-ing" "-in'", "before" "afore", "your" "yer", "yes" "aye", "we were" "we was", "I've told you" "I told you", "an apple" "a apple". The meaning never changes, names and numbers are left whole, and the same line always comes out the same.
+- Who speaks plainly: clerics, librarians, cartographers, rulers, knights and above, hermit wizards, the Z Fighter characters, and 15 in a hundred others who learned their letters anyway (by who they are, so a villager always talks the same way). Goblins, orcs and old-tongued knights keep their own speech; foreigners still come out in their own tongue first.
+- Hand-written country versions of any line can go in lang as `dialect.jaymoskingdoms.rustic.<key>` (Dialects#rustic, same client step as goblin and old-tongue talk).
+- Built (compileJava, compileClientJava); not played.
