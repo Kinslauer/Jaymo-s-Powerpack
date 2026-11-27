@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:52). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:12). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -58,6 +58,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2328 Rig suit-down - parking the suit plays the wrap backwards (Powers, 2026-11-27)
 - [ ] #2327 Rig wrap suit-up - arms out, the suit closes on piece by piece, filmed from the front (Powers, Kingdoms, 2026-11-27)
 - [ ] #2324 no idle camera in bed (Powers, Kingdoms, 2026-11-27)
 - [ ] #2323 webbed tip card, captive escape hints carded (Powers, Kingdoms, 2026-11-27)
@@ -117,8 +118,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2266 no lift prompt on tiny bodies (Powers, Kitchen, 2026-11-27)
 - [ ] #2265 Building news is found out, not told in chat (Kingdoms, 2026-11-27)
 - [ ] #2264 crows over a body no longer hang flapping in one spot in the sky (Kingdoms, 2026-11-27)
-- [ ] #2263 Arrows stuck in you are real arrows, not tools on your back (Powers, 2026-11-27)
-- …and 685 older ones.
+- …and 686 older ones.
 
 ## Health
 
