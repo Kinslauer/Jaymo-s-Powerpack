@@ -35,5 +35,7 @@ abstract class DismemberLivingEntityRendererMixin {
 		com.jaymospowers.client.power.gravity.GravityRocksLayer.extract(entity, state, partialTicks);
 		// and the web it's wrapped in
 		com.jaymospowers.client.power.web.WebbedLook.extract(entity, state);
+		// and an NPC's weapons in their places on the body (a player's come from the avatar renderer)
+		com.jaymospowers.client.armory.BodyWeaponsLayer.extractNpc(entity, state);
 	}
 }

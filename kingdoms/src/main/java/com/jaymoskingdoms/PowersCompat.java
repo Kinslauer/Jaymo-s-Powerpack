@@ -1504,6 +1504,40 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- an NPC's weapons on its body: Powers' BodyWeapons (its homes, and the layer that draws them) ----------------------
+
+	/** Powers' {@code BodyWeapons.carry(LivingEntity, List)}. */
+	private static java.lang.invoke.@Nullable MethodHandle bodyWeapons;
+	private static boolean lookedForBodyWeapons;
+
+	/**
+	 * What the NPC {@code mob} carries off its hands, in the order it should show ({@link Sidearms#show}): Powers gives up to
+	 * three of them their places on the body (a blade at the hip, a bow or gun slung on the back) and draws them as it does a
+	 * player's. Nothing without Powers.
+	 */
+	static void carry(LivingEntity mob, java.util.List<net.minecraft.world.item.ItemStack> carried) {
+		if (!lookedForBodyWeapons) {
+			lookedForBodyWeapons = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					bodyWeapons = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.armory.BodyWeapons"), "carry",
+						java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class, java.util.List.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Powers can't show NPCs' weapons on their bodies (older Powers?)", e);
+				}
+			}
+		}
+		if (bodyWeapons == null) {
+			return;
+		}
+		try {
+			bodyWeapons.invoke(mob, carried);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't show {}'s weapons", mob, e);
+			bodyWeapons = null;
+		}
+	}
+
 	// ---- (0.7.268) a film: Powers' UltimateFilm (letterbox bars, and one player's camera) ------------------------------
 
 	/** Powers' {@code UltimateFilm.play(ServerPlayer, int, int, Vec3, Entity, double)} and {@code witnessed(Entity, int, int, Vec3, Entity, double)}. */

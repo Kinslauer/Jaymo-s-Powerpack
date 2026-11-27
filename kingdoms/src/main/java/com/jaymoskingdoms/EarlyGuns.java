@@ -177,9 +177,14 @@ public final class EarlyGuns {
 		return Rung.of(mob.getMainHandItem()) != null;
 	}
 
-	/** Whether {@code mob} is a gunner: an early gun in hand, or (a guard of a wealthy realm) the musket he was issued. */
+	/**
+	 * Whether {@code mob} is a gunner: an early gun in hand, or (a guard of a wealthy realm) the musket he was issued; or either
+	 * slung at his belt while his sidearm is out ({@link Sidearms}), so his kit and hands stay a gunner's.
+	 */
 	static boolean gunner(LivingEntity mob) {
-		return holds(mob) || mob.entityTags().contains(ISSUED) && mob.getMainHandItem().is(Muskets.musket());
+		ItemStack slung = Sidearms.belt(mob);
+		return holds(mob) || mob.entityTags().contains(ISSUED) && mob.getMainHandItem().is(Muskets.musket())
+			|| Rung.of(slung) != null || mob.entityTags().contains(ISSUED) && slung.is(Muskets.musket());
 	}
 
 	/** A soaked gunner's powder (Jaymo's Powers' Soaked) is damp: this share of his shots fizzle out of the rain too. */
@@ -269,7 +274,8 @@ public final class EarlyGuns {
 	static void garrison(ServerLevel level, PathfinderMob guard, int factionId) {
 		// (a caravan's guard keeps his musketoon)
 		long now = level.getGameTime();
-		if (Musketoon.holds(guard) || now < LOOKED.getOrDefault(guard, 0L)) {
+		// (nor while his sidearm is out: his gun is slung, not lost)
+		if (Musketoon.holds(guard) || Sidearms.drawn(guard) || now < LOOKED.getOrDefault(guard, 0L)) {
 			return;
 		}
 		LOOKED.put(guard, now + ISSUE_CHECK);
@@ -323,8 +329,8 @@ public final class EarlyGuns {
 				continue;
 			}
 			Rung rung = Rung.of(guard.getMainHandItem());
-			// (a folk musketeer's shots are Muskets')
-			if (!(guard.level() instanceof ServerLevel level) || Downed.isDowned(guard) || rung == null && guard instanceof Folk) {
+			// (a folk musketeer's shots are Muskets'; one with his sidearm out has his gun slung)
+			if (!(guard.level() instanceof ServerLevel level) || Downed.isDowned(guard) || rung == null && guard instanceof Folk || Sidearms.drawn(guard)) {
 				continue;
 			}
 			long now = level.getGameTime();

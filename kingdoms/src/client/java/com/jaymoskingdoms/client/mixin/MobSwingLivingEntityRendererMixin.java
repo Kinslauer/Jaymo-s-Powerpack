@@ -57,6 +57,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.CapeLayer.extract(entity, state, partialTicks);
 		// (fighting AI patch 7) a shield or blade carried on the back
 		com.jaymoskingdoms.client.BackGearLayer.extract(entity, state);
+		// and an NPC archer's quiver (Sidearms)
+		com.jaymoskingdoms.client.QuiverLayer.extract(entity, state);
 		// (0.7.641) a stake in a vampire
 		com.jaymoskingdoms.client.StakeLayer.extract(entity, state);
 		com.jaymoskingdoms.client.StakeStruggle.extract(entity, state, partialTicks);
