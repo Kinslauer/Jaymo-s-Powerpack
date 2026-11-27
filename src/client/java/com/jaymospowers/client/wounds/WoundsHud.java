@@ -56,6 +56,8 @@ public final class WoundsHud {
 		// (0.20.111) passing out from hunger or thirst
 		FaintHud.init();
 		SpinDizzyHud.init();
+		// why you're hurt, every time: a line under the crosshair, a mark on the side it came from
+		HurtCauseHud.init();
 	}
 
 	/** (0.14.5) How whole the local player's part {@code index} was last tick (plan order: 0 head, 1 body). */
