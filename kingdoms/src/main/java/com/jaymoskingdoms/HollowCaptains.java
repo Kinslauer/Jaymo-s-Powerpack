@@ -9,6 +9,7 @@ import java.util.Map;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -112,8 +113,8 @@ public final class HollowCaptains {
 		static final double MEND_RANGE = 10.0;
 		static final float MEND = 6.0F;
 		static final int MEND_COLOUR = 0xFF7FD8E0;
-		/** How often a mender checks for wounded (the 2.0F threshold below max health). */
-		static final float MEND_THRESHOLD = 2.0F;
+		/** A mender heals the worst hurt of his army (or himself) when their health is this far below max. */
+				static final float MEND_THRESHOLD = 2.0F;
 		/** A blow at most this often (ticks): a zombie's. */
 		static final int MELEE_EVERY = 20;
 		/** A bowman's: shoots from within this range (blocks), backs off inside this, draws this long and shoots this often (ticks). */
@@ -157,8 +158,11 @@ public final class HollowCaptains {
 		static final AttachmentType<List<String>> PLAYER_WALKING = AttachmentRegistry.create(JaymosKingdoms.id("hollow_player_walking"),
 			builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
 		/** On a player: the captain ids on their ladder. Saved, kept through death. */
-		static final AttachmentType<List<String>> PLAYER_LADDER = AttachmentRegistry.create(JaymosKingdoms.id("hollow_player_ladder"),
-			builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
+				static final AttachmentType<List<String>> PLAYER_LADDER = AttachmentRegistry.create(JaymosKingdoms.id("hollow_player_ladder"),
+					builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
+			/** On a Hollow entity: the UUID of the player they belong to (for plain Hollows that aren't captains). */
+			static final AttachmentType<String> HOLLOW_OWNER = AttachmentRegistry.create(JaymosKingdoms.id("hollow_owner"),
+				builder -> builder.persistent(Codec.STRING));
 
 	/** Work put off to the end of the tick (a body can't be swapped while its chunk is still loading it). */
 	private static final List<Runnable> LATER = new ArrayList<>();
@@ -171,33 +175,64 @@ public final class HollowCaptains {
 	}
 
 	static void register() {
-		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
-			BOWS.remove(entity.getUUID());
-			NEXT.remove(entity.getUUID());
-			Entity.RemovalReason why = entity.getRemovalReason();
+			ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+				BOWS.remove(entity.getUUID());
+				NEXT.remove(entity.getUUID());
+				Entity.RemovalReason why = entity.getRemovalReason();
 					if (is(entity) && why != null && why.shouldDestroy() && why != Entity.RemovalReason.KILLED) {
 						// (taken out of the world some other way: not dead, so the count stands, and another will walk in its place)
 						// Find the player this Hollow belongs to and remove from their walking list
 						Captain c = Captains.is(entity) ? Captains.of(entity) : null;
 						String captainId = c == null ? null : c.id();
-						ServerPlayer owner = captainId == null ? null : findPlayerWithCaptain(level.getServer(), captainId);
+						ServerPlayer owner = null;
+					
+						if (captainId != null) {
+							// Captain: find owner through ladder
+							owner = findPlayerWithCaptain(level.getServer(), captainId);
+						} else {
+							// Plain Hollow: get owner from entity attachment
+							String ownerUuid = entity.getAttachedOrElse(HOLLOW_OWNER, null);
+							if (ownerUuid != null) {
+								owner = level.getServer().getPlayerList().getPlayer(java.util.UUID.fromString(ownerUuid));
+							}
+						}
+					
 						if (owner != null) {
 							playerWalking(owner, entity, false);
 						} else {
 							walking(level.getServer(), entity, false);
 						}
 					}
-		});
+			});
 		ServerLivingEntityEvents.AFTER_DEATH.register(HollowCaptains::died);
-		ServerTickEvents.END_SERVER_TICK.register(HollowCaptains::roam);
-		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			if (LATER.isEmpty()) {
-				return;
-			}
-			List<Runnable> now = List.copyOf(LATER);
-			LATER.clear();
-			now.forEach(Runnable::run);
-		});
+				ServerTickEvents.END_SERVER_TICK.register(HollowCaptains::roam);
+				ServerTickEvents.END_SERVER_TICK.register(server -> {
+					if (LATER.isEmpty()) {
+						return;
+					}
+					List<Runnable> now = List.copyOf(LATER);
+					LATER.clear();
+					now.forEach(Runnable::run);
+				});
+				// When a player joins, check if any of their due-back captains can now come back
+				ServerPlayerEvents.JOIN.register(player -> {
+					if (!live()) {
+						return;
+					}
+					MinecraftServer server = player.getServer();
+					ServerLevel level = server.overworld();
+					for (String captainId : player.getAttachedOrElse(PLAYER_LADDER, List.of())) {
+						Captain c = Captains.get(server, captainId);
+						if (c != null && c.fallen() && c.back() >= 0 && c.body().isEmpty()) {
+							// Find a dead body for this captain to rise in
+							List<PathfinderMob> dead = level.getEntitiesOfClass(PathfinderMob.class, player.getBoundingBox().inflate(ROAM_FAR),
+								e -> e.isAlive() && plainDead(e) && e.distanceTo(player) >= ROAM_NEAR && !player.hasLineOfSight(e));
+							if (!dead.isEmpty()) {
+								comeBack(level, captainId, dead.get(level.getRandom().nextInt(dead.size())));
+							}
+						}
+					}
+				});
 	}
 
 	/** Whether Pallids rise to lead the dead (MCA is here). */
@@ -256,9 +291,13 @@ public final class HollowCaptains {
 			}
 			body.addTag(Rivals.ROLLED_TAG);
 			if (!level.addFreshEntity(body)) {
-				return null;
-			}
-			playerWalking(forPlayer, body, true);
+						return null;
+					}
+					// Track the owner for plain Hollows (not captains) so we can clean up PLAYER_WALKING when they die/unload
+					if (id == null) {
+						body.setAttached(HOLLOW_OWNER, forPlayer.getUUID().toString());
+					}
+					playerWalking(forPlayer, body, true);
 			McaCompat.untree(level, body);
 			level.sendParticles(ParticleTypes.SOUL, body.getX(), body.getY(0.4), body.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
 			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.HOSTILE, 0.8F, 0.7F);
@@ -448,10 +487,20 @@ public final class HollowCaptains {
 			player.setAttached(PLAYER_COUNT, Math.max(0, Math.min(PER_PLAYER, value)));
 		}
 
-		/** How many more Hollow captains may stand up for this player. */
-		static int playerRoom(ServerPlayer player) {
-			return playerCount(player) - player.getAttachedOrElse(PLAYER_WALKING, List.of()).size();
-		}
+		/** How many more Hollow captains may stand up for this player. Due-back captains on the ladder count as reserved. */
+				static int playerRoom(ServerPlayer player) {
+					int walking = player.getAttachedOrElse(PLAYER_WALKING, List.of()).size();
+					// Count captains on this player's ladder who are due back (fallen with back >= 0)
+					MinecraftServer server = player.level().getServer();
+					int dueBack = 0;
+					for (String captainId : player.getAttachedOrElse(PLAYER_LADDER, List.of())) {
+						Captain c = Captains.get(server, captainId);
+						if (c != null && c.fallen() && c.back() >= 0) {
+							dueBack++;
+						}
+					}
+					return playerCount(player) - walking - dueBack;
+				}
 
 		/** Add or remove a body from a player's walking list. */
 		private static void playerWalking(ServerPlayer player, Entity body, boolean is) {
@@ -599,39 +648,52 @@ public final class HollowCaptains {
 		}
 
 	/** One of the Hollow died: unless he's a captain due back, there's one fewer. The dead took a villager: now and then, one more. */
-		private static void died(LivingEntity entity, net.minecraft.world.damagesource.DamageSource source) {
-			if (!(entity.level() instanceof ServerLevel level) || !live()) {
-				return;
-			}
-			MinecraftServer server = level.getServer();
-			if (is(entity)) {
-				// Find which player this Hollow belongs to
-				Captain c = Captains.is(entity) ? Captains.of(entity) : null;
-				String captainId = c == null ? null : c.id();
-				ServerPlayer owner = captainId == null ? null : findPlayerWithCaptain(server, captainId);
-			
-				if (owner != null) {
-					playerWalking(owner, entity, false);
-					// If this captain is due back (fallen with back >= 0), they KEEP their place on the ladder
-					// The COUNT only drops when they're gone for good
-					if (c != null && c.fallen() && c.back() >= 0) {
-						// Captain due back: keep their place on the ladder, don't decrement count
-						// The walking list entry is removed (body died) but ladder spot is reserved
-						return;
-					}
-					// Not a captain due back: permanently decrement the player's count
-					playerCount(owner, playerCount(owner) - 1);
-					removeFromLadder(owner, captainId);
+			private static void died(LivingEntity entity, net.minecraft.world.damagesource.DamageSource source) {
+				if (!(entity.level() instanceof ServerLevel level) || !live()) {
 					return;
 				}
-				// No owner found (shouldn't happen for captains, but handle non-captain Hollows)
-				// Fall back to old behavior for non-captain Hollows
-				walking(server, entity, false);
-				if (c == null || !c.fallen() || c.back() < 0) {
-					count(server, -1);
+				MinecraftServer server = level.getServer();
+				if (is(entity)) {
+					// Find which player this Hollow belongs to
+					Captain c = Captains.is(entity) ? Captains.of(entity) : null;
+					String captainId = c == null ? null : c.id();
+					ServerPlayer owner = null;
+				
+					if (captainId != null) {
+						// Captain: find owner through ladder
+						owner = findPlayerWithCaptain(server, captainId);
+					} else {
+						// Plain Hollow: get owner from entity attachment
+						String ownerUuid = entity.getAttachedOrElse(HOLLOW_OWNER, null);
+						if (ownerUuid != null) {
+							owner = server.getPlayerList().getPlayer(java.util.UUID.fromString(ownerUuid));
+						}
+					}
+
+					if (owner != null) {
+						playerWalking(owner, entity, false);
+						// If this captain is due back (fallen with back >= 0), they KEEP their place on the ladder
+						// The COUNT only drops when they're gone for good
+						if (c != null && c.fallen() && c.back() >= 0) {
+							// Captain due back: keep their place on the ladder, don't decrement count
+							// The walking list entry is removed (body died) but ladder spot is reserved
+							return;
+						}
+						// Not a captain due back: permanently decrement the player's count
+						playerCount(owner, playerCount(owner) - 1);
+						if (captainId != null) {
+							removeFromLadder(owner, captainId);
+						}
+						return;
+					}
+					// No owner found (shouldn't happen for captains, but handle non-captain Hollows)
+					// Fall back to old behavior for non-captain Hollows
+					walking(server, entity, false);
+					if (c == null || !c.fallen() || c.back() < 0) {
+						count(server, -1);
+					}
+					return;
 				}
-				return;
-			}
 			Entity by = source.getEntity();
 			if (entity instanceof net.minecraft.world.entity.npc.villager.Villager && by != null && (is(by) || Rivals.roamer(by) == Rivals.Side.RAISED)
 				&& level.getRandom().nextFloat() < TAKE_CHANCE) {
