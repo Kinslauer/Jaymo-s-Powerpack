@@ -19,3 +19,4 @@ thread: t3 mcp:8c6c9f9d-989a-4a25-9d6c-8c2cf549c08f
 - 2026-11-27 11:41 Back to the modeller (Hunter's Road thread, 2026-11-27): models are Prometheus' job; that thread builds the patch once each model lands.
 - 2026-11-27 08:35 Andy 2026-11-27: models to Codex and Antigravity through T3
 - 2026-11-27 08:55 Codex out of usage (weekly limit, resets Dec 1 10:47 AM); moved to Antigravity gemini-4-carbon, T3 thread mcp:398bb09e-1f3f-4d3d-b57f-fdee68183413
+- 2026-11-27 09:06 Antigravity quota reached 2026-11-27 9:05 AM (resets about 1:30 PM); thread failed with no work done. Still claimed by t3, waiting on Andy: retry on Antigravity after the reset, or hand to Hermes.
