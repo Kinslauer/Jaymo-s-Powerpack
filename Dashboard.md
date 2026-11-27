@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:23). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -47,6 +47,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2283 Symbiote suit moves and the suit-up pose (Powers, 2026-11-27)
 - [ ] #2282 Legends patch 6 fixes - air flips, air step, landings, katana forms (Powers, 2026-11-27)
 - [ ] #2281 Big symbiote combat (Powers, 2026-11-27)
 - [ ] #2279 Guards grow suspicious of what they half see or hear, light up and go to look (Kingdoms, 2026-11-27)
@@ -106,12 +107,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2208 Reason look pack replaces Excalibur; art check on PRs (Powers, 2026-11-26)
 - [ ] #2207 The salmon run: salmon swim upriver in autumn, spawn in the headwaters and die there (Powers, Kingdoms, 2026-11-26)
 - [ ] #2206 Giant mushrooms repainted in the pack's vanilla style (Kingdoms, 2026-11-26)
-- [ ] #2205 anacondas lie on the ground, live in the jungle and hunt from trees and water (Kingdoms, 2026-11-26)
-- …and 644 older ones.
+- …and 645 older ones.
 
 ## Health
 
-24 problems in the notes: [[Health]].
+23 problems in the notes: [[Health]].
 
 ## Last week
 
