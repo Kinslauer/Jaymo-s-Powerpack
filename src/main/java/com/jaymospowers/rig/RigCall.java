@@ -56,7 +56,7 @@ public final class RigCall {
 			.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
 	private static final Map<UUID, Long> FAILSAFE_READY = new HashMap<>();
 
-	/** The streak of sparks coming in before the first piece lands (ticks). */
+	/** The streak of sparks coming in before the first piece lands (ticks) in the plain call; each suit-up has its own ({@link RigSuitUp#inbound}). */
 	static final int INBOUND_TICKS = 12;
 	/**
 	 * (0.11.104) When each piece of {@link #ORDER} lands, in ticks after the first: the Core's spine unit has to land and
@@ -69,6 +69,11 @@ public final class RigCall {
 
 	/** Players whose suit is flying in: ticks since the call. */
 	private static final Map<UUID, int[]> CALLING = new HashMap<>();
+
+	/** Whether this player's suit is flying in right now (server). */
+	static boolean calling(Player player) {
+		return CALLING.containsKey(player.getUUID());
+	}
 
 	/** The order the pieces lock on: (0.11.104) the Core's big spine unit first, the Helm last. */
 	private static final Rig.Piece[] ORDER = {Rig.Piece.CORE, Rig.Piece.ARMS, Rig.Piece.THRUSTERS, Rig.Piece.HELM};
@@ -184,11 +189,19 @@ public final class RigCall {
 			FROM.put(player.getUUID(), post);
 		}
 		player.setAttached(FLYING_IN, true);
-		// arms out and feet planted while it builds on
-		RigMoves.start(player, RigMoves.CALL);
-		CALLING.put(player.getUUID(), new int[1]);
+		// the suit-up that fits the moment (standing, at the parked post, in the air, falling from a height) and its pose
+		boolean thrusters = Rig.wears(player, Rig.Piece.THRUSTERS) || hasParked(player, Rig.Piece.THRUSTERS);
+		int style = RigSuitUp.pick(player, post, thrusters);
+		RigSuitUp.begin(player, style, 0L);
+		CALLING.put(player.getUUID(), new int[] {0, style});
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.calling"));
+	}
+
+	/** Whether this player has pieces parked in this slot. */
+	static boolean hasParked(Player player, Rig.Piece piece) {
+		List<ItemStack> parked = player.getAttached(PARKED);
+		return parked != null && parked.size() > piece.ordinal() && !parked.get(piece.ordinal()).isEmpty();
 	}
 
 	/** Every tick, for everyone: a suit flying in. */
@@ -201,19 +214,23 @@ public final class RigCall {
 			CALLING.remove(player.getUUID());
 			FROM.remove(player.getUUID());
 			player.removeAttached(FLYING_IN);
+			RigSuitUp.forget(player);
 			return;
 		}
 		int t = calling[0]++;
+		int style = calling[1];
+		int inbound = RigSuitUp.inbound(style);
+		int[] landAt = RigSuitUp.landAt(style);
 		ServerLevel level = player.level();
 		double yaw = Math.toRadians(player.getYRot());
 		Vec3 back = new Vec3(Math.sin(yaw), 0.0, -Math.cos(yaw)).scale(FROM_BACK);
 		Vec3 post = FROM.get(player.getUUID());
 		Vec3 source = post != null ? post.add(0.0, 1.0, 0.0) : player.position().add(back).add(0.0, FROM_UP, 0.0);
 		Vec3 body = player.position().add(0.0, 1.0, 0.0);
-		int last = INBOUND_TICKS + LAND_AT[LAND_AT.length - 1];
+		int last = inbound + landAt[landAt.length - 1];
 		if (t < last) {
 			// the streak: sparks along the line in from the sky, closing on the body
-			double share = Math.min(1.0, (t + 1) / (double)INBOUND_TICKS);
+			double share = Math.min(1.0, (t + 1) / (double)inbound);
 			Vec3 head = source.lerp(body, share);
 			for (int i = 0; i < 4; i++) {
 				Vec3 p = source.lerp(head, level.getRandom().nextDouble());
@@ -222,22 +239,64 @@ public final class RigCall {
 			level.sendParticles(ParticleTypes.FLAME, head.x, head.y, head.z, 2, 0.05, 0.05, 0.05, 0.01);
 		}
 		if (t > last + FLY_TICKS) {
-			CALLING.remove(player.getUUID());
-			FROM.remove(player.getUUID());
-			player.removeAttached(FLYING_IN);
-			player.removeAttached(PARKED);
-			RigMind.sayAlways(player, "call", 1.2F);
+			finish(player);
 			return;
 		}
 		int index = -1;
-		for (int i = 0; i < LAND_AT.length; i++) {
-			if (t == INBOUND_TICKS + LAND_AT[i]) {
+		for (int i = 0; i < landAt.length; i++) {
+			if (t == inbound + landAt[i]) {
 				index = i;
 			}
 		}
-		if (index < 0) {
+		if (index >= 0) {
+			land(player, index, style, source);
+		}
+	}
+
+	/** The suit has come all the way in. */
+	private static void finish(ServerPlayer player) {
+		CALLING.remove(player.getUUID());
+		FROM.remove(player.getUUID());
+		player.removeAttached(FLYING_IN);
+		player.removeAttached(PARKED);
+		RigMind.sayAlways(player, "call", 1.2F);
+		if (player.getAttachedOrElse(RigSuitUp.STYLE, 0) != RigSuitUp.FALL) {
+			// (a falling assembly keeps its style until the thrusters have set you down)
+			RigSuitUp.end(player);
+		}
+	}
+
+	/** Whatever has not landed yet lands now (a fall too short for the whole assembly) and the call is done. */
+	static void finishNow(ServerPlayer player) {
+		int[] calling = CALLING.get(player.getUUID());
+		if (calling == null) {
 			return;
 		}
+		int style = calling[1];
+		int[] landAt = RigSuitUp.landAt(style);
+		int from = Math.max(0, Math.min(landAt.length, countLanded(calling[0], style)));
+		for (int i = from; i < landAt.length; i++) {
+			land(player, i, style, player.position().add(0.0, 4.0, 0.0));
+		}
+		finish(player);
+	}
+
+	/** How many pieces have landed by call tick {@code t}. */
+	private static int countLanded(int t, int style) {
+		int[] landAt = RigSuitUp.landAt(style);
+		int inbound = RigSuitUp.inbound(style);
+		int n = 0;
+		for (int at : landAt) {
+			if (t > inbound + at) {
+				n++;
+			}
+		}
+		return n;
+	}
+
+	/** Piece {@code index} of the order lands on the wearer. */
+	private static void land(ServerPlayer player, int index, int style, Vec3 source) {
+		ServerLevel level = player.level();
 		Rig.Piece piece = ORDER[index];
 		List<ItemStack> parked = new ArrayList<>(player.getAttachedOrElse(PARKED, List.of()));
 		while (parked.size() < Rig.Piece.values().length) {
@@ -268,6 +327,7 @@ public final class RigCall {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 1.0F,
 			0.9F + index * 0.1F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.25F, 1.8F);
+		RigSuitUp.landed(player, style, index, y);
 		// each piece landing jolts the wearer's view
 		Shakes.send(player, 1.2F, source);
 	}
