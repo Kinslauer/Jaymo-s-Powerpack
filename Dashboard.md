@@ -6,6 +6,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Ready to merge** (say "merge" in the project chat):
+- [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · PR #2281 · ready
 - [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · PR #2255 · ready
 
 **Questions for you:**
@@ -45,7 +46,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-11 waiting for a bot, 2 being built, 11 in review: see [[Kanban]].
+11 waiting for a bot, 1 being built, 11 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
