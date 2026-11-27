@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:17). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:26). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -52,12 +52,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-17 waiting for a bot, 1 being built, 11 in review: see [[Kanban]].
+17 waiting for a bot, 1 being built, 9 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2304 how a player turns - a far crypt, the Elder's blood at any time, a bitten start (Kingdoms, 2026-11-27)
 - [ ] #2302 Night's Blood 4 - the true shape of the night (Kingdoms, 2026-11-27)
 - [ ] #2301 Rig Octo Core - four mechanical arms, tendril moves for Tinkerers and web slingers (Powers, 2026-11-27)
 - [ ] #2300 Air combo: ragdolls, enemy step, Yank and tendril pull-ups, slam spares friends (Powers, Kingdoms, Kitchen, 2026-11-27)
@@ -117,8 +118,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2236 Town crier: verdicts are cried by the seat, not sent to chat (Kingdoms, 2026-11-26)
 - [ ] #2235 fire smoke settles low too, and makes you sick (Kingdoms, 2026-11-26)
 - [ ] #2234 Maggots come as a writhing heap that splats underfoot (Kingdoms, 2026-11-26)
-- [ ] #2233 Reincarnate link on the character page (Powers, Kingdoms, 2026-11-26)
-- …and 664 older ones.
+- …and 665 older ones.
 
 ## Health
 
