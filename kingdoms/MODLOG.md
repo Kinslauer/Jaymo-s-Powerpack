@@ -18204,3 +18204,13 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 
 - Kingdoms mirrors Powers' new `UNBLOCKABLE_TAG` (`PowersCompat`, `MobCombat`), and adds a loading hint for the gold glint (hint 209).
 - Built; not played.
+
+## 0.13.77 (2026-11-27): Ragged edges for the steam valleys, ashlands, salt pans and steppe (#2286)
+
+- The four lands (`lands/Lands`) used to end in smooth round blobs where their simplex noise crossed its threshold. The
+  place the noise is read at is now pushed about by a FastNoiseLite domain warp (two layers, three wiggles a wave, up to
+  an eighth of a wave), so their edges wander in bays and spits. The lands still lie where they did, give or take a few
+  dozen blocks; only chunks generated from now on follow the new edges.
+- FastNoiseLite 1.1.1 (Jordan Peck, MIT) vendored as `noise/FastNoiseLite` (package line added, float positions switched
+  to double), licence in `licenses/fastnoiselite/`.
+- Built (Gradle compileJava); edge shapes checked by rendering the threshold to images. Not played in game.
