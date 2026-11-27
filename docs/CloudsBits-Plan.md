@@ -42,7 +42,7 @@ against the 26.3 sources. New keys default to unbound unless said otherwise (R/G
   high sky bands, gives a Bottle of Cloud. Used on a block it places a short-lived cloud puff (2x1x2 of a temporary
   cloud block that holds you up, unlike cloudbank and the aerclouds, which you fall through; thins away in about 20 s);
   used in mid-air it catches you below your feet once. Blue, golden and purple aerclouds fill a bottle of their own colour
-  (their gliders' material, since clouds drop nothing).
+  (their gliders' material; clouds drop only to Silk Touch).
   Lore paragraph (new).
 
 ## Patch 4: Moving about (Powers + Kingdoms)

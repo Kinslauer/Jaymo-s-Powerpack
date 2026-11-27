@@ -776,6 +776,11 @@ def item_entry(name, **extra):
     return dict({"type": "minecraft:item", "name": name}, **extra)
 
 
+def silk_only(b):
+    """Drops itself to Silk Touch, nothing otherwise."""
+    return table(b, [{"rolls": 1, "condition": SILK, "entries": [item_entry(jp(b))]}])
+
+
 def self_table(b):
     return table(b, [{"rolls": 1, "condition": SURVIVES, "entries": [item_entry(jp(b))]}])
 
@@ -828,9 +833,10 @@ def loot():
               "skyroot_planks", "skyroot_sapling", "golden_oak_sapling", "white_flower", "purple_flower", "ambrosium_torch",
               "berry_bush_stem"]:
         tables[b] = self_table(b)
-    # (Andy: "break it and it disappears like leaves") a cloud drops nothing, Silk Touch or not; bottling gathers cloud
+    # (Andy: "break it and it disappears like leaves", and "they can still be silk touched") a cloud drops nothing unless
+    # mined with Silk Touch; bottling gathers cloud too
     for b in CLOUDS + ["cloudbank"]:
-        tables[b] = table(b, [])
+        tables[b] = silk_only(b)
     tables["aether_grass_block"] = silk_else("aether_grass_block", jp("aether_dirt"))
     tables["enchanted_aether_grass_block"] = silk_else("enchanted_aether_grass_block", jp("aether_dirt"))
     tables["quicksoil_glass"] = table("quicksoil_glass", [{"rolls": 1, "condition": SILK, "entries": [item_entry(jp("quicksoil_glass"))]}])
@@ -1831,7 +1837,7 @@ N1_ORES = {  # ore block -> (what it drops, bonus modifiers) when not mined with
     "undershale_zanite_ore": jp("zanite_gemstone"), "undershale_arkenium_ore": jp("inert_arkenium"), "undershale_glint_ore": jp("glint_gemstone")}
 N1_SILK_ONLY = ["scatterglass", "scatterglass_pane", "quicksoil_glass_pane", "arctic_ice", "fragile_arctic_ice", "arctic_packed_ice"]
 N1_SOIL_DROPS_DIRT = ["aether_dirt_path", "aether_farmland"]
-N1_CLOUDS = ["green_aercloud", "purple_aercloud", "storm_aercloud"]  # drop nothing, like the first three
+N1_CLOUDS = ["green_aercloud", "purple_aercloud", "storm_aercloud"]  # drop only to Silk Touch, like the first three
 
 
 def n1_loot():
@@ -1846,7 +1852,7 @@ def n1_loot():
     for b, drop in N1_ORES.items():
         tables[b] = silk_else(b, drop, ORE_BONUS)
     for b in N1_CLOUDS:
-        tables[b] = table(b, [])
+        tables[b] = silk_only(b)
     for b in N1_SILK_ONLY:
         tables[b] = table(b, [{"rolls": 1, "condition": SILK, "entries": [item_entry(jp(b))]}])
     for b in N1_SOIL_DROPS_DIRT:
@@ -1928,7 +1934,7 @@ def n1_recipes():
     r["glint_coin_from_gemstone"] = shapeless([jp("glint_gemstone")], jp("glint_coin"), 4)
     r["glint_gemstone_from_coins"] = shapeless([jp("glint_coin")] * 4, jp("glint_gemstone"), 1)
     # cloudwool
-    r["cloudwool"] = shaped({"#": jp("bottle_of_cloud")}, ["##", "##"], jp("cloudwool"), 2, "wool")
+    r["cloudwool"] = shaped({"#": [jp("bottle_of_cloud"), jp("cold_aercloud")]}, ["##", "##"], jp("cloudwool"), 2, "wool")
     r["cloudwool_carpet"] = shaped({"#": jp("cloudwool")}, ["##"], jp("cloudwool_carpet"), 3, "carpet")
     for dye in N1_DYED:
         r[dye + "_cloudwool"] = shapeless([jp("cloudwool"), mc(dye + "_dye")], jp(dye + "_cloudwool"), 1, "wool", "building")

@@ -6,8 +6,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Cloudbank: what the Cloud Sea ({@link CloudSea}) is made of. A cold aercloud in every way but one (soft like leaves: you
- * fall through it slowly, climb it with Jump, a hard hit bursts it, it drops nothing): daylight goes straight down through it. So the sky under
- * the overcast is as bright as the sky over it, and a chunk that is nothing but air and cloud has no shadows to work out.
+ * fall through it slowly, climb it with Jump, a hard hit bursts it, it drops only to Silk Touch): daylight goes straight down
+ * through it. So the sky under the overcast is as bright as the sky over it, and a chunk that is nothing but air and cloud
+ * has no shadows to work out.
  */
 public class CloudbankBlock extends AercloudBlock {
 	public CloudbankBlock(BlockBehaviour.Properties properties) {

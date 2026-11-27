@@ -38,10 +38,11 @@ import net.minecraft.world.level.material.MapColor;
  * Bottled cloud (Clouds and Bits, world bits). An empty glass bottle used on a cloud (our Cloudbank, or any of the Aether's
  * aerclouds, never a puff of bottled cloud) or used in the air in the Cloud Sea or the high sky of a stacked world gives a
  * Bottle of Cloud ({@link BottleOfCloudItem}), which lays a short-lived puff ({@link CloudPuffBlock}) or catches a faller. The
- * cloud is not used up by bottling. Clouds drop nothing when broken (they are soft like leaves, {@link AercloudBlock}), so
- * bottling is how cloud is gathered: a blue, golden or purple aercloud fills a bottle of its own colour (what their gliders
- * are made from), every other cloud and the open sky a plain Bottle of Cloud (what the cold glider, the cloud skiff, the
- * updraft vent and cloudwool are made from). Every bottle lays the same puff, and crafting hands the glass back. Art:
+ * cloud is not used up by bottling. Clouds drop nothing when broken unless mined with Silk Touch (they are soft like leaves,
+ * {@link AercloudBlock}), so bottling is the other way cloud is gathered: a blue, golden or purple aercloud fills a bottle
+ * of its own colour (what their gliders are made from, as well as the Silk Touched block), every other cloud and the open
+ * sky a plain Bottle of Cloud (what the cold glider, the cloud skiff, the updraft vent and cloudwool are made from, as well
+ * as a Silk Touched cold aercloud). Every bottle lays the same puff, and crafting hands the glass back. Art:
  * tools/gen_stone_ores.py (the bottles, the puff), lang: lang/parts/cloud_bottle.json.
  */
 public final class CloudBottle {

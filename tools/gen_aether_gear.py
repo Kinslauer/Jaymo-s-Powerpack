@@ -616,16 +616,16 @@ def recipes():
             continue  # boss loot only (and the altar mends it)
         for piece, pname in PIECES:
             r["%s_%s" % (sid, piece)] = shaped({"#": jp(mat)}, patterns[piece], jp("%s_%s" % (sid, piece)))
-    # gliders: canopy of bottled cloud (clouds drop nothing), cloudtwine lines and a frame of sticks
+    # gliders: canopy of bottled cloud or the Silk Touched aercloud itself, cloudtwine lines and a frame of sticks
     glider = lambda cloud, extra=None: shaped(dict({"A": jp(cloud), "T": jp("cloudtwine"), "S": mc("stick")}, **(extra or {})),
                                               ["AAA", "T T", "S S"], None) if False else None
     def glider_recipe(gid, cloud, centre):
-        rec = shaped({"A": jp(cloud), "T": jp("cloudtwine"), "S": mc("stick"), "Z": centre}, ["AAA", "TZT", "S S"], jp(gid + "_aercloud_glider"), cat="equipment")
+        rec = shaped({"A": [jp(c) for c in cloud], "T": jp("cloudtwine"), "S": mc("stick"), "Z": centre}, ["AAA", "TZT", "S S"], jp(gid + "_aercloud_glider"), cat="equipment")
         return rec
-    r["cold_aercloud_glider"] = glider_recipe("cold", "bottle_of_cloud", jp("ambrosium_shard"))
-    r["golden_aercloud_glider"] = glider_recipe("golden", "bottle_of_golden_cloud", jp("golden_amber"))
-    r["blue_aercloud_glider"] = glider_recipe("blue", "bottle_of_blue_cloud", jp("zanite_gemstone"))
-    r["purple_aercloud_glider"] = glider_recipe("purple", "bottle_of_purple_cloud", jp("zanite_gemstone"))
+    r["cold_aercloud_glider"] = glider_recipe("cold", ["bottle_of_cloud", "cold_aercloud"], jp("ambrosium_shard"))
+    r["golden_aercloud_glider"] = glider_recipe("golden", ["bottle_of_golden_cloud", "golden_aercloud"], jp("golden_amber"))
+    r["blue_aercloud_glider"] = glider_recipe("blue", ["bottle_of_blue_cloud", "blue_aercloud"], jp("zanite_gemstone"))
+    r["purple_aercloud_glider"] = glider_recipe("purple", ["bottle_of_purple_cloud", "purple_aercloud"], jp("zanite_gemstone"))
     r["altar"] = shaped({"H": jp("holystone"), "Z": jp("zanite_gemstone")}, ["HZH", " H ", "HHH"], jp("altar"), cat="misc")
     # arkenium plates: smelt inert arkenium (the altar does it too, for shards)
     r["arkenium_plate_from_smelting"] = {"type": "minecraft:smelting", "category": "misc", "cookingtime": 200, "experience": 0.7,

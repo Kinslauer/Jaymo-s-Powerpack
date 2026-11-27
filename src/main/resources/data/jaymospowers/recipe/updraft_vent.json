@@ -3,7 +3,10 @@
   "category": "building",
   "key": {
     "H": "jaymospowers:holystone",
-    "A": "jaymospowers:bottle_of_cloud",
+    "A": [
+      "jaymospowers:bottle_of_cloud",
+      "jaymospowers:cold_aercloud"
+    ],
     "Z": "jaymospowers:zanite_gemstone"
   },
   "pattern": [

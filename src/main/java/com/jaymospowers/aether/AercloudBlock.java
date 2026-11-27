@@ -29,8 +29,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * drags on you like a canopy, so you sink slowly and your fall is cushioned; hold Jump to climb up through it; hit it hard
  * (a fall past your safe distance, or flying in fast) and the clouds you hit burst apart. Landing in a cloud never hurts.
  * Mobs path through clouds as through open air ({@code LeavesPathMixin}) and never plan a walk on top of one. Broken, a
- * cloud just goes: it drops nothing, Silk Touch or not (bottling one, {@code cloudbottle/CloudBottle}, is how cloud is
- * gathered). {@link BlueAercloudBlock} still bounces, green shoves and purple flings.
+ * cloud just goes and drops nothing, unless it is mined with Silk Touch (Andy: "they can still be silk touched"), which
+ * gives the block; bottling one ({@code cloudbottle/CloudBottle}) gathers cloud too. {@link BlueAercloudBlock} still bounces, green shoves and purple flings.
  *
  * <p>A puff of bottled cloud ({@code cloudbottle/CloudPuffBlock}) is the one firm cloud ({@link #soft} false): a single
  * layer is a hair-thin plate you sink into and stand in, a fall faster than {@link #FAST_FALL} blocks meets a 0.9-tall box,

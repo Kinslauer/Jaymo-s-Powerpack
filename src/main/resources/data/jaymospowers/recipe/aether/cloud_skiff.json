@@ -6,7 +6,10 @@
     "SSS"
   ],
   "key": {
-    "A": "jaymospowers:bottle_of_cloud",
+    "A": [
+      "jaymospowers:bottle_of_cloud",
+      "jaymospowers:cold_aercloud"
+    ],
     "S": "jaymospowers:skyroot_planks"
   },
   "result": {
