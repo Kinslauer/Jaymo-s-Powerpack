@@ -1,0 +1,20 @@
+{
+  "values": [
+    {
+      "id": "jaymoskingdoms:herbalist/4/sell_formula_keen_edge",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/4/sell_formula_grey_sight",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/4/sell_mandrake",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:herbalist/4/sell_honey_fungus",
+      "required": false
+    }
+  ]
+}

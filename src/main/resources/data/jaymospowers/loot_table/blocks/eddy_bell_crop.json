@@ -1,0 +1,61 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:eddy_bell",
+              "modifier": {
+                "type": "minecraft:set_count",
+                "count": {
+                  "type": "minecraft:uniform",
+                  "min": 1,
+                  "max": 2
+                }
+              },
+              "condition": {
+                "type": "minecraft:any_of",
+                "terms": [
+                  {
+                    "type": "minecraft:match_block",
+                    "blocks": "jaymospowers:eddy_bell_crop",
+                    "state": {
+                      "age": "7"
+                    }
+                  },
+                  {
+                    "type": "minecraft:match_block",
+                    "blocks": "jaymospowers:eddy_bell_crop",
+                    "state": {
+                      "wild": "true"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:eddy_bell_seeds",
+              "condition": {
+                "type": "minecraft:inverted",
+                "term": {
+                  "type": "minecraft:match_block",
+                  "blocks": "jaymospowers:eddy_bell_crop",
+                  "state": {
+                    "wild": "true"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/eddy_bell_crop"
+}

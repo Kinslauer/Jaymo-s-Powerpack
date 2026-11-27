@@ -107,6 +107,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		BlockEntityRenderers.register(com.jaymoskitchen.delight.Delight.CUTTING_BOARD_ENTITY,
 			com.jaymoskitchen.client.delight.CuttingBoardRenderer::new);
 		com.jaymoskitchen.client.delight.DelightFarmClient.register();
+		// the thrown toxic cake, drawn as the cake item
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymoskitchen.cooking.PoisonedSweets.CAKE_ENTITY,
+			net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
 		// the stove's grill, and the skillet's models
 		com.jaymoskitchen.client.delight.DelightHomeClient.register();
 		// (0.5.27) hides hanging on drying racks

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cocoa_beans",
+    "minecraft:cocoa_beans",
+    "minecraft:sugar",
+    "minecraft:milk_bucket",
+    "#jaymoskitchen:sweet_poisons"
+  ],
+  "result": {
+    "id": "jaymoskitchen:milk_chocolate",
+    "count": 4
+  }
+}

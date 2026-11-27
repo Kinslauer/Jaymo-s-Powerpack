@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:string",
+    "jaymoskitchen:dark_chocolate",
+    "jaymoskitchen:dark_chocolate",
+    "jaymoskitchen:dark_chocolate"
+  ],
+  "result": {
+    "id": "jaymoskitchen:gift_box",
+    "count": 1,
+    "components": {
+      "jaymoskitchen:gift": "jaymoskitchen:dark_chocolate"
+    }
+  }
+}
