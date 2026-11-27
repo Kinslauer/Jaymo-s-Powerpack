@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:cave_ivy"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/cave_ivy"
+}
