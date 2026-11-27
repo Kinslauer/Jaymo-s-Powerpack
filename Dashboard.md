@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 04:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 04:47). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -9,6 +9,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · PR #2255 · ready
 
 **Questions for you:**
+- [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 2026-11-27 04:46 Text pass content is complete (reviewed captain-ground.json lang keys and changes/kingdoms/hollow-captains-fix.md; all player-facing, no rewri…
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-26 20:05 ON HOLD until wave 4 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-26 21:09 ON HOLD until hunters-road-6 merges (last wave). Not a question for Andy: the vault coordinator opens it.
 - [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-26 19:58 ON HOLD until wave 1 merges (order 1+2, 3+6, 4+7, 5+8, 9+10) and its hermes-modeller models are done. Not a question for Andy: the vault coord…
@@ -43,7 +44,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-13 waiting for a bot, 3 being built, 9 in review: see [[Kanban]].
+13 waiting for a bot, 2 being built, 9 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
