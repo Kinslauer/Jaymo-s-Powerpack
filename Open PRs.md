@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-26 21:00
+updated: 2026-11-26 22:34
 ---
 # Open PRs
 
-13 open, as of 2026-11-26 21:00. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+15 open, as of 2026-11-26 22:34. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -61,12 +61,22 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** [[legends-p7-zfighter-weapon-moves]]
 
-## [#2256](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2256) HD Effekseer effects for ultimates
-- **Branch:** `codex/effekseer-hd` · **Updated:** 2026-11-27 (today)
+## [#2259](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2259) Small Armies Picks: plan doc (4 rows)
+- **Branch:** `claude/small-armies-picks` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2257](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2257) Legends: web swinging, web attacks and uptilt, Chrono wormhole
-- **Branch:** `claude/project-thread-aaw9tm` · **Updated:** 2026-11-27 (today)
+## [#2262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2262) Kingdoms: shadows see-through, sized, wispy, gone between strikes, unmade by the sun
+- **Branch:** `claude/project-thread-4rqrmh` · **Updated:** 2026-11-27 (today)
 - **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2263](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2263) Arrows stuck in you are real arrows, not tools on your back
+- **Branch:** `claude/project-thread-uzeu11` · **Updated:** 2026-11-27 (today)
+- **Checks:** ⏳ 1 of 5 running
+- **Agent:** no agent note
+
+## [#2264](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2264) Crows over a body no longer hang flapping in one spot in the sky
+- **Branch:** `claude/project-thread-jdtczd` · **Updated:** 2026-11-27 (today)
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
