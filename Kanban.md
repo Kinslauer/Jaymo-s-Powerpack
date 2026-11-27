@@ -60,7 +60,6 @@ kanban-plugin: board
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/nycto-4|nycto-4]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · blocked
-- [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · blocked
 - [ ] [[Inbox/black-panther-r2|black-panther-r2]] · for any · blocked
 - [ ] [[Inbox/black-panther-r3|black-panther-r3]] · for any · blocked
 - [ ] [[Inbox/black-panther-r4|black-panther-r4]] · for any · blocked
@@ -81,6 +80,7 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-k5|black-panther-k5]] · for any · blocked
 - [ ] [[Inbox/black-panther-k6|black-panther-k6]] · for any · blocked
 - [ ] [[Inbox/black-panther-k7|black-panther-k7]] · for any · blocked
+- [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
