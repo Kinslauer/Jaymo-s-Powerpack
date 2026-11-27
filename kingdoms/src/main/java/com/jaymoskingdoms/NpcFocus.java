@@ -20,6 +20,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
@@ -32,6 +33,7 @@ import org.jspecify.annotations.Nullable;
  * its brain's activity, the task Jade shows ({@link NpcTasks}), and where its path goes and whether it gets there.
  * <p>On top is its state:
  * <ul>
+ * <li><b>Thinking, sizing up</b>: it has just picked out a player and takes a second before setting on them ({@link ThinkFirst});</li>
  * <li><b>Stuck</b>: it has a path but hasn't got {@link #STUCK_MOVE} blocks across the ground in {@link #STUCK_TICKS} (climbing
  * a wall's vines and dropping back counts as going nowhere);</li>
  * <li><b>Thinking, re-planning</b>: its path was made afresh {@link #REPLAN_MANY} or more times in {@link #REPLAN_TICKS};</li>
@@ -134,7 +136,13 @@ public final class NpcFocus {
 		// ---- the state on top ----
 		int state;
 		MutableComponent top;
-		if (stuckFor >= STUCK_TICKS) {
+		ThinkFirst.Sizing sizing = ThinkFirst.sizing(mob);
+		Player sized = sizing == null ? null : mob.level().getPlayerByUUID(sizing.who());
+		if (sized != null) {
+			// (ThinkFirst) it has just picked out a player and is making up its mind about them
+			state = THINKING;
+			top = Component.translatable("gui.jaymoskingdoms.eyes.sizing_up", sized.getDisplayName(), seconds(sizing.left()));
+		} else if (stuckFor >= STUCK_TICKS) {
 			state = STUCK;
 			top = Component.translatable(mob.onClimbable() && !mob.onGround() ? "gui.jaymoskingdoms.eyes.stuck_climbing" : "gui.jaymoskingdoms.eyes.stuck",
 				seconds(stuckFor));
@@ -179,6 +187,13 @@ public final class NpcFocus {
 			lines.add(running.size() > NAMES_MAX
 				? Component.translatable("gui.jaymoskingdoms.eyes.running_more", names, running.size() - NAMES_MAX)
 				: Component.translatable("gui.jaymoskingdoms.eyes.running", names));
+		}
+		Map.Entry<java.util.UUID, Float> suspect = GuardWatch.most(mob);
+		Player suspected = suspect == null ? null : mob.level().getPlayerByUUID(suspect.getKey());
+		if (suspected != null) {
+			// (GuardWatch) a guard's suspicion of a player he half made out or heard
+			lines.add(Component.translatable(GuardWatch.investigating(mob) ? "gui.jaymoskingdoms.eyes.investigating" : "gui.jaymoskingdoms.eyes.suspicion",
+				suspected.getDisplayName(), Math.round(suspect.getValue() * 100.0F)));
 		}
 		if (target != null) {
 			lines.add(Component.translatable("gui.jaymoskingdoms.eyes.target", target.getDisplayName(), metres(mob.distanceTo(target))));

@@ -12,6 +12,7 @@
   "gui.jaymoskingdoms.eyes.focus.target": "fighting %s",
   "gui.jaymoskingdoms.eyes.focus.walking": "walking to %s %s %s",
   "gui.jaymoskingdoms.eyes.thinking": "Thinking: picking what to do next",
+  "gui.jaymoskingdoms.eyes.sizing_up": "Thinking: sizing up %1$s (%2$s s left)",
   "gui.jaymoskingdoms.eyes.replanning": "Thinking: re-planning its path (%1$s new paths in %2$s s)",
   "gui.jaymoskingdoms.eyes.stuck": "Stuck: %s s without getting anywhere",
   "gui.jaymoskingdoms.eyes.stuck_climbing": "Stuck: %s s without getting anywhere, climbing",
@@ -23,5 +24,7 @@
   "gui.jaymoskingdoms.eyes.target": "Target: %1$s (%2$s m)",
   "gui.jaymoskingdoms.eyes.path": "Path: to %1$s %2$s %3$s, %4$s m away, %5$s steps left",
   "gui.jaymoskingdoms.eyes.path_short": "Path: to %1$s %2$s %3$s, can't reach, ends %4$s m short, %5$s steps left",
-  "gui.jaymoskingdoms.eyes.walk": "Walk target: %1$s %2$s %3$s (%4$s m)"
+  "gui.jaymoskingdoms.eyes.walk": "Walk target: %1$s %2$s %3$s (%4$s m)",
+  "gui.jaymoskingdoms.eyes.suspicion": "Suspicious of %1$s: %2$s%%",
+  "gui.jaymoskingdoms.eyes.investigating": "Investigating %1$s: %2$s%% suspicious"
 }
