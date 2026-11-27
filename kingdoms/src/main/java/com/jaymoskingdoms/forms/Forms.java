@@ -649,6 +649,10 @@ public final class Forms {
 				list.add(aimed);
 			}
 		}
+		// locked on, a form only finds the locked foe (a flail or the chain axe aside: CombatArts.strikesOnly)
+		if (lock != null && !CombatArts.wide(player.getMainHandItem())) {
+			list.removeIf(e -> e != lock);
+		}
 		return list;
 	}
 

@@ -332,6 +332,10 @@ public final class Guard {
 	 * guard.
 	 */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand) {
+		if (com.jaymospowers.armory.LanceCouch.couches(player, hand)) {
+			// a lance from the saddle couches (LanceCouch), whatever is in the off hand: a rider's shield mustn't stop it
+			return InteractionResult.PASS;
+		}
 		// (0.20.118) every guarding WeaponMod weapon (knife, katana, battleaxe, halberd, spear) goes through KnifeGuard
 		boolean knife = hand == InteractionHand.MAIN_HAND && !player.isSpectator() && KnifeGuard.guards(player.getMainHandItem().getItem());
 		if (!knife && (hand != InteractionHand.MAIN_HAND || !weaponGuard(player.getMainHandItem()) || player.isSpectator()

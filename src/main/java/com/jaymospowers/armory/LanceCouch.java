@@ -1,5 +1,6 @@
 package com.jaymospowers.armory;
 
+import com.jaymospowers.core.LockOn;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
@@ -35,7 +36,8 @@ import org.jspecify.annotations.Nullable;
  * riding and the lance is couched for {@link #COUCH_TICKS} ticks. The first foe it meets is hit for damage that grows
  * with how fast the mount is going, thrown back, and knocked out of its saddle if it rides. Only from a mount the lance
  * reaches down from ({@link #horseback}): horses, pigs, goats, llamas and the like, never a camel, moa, elephant or
- * dragon. Mounted the right-click couches instead of raising the guard ({@code combat.Guard}); on foot it guards as before.
+ * dragon. Mounted the right-click couches instead of raising the guard ({@code combat.Guard}), whatever is in the off hand
+ * ({@link #couches}); on foot it guards as before. Locked on, only the locked foe is struck.
  */
 public final class LanceCouch {
 	/** How long the lance stays couched (ticks), how far ahead it reaches (blocks), the slowest mount that still drives it home (blocks/tick). */
@@ -107,6 +109,11 @@ public final class LanceCouch {
 		return true;
 	}
 
+	/** Whether a right-click with {@code hand} couches {@code player}'s lance: a lance in the main hand, from a mount it reaches down from. */
+	public static boolean couches(Player player, InteractionHand hand) {
+		return hand == InteractionHand.MAIN_HAND && Armory.isLance(player.getMainHandItem()) && horseback(player);
+	}
+
 	/** Whether {@code rider} is on a mount the lance can't reach down from (too tall, or a dragon). */
 	static boolean tooHigh(Entity rider) {
 		return rider.getVehicle() instanceof LivingEntity && !horseback(rider) && rider.getVehicle().getFirstPassenger() == rider;
@@ -153,7 +160,10 @@ public final class LanceCouch {
 		AABB reach = player.getBoundingBox().expandTowards(look.scale(COUCH_REACH)).inflate(0.4, 0.5, 0.4);
 		LivingEntity foe = null;
 		double best = Double.MAX_VALUE;
+		// locked on, the lance only goes home in the locked foe (LockedSwings)
+		LivingEntity lock = LockOn.target(player);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, reach, e -> e != player && e != mount && e.isAlive()
+			&& (lock == null || e == lock)
 			&& e.isAttackable() && !e.isSpectator() && !player.isAlliedTo(e) && !e.isPassengerOfSameVehicle(player) && !e.hasPassenger(player)
 			&& !(e instanceof OwnableEntity owned && owned.getOwner() == player))) {
 			double d = e.distanceToSqr(player);

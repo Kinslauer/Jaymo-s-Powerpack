@@ -73,6 +73,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.SwallowedPower.init();
 		com.jaymospowers.core.FlightRoll.init();
 		com.jaymospowers.core.LockOn.init();
+		// locked on, a swing hits only the locked foe (flails and the chain axe aside)
+		com.jaymospowers.combat.LockedSwings.init();
 		// (0.17.67) the guard and the parry, for everyone
 		com.jaymospowers.combat.Guard.init();
 		com.jaymospowers.combat.CombatAttrs.init();
