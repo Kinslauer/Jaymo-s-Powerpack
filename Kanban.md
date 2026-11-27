@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 04:52). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 04:59). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,7 +26,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 🍇 Bacchus · #2281 · changes · fixing review notes
+- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 🍇 Bacchus · #2281 · claimed
 
 
 ## In review
