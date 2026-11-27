@@ -197,39 +197,35 @@ public final class CreeperWard {
     }
 
     /**
-     * Returns the wizard's "freshness" 0.0-1.0: 1.0 = just come of age, 0.0 = elder (8+ days grown).
+     * Returns the wizard's strength 0.0-1.0 based on their level/experience.
      * Used to scale prevention chance.
      */
-    public static double wizardFreshness(ServerLevel level, Worker wizard) {
-        if (wizard instanceof Aging aging) {
-            long grownDays = CourtWizards.grownDays(level, aging);
-            if (grownDays < 0) return 1.0; // Unknown age, treat as fresh
-            return Math.max(0.0, 1.0 - (double) grownDays / CourtWizards.ELDER_DAYS);
-        }
-        return 1.0;
+    public static double wizardStrength(ServerLevel level, Worker wizard) {
+    	// Use the worker's max health as a proxy for strength (higher = stronger)
+    	if (wizard.mob() instanceof net.minecraft.world.entity.LivingEntity living) {
+    		float maxHp = living.getMaxHealth();
+    		return Math.min(1.0, maxHp / 20.0F);
+    	}
+    	return 0.5;
     }
 
     /**
-     * Visualises all active wards with a subtle shimmer at chunk corners.
+     * Visualises all active wards with a subtle shimmer at the plot's edge, near players.
      */
     private static void visualiseWards(ServerLevel level, long now) {
-        Map<String, List<Long>> wards = level.getAttachedOrElse(WARDS, Map.of());
-        for (Map.Entry<String, List<Long>> e : wards.entrySet()) {
-            int factionId = Integer.parseInt(e.getKey());
-            Faction faction = Factions.get(level.getServer(), factionId);
-            if (faction == null || faction.fallen()) continue;
+    	Map<String, List<Long>> wards = level.getAttachedOrElse(WARDS, Map.of());
+    	for (Map.Entry<String, List<Long>> e : wards.entrySet()) {
+    		int factionId = Integer.parseInt(e.getKey());
+    		Faction faction = Factions.get(level.getServer(), factionId);
+    		if (faction == null || faction.fallen()) continue;
 
-            // Draw sigil at the kingdom's seat
-            Fx.sigil(level, Vec3.atCenterOf(faction.seat()), 16.0F, WARD_COLOUR, VISUAL_TICKS);
-
-            // Draw faint ring at chunk corners of the plot boundary
-            	for (long packed : e.getValue()) {
-            		int cx = unpackX(packed);
-            		int cz = unpackZ(packed);
-            		BlockPos corner = new BlockPos(cx << 4, level.getSeaLevel() + 1, cz << 4);
-            		Fx.ring(level, Vec3.atCenterOf(corner), 8.0F, WARD_COLOUR);
-            	}
-        }
+    		// Draw sigil at the kingdom's seat (only if a player is within 64 blocks)
+    		BlockPos seat = faction.seat();
+    		boolean nearPlayer = level.getPlayers(p -> true).stream().anyMatch(p -> p.blockPosition().distSqr(seat) < 64 * 64);
+    		if (nearPlayer) {
+    			Fx.sigil(level, Vec3.atCenterOf(seat), 16.0F, WARD_COLOUR, VISUAL_TICKS);
+    		}
+    	}
     }
 
     /**
@@ -260,43 +256,48 @@ public final class CreeperWard {
 
     /**
      * Repulses creepers at ward edges: ~50% chance to turn away with a visual recoil.
+     * Each creeper rolls once at the edge; the result is remembered.
      */
     private static void repulseAtEdges(ServerLevel level) {
-        Map<String, List<Long>> wards = level.getAttachedOrElse(WARDS, Map.of());
-        if (wards.isEmpty()) return;
+    	Map<String, List<Long>> wards = level.getAttachedOrElse(WARDS, Map.of());
+    	if (wards.isEmpty()) return;
 
-        // Collect all warded chunks into a set for fast lookup
-        Set<Long> wardedChunks = new HashSet<>();
-        for (List<Long> chunks : wards.values()) {
-            wardedChunks.addAll(chunks);
-        }
+    	// Collect all warded chunks into a set for fast lookup
+    	Set<Long> wardedChunks = new HashSet<>();
+    	for (List<Long> chunks : wards.values()) {
+    		wardedChunks.addAll(chunks);
+    	}
 
-        // Find creepers near warded chunks (within 8 blocks of boundary)
-        AABB searchBox = new AABB(-1024, -64, -1024, 1024, 320, 1024);
-        for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, searchBox, Creeper::isAlive)) {
-        	ChunkPos creeperChunk = creeper.chunkPosition();
-        	boolean atEdge = false;
-        	for (int dx = -1; dx <= 1 && !atEdge; dx++) {
-        		for (int dz = -1; dz <= 1 && !atEdge; dz++) {
-        			if (wardedChunks.contains(new ChunkPos(creeperChunk.x() + dx, creeperChunk.z() + dz).pack())) {
-        				atEdge = true;
-        			}
-        		}
-        	}
-        	if (!atEdge) continue;
+    	// Find creepers near warded chunks (within 32 blocks of boundary)
+    	for (Creeper creeper : level.getEntitiesOfClass(Creeper.class,
+    			searchBoxAroundWards(wardedChunks), Creeper::isAlive)) {
+    		ChunkPos creeperChunk = creeper.chunkPosition();
+    		boolean atEdge = false;
+    		for (int dx = -1; dx <= 1 && !atEdge; dx++) {
+    			for (int dz = -1; dz <= 1 && !atEdge; dz++) {
+    				if (wardedChunks.contains(new ChunkPos(creeperChunk.x() + dx, creeperChunk.z() + dz).pack())) {
+    					atEdge = true;
+    				}
+    			}
+    		}
+    		if (!atEdge) continue;
 
-        	if (level.getRandom().nextFloat() < 0.5F) {
-                // Turn away from the ward center
-                Vec3 away = creeper.position().subtract(findNearestWardCenter(creeper.position(), wardedChunks, level)).normalize();
-                Vec3 newPos = creeper.position().add(away.scale(4.0));
-                creeper.getNavigation().moveTo(newPos.x, newPos.y, newPos.z, 1.2);
-                // Visual: shimmer recoil
-                Fx.ring(level, creeper.position(), 2.0F, WARD_COLOUR);
-                Fx.wave(level, creeper.position(), away, 4.0, 1.5F, WARD_COLOUR, 10);
-                level.playSound(null, creeper.getX(), creeper.getY(), creeper.getZ(),
-                        SoundEvents.ENDERMAN_TELEPORT, SoundSource.HOSTILE, 0.6F, 1.2F);
-            }
-        }
+    		// Roll once per creeper: mark repelled or not via a custom tag
+    		if (!creeper.entityTags().contains("ward_repelled") && !creeper.isRemoved()) {
+    			if (level.getRandom().nextFloat() < 0.5F) {
+    				creeper.addTag("ward_repelled");
+    				// Turn away from the ward center
+    				Vec3 away = creeper.position().subtract(findNearestWardCenter(creeper.position(), wardedChunks, level)).normalize();
+    				Vec3 newPos = creeper.position().add(away.scale(4.0));
+    				creeper.getNavigation().moveTo(newPos.x, newPos.y, newPos.z, 1.2);
+    				// Visual: shimmer recoil
+    				Fx.ring(level, creeper.position(), 2.0F, WARD_COLOUR);
+    				Fx.wave(level, creeper.position(), away, 4.0, 1.5F, WARD_COLOUR, 10);
+    				level.playSound(null, creeper.getX(), creeper.getY(), creeper.getZ(),
+    						SoundEvents.ENDERMAN_TELEPORT, SoundSource.HOSTILE, 0.6F, 1.2F);
+    			}
+    		}
+    	}
     }
 
     /**
@@ -323,82 +324,116 @@ public final class CreeperWard {
 
     /**
      * Applies weakening to creepers inside wards, restores those outside.
+     * Searches only near warded plots, every 10 ticks.
      */
     private static void weakenCreepersInWards(ServerLevel level) {
-        Map<String, List<Long>> wards = level.getAttachedOrElse(WARDS, Map.of());
-        AABB searchBox = new AABB(-1024, -64, -1024, 1024, 320, 1024);
+    	Map<String, List<Long>> wards = level.getAttachedOrElse(WARDS, Map.of());
+    	if (wards.isEmpty()) return;
 
-        Set<Long> wardedChunks = new HashSet<>();
-        for (List<Long> chunks : wards.values()) {
-            wardedChunks.addAll(chunks);
-        }
+    	Set<Long> wardedChunks = new HashSet<>();
+    	for (List<Long> chunks : wards.values()) {
+    		wardedChunks.addAll(chunks);
+    	}
 
-        for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, searchBox, Creeper::isAlive)) {
-            long key = creeper.chunkPosition().pack();
-            boolean inWard = wardedChunks.contains(key);
-            boolean wasWeakened = WEAKENED.contains(creeper.getUUID());
-            if (inWard && !wasWeakened) {
-                weakenCreeperInWard(creeper);
-                WEAKENED.add(creeper.getUUID());
-            } else if (!inWard && wasWeakened) {
-                restoreCreeperFromWard(creeper);
-                WEAKENED.remove(creeper.getUUID());
-            }
-        }
+    	// Search only near warded chunks (within 32 blocks of each)
+    	for (Creeper creeper : level.getEntitiesOfClass(Creeper.class,
+    			searchBoxAroundWards(wardedChunks), Creeper::isAlive)) {
+    		long key = creeper.chunkPosition().pack();
+    		boolean inWard = wardedChunks.contains(key);
+    		boolean wasWeakened = WEAKENED.contains(creeper.getUUID());
+    		if (inWard && !wasWeakened) {
+    			weakenCreeperInWard(creeper);
+    			WEAKENED.add(creeper.getUUID());
+    		} else if (inWard && wasWeakened) {
+    			// Renew the effects while the creeper stays in the ward
+    			renewCreeperWardEffects(creeper);
+    		} else if (!inWard && wasWeakened) {
+    			restoreCreeperFromWard(creeper);
+    			WEAKENED.remove(creeper.getUUID());
+    		}
+    	}
 
-        // Clean up dead creepers from the set
-        WEAKENED.removeIf(id -> {
-            net.minecraft.world.entity.Entity e = level.getEntity(id);
-            return e == null || !e.isAlive();
-        });
+    	// Clean up dead creepers from the set
+    	WEAKENED.removeIf(id -> {
+    		net.minecraft.world.entity.Entity e = level.getEntity(id);
+    		return e == null || !e.isAlive();
+    	});
+    }
+
+    /** Builds a search AABB that covers all warded chunks plus a 32-block margin. */
+    private static AABB searchBoxAroundWards(Set<Long> wardedChunks) {
+    	double minX = Double.MAX_VALUE, minY = -64, minZ = Double.MAX_VALUE;
+    	double maxX = -Double.MAX_VALUE, maxY = 320, maxZ = -Double.MAX_VALUE;
+    	for (long packed : wardedChunks) {
+    		int cx = unpackX(packed) << 4;
+    		int cz = unpackZ(packed) << 4;
+    		minX = Math.min(minX, cx - 32);
+    		minZ = Math.min(minZ, cz - 32);
+    		maxX = Math.max(maxX, cx + 48);
+    		maxZ = Math.max(maxZ, cz + 48);
+    	}
+    	if (minX > maxX) return new AABB(0, -64, 0, 1, 320, 1);
+    	return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     /**
-     * Handles a creeper explosion inside a ward: prevents it if the wizard is fresh enough,
-     * otherwise queues the blocks for rewind.
-     * @return true if the explosion was prevented or will be rewound (i.e. handled by the ward)
+     * Handles a creeper explosion inside a ward: prevents it if the wizard is strong enough,
+     * otherwise the blast goes off and blocks are recorded for rewind.
+     * @return true if the explosion was prevented (fizzled)
      */
-    public static boolean handleCreeperExplosion(ServerLevel level, Creeper creeper, List<BlockPos> targets) {
-        int factionId = wardedFactionAt(level.getServer(), creeper.blockPosition());
-        if (factionId < 0) return false;
+    public static boolean tryPrevent(ServerLevel level, Creeper creeper) {
+    	int factionId = wardedFactionAt(level.getServer(), creeper.blockPosition());
+    	if (factionId < 0) return false;
 
-        Faction faction = Factions.get(level.getServer(), factionId);
-        if (faction == null || faction.fallen()) return false;
+    	Faction faction = Factions.get(level.getServer(), factionId);
+    	if (faction == null || faction.fallen()) return false;
 
-        Worker wizard = findCourtWizard(level.getServer(), faction);
-        double freshness = wizard != null ? wizardFreshness(level, wizard) : 0.0;
+    	Worker wizard = findCourtWizard(level.getServer(), faction);
+    	double strength = wizard != null ? wizardStrength(level, wizard) : 0.0;
 
-        // Prevention chance scales with freshness: fresh wizard = 90% prevention, elder = 10%
-        double preventChance = 0.1 + 0.8 * freshness;
-        if (level.getRandom().nextDouble() < preventChance) {
-            // Fizzle: prevent the explosion entirely
-            Fx.ring(level, creeper.position(), 3.0F, WARD_COLOUR);
-            Fx.burst(level, creeper.getX(), creeper.getY(0.5), creeper.getZ(),
-                    WARD_COLOUR, 1.5F, 30, 2.0, 1.0, 2.0);
-            level.playSound(null, creeper.getX(), creeper.getY(), creeper.getZ(),
-                    SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.8F, 1.5F);
-            return true; // Explosion prevented
-        }
+    	// Prevention chance scales with wizard strength: strong = 90% prevention, weak = 10%
+    	double preventChance = 0.1 + 0.8 * strength;
+    	if (level.getRandom().nextDouble() < preventChance) {
+    		// Fizzle: prevent the explosion entirely
+    		Fx.ring(level, creeper.position(), 3.0F, WARD_COLOUR);
+    		Fx.burst(level, creeper.getX(), creeper.getY(0.5), creeper.getZ(),
+    				WARD_COLOUR, 1.5F, 30, 2.0, 1.0, 2.0);
+    		level.playSound(null, creeper.getX(), creeper.getY(), creeper.getZ(),
+    				SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.8F, 1.5F);
+    		// Discard the creeper (it fizzled)
+    		creeper.discard();
+    		return true;
+    	}
+    	return false;
+    }
 
-        // Blast goes off but will be rewound: record blocks for rewind
-        if (!targets.isEmpty()) {
-            List<RewindBlock> blocks = new ArrayList<>();
-            for (BlockPos pos : targets) {
-                net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
-                if (!state.isAir() && !state.hasBlockEntity() && state.getBlock().asItem() != net.minecraft.world.item.Items.AIR) {
-                    blocks.add(new RewindBlock(pos.immutable(), state));
-                }
-            }
-            if (!blocks.isEmpty()) {
-                long chunkKey = creeper.chunkPosition().pack();
-                REWINDS.computeIfAbsent(chunkKey, k -> new ArrayList<>()).addAll(blocks);
-                // Visual: time rewind shimmer
-                Fx.blast(level, creeper.position(), 4.0F, WARD_COLOUR);
-                level.playSound(null, creeper.getX(), creeper.getY(), creeper.getZ(),
-                        SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0F, 0.6F);
-            }
-        }
-        return true; // Explosion handled (will be rewound)
+    /**
+     * Records blocks a creeper blast inside a ward will break, for later rewind.
+     * The blocks DO break (the explosion goes off); they are restored over time.
+     */
+    public static void recordRewindBlocks(ServerLevel level, Creeper creeper, List<BlockPos> targets) {
+    	int factionId = wardedFactionAt(level.getServer(), creeper.blockPosition());
+    	if (factionId < 0) return;
+
+    	Faction faction = Factions.get(level.getServer(), factionId);
+    	if (faction == null || faction.fallen()) return;
+
+    	if (targets.isEmpty()) return;
+    	List<RewindBlock> blocks = new ArrayList<>();
+    	for (BlockPos pos : targets) {
+    		net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+    		if (!state.isAir() && !state.hasBlockEntity()) {
+    			blocks.add(new RewindBlock(pos.immutable(), state));
+    		}
+    	}
+    	if (!blocks.isEmpty()) {
+    		long chunkKey = creeper.chunkPosition().pack();
+    		REWINDS.computeIfAbsent(chunkKey, k -> new ArrayList<>()).addAll(blocks);
+    		// Visual: time rewind shimmer
+    		Fx.blast(level, creeper.position(), 4.0F, WARD_COLOUR);
+    		level.playSound(null, creeper.getX(), creeper.getY(), creeper.getZ(),
+    				SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0F, 0.6F);
+    	}
     }
 
     /**
@@ -436,22 +471,43 @@ public final class CreeperWard {
     }
 
     /**
-     * Weakens a creeper inside a ward: 30% slower.
+     * Weakens a creeper inside a ward: 30% slower, blast radius halved.
      * Call this from a creeper tick or when it enters the ward.
      */
     public static void weakenCreeperInWard(Creeper creeper) {
-        creeper.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                net.minecraft.world.effect.MobEffects.SLOWNESS,
-                20 * 10,
-                1, // amplifier 1 = 30% slow
-                false, false
-        ));
+    	creeper.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+    			net.minecraft.world.effect.MobEffects.SLOWNESS,
+    			20 * 10,
+    			1, // amplifier 1 = 30% slow
+    			false, false
+    	));
+    	creeper.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+    			net.minecraft.world.effect.MobEffects.RESISTANCE,
+    			20 * 10,
+    			1, // amplifier 1 = 50% damage reduction
+    			false, false
+    	));
+    }
+
+    /**
+     * Renews the ward effects on a creeper that is still inside the ward.
+     */
+    private static void renewCreeperWardEffects(Creeper creeper) {
+    	if (creeper.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS)) {
+    		creeper.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+    				net.minecraft.world.effect.MobEffects.SLOWNESS, 20 * 5, 1, false, false));
+    	}
+    	if (creeper.hasEffect(net.minecraft.world.effect.MobEffects.RESISTANCE)) {
+    		creeper.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+    				net.minecraft.world.effect.MobEffects.RESISTANCE, 20 * 5, 1, false, false));
+    	}
     }
 
     /**
      * Restores a creeper's original stats when it leaves the ward.
      */
     public static void restoreCreeperFromWard(Creeper creeper) {
-        creeper.removeEffect(net.minecraft.world.effect.MobEffects.SLOWNESS);
+    	creeper.removeEffect(net.minecraft.world.effect.MobEffects.SLOWNESS);
+    	creeper.removeEffect(net.minecraft.world.effect.MobEffects.RESISTANCE);
     }
 }

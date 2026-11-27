@@ -6,9 +6,9 @@ import com.jaymoskingdoms.CreeperWard;
 import com.jaymoskingdoms.equestrian.Equestrian;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ServerExplosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,8 +21,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ServerExplosion.class)
 abstract class ServerExplosionMixin {
 	@Inject(method = "explode", at = @At("HEAD"))
-	private void jaymoskingdoms$frighten(CallbackInfoReturnable<Integer> cir) {
+	private void jaymoskingdoms$wardPrevent(CallbackInfoReturnable<Integer> cir) {
 		ServerExplosion self = (ServerExplosion)(Object)this;
+		// Court wizard creeper ward: cancel the blast entirely if the ward prevents it
+		if (self.getDirectSourceEntity() instanceof Creeper creeper && self.level() instanceof ServerLevel level) {
+			if (CreeperWard.tryPrevent(level, creeper)) {
+				cir.setReturnValue(0);
+				return;
+			}
+		}
 		Equestrian.blast(self.level(), self.center(), self.radius());
 		BlastFright.heard(self.level(), self.center());
 	}
@@ -31,13 +38,9 @@ abstract class ServerExplosionMixin {
 	@Inject(method = "interactWithBlocks", at = @At("HEAD"))
 	private void jaymoskingdoms$note(List<BlockPos> targets, CallbackInfo ci) {
 		ServerExplosion self = (ServerExplosion)(Object)this;
-		// Court wizard creeper ward: if this is a creeper explosion inside a ward, handle it
-		if (self.getDirectSourceEntity() instanceof Creeper creeper && self.level() instanceof net.minecraft.server.level.ServerLevel level) {
-			if (CreeperWard.handleCreeperExplosion(level, creeper, targets)) {
-				// Ward handled it: prevent the blast from breaking blocks
-				targets.clear();
-				return;
-			}
+		// Court wizard creeper ward: record blocks for rewind (they break, then are restored)
+		if (self.getDirectSourceEntity() instanceof Creeper creeper && self.level() instanceof ServerLevel level) {
+			CreeperWard.recordRewindBlocks(level, creeper, targets);
 		}
 		BlastMend.noted(self.level(), self.center(), targets, self.getIndirectSourceEntity() instanceof Player);
 	}
