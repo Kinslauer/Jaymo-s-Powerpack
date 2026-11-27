@@ -8,20 +8,20 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
+- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
-- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · for antigravity · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · 🔥 Prometheus · claimed
 
 
 ## In review
