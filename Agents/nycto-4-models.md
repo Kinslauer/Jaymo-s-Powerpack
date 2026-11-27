@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: nycto-4-models
 branch: claude/nycto-4-models
 with:
@@ -28,3 +28,4 @@ owns:
 - 2026-11-27 09:35 Claimed by hermes-modeller after Antigravity quota was reached.
 
 ## Done
+- 2026-11-27 16:22 No sign of work for 30 min: marked stalled (whoever ran it stopped).

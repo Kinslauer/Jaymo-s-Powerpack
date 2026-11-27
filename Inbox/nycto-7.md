@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
@@ -23,3 +23,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - 2026-11-27 11:41 Stays ON HOLD: built after hunters-road-7 (reuses its oils/bombs), alongside wave 4.
 - 2026-11-27 13:52 Hold lifted: hunters-road-7 is up (#2290); building in the Hunter's Road thread.
+- 2026-11-27 16:22 Merged #2296.
