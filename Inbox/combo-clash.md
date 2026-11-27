@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: claude-cloud (Combo Clash thread)
 asked: 2026-11-27
@@ -13,3 +13,4 @@ pr: 2334
 Andy (2026-11-27) chose "Ship the jar now, remake later" for Combo Clash (4-hit M1 strings, dashes, blocks). PR #2334 ships the unmodified jar plus our bridge; a from-scratch remake of the dodges and 4-hit strings follows in separate PRs. Built, not played. Lore: Lore.md "Close fighting" (new), after "The three glints".
 
 ## Notes
+- 2026-11-27 23:22 Merged #2334.
