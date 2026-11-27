@@ -20,4 +20,4 @@ Nits: air step's resetFallDistance (CoreMotion.java:83) wipes falls for 4 Feathe
 
 ## Notes
 - 2026-11-27 03:27 Andy ruled 2026-11-27 (decision card): power users get slide, backflip, vaults and air flips FREE without the skill tree. Skip item 1 (keep it as merged); say so in the change note. Do items 2-5 and the nits.
-- 2026-11-27 05:58 PR #2282 is merged into master; moved to Inbox/Done.
+- 2026-11-27 11:03 PR #2282 is merged into master; moved to Inbox/Done.
