@@ -1,6 +1,6 @@
 ---
 status: open
-for: any
+for: prometheus
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: Power-pack Supplement
