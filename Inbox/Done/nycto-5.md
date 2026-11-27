@@ -23,4 +23,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - 2026-11-27 14:24 Hold lifted 2026-11-27: Hunter's Road thread building it (nycto-3 merged, nycto-6 in review as #2298).
 - 2026-11-27 14:56 #2299 is a draft stacked on #2298 (nycto-6).
-- 2026-11-27 16:32 Merged #2299.
+- 2026-11-27 11:51 PR #2299 is merged into master; moved to Inbox/Done.
