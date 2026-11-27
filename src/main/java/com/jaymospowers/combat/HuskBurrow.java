@@ -122,7 +122,7 @@ public final class HuskBurrow {
 	}
 
 	/**
-	 * A husk has just spawned ({@code ZombieBuriedMixin}, after its equipment is given): naturally, on sand, after dark, near a
+	 * A husk has just spawned ({@code ZombieLungeMixin}, after its equipment is given): naturally, on sand, after dark, near a
 	 * player at Dread, it starts buried {@link #SPAWN_CHANCE} of the time.
 	 */
 	public static void spawned(Husk husk, EntitySpawnReason reason) {
