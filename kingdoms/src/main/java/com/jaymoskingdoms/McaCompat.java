@@ -64,6 +64,33 @@ public final class McaCompat {
 		return LOADED && McaBridge.interactingWith(entity, player);
 	}
 
+	/** {@code entity} (an MCA villager) says {@code line} to {@code player} in their talk: in the talk box while it runs. */
+	static void talkSay(net.minecraft.world.entity.Entity entity, ServerPlayer player, net.minecraft.network.chat.Component line) {
+		if (LOADED) {
+			McaBridge.talkSay(entity, player, line);
+		}
+	}
+
+	/**
+	 * {@code entity}'s talk menu opens again for {@code player} (as a right click on them opens it), unless it's open already;
+	 * false if they're no MCA villager ({@link Conversations}).
+	 */
+	static boolean talkReopen(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		return LOADED && McaBridge.talkReopen(entity, player);
+	}
+
+	/** {@code entity}'s talk menu shuts for {@code player}, if it's open. */
+	static void talkClose(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		if (LOADED) {
+			McaBridge.talkClose(entity, player);
+		}
+	}
+
+	/** {@code player}'s talk with {@code entity} goes on: the talk wheel shows MCA's main answers again, with no new greeting. */
+	public static boolean talkMain(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		return LOADED && McaBridge.talkMain(entity, player);
+	}
+
 	/**
 	 * (0.7.87) A player's MCA look as it's saved ({@code McaPlayerSizeMixin}): (0.7.290) its Size and Width are kept to
 	 * their heritage's body ({@link BodySizes}).

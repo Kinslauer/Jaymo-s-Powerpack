@@ -94,8 +94,17 @@ abstract class McaDialogueMixin {
 			// (letterbox cutscene) the player picked an answer: they're speaking now
 			DialogueCue.cue(player, villager, DialogueCue.Speaker.PLAYER);
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.Conversations.GOODBYE.equals(answer)) {
+			// (Andy 2026-11-27) "Take your leave": the player ends the talk; they bid you goodbye (in their tongue's
+			// gestures if you share none) and that's the end of it
+			com.jaymoskingdoms.Conversations.goodbye(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("root".equals(question) && McaCompat.shunOpening(villager, player)) {
 			// one who turned their back on you for pestering them won't talk yet (Introductions#shunned)
+			com.jaymoskingdoms.Conversations.refusedTalk(player, villager);
 			ci.cancel();
 			return;
 		}
@@ -199,12 +208,14 @@ abstract class McaDialogueMixin {
 				Recollections.nameTo(player, villager)), player);
 			// (refusal hints) and the worst of it, or what they bear you
 			com.jaymoskingdoms.RefusalHints.hintStanding(player, villager);
+			// (Andy 2026-11-27) they refuse to talk to you: the talk ends here, not back on the wheel
+			com.jaymoskingdoms.Conversations.refusedTalk(player, villager);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
 		}
 		if ("main".equals(question) && com.jaymoskingdoms.Replies.is(answer)) {
-			// (Andy 2026-11-27) the first spoke: an answer to what they just said, and theirs back; the talk ends there as a chat does
+			// (Andy 2026-11-27) the first spoke: an answer to what they just said, and theirs back; then back to the wheel
 			villager.sendChatMessage(com.jaymoskingdoms.Replies.reply(player, villager, answer), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
@@ -249,7 +260,8 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && Rulers.ANSWER.equals(answer)) {
-			// (0.7.138) an audience with a villager ruler
+			// (0.7.138) an audience with a villager ruler (the talk ends for it)
+			com.jaymoskingdoms.Conversations.ends(player, villager);
 			villager.getInteractions().stopInteracting();
 			if (Rulers.is(villager)) {
 				Rulers.audience(player, villager);

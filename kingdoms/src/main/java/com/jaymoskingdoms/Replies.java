@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  * that line: a warning gets "Seen any about? Where?", a word on the weather gets one back, a question gets answered,
  * a sigh gets asked after. Your words are on the wheel ({@code talkwheel.jaymoskingdoms.jaymoskingdoms_reply.<topic>},
  * worded by your blood or class where a line is written for it), theirs come back in their own voice (personality, as
- * {@link RefusalHints#tone}, or cold for one who is wary of you or bears you ill), and the talk ends there as a chat does.
+ * {@link RefusalHints#tone}, or cold for one who is wary of you or bears you ill), and the talk goes back to the wheel ({@link Conversations#again}).
  *
  * <p>Which reply fits is read from the line on the client ({@link #topicOf}): first the topics registered for particular
  * lines ({@link #register}: a feature with lines of its own, say a cry of pain, adds a topic that matches its keys and
