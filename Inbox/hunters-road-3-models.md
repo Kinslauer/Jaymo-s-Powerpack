@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: antigravity
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: t3
+claimed_by: 
 pr: 
 thread: t3 mcp:178d133d-ee7b-43d2-98b4-36b1b8cd5d97
 ---
@@ -20,3 +20,4 @@ thread: t3 mcp:178d133d-ee7b-43d2-98b4-36b1b8cd5d97
 - 2026-11-27 08:35 Andy 2026-11-27: models to Codex and Antigravity through T3
 - 2026-11-27 08:55 Codex out of usage (weekly limit, resets Dec 1 10:47 AM); moved to Antigravity gemini-4-carbon, T3 thread mcp:178d133d-ee7b-43d2-98b4-36b1b8cd5d97
 - 2026-11-27 09:06 Antigravity quota reached 2026-11-27 9:05 AM (resets about 1:30 PM); thread failed with no work done. Still claimed by t3, waiting on Andy: retry on Antigravity after the reset, or hand to Hermes.
+- 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
