@@ -29,4 +29,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 **Where to start:** `Dismember#halve` and `halvable` (copy the shape), `SeveredPart`, `Gibs`, the ragdoll drop (#1020).
 
 ## Notes
-- 
+- 2026-11-27 17:49 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on gore 1-4 (via Claude coordinator, 2026-11-27)
