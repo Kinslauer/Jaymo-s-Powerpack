@@ -8880,3 +8880,10 @@ Deviations from the plan:
 - Anyone a symbiote rides (awake, not dormant) can now launch and juggle too (`AirCombo.can`).
 - The slam's splash spares your pets, your team or Kingdoms party, and villagers, unless they're attacking you (`AirCombo.spared`).
 - Built; not played.
+
+## 0.28.22 (2026-11-27): Night's Blood 7: the hunter's oil, garlic from farmers, fire burst burns vampires (#2296)
+
+- **Hunter's oil**: a fifth blade oil (garlic and silver) that bites the cursed (vampires and werewolves, `MonsterKinds` cursed, read through Kingdoms). Same +2/+4/+6 and 20/40/60 swings as the others; made in the crucible from dead grease with the hunter's oils research; fits the oil pot, sash and bandolier.
+- **Fire burst** bomb now hurts with fire damage (in-fire type), so a vampire takes its 4x fire weakness from the blast itself as well as from the burning.
+- **Farmers** sell wild garlic (level 2): four for an emerald. The herb already grew in forests and swamps and could be planted; no second garlic was made.
+- Built; not played. Art for the flask is a script-drawn placeholder (`tools/gen_ny7_powers.py`).
