@@ -8940,3 +8940,9 @@ Deviations from the plan:
 - **Foot in the stirrup first**: climbing on from a horse's side, someone standing closer in than its flank (easy at an Icy's draft horse's shoulder, 1.5 to 1.6 blocks wide) first steps out to it over the opening of the climb, instead of rising out of its body (`IcySaddle.stirrup`). Any horse-like mount, players and the villagers and guards who mount on their own alike.
 - **Inventory tabs**: while you ride a tame horse, Icy's horse-head tab (back to the horse's inventory) sits on the survival inventory's left edge, where the powers and baubles tabs covered it. They now move down 40 px under it while it is there (`IcyRiderTab`), and back up when it isn't.
 - Built; not played. Pictures in the PR are worked out from the code, not taken in game.
+
+## 0.28.29 (2026-11-27): Clouds drop to Silk Touch again (#2312)
+
+- **Cloudbank and every aercloud** drop themselves when mined with Silk Touch (Andy: "they can still be silk touched"). Broken any other way, or burst by a hard landing, they still just go with nothing left behind.
+- **Recipes take either**: the four gliders, the cloud skiff, the updraft vent and cloudwool accept the Silk Touched aercloud block (cold for the cold glider, skiff, vent and cloudwool; blue, golden or purple for their gliders) as well as the bottle of cloud (`tools/gen_aether.py`, `gen_aether_gear.py`, `gen_aether_animals.py`).
+- Built; not played.
