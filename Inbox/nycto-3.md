@@ -1,5 +1,5 @@
 ---
-status: open
+status: claimed
 for: claude-cloud
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
