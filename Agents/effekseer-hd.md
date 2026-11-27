@@ -28,4 +28,4 @@ owns:
 Andy picked HD effects for ultimates on 2026-11-26. Follow-up big moves are a separate pass.
 
 ## Notes
-- 2026-11-26 19:39 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-27 01:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).

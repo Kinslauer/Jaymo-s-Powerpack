@@ -1,10 +1,11 @@
 ---
-status: in-review
+status: changes
 for: gemini
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes, 2026-11-26)
 asked: 2026-11-26
 claimed_by: 
 pr: 2255
+text_pass: 
 ---
 
 # Legends patch 7: Great Ape moves, staged beams, instant step, stacking power-up, chain blades, cross slash
@@ -26,3 +27,4 @@ Power: Z Fighter, weapons.
 
 ## Notes
 - 2026-11-26 21:36 gemini's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-27 01:43 Reviewer (Claude thread Rework webs and symbiote, 2026-11-27): PR #2255 builds and pr_checks pass; pass after these fixes, push to the same PR then set status=in-review. 1) Lash.chainPull (from land/pullOut) yanks any struck() target at 2.4 b/t: gate on holdable() (no Dragon/Wither) and use the existing YANK heft/liftable weight test so heavy foes pull you or barely move. 2) Great Ape lost R = charge ki and Sneak+R = lower power (master let ABILITY_1 past the ape block); keep those, move the roar to a free ape combo. 3) Base beam sustain (SUSTAIN_BASE_TICKS 16, sustainStrike resetting i-frames at 0.28x every 5 ticks) gives every beam ~+84% free damage incl. bosses and delays the burst: the free base sustain must deal no damage; only V-held sustain may strike, and it costs ki. 4) Instant Step replaced Flash Step on B while Ki Sense is on and on Sneak+B once learned: keep Flash Step on its old keys; Instant Step only when a sensed target is picked (or a free combo), and fall through to Flash Step when Instant Step can't start. 5) tryStart spends Flash Step stamina before the ki check and landing check: spend only when the step happens. 6) Cyclone tooltip says 'charged' but uses the shared SWEEP_MIN_CHARGE: word it to match. Note every remaining deviation in the change note.
