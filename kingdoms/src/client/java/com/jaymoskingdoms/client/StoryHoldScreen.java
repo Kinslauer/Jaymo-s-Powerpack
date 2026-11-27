@@ -218,6 +218,11 @@ final class StoryHoldScreen extends Screen {
 	}
 
 	private static void narrate() {
+		// (squelched, nothing is read; let speak again, the title is read from the top)
+		if (NarratorSetting.squelched()) {
+			hush(Minecraft.getInstance());
+			return;
+		}
 		// (0.7.400) Andy: "all the narrator should say here is your story is being written." So only the title is read,
 		// once, and not what the hold is for. (0.7.360) the life story's narrator never reads over this one.
 		if (read.isEmpty()) {
@@ -245,6 +250,12 @@ final class StoryHoldScreen extends Screen {
 
 	static boolean holding() {
 		return !holding.isEmpty() || landing;
+	}
+
+	/** Andy: "can you make a button in the story to squelch the narrator?" In the top right corner, as on the life story. */
+	@Override
+	protected void init() {
+		addRenderableWidget(NarratorSetting.button(this.width - 4 - NarratorSetting.SIZE, 4));
 	}
 
 	@Override
