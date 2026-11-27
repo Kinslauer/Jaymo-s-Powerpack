@@ -1,34 +1,43 @@
 package com.jaymospowers.aether;
 
-import com.jaymospowers.core.Leaves;
+import com.jaymospowers.power.zfighter.pod.PodEntity;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * Cold and golden aerclouds: soft as leaves (Andy: "i should fall through and punch through them like leaves"). Players,
- * mobs and animals have nothing to stand on: they sink slowly down through a cloud, wade through it, climb up through it
- * holding Jump, and a hard fall or a fast flight crashes through it ({@link Leaves#inside}); the fall is forgotten inside
- * (no fall damage on any aercloud). Arrows and falling blocks still meet the thin plate at the bottom (stacked clouds, a
- * whole block). Broken, a cloud comes apart into nothing: there is no cloud to carry off. {@link BlueAercloudBlock} bounces.
+ * Cold and golden aerclouds: a soft cloud you walk into. Only a hair-thin plate at the bottom is solid, so you sink into
+ * it and stand in it; inside, your fall is cut to almost nothing and forgotten (no fall damage on any aercloud), and
+ * you can jump out. Falling fast (past {@link #FAST_FALL} blocks) you meet a 0.9-tall box instead and land on top.
+ * Stacked clouds are one solid block. {@link BlueAercloudBlock} bounces.
  */
 public class AercloudBlock extends TransparentBlock {
 	// ---- tuning ----
+	/** A fall this long (blocks) lands on top of the cloud instead of in it. */
+	public static final double FAST_FALL = 2.5;
+	/** Falling speed kept each tick while inside (the notes: damped by 0.005). */
+	public static final double FALL_KEPT = 0.005;
 	/** Brightness of faces next to a cloud (the notes: shade 0.25). */
 	public static final float SHADE = 0.25F;
 
 	private static final VoxelShape PLATE = Block.box(0.0, 0.0, 0.0, 16.0, 0.01, 16.0);
+	private static final VoxelShape FALLING_BOX = Shapes.box(0.0, 0.0, 0.0, 1.0, 0.9, 1.0);
 
 	public AercloudBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -52,26 +61,36 @@ public class AercloudBlock extends TransparentBlock {
 
 	@Override
 	protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		if (Leaves.passesThrough(context)) {
-			// soft as leaves: whoever walks, falls or flies (a space pod too) goes into it and through it
+		if (context instanceof EntityCollisionContext podContext && podContext.getEntity() instanceof PodEntity) {
+			// (Patch 9, tr_cockpit) a space pod climbs straight through every cloud; whoever walks still stands on it
 			return Shapes.empty();
 		}
 		VoxelShape plate = this.plate(state, level, pos, context);
 		if (!plate.isEmpty() && level.getBlockState(pos.above()).getBlock() instanceof AercloudBlock) {
 			return Shapes.block();
 		}
+		if (!plate.isEmpty() && context instanceof EntityCollisionContext entityContext) {
+			Entity entity = entityContext.getEntity();
+			if (entity != null && entity.fallDistance > FAST_FALL && !(entity instanceof LivingEntity living && living.isFallFlying())) {
+				return FALLING_BOX;
+			}
+		}
 		return plate;
 	}
 
 	@Override
 	protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
-		this.settle(level, pos, entity);
+		this.settle(entity);
 	}
 
-	/** In the cloud: dragged on as in leaves (crashing through it if it hit hard), and the fall forgotten. */
-	protected void settle(Level level, BlockPos pos, Entity entity) {
-		Leaves.inside(level, pos, entity);
+	/** In the cloud: the fall forgotten and almost stopped, and able to jump out. */
+	protected void settle(Entity entity) {
 		entity.fallDistance = 0;
+		Vec3 v = entity.getDeltaMovement();
+		if (v.y < 0.0 && !(entity instanceof Projectile)) {
+			entity.setDeltaMovement(v.x, v.y * FALL_KEPT, v.z);
+		}
+		entity.setOnGround(entity instanceof LivingEntity living && !(living instanceof Player player && player.getAbilities().flying));
 	}
 
 	/** Landing on or in any aercloud never hurts. */

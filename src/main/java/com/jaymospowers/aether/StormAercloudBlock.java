@@ -27,7 +27,7 @@ public class StormAercloudBlock extends AercloudBlock {
 
 	@Override
 	protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
-		this.settle(level, pos, entity);
+		this.settle(entity);
 		if (level.isClientSide()) {
 			if (level.getRandom().nextInt(3) == 0) {
 				level.addParticle(ParticleTypes.ELECTRIC_SPARK, entity.getRandomX(0.6), entity.getRandomY(), entity.getRandomZ(0.6), 0.0, 0.0, 0.0);

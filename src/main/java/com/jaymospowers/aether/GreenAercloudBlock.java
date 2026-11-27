@@ -33,7 +33,7 @@ public class GreenAercloudBlock extends AercloudBlock {
 
 	@Override
 	protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
-		this.settle(level, pos, entity);
+		this.settle(entity);
 		long now = level.getGameTime();
 		Long last = LAST.get(entity);
 		if (entity instanceof Projectile || (last != null && now - last < COOLDOWN && now >= last)) {

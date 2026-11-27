@@ -74,7 +74,7 @@ public final class AetherBlocks {
 	public static final int SILT_DUST = 0x8D9FB8, FERROSITE_SAND_DUST = 0xB96A3D;
 	/** Experience (min, max) of holystone quartz ore 2-5 and glint ore 3-5 (arkenium ore gives none). */
 	public static final int QUARTZ_XP_MIN = 2, QUARTZ_XP_MAX = 5, GLINT_XP_MIN = 3, GLINT_XP_MAX = 5;
-	public static final float SOIL_HARDNESS = 0.2F, QUICKSOIL_HARDNESS = 0.5F, AERCLOUD_HARDNESS = 0.2F;
+	public static final float SOIL_HARDNESS = 0.2F, QUICKSOIL_HARDNESS = 0.5F, AERCLOUD_HARDNESS = 0.3F;
 	/** The friction a quicksoil block gives (1.0 would be no loss at all, vanilla ice is 0.98). */
 	public static final float QUICKSOIL_FRICTION = 1.1F;
 	/** Light of quicksoil glass, and of an ambrosium torch (a vanilla torch is 14). */
@@ -153,9 +153,7 @@ public final class AetherBlocks {
 
 	private static BlockBehaviour.Properties cloud(MapColor color) {
 		return BlockBehaviour.Properties.of().mapColor(color).strength(AERCLOUD_HARDNESS).sound(SoundType.WOOL).noOcclusion()
-			.isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never)
-			// (see-through from inside too: a head in a cloud sees out of it, as from inside leaves)
-			.isViewBlocking((state, level, pos, box) -> false);
+			.isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never);
 	}
 
 	static void init() {

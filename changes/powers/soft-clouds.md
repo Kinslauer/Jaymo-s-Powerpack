@@ -1,6 +1,0 @@
-# Clouds soft as leaves: see-through, fall through, burst, drop nothing
-- **Cloudbank and every aercloud** (cold, blue, golden, green, purple, storm) are now soft as leaves (Andy: "i should fall through and punch through them like leaves"): players, mobs and animals sink slowly down through them, wade through them, climb up holding Jump, and a hard fall or fast flight crashes through and the cloud bursts with a soft whump (`core/Leaves.soft`, `AercloudBlock.settle`). No fall damage inside any cloud, as before. Blue still bounces, green still shoves, purple still flings, storm still shocks. Arrows and falling blocks still meet the thin plate. Mobs path through clouds as through leaves (`LeavesPathMixin`).
-- **Broken, a cloud drops nothing**, with any tool, Silk Touch too (empty loot tables, written by `tools/gen_aether.py`). Hardness 0.2, as leaves. Cloudwool's recipe (2x2 cold aercloud) is now creative-only.
-- **See-through**: the coloured aerclouds are as clear as the cold one now (texture alpha 150/130/115, storm 175/155/140), and a head inside a cloud sees out of it (`isViewBlocking` never).
-- The Cloud Sea's overcast is no longer a floor: you sink through it, and dropping out of the band's bottom still gives Slow Falling.
-- Built; not played.
