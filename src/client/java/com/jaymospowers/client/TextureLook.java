@@ -86,6 +86,13 @@ public final class TextureLook {
 		return Command.SINGLE_SUCCESS;
 	}
 
+	/** Picks the vanilla look without a command, for a new install ({@link NewPlayerDefaults}). */
+	static void pickVanilla(Minecraft minecraft) {
+		if (!vanilla()) {
+			toVanilla(minecraft);
+		}
+	}
+
 	private static void toVanilla(Minecraft minecraft) {
 		try {
 			Files.writeString(marker(), "The vanilla look is picked (/texturelook vanilla): the pack's retexture packs stay off. "

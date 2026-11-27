@@ -187,6 +187,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.armory.FangGauntletsClient.init();
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
+		// a new install starts with low-end mode on and the vanilla texture look; registered first, so it runs before
+		// the pack's resource packs are switched on and before low-end mode's own first-launch check
+		NewPlayerDefaults.init();
 		// once per install: switch on the pack's resource packs (medieval MCA villagers, Fresh Animations' player) the
 		// CurseForge import downloaded
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(PackResourcePacks::enableOnce);

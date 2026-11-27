@@ -144,6 +144,9 @@ launches; `/texturelook reason` puts them back. A new retexture pack of vanilla 
 `TextureLook.FILE_PACKS` (or `BUILT_IN`) too. Our mods' own textures, the medieval MCA villagers, Tissou's zombies,
 KSPACK, music and Fresh Animations stay on.
 
+New installs start on the vanilla look (Andy, 2026-11-27): `client/NewPlayerDefaults` picks it, with low-end mode, on an
+install's first launch (no `config/jaymospowers-low-end.properties` yet). Installs that launched before keep their choice.
+
 Don't copy pixels from Pixel Perfection Fidelity into our own textures: share-alike would then cover them. New art for our
 own items goes to an art agent, starting from the CC0 and MIT sources Andy picked (OpenGameArt weapon, RPG item, block
 and ship sets; Computercraft Greentech, CC Industrialized, Militech, Wares Recalibration, Vanilla Military, Starlight 16x).
