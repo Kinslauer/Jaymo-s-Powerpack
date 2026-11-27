@@ -136,6 +136,8 @@ public final class Speech {
 			// (0.5.42) golems never speak
 			return;
 		}
+		// a villager's cry ("Help! Thief!") is something they'll tell you about if you ask what's wrong (Outcry)
+		Outcry.cried(speaker, words);
 		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, speaker.getBoundingBox().inflate(range))) {
 			// one whose ears ring hears no callouts but from close by
 			if (Deafened.unheard(p, speaker)) {
