@@ -81,7 +81,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Bat wings: Space in the air glides like an elytra, no elytra needed. The wings tire while they glide
  * ({@link #WINGS_MAX}) and heal with experience.</li>
  * <li>Under the earth, out of the sun's reach ({@link #DEEP_Y}), they're quick.</li>
- * <li>(vampires only) The sun drains their hunger.</li>
+ * <li>(vampires only) The sun drains their blood ({@link VampireBlood}).</li>
  * </ul>
  *
  * <p><b>Werewolves</b> (and {@link Lycans.Curse#half() wolfbloods}, half-cursed, who never change):
@@ -137,8 +137,6 @@ public final class NightGifts {
 	static final int WINGS_PER_XP = 2;
 	/** Below this height, out of the sky's sight, a vampire's quick. */
 	static final int DEEP_Y = 60;
-	/** The sun's drain on a vampire's hunger (exhaustion a second). */
-	static final float SUN_EXHAUSTION = 0.05F;
 	/** Safe fall distance added (blocks): human-form werewolves, the beast; the beast's fall damage share taken off. */
 	static final double WOLF_SAFE_FALL = 3.0, BEAST_SAFE_FALL = 10.0, BEAST_FALL_CUT = -0.5;
 
@@ -147,8 +145,15 @@ public final class NightGifts {
 	static final float GOSSIP_CHANCE = 0.12F, GOSSIP_CURSED_CHANCE = 0.4F;
 	static final int GOSSIP_LINES = 18;
 
-	/** The move number the client sends for sneak and {@code O}: the shapes of the night ({@code NightForms}). */
-	public static final int SHAPES = 4;
+	/**
+	 * (Blood) What each move of a full vampire's costs, in mB (a dhampir's are free): the Blood Dash, the Groundpound, the eye
+	 * laser. The claw moves, the shapes, the stare and the leap have their own ({@link ClawArts}, {@code NightForms},
+	 * {@link BloodLeap}).
+	 */
+	static final int DASH_MB = 50, POUND_MB = 150, GAZE_MB = 200;
+
+	/** The bar's moves, in the order of {@code FormSkills.NIGHT_MOVES}: what each index stands for. */
+	public static final int DASH = 0, POUND = 1, GAZE = 2, FEED = 3, BAT = 4, COLONY = 5, MIST = 6, STARE = 7, RAKE = 8, REND = 9, POUNCE = 10, ROAR = 11;
 
 	/** What gift a player has. */
 	public static final int NONE = 0, VAMPIRE = 1, DHAMPIR = 2, WEREWOLF = 3, WOLFBLOOD = 4;
@@ -174,7 +179,7 @@ public final class NightGifts {
 	public static final AttachmentType<Gift> GIFT = AttachmentRegistry.create(JaymosKingdoms.id("night_gift"),
 		builder -> builder.persistent(Gift.CODEC).copyOnDeath().syncWith(Gift.STREAM_CODEC.cast(), (target, viewer) -> target instanceof Player));
 
-	/** Player → server: {@code O} (0) or {@code P} (1). */
+	/** Player → server: a werewolf's {@code O} (0) or {@code P} (1). */
 	public record Move(int which) implements CustomPacketPayload {
 		public static final Type<Move> TYPE = new Type<>(JaymosKingdoms.id("night_move"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Move> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Move::which, Move::new);
@@ -239,7 +244,13 @@ public final class NightGifts {
 		PayloadTypeRegistry.serverboundPlay().register(Move.TYPE, Move.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Reveal.TYPE, Reveal.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Move.TYPE, (payload, context) -> move(context.player(), payload.which()));
+		ServerPlayNetworking.registerGlobalReceiver(Move.TYPE, (payload, context) -> {
+			// O and P are the werewolf's; a vampire's moves are all on the skill bar
+			Gift g = context.player().getAttached(GIFT);
+			if (g != null && g.wolf() && payload.which() >= 0 && payload.which() <= 1) {
+				move(context.player(), payload.which());
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(NightGifts::tick);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
 			if (!(entity instanceof ServerPlayer player)) {
@@ -421,10 +432,6 @@ public final class NightGifts {
 			if (level.dimension() == Level.OVERWORLD && player.getY() < DEEP_Y && !level.canSeeSky(player.blockPosition().above())) {
 				player.addEffect(new MobEffectInstance(MobEffects.SPEED, 40, 0, true, false, true));
 			}
-			if (kind == VAMPIRE && !night && !player.isCreative() && level.dimension() == Level.OVERWORLD
-				&& !level.isRainingAt(player.blockPosition()) && level.canSeeSky(BlockPos.containing(player.getEyePosition()))) {
-				player.causeFoodExhaustion(SUN_EXHAUSTION);
-			}
 		} else if (!beast && night && level.dimension() == Level.OVERWORLD) {
 			Holder<net.minecraft.world.level.biome.Biome> biome = level.getBiome(player.blockPosition());
 			if (biome.is(BiomeTags.IS_FOREST) || biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_JUNGLE)) {
@@ -432,6 +439,13 @@ public final class NightGifts {
 			}
 		}
 		sense(server, player, now);
+	}
+
+	/** (Blood) The open sun by day drains a full vampire's reserve ({@link VampireBlood}): under the open sky, not in rain. */
+	static boolean sunDrains(ServerPlayer player) {
+		ServerLevel level = player.level();
+		return level.dimension() == Level.OVERWORLD && !Vampires.night(level.getOverworldClockTime()) && !level.isRainingAt(player.blockPosition())
+			&& level.canSeeSky(BlockPos.containing(player.getEyePosition()));
 	}
 
 	/** Werewolves fall better (the beast much better); everyone else as they were. */
@@ -498,51 +512,136 @@ public final class NightGifts {
 
 	// ---- the moves -----------------------------------------------------------------------------------------------------
 
-	/** Whether it went: {@code which} 0 ({@code O}), 1 ({@code P}) or (0.7.632) 2, a vampire's eye laser, or (0.7.634) 3, Feed (the skill bar only). */
+	/**
+	 * Whether it went: {@code which} 0 ({@code O}, a werewolf's leap) and 1 ({@code P}, its howl), and the skill bar's moves of a
+	 * vampire or dhampir (indexes {@link #DASH} to {@link #ROAR}, those of {@code FormSkills.NIGHT_MOVES}). Each costs a full
+	 * vampire mB ({@link VampireBlood}), and is cheaper when it chains from the move before ({@link NightFlow}).
+	 */
 	public static boolean move(ServerPlayer player, int which) {
 		Gift g = player.getAttached(GIFT);
-		if (g == null || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isSleeping()) {
+		if (g == null || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isSleeping() || which < 0 || which > ROAR) {
 			return false;
-		}
-		if (which == SHAPES) {
-			// a vampire's shapes of the night (sneak and O)
-			return com.jaymoskingdoms.nightforms.NightForms.menu(player);
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		long[] ready = READY.computeIfAbsent(player.getUUID(), k -> new long[4]);
-		if (which < 0 || which > 3 || now < ready[which]) {
+		if (g.blood()) {
+			return vampireMove(level, player, which, now);
+		}
+		if (which > 1 || !g.wolf()) {
 			return false;
 		}
-		if (g.blood()) {
-			if (which == 0 && dash(level, player)) {
+		long[] ready = READY.computeIfAbsent(player.getUUID(), k -> new long[4]);
+		if (now < ready[which]) {
+			return false;
+		}
+		boolean beast = WerewolfPlayers.beast(player);
+		if (which == 0 && leap(level, player, beast)) {
+			ready[0] = now + LEAP_COOLDOWN;
+			return true;
+		} else if (which == 1 && TreeLocks.check(player, TreeLocks.Lock.NIGHT_POUND)) {
+			// (Andy's skill-tree locks) the Groundpound and the Howl are learned: Night Pound
+			howl(level, player, beast);
+			ready[1] = now + HOWL_COOLDOWN;
+			return true;
+		}
+		return false;
+	}
+
+	/** What the bar's move {@code which} costs a full vampire to start (mB), for the controls page; Feed costs nothing (it fills the reserve). */
+	public static int costOf(int which) {
+		return switch (which) {
+			case DASH -> DASH_MB;
+			case POUND -> POUND_MB;
+			case GAZE -> GAZE_MB;
+			case BAT -> com.jaymoskingdoms.nightforms.NightForms.baseCost(com.jaymoskingdoms.nightforms.NightForms.BAT);
+			case COLONY -> com.jaymoskingdoms.nightforms.NightForms.baseCost(com.jaymoskingdoms.nightforms.NightForms.COLONY);
+			case MIST -> com.jaymoskingdoms.nightforms.NightForms.baseCost(com.jaymoskingdoms.nightforms.NightForms.MIST);
+			case STARE -> com.jaymoskingdoms.nightforms.NightForms.baseCost(com.jaymoskingdoms.nightforms.NightForms.STARE);
+			case RAKE -> ClawArts.RAKE_MB;
+			case REND -> ClawArts.REND_MB;
+			case POUNCE -> ClawArts.POUNCE_MB;
+			case ROAR -> ClawArts.ROAR_MB;
+			default -> 0;
+		};
+	}
+
+	/** A vampire's or dhampir's move off the skill bar. */
+	private static boolean vampireMove(ServerLevel level, ServerPlayer player, int which, long now) {
+		long[] ready = READY.computeIfAbsent(player.getUUID(), k -> new long[4]);
+		switch (which) {
+			case DASH -> {
+				if (now < ready[0]) {
+					return false;
+				}
+				// (mist ends in a leap: the dash takes its place, and goes harder)
+				boolean mist = com.jaymoskingdoms.nightforms.NightForms.inMist(player);
+				boolean chained = mist || NightFlow.within(player, NightFlow.Link.MIST_LEAP);
+				int mb = NightFlow.cost(DASH_MB, chained);
+				if (!VampireBlood.afford(player, mb)) {
+					VampireBlood.lack(player);
+					return false;
+				}
+				if (mist) {
+					com.jaymoskingdoms.nightforms.NightForms.end(player, false);
+				}
+				if (!dash(level, player, chained)) {
+					return false;
+				}
+				VampireBlood.drain(player, mb);
 				ready[0] = now + DASH_COOLDOWN;
+				NightFlow.close(player, NightFlow.Link.MIST_LEAP);
+				NightFlow.open(player, NightFlow.Link.DASH_CLAW, NightFlow.DASH_WINDOW);
 				return true;
-			} else if (which == 1 && TreeLocks.check(player, TreeLocks.Lock.NIGHT_POUND) && pound(level, player)) {
+			}
+			case POUND -> {
+				if (now < ready[1] || !TreeLocks.check(player, TreeLocks.Lock.NIGHT_POUND)) {
+					return false;
+				}
+				if (!VampireBlood.afford(player, POUND_MB)) {
+					VampireBlood.lack(player);
+					return false;
+				}
+				if (!pound(level, player)) {
+					return false;
+				}
+				VampireBlood.drain(player, POUND_MB);
 				ready[1] = now + POUND_COOLDOWN;
 				return true;
-			} else if (which == 2 && net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			}
+			case GAZE -> {
+				if (now < ready[2] || !net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+					return false;
+				}
+				if (!VampireBlood.afford(player, GAZE_MB)) {
+					VampireBlood.lack(player);
+					return false;
+				}
 				// (0.7.632) Jaymo's Powers fires it (its FrostBeam, out of the eyes, red, for a second)
+				VampireBlood.drain(player, GAZE_MB);
 				player.addTag(GAZE_TAG);
 				ready[2] = now + GAZE_COOLDOWN;
 				return true;
-			} else if (which == 3) {
+			}
+			case FEED -> {
 				// (0.7.634) Feed: the grab, the throw, or a bite (BloodGrab.feed)
 				return BloodGrab.feed(player);
 			}
-		} else if (g.wolf()) {
-			boolean beast = WerewolfPlayers.beast(player);
-			if (which == 0 && leap(level, player, beast)) {
-				ready[0] = now + LEAP_COOLDOWN;
-				return true;
-			} else if (which == 1 && TreeLocks.check(player, TreeLocks.Lock.NIGHT_POUND)) {
-				// (Andy's skill-tree locks) the Groundpound and the Howl are learned: Night Pound
-				howl(level, player, beast);
-				ready[1] = now + HOWL_COOLDOWN;
-				return true;
+			case BAT -> {
+				return com.jaymoskingdoms.nightforms.NightForms.cast(player, com.jaymoskingdoms.nightforms.NightForms.BAT);
+			}
+			case COLONY -> {
+				return com.jaymoskingdoms.nightforms.NightForms.cast(player, com.jaymoskingdoms.nightforms.NightForms.COLONY);
+			}
+			case MIST -> {
+				return com.jaymoskingdoms.nightforms.NightForms.cast(player, com.jaymoskingdoms.nightforms.NightForms.MIST);
+			}
+			case STARE -> {
+				return com.jaymoskingdoms.nightforms.NightForms.cast(player, com.jaymoskingdoms.nightforms.NightForms.STARE);
+			}
+			default -> {
+				return ClawArts.cast(player, which);
 			}
 		}
-		return false;
 	}
 
 	/** Thrown by another leap ({@link BloodLeap}): no fall damage until they land, as after a dash. */
@@ -557,15 +656,15 @@ public final class NightGifts {
 		player.connection.send(new ClientboundSetEntityMotionPacket(player));
 	}
 
-	/** {@code O}, a vampire: Blood Dash. */
-	private static boolean dash(ServerLevel level, ServerPlayer player) {
+	/** The Blood Dash; {@code boosted} out of mist ({@link NightFlow#MIST_LEAP_BOOST}). */
+	private static boolean dash(ServerLevel level, ServerPlayer player, boolean boosted) {
 		boolean air = !player.onGround() && !player.isInWater();
 		if (air && !AIR_DASHED.add(player.getUUID())) {
 			return false;
 		}
 		Vec3 look = player.getLookAngle();
 		// (0.7.88) night-deep: a Nightborn in the dark goes further
-		double deep = NightbornBlood.deep(player) ? NightbornBlood.DEEP_DASH : 1.0;
+		double deep = (NightbornBlood.deep(player) ? NightbornBlood.DEEP_DASH : 1.0) * (boosted ? NightFlow.MIST_LEAP_BOOST : 1.0);
 		Vec3 v;
 		if (player.getXRot() < LOOK_UP) {
 			v = new Vec3(look.x * DASH_LEAP_ALONG * deep, DASH_LEAP_UP, look.z * DASH_LEAP_ALONG * deep);
@@ -587,7 +686,7 @@ public final class NightGifts {
 		return true;
 	}
 
-	/** {@code P} in the air, a vampire: Groundpound. */
+	/** In the air, a vampire: Groundpound. */
 	private static boolean pound(ServerLevel level, ServerPlayer player) {
 		if (player.onGround() || player.isInWater() || POUNDING.contains(player.getUUID())) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.night.pound_air").withStyle(ChatFormatting.DARK_RED));
@@ -612,6 +711,7 @@ public final class NightGifts {
 		boolean deep = NightbornBlood.deep(player);
 		double radius = deep ? POUND_RADIUS * NightbornBlood.DEEP_POUND_RADIUS : POUND_RADIUS;
 		double push = deep ? POUND_PUSH * NightbornBlood.DEEP_POUND_PUSH : POUND_PUSH;
+		List<LivingEntity> thrown = new ArrayList<>();
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> e != player && e.isAlive()
 			&& !(e instanceof ArmorStand) && !(e instanceof Player p && (p.isCreative() || p.isSpectator())))) {
 			double dx = e.getX() - player.getX(), dz = e.getZ() - player.getZ();
@@ -624,7 +724,10 @@ public final class NightGifts {
 			e.knockback(push * share, -dx, -dz, level.damageSources().playerAttack(player), 0.0F);
 			e.setDeltaMovement(e.getDeltaMovement().add(0.0, 0.35 * share, 0.0));
 			e.needsSync = true;
+			thrown.add(e);
 		}
+		// (the groundpound into a rend: those it threw can be torn at before they land)
+		NightFlow.pounded(player, thrown);
 		level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY(), player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		for (int i = 0; i < 32; i++) {
 			double a = i * Mth.TWO_PI / 32.0;
@@ -751,6 +854,7 @@ public final class NightGifts {
 				player.removeAttached(Vampires.BITTEN);
 				Vampires.Kind kind = what.equalsIgnoreCase("dhampir") ? Vampires.Kind.DHAMPIR : Vampires.Kind.PLAYER;
 				player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(kind.name().toLowerCase(Locale.ROOT), nightNo, 0L));
+				VampireBlood.wake(player);
 			}
 			case "werewolf", "wolfblood" -> {
 				player.removeAttached(Vampires.VAMPIRE);

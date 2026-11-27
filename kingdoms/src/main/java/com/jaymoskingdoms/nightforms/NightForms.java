@@ -4,7 +4,6 @@ import com.jaymoskingdoms.BossBars;
 import com.jaymoskingdoms.BloodGrab;
 import com.jaymoskingdoms.HudBars;
 import com.jaymoskingdoms.NightGifts;
-import com.jaymoskingdoms.VampirePlayers;
 import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -12,9 +11,10 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.NightFlow;
 import com.jaymoskingdoms.Parties;
 import com.jaymoskingdoms.Skills;
-import com.jaymoskingdoms.TalkNet;
+import com.jaymoskingdoms.VampireBlood;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,7 +26,6 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -59,16 +58,18 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The vampire player's shapes of the night, further night gifts ({@link NightGifts}) for a full vampire (not a dhampir). Sneak and
- * {@code O} (the Blood Dash key) opens a menu on the talk screen; sneak and {@code O} in a shape turns them back. Each shape costs
- * blood, paid in the food level a bite fills ({@link VampirePlayers}), and then makes them wait. They need a few points to spare.
+ * The vampire player's shapes of the night, further night gifts ({@link NightGifts}) for a full vampire (not a dhampir). Each is
+ * a move on the skill bar ({@code night_bat}, {@code night_colony}, {@code night_mist}, {@code night_stare}; the shape menu and
+ * sneak and {@code O} are gone), and pressing a shape's move while in a shape turns them back. Each shape costs blood, in
+ * millibuckets ({@link VampireBlood}), and then makes them wait. They need a little to spare ({@link #KEEP}).
  * <ul>
  * <li><b>Bat</b> ({@link #BAT_TICKS}): a small body that flies. A vanilla bat is drawn in their place (a puppet that follows them,
  * unhurtable; a blow on it is a blow on them) and their own body is not drawn. Seeing the living through walls is blood vision's
- * already. It drinks a point of blood now and then.</li>
+ * already. It drinks {@link #BAT_DRAIN_MB} mB now and then.</li>
  * <li><b>Colony</b>: a swarm of bats lifts one foe in sight up ({@link #LIFT_TICKS}) and drops it. Players only where
  * player-versus-player is allowed, never a party member.</li>
- * <li><b>Mist</b> ({@link #MIST_TICKS}): nothing can hurt them and they can hurt nothing; they drift slowly.</li>
+ * <li><b>Mist</b> ({@link #MIST_TICKS}): nothing can hurt them and they can hurt nothing; they drift slowly. It can end in a
+ * leap ({@link NightFlow#MIST_WINDOW}).</li>
  * <li><b>The stare</b> fixes the eyes ({@link NightGaze}).</li>
  * <li><b>The riposte</b>: crouch just before a blow lands ({@link #RIPOSTE_WINDOW} ticks) and it finds only bats: they are a few
  * blocks off. (A player with the Slip perk uses Slip instead.)</li>
@@ -81,17 +82,17 @@ public final class NightForms {
 	public static final String PUPPET_TAG = "jaymoskingdoms_night_puppet";
 
 	// ---- tuning ----
-	/** The blood (food points) each costs (at night three quarters). */
-	static final int BAT_COST = 3, MIST_COST = 4, COLONY_COST = 6, STARE_COST = 2, RIPOSTE_COST = 3;
-	/** The food level they must keep after paying (a shape never starves them). */
-	static final int KEEP = 3;
+	/** The blood (mB: the old food points, a hundred each) each costs (at night three quarters). */
+	static final int BAT_COST = 300, MIST_COST = 400, COLONY_COST = 600, STARE_COST = 200, RIPOSTE_COST = 300;
+	/** The blood they must keep after paying (mB; a shape never starves them). */
+	static final int KEEP = 300;
 	/** How long each lasts (ticks). */
 	static final int BAT_TICKS = 1200, MIST_TICKS = 100;
 	/** How long they must wait after each (ticks). */
 	static final long BAT_COOLDOWN = 300L, MIST_COOLDOWN = 600L, COLONY_COOLDOWN = 700L, STARE_COOLDOWN = 200L, RIPOSTE_COOLDOWN = 400L;
-	/** The bat's size (added to the scale: the body is this much smaller), how often its flight drinks a point (ticks), and its flight and the mist's (fly speed). */
+	/** The bat's size (added to the scale: the body is this much smaller), how often its flight drinks (ticks) and how much (mB), and its flight and the mist's (fly speed). */
 	static final double BAT_SCALE = -0.7;
-	static final int BAT_DRAIN_EVERY = 60;
+	static final int BAT_DRAIN_EVERY = 60, BAT_DRAIN_MB = 100;
 	static final float BAT_FLY = 0.04F, MIST_FLY = 0.02F;
 	/** The colony: bats, ticks the foe is lifted, ticks the swarm stays, the lift's speed, how far it finds a foe (blocks) and how true the aim must be (cosine). */
 	static final int COLONY_BATS = 9, LIFT_TICKS = 26, COLONY_END = 44;
@@ -102,8 +103,6 @@ public final class NightForms {
 	static final double RIPOSTE_REACH = 6.0;
 	/** The slow fall they get when a shape ends in the air (ticks). */
 	static final int FALL_TICKS = 60;
-	/** How long a menu waits for an answer (ticks). */
-	static final long MENU_TICKS = 1200L;
 
 	/** The colour of the blood. */
 	public static final int BLOOD = 0x8A0303;
@@ -147,16 +146,11 @@ public final class NightForms {
 		}
 	}
 
-	/** An open menu: the options, and when it lapses. */
-	private record Open(List<String> kinds, long until) {
-	}
-
 	private static final Map<UUID, Active> ACTIVE = new HashMap<>();
 	/** Puppet and swarm bats (their own id) and whose they are. */
 	private static final Map<UUID, UUID> PUPPETS = new HashMap<>();
 	private static final List<Swarm> SWARMS = new ArrayList<>();
 	private static final Map<String, Long> READY = new HashMap<>();
-	private static final Map<UUID, Open> MENUS = new HashMap<>();
 	/** Who is crouching, and when they last began to. */
 	private static final Set<UUID> SNEAKING = new HashSet<>();
 	private static final Map<UUID, Long> PRESSED = new HashMap<>();
@@ -175,14 +169,14 @@ public final class NightForms {
 		return p.getAttachedOrElse(FORM, "");
 	}
 
-	/** The blood they have: their food level (a bite fills it, and ordinary food gives a vampire nothing). */
+	/** The blood they have, in mB ({@link VampireBlood}: a bite fills it, and ordinary food gives a vampire nothing). */
 	static int blood(Player p) {
-		return p.getFoodData().getFoodLevel();
+		return VampireBlood.get(p);
 	}
 
-	/** Pays {@code by} of blood. */
+	/** Pays {@code by} mB of blood. */
 	static void spend(ServerPlayer p, int by) {
-		p.getFoodData().setFoodLevel(Math.max(0, blood(p) - by));
+		VampireBlood.drain(p, by);
 	}
 
 
@@ -211,7 +205,6 @@ public final class NightForms {
 			PUPPETS.clear();
 			SWARMS.clear();
 			READY.clear();
-			MENUS.clear();
 			SNEAKING.clear();
 			PRESSED.clear();
 		});
@@ -254,79 +247,87 @@ public final class NightForms {
 		HudBars.gauge(p, "night_form", left / (float) Math.max(1L, a.end - a.start), HudBars.DARK_RED, Component.translatable("bar.jaymoskingdoms.night_form"), null);
 	}
 
-	// ---- the menu ----
+	// ---- the moves on the bar ----
 
-	/** The open-air crouch-use: back to themselves when in a shape, else the menu. */
-	public static boolean menu(ServerPlayer p) {
+	/** The kinds a bar move can name. */
+	public static final String COLONY = "colony", STARE = "stare";
+
+	/** What the shape or move {@code kind} costs a full vampire to start (mB, by day; at night three quarters), for the controls page. */
+	public static int baseCost(String kind) {
+		return switch (kind) {
+			case BAT -> BAT_COST;
+			case MIST -> MIST_COST;
+			case COLONY -> COLONY_COST;
+			case STARE -> STARE_COST;
+			default -> 0;
+		};
+	}
+
+	/** Whether the move {@code kind} could go now: its blood, its wait, a foe for the colony, eyes not fixed yet for the stare. */
+	private static boolean open(ServerPlayer p, ServerLevel level, String kind) {
+		return switch (kind) {
+			case BAT -> canAfford(p, level, BAT_COST) && ready(p, BAT);
+			case MIST -> canAfford(p, level, MIST_COST) && ready(p, MIST);
+			case COLONY -> canAfford(p, level, COLONY_COST) && ready(p, COLONY) && foe(p, level) != null;
+			case STARE -> canAfford(p, level, STARE_COST) && ready(p, STARE) && !NightGaze.armed(p);
+			default -> false;
+		};
+	}
+
+	/**
+	 * A shape's move on the skill bar ({@code night_bat}, {@code night_colony}, {@code night_mist}, {@code night_stare}): in a
+	 * shape it turns them back (and starts no wait); otherwise it takes the shape or sends the colony or fixes the eyes. Whether
+	 * it went (nothing: the bar's cooldown doesn't start).
+	 */
+	public static boolean cast(ServerPlayer p, String kind) {
 		if (!vampire(p) || !p.isAlive() || p.isSpectator() || !(p.level() instanceof ServerLevel level) || p.hasAttached(BloodGrab.GRABBING)) {
 			return false;
 		}
 		if (ACTIVE.containsKey(p.getUUID())) {
 			end(p, false);
-			return true;
-		}
-		if (!ServerPlayNetworking.canSend(p, TalkNet.Ask.TYPE)) {
 			return false;
 		}
-		List<String> kinds = List.of(BAT, "colony", MIST, "stare", "close");
-		List<Component> options = new ArrayList<>();
-		List<Boolean> enabled = new ArrayList<>();
-		for (String kind : kinds) {
-			options.add(Component.translatable("talk.jaymoskingdoms.nightform.menu." + kind));
-			enabled.add(open(p, level, kind));
-		}
-		MENUS.put(p.getUUID(), new Open(kinds, level.getGameTime() + MENU_TICKS));
-		ServerPlayNetworking.send(p, new TalkNet.Ask(p.getId(), Component.translatable("talk.jaymoskingdoms.nightform.menu.speaker"),
-			Component.translatable("talk.jaymoskingdoms.nightform.menu.ask"), options, enabled));
-		return true;
-	}
-
-	private static boolean open(ServerPlayer p, ServerLevel level, String kind) {
-		return switch (kind) {
-			case BAT -> canAfford(p, level, BAT_COST) && ready(p, BAT);
-			case MIST -> canAfford(p, level, MIST_COST) && ready(p, MIST);
-			case "colony" -> canAfford(p, level, COLONY_COST) && ready(p, "colony") && foe(p, level) != null;
-			case "stare" -> canAfford(p, level, STARE_COST) && ready(p, "stare") && !NightGaze.armed(p);
-			default -> true;
-		};
-	}
-
-	/** An answer on the shape menu; false when it was not one. */
-	public static boolean answer(ServerPlayer p, TalkNet.Answer answer) {
-		Open open = MENUS.get(p.getUUID());
-		if (open == null || answer.entityId() != p.getId()) {
-			return false;
-		}
-		MENUS.remove(p.getUUID());
-		if (answer.option() < 0 || answer.option() >= open.kinds().size() || p.level().getGameTime() > open.until() || !(p.level() instanceof ServerLevel level)
-			|| !vampire(p) || !p.isAlive() || ACTIVE.containsKey(p.getUUID())) {
-			return true;
-		}
-		String kind = open.kinds().get(answer.option());
 		if (!open(p, level, kind)) {
-			return true;
+			why(p, level, kind);
+			return false;
 		}
 		long now = level.getGameTime();
 		switch (kind) {
 			case BAT -> enter(p, level, BAT, BAT_COST, BAT_COOLDOWN, BAT_TICKS);
 			case MIST -> enter(p, level, MIST, MIST_COST, MIST_COOLDOWN, MIST_TICKS);
-			case "colony" -> {
+			case COLONY -> {
 				LivingEntity foe = foe(p, level);
 				if (foe != null) {
 					spend(p, cost(level, COLONY_COST));
-					READY.put(key(p, "colony"), now + COLONY_COOLDOWN);
+					READY.put(key(p, COLONY), now + COLONY_COOLDOWN);
 					colony(p, level, foe);
 				}
 			}
-			case "stare" -> {
+			case STARE -> {
 				spend(p, cost(level, STARE_COST));
-				READY.put(key(p, "stare"), now + STARE_COOLDOWN);
+				READY.put(key(p, STARE), now + STARE_COOLDOWN);
 				NightGaze.arm(p);
 			}
 			default -> {
+				return false;
 			}
 		}
 		return true;
+	}
+
+	/** A word above the hotbar for a move that could not go. */
+	private static void why(ServerPlayer p, ServerLevel level, String kind) {
+		int base = switch (kind) {
+			case BAT -> BAT_COST;
+			case MIST -> MIST_COST;
+			case COLONY -> COLONY_COST;
+			default -> STARE_COST;
+		};
+		if (!canAfford(p, level, base)) {
+			VampireBlood.lack(p);
+		} else if (kind.equals(COLONY) && ready(p, COLONY)) {
+			p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightform.no_foe").withStyle(ChatFormatting.DARK_RED));
+		}
 	}
 
 	// ---- the shapes ----
@@ -361,8 +362,13 @@ public final class NightForms {
 		}
 	}
 
-	/** The shape ends: they are themselves again (spent after the wolf if it ran its course). */
-	static void end(ServerPlayer p, boolean spent) {
+	/** Whether {@code p} is in mist now. */
+	public static boolean inMist(Player p) {
+		return MIST.equals(form(p));
+	}
+
+	/** The shape ends: they are themselves again (spent after the wolf if it ran its course); mist ending opens its leap ({@link NightFlow}). */
+	public static void end(ServerPlayer p, boolean spent) {
 		Active a = ACTIVE.remove(p.getUUID());
 		NightGaze.disarm(p.getUUID(), p.level().getServer());
 		PRESSED.remove(p.getUUID());
@@ -375,6 +381,9 @@ public final class NightForms {
 		if (a.puppet != null) {
 			PUPPETS.remove(a.puppet.getUUID());
 			a.puppet.discard();
+		}
+		if (a.form.equals(MIST) && p.isAlive()) {
+			NightFlow.open(p, NightFlow.Link.MIST_LEAP, NightFlow.MIST_WINDOW);
 		}
 		setSize(p, 0.0);
 		if (a.flight) {
@@ -520,7 +529,7 @@ public final class NightForms {
 		switch (a.form) {
 			case BAT -> {
 				if (age > 0 && age % BAT_DRAIN_EVERY == 0) {
-					spend(p, 1);
+					spend(p, BAT_DRAIN_MB);
 					if (blood(p) <= 0) {
 						end(p, false);
 					}
