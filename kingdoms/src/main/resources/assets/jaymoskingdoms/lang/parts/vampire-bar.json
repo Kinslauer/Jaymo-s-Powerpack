@@ -26,6 +26,6 @@
   "spell.jaymoskingdoms.night_pounce.description": "Fly at the foe in front of you and bear it down: it is pinned under you for a moment. Costs 150 mB. After a Blood Dash it finds a foe further off and costs half.",
   "spell.jaymoskingdoms.night_roar.name": "Roar",
   "spell.jaymoskingdoms.night_roar.description": "Everything near that can fear does; for a while you are stronger and quicker, your claws open two wounds a blow and you heal twice as fast. Costs 300 mB.",
-  "gui.jaymoskingdoms.story.hint.209": "Every move a vampire has sits on the skill bar beside the hotbar: the shapes, the stare, the claws and the roar. Each one costs blood, and a move run straight into the next costs half.",
-  "gui.jaymoskingdoms.story.hint.210": "A vampire's hunger is a row of dark vials where the food bar was, two thousand millibuckets in all. Bites, bottles of blood and spilt blood fill it; moves, shapes and the sun drain it. Below 200 it is starving."
+  "gui.jaymoskingdoms.story.hint.210": "Every move a vampire has sits on the skill bar beside the hotbar: the shapes, the stare, the claws and the roar. Each one costs blood, and a move run straight into the next costs half.",
+  "gui.jaymoskingdoms.story.hint.211": "A vampire's hunger is a row of dark vials where the food bar was, two thousand millibuckets in all. Bites, bottles of blood and spilt blood fill it; moves, shapes and the sun drain it. Below 200 it is starving."
 }

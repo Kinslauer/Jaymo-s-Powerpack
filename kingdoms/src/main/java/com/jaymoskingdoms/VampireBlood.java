@@ -1,10 +1,14 @@
 package com.jaymoskingdoms;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -30,6 +34,9 @@ import net.minecraft.world.entity.player.Player;
  * ({@link #starving}); with none they can do nothing that costs.</li>
  * <li>It runs down a little as time passes ({@link #DRAIN_MB} every {@link #DRAIN_EVERY} ticks: two nights from full to
  * starving, as the old two nights without a bite were), and a little faster in the open sun.</li>
+ * <li>What exertion wears off the food bar (sprinting, fighting, mending, blood fever's hunger near people) is taken from
+ * the reserve instead, {@link #PER_FOOD} mB a point; a starving vampire's bar is held at {@link #STARVING_FOOD}, so they stop
+ * mending.</li>
  * <li>The vanilla food bar is kept full and ignored for a full vampire (ordinary food already gives them nothing:
  * {@code VampireFoodMixin}). A dhampir has none of this: they keep the food bar, and every move is free to them.</li>
  * </ul>
@@ -50,6 +57,11 @@ public final class VampireBlood {
 	static final int SUN_DRAIN_MB = 1;
 	/** The food bar is put back to full this often (ticks). */
 	static final int FOOD_EVERY = 4;
+	/**
+	 * The food bar a starving vampire is held at instead of full: under vanilla's 18, so the body stops mending itself, as it
+	 * did when the old food bar ran low.
+	 */
+	static final int STARVING_FOOD = 17;
 	/** At or over this (mB) a vampire counts as nourished (a thrown body breaks what is softer than stone). */
 	public static final int NOURISHED = 1600;
 
@@ -57,11 +69,15 @@ public final class VampireBlood {
 	public static final AttachmentType<Integer> BLOOD = AttachmentRegistry.create(JaymosKingdoms.id("vampire_blood"),
 		builder -> builder.persistent(Codec.INT).initializer(() -> START).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
+	/** The food level each full vampire was last put back to, to see how far exertion has worn it down since. */
+	private static final Map<UUID, Integer> KEPT_AT = new HashMap<>();
+
 	private VampireBlood() {
 	}
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(VampireBlood::tick);
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> KEPT_AT.remove(handler.player.getUUID()));
 	}
 
 	/** A full vampire: has the reserve and no food bar (a dhampir, a mortal and a werewolf are not); on either side. */
@@ -167,12 +183,21 @@ public final class VampireBlood {
 			if (!full(player) || !player.isAlive()) {
 				continue;
 			}
-			// the food bar stays full and counts for nothing (saturation none, so the bar's own healing stays the slow kind)
+			// the food bar stays full and counts for nothing (saturation none, so the bar's own healing stays the slow kind).
+			// What exertion wears off it (sprinting, fighting, mending, the hunger near people) comes out of the reserve
+			// instead, a food point's worth of mB for each point lost, as the old food bar paid it.
 			if ((now + player.getId()) % FOOD_EVERY == 0) {
 				var food = player.getFoodData();
-				if (food.getFoodLevel() != 20) {
-					food.setFoodLevel(20);
+				int kept = KEPT_AT.getOrDefault(player.getUUID(), 20);
+				int worn = kept - food.getFoodLevel();
+				if (worn > 0 && !player.isCreative() && !player.isSpectator()) {
+					drain(player, worn * PER_FOOD);
 				}
+				int keep = starving(player) ? STARVING_FOOD : 20;
+				if (food.getFoodLevel() != keep) {
+					food.setFoodLevel(keep);
+				}
+				KEPT_AT.put(player.getUUID(), keep);
 				if (food.getSaturationLevel() > 0.0F) {
 					food.setSaturation(0.0F);
 				}
