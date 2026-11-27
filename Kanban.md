@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 19:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 20:22). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,16 +18,16 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-1|nycto-1]] · for any · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · for codex · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for codex · open
+- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · for ☀️ Apollo · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/legends-p6-core-animations|legends-p6-core-animations]] · codex · claimed
 
 
 ## In review
