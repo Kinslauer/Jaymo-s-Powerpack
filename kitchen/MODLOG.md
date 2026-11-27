@@ -3031,3 +3031,9 @@ Andy: "there should be a way to dismember them from the inventory screen so you 
 
 - `MobRagdolls.thrown(mob, vx, vy, vz)`: Jaymo's Powers' air combo knocks a mob limp (or takes one already limp) and throws the body at that speed, not cut to the knockback caps (a throw on purpose, as players' `LivingRagdolls.knock`), with a flick at the head (`THROWN_TUMBLE` 0.2) so it turns over in the air; its limp time starts again so it doesn't get up in mid-air. Does nothing with Ragdollified Reactions loaded.
 - Built; not played.
+
+## 0.7.13 (2026-11-27): Burning bodies no longer spread fire (#2315)
+
+- A burning corpse no longer lights anything around it (Andy: "bodies that catch fire should no longer spread the flame. it gets far too rampant far too quickly and often burns loot"). It still burns down to bone and ash on its own and drops its worn gear in the ash. Fire from anything else spreads as it did (the faster fire from Kingdoms is untouched).
+- `CorpseEntity`: `spreadFire`, `burnable`, `flammableBeside` and the saved `FiresLit` count removed.
+- Built; not played.
