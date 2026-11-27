@@ -101,6 +101,11 @@ public final class GrownTrees {
 				return false;
 			}
 		}
+		// (as the world generates, none grows into or against a building, a road or a field: Overgrowth; handled, so the
+		// game doesn't grow its own there instead)
+		if (Overgrowth.crowds(level, room(origin, shape))) {
+			return true;
+		}
 		for (BlockPos foot : shape.feet) {
 			BlockPos below = origin.offset(foot).below();
 			BlockState dirt = tree.belowTrunkProvider().value().getState(level, random, below);
@@ -116,6 +121,23 @@ public final class GrownTrees {
 		}
 		leaves(tree, level, random, origin, shape);
 		return true;
+	}
+
+	/** The room a tree at {@code origin} takes: its wood, and {@link Overgrowth#LEAF_ROOM} past it for its leaves. */
+	private static net.minecraft.world.level.levelgen.structure.BoundingBox room(BlockPos origin, Shape shape) {
+		int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
+		int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
+		for (BlockPos l : shape.logs.keySet()) {
+			minX = Math.min(minX, l.getX());
+			minY = Math.min(minY, l.getY());
+			minZ = Math.min(minZ, l.getZ());
+			maxX = Math.max(maxX, l.getX());
+			maxY = Math.max(maxY, l.getY());
+			maxZ = Math.max(maxZ, l.getZ());
+		}
+		int r = Overgrowth.LEAF_ROOM;
+		return new net.minecraft.world.level.levelgen.structure.BoundingBox(origin.getX() + minX - r, origin.getY() + minY,
+			origin.getZ() + minZ - r, origin.getX() + maxX + r, origin.getY() + maxY + r, origin.getZ() + maxZ + r);
 	}
 
 	/** Air, plants, snow, leaves or a sapling: a tree may grow through it. */
