@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:54). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:55). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -74,13 +74,13 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-p7|black-panther-p7]] · for any · blocked
 - [ ] [[Inbox/black-panther-p8|black-panther-p8]] · for any · blocked
 - [ ] [[Inbox/black-panther-p9|black-panther-p9]] · for any · blocked
-- [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · blocked
 - [ ] [[Inbox/black-panther-r2|black-panther-r2]] · for any · blocked
 - [ ] [[Inbox/black-panther-r3|black-panther-r3]] · for any · blocked
 - [ ] [[Inbox/black-panther-r4|black-panther-r4]] · for any · blocked
 - [ ] [[Inbox/black-panther-r5|black-panther-r5]] · for any · blocked
 - [ ] [[Inbox/black-panther-r6|black-panther-r6]] · for any · blocked
 - [ ] [[Inbox/black-panther-r7|black-panther-r7]] · for any · blocked
+- [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
