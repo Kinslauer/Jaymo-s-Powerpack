@@ -1,9 +1,12 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 23:57). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 00:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
 
 ## Waiting on you
+
+**Ready to merge** (say "merge" in the project chat):
+- [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · PR #2255 · ready
 
 **Questions for you:**
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-26 20:05 ON HOLD until wave 4 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
@@ -42,7 +45,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-15 waiting for a bot, 8 being built, 3 in review: see [[Kanban]].
+15 waiting for a bot, 7 being built, 3 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
