@@ -18509,3 +18509,9 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - Who speaks plainly: clerics, librarians, cartographers, rulers, knights and above, hermit wizards, the Z Fighter characters, and 15 in a hundred others who learned their letters anyway (by who they are, so a villager always talks the same way). Goblins, orcs and old-tongued knights keep their own speech; foreigners still come out in their own tongue first.
 - Hand-written country versions of any line can go in lang as `dialect.jaymoskingdoms.rustic.<key>` (Dialects#rustic, same client step as goblin and old-tongue talk).
 - Built (compileJava, compileClientJava); not played.
+
+## 0.14.15 (2026-11-27): Loading hint for Combo Clash's combat mode (#2334)
+
+- New loading hint 299 (lang part `combo-clash.json`; `StoryHoldScreen.HINTS` 299). It covers the ` key, the 4-hit
+  string, the uppercut and the slam, Alt to dash or break free, and F to block or perfect block.
+- Built; not played.
