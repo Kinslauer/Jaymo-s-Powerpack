@@ -303,11 +303,13 @@ final class Castle {
 			f.set(level, h - 1, y, z0 + 1, f.turn(Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.WEST)));
 		}
 		torches(level, f, -h + 1, h - 1, z0 + 2, z0 + d - 1, 2);
-		f.set(level, 0, KEEP_UPPER - 1, z0 + d / 2, Blocks.LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true));
-		BlockPos throne = throneRoom(level, f, p, kingdom, -3, 3, z0 + 1, z0 + d - 1, 0);
-		BlockPos cellar = panicRoom(level, f, p, random, 2, z0 + d - 1, 0, z0 + d - 4);
-		List<BlockPos> posts = List.of(f.at(-h, KEEP_WALL + 1, z0 + d / 2), f.at(h, KEEP_WALL + 1, z0 + d / 2));
-		return new Keep(throne, cellar, f.at(0, 0, z0 - 2), f.at(0, 0, z0 + d / 2), posts);
+				f.set(level, 0, KEEP_UPPER - 1, z0 + d / 2, Blocks.LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true));
+				BlockPos throne = throneRoom(level, f, p, kingdom, -3, 3, z0 + 1, z0 + d - 1, 0);
+				BlockPos cellar = panicRoom(level, f, p, random, 2, z0 + d - 1, 0, z0 + d - 4);
+				// Posts on the wall walk (KEEP_WALL), not on battlements (KEEP_WALL + 1), so archers can stand and path to them
+							// Move posts sideways to open walk cells (not on the wall block itself)
+							List<BlockPos> posts = List.of(f.at(-h + 1, KEEP_WALL + 1, z0 + d / 2), f.at(h - 1, KEEP_WALL + 1, z0 + d / 2));
+				return new Keep(throne, cellar, f.at(0, 0, z0 - 2), f.at(0, 0, z0 + d / 2), posts);
 	}
 
 	/** A solid 3 x 3 column (a corner tower) from the ground to {@code top}, crenellated. */
@@ -494,14 +496,16 @@ final class Castle {
 		// the keep, at the back of the courtyard
 		Keep inner = keep(level, f, p, kingdom, random, d - KEEP_DEPTH - 1);
 		torches(level, f, -h + 1, h - 1, 2, d - KEEP_DEPTH - 3, 3);
-		List<BlockPos> posts = new ArrayList<>(inner.posts());
-		posts.add(f.at(-h, CURTAIN + 5, 0));
-		posts.add(f.at(h, CURTAIN + 5, 0));
-		posts.add(f.at(-3, CURTAIN + 4, 0));
-		posts.add(f.at(3, CURTAIN + 4, 0));
-		posts.add(f.at(-h + 1, CURTAIN + 1, d / 2));
-		posts.add(f.at(h - 1, CURTAIN + 1, d / 2));
-		return new Keep(inner.throne(), inner.cellar(), f.at(0, 0, -2), f.at(0, 0, 9), List.copyOf(posts));
+				// Posts on the wall walk (CURTAIN + 1), not on the slab (CURTAIN), so archers can stand and path to them
+						// Move posts sideways to open walk cells (not on the wall block itself)
+						List<BlockPos> posts = new ArrayList<>(inner.posts());
+						posts.add(f.at(-h + 1, CURTAIN + 1, 0));
+						posts.add(f.at(h - 1, CURTAIN + 1, 0));
+						posts.add(f.at(-3, CURTAIN + 1, 0));
+						posts.add(f.at(3, CURTAIN + 1, 0));
+						posts.add(f.at(-h + 1, CURTAIN + 1, d / 2));
+						posts.add(f.at(h - 1, CURTAIN + 1, d / 2));
+				return new Keep(inner.throne(), inner.cellar(), f.at(0, 0, -2), f.at(0, 0, 9), List.copyOf(posts));
 	}
 
 	/** A lean-to of bunks along the wall: x {@code x0..x1}, z {@code z0..z1}. */
@@ -581,8 +585,10 @@ final class Castle {
 		f.set(level, -4, chamber, d - 1, Blocks.BOOKSHELF.defaultBlockState());
 		f.set(level, -4, chamber + 1, d - 1, Blocks.BOOKSHELF.defaultBlockState());
 		BlockPos cellar = panicRoom(level, f, p, random, -2, d / 2 + CELLAR_HALF, 0, d / 2);
-		List<BlockPos> posts = List.of(f.at(-3, top + 1, 2), f.at(3, top + 1, d - 2), f.at(-3, top + 1, d - 2));
-		return new Keep(throne, cellar, f.at(0, 0, -2), f.at(0, 0, d / 2), posts);
+				// Posts on the roof floor (top + 1), not on battlements (top + 2), so archers can stand and path to them via the ladder
+						// Move posts sideways to open walk cells (not on the wall block itself)
+						List<BlockPos> posts = List.of(f.at(-3 + 1, top + 1, 2), f.at(3 - 1, top + 1, d - 2), f.at(-3 + 1, top + 1, d - 2));
+				return new Keep(throne, cellar, f.at(0, 0, -2), f.at(0, 0, d / 2), posts);
 	}
 
 	// ---- watchtowers -----------------------------------------------------------------------------------------------
@@ -618,8 +624,10 @@ final class Castle {
 			}
 		}
 		f.set(level, 0, high + 1, 3, f.turn(p.trapdoor().setValue(TrapDoorBlock.HALF, Half.TOP)));
-		f.set(level, 1, high + 2, 1, Blocks.LANTERN.defaultBlockState());
-		return f.at(0, high + 2, 1);
+				f.set(level, 1, high + 2, 1, Blocks.LANTERN.defaultBlockState());
+				// Post on the platform (high + 1), not on the parapet (high + 2), so archers can stand and path to it via the ladder and trapdoor
+						// Move post sideways to an open walk cell (not on the planks)
+						return f.at(1, high + 1, 1);
 	}
 
 	static BlockState byName(String name, Block fallback) {

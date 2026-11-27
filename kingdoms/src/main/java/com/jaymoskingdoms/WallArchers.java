@@ -1,7 +1,9 @@
 package com.jaymoskingdoms;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.phys.AABB;
@@ -33,14 +35,36 @@ final class WallArchers {
 	}
 
 	/** One of {@code keep}'s posts with nobody on it (folk or villager), or any of them. */
-	static BlockPos freePost(ServerLevel level, Castle.Keep keep) {
-		for (BlockPos post : keep.posts()) {
-			if (Workers.near(level, new AABB(post).inflate(2.0), w -> w.isAlive() && w.role() == Folk.ARCHER).isEmpty()) {
-				return post;
+		static BlockPos freePost(ServerLevel level, Castle.Keep keep) {
+			for (BlockPos post : keep.posts()) {
+				if (Workers.near(level, new AABB(post).inflate(2.0), w -> w.isAlive() && w.role() == Folk.ARCHER).isEmpty()) {
+					// Validate the post has standing clearance and is not inside a block
+					if (isPostValid(level, post)) {
+						return post;
+					}
+				}
 			}
+			// Fallback: return first valid post, or first post if none valid
+			for (BlockPos post : keep.posts()) {
+				if (isPostValid(level, post)) {
+					return post;
+				}
+			}
+			return keep.posts().get(level.getRandom().nextInt(keep.posts().size()));
 		}
-		return keep.posts().get(level.getRandom().nextInt(keep.posts().size()));
-	}
+
+		/**
+		 * Checks if a post has valid standing space: 2 blocks of air at the post position,
+		 * and a solid, non-leaves floor block below.
+		 */
+		private static boolean isPostValid(ServerLevel level, BlockPos post) {
+			return level.getBlockState(post).isAir()
+					&& level.getBlockState(post.above()).isAir()
+					&& level.getBlockState(post.below()).isFaceSturdy(level, post.below(), Direction.UP)
+					&& !level.getBlockState(post.below()).is(BlockTags.LEAVES)
+					&& level.getFluidState(post).isEmpty()
+					&& level.getFluidState(post.above()).isEmpty();
+		}
 
 	/** With MCA, one of {@code f}'s villagers made an archer on a free post of {@code keep}, counted in its roster; null if none could be had. */
 	static @Nullable Worker enlist(ServerLevel level, Faction f, Castle.Keep keep) {
