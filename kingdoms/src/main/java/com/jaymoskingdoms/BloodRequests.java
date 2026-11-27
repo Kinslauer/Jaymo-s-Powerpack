@@ -17,13 +17,14 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 /**
  * (0.7.332) Requests, the vampire's side: about once a day the blood asks one thing of its host, in a line on the action
  * bar. By night: {@link #DAWN} (drink before dawn) or {@link #FRIEND} (feed on someone you know: a player). By day:
- * {@link #SUN} (stay out of the sun today) or {@link #PRIEST} (stay away from the priest: no cleric within
+ * {@link #FAVOURITE} (night: drink the blood you favour, {@link Favourites}: a bite of theirs, or a bottle of their
+ * blood) or {@link #SUN} (stay out of the sun today) or {@link #PRIEST} (stay away from the priest: no cleric within
  * {@link #PRIEST_RANGE} blocks). Keeping to it before the deadline eases the fever and the surrender a little
  * ({@link #KEPT_EASE}, {@link #KEPT_SURRENDER}); ignoring it raises the fever ({@link #BROKEN_RISE}). Kept (it persists
  * with the player). No screen entry: only the action bar.
  */
 public final class BloodRequests {
-	public static final String NONE = "", DAWN = "dawn", FRIEND = "friend", SUN = "sun", PRIEST = "priest";
+	public static final String NONE = "", DAWN = "dawn", FRIEND = "friend", FAVOURITE = "favourite", SUN = "sun", PRIEST = "priest";
 	/** What the blood is asking now (kind), when it's due (Overworld clock), when it may ask again (clock), and whether it's been broken. */
 	record State(String kind, long deadline, long nextAt, boolean broken) {
 		static final Codec<State> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -98,6 +99,9 @@ public final class BloodRequests {
 			if (anyoneElse(player)) {
 				kinds.add(FRIEND);
 			}
+			if (favourite(player) != null) {
+				kinds.add(FAVOURITE);
+			}
 		} else {
 			deadline = today + Vampires.NIGHT_FROM + (t >= Vampires.NIGHT_TO ? 24000L : 0L);
 			kinds.add(SUN);
@@ -117,9 +121,32 @@ public final class BloodRequests {
 		if (s == null || s.kind().isEmpty()) {
 			return;
 		}
-		if (DAWN.equals(s.kind()) || FRIEND.equals(s.kind()) && target instanceof ServerPlayer) {
+		if (DAWN.equals(s.kind()) || FRIEND.equals(s.kind()) && target instanceof ServerPlayer
+			|| FAVOURITE.equals(s.kind()) && target.getUUID().toString().equals(Favourites.favourite(player))) {
 			save(player, kept(player, s));
 		}
+	}
+
+	/** A bottle of {@code donor}'s blood drunk (Kitchen's bottle remembers whose it is): it keeps "drink the blood you favour" if they are the favourite. */
+	static void drankOf(ServerPlayer player, java.util.UUID donor) {
+		State s = player.getAttached(STATE);
+		if (s != null && FAVOURITE.equals(s.kind()) && donor.toString().equals(Favourites.favourite(player))) {
+			save(player, kept(player, s));
+		}
+	}
+
+	/** The favourite the blood fixed on, if they are in the world and mortal (a player to drink from). */
+	private static @org.jspecify.annotations.Nullable ServerPlayer favourite(ServerPlayer player) {
+		String id = Favourites.favourite(player);
+		if (id == null) {
+			return null;
+		}
+		for (ServerPlayer other : player.level().players()) {
+			if (other != player && other.getUUID().toString().equals(id) && Vampires.mortal(other)) {
+				return other;
+			}
+		}
+		return null;
 	}
 
 	private static State kept(ServerPlayer player, State s) {

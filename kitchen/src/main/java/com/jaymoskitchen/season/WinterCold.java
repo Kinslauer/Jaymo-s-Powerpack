@@ -17,6 +17,7 @@ public final class WinterCold {
 	/** Worn clothing that keeps the cold off (body heat counts the pieces). */
 	public static final TagKey<Item> WARM_CLOTHING = TagKey.create(Registries.ITEM, JaymosKitchen.id("warm_clothing"));
 	private static Predicate<Player> coldProof = player -> false;
+	private static final java.util.List<Predicate<Player>> MORE_COLD_PROOF = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	private WinterCold() {
 	}
@@ -28,6 +29,19 @@ public final class WinterCold {
 
 	/** Whether the cold can't touch this player (Kingdoms' Frostborn): {@code BodyHeat} won't push them past chilly. */
 	public static boolean coldProof(Player player) {
-		return coldProof.test(player);
+		if (coldProof.test(player)) {
+			return true;
+		}
+		for (Predicate<Player> proof : MORE_COLD_PROOF) {
+			if (proof.test(player)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** For other mods (by reflection): one more reason the cold can't touch someone (a Frostborn's blood taken, say). */
+	public static void addColdProof(Predicate<Player> proof) {
+		MORE_COLD_PROOF.add(proof);
 	}
 }

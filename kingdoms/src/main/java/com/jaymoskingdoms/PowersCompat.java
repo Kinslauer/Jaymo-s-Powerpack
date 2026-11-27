@@ -3907,6 +3907,39 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * The colour (RGB) of {@code creature}'s blood as Powers' bleeding picks it ({@code BladeBlood.color}, heritage and kind), or
+	 * -1 if it has none to show (no Powers, or it doesn't bleed). Read on either side.
+	 */
+	public static int bloodColour(LivingEntity creature) {
+		lookForBlood();
+		if (bleedsHandle == null || bloodColorHandle == null) {
+			return -1;
+		}
+		try {
+			return (boolean)bleedsHandle.invoke(creature) ? (int)bloodColorHandle.invoke(creature) & 0xFFFFFF : -1;
+		} catch (Throwable e) {
+			return -1;
+		}
+	}
+
+	private static void lookForBlood() {
+		if (lookedForBlood2) {
+			return;
+		}
+		lookedForBlood2 = true;
+		if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			try {
+				Class<?> blood = Class.forName("com.jaymospowers.core.BladeBlood");
+				var lookup = java.lang.invoke.MethodHandles.publicLookup();
+				bleedsHandle = lookup.findStatic(blood, "bleeds", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+				bloodColorHandle = lookup.findStatic(blood, "color", java.lang.invoke.MethodType.methodType(int.class, LivingEntity.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blade blood (older Powers?)", e);
+			}
+		}
+	}
+
 	/** Powers' {@code BladeBlood.squashed(LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle squashedHandle;
 	private static boolean lookedForSquashed;
