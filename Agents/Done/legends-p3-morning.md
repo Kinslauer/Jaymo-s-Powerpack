@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 task: legends-p3-big-symbiote
 pr: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2281
 ---
@@ -24,3 +24,4 @@ Overnight checks by Claude on the Hermes bots' work. One line per check.
 
 ## Notes
 - 2026-11-27 02:25 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-27 05:58 PR #2281 is merged into master; moved to Agents/Done.
