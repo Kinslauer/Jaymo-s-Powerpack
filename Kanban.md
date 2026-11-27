@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:23). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,6 +29,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · changes · fixing review notes
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · changes · fixing review notes
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · 🪶 Quill · #2222 · writing
 
 
 ## In review
@@ -40,7 +41,6 @@ kanban-plugin: board
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
-- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
