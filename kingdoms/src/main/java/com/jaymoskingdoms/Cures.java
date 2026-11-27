@@ -87,6 +87,7 @@ public final class Cures {
 		}
 		boolean vampire = Vampires.isVampire(player);
 		BloodThralls.release(player); // (0.7.332) the rite also frees a thrall
+		Servants.freeAll(player); // and every servant they had
 		player.removeAttached(Vampires.VAMPIRE);
 		player.removeAttached(Vampires.BITTEN);
 		if (vampire) {

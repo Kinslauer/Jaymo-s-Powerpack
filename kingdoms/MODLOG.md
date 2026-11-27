@@ -18307,3 +18307,39 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Make way**: a villager (or folk) whose walk has stalled looks at the next steps of its path; whoever stands on them is asked, in a speech bubble, to move ("Excuse me, coming through", "Move that horse, would you?", "Shoo!"). Someone on foot steps aside off the path for a few seconds and may say sorry; a realm's rider in a doorway or under a roof gets down and takes the horse out to a fence, any other rider moves aside; a loose animal is shooed aside. A player is only asked. Nobody asleep, down, fighting, at the fire, trading or talking with a player moves. MakeWay (new), from Unstick; Workers.step holds the brain while they lead, fetch or stand aside.
 - New loading hint (252).
 - Built; not played.
+
+## 0.13.89 (2026-11-27): Air combo perk text and hint for the enemy step and pull-ups (#2300)
+
+- The Air Combo perk's description names symbiote hosts, the slam sparing friends and villagers, mid-air Yank and tendril pull-ups and the enemy step; loading hint 253 explains the step.
+- A Sorcerer's second jump waits when the press is Powers' enemy step (`SorcererJumpClient`).
+- Built; not played.
+
+## 0.13.90 (2026-11-27): Night's Blood 7: hunters (garlic wreath, garlic draught, hunter's coat, priests' kit) (#2296)
+
+- **Garlic wreath** (`GarlicWreath`): worn in the amulet or head baubles slot, a vampire's bite slips off you (mob and player vampires) and a grab can't take hold; hung on a wall or a door as a block, no vampire passes within a block or so of it, even one that was invited (`OldRules`). Item and block wither in three days (item wear every minute; block dries a stage a day). A block taken down drops as worn as it was. Crafted from four garlic and four vines.
+- **Garlic draught** (`HunterKit`): awkward potion plus garlic (Kingdoms' garlic or Powers' wild garlic, item tag `jaymoskingdoms:garlic`), long with redstone, splash with gunpowder. While Sour Blood lasts, a vampire that bites you retches (nausea, slowness), lets go and gets nothing: no heal, no blood (mB), no feeding, no turning.
+- **Hunter's coat** (`HunterKit.COAT`): a chest piece that turns 60% of bites aside (6 wear each) and no grab takes hold of the wearer. Tailors (shepherds) sell it at level 3; also a grid recipe.
+- **The Lantern Warden's priests** sell the kit (coat, wreath and, with Powers, the hunter's oil) to anyone who has slain a vampire (`HunterKit.SLAYER`, set in `Vampires.died`); the offers are added or taken away each time a priest of a Lantern Warden realm is opened.
+- Garlic (either sort) now flinches a vampire as Kingdoms' garlic did; wild garlic counts.
+- Loading hints 260 to 264.
+- Built; not played. The coat's and wreath's pictures are placeholders recoloured or drawn by script (`tools/gen_ny7_kingdoms.py`).
+
+## 0.13.91 (2026-11-27): Night's Blood 6 - days and nights (#2298)
+
+- **Sleep the day away**: a vampire in a coffin by day, with every player asleep or resting, skips the clock to dusk (`CoffinRest`). A stake into a sleeper still kills. A crypt claims its coffin as the vampire's lair.
+- **Night-cloak**: sold by tailors only (Powers' item, `TailorHats`). Hood up: noon stings (Weakness, smoke, no fire); folk see "a hooded figure" (`NightCloaks`, `Suspicion`, `VampireLooks`). Holy dread is untouched. A lowered hood burns like a bare head.
+- **New moon is theirs** (`NewMoon`): the Elder's rest is halved (hunts twice in the night), Night Bleeders drop near players outdoors, fever climbs 1.5x, leap 1.15x, claws 1.2x.
+- **Hunters seek the lair by day** (`LairHunts`): per-realm suspicion tally fed from `Suspicion`; high suspicion sends guards (stakes, torches) and a priest to the lair. The player hears them through the heartbeat (`BloodFever`). They break into the coffin and shrine. `CoffinKit`: breaking a coffin or shrine bed in survival packs it into a Coffin item; placing it rebuilds the coffin, slabs and the dressed shrine.
+- **Willing turning** (`OldBlood`): Elder's Blood from beating the Elder down (not killing) or bargaining in talk (60 silver, one per 8 days, Initiated or beyond). Drunk under a new moon it lays the bite; turn at next nightfall. Hinted only in gossip, two loose pages, hunters' words and loading hint 274.
+- Loading hints 270-274 (hints 224-269 belong to other patches and are not in this branch).
+- Built; not played.
+
+## 0.13.92 (2026-11-27): Night's Blood 5 - servants and your get (#2299)
+
+- **Thralls** (`Servants`): an MCA villager, or a tamed horse or wolf, held by the stare (`NightGaze`; a held beast walks to you like a villager) and drunk from calmly (`BloodGrab`, `VampirePlayers.drink`, no blow, never infects) on three separate nights becomes your thrall for good. A thrall villager keeps name, home, job and family; on a night spent away from home or at your side its kin come to suspect you (`Suspicion.noticed`, kind `away`, with gossip lines and the realm's tally). Thralls take the four quick orders with no shared tongue (`QuickOrders`, `Followers.takesOrders`, `Comrades.side`); `Bonds` holds the bond (50 to start, a bottle adds 5). A horse or wolf takes them its own way: Come and Help bring it, Wait stands it (a wolf sits), Go sets it on the nearest foe or scouts ahead.
+- **Keeping them sound**: a bottle of blood fed to a thrall (use it on them) heals and tends them. Unfed three days they are unsound (Weakness, Slowness, no riding); unfed ten the link lapses. The priest's cure (`Cures.rite`), your death, or a thrall villager kept in a temple beside a priest frees them; a thrall in an unloaded chunk is freed when it loads.
+- **Ride your thrall by day** (`ThrallRide`, `ThrallRideClient`): sneak-use your coffin by day with an empty hand and a thrall villager within 80 blocks and you lie down and look out through its eyes. Walk, sprint, sneak, jump; the body faces where it goes, the head where you look. Its hands are yours (Andy: "they should play completely as if you were they"): fight, dig, build, open chests and crafting, use what you hold, talk and trade, all measured from its reach (`RideRangeMixin`, block, entity and attack range), and what you shoot or throw leaves from its eyes along its look. It picks up what it passes (nine stacks), hands it over by the coffin, and drops it where Drop is pressed. Wake with Delete (Delete with sneak rides the next thrall). You wake at nightfall, when the thrall is hurt below half or by a blow of 6, dies, falls unsound, or when holy dread or a temple throws you out (Weakness, Slowness, a shake). Your body lies in the coffin and can still be staked. A rider does not count as lying down to sleep the day away (`CoffinRest`), and the coffin's dressed shrine still opens on its candle and skull (`BloodPage`).
+- **Your get** (`Fledglings`): villagers your bite turns are your fledglings. You feel the nearest as kin in sight or not (`Kinship`); idle at night they drift toward you; a death is felt. They may come when you are hunted (`LairHunts.men`, `Hunts.men`, mobs after you), 70% by night, 25% by day. At night they take the quick orders like a thrall. One whose blood age (nights fed plus feedings) outgrows yours by 5 may, on a night, turn on you: it hunts you on sight and heeds no order. They spare you, your thralls and their fellow get in their own hunts (`Vampires.findPrey`).
+- `HolyDread.dreadAt` and `inTemple` take any creature. New key: wake from your thrall (Delete).
+- Loading hints 280-284 (hints 275-279 belong to other patches and are not in this branch).
+- Built; not played.

@@ -115,7 +115,15 @@ public final class HolyDread {
 
 	/** The strongest holy thing near {@code player} (0-1). */
 	static float dread(MinecraftServer server, ServerPlayer player) {
-		ServerLevel level = player.level();
+		return dreadAt(server, player);
+	}
+
+	/**
+	 * The strongest holy thing near {@code who} (0-1): what a vampire player feels, and what a vampire's thrall ridden by day
+	 * ({@link ThrallRide}) stands in.
+	 */
+	static float dreadAt(MinecraftServer server, LivingEntity player) {
+		ServerLevel level = (ServerLevel) player.level();
 		float most = 0.0F;
 		double reach = Math.max(HELD_RANGE, PERSON_RANGE);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(reach), LivingEntity::isAlive)) {
@@ -162,6 +170,24 @@ public final class HolyDread {
 			}
 		}
 		return Math.min(most, 1.0F);
+	}
+
+	/** Whether {@code who} stands within a temple's walls. */
+	static boolean inTemple(MinecraftServer server, LivingEntity who) {
+		ServerLevel level = (ServerLevel) who.level();
+		BlockPos at = who.blockPosition();
+		String world = level.dimension().identifier().toString();
+		for (Temples.Temple t : Temples.all(server)) {
+			Patron patron = t.patronOf();
+			if (patron == null || !t.world().equals(world) || Math.abs(t.center().getY() - at.getY()) > TEMPLE_HEIGHT) {
+				continue;
+			}
+			int r = TempleBuildings.radius(patron);
+			if (Math.max(Math.abs(t.center().getX() - at.getX()), Math.abs(t.center().getZ() - at.getZ())) - r <= 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static float close(double d, double range) {

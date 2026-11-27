@@ -1,0 +1,16 @@
+{
+  "title": "A Hunter's Ledger",
+  "author": "unsigned",
+  "pages": [
+    "Third night out. Crypt found by day, as always: they cannot stand the sun, so we go in with it.\n\nStakes, torches, one priest. No bargains.",
+    "The old one was beaten, not killed. He left a bottle of his own blood on the stones. Dark as wine, still warm.\n\nThe priest smashed it. He says a man who drinks that under a moon with no light is not bitten, he is welcomed.",
+    "Note for the next party: move the coffin if you must, it packs like a chest. They move theirs too."
+  ],
+  "drop": {
+    "entities": [
+      "jaymoskingdoms:night_bleeder",
+      "jaymoskingdoms:blightwing"
+    ],
+    "chance": 0.1
+  }
+}

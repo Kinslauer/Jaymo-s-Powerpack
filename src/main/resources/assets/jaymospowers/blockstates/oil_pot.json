@@ -508,6 +508,42 @@
       "apply": {
         "model": "jaymospowers:block/alchemy/oil_pot_healing_4"
       }
+    },
+    {
+      "when": {
+        "oil": "cursed",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_cursed_1"
+      }
+    },
+    {
+      "when": {
+        "oil": "cursed",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_cursed_2"
+      }
+    },
+    {
+      "when": {
+        "oil": "cursed",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_cursed_3"
+      }
+    },
+    {
+      "when": {
+        "oil": "cursed",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jaymospowers:block/alchemy/oil_pot_cursed_4"
+      }
     }
   ]
 }

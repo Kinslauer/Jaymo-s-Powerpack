@@ -74,7 +74,7 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 
 	/** Called from the render-state mixin: what {@code entity} shows this frame. */
 	public static Integer look(LivingEntity entity) {
-		if (!(entity instanceof Player) || !Vampires.isVampire(entity) || VampireMask.up(entity)) {
+		if (!(entity instanceof Player) || !Vampires.isVampire(entity) || VampireMask.up(entity) || com.jaymoskingdoms.NightCloaks.up(entity)) {
 			// (0.7.332) under the Mask they look like anyone
 			return null;
 		}

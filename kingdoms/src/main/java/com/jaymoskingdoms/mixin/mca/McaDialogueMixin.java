@@ -346,6 +346,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.OldBlood.ANSWER.equals(answer)) {
+			// (Night's Blood) a bargain with the Elder: a bottle of his blood for silver, or why not
+			villager.sendChatMessage(com.jaymoskingdoms.OldBlood.bargain(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.Accusations.ANSWER.equals(answer)) {
 			// (0.7.332) the nearest other player named to the priest, who tests them with holy water
 			villager.getInteractions().stopInteracting();

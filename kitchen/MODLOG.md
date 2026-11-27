@@ -3026,3 +3026,8 @@ Andy: "there should be a way to dismember them from the inventory screen so you 
   rot baring about its share, with a rim of raw dried flesh round the bone and a little grain in it. Same for a body
   a scavenger has eaten down to the bone.
 - Built; not played.
+
+## 0.7.12 (2026-11-27): Air combo throws mobs as ragdolls (#2300)
+
+- `MobRagdolls.thrown(mob, vx, vy, vz)`: Jaymo's Powers' air combo knocks a mob limp (or takes one already limp) and throws the body at that speed, not cut to the knockback caps (a throw on purpose, as players' `LivingRagdolls.knock`), with a flick at the head (`THROWN_TUMBLE` 0.2) so it turns over in the air; its limp time starts again so it doesn't get up in mid-air. Does nothing with Ragdollified Reactions loaded.
+- Built; not played.

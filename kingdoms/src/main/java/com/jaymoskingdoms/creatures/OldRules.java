@@ -43,6 +43,8 @@ import org.jspecify.annotations.Nullable;
  * a bed in it) until a resident invites it. A resident is a villager whose bed is there, or a player who sleeps there; they
  * invite by sneaking and using an empty hand on the vampire, and doing it again takes the welcome back. A vampire mob that has
  * not been exposed can be invited by a villager who lives in the home. The invitation is the vampire's, kept across saves.</li>
+ * <li><b>Garlic over a door.</b> A garlic wreath hung by a door keeps every vampire from it, invited or not
+ * ({@link com.jaymoskingdoms.GarlicWreath#hung}).</li>
  * <li><b>Running water.</b> A vampire cannot cross flowing water or a river on its own; it is thrown back, scalded.
  * A boat or a mount carries it over.</li>
  * <li><b>The coffin.</b> A bed boxed in by dark oak slabs is a coffin (the vampires' lairs have them); a stake into a vampire
@@ -231,6 +233,10 @@ public final class OldRules {
 			barred = true;
 			why = "creatures.jaymoskingdoms.running_water";
 			v.hurtServer(level, level.damageSources().magic(), SCALD);
+		} else if (com.jaymoskingdoms.GarlicWreath.hung(level, pos)) {
+			// a garlic wreath over a door: no vampire comes through, even one who was invited
+			barred = true;
+			why = "creatures.jaymoskingdoms.garlic_door";
 		} else {
 			Long key = home(level, pos);
 			if (key != null && !invited(v, key)) {

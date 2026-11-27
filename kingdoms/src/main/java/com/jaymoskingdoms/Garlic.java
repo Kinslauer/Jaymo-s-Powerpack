@@ -52,6 +52,9 @@ public final class Garlic {
 	/** One try on the same vampire this often (ticks). */
 	static final long TRY_EVERY = 20L;
 
+	/** Garlic as the vampires mind it: Kingdoms' own head of garlic and, with Powers, the wild garlic (item tag {@code jaymoskingdoms:garlic}). */
+	public static final net.minecraft.tags.TagKey<Item> GARLIC_TAG = net.minecraft.tags.TagKey.create(Registries.ITEM, JaymosKingdoms.id("garlic"));
+
 	public static Item GARLIC;
 	public static Item WOLFSBANE;
 
@@ -95,12 +98,17 @@ public final class Garlic {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TRIED.clear());
 	}
 
+	/** Whether {@code stack} is garlic of either sort ({@link #GARLIC_TAG}). */
+	static boolean garlic(ItemStack stack) {
+		return !stack.isEmpty() && (stack.is(GARLIC) || stack.is(GARLIC_TAG));
+	}
+
 	/** Whether {@code stack} is garlic or silver. (0.7.498) Not the realms' coins: realm silver and hacksilver are money, not the metal. */
 	static boolean bane(ItemStack stack) {
 		if (stack.isEmpty()) {
 			return false;
 		}
-		return stack.is(GARLIC) || Currency.byItem(stack.getItem()) == null && BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("silver");
+		return garlic(stack) || Currency.byItem(stack.getItem()) == null && BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("silver");
 	}
 
 	private static void try_(ServerLevel level, ServerPlayer user, LivingEntity target, ItemStack held, InteractionHand hand) {
@@ -132,7 +140,7 @@ public final class Garlic {
 		if (target instanceof ServerPlayer vampire) {
 			vampire.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.flinch.self").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
 		}
-		if (held.is(GARLIC) && !user.isCreative()) {
+		if (garlic(held) && !user.isCreative()) {
 			held.shrink(1);
 		}
 	}

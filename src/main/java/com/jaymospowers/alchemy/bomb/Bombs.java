@@ -250,7 +250,8 @@ public final class Bombs {
 		MagicFx.blast(level, at.x, at.y, at.z, (float) BURST_RADIUS, Kind.FIRE_BURST.color);
 		level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.3, at.z, 40, 1.0, 0.6, 1.0, 0.12);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 1.3F);
-		DamageSource source = level.damageSources().explosion(null, owner);
+		// fire damage (the in-fire type, {@code #minecraft:is_fire}), so a vampire takes its fire weakness from the blast as well as from the burning
+		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(net.minecraft.world.damagesource.DamageTypes.IN_FIRE), null, owner);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS))) {
 			double d = Math.sqrt(e.position().distanceToSqr(at));
 			if (d <= BURST_RADIUS) {

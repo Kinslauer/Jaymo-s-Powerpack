@@ -71,6 +71,13 @@ public final class Kinship {
 					}
 				}
 			}
+			if (heard != 0 || player.isAlive() && !player.isSpectator() && !player.isCreative() && monster(player)) {
+				// (Night's Blood) the get are kin without sight: a vampire's own fledglings, felt wherever they are within range
+				double get = Fledglings.nearest(player, RANGE);
+				if (get >= 0.0 && (heard == 0 || get < (1.0 - (heard % KIND) / 100.0) * RANGE)) {
+					heard = VAMPIRE_KIN * KIND + Math.max(1, (int) Math.round((1.0 - get / RANGE) * 100.0));
+				}
+			}
 			Integer was = player.getAttached(HEARD);
 			if (heard == 0) {
 				if (was != null) {

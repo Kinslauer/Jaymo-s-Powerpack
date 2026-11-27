@@ -55,6 +55,8 @@ public final class MobRagdolls {
 	/** A topple: the share of the fling the head takes, and the share the rest of the body feels. */
 	private static final double TOPPLE = 0.35;
 	private static final float TOPPLE_SHARE = 0.15F;
+	/** A throw ({@link #thrown}): the flick at the head that turns the body over in the air (blocks a tick). */
+	private static final double THROWN_TUMBLE = 0.2;
 	/** A body bigger than this (blocks, standing, either way) is never knocked limp: a ghast, a dragon. */
 	private static final float MAX_SIZE = 4.0F;
 	/** Differences smaller than this (blocks a tick) are the game's own noise, not a shove. */
@@ -86,6 +88,8 @@ public final class MobRagdolls {
 	private static final Map<Mob, Limp> LIMPS = new WeakHashMap<>();
 	/** The game tick each mob that got up may be knocked limp again from. */
 	private static final Map<Mob, Long> READY_AT = new WeakHashMap<>();
+	/** Whether the ragdolls here run at all (not with Ragdollified Reactions, which does its own). */
+	private static boolean running;
 
 	private MobRagdolls() {
 	}
@@ -95,6 +99,7 @@ public final class MobRagdolls {
 			// Ragdollified Reactions does the big hits and heavy blades
 			return;
 		}
+		running = true;
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (!(entity instanceof Mob mob) || blocked || damageTaken <= 0.0F || !mob.isAlive()) {
 				return;
@@ -156,6 +161,54 @@ public final class MobRagdolls {
 			takeIn(copy, pushed);
 		}
 		return copy;
+	}
+
+	/**
+	 * Jaymo's Powers' air combo (AirCombo: a launcher, a juggle, a slam): {@code mob} is thrown limp at this speed
+	 * (blocks a tick). Not yet limp, it's knocked limp standing as it stands, if it may be ({@link #may}); already limp,
+	 * the throw sets the body's speed. A throw on purpose, so it isn't cut to {@link #MAX_CARRY} and {@link #SHOVE_LIFT}
+	 * as a blow's knockback is (Kitchen's LivingRagdolls.knock throws players the same way), and the time it has lain
+	 * limp starts again, so it doesn't get up in mid-air. Whether it's limp now (false: Powers throws it itself).
+	 */
+	public static boolean thrown(Mob mob, double vx, double vy, double vz) {
+		if (!running || !mob.isAlive() || !(mob.level() instanceof ServerLevel)) {
+			return false;
+		}
+		Limp limp = LIMPS.get(mob);
+		if (limp == null) {
+			if (isLimp(mob) || !may(mob)) {
+				return false;
+			}
+			if (mob.isPassenger()) {
+				mob.stopRiding();
+			}
+			EntityDimensions size = mob.getDimensions(Pose.STANDING);
+			RagdollRig rig = RagdollShapes.rig(mob.getType(), size.width(), size.height());
+			limp = new Limp(mob, RagdollBody.standing(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot));
+			mob.getNavigation().stop();
+			mob.setSprinting(false);
+			if (mob.isUsingItem()) {
+				mob.stopUsingItem();
+			}
+			mob.setAttached(LIMP, true);
+			LIMPS.put(mob, limp);
+		}
+		limp.body.setSpeed(vx, vy, vz);
+		// a flick at the head the way the throw goes, or any way for one straight up: it turns over as it flies
+		RagdollBody body = limp.body;
+		int head = switch (body.rig.shape) {
+			case HUMANOID -> RagdollRig.HEAD;
+			case QUADRUPED -> RagdollRig.SNOUT;
+			case BOX, CHAIN -> RagdollRig.TOP_RIGHT;
+		};
+		double flat = Math.hypot(vx, vz);
+		double angle = flat < 0.05 ? mob.getRandom().nextDouble() * Math.PI * 2.0 : Math.atan2(vz, vx);
+		body.hit(body.x[head], body.y[head], body.z[head], Math.cos(angle) * THROWN_TUMBLE, 0.0, Math.sin(angle) * THROWN_TUMBLE, TOPPLE_SHARE);
+		limp.ticks = 0;
+		limp.still = 0;
+		write(mob, limp);
+		send(mob, limp);
+		return true;
 	}
 
 	/** Whether {@code mob}, dying, will be swapped for a corpse that takes its body (as LivingEntityMixin decides). */
