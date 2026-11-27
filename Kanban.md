@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:23). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:24). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -17,7 +17,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · ☁️ Cloud · open
-- [ ] [[Inbox/nycto-1|nycto-1]] · ☁️ Cloud · open
 
 
 ## Being built
@@ -37,6 +36,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/hunters-road-1|hunters-road-1]] · ☁️ Cloud · #2284 · in-review
+- [ ] [[Inbox/nycto-1|nycto-1]] · ☁️ Cloud · #2285 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
