@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:59). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 17:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -20,7 +20,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/black-panther-p7|black-panther-p7]] · 2026-11-27 ON HOLD until black-panther-p6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-p8|black-panther-p8]] · 2026-11-27 ON HOLD until black-panther-p7 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-p9|black-panther-p9]] · 2026-11-27 ON HOLD until black-panther-p6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
-- [[Inbox/black-panther-r1|black-panther-r1]] · 2026-11-27 16:55 N2 (claw heads) dropped by Andy 2026-11-27; nothing in r1 needs to leave room for it. Octo thread's E3/N1 don't touch the Forge files.
 - [[Inbox/black-panther-r2|black-panther-r2]] · 2026-11-27 ON HOLD until black-panther-r1 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-r3|black-panther-r3]] · 2026-11-27 ON HOLD until black-panther-r2 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-r4|black-panther-r4]] · 2026-11-27 ON HOLD until black-panther-r3 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
@@ -47,7 +46,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 - [[Agents/nycto-4-models|nycto-4-models]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -55,12 +54,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-16 waiting for a bot, 2 being built, 9 in review: see [[Kanban]].
+17 waiting for a bot, 1 being built, 10 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2301 Rig Octo Core - four mechanical arms, tendril moves for Tinkerers and web slingers (Powers, 2026-11-27)
 - [ ] #2300 Air combo: ragdolls, enemy step, Yank and tendril pull-ups, slam spares friends (Powers, Kingdoms, Kitchen, 2026-11-27)
 - [ ] #2299 Night's Blood 5 - servants and your get (Kingdoms, 2026-11-27)
 - [ ] #2298 Night's Blood 6 - the night-cloak (Powers, Kingdoms, 2026-11-27)
@@ -120,12 +120,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2234 Maggots come as a writhing heap that splats underfoot (Kingdoms, 2026-11-26)
 - [ ] #2233 Reincarnate link on the character page (Powers, Kingdoms, 2026-11-26)
 - [ ] #2232 Dragon keys no longer stop the game starting (Kingdoms, 2026-11-26)
-- [ ] #2231 Dyed and grey sheep no longer sprout stray boxes (Powers, 2026-11-26)
-- …and 662 older ones.
+- …and 663 older ones.
 
 ## Health
 
-27 problems in the notes: [[Health]].
+28 problems in the notes: [[Health]].
 
 ## Last week
 
