@@ -62,6 +62,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.246) Opening the menu on a shipmate, or on one who knows how your story started ({@link com.jaymoskingdoms.StoryTalk}): they say so, never MCA's stranger's greeting.
  * (0.7.332) "Accuse someone here" with a priest ({@link com.jaymoskingdoms.Accusations}).
  * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
+ * Andy (2026-11-27): the talk wheel's first spoke answers what they just said ({@link com.jaymoskingdoms.Replies}); they answer back.
  * (0.7.397) Opening the menu on an outlaw ({@link com.jaymoskingdoms.Outlaws}): a curt word, never MCA's stranger's welcome.
  * (0.7.424) Held down on the execution hold for questioning ({@link com.jaymoskingdoms.Questioning}): the questions only.
  * (0.7.405) Opening it on a Z Fighter character ({@link com.jaymoskingdoms.ZFighterFolk}): a line of their own, likewise.
@@ -192,12 +193,19 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
-		if ("main".equals(question) && SOCIAL.contains(answer) && Recollections.refuses(villager, player)) {
+		if ("main".equals(question) && (SOCIAL.contains(answer) || com.jaymoskingdoms.Replies.is(answer)) && Recollections.refuses(villager, player)) {
 			// (0.7.109) they remember too much ill of you for that
 			villager.sendChatMessage(Component.translatable("recall.jaymoskingdoms.refuse." + villager.getRandom().nextInt(Recollections.REFUSALS),
 				Recollections.nameTo(player, villager)), player);
 			// (refusal hints) and the worst of it, or what they bear you
 			com.jaymoskingdoms.RefusalHints.hintStanding(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Replies.is(answer)) {
+			// (Andy 2026-11-27) the first spoke: an answer to what they just said, and theirs back; the talk ends there as a chat does
+			villager.sendChatMessage(com.jaymoskingdoms.Replies.reply(player, villager, answer), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
