@@ -107,6 +107,8 @@ known = {os.path.basename(f)[:-5] for f in glob.glob(os.path.join(A, "items", "*
 
 
 def item_ok(s):
+    if isinstance(s, list):  # an ingredient that takes any of several items
+        return all(item_ok(i) for i in s)
     if s.startswith("#"):
         return True
     ns, name = s.split(":")
