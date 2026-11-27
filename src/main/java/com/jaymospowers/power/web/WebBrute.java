@@ -296,7 +296,7 @@ public final class WebBrute {
 	}
 
 	private static void press(ServerPlayer player) {
-		if (!able(player)) {
+		if (!able(player) || WebBruteArts.busy(player) || WebBruteMovement.special(player)) {
 			return;
 		}
 		ServerLevel level = player.level();
@@ -885,7 +885,8 @@ public final class WebBrute {
 	/** Every tick, for web slingers. */
 	static void tick(ServerPlayer player) {
 		Run run = RUNS.get(player.getUUID());
-		boolean on = player.isAlive() && !player.isSpectator() && WebSymbiote.bulked(player) && !WebSymbiote.driving(player);
+		boolean on = player.isAlive() && !player.isSpectator() && WebSymbiote.bulked(player) && !WebSymbiote.driving(player)
+			&& !WebBruteArts.busy(player) && !WebBruteMovement.special(player);
 		if (run == null) {
 			if (!on) {
 				return;

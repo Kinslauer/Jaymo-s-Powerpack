@@ -326,6 +326,7 @@ public final class WebPower implements Power {
 		WebWhip.register();
 		WebSlam.register();
 		WebBrute.register();
+		WebBruteArts.register();
 		WebWallRun.register();
 		WebParkour.register();
 		WebStrain.register();
@@ -468,6 +469,7 @@ public final class WebPower implements Power {
 	/** (0.15.31) Downed: what was running ends. */
 	@Override
 	public void onDowned(ServerPlayer player) {
+		WebBruteArts.forget(player);
 		// the lines and ropes are let go, the wings fold, whatever the tendrils hold is dropped (the symbiote acts on its own)
 		player.removeAttached(LINE);
 		player.removeAttached(ROPE);
@@ -479,6 +481,7 @@ public final class WebPower implements Power {
 
 	@Override
 	public void onLost(ServerPlayer player) {
+		WebBruteArts.forget(player);
 		AttributeInstance gravity = player.getAttribute(Attributes.GRAVITY);
 		if (gravity != null) {
 			gravity.removeModifier(FLOAT_ID);
@@ -705,8 +708,8 @@ public final class WebPower implements Power {
 		} else if (!coiling && player.getAttached(CHARGING) != null) {
 			player.removeAttached(CHARGING);
 		}
-		if (state.chargeHold) {
-			// the symbiote braces for the landing
+		if (state.chargeHold && !WebSymbiote.bulked(player)) {
+			// the thin suit braces for the landing
 			player.resetFallDistance();
 			if (player.tickCount % 3 == 0) {
 				player.level().sendParticles(WebSymbiote.dust(1.0F), player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.3, 0.05, 0.3, 0.0);

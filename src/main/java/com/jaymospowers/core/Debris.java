@@ -32,6 +32,12 @@ public final class Debris {
 	 * the softer ones more readily and further out. The faster, the wider and the harder the blocks it breaks.
 	 */
 	public static void smash(ServerLevel level, Vec3 at, double speed, @Nullable Entity cause) {
+		smash(level, at, speed, cause, pos -> true);
+	}
+
+	/** A smash that may only break the positions its caller can reach. */
+	public static void smash(ServerLevel level, Vec3 at, double speed, @Nullable Entity cause,
+		java.util.function.Predicate<BlockPos> canBreak) {
 		double radius = Math.min(SMASH_RADIUS_MAX, SMASH_RADIUS_BASE + Math.max(0.0, speed - SMASH_FROM) * SMASH_RADIUS_PER_SPEED);
 		float power = (float)(speed * SMASH_POWER_PER_SPEED);
 		var random = level.getRandom();
@@ -39,7 +45,7 @@ public final class Debris {
 		BlockPos center = BlockPos.containing(at);
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
 			double distance = Math.sqrt(pos.distToCenterSqr(at));
-			if (distance > radius) {
+			if (distance > radius || !canBreak.test(pos)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(pos);

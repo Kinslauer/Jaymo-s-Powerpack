@@ -92,6 +92,16 @@ public record WebPose(int kind, long start, int side) {
 		FIST_CRUSH = 53, SENSE_TURN = 54, HUNT_DIVE = 55, SURF = 56;
 	public static final int FIRST_ATTACK = ZIP_KICK, LAST_ATTACK = SURF;
 
+	/** The big suit's own attacks, recovery and wall motions. */
+	public static final int BRUTE_CLAP = 57, BRUTE_FLIP = 58, BRUTE_POUND = 59, BRUTE_RAMPAGE = 60,
+		BRUTE_STOMP = 61, BRUTE_NOVA = 62, BRUTE_COIL = 63, BRUTE_AIR = 64, BRUTE_LAND = 65,
+		BRUTE_HOOK = 66, BRUTE_HOOK_LUNGE = 67, BRUTE_WALL_GRAB = 68, BRUTE_WALL_HOLD = 69,
+		BRUTE_WALL_HEAVE = 70, BRUTE_WALL_SIDE = 71, BRUTE_WALL_LEAP = 72, BRUTE_WALL_LEDGE = 73;
+
+	public static boolean brute(int kind) {
+		return kind >= BRUTE_CLAP && kind <= BRUTE_WALL_LEDGE;
+	}
+
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
 	public static final int RAGDOLL_TICKS = 40;
@@ -136,6 +146,16 @@ public record WebPose(int kind, long start, int side) {
 			case FIST_JAB, FIST_KICK, FIST_UPPER, FIST_TWIST, FIST_CRUSH -> 8;
 			case HUNT_DIVE -> 24;
 			case SURF -> 70;
+			case BRUTE_CLAP -> 38;
+			case BRUTE_FLIP -> 24;
+			case BRUTE_POUND -> WebBruteArts.POUND_TICKS;
+			case BRUTE_RAMPAGE, BRUTE_AIR -> 46;
+			case BRUTE_STOMP -> 22;
+			case BRUTE_NOVA -> WebBruteArts.NOVA_WINDUP + 1;
+			case BRUTE_COIL -> WebLeap.CHARGE_FULL;
+			case BRUTE_LAND, BRUTE_HOOK, BRUTE_WALL_LEAP -> 12;
+			case BRUTE_HOOK_LUNGE, BRUTE_WALL_LEDGE -> 17;
+			case BRUTE_WALL_GRAB, BRUTE_WALL_HOLD, BRUTE_WALL_HEAVE, BRUTE_WALL_SIDE -> 9;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
 			case SPIKES -> WebSymbiote.SPIKE_POSE_TICKS;
 			default -> DODGE_TICKS;

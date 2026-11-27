@@ -136,6 +136,11 @@ public final class WebSlam {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long since = player.getAttached(STANCE);
+		if (phase != 0 && phase != 1 && phase != 2 || phase != 0 && (WebBruteArts.busy(player)
+			|| WebBruteMovement.special(player) || !player.isAlive()
+			|| com.jaymospowers.core.wounds.Downed.isDowned(player))) {
+			return;
+		}
 		if (phase == 1) {
 			if (since == null && WebSymbiote.bulked(player) && !player.onGround() && now >= READY.getOrDefault(player.getUUID(), 0L)) {
 				player.setAttached(STANCE, now);
@@ -149,7 +154,7 @@ public final class WebSlam {
 		}
 		player.removeAttached(STANCE);
 		Double peak = PEAK.remove(player.getUUID());
-		if (phase == 2 && WebSymbiote.bulked(player) && now - since >= MIN_TICKS) {
+		if (phase == 2 && player.onGround() && WebSymbiote.bulked(player) && now - since >= MIN_TICKS) {
 			READY.put(player.getUUID(), now + COOLDOWN);
 			slam(player, peak == null ? 0.0F : (float)Math.max(0.0, peak - player.getY()));
 		}
@@ -170,7 +175,7 @@ public final class WebSlam {
 	}
 
 	/** Both fists brought down into the ground. */
-	private static void slam(ServerPlayer player, float fallen) {
+	static void slam(ServerPlayer player, float fallen) {
 		ServerLevel level = player.level();
 		Vec3 at = player.position();
 		Vec3 ahead = player.getLookAngle().horizontal();
@@ -198,7 +203,7 @@ public final class WebSlam {
 			}
 		}
 		// the ground blown out under the fists, and a ring of debris thrown up around
-		Debris.smash(level, impact.subtract(0.0, 0.5, 0.0), SMASH_SPEED + Math.min(0.6, fallen * 0.05), player);
+		breakGround(player, impact, SMASH_SPEED + Math.min(0.6, fallen * 0.05));
 		Debris.ring(level, BlockPos.containing(impact).below(), RING, 1.6F);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, impact.x, impact.y + 0.3, impact.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, impact.x, impact.y + 0.3, impact.z, 20, RING * 0.5, 0.2, RING * 0.5, 0.02);
@@ -250,6 +255,16 @@ public final class WebSlam {
 			if (near != player && near.distanceToSqr(at) < NEAR_SHAKE_RANGE * NEAR_SHAKE_RANGE) {
 				com.jaymospowers.core.Shakes.send(near, NEAR_SHAKE, at);
 			}
+		}
+	}
+
+	/** The same local terrain impact as the normal heavy landing. */
+	static void breakGround(ServerPlayer player, Vec3 impact, double speed) {
+		ServerLevel level = player.level();
+		if (level.hasChunkAt(BlockPos.containing(impact)) && player.onGround() && player.mayBuild()
+			&& level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) {
+			Debris.smash(level, impact.subtract(0, 0.5, 0), speed, player,
+				pos -> level.hasChunkAt(pos) && level.getWorldBorder().isWithinBounds(pos) && level.mayInteract(player, pos));
 		}
 	}
 

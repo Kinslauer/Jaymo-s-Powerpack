@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import com.jaymospowers.power.web.WebPose;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.player.PlayerModel;
@@ -265,6 +266,8 @@ final class WebHulk {
 		WebSymbioteClient.Tendrils tendrils = s.getData(WebSymbioteClient.TENDRILS);
 		float run = beast > 0.0F && tendrils != null && tendrils.armor() ? beast * tendrils.run() * Mth.clamp(0.4F + speed, 0.0F, 1.0F) : 0.0F;
 		float walk = pos * 0.6662F, gallop = pos * 0.45F;
+		WebBrutePose.Pose art = s.getData(WebBrutePose.KEY);
+		boolean bruteArt = art != null && WebPose.brute(art.kind());
 		for (int side = 0; side < 2; side++) {
 			boolean right = side == 0;
 			ModelPart arm = right ? m.rightArm : m.leftArm;
@@ -274,7 +277,15 @@ final class WebHulk {
 			float galloping = 0.5F - 0.5F * Mth.cos(gallop - Mth.HALF_PI - ELBOW_LAG);
 			float bend = ELBOW_REST + ELBOW_SWING * speed * Mth.lerp(run, stride, galloping)
 				+ ELBOW_IDLE * idle * (0.5F + 0.5F * Mth.sin(age * IDLE_RATE * 1.3F + side * 1.7F));
-			if (busy(s, right)) {
+			if (bruteArt) {
+				bend = switch (art.kind()) {
+					case WebPose.BRUTE_CLAP -> Mth.lerp(Mth.clamp((art.t() - 20) / 8, 0, 1), 0.72F, 0.14F);
+					case WebPose.BRUTE_HOOK, WebPose.BRUTE_HOOK_LUNGE -> ((art.side() > 0) == right)
+						? 0.85F - 0.56F * Mth.clamp(art.t() / 5, 0, 1) : 0.7F;
+					case WebPose.BRUTE_COIL, WebPose.BRUTE_LAND -> 0.62F;
+					default -> 0.28F;
+				};
+			} else if (busy(s, right)) {
 				bend *= ELBOW_HOLDING;
 			} else {
 				arm.xRot += IDLE_SWAY * idle * Mth.sin(age * IDLE_RATE + side * 2.1F);

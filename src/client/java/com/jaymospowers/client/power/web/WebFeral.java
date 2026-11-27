@@ -93,6 +93,9 @@ public final class WebFeral {
 			|| avatar.isPassenger || avatar.isCrouching && charge == null) {
 			return;
 		}
+		if (WebBrutePose.gait(humanoid, avatar, slim)) {
+			return;
+		}
 		if (up >= 1.0F) {
 			brute(humanoid, avatar, slim);
 			return;

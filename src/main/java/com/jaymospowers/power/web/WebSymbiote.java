@@ -22,6 +22,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -1007,6 +1008,17 @@ public final class WebSymbiote {
 	 * A takeover has you: present the whole time, holding how far your struggle bar is filled (0-1, in steps of
 	 * {@link #STRUGGLE_SYNC_STEP}). Synced to everyone: the suit visibly peels back off you as it fills (WebSuitGrowth).
 	 */
+	public static final int BEAT_PERIOD = 16;
+	private static final int BEAT_WINDOW = 3;
+	private static final float BEAT_PRESS = 4.0F, BEAT_FADE = 0.035F;
+	public static final AttachmentType<Long> RHYTHM = AttachmentRegistry.create(JaymosPowers.id("web_brute_rhythm"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
+
+	public static boolean beat(long age) {
+		int phase = Math.floorMod(age, BEAT_PERIOD);
+		return age >= 0 && (phase <= BEAT_WINDOW || phase >= BEAT_PERIOD - BEAT_WINDOW);
+	}
+
 	public static final AttachmentType<Float> STRUGGLE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_struggling"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
 
@@ -1141,6 +1153,9 @@ public final class WebSymbiote {
 		boolean suitBeforeFeeding;
 		/** The big body shed by the Suit key while Living Armor stays out: it doesn't swell back until the armour comes off. */
 		boolean armorSlim;
+		ServerLevel rhythmLevel;
+		long lastBeat = Long.MIN_VALUE;
+		long bulkSpentUntil;
 		/**
 		 * The red one kept its big body when its takeover ended (Andy, 2026-11-25: "it should also morph into the large suit
 		 * whenever it takes over, and there should be a struggle whenever you want to go back to the regular suit"): it
@@ -1267,7 +1282,7 @@ public final class WebSymbiote {
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Struggle.TYPE, (payload, ctx) -> {
 			// (or against it fighting you for the suit: WebSymbioteBond)
 			if (!WebSymbioteBond.struggle(ctx.player())) {
-				struggle(ctx.player());
+				struggle(ctx.player(), payload.sneak());
 			}
 		});
 		// (0.13.4) nor lets a fall kill you: it pools over your legs and takes the landing
@@ -1304,7 +1319,9 @@ public final class WebSymbiote {
 				endShroud(attacker);
 			}
 			if (entity instanceof ServerPlayer victim && source.getEntity() instanceof LivingEntity attacker && attacker != victim && damageTaken > 0.0F) {
-				retaliate(victim, attacker);
+				if (!loseControl(victim, attacker)) {
+					retaliate(victim, attacker);
+				}
 			}
 			if (entity instanceof ServerPlayer victim && damageTaken > 0.0F) {
 				flail(victim);
@@ -2239,8 +2256,10 @@ public final class WebSymbiote {
 			live.redHeld = false;
 		}
 		boolean bulkWanted = live.takeoverTicks > 0 && (live.bigTakeover || redNow) || live.redHeld || roarAge >= ROAR_BULK_AT
-			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= bulkBond(player) && !live.feedingArmor && live.takeoverTicks <= 0 && !live.armorSlim
-			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && live.bigTakeover && !sulking(player) && !live.armorSlim;
+			|| now >= live.bulkSpentUntil && next.has(WebSymbioteState.ARMOR) && next.bond() >= bulkBond(player)
+				&& !live.feedingArmor && live.takeoverTicks <= 0 && !live.armorSlim
+			|| now >= live.bulkSpentUntil && next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && live.bigTakeover
+				&& !sulking(player) && !live.armorSlim;
 		if (bulkWanted != next.has(WebSymbioteState.BULK)) {
 			next = next.withFlag(WebSymbioteState.BULK, bulkWanted);
 			if (bulkWanted) {
@@ -3193,7 +3212,16 @@ public final class WebSymbiote {
 	}
 
 	/** It hands control back. */
+	static void cancelRhythm(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		if (live != null && live.rhythmLevel != null) {
+			endTakeover(player, live);
+		}
+	}
+
 	private static void endTakeover(ServerPlayer player, Live live) {
+		live.rhythmLevel = null;
+		player.removeAttached(RHYTHM);
 		// the red one keeps the big body it took the wheel in (see Live.redHeld); breakFree takes that back off
 		if (bulked(player) && WebSymbioteMind.red(player) && !WebSymbioteMind.redControlled(player) && player.isAlive() && !player.isCreative()) {
 			live.redHeld = true;
@@ -3470,7 +3498,7 @@ public final class WebSymbiote {
 	 * A key pressed against a takeover's hold (the client swallows every key while it drives). Until enough of its
 	 * abilities are earned it pays no attention; after that, enough presses close together break its hold.
 	 */
-	private static void struggle(ServerPlayer player) {
+	private static void struggle(ServerPlayer player, boolean sneak) {
 		Live live = player.getAttached(LIVE);
 		if (live == null || live.takeoverTicks <= 0 || !isBonded(player)) {
 			return;
@@ -3488,8 +3516,19 @@ public final class WebSymbiote {
 			}
 			return;
 		}
-		// (the red hunt's hold is stronger: RED_HUNT_STRUGGLE)
-		live.struggle += live.redHunt ? RED_HUNT_STRUGGLE : 1.0F;
+		Long rhythm = player.getAttached(RHYTHM);
+		if (rhythm != null) {
+			long age = now - rhythm;
+			long pulse = Math.floorDiv(age + BEAT_WINDOW, BEAT_PERIOD);
+			if (!sneak || live.rhythmLevel != player.level() || !beat(age) || pulse == live.lastBeat) {
+				return;
+			}
+			live.lastBeat = pulse;
+			live.struggle += BEAT_PRESS;
+		} else {
+			// The red hunt's hold is stronger.
+			live.struggle += live.redHunt ? RED_HUNT_STRUGGLE : 1.0F;
+		}
 		syncStruggle(player, live);
 		if (live.struggle >= needed) {
 			breakFree(player, live, now, false);
@@ -3523,7 +3562,7 @@ public final class WebSymbiote {
 
 	/** The struggle, a tick at a time: the bar drains, and once a surge of yours has fallen back it pours back over you. */
 	private static void tickStruggle(ServerPlayer player, Live live) {
-		live.struggle = Math.max(0.0F, live.struggle - TAKEOVER_STRUGGLE_FADE);
+		live.struggle = Math.max(0.0F, live.struggle - (live.rhythmLevel != null ? BEAT_FADE : TAKEOVER_STRUGGLE_FADE));
 		int needed = breakFreeNeeded(player);
 		if (live.surged && needed > 0 && live.struggle < needed * LOCKOUT_REARM) {
 			// it surges back over you: your screen lurches and darkens
@@ -4165,7 +4204,33 @@ public final class WebSymbiote {
 		endTakeover(player, live);
 	}
 
+	private static boolean loseControl(ServerPlayer player, LivingEntity attacker) {
+		if (!player.isAlive() || player.isCreative() || player.isSpectator() || Downed.isDowned(player)
+			|| !Powers.has(player, WebPower.INSTANCE) || Powers.silenced(player) || !isBonded(player)
+			|| state(player).kind() != WebSymbioteStrain.BLACK || player.getHealth() > player.getMaxHealth() * 0.28F
+			|| breakFreeNeeded(player) < 0 || !attacker.isAlive() || attacker.isSpectator() || player.isAlliedTo(attacker)) {
+			return false;
+		}
+		Live live = live(player);
+		long now = player.level().getGameTime();
+		if (live.takeoverTicks > 0 || now < live.takeoverReadyAt || lockedOut(player) || sulking(player)
+			|| player.getRandom().nextFloat() >= 0.4F) {
+			return false;
+		}
+		startTakeover(player, live, now, attacker);
+		live.bigTakeover = true;
+		live.rhythmLevel = player.level();
+		live.lastBeat = Long.MIN_VALUE;
+		player.setAttached(RHYTHM, now + 12);
+		return true;
+	}
+
 	private static void tickTakeover(ServerPlayer player, Live live, long now) {
+		if (live.rhythmLevel != null && (live.rhythmLevel != player.level() || !Powers.has(player, WebPower.INSTANCE)
+			|| Powers.silenced(player) || Downed.isDowned(player) || !player.isAlive())) {
+			endTakeover(player, live);
+			return;
+		}
 		Entity target = player.level().getEntity(live.takeoverTarget);
 		tickStruggle(player, live);
 		if (live.fleeing) {
@@ -4730,6 +4795,15 @@ public final class WebSymbiote {
 	 * The red one's big body comes off: back into the plain suit (Living Armor put away with it, so the bond doesn't swell
 	 * it straight back), after the fight for it (WebSymbioteBond#fightForBody) or, when it lets you, at a press.
 	 */
+	/** Spending the big body leaves its bonded armour on. */
+	static void exhaustBulk(ServerPlayer player) {
+		Live live = live(player);
+		live.bulkSpentUntil = player.level().getGameTime() + 160;
+		live.redHeld = false;
+		WebSymbioteState state = state(player);
+		set(player, state.withFlag(WebSymbioteState.SUIT, true));
+	}
+
 	static void shedRedBody(ServerPlayer player) {
 		Live live = live(player);
 		live.redHeld = false;
