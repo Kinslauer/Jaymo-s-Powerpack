@@ -61,6 +61,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// Powers' training on the experience meter (Kingdoms' SkillMeter)
 		com.jaymospowers.client.hud.MeterFeed.init();
 		com.jaymospowers.client.hud.TipCard.init();
+		// (Andy, 2026-11-27) /autohud on|off
+		com.jaymospowers.client.compat.AutoHudToggle.init();
 		com.jaymospowers.client.hud.PowerTips.init();
 		// the UI tutorial: a card the first time each part of the screen shows
 		com.jaymospowers.client.hud.UiTips.init();
