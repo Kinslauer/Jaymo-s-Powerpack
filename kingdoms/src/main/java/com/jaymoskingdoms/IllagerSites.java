@@ -975,7 +975,9 @@ final class IllagerSites {
 			return Illagers.tag(e) == null;
 		}
 		if (e instanceof Allay allay) {
-			return !allay.entityTags().contains(CAGED_TAG) && !allay.getBrain().hasMemoryValue(MemoryModuleType.LIKED_PLAYER);
+			Set<String> tags = allay.entityTags();
+			return !tags.contains(CAGED_TAG) && !tags.contains(Allays.FREED_TAG) && !tags.contains(Allays.HAVEN_TAG)
+				&& !allay.getBrain().hasMemoryValue(MemoryModuleType.LIKED_PLAYER);
 		}
 		return e instanceof Villager v && !v.hasAttached(Captives.CAPTIVE) && !v.isPersistenceRequired();
 	}

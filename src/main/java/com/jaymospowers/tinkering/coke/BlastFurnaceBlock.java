@@ -85,6 +85,9 @@ public class BlastFurnaceBlock extends HorizontalDirectionalBlock implements Ent
 			ItemStack taken = furnace.take(player.isShiftKeyDown());
 			if (!taken.isEmpty()) {
 				player.getInventory().placeItemBackInInventory(taken, net.minecraft.util.Prediction.SERVER_ONLY);
+			} else if (com.jaymospowers.core.StationHints.idle(player)) {
+				// nothing to take: say what's missing (the tower, or what it's loaded with)
+				com.jaymospowers.core.StationHints.tell(player, !BlastFurnaceEntity.formed(level, pos, state.getValue(FACING)) ? "blast_furnace.unformed" : "blast_furnace.takes");
 			}
 		}
 		return InteractionResult.SUCCESS;

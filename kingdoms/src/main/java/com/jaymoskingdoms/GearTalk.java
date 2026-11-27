@@ -554,7 +554,8 @@ final class GearTalk {
 	// ---- remarking on sight -------------------------------------------------------------------------------------------------
 
 	private static boolean mayRemark(ServerPlayer player, Villager v) {
-		return v.isAlive() && !v.isBaby() && !v.isSleeping() && McaCompat.isMca(v) && !Approaches.talking(v)
+		// (one still shaken from crying out has no mind for your clothes: Outcry)
+		return v.isAlive() && !v.isBaby() && !v.isSleeping() && McaCompat.isMca(v) && !Approaches.talking(v) && !Outcry.upset(v)
 			&& !Bearings.cold(v, player) && v.hasLineOfSight(player);
 	}
 

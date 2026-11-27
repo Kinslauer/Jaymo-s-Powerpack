@@ -224,6 +224,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// blasts that undercut a building bring down what's over the hole (chests ride down whole)
 		Collapse.register();
 		LooseWood.register();
+		// a wood's sticks, saplings and apples nobody threw go after a minute (a burning wood drops hundreds)
+		Windfall.register();
 		// 0.7.588: mob griefing always on (Andy)
 		PackRules.register();
 		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
@@ -282,6 +284,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		ClericHeals.register();
 		SmithMending.register();
 		GuardMeals.register();
+		HandedFood.register();
 		GuardKicks.register();
 		AlarmBells.register();
 		com.jaymoskingdoms.deep.Deeps.register();
@@ -427,6 +430,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
+		// a villager who cried out tells you why if you ask, or brings it up first
+		Outcry.register();
 		NightTrouble.register();
 		NightBurglars.register();
 		SignalBrazier.register();
@@ -436,6 +441,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		VigilanteTrials.register();
 		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
+		GuardCries.register();
+		TownCrier.register();
+		BuildNews.register();
+		CrierGrudges.register();
 		// 0.7.211: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)
 		LOGGER.debug("underworld attachments: {} {} {} {} {}", Underworld.DENS, Underworld.FOUND, Busts.OFFENCES, Busts.CHARGES, Busts.JAILED);
 		Underworld.register();
@@ -513,6 +522,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// their creatures: sporelings, trufflers, glowmoths, the old woods' mimicaps and bloatshrooms, the spore-rot's shamblers and the Myceliarch
 		com.jaymoskingdoms.glowwood.creatures.GlowCreatures.register();
 		GlowHavenLife.register();
+		Allays.register();
 		// (0.7.490) Havens expand: their works, land and sworn order
 		HavenGrowth.register();
 		// (0.7.490) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
@@ -1295,6 +1305,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		RisenLooks.register();
 		// the Awakening picks: the Warding Hush (the Lantern Warden's, and a scroll) and Rot (the Ash Whisperer's)
 		HushWard.register();
+		// chat, toasts and advancement lines wait till a joining player can see the world
+		JoinHush.register();
 		AshRot.register();
 		ArtKeys.register();
 		// the Cleric's medallion board (the medallion key and the number keys as its marks)

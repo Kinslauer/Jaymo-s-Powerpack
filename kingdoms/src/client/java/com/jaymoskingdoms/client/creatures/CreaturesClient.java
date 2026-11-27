@@ -27,7 +27,8 @@ public final class CreaturesClient {
 		creature(Creatures.CLOAK_FLIER, "cloak_flier", 0.0F, -1, CloakFlier.HUNTING, false);
 		creature(Creatures.HARPY, "harpy", 0.4F, -1, Harpy.SINGING, false);
 		creature(Creatures.DIGGER, "digger", 0.3F, -1, -1, false);
-		creature(Creatures.SHADOW, "shadow", 0.0F, -1, -1, false);
+		// drawn as the ghosts are, in a dark see-through skin, some with a wispy tail
+		EntityRenderers.register(Creatures.SHADOW, ShadowRenderer::new);
 		creature(Creatures.SHAPESHIFTER, "shapeshifter", 0.5F, -1, -1, false);
 		creature(Creatures.BOG_LIGHT, "bog_light", 0.0F, -1, -1, true);
 		// the blossom lands' animals

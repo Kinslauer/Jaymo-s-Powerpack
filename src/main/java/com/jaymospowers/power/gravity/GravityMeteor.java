@@ -571,6 +571,8 @@ public final class GravityMeteor {
 	/** It lands: the blast and the hurt; the shockwave sets off from here (see {@link #wave}). */
 	private static void impact(ServerLevel level, ServerPlayer owner, Vec3 at, float charge, Set<Long> floatingBefore) {
 		double radius = AbilityPower.size(owner, radius(charge));
+		MagicFx.spectacle(level, at.add(0.0, 0.2, 0.0), "pierre01/phantasmmeteor_single", 0.10F + charge * 0.08F,
+			MagicFx.EMBER_COLOR, 40, MagicFx.BLAST, Vec3.ZERO, (float)radius);
 		float damageMax = Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX);
 		Wave wave = new Wave(level.dimension(), owner == null ? new UUID(0L, 0L) : owner.getUUID(), at, level.getGameTime(), charge, radius);
 		wave.floatingBefore.addAll(floatingBefore);

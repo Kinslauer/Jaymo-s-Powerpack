@@ -649,6 +649,8 @@ final class McaBridge {
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.AMBROSIA_FARMER).orElseThrow());
 		// (medieval picks) and an old age's descendant (RuinFolk sets their stall)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.RUIN_KEEPER).orElseThrow());
+		// and a realm's dragon tamer (RealmDragons)
+		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.DRAGON_TAMER).orElseThrow());
 		// a villager that was unloaded when a player was reborn forgets them as it loads
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof VillagerEntityMCA v) {
@@ -1560,6 +1562,29 @@ final class McaBridge {
 		// (the cold word once a day; after that a look, never the words again: Introductions#waryOpening)
 		Component line = Languages.understands(player, villager) ? Introductions.waryOpening(player, villager)
 			: Component.translatable("dialogue.chat.jaymoskingdoms.wary_opening.wordless");
+		met(villager, player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/**
+	 * MCA's menu opening on {@code villager} ("root") while they're still shaken from crying out ({@link Outcry}): they bring
+	 * it up first, before any greeting (once per player for each outcry), and go to the main menu, where the reply spoke asks
+	 * "What happened?"; true if so.
+	 */
+	static boolean outcryOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || villager.isBaby() || Outlaws.is(villager) || ZFighterFolk.is(villager)) {
+			return false;
+		}
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (main == null) {
+			return false;
+		}
+		Component line = Outcry.opening(villager, player, Languages.understands(player, villager));
+		if (line == null) {
+			return false;
+		}
 		met(villager, player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);

@@ -40,6 +40,8 @@ import org.jspecify.annotations.Nullable;
  * walks you there, waiting when you fall behind, and says so when you've arrived. A town's guards and office-holders
  * keep their posts and only point.</li>
  * </ul>
+ * (Andy, 2026-11-27: finished buildings are no longer told in chat) And What's New?: they point you to the newest thing the
+ * town has put up this past week, or to what the builders are putting up now ({@link BuildNews}).
  * One who bears you real ill will ({@link #REFUSE_HEARTS}) tells you to find it yourself. Asking needs a shared tongue
  * (a foreigner gets a shrug, {@link Languages}).
  */
@@ -81,7 +83,9 @@ public final class Directions {
 		RULER("ruler"),
 		/** (0.7.498) a money changer, and someone who still takes emeralds ({@link MoneyTalk}) */
 		CHANGER("changer"),
-		EMERALDS("emeralds");
+		EMERALDS("emeralds"),
+		/** what the town has built lately ({@link BuildNews}) */
+		NEWS("news");
 
 		final String key;
 		final List<ResourceKey<VillagerProfession>> jobs;
@@ -174,6 +178,9 @@ public final class Directions {
 		if (LEADS.containsKey(v)) {
 			return Component.translatable(line("already", random));
 		}
+		if (place == Place.NEWS) {
+			return news(level, v, random);
+		}
 		Found found = find(level, v, place);
 		if (found == null) {
 			return Component.translatable("directions.jaymoskingdoms.none." + place.key);
@@ -218,6 +225,35 @@ public final class Directions {
 			return Component.translatable(line("close", random), found.name());
 		}
 		return Component.translatable(line(kind, random), found.name(), distance(far), heading(v.position(), at));
+	}
+
+	/** What's New?: the newest building they've put up (when, and where), or what's going up now, or nothing. */
+	private static Component news(ServerLevel level, Villager v, RandomSource random) {
+		MinecraftServer server = level.getServer();
+		Faction f = Factions.around(server, level, v.blockPosition(), FIND_RANGE);
+		if (f == null) {
+			return Component.translatable(line("news.none", random));
+		}
+		long now = level.getGameTime();
+		Works.Built b = BuildNews.newest(server, f, now);
+		if (b != null) {
+			return told(v, BuildNews.middle(b.min(), b.max()), random, "news.built", BuildNews.name(b.entry()), BuildNews.when(now, b.finished()));
+		}
+		Works.Project p = BuildNews.underway(server, f);
+		if (p != null) {
+			return told(v, Vec3.atCenterOf(p.origin()), random, "news.building", BuildNews.name(p.entry()), Component.empty());
+		}
+		return Component.translatable(line("news.none", random));
+	}
+
+	/** They turn to face {@code at} and tell of {@code what} there ({@code kind}: name, how far, which way, when). */
+	private static Component told(Villager v, Vec3 at, RandomSource random, String kind, Component what, Component when) {
+		POINTING.put(v, new Point(at, v.level().getGameTime() + POINT_TICKS));
+		double far = at.distanceTo(v.position());
+		if (far <= POINT_ONLY) {
+			return Component.translatable(line(kind + ".here", random), what, when);
+		}
+		return Component.translatable(line(kind, random), what, distance(far), heading(v.position(), at), when);
 	}
 
 	// ---- finding it ---------------------------------------------------------------------------------------------------

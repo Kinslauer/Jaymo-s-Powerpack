@@ -169,6 +169,10 @@ public final class ChronoPower implements Power {
 		ServerTickEvents.END_SERVER_TICK.register(ChronoPunch::tick);
 		// held attack while overclocked: the flurry
 		ChronoFlurry.register();
+		// the wormhole (run into it: the future, a marked place, a dragged foe), time skip and blur steps
+		ChronoWormhole.register();
+		ChronoSkip.register();
+		ChronoFlicker.register();
 		ChronoFlow.init();
 		ChronoWindDay.init();
 		// (0.21.23, Rivals patch 9) takedowns, the shadow-strike blink
@@ -191,6 +195,9 @@ public final class ChronoPower implements Power {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ChronoState state = STATES.get(handler.player.getUUID());
 			ChronoFlurry.stop(handler.player);
+			ChronoBlitz.forget(handler.player);
+			ChronoSkip.forget(handler.player);
+			ChronoFlicker.forget(handler.player);
 			if (state != null) {
 				stopAll(handler.player, state);
 				state.clearHistory();
@@ -299,6 +306,8 @@ public final class ChronoPower implements Power {
 		ChronoCheatDeath.forget(player);
 		ChronoCalculation.forget(player);
 		ChronoDecoys.forget(player);
+		ChronoSkip.forget(player);
+		ChronoWormhole.forget(player);
 		// clear the HUD state on the client
 		if (ServerPlayNetworking.canSend(player, ChronoSync.TYPE)) {
 			int[] zero = new int[ChronoSync.ABILITIES];

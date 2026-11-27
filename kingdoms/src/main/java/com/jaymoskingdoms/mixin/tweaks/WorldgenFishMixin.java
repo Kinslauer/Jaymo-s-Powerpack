@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <p>
  * The first time such a fish (a vanilla one, kept, not from a bucket, not named) is checked for despawning, it stops
  * being kept: it leaves when no one is near, as fish do, and natural spawning brings fish back within its caps
- * ({@link MonsterCapMixin}, {@link WaterClusterMixin}). If its chunk already has {@link #CHUNK_FISH} fish it goes at
+ * ({@link MonsterCapMixin}). If its chunk already has {@link #CHUNK_FISH} fish it goes at
  * once, so a crowded school thins to a few. Fish from a bucket (Powers' catch-and-release marks its vanilla fish so),
  * with a name tag, or with no mind of their own (a Druid's fish form, `Druids.stand`) are kept as before.
  */

@@ -1,0 +1,7 @@
+Dragonforge: Four Elements (1.20.1, v1.4.0) by RochStudio
+
+Used with Andy's (the pack owner's) permission, 2026-11-26: the sound files under
+assets/jaymoskingdoms/sounds/dragon/ (bite, tame, horn, fire_roar, ice_roar, lightning_roar,
+earth_roar, earth_breath) and the particle frames assets/jaymoskingdoms/textures/particle/dragon_rubble_0..7.png
+(its earth_breath frames). Its mechanics (part hitboxes, mounted bite, dive slam, sprint flight, wander and patrol
+orders, the calling horn, nests and elemental landmarks) are rewritten in our own code for Fabric 26.3.

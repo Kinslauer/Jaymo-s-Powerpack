@@ -232,7 +232,12 @@ public final class ChronoFlurry {
 	private static boolean strike(ServerPlayer player, LivingEntity target, float damage) {
 		target.setInvulnerableTime(0);
 		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.flurry", 1);
-		return target.hurtServer(player.level(), player.damageSources().playerAttack(player), damage);
+		boolean hurt = target.hurtServer(player.level(), player.damageSources().playerAttack(player), damage);
+		if (hurt || player.hasAttached(ChronoSlowTime.SLOWING)) {
+			// the flurry's own blows pose and disarm only while time is slowed (a blow held in it counts)
+			ChronoBlitz.struck(player, target, false);
+		}
+		return hurt;
 	}
 
 	/** The nearest creature in front of you, in reach and in sight; never a friend or your own pet. */

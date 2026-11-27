@@ -47,12 +47,15 @@ import org.jspecify.annotations.Nullable;
  * <p>Andy: "you should be able to pickup maggots as an item for bait". A tap of use on a maggot takes it off the body alive,
  * as one of Jaymo's Powers' maggots for the hook ({@link #MAGGOT_BAIT}); a stomp still bursts it (SpiderSquash). Without
  * Powers there's no bait to take, and use does nothing.
+ * <p>Andy: "the maggot entity always drops maggots plural, the entity should be drawn as multiple maggots". A maggot is a
+ * heap of them, writhing over each other ({@code MaggotModel}), half a block across: the whole heap is taken for one bait
+ * and bursts together underfoot.
  */
 public class Critter extends PathfinderMob {
 	/** The seven kinds: the size of their body, whether they fly, how many coats (textures) each has, and its health. */
 	public enum Kind {
 		CRICKET("cricket", 0.35F, 0.3F, false, 2, 1.0), SNAIL("snail", 0.3F, 0.3F, false, 6, 1.0), FLY("fly", 0.15F, 0.12F, true, 1, 1.0),
-		MAGGOT("maggot", 0.25F, 0.15F, false, 1, 1.0), ROACH("roach", 0.4F, 0.25F, false, 1, 2.0), MOUSE("mouse", 0.3F, 0.3F, false, 3, 2.0),
+		MAGGOT("maggot", 0.5F, 0.15F, false, 1, 1.0), ROACH("roach", 0.4F, 0.25F, false, 1, 2.0), MOUSE("mouse", 0.3F, 0.3F, false, 3, 2.0),
 		MOLE("mole", 0.5F, 0.45F, false, 1, 5.0);
 
 		public final String id;

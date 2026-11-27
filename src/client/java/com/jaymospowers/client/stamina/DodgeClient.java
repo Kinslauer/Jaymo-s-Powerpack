@@ -179,6 +179,11 @@ public final class DodgeClient {
 			wanted = false;
 			landingRoll = 0;
 		}
+		if (wanted && com.jaymospowers.client.power.chrono.ChronoFlickerClient.step(player)) {
+			// a Chrono overclocked in a low gear, with left, right, back or jump held: a blur step instead of the dash
+			wanted = false;
+			landingRoll = 0;
+		}
 		if (wanted && dive(player)) {
 			// (Andy, 2026-11-22) at an edge over deep water, or falling over it: a dive, head first
 			wanted = false;

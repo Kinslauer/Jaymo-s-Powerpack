@@ -2,5 +2,13 @@
 	"jaymoskingdoms.context.greet": "greet",
 	"jaymoskingdoms.context.bow": "bow",
 	"jaymoskingdoms.context.talk": "talk",
+	"jaymoskingdoms.context.busy.fight": "busy (fighting)",
+	"jaymoskingdoms.context.busy.talk": "busy (talking to someone)",
+	"jaymoskingdoms.context.busy.tend": "busy (tending someone)",
+	"jaymoskingdoms.context.busy.dead": "busy (seeing to the dead)",
+	"jaymoskingdoms.context.busy.prisoner": "busy (with a prisoner)",
+	"jaymoskingdoms.context.busy.loot": "busy (looting)",
+	"jaymoskingdoms.context.trade": "trade",
+	"jaymoskingdoms.context.shake_awake": "shake awake",
 	"jaymoskingdoms.context.pickpocket": "pick their pocket"
 }

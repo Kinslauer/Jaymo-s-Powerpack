@@ -167,6 +167,8 @@ public final class WindThunderDive {
 		float damage = Mth.lerp(power, DAMAGE_MIN, DAMAGE_MAX) * WindModes.abilityScale(player);
 		double push = Mth.lerp(power, PUSH_MIN, PUSH_MAX);
 		Vec3 at = player.position();
+		MagicFx.spectacle(level, at, "pierre01/lightningstrike", 0.025F + power * 0.02F, MagicFx.CRACKLE_COLOR, 30,
+			MagicFx.BOLT, new Vec3(0.0, radius, 0.0), 0.3F);
 		DamageSource source = player.damageSources().source(DamageTypes.LIGHTNING_BOLT, player);
 		AABB area = new AABB(at, at).inflate(radius, radius * 0.6, radius);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,

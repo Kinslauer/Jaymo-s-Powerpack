@@ -1,0 +1,18 @@
+Legends Mod Core Animation Assets — Credit & License Notice
+===========================================================
+
+Files in this folder (`player.json` and `katana.json`) are ported from
+Legends Mod Core (`Legends-1.20.1-ss1.0.25.jar`, Modrinth project `TfKZ50GD`,
+version `kCUYqPqz`):
+
+- `player.json`: ported from `assets/legendsmod/legends_animations/player.animation.json`
+- `katana.json`: ported from `assets/legendsmod/animations/item/katana.animation.json`
+
+Also derived from it, outside this folder:
+
+- `../katana_forms.json`: its item (`right_item`) tracks are retimed from `katana.json`;
+  its arm and torso tracks are not from `katana.json` (which animates only the blade).
+
+Upstream authors: Tihyo and the Legends Mod Team.
+License: GNU Lesser General Public License v3.0 (LGPL-3.0).
+Full license texts are included alongside these files in `LGPL-3.0.txt` and `GPL-3.0.txt`.

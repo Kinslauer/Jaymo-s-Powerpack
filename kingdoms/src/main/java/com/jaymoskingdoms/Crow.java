@@ -14,6 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -21,6 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -56,6 +58,9 @@ import org.jspecify.annotations.Nullable;
  * fled from, and once a day, when near its tree, is brought a small trinket and dropped at their feet. Nobody who leaves
  * it alone is punished.</li>
  * </ul>
+ * <p>A crow with neither a tree nor a field (one come down to a body lying out, {@code wild.HuntWays}) has no perch: it
+ * circles and lands where the body draws it, and goes for good once the body is gone, at dusk, or after
+ * {@link #CARRION_LIFE}.
  */
 public final class Crow extends Parrot {
 	// ---- tuning ----
@@ -94,6 +99,13 @@ public final class Crow extends Parrot {
 	/** The chance a crow goes for a crop a scarecrow guards, and how many times it turns back from one before it gives up the field. */
 	static final float BOLD_CHANCE = 0.12F;
 	static final int FIELD_SHY_LIMIT = 3;
+
+	// ---- tuning: a carrion crow (come down to a body lying out) ----
+	/** How far (blocks) it looks for a body to stay for, how long (ticks) before it first looks, and how long it stays in any case. */
+	static final double CARRION_REACH = 64.0;
+	static final int CARRION_SETTLE = 200, CARRION_LIFE = 20 * 60 * 5;
+	/** Jaymo's Kitchen's body lying out. */
+	private static final Identifier CORPSE = Identifier.fromNamespaceAndPath("jaymoskitchen", "corpse");
 
 	private static final Codec<Map<String, Long>> FRIENDS = Codec.unboundedMap(Codec.STRING, Codec.LONG);
 	public static EntityType<Crow> TYPE;
@@ -136,6 +148,22 @@ public final class Crow extends Parrot {
 
 	boolean isFlock() {
 		return this.field;
+	}
+
+	/** Come down to a body lying out: no tree and no field, so no perch to keep to. */
+	private boolean carrion() {
+		return this.hanged == null && !this.field;
+	}
+
+	/** Flying off for good (the hunt's circling lets it go). */
+	public boolean isLeaving() {
+		return this.leaving;
+	}
+
+	/** A body lying out within {@link #CARRION_REACH}: something for a carrion crow to stay for. */
+	private boolean bodyNear(ServerLevel level) {
+		EntityType<?> corpse = BuiltInRegistries.ENTITY_TYPE.getOptional(CORPSE).orElse(null);
+		return corpse != null && !level.getEntities(corpse, this.getBoundingBox().inflate(CARRION_REACH), Entity::isAlive).isEmpty();
 	}
 
 	// ---- goals ----
@@ -265,6 +293,8 @@ public final class Crow extends Parrot {
 
 		@Override
 		public void tick() {
+			// (no path left over from before pulls it back)
+			Crow.this.getNavigation().stop();
 			Vec3 to = Crow.this.position().add(this.away.scale(20.0)).add(0.0, 8.0, 0.0);
 			Crow.this.getMoveControl().setWantedPosition(to.x, to.y, to.z, 1.3);
 		}
@@ -617,10 +647,16 @@ public final class Crow extends Parrot {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
-		if (this.perch == null && !this.field) {
+		// (only a tree's crow keeps a perch: a carrion crow's spot in the air was where it was let into the world, and
+		// holding it there left it flapping in place in the sky)
+		if (this.perch == null && this.hanged != null) {
 			this.perch = this.blockPosition();
 		}
 		if (this.field && !this.leaving && (++this.fieldAge > FIELD_LIFE || !FieldCrows.daylight(level))) {
+			this.leave();
+		}
+		if (this.carrion() && !this.leaving && (++this.fieldAge > CARRION_LIFE || !FieldCrows.daylight(level)
+			|| this.fieldAge > CARRION_SETTLE && this.tickCount % CHECK_TICKS == 0 && !this.bodyNear(level))) {
 			this.leave();
 		}
 		if (this.leaving) {
@@ -750,7 +786,8 @@ public final class Crow extends Parrot {
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.hanged = input.read("Hanged", BlockPos.CODEC).orElse(null);
-		this.perch = input.read("Perch", BlockPos.CODEC).orElse(null);
+		// (a perch saved for a crow with no tree is a spot in the air: let go of it)
+		this.perch = this.hanged == null ? null : input.read("Perch", BlockPos.CODEC).orElse(null);
 		this.friends.clear();
 		input.read("Friends", FRIENDS).orElse(Map.of()).forEach((id, day) -> {
 			try {

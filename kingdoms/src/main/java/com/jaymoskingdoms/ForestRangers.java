@@ -450,14 +450,12 @@ public final class ForestRangers {
 		String side = Comrades.side(folk);
 		boolean outlaw = side.startsWith("f:") && Camps.all(server).containsKey(side.substring(2));
 		Faction home = outlaw ? null : Factions.around(server, level, folk.blockPosition(), Hunters.TOWN_RANGE + 32.0);
-		Component name = folk.getName();
+		// not to chat (Andy, 2026-11-26): the ranger says it aloud, and the court's crier cries what came of it (TownCrier)
 		Component courtName = Component.literal(court != null ? court.name() : "");
-		for (ServerPlayer p : level.players()) {
-			if (p.distanceTo(folk) < SIGHT * 2) {
-				p.sendSystemMessage(Component.translatable(court == null ? "message.jaymoskingdoms.ranger.folk_let_off"
-					: outlaw ? "message.jaymoskingdoms.ranger.folk_taken" : "message.jaymoskingdoms.ranger.folk_fined", ranger.getName(), name, courtName)
-					.withStyle(ChatFormatting.DARK_GREEN));
-			}
+		Speech.say(level, ranger, Component.translatable(court == null ? "speech.jaymoskingdoms.ranger.folk_let_off" : "speech.jaymoskingdoms.ranger.folk_to_court",
+			folk.getName(), courtName), 0x88CC66, SIGHT);
+		if (court != null) {
+			TownCrier.cry(level, court, outlaw ? "ranger.taken" : "ranger.fined", folk);
 		}
 		if (court == null) {
 			Lasso.free(folk);

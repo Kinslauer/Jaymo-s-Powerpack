@@ -60,5 +60,11 @@
 	"message.jaymospowers.mortality.wake.risen": "You wake cold. Nothing hurts. Your heart isn't beating.",
 	"message.jaymospowers.mortality.turning": "Everything goes dark. Something in your blood keeps moving after your heart stops.",
 	"message.jaymospowers.mortality.wake.turned": "You open your eyes. The turning is done. Whatever you were, you are not that any more.",
-	"message.jaymospowers.mortality.turning_out": "Your legs give. Your eyes close by themselves. Something in your blood is finishing what it started."
+	"message.jaymospowers.mortality.turning_out": "Your legs give. Your eyes close by themselves. Something in your blood is finishing what it started.",
+	"menu.jaymospowers.reincarnate": "Reincarnate",
+	"menu.jaymospowers.reincarnate.title": "Reincarnate?",
+	"menu.jaymospowers.reincarnate.message": "This character's life ends here, for good. Everything goes with it: what you carry, your power, skills, quests, standing and every mark this life left. Then your life story is told anew, with a new look and name.",
+	"menu.jaymospowers.reincarnate.yes": "Reincarnate",
+	"menu.jaymospowers.reincarnate.no": "Not yet",
+	"message.jaymospowers.reincarnate.not_now": "You can't reincarnate right now."
 }

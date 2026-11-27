@@ -250,6 +250,11 @@ public final class BlastGore {
 		if (!(target.level() instanceof ServerLevel) || blast(source) || blunderShot(source) || source.getEntity() == target) {
 			return false;
 		}
+		if (bookkept(source, amount)) {
+			// (Andy: a digger "has no realistic way" to burst someone) a death let come, credited to whoever felled them, is
+			// dealt as one endless blow; it is no blow of theirs, so their size and strength decide nothing here
+			return false;
+		}
 		if (source.is(CRUSHING_TYPES)) {
 			return true;
 		}
@@ -257,6 +262,26 @@ public final class BlastGore {
 			return false;
 		}
 		return amount >= CRUSH_ANY || bulk(by) >= CRUSH_BULK * bulk(target);
+	}
+
+	/**
+	 * Whether this is no blow at all but a death dealt by the rules: a downed body finished ({@code Downed}), a head or body
+	 * gone black ({@code Wounds}), a bleed-out, or any kill dealt as {@code Float.MAX_VALUE}. A crushing blow that led to it
+	 * was already counted when it landed ({@link #crushedNow}, the same tick).
+	 */
+	private static boolean bookkept(DamageSource source, float amount) {
+		return amount >= Float.MAX_VALUE || source.is(com.jaymospowers.core.wounds.Wounds.WOUNDS_DAMAGE)
+			|| source.is(com.jaymospowers.core.wounds.Bleeding.BLEEDING_DAMAGE);
+	}
+
+	/**
+	 * {@code target} dies under something's whole weight this tick (a ravager's or the warden's execution,
+	 * {@code MobExecutions}): its death is a crushing one, as a slam's is.
+	 */
+	public static void crushes(LivingEntity target) {
+		if (target.level() instanceof ServerLevel) {
+			CRUSHING.put(target, target.level().getGameTime());
+		}
 	}
 
 	/** Whether {@code source}'s blow was struck with a blade (a sword or an axe), which cuts and never crushes. */

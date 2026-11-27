@@ -131,7 +131,16 @@ public final class Research {
 		addTopic(fears());
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (level.isClientSide() || hand != net.minecraft.world.InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel sl)
-				|| player.isShiftKeyDown() || !level.getBlockState(hit.getBlockPos()).is(Blocks.LECTERN) || shelves(sl, hit.getBlockPos()) < SHELVES) {
+				|| player.isShiftKeyDown() || !level.getBlockState(hit.getBlockPos()).is(Blocks.LECTERN)) {
+				return InteractionResult.PASS;
+			}
+			int shelves = shelves(sl, hit.getBlockPos());
+			if (shelves < SHELVES) {
+				if (sp.getMainHandItem().isEmpty() && !level.getBlockState(hit.getBlockPos()).getValue(net.minecraft.world.level.block.LecternBlock.HAS_BOOK)) {
+					// an empty lectern does nothing by itself: say how many shelves research wants round it
+					sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.station.research_shelves", SHELVES, shelves)
+						.withStyle(net.minecraft.ChatFormatting.GRAY));
+				}
 				return InteractionResult.PASS;
 			}
 			open(sp, null, hit.getBlockPos());

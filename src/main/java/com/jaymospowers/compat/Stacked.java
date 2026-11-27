@@ -166,6 +166,17 @@ public final class Stacked {
 		return realm != Level.OVERWORLD && band(server, realm) != null;
 	}
 
+	/** Band bounds ({min, max exclusive}), or null when absent or unreadable, so sleeping never uses vanilla fallbacks. */
+	static int[] sleepRange(MinecraftServer server, ResourceKey<Level> realm) {
+		Object band = band(server, realm);
+		if (band == null) {
+			return null;
+		}
+		int min = read(band, bandMin, Integer.MIN_VALUE);
+		int max = read(band, bandMax, Integer.MAX_VALUE);
+		return min == Integer.MIN_VALUE || max == Integer.MAX_VALUE || min >= max ? null : new int[] {min, max};
+	}
+
 	/** The level that holds this realm: the stacked Overworld when the realm is one of its bands, else its own (may be null). */
 	public static ServerLevel level(MinecraftServer server, ResourceKey<Level> realm) {
 		return band(server, realm) != null ? server.overworld() : server.getLevel(realm);

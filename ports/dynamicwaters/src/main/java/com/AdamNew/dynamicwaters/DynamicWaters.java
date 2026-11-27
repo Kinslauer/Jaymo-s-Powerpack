@@ -270,6 +270,41 @@ public class DynamicWaters {
                             context.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal(report), false);
                             return 1;
                         }))
+                .then(net.minecraft.commands.Commands.literal("watch")
+                        .requires(net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS))
+                        .then(net.minecraft.commands.Commands.literal("report")
+                                .executes(context -> {
+                                    final String report = ColumnWatch.report(context.getSource().getLevel());
+                                    com.mojang.logging.LogUtils.getLogger().info("[DW watch] " + report);
+                                    context.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal(report), false);
+                                    return 1;
+                                }))
+                        .then(net.minecraft.commands.Commands.literal("off")
+                                .executes(context -> {
+                                    context.getSource().sendSuccess(() -> net.minecraft.network.chat.Component
+                                            .literal(ColumnWatch.stop()), false);
+                                    return 1;
+                                }))
+                        .then(net.minecraft.commands.Commands.argument("x", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                .then(net.minecraft.commands.Commands.argument("z", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                        .then(net.minecraft.commands.Commands.argument("radius", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 256))
+                                                .executes(context -> {
+                                                    final String msg = ColumnWatch.watch(com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(context, "x"),
+                                                            com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(context, "z"), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(context, "radius"));
+                                                    context.getSource().sendSuccess(() -> net.minecraft.network.chat.Component
+                                                            .literal(msg), false);
+                                                    return 1;
+                                                })))))
+                .then(net.minecraft.commands.Commands.literal("column")
+                        .requires(net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS))
+                        .executes(context -> {
+                            final net.minecraft.world.phys.Vec3 at = context.getSource().getPosition();
+                            final String report = ColumnWatch.column(context.getSource().getLevel(),
+                                    net.minecraft.util.Mth.floor(at.x), net.minecraft.util.Mth.floor(at.z));
+                            com.mojang.logging.LogUtils.getLogger().info("[DW watch] " + report);
+                            context.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal(report), false);
+                            return 1;
+                        }))
                 .then(net.minecraft.commands.Commands.literal("bench")
                         .requires(net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS))
                         .then(net.minecraft.commands.Commands

@@ -72,6 +72,19 @@ public final class Tornadoes {
 	/** Townsfolk this near one run home (or away) (by size). */
 	static final double[] SHELTER = {0.0, 110.0, 150.0};
 	static final double HOME_NEAR = 64.0;
+	/** How long townsfolk keep under cover once a tornado sends them there (ticks), and how far they run when home's no good. */
+	static final long COVER_TICKS = 20L * 30;
+	static final double COVER_RUN = 30.0;
+	/** Townsfolk this near a dust devil scatter from it (blocks). */
+	static final double DEVIL_SCARE = 10.0;
+	/** Someone near a tornado cries out about it this often (ticks), heard this far (blocks); lines of each (lang {@code talk.jaymoskingdoms.twister.<n>}, {@code .dust_devil.<n>}). */
+	static final long CRY_EVERY = 60L;
+	static final double CRY_RANGE = 48.0;
+	static final int TWISTER_LINES = 6, DEVIL_LINES = 4;
+	/** When each tornado (by id) last had someone cry out about it. */
+	private static final java.util.Map<Integer, Long> CRIED = new java.util.HashMap<>();
+	/** Guards this near a touchdown shout everyone under cover ({@link com.jaymoskingdoms.GuardCries#disaster}). */
+	static final double TOUCHDOWN_CRY_REACH = 48.0;
 	/** Players hear of a touchdown within this distance. */
 	static final double NEWS_RANGE = 320.0;
 	/** Jaymo's Powers' tags: a Wind user, and a Cyclone Lance cast (followed by the game time). */
@@ -96,6 +109,7 @@ public final class Tornadoes {
 		THROWN.clear();
 		TREES.clear();
 		LANCED.clear();
+		CRIED.clear();
 	}
 
 	/** A tornado of {@code size} touches down at (x, z) (under {@code storm}, or alone for a dust devil). */
@@ -119,6 +133,8 @@ public final class Tornadoes {
 		t.water = onWater(level, x, y, z);
 		SERVER.add(t);
 		if (size != Tornado.DUST_DEVIL && !quiet) {
+			// (Andy, 2026-11-27) the guards near it shout everyone to the cellars
+			com.jaymoskingdoms.GuardCries.disaster(level, x, z, TOUCHDOWN_CRY_REACH, "tornado");
 			// over the sea it's a waterspout: the same funnel, its foot on the water
 			String news = t.water ? "disaster.jaymoskingdoms.touchdown.waterspout." + Tornado.NAMES[size] : "disaster.jaymoskingdoms.touchdown." + Tornado.NAMES[size];
 			for (ServerPlayer p : level.players()) {
@@ -185,8 +201,12 @@ public final class Tornadoes {
 			if (now % 40 == t.id % 40) {
 				roar(level, t, random);
 			}
-			if (now % 20 == 0 && SHELTER[t.size] > 0.0) {
-				shelter(level, t);
+			if (now % 20 == 0) {
+				if (SHELTER[t.size] > 0.0) {
+					shelter(level, t, now);
+				} else if (!t.water) {
+					scatter(level, t, now);
+				}
 			}
 		}
 		SERVER.removeIf(t -> {
@@ -194,6 +214,7 @@ public final class Tornadoes {
 			if (gone) {
 				THROWN.remove(t.id);
 				TREES.remove(t.id);
+				CRIED.remove(t.id);
 			}
 			return gone;
 		});
@@ -427,26 +448,80 @@ public final class Tornadoes {
 		}
 	}
 
-	/** Villagers near it (MCA's too) run home to their beds if home is near, else away from it. */
-	private static void shelter(ServerLevel level, Tornado t) {
+	/**
+	 * Villagers near it (MCA's too) run home to their beds if home is near and not toward the funnel, else well away from
+	 * it, and keep under cover a while ({@link com.jaymoskingdoms.Frights#takeCover}: whatever else they were running from,
+	 * this is worse, and the grown ones bring a child along). Andy (2026-11-26): "NPCs should be far more alarmed during
+	 * disasters like fire and Tornadoes". The settlement's own folk run too, and someone cries out as it comes.
+	 */
+	private static void shelter(ServerLevel level, Tornado t, long now) {
 		double range = SHELTER[t.size];
 		AABB box = new AABB(t.x - range, t.y - 30.0, t.z - range, t.x + range, t.y + 40.0, t.z + range);
-		for (Villager v : level.getEntitiesOfClass(Villager.class, box, Villager::isAlive)) {
+		Vec3 foot = new Vec3(t.x, t.y, t.z);
+		double danger = PULL[t.size] + 12.0;
+		Villager nearest = null;
+		for (Villager v : level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && !com.jaymoskingdoms.Downed.isDowned(v))) {
 			Optional<GlobalPos> home = v.getBrain().getMemoryInternal(MemoryModuleType.HOME);
 			BlockPos to;
-			if (home != null && home.isPresent() && home.get().dimension() == level.dimension() && home.get().pos().closerThan(v.blockPosition(), HOME_NEAR)) {
+			if (home != null && home.isPresent() && home.get().dimension() == level.dimension() && home.get().pos().closerThan(v.blockPosition(), HOME_NEAR)
+				&& home.get().pos().distToCenterSqr(t.x, home.get().pos().getY(), t.z) > danger * danger) {
 				to = home.get().pos();
 			} else {
-				Vec3 away = v.position().subtract(t.x, v.getY(), t.z);
-				if (away.lengthSqr() < 1.0E-3) {
-					away = new Vec3(1.0, 0.0, 0.0);
-				}
-				Vec3 at = v.position().add(away.normalize().scale(20.0));
-				int x = Mth.floor(at.x), z = Mth.floor(at.z);
-				to = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
+				to = away(level, v, foot);
 			}
-			BehaviorUtils.setWalkAndLookTargetMemories(v, to, 0.75F, 1);
+			com.jaymoskingdoms.Frights.takeCover(level, v, to, now + COVER_TICKS);
+			// (a guard stands firm against monsters, so Frights lets go of him: the walk is set here as well)
+			BehaviorUtils.setWalkAndLookTargetMemories(v, to, 0.85F, 1);
+			if (!v.isBaby() && (nearest == null || v.distanceToSqr(foot) < nearest.distanceToSqr(foot))) {
+				nearest = v;
+			}
 		}
+		// a settlement's own folk (its builders, farmers, guards) not in a fight run from it as well
+		for (com.jaymoskingdoms.Folk folk : level.getEntitiesOfClass(com.jaymoskingdoms.Folk.class, box, f -> f.isAlive() && f.getTarget() == null)) {
+			BlockPos to = away(level, folk, foot);
+			folk.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 1.25);
+		}
+		if (nearest != null) {
+			cry(level, t, nearest, "talk.jaymoskingdoms.twister.", TWISTER_LINES, now);
+		}
+	}
+
+	/** A dust devil: those right by it scatter from the whirl (dust in the eyes, hats and washing gone), and one of them says so. */
+	private static void scatter(ServerLevel level, Tornado t, long now) {
+		Vec3 foot = new Vec3(t.x, t.y, t.z);
+		AABB box = new AABB(foot, foot).inflate(DEVIL_SCARE, 6.0, DEVIL_SCARE);
+		Villager first = null;
+		for (Villager v : level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && !com.jaymoskingdoms.Downed.isDowned(v)
+			&& v.distanceToSqr(foot.x, v.getY(), foot.z) < DEVIL_SCARE * DEVIL_SCARE)) {
+			com.jaymoskingdoms.Frights.scare(level, v, foot);
+			if (first == null && !v.isBaby()) {
+				first = v;
+			}
+		}
+		if (first != null) {
+			cry(level, t, first, "talk.jaymoskingdoms.dust_devil.", DEVIL_LINES, now);
+		}
+	}
+
+	/** {@code who} cries out about {@code t} (a line of {@code key}), no more than once every {@link #CRY_EVERY} for it. */
+	private static void cry(ServerLevel level, Tornado t, LivingEntity who, String key, int lines, long now) {
+		Long last = CRIED.get(t.id);
+		if (last != null && now - last < CRY_EVERY) {
+			return;
+		}
+		CRIED.put(t.id, now);
+		com.jaymoskingdoms.Speech.say(level, who, Component.translatable(key + level.getRandom().nextInt(lines)), com.jaymoskingdoms.Speech.RED, CRY_RANGE);
+	}
+
+	/** A spot on the ground {@link #COVER_RUN} blocks from the funnel's foot, the way {@code who} already is from it. */
+	private static BlockPos away(ServerLevel level, LivingEntity who, Vec3 foot) {
+		Vec3 away = who.position().subtract(foot.x, who.getY(), foot.z);
+		if (away.lengthSqr() < 1.0E-3) {
+			away = new Vec3(1.0, 0.0, 0.0);
+		}
+		Vec3 at = who.position().add(away.normalize().scale(COVER_RUN));
+		int x = Mth.floor(at.x), z = Mth.floor(at.z);
+		return new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
 	}
 
 	/** A Wind user's Cyclone Lance, cast just now toward this tornado, shoves it the way they were looking. */
