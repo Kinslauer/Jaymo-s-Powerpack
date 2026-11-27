@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 05:56). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 05:58). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -38,8 +38,6 @@ kanban-plugin: board
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · 💻 Odysseus · #2283 · in-review
-- [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · 💻 Odysseus · #2282 · in-review
-- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 💻 Odysseus · #2281 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -65,22 +63,22 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · for any · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · for any · blocked
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · blocked
-- [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · #2255 · ready
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
+- [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]]
+- [x] [[Inbox/Done/legends-p6-followups|legends-p6-followups]]
+- [x] [[Inbox/Done/legends-p3-big-symbiote|legends-p3-big-symbiote]]
 - [x] [[Inbox/Done/legends-p6-core-animations|legends-p6-core-animations]]
 - [x] [[Inbox/Done/mordhau-4-legs|mordhau-4-legs]]
 - [x] [[Inbox/Done/mordhau-3-body|mordhau-3-body]]
 - [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
 - [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
-- [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
-- [x] [[Inbox/Done/mordhau-2-hoods-crests|mordhau-2-hoods-crests]]
-- [x] [[Inbox/Done/mordhau-1-helms|mordhau-1-helms]]
 
 
 %% kanban:settings
