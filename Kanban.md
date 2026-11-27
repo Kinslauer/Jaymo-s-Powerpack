@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:02). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-26 21:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,8 +26,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · #2255 · changes · fixing review notes
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · #2255 · changes · fixing review notes
 
 
 ## In review
