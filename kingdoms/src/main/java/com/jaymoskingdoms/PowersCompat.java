@@ -1400,6 +1400,33 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Freerun.onWall(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle onWall;
+	private static boolean lookedForOnWall;
+
+	/** Whether {@code player} clings to, climbs or runs up a wall just now (Powers' freerun); false without Powers. */
+	public static boolean onWall(Player player) {
+		if (!lookedForOnWall) {
+			lookedForOnWall = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					onWall = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.freerun.Freerun"),
+						"onWall", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' wall climbing (older Powers?)", e);
+				}
+			}
+		}
+		if (onWall == null) {
+			return false;
+		}
+		try {
+			return (boolean) onWall.invoke(player);
+		} catch (Throwable t) {
+			return false;
+		}
+	}
+
 	/** Powers' {@code XenoformState.transformed(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle xeno;
 	private static boolean lookedForXeno;

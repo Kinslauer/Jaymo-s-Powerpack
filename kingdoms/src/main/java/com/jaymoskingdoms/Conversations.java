@@ -258,7 +258,10 @@ public final class Conversations {
 
 	/** "Take your leave": {@code villager} bids {@code player} goodbye, and the talk ends after it. */
 	public static void goodbye(ServerPlayer player, Entity villager) {
-		say(player, villager, "goodbye", GOODBYE_LINES);
+		// (a guard you keep walking off from tells you to speak plain instead: Quips)
+		if (!Quips.leftTalk(player, villager)) {
+			say(player, villager, "goodbye", GOODBYE_LINES);
+		}
 		ends(player, villager);
 	}
 

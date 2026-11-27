@@ -914,6 +914,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Specialties.register();
 		Powderheads.register();
 		Remarks.register();
+		// easter-egg quips in an old knight's voice
+		Quips.register();
 		TableTalk.register();
 		CampSuppers.register();
 		// life round a camp's fire outside supper: sitting, talk, the spit
