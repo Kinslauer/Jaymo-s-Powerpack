@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:22). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:28). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -16,7 +16,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/hunters-road-9|hunters-road-9]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
-- [[Inbox/nycto-4|nycto-4]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
+- [[Inbox/nycto-4|nycto-4]] · 2026-11-27 16:28 nycto-3 and -6 merged (#2291, #2298): now waits only on nycto-4-models.
 - [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · 2026-11-26 07:21 Design draft complete: Overworld aqueduct structure, SettlementCurse system, 4 board quests (Stem the Flow, Clear the Pillars, Purify the Ston…
 
 ## Stuck
@@ -34,13 +34,14 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-14 waiting for a bot, 1 being built, 12 in review: see [[Kanban]].
+14 waiting for a bot, 1 being built, 11 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
 - [ ] #2300 Air combo: ragdolls, enemy step, Yank and tendril pull-ups, slam spares friends (Powers, Kingdoms, Kitchen, 2026-11-27)
+- [ ] #2298 Night's Blood 6 - the night-cloak (Powers, Kingdoms, 2026-11-27)
 - [ ] #2297 mounted guards tie up their horses; villagers ask whoever's in the way to move (Kingdoms, 2026-11-27)
 - [ ] #2296 Night's Blood 7: the hunter's oil, garlic from farmers, fire burst burns vampires (Powers, Kingdoms, 2026-11-27)
 - [ ] #2295 Pickpocketing: nothing from nothing, pick a mark bare, the steel blueprint in the smith's pocket (Kingdoms, 2026-11-27)
@@ -99,8 +100,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2232 Dragon keys no longer stop the game starting (Kingdoms, 2026-11-26)
 - [ ] #2231 Dyed and grey sheep no longer sprout stray boxes (Powers, 2026-11-26)
 - [ ] #2230 /texturelook vanilla|reason - switch the pack's retexture packs off and back on (Powers, 2026-11-26)
-- [ ] #2229 cannon loading tip cards (Powers, 2026-11-26)
-- …and 660 older ones.
+- …and 661 older ones.
 
 ## Health
 
