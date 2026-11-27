@@ -289,6 +289,8 @@ public final class Lash {
 	public static final int PULL_TICKS = 6;
 	static final double PULL_SPEED = 1.45, PULL_UP = 0.36, PULL_MAX = 2.4;
 	static final float PULL_SHARE = 0.35F;
+	/** How much of the chain pull a body too heavy to lift gets. */
+	static final double PULL_HEAVY_SCALE = 0.2;
 	static final int PULL_SLOW_TICKS = 30;
 	/**
 	 * Spinning cyclone of chained blades all around you (Sneak+left-click with Chain Axe). {@code CYCLONE_COOLDOWN} is the
@@ -1592,12 +1594,19 @@ public final class Lash {
 		}
 		Vec3 to = player.position().subtract(target.position());
 		double flatDist = Math.hypot(to.x, to.z);
-		if (flatDist > 0.4) {
+		// bosses are not pulled at all, and a body too heavy to lift (as the whip's yank judges) barely budges
+		boolean pullable = holdable(player, target);
+		if (pullable && flatDist > 0.4) {
 			double speed = Math.min(PULL_MAX, PULL_SPEED + flatDist * 0.12);
+			if (!liftable(target)) {
+				speed *= PULL_HEAVY_SCALE;
+			}
 			Vec3 vel = new Vec3(to.x / flatDist * speed, Math.max(PULL_UP, Math.min(0.65, to.y * 0.18 + PULL_UP)), to.z / flatDist * speed);
 			shove(target, vel.subtract(target.getDeltaMovement()));
 		}
-		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, PULL_SLOW_TICKS, 1), player);
+		if (pullable) {
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, PULL_SLOW_TICKS, 1), player);
+		}
 		player.setAttached(STATE, state.to(PULL, now, target.getId(), at, at));
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 8, 0.25, 0.25, 0.25, 0.2);
 		com.jaymospowers.core.fx.MagicFx.stroke(level, at, hand(player, 1.0F), 0.7F, CYCLONE_COLOR);

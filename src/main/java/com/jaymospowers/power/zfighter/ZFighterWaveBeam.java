@@ -246,6 +246,7 @@ public final class ZFighterWaveBeam {
 			if (!old.burstDone) {
 				detonate(player, old, old.head(), false);
 			}
+			send(old, old.head(), true);
 			sendTargets(player, new int[0]);
 		}
 		Wave wave = new Wave(player.level(), player.getUUID(), player.getId(), start, dir.normalize(), spec);
@@ -304,6 +305,7 @@ public final class ZFighterWaveBeam {
 				if (!wave.burstDone) {
 					detonate(player, wave, wave.head(), false);
 				}
+				send(wave, wave.head(), true);
 				sendTargets(player, new int[0]);
 				end(player);
 			}
@@ -364,6 +366,8 @@ public final class ZFighterWaveBeam {
 			if (reached) {
 				wave.stage = STAGE_SUSTAIN;
 				setStage(player, STAGE_SUSTAIN);
+				// the tip bursts the moment it arrives, as ever; the sustain after it is the beam lingering
+				detonate(player, wave, head, false);
 				MagicFx.ring(level, head, (float)Math.max(1.5, spec.radius() * 1.8), spec.color());
 			}
 			return true;
@@ -386,16 +390,9 @@ public final class ZFighterWaveBeam {
 		}
 		wave.length = reach;
 		Vec3 head = wave.head();
-		strike(player, wave, head);
-		if (wave.sustainTicks % SUSTAIN_HIT_EVERY == 0) {
-			sustainStrike(player, wave, head);
-		}
-		sparks(wave, head);
-		sendTargets(player, collectTargets(player, wave, head));
-		if (wave.age % HUM_EVERY == 0) {
-			Soundscape.play(level, head, SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.5F).pitched(spec.pitch() * 1.05F), ZFighterKi.KI_SURGE);
-		}
+		// the base hold is only the beam lingering (the tip burst already landed); damage comes only from ki-paid hold past it
 		boolean keep = wave.sustainTicks < SUSTAIN_BASE_TICKS;
+		boolean paid = false;
 		if (!keep && wave.holding && wave.sustainTicks < SUSTAIN_MAX_TICKS) {
 			ZFighterPower.Live live = ZFighterPower.live(player);
 			if (spec.ape() || player.isCreative() || live.raging() || live.ki >= SUSTAIN_KI_PER_TICK) {
@@ -403,14 +400,27 @@ public final class ZFighterWaveBeam {
 					live.ki = Math.max(0.0F, live.ki - SUSTAIN_KI_PER_TICK);
 				}
 				keep = true;
+				paid = true;
 			}
+		}
+		if (paid) {
+			strike(player, wave, head);
+			if (wave.sustainTicks % SUSTAIN_HIT_EVERY == 0) {
+				sustainStrike(player, wave, head);
+			}
+		}
+		sparks(wave, head);
+		sendTargets(player, collectTargets(player, wave, head));
+		if (wave.age % HUM_EVERY == 0) {
+			Soundscape.play(level, head, SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.5F).pitched(spec.pitch() * 1.05F), ZFighterKi.KI_SURGE);
 		}
 		if (keep && wave.age < wave.maxAge) {
 			send(wave, head, false);
 			return true;
 		}
-		// transition into STAGE_END: burst at tip, start client fade, clear red outlines, hold cool-off pose briefly
+		// transition into STAGE_END: start client fade, clear red outlines, hold cool-off pose briefly
 		detonate(player, wave, head, false);
+		send(wave, head, true);
 		sendTargets(player, new int[0]);
 		wave.stage = STAGE_END;
 		wave.endTicks = 0;
@@ -511,10 +521,11 @@ public final class ZFighterWaveBeam {
 	/** Where the head stops, it bursts (the beam's own blast); a clash's end only shakes the ground with it. */
 	private static void burst(ServerPlayer player, Wave wave, Vec3 at, boolean byClash) {
 		detonate(player, wave, at, byClash);
+		send(wave, at, true);
 		end(player);
 	}
 
-	/** Fires the beam's tip blast/shatter and starts the client fade (once per wave). */
+	/** Fires the beam's tip blast/shatter (once per wave); the client fade is {@link #send} with done. */
 	private static void detonate(ServerPlayer player, Wave wave, Vec3 at, boolean byClash) {
 		if (wave.burstDone) {
 			return;
@@ -522,7 +533,6 @@ public final class ZFighterWaveBeam {
 		wave.burstDone = true;
 		ServerLevel level = wave.level;
 		Spec spec = wave.spec;
-		send(wave, at, true);
 		if (spec.blast() > 0.0F) {
 			level.explode(player, ZFighterKi.source(player), byClash || spec.groundOnly() ? ZFighterKi.GROUND_ONLY : null, at.x, at.y, at.z,
 				spec.blast() * (byClash ? CLASH_BURST : 1.0F), false, spec.interaction());

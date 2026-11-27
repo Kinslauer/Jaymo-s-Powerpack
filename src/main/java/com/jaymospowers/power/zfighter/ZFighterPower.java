@@ -905,13 +905,6 @@ public final class ZFighterPower implements Power {
 			sync(player, live, maxKi(player));
 			return;
 		}
-		// Instant Step behind a sighted foe takes priority over Divine, Verdant and legend Sneak+B when Ki Sense is active
-		if (down && key == PowerKey.ABILITY_4 && player.isShiftKeyDown()
-			&& (!ZFighterTeleport.equipped(player) || live.lineage == ZFighterLineage.VERDANT)
-			&& ZFighterKiSense.isOn(player) && ZFighterInstantStep.tryStart(player, live, true)) {
-			sync(player, live, maxKi(player));
-			return;
-		}
 		// (0.18.48) a Divine-born's sneak+G (Flying Sword) and sneak+B (Eight-Sign Circle)
 		if (down && player.isShiftKeyDown() && ZFighterDivineMoves.key(player, live, key)) {
 			sync(player, live, maxKi(player));
@@ -981,8 +974,8 @@ public final class ZFighterPower implements Power {
 					if (ready(player, ZFighterState.STEP) && ZFighterLineage.heal(player, live)) {
 						cooldown(player, ZFighterState.STEP, ZFighterLineage.HEAL_COOLDOWN);
 					}
-				} else if (down && (ZFighterKiSense.isOn(player) || player.isShiftKeyDown()) && ZFighterInstantStep.tryStart(player, live)) {
-					// Instant Step: two fingers to the brow, blink ahead (or behind sighted foe when sneaking)
+				} else if (down && ZFighterInstantStep.tryStart(player, live)) {
+					// Ki Sense on and a sensed foe picked or in sights: two fingers to the brow, blink behind it (else Flash Step below)
 				} else if (down && ready(player, ZFighterState.STEP) && ZFighterHooks.flashStepStamina(player) && ZFighterKi.step(player, live)) {
 					cooldown(player, ZFighterState.STEP, ZFighterKi.STEP_COOLDOWN);
 				}

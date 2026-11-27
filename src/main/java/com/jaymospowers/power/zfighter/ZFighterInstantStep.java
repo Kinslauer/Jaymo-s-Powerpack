@@ -26,8 +26,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Instant Step: once Ki Sense is learned, raise two fingers to the brow ({@link ZFighterHands#BROW}) and blink a few
- * blocks ahead in a flash — or behind the foe in your sights if you sneak — leaving a short shimmer at both ends.
+ * Instant Step: with Ki Sense on, raise two fingers to the brow ({@link ZFighterHands#BROW}) and blink behind the foe
+ * you have picked or are looking at, leaving a short shimmer at both ends. It only claims B when it can really go
+ * (a sensed foe, the ki, a free landing); otherwise B is Flash Step's as ever.
  */
 public final class ZFighterInstantStep {
 	/** Ticks holding two fingers to the brow before blinking. */
@@ -35,14 +36,17 @@ public final class ZFighterInstantStep {
 	/** Ki cost and cooldown (ticks). */
 	static final float STEP_KI = 12.0F;
 	static final int STEP_COOLDOWN = 24;
-	/** Forward blink distance (blocks), and max distance to lock onto a foe in sights when sneaking. */
-	static final double STEP_BLOCKS = 8.0;
+	/** Max distance to lock onto a foe in sights. */
 	static final double SIGHT_RANGE = 24.0;
 	static final float STEP_EXHAUSTION = 0.6F;
 	/** Shimmer colour tint blended with the fighter's ki colour. */
 	static final int SHIMMER_COLOR = 0xB8F0FF;
 
-	private record Pending(long start, boolean behind, int targetId) {
+	private record Pending(long start, int targetId) {
+	}
+
+	/** Where the blink lands: the feet position and the facing there (toward the foe). */
+	private record Spot(Vec3 dest, float yaw, float pitch) {
 	}
 
 	private static final Map<UUID, Pending> PENDING = new HashMap<>();
@@ -69,18 +73,12 @@ public final class ZFighterInstantStep {
 	}
 
 	/**
-	 * Starts the brief brow-touch wind-up if Ki Sense has been learned and the fighter can pay for it.
-	 * Returns true if Instant Step claimed the key press.
+	 * Starts the brief brow-touch wind-up when Ki Sense is on, a sensed foe is picked or in sights, the fighter can pay
+	 * and there is a free spot behind it. Returns true only if Instant Step claimed the key press; on false nothing was
+	 * spent and the press is free for Flash Step.
 	 */
 	static boolean tryStart(ServerPlayer player, ZFighterPower.Live live) {
-		return tryStart(player, live, false);
-	}
-
-	/**
-	 * Starts Instant Step; when {@code behindOnly} is true, only claims the key if a foe is sighted to blink behind.
-	 */
-	static boolean tryStart(ServerPlayer player, ZFighterPower.Live live, boolean behindOnly) {
-		if (!ZFighterKiSense.learned(player) || ZFighterLineage.ape(player) || Powers.silenced(player)) {
+		if (!ZFighterKiSense.learned(player) || !ZFighterKiSense.isOn(player) || ZFighterLineage.ape(player) || Powers.silenced(player)) {
 			return false;
 		}
 		if (PENDING.containsKey(player.getUUID())) {
@@ -89,21 +87,25 @@ public final class ZFighterInstantStep {
 		if (!ZFighterPower.ready(player, ZFighterState.STEP)) {
 			return false;
 		}
-		boolean behind = behindOnly || player.isShiftKeyDown();
-		LivingEntity target = behind ? sightedFoe(player) : null;
-		if (behindOnly && target == null) {
+		LivingEntity target = sightedFoe(player);
+		double sense = ZFighterKiSense.range(player);
+		if (target == null || ZFighterKiSense.hidesKi(target) || target.distanceToSqr(player) > sense * sense) {
 			return false;
 		}
 		float cost = STEP_KI * ZFighterAndroid.costFactor(player);
 		if (!player.isCreative() && !live.raging() && live.ki < cost && !ZFighterRaces.canCover(player, live, cost)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
-			return true;
+			return false;
+		}
+		// the landing is found before anything is spent
+		Spot spot = spotBehind(player, target);
+		if (spot == null || spot.dest().distanceToSqr(player.position()) < 0.25) {
+			return false;
 		}
 		if (!ZFighterHooks.flashStepStamina(player)) {
-			return true;
+			return false;
 		}
 		long now = player.level().getGameTime();
-		PENDING.put(player.getUUID(), new Pending(now, behind, target == null ? -1 : target.getId()));
+		PENDING.put(player.getUUID(), new Pending(now, target.getId()));
 		ZFighterHands.pose(player, ZFighterHands.BROW);
 		ServerLevel level = player.level();
 		Vec3 brow = player.getEyePosition().add(player.getViewVector(1.0F).scale(0.35)).add(0.0, 0.12, 0.0);
@@ -133,50 +135,14 @@ public final class ZFighterInstantStep {
 	private static void execute(ServerPlayer player, ZFighterPower.Live live, Pending pending) {
 		ServerLevel level = player.level();
 		Vec3 start = player.position();
-		Vec3 look = player.getViewVector(1.0F);
-		Vec3 dest = null;
-		float yaw = player.getYRot();
-		float pitch = player.getXRot();
-
-		if (pending.behind()) {
-			LivingEntity target = resolveTarget(player, level, pending.targetId());
-			if (target != null) {
-				float facing = target.getYRot() * Mth.DEG_TO_RAD;
-				Vec3 forward = new Vec3(-Mth.sin(facing), 0.0, Mth.cos(facing));
-				double gap = target.getBbWidth() * 0.5 + 0.95;
-				Vec3 away = target.position().subtract(start).multiply(1.0, 0.0, 1.0);
-				Vec3 alt = away.lengthSqr() < 1.0E-4 ? target.position().subtract(forward.scale(gap))
-					: target.position().add(away.normalize().scale(gap));
-				for (Vec3 candidate : new Vec3[] {
-					target.position().subtract(forward.scale(gap)),
-					alt,
-					target.position().subtract(forward.scale(gap)).add(0.0, 1.0, 0.0)
-				}) {
-					if (free(player, candidate)) {
-						dest = candidate;
-						break;
-					}
-				}
-				if (dest != null) {
-					Vec3 toTarget = target.getEyePosition().subtract(dest.add(0.0, player.getEyeHeight(), 0.0));
-					yaw = (float)(Mth.atan2(toTarget.z, toTarget.x) * Mth.RAD_TO_DEG) - 90.0F;
-					pitch = (float)(-Mth.atan2(toTarget.y, Math.sqrt(toTarget.x * toTarget.x + toTarget.z * toTarget.z)) * Mth.RAD_TO_DEG);
-				}
-			}
+		LivingEntity target = resolveTarget(player, level, pending.targetId());
+		Spot spot = target == null ? null : spotBehind(player, target);
+		if (spot == null || spot.dest().distanceToSqr(start) < 0.25) {
+			return;
 		}
-
-		if (dest == null) {
-			for (double d = 0.25; d <= STEP_BLOCKS; d += 0.25) {
-				Vec3 candidate = start.add(look.scale(d));
-				if (!free(player, candidate)) {
-					break;
-				}
-				dest = candidate;
-			}
-			if (dest == null || dest.distanceToSqr(start) < 0.5) {
-				return;
-			}
-		}
+		Vec3 dest = spot.dest();
+		float yaw = spot.yaw();
+		float pitch = spot.pitch();
 
 		if (!ZFighterPower.spend(player, live, STEP_KI)) {
 			return;
@@ -195,6 +161,30 @@ public final class ZFighterInstantStep {
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(STEP_EXHAUSTION);
 		}
+	}
+
+	/** The first free spot behind (or beside) the foe, facing it; null when there is none. */
+	private static @Nullable Spot spotBehind(ServerPlayer player, LivingEntity target) {
+		Vec3 start = player.position();
+		float facing = target.getYRot() * Mth.DEG_TO_RAD;
+		Vec3 forward = new Vec3(-Mth.sin(facing), 0.0, Mth.cos(facing));
+		double gap = target.getBbWidth() * 0.5 + 0.95;
+		Vec3 away = target.position().subtract(start).multiply(1.0, 0.0, 1.0);
+		Vec3 alt = away.lengthSqr() < 1.0E-4 ? target.position().subtract(forward.scale(gap))
+			: target.position().add(away.normalize().scale(gap));
+		for (Vec3 candidate : new Vec3[] {
+			target.position().subtract(forward.scale(gap)),
+			alt,
+			target.position().subtract(forward.scale(gap)).add(0.0, 1.0, 0.0)
+		}) {
+			if (free(player, candidate)) {
+				Vec3 toTarget = target.getEyePosition().subtract(candidate.add(0.0, player.getEyeHeight(), 0.0));
+				float yaw = (float)(Mth.atan2(toTarget.z, toTarget.x) * Mth.RAD_TO_DEG) - 90.0F;
+				float pitch = (float)(-Mth.atan2(toTarget.y, Math.sqrt(toTarget.x * toTarget.x + toTarget.z * toTarget.z)) * Mth.RAD_TO_DEG);
+				return new Spot(candidate, yaw, pitch);
+			}
+		}
+		return null;
 	}
 
 	/** Short pale-ki shimmer column at departure and landing. */
