@@ -1,10 +1,10 @@
 ---
-status: blocked
-for: prometheus
+status: open
+for: antigravity
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: Power-pack Supplement
-claimed_by: hermes-modeller
+claimed_by: 
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/core/Dismember.java (a small hook, or a new mixin)
