@@ -1,9 +1,9 @@
 ---
-status: open
-for: hermes-modeller
+status: claimed
+for: antigravity
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: t3
 pr: 
 thread: 
 ---
@@ -22,3 +22,4 @@ thread:
 ## Notes
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - 2026-11-27 11:41 Back to the modeller (Hunter's Road thread, 2026-11-27): models are Prometheus' job; that thread builds the patch once each model lands.
+- 2026-11-27 08:35 Andy 2026-11-27: models to Codex and Antigravity through T3
