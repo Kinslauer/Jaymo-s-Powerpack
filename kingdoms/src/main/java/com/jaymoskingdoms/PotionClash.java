@@ -22,11 +22,17 @@ import net.minecraft.world.item.alchemy.PotionContents;
  * Wits: a sharper head keeps its brews apart), and then one of four things: the two cancel (the first is gone and the second
  * does nothing), both double (their strengths are as long again), the second turns harmful (a sour draught: poison and a
  * swimming head), or it blasts in the belly (a few points of damage and a puff of smoke; no block is touched).
+ * <p>
+ * It reads Jaymo's Powers' toxicity (Hunter's Road, patch 6): past half a load the chance climbs, and a sour or belly clash
+ * leaves some toxin in the body.
  */
 public final class PotionClash {
 	/** The base chance of a clash, what each Wits point takes off it, its floor, and how long a drink counts as working (ticks). */
 	static final double CHANCE = 0.45, WITS_CUT = 0.004, FLOOR = 0.12;
 	static final int WORKING = 6000, SOUR_POISON = 120, SOUR_NAUSEA = 240;
+	/** What a full toxin load adds to the chance (scaled from half a load), the highest the chance goes, and the toxin a sour or belly clash leaves (load units). */
+	static final double LOAD_ADDS = 0.35, MOST = 0.85;
+	static final int SOUR_LOAD = 120, BELLY_LOAD = 80;
 	static final float BELLY = 4.0F;
 
 	private record Drink(List<Holder<MobEffect>> effects, long at) {
@@ -43,7 +49,10 @@ public final class PotionClash {
 
 	/** The chance a second potion clashes with the first for {@code player}. */
 	static double chance(ServerPlayer player) {
-		return Math.max(FLOOR, CHANCE - WITS_CUT * Stats.value(player, Stats.Stat.WITS));
+		double base = Math.max(FLOOR, CHANCE - WITS_CUT * Stats.value(player, Stats.Stat.WITS));
+		// a body already loaded with toxin (Jaymo's Powers' Toxicity) keeps its brews apart worse, from half a load up
+		double load = PowersCompat.toxicLoad(player) / 1000.0;
+		return Math.min(MOST, base + Math.max(0.0, load - 0.5) * 2.0 * LOAD_ADDS);
 	}
 
 	/**
@@ -89,12 +98,14 @@ public final class PotionClash {
 				// the second turns
 				player.addEffect(new MobEffectInstance(MobEffects.POISON, SOUR_POISON, 0));
 				player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SOUR_NAUSEA, 0));
+				PowersCompat.toxicDose(player, SOUR_LOAD);
 				say(player, "sour");
 				return true;
 			}
 			default -> {
 				// it blasts in the belly, and then takes hold as usual
 				player.hurtServer(level, level.damageSources().magic(), BELLY);
+				PowersCompat.toxicDose(player, BELLY_LOAD);
 				Fx.blast(level, player.position().add(0, 1, 0), 1.0F, 0xB8A8C8);
 				level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.5F, 1.6F);
 				say(player, "belly");

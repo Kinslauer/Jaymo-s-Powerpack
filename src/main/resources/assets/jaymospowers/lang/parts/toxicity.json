@@ -1,0 +1,16 @@
+{
+  "item.jaymospowers.toxin_gauge": "Toxin Gauge",
+  "tooltip.jaymospowers.toxin_gauge": "Held, or worn in the charm slot, it reads the toxin in your body",
+  "effect.jaymospowers.harm_toxin": "Toxin",
+  "effect.jaymospowers.harm_acid": "Acid",
+  "effect.jaymospowers.harm_flammable": "Flammable",
+  "effect.jaymospowers.harm_cripple": "Crippled",
+  "effect.jaymospowers.harm_hunt": "Hunted",
+  "gui.jaymospowers.toxin_gauge.load": "Load %s%%",
+  "gui.jaymospowers.toxin_gauge.tolerance": "Tolerance %s%%",
+  "gui.jaymospowers.toxin_gauge.next": "Next line at %s%%",
+  "gui.jaymospowers.toxin_gauge.next_none": "Nowhere left to climb",
+  "gui.jaymospowers.toxin_gauge.mutagens": "Mutagens",
+  "gui.jaymospowers.toxin_gauge.none": "none",
+  "jei.jaymospowers.toxin_gauge": "Held in a hand, or worn in the charm slot, it shows the toxin your body holds: the load with a white mark at half and a red mark where harm begins, your tolerance, the next line to cross, and any mutagens. Craft it with two copper ingots, a gold nugget, a glass pane and a spider eye."
+}

@@ -5672,4 +5672,82 @@ public final class PowersCompat {
 			// a cue is only a flourish: any mismatch is silent
 		}
 	}
+
+	// ---- Powers' toxicity and harms (Hunter's Road, patch 6) ----
+	private static java.lang.invoke.@Nullable MethodHandle toxicTotal, toxicDose, harmApply, harmClear;
+	private static boolean lookedForToxic;
+
+	private static void toxic() {
+		if (lookedForToxic) {
+			return;
+		}
+		lookedForToxic = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			var lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> toxicity = Class.forName("com.jaymospowers.alchemy.toxic.Toxicity");
+			Class<?> harms = Class.forName("com.jaymospowers.alchemy.toxic.Harms");
+			toxicTotal = lookup.findStatic(toxicity, "total", java.lang.invoke.MethodType.methodType(int.class, Player.class));
+			toxicDose = lookup.findStatic(toxicity, "dose", java.lang.invoke.MethodType.methodType(int.class, net.minecraft.server.level.ServerPlayer.class, int.class, int.class));
+			harmApply = lookup.findStatic(harms, "apply", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, String.class, int.class, int.class));
+			harmClear = lookup.findStatic(harms, "clear", java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' toxicity (older Powers?)", e);
+		}
+	}
+
+	/** How much toxin {@code player}'s body holds, 0 to 1000 (Powers' {@code Toxicity.total}); 0 without Powers. */
+	public static int toxicLoad(Player player) {
+		toxic();
+		if (toxicTotal != null) {
+			try {
+				return (int) toxicTotal.invoke(player);
+			} catch (Throwable e) {
+				// (as if none)
+			}
+		}
+		return 0;
+	}
+
+	/** {@code player} takes {@code strength} load units of toxin (Powers' {@code Toxicity.dose}, not held); nothing without Powers. */
+	public static void toxicDose(net.minecraft.server.level.ServerPlayer player, int strength) {
+		toxic();
+		if (toxicDose != null) {
+			try {
+				int ignored = (int) toxicDose.invoke(player, strength, 0);
+			} catch (Throwable e) {
+				// (as if none)
+			}
+		}
+	}
+
+	/**
+	 * {@code victim} takes one of Powers' harms by its id ({@code toxin}, {@code acid}, {@code flammable}, {@code cripple},
+	 * {@code hunt}) for {@code ticks}; false without Powers.
+	 */
+	public static boolean harm(LivingEntity victim, String id, int ticks, int level) {
+		toxic();
+		if (harmApply != null) {
+			try {
+				return (boolean) harmApply.invoke(victim, id, ticks, level);
+			} catch (Throwable e) {
+				// (as if none)
+			}
+		}
+		return false;
+	}
+
+	/** Takes every one of Powers' harms off {@code who} (the antidote). */
+	public static void clearHarms(LivingEntity who) {
+		toxic();
+		if (harmClear != null) {
+			try {
+				harmClear.invoke(who);
+			} catch (Throwable e) {
+				// (as if none)
+			}
+		}
+	}
 }

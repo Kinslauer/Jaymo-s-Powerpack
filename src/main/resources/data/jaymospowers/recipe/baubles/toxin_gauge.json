@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "N": "minecraft:gold_nugget",
+    "G": "minecraft:glass_pane",
+    "S": "minecraft:spider_eye"
+  },
+  "pattern": [
+    " N ",
+    "CGC",
+    " S "
+  ],
+  "result": {
+    "id": "jaymospowers:toxin_gauge",
+    "count": 1
+  }
+}

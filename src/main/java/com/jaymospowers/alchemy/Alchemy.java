@@ -67,6 +67,7 @@ public final class Alchemy {
 		com.jaymospowers.alchemy.healing.HealingBrews.init();
 		LabEscape.init();
 		com.jaymospowers.alchemy.picks.AlchemyPicks.init();
+		com.jaymospowers.alchemy.toxic.Toxicity.init();
 	}
 
 	/** Registers an item and adds it to the Alchemy tab. */
