@@ -8971,3 +8971,9 @@ Deviations from the plan:
 - **Worn holy symbol**: Jaymo's Kingdoms' holy symbol worn in the amulet slot is drawn on the body: a small gold cross with an iron heart on a cord, swinging with the stride. It sits against the chest with no push-out, so a chestplate covers it, and under a chestplate it swings only about a third as far so it never shows through.
 - New swing kind `tucked` in WornLooks; tools/gen_worn_looks.py takes another mod's item id for a look (texture under textures/entity/worn/<namespace>/).
 - Built; not played.
+
+## 0.28.33 (2026-11-27): Abilities window grows with the screen (#2317)
+
+- The powers window (H: Overview, Abilities, Mastery and the rest) now grows with the screen, up to 340 x 250 instead of a fixed 176 x 186, so a long ability description fits in the box instead of scrolling. Small screens keep the old size.
+- Classes: `PowerScreen` (`w()`, `h()`, `canvasW()`, `canvasH()`).
+- Built; not played.
