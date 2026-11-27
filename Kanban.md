@@ -24,7 +24,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 💻 Odysseus · #2281 · claimed
 
 
 ## In review
@@ -66,6 +65,7 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-7|nycto-7]] · for any · blocked
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · blocked
 - [ ] [[Inbox/legends-p7-zfighter-weapon-moves|legends-p7-zfighter-weapon-moves]] · for gemini · #2255 · ready
+- [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · 💻 Odysseus · #2281 · ready
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 
