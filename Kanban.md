@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:02). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 03:09). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,6 +21,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
 - [ ] [[Inbox/legends-p3-big-symbiote|legends-p3-big-symbiote]] · for codex · open
 - [ ] [[Inbox/legends-p4-symbiote-suit-moves|legends-p4-symbiote-suit-moves]] · for held-for-p3 · open
+- [ ] [[Inbox/legends-p6-followups|legends-p6-followups]] · for codex · open
 
 
 ## Being built
