@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:53). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 16:55). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -20,7 +20,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/black-panther-p7|black-panther-p7]] · 2026-11-27 ON HOLD until black-panther-p6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-p8|black-panther-p8]] · 2026-11-27 ON HOLD until black-panther-p7 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-p9|black-panther-p9]] · 2026-11-27 ON HOLD until black-panther-p6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
-- [[Inbox/black-panther-r1|black-panther-r1]] · 2026-11-27 ON HOLD until PR #2301 (Octo Core) merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/black-panther-r1|black-panther-r1]] · 2026-11-27 16:55 N2 (claw heads) dropped by Andy 2026-11-27; nothing in r1 needs to leave room for it. Octo thread's E3/N1 don't touch the Forge files.
 - [[Inbox/black-panther-r2|black-panther-r2]] · 2026-11-27 ON HOLD until black-panther-r1 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-r3|black-panther-r3]] · 2026-11-27 ON HOLD until black-panther-r2 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-r4|black-panther-r4]] · 2026-11-27 ON HOLD until black-panther-r3 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
