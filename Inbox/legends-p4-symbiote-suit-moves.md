@@ -35,3 +35,4 @@ PR body: each row, what you built, classes, keys, every deviation from the plan,
 
 ## Notes
 - 2026-11-26 23:01 Held until legends-p3-big-symbiote is merged into claude/project-thread-aaw9tm; the Claude thread sets for=hermes then.
+- 2026-11-27 03:02 Update 2026-11-27: patches 1, 2, 5 are merged into master (#2257): branch from origin/master and PR against master once patch 3 is merged.
