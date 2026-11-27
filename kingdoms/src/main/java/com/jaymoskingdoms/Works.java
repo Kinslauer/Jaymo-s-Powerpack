@@ -73,17 +73,24 @@ public final class Works {
 	/**
 	 * A finished building: its entry and its footprint (corners, inclusive); (0.5.11) how it was turned and which variant
 	 * it is, so it can be put up again the same if it's lost (empty for buildings finished before, and for mines and
-	 * adopted farms), and since when it's been in ruins (0: it stands; {@link Rebuilds}).
+	 * adopted farms), since when it's been in ruins (0: it stands; {@link Rebuilds}), and the game time its builders finished
+	 * it (0: the village had it already; {@link BuildNews}).
 	 */
-	public record Built(String entry, BlockPos min, BlockPos max, Optional<Rotation> rotation, long variant, long ruined) {
+	public record Built(String entry, BlockPos min, BlockPos max, Optional<Rotation> rotation, long variant, long ruined, long finished) {
 		public static final Codec<Built> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("entry").forGetter(Built::entry),
 				BlockPos.CODEC.fieldOf("min").forGetter(Built::min),
 				BlockPos.CODEC.fieldOf("max").forGetter(Built::max),
 				Rotation.CODEC.optionalFieldOf("rotation").forGetter(Built::rotation),
 				Codec.LONG.optionalFieldOf("variant", 0L).forGetter(Built::variant),
-				Codec.LONG.optionalFieldOf("ruined", 0L).forGetter(Built::ruined))
+				Codec.LONG.optionalFieldOf("ruined", 0L).forGetter(Built::ruined),
+				Codec.LONG.optionalFieldOf("finished", 0L).forGetter(Built::finished))
 			.apply(i, Built::new));
+
+		/** One the village already had, or one whose finishing day nobody kept ({@code finished} 0). */
+		public Built(String entry, BlockPos min, BlockPos max, Optional<Rotation> rotation, long variant, long ruined) {
+			this(entry, min, max, rotation, variant, ruined, 0L);
+		}
 
 		/** A building that can't be put up again from a blueprint (a mine, a farm the village already had). */
 		public Built(String entry, BlockPos min, BlockPos max) {
@@ -91,7 +98,7 @@ public final class Works {
 		}
 
 		public Built withRuined(long ruined) {
-			return new Built(this.entry, this.min, this.max, this.rotation, this.variant, ruined);
+			return new Built(this.entry, this.min, this.max, this.rotation, this.variant, ruined, this.finished);
 		}
 
 		/** A building's highest block: {@code max} keeps its full height since 0.5.7; older ones kept only the floor. */

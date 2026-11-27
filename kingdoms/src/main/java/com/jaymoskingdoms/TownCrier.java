@@ -32,6 +32,11 @@ import org.jspecify.annotations.Nullable;
  * his handbell, calls "Hear ye!" and cries the news, one piece at a time, in speech bubbles over his head. Nobody away from
  * him is told anything; news nobody has come by to hear is forgotten after a day. He is whoever of the realm's people is
  * nearest the seat (and he keeps the post while he's about), never its ruler.
+ *
+ * <p>Andy (2026-11-27), of "a butchershop was built" in chat: "these should stop being shown as text. it is another thing
+ * you should notice from walking, asking the way, or hearing from the crier." So the town's own news ({@link #town}: a
+ * building finished, lost or put up again, a mine dug, a wall begun, a town project done) is cried here too, after a
+ * "Hear ye, news of the town!" of its own; see also {@link BuildNews}.
  */
 public final class TownCrier {
 	/** The crier is the realm's grown townsfolk nearest its seat, from this close; players this near him hear him. */
@@ -66,26 +71,33 @@ public final class TownCrier {
 	}
 
 	/**
-	 * One piece of news: the line ({@code crier.jaymoskingdoms.<key>}, its number picked), who it's about, and the rest;
-	 * {@code outcome} is what came of it (a sentence's key, or a ranger's "fined" or "taken"), for those who hear it ({@link CrierGrudges}).
+	 * One piece of news: the line ({@code crier.jaymoskingdoms.<key>}, its number picked), who it's about (none for the
+	 * town's own news), and the rest; {@code outcome} is what came of it (a sentence's key, or a ranger's "fined" or
+	 * "taken"), for those who hear it ({@link CrierGrudges}); {@code opener} is the call before it ({@link #COURT} or {@link #TOWN}).
 	 */
-	record Cry(String key, Named who, List<Component> rest, String outcome, long at) {
+	record Cry(String key, @Nullable Named who, List<Component> rest, String outcome, String opener, long at) {
 		Component words(ServerLevel level, ServerPlayer viewer) {
-			Object[] args = new Object[this.rest.size() + 1];
-			args[0] = this.who.to(level, viewer);
+			int first = this.who == null ? 0 : 1;
+			Object[] args = new Object[this.rest.size() + first];
+			if (this.who != null) {
+				args[0] = this.who.to(level, viewer);
+			}
 			for (int i = 0; i < this.rest.size(); i++) {
-				args[i + 1] = this.rest.get(i);
+				args[i + first] = this.rest.get(i);
 			}
 			return Component.translatable(this.key, args);
 		}
 	}
 
+	/** His call before the court's news, and before the town's (lang {@code crier.jaymoskingdoms.<opener>.<n>}). */
+	static final String COURT = "hear_ye", TOWN = "town_news";
+
 	/** A realm's news, its crier, and where he is in his crying. */
 	private static final class Stand {
 		final Deque<Cry> news = new ArrayDeque<>();
 		@Nullable UUID crier;
-		/** Rung his bell and called out: the news comes next. */
-		boolean opened;
+		/** The call he's rung his bell and called out ({@link #COURT} or {@link #TOWN}): its news comes next. Null: not yet. */
+		@Nullable String opened;
 		long next;
 	}
 
@@ -107,6 +119,15 @@ public final class TownCrier {
 
 	/** {@code f}'s crier is to cry {@code crier.jaymoskingdoms.<key>.<n>} about {@code who}, with {@code rest} after their name. */
 	static void cry(ServerLevel level, Faction f, String key, Entity who, Component... rest) {
+		add(level, f, key, Named.of(who), COURT, rest);
+	}
+
+	/** {@code f}'s crier is to cry the town's own news {@code crier.jaymoskingdoms.town.<key>.<n>}, with {@code rest}. */
+	static void town(ServerLevel level, Faction f, String key, Component... rest) {
+		add(level, f, "town." + key, null, TOWN, rest);
+	}
+
+	private static void add(ServerLevel level, Faction f, String key, @Nullable Named who, String opener, Component... rest) {
 		Stand post = POSTS.computeIfAbsent(f.id(), id -> new Stand());
 		if (post.news.size() >= MOST) {
 			// the oldest is stale by now
@@ -114,7 +135,7 @@ public final class TownCrier {
 		}
 		String line = "crier.jaymoskingdoms." + key + "." + level.getRandom().nextInt(LINES);
 		String outcome = key.substring(key.lastIndexOf('.') + 1);
-		post.news.addLast(new Cry(line, Named.of(who), List.of(rest), outcome, level.getGameTime()));
+		post.news.addLast(new Cry(line, who, List.of(rest), outcome, opener, level.getGameTime()));
 	}
 
 	// ---- the tick ------------------------------------------------------------------------------------------------------
@@ -147,7 +168,7 @@ public final class TownCrier {
 	private static void step(ServerLevel level, Faction f, Stand post, long now) {
 		Villager crier = crier(level, f, post);
 		if (crier == null) {
-			post.opened = false;
+			post.opened = null;
 			return;
 		}
 		List<ServerPlayer> near = new ArrayList<>();
@@ -157,7 +178,7 @@ public final class TownCrier {
 		}
 		if (near.isEmpty()) {
 			// nobody to hear it: the news keeps till someone comes by
-			post.opened = false;
+			post.opened = null;
 			return;
 		}
 		ServerPlayer nearest = near.get(0);
@@ -168,26 +189,34 @@ public final class TownCrier {
 		}
 		crier.getNavigation().stop();
 		crier.getLookControl().setLookAt(nearest, 30.0F, 30.0F);
-		if (!post.opened) {
+		Cry head = post.news.peekFirst();
+		if (head == null) {
+			post.opened = null;
+			return;
+		}
+		if (!head.opener().equals(post.opened)) {
+			// the court's news and the town's each get their own call
 			level.playSound(null, crier.getX(), crier.getEyeY(), crier.getZ(), SoundEvents.BELL_BLOCK, SoundSource.NEUTRAL, BELL_VOLUME, BELL_PITCH);
-			Speech.say(level, crier, Component.translatable("crier.jaymoskingdoms.hear_ye." + level.getRandom().nextInt(LINES), f.name()), COLOR, EARSHOT);
-			post.opened = true;
+			Speech.say(level, crier, Component.translatable("crier.jaymoskingdoms." + head.opener() + "." + level.getRandom().nextInt(LINES), f.name()), COLOR,
+				EARSHOT);
+			post.opened = head.opener();
 			post.next = now + OPEN_TICKS;
 			return;
 		}
 		Cry cry = post.news.pollFirst();
-		if (cry == null) {
-			post.opened = false;
-			return;
-		}
 		for (ServerPlayer p : near) {
 			// each hears the names they know, in the crier's tongue
 			Speech.privately(crier, p, Languages.heard(p, crier, cry.words(level, p)), COLOR);
 		}
-		// whoever by him doesn't like what he's just cried may do something about it
-		CrierGrudges.heard(level, f, crier, cry.who().id(), cry.outcome());
-		post.opened = !post.news.isEmpty();
-		post.next = now + (post.opened ? OPEN_TICKS + GAP_TICKS / 2 : GAP_TICKS);
+		if (cry.who() != null) {
+			// whoever by him doesn't like what he's just cried may do something about it
+			CrierGrudges.heard(level, f, crier, cry.who().id(), cry.outcome());
+		}
+		boolean more = !post.news.isEmpty();
+		if (!more) {
+			post.opened = null;
+		}
+		post.next = now + (more ? OPEN_TICKS + GAP_TICKS / 2 : GAP_TICKS);
 	}
 
 	/** {@code f}'s crier: the one who had the post if he's still fit for it, else its grown townsfolk nearest the seat. */

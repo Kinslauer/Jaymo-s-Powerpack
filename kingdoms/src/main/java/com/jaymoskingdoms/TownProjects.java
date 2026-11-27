@@ -59,8 +59,6 @@ public final class TownProjects {
 	/** The share of the coin given that goes back to the givers (the rest goes to the treasury); the reputation each giver gets (least, and the pool shared by share). */
 	static final float PAYBACK = 0.25F;
 	static final int REP_LEAST = 10, REP_POOL = 90;
-	/** Players this near a village's seat hear that a project is finished. */
-	static final double LOCAL_NEWS = 300.0;
 	/** A wall makes raids this much as likely; a watchtower this much; and warns players this near the seat. */
 	static final float WALL_RAID = 0.75F, TOWER_RAID = 0.85F;
 	static final double TOWER_WARN_RANGE = 200.0;
@@ -648,11 +646,8 @@ public final class TownProjects {
 		if (f.type().isRealm()) {
 			KingdomEvents.announce(server, news);
 		} else {
-			for (ServerPlayer player : level.players()) {
-				if (player.blockPosition().closerThan(f.seat(), LOCAL_NEWS)) {
-					player.sendSystemMessage(news);
-				}
-			}
+			// (not in chat, Andy 2026-11-27: the crier cries it)
+			TownCrier.town(level, f, "word", news);
 		}
 		// the payout: a quarter of the coin and the bonus, shared by points; the rest of the coin to the treasury
 		long back = Math.round(pr.coin() * PAYBACK);

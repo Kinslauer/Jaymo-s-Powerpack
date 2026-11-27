@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -50,7 +51,8 @@ public final class LodgedLayer {
 
 	/** From every living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
-		List<ItemStack> stuck = Lodged.stuck(entity);
+		// (arrows are the game's own stuck arrows, never drawn here like a stuck blade)
+		List<ItemStack> stuck = Lodged.stuck(entity).stream().filter(stack -> !stack.is(ItemTags.ARROWS)).toList();
 		if (stuck.isEmpty()) {
 			state.setData(KEY, null);
 			return;

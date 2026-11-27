@@ -73,11 +73,10 @@ final class HuntWays {
 		if (t % STEP_EVERY != 0) {
 			return;
 		}
-		if (t % 100 == 0) {
-			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-				if (p.level() instanceof ServerLevel level) {
-					kills(level, p);
-				}
+		// (every step, so a circling bird is always given its next point on the ring and never left hanging at the last one)
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			if (p.level() instanceof ServerLevel level) {
+				kills(level, p);
 			}
 		}
 		for (Mob prey : Nature.of(Nature.SMALL_PREY)) {
@@ -142,7 +141,7 @@ final class HuntWays {
 			}
 			boolean circling = now - found < CIRCLE_TICKS;
 			for (Mob bird : Nature.of(Nature.CARRION_BIRDS)) {
-				if (bird.level() == level && Nature.free(bird) && bird.distanceToSqr(body) < CIRCLE_DRAW * CIRCLE_DRAW) {
+				if (bird.level() == level && Nature.free(bird) && !gone(bird) && bird.distanceToSqr(body) < CIRCLE_DRAW * CIRCLE_DRAW) {
 					if (circling) {
 						double a = (now / 20.0 + bird.getId()) * 0.4;
 						Nature.go(bird, body.position().add(Math.cos(a) * CIRCLE_RADIUS, CIRCLE_HIGH, Math.sin(a) * CIRCLE_RADIUS), 1.2);
@@ -159,6 +158,11 @@ final class HuntWays {
 			}
 			bigger(level, body);
 		}
+	}
+
+	/** A crow that has had its fill and is flying off for good: not called back to the body. */
+	private static boolean gone(Mob bird) {
+		return bird instanceof com.jaymoskingdoms.Crow crow && crow.isLeaving();
 	}
 
 	/** A body with no carrion birds about: by day, a few crows come down. */

@@ -18001,3 +18001,27 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Animals' own drops**: a chicken's egg, an armadillo's or grown turtle's scute, a sniffer's dug-up seed and a panda's sneezed slimeball aren't left with nobody within 32 blocks; that one is skipped and the next comes at its usual time (`UnwatchedGiftMixin`). A mob's death loot is unchanged (it already goes into its Kitchen corpse, not onto the ground).
 - Windfall's one-minute life for sticks, saplings, apples and leaves nobody threw is kept for the ones that do drop.
 - Built; not played.
+
+## 0.13.57 (2026-11-27): crows over a body no longer hang flapping in one spot in the sky (#2264)
+
+- **What was wrong**: the crows that come down to a body lying out (`wild.HuntWays`) are let into the world 18 blocks above it. On their first tick `Crow` took that spot in the air as their perch, and `ReturnToPerch` pulled them back to it every few ticks, so they hung there flapping in place, well after the body was gone (they never despawn). The circling also only gave each bird its next point every 5 seconds, so they reached it and hovered between.
+- **Now**: only a hanging tree's crow keeps a perch. A crow with no tree and no field has none: it circles and lands where the body draws it, and flies off for good once no body is within 64 blocks, at dusk or in rain, or after 5 minutes. A crow flying off is no longer called back by the circling, and the circling now gives each bird its next point on the ring every second.
+- Crows already in a world with a perch saved in the air (no tree) drop it when loaded, so the ones Andy saw stuck over Haldale should fly off.
+- Built; not played.
+
+## 0.13.58 (2026-11-27): Building news is found out, not told in chat (#2265)
+
+- Andy: "i was notified that a butchershop was built. first of all these should stop being shown as text. it is another thing you should notice from walking, asking the way, or hearing from the crier." These chat lines are gone: "The builders of X have finished a Y." (any player within 128 blocks of the seat), "The Y of X lies in ruins" / "X's builders begin to put up the Y again", the mine-dug lines, the overnight "While you slept, the builders laid N blocks" / "dug N blocks of its mine" lines, a village's tier-2 "a palisade will rise round it" line, and a village's (not a realm's) "X has finished Y, with the help of N hands" town-project line. Realm-wide news (walled town tier 3+, a realm's town project) already went to the town boards and Tidings, not chat, and is unchanged.
+- **The crier cries it** (`TownCrier.town`): each of those is now queued for the town's crier by the seat, after a call of its own ("Hear ye, hear ye! News of X!", separate from the court's "the court has sat"). A finished building is cried with where it stands from the seat ("The builders have finished a new Butcher's Shop, about 40 paces to the north-east of here!"). Same rules as the court's news: only players within 20 blocks hear it, kept a day, at most 6 pieces per town.
+- **Walking past** (`BuildNews`): for three days after a building is finished, walking within 8 blocks of it gets a remark from the nearest townsperson within 16 blocks who can see you, in a speech bubble for you alone ("That's our new Butcher's Shop. Went up yesterday."; children have their own lines). Once per building per player (a restart lets them say it again).
+- **Asking the way**: Ask the Way has a new "What's New" button. They turn and point to the newest building the town finished this past week, saying when and where; if nothing's finished lately, to what the builders are putting up now; else "nothing new".
+- Finished buildings now keep when they were finished (`Works.Built.finished`, 0 for ones the village already had).
+- Left in chat: your own plan-site and mason-table builds finishing (your own work), and plot choices.
+- Built; not played.
+
+## 0.13.59 (2026-11-27): Reply to what a villager says - first spoke on the talk wheel (#2267)
+
+- **Answer what they said** (Andy: "there should always be an option to address what they say here. either the first on the tree or a button"): whatever a villager opens the talk with, the first spoke on the wheel answers that line. A warning about creepers gets "Have you seen any about? Where?" and they tell you the nearest monster and which way it is (or that none are close); a word on the weather gets one back that matches the sky now (clear, rain or storm); a question ("How are you?") gets answered and they tell you how they are by their mood; a sigh about work, sleep or supper, a cold greeting ("Have I done something to you?"), an `*action*`, a hello, or anything else ("Is that so? Go on.") each have their own. They answer in their own voice (gentle, sharp, timid, odd or a child's, as refusal hints), or coldly if they're wary of you or dislike you; one who bears you too much ill won't have it (as a chat). Hearing them out is worth a heart, once a day each. The talk ends after their answer, as a chat does. Not on the stranger's page (only Introduce), the Judge, Keeper and masters, or questioning.
+- Which line it is comes from the key MCA picked for it (so the guard's creeper warning is told from the other night lines) and its words. Other features add their own kinds of line with `Replies.register` (a key test, a word test, their answer).
+- `Replies` (new), `TalkFirst` (the spoke), `McaDialogueBoxMixin` (hands it the line), `McaDialogueMixin` (the answer). Lang part `talk-replies.json`.
+- Built; not played.
