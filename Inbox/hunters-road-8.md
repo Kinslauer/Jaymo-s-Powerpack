@@ -1,10 +1,11 @@
 ---
 status: blocked
-for: any
+for: claude-cloud
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 ---
 
 # Hunter's Road 8: Hunter's gear (Powers `armory/`, Kingdoms stables) rows E2 E3 E4 E5 E6
@@ -22,3 +23,4 @@ pr:
 - 2026-11-26 21:04 ON HOLD also for Toxony (2026-11-26): Andy linked Toxony; its picks fold into this patch. Don't open until the Hunter's Road thread sends the updated plan.
 - 2026-11-26 21:07 2026-11-26 21:06 Toxony picks folded in (Andy 29 of 30): also build the plan's 'Toxony additions' > 'Into patch 8' subsection, and keep its 'Licence: ideas only' rule (no Toxony code, art, sound, journal text or invented names). Toxony hold released: back to its normal wave.
 - 2026-11-26 21:08 Its new gear models come first from hermes-modeller (task hunters-road-8-models); build the cyclebow only if its model passes review, else say so in the PR.
+- 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
