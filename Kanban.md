@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 01:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 01:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,11 +27,10 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · changes · fixing review notes
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · changes · fixing review notes
 - [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · changes · fixing review notes
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · changes · fixing review notes
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · claimed
+- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · claimed
 
 
 ## In review
@@ -41,6 +40,7 @@ kanban-plugin: board
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
