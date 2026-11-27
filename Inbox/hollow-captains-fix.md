@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: changes
 for: apollo
 claimed_by: hermes-a
 from: Andy (Claude chat, 2026-11-26)
