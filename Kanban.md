@@ -16,6 +16,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · for 🔥 Prometheus · open
 
 
 ## Being built
@@ -61,7 +62,6 @@ kanban-plugin: board
 - [ ] [[Inbox/nycto-5|nycto-5]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-6|nycto-6]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-7|nycto-7]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · for 🔥 Prometheus · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
