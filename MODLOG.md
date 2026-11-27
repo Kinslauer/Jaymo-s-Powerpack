@@ -8916,3 +8916,15 @@ Deviations from the plan:
 - **Truer paint**: a painted suit is drawn from light-grey sheets of each frame's plates (`tools/gen_rig_paint.py`), so red is red and gold is gold rather than the paint darkened by the gunmetal under it. The frame's wear (seams, scorch, rust spots) still shows through.
 - **The Octo Core's arms** take the trim's paint (else the Core's plates'), and the lights' colour on their joints.
 - Built; not played.
+
+## 0.28.26 (2026-11-27): Clouds soft like leaves: fall and punch through, see-through, drop nothing (#2307)
+
+- **Cloudbank and every aercloud** (cold, blue, golden, green, purple, storm): soft the way leaves are (Andy: "i should fall through and punch through them like leaves"). Nothing in a cloud is solid to anything that moves: players, mobs, items, arrows and falling blocks go into it and through it. Inside, it drags on you like a canopy (`Leaves.inside`): you sink slowly, the fall is cushioned, hold Jump to climb up through it, and a hard hit (a fall past your safe distance, or flying in fast) bursts the clouds you hit in a puff with a soft whump. Still no fall damage in any cloud. Blue still bounces, green shoves, purple flings, storm shocks. Checks with no entity (placement, support, "is this ground") see only the hair-thin plate, so nothing counts a cloud as ground to stand or build on (`AercloudBlock`, `Leaves.soft`).
+- **See-through**: the cold aercloud and cloudbank textures are fainter (about 60% and 70% of their old opacity), the coloured aerclouds about half see-through (`tools/gen_aether.py`).
+- **Broken, a cloud just goes**: no drop, Silk Touch or not (all seven loot tables are empty). Hardness 0.2, the same as leaves.
+- **Mobs** path through clouds as through open air (`LeavesPathMixin`), so they never plan a walk onto one.
+- **The Cloud Sea's overcast** no longer catches what falls off the Aether: you sink through it, cushioned, drop out of the band's floor and float down into the Overworld on the Slow Falling that was already there (`WindAether`). From underneath you can climb up through it with Jump.
+- **Steam towns** keep their stone-brick deck and iron rail; the cloudbank banked under the deck is now just cloud.
+- **Bottled cloud is how cloud is gathered**: a blue, golden or purple aercloud fills a Bottle of Blue / Golden / Purple Cloud, every other cloud (and the open sky) a plain Bottle of Cloud. Every bottle lays the same puff and hands the glass back when crafted with. The recipes that took aercloud blocks take bottles now: the four gliders (plain bottles for the cold glider), the cloud skiff, the updraft vent and cloudwool (`CloudBottle`, `tools/gen_stone_ores.py`, `gen_aether_gear.py`, `gen_aether_animals.py`).
+- **A puff of bottled cloud** is the one firm cloud: it still holds you up and still catches a faller (`CloudPuffBlock.soft()` false).
+- Built; not played.
