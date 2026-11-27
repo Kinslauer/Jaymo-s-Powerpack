@@ -1,9 +1,9 @@
 ---
-status: open
-for: antigravity
+status: claimed
+for: prometheus
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: hermes-modeller
 pr: 
 thread: hermes-modeller
 claim_handbacks: 1
