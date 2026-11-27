@@ -15,7 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Carrying someone, right-click (anywhere, at the air too) lets go: they drop from your arms, or (Andy, 2026-11-20:
  * "throwing needs to be more deliberate") with sneak and right-click held they're thrown a short way ahead once the
  * wind-up fills ({@code Carry.THROW_TICKS}). The same controls as Jaymo's Kitchen's corpses. (0.17.7) Only a fresh press: the
- * held right-click that lifted them doesn't put them straight back down.
+ * held right-click that lifted them doesn't put them straight back down. (Andy, 2026-11-27: "you shouldnt be able to drop
+ * them") A person is set down with right-click held too ({@code Carry.SET_DOWN_TICKS}): every repeat of the hold goes to
+ * the server, which lays them down once it's been held long enough.
  */
 @Mixin(Minecraft.class)
 abstract class CarryUseMixin {
@@ -43,6 +45,9 @@ abstract class CarryUseMixin {
 	 */
 	private static boolean jaymospowers$windingUp;
 
+	/** Whether the hold being sent on is a throw's (sneak held at its start) or a setting down's. */
+	private static boolean jaymospowers$tossHold;
+
 	@Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$letGo(CallbackInfo ci) {
 		if (this.player == null) {
@@ -65,9 +70,9 @@ abstract class CarryUseMixin {
 			return;
 		}
 		if (sameHold) {
-			if (jaymospowers$windingUp && this.player.isShiftKeyDown()) {
-				// (Andy, 2026-11-20) still winding up the throw: the server keeps count
-				ClientPlayNetworking.send(new Carry.Release(true));
+			if (jaymospowers$windingUp && this.player.isShiftKeyDown() == jaymospowers$tossHold) {
+				// (Andy, 2026-11-20) still winding up the throw, or (2026-11-27) still setting someone down: the server keeps count
+				ClientPlayNetworking.send(new Carry.Release(jaymospowers$tossHold));
 				this.rightClickDelay = RELEASE_DELAY;
 			}
 			// (0.17.7) or still the hold that lifted them: let go of right-click first
@@ -84,10 +89,11 @@ abstract class CarryUseMixin {
 		}
 		boolean toss = this.player.isShiftKeyDown();
 		ClientPlayNetworking.send(new Carry.Release(toss));
-		if (toss) {
-			// (Andy, 2026-11-20) a throw is held for now: the first beat of its wind-up
-			jaymospowers$windingUp = true;
-		} else {
+		jaymospowers$tossHold = toss;
+		// (Andy, 2026-11-20) a throw is held for now: the first beat of its wind-up; (2026-11-27) and so is setting a person
+		// down (anything else is let go on this first beat, and the server pays the repeats no mind)
+		jaymospowers$windingUp = true;
+		if (!toss) {
 			this.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
 		}
 		this.rightClickDelay = RELEASE_DELAY;

@@ -172,6 +172,8 @@ public final class Captives {
 	static void register() {
 		// (what they're doing in their chains is drawn by everyone's client: the type is known before any is sent)
 		CaptiveIdle.init();
+		// (Andy, 2026-11-27: "you should be able to carry prisoners") a captive you freed lets you carry them (Powers' Carry)
+		PowersCompat.willingCheck((player, entity) -> rescuedBy(entity, player));
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Villager v && v.hasAttached(CAPTIVE)) {
 				LOADED.add(v);
@@ -226,6 +228,12 @@ public final class Captives {
 			LOST.clear();
 			WAITED.clear();
 		});
+	}
+
+	/** {@code player} broke {@code entity}'s chains and they're following them home: they'd gladly be carried. */
+	public static boolean rescuedBy(Entity entity, Player player) {
+		Captive c = entity.getAttached(CAPTIVE);
+		return c != null && !bound(entity) && c.rescuer().isPresent() && c.rescuer().get().equals(player.getUUID());
 	}
 
 	/** {@code entity} is a captive still in chains. */
@@ -483,6 +491,14 @@ public final class Captives {
 			Menus.Choice.of(take, p -> {
 				if (bound(v) && v.isAlive()) {
 					free(level, p, v);
+				}
+			}),
+			// (Andy, 2026-11-27: "you should be able to carry prisoners") the chains broken and up into your arms at once (Powers'
+			// Carry; too far off or too heavy in their armour, they follow on foot and can be lifted later: sneak + hold use)
+			Menus.Choice.of(Component.translatable("talk.jaymoskingdoms.captive.carry"), p -> {
+				if (bound(v) && v.isAlive()) {
+					free(level, p, v);
+					PowersCompat.liftChosen(p, v);
 				}
 			}),
 			Menus.Choice.of(Component.translatable("talk.jaymoskingdoms.captive.decline"), p -> {

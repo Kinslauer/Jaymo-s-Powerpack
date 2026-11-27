@@ -111,6 +111,13 @@ import org.jspecify.annotations.Nullable;
  * hand on its own path ({@link #dragStep}), and they smear their blood along it ({@code BloodSmears}). Right-click lets
  * go where they lie; sneak + right-click hoists them up into your arms (a carry's hold, if their armour isn't too heavy:
  * otherwise a piece comes off first, as a lift's would).
+ * <p>
+ * Andy (2026-11-27, a freed prisoner set down by a stray click and then dragged downhill till he died): "you should be able
+ * to carry prisoners and anyone willing, and you shouldnt be able to drop them". Anyone willing ({@link #WILLING_CHECKS}:
+ * Kingdoms' freed captives and followers) is lifted as a player is. A person in your arms ({@link #keptSafe}) is set down
+ * only with a held right-click on the ground ({@link #SET_DOWN_TICKS}), comes along when you're moved some other way
+ * ({@link #bringAlong}), is laid down gently when you can't hold them any more, and takes no harm from the ground while
+ * carried, dragged, slung or settling ({@link #sheltered}); a downed mob's bleeding out holds while it's held ({@code Downed}).
  */
 public final class Carry {
 	/** The holds: over one shoulder, across both arms, held up by the shoulder at your side, slung over your back. */
@@ -162,6 +169,20 @@ public final class Carry {
 	 * held; a gap past {@link #WIND_UP_GRACE} is a let-go.
 	 */
 	public static final int THROW_TICKS = 20, THROW_READY = 20, HOIST_TICKS = 30, WIND_UP_GRACE = 8;
+	/**
+	 * Andy (2026-11-27, a freed prisoner set down by a stray click, then dragged downhill till he died): "you should be able
+	 * to carry prisoners and anyone willing, and you shouldnt be able to drop them". A person in your arms ({@link #keptSafe})
+	 * is set down with plain right-click <i>held</i> this long (ticks), never with a click, and only with your feet on the
+	 * ground (or in water): laid down in front of you, not dropped.
+	 */
+	public static final int SET_DOWN_TICKS = 20;
+	/**
+	 * A person set down, slung off or let go never takes harm from the fall that follows or from the ground they come to
+	 * rest in, till they've lain on the ground this long (ticks), or at most {@link #SETTLE_MOST} after.
+	 */
+	static final int SETTLE_TICKS = 4, SETTLE_MOST = 600;
+	/** A dragged body is raised this much at a time (blocks), up to {@link #DRAG_CLIMB}, to lie on the ground it's pulled over rather than in it. */
+	static final double DRAG_CLIMB_STEP = 0.25, DRAG_CLIMB = 1.5;
 	/** (0.17.7) How far past reach they may slip while the lift fills (blocks). */
 	static final double LIFT_SLACK = 0.5;
 	/**
@@ -290,6 +311,8 @@ public final class Carry {
 		SET_DOWN,
 		/** (0.13.11) A carried block put into the spot the carrier is looking at ({@link Entry#placeAt}). */
 		PLACE,
+		/** (Andy, 2026-11-27) A person laid down in front of the carrier, gently: no push, no fall's harm ({@link #SETTLING}). */
+		LAY,
 		DROP,
 		THROW,
 		ESCAPE
@@ -297,7 +320,8 @@ public final class Carry {
 
 	private static final class Entry {
 		final UUID carrier;
-		final Entity carried;
+		/** (Not final: someone carried is brought along into another world as a new entity, {@link #bringAlong}.) */
+		Entity carried;
 		int hold;
 		boolean flying;
 		Vec3 lastCarrierPos;
@@ -364,6 +388,50 @@ public final class Carry {
 		return false;
 	}
 
+	/**
+	 * Andy (2026-11-27): "you should be able to carry prisoners and anyone willing". Asked of every person standing on
+	 * their own feet that a player would lift: whether they're willing to be carried by that player. Jaymo's Kingdoms adds
+	 * one (by reflection): a captive they freed, and anyone who follows them. A willing one is lifted as a player is (sneak
+	 * + right-click held) and held as anyone carried; it doesn't struggle.
+	 */
+	public static final List<java.util.function.BiPredicate<Player, Entity>> WILLING_CHECKS = new ArrayList<>();
+
+	/** Whether {@code entity}, on their own feet, is willing to be carried by {@code player} ({@link #WILLING_CHECKS}). */
+	public static boolean willing(Player player, Entity entity) {
+		if (!(entity instanceof LivingEntity) || entity instanceof Player || entity instanceof Animal || entity instanceof SeveredPart
+			|| !entity.isAlive() || tooBig(entity)) {
+			return false;
+		}
+		for (java.util.function.BiPredicate<Player, Entity> check : WILLING_CHECKS) {
+			try {
+				if (check.test(player, entity)) {
+					return true;
+				}
+			} catch (RuntimeException e) {
+				JaymosPowers.LOGGER.warn("A willing-to-be-carried check failed for {}", entity, e);
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Someone no carry may drop by accident (Andy, 2026-11-27): a person, a player or a villager, or anyone downed or
+	 * hogtied, but not an animal, a block or a severed part. They're only ever set down on purpose ({@link #SET_DOWN_TICKS}),
+	 * brought along when their carrier is moved some other way, laid down gently if their carrier can't hold them any more,
+	 * and held clear of harm from the ground while they're carried, dragged or settling ({@link #sheltered}).
+	 */
+	public static boolean keptSafe(@Nullable Entity entity) {
+		if (!(entity instanceof LivingEntity) || entity instanceof SeveredPart || CarryBlock.is(entity)) {
+			return false;
+		}
+		return person(entity) || bound(entity) || Downed.isDowned(entity) && !(entity instanceof Animal);
+	}
+
+	/** People just set down or let go, by id → {since (game time), ticks lain on the ground}: still settling ({@link #SETTLE_TICKS}). */
+	private static final Map<UUID, long[]> SETTLING = new HashMap<>();
+	/** Carriers → when their hold to set someone down began, and when use last came (game time). */
+	private static final Map<UUID, long[]> SETTING_DOWN = new HashMap<>();
+
 	/** (0.17.7) A lift being held: on whom, since when, and when use last came. */
 	private static final class Lift {
 		final Entity target;
@@ -397,7 +465,10 @@ public final class Carry {
 		UseEntityCallback.EVENT.register(Carry::onUseEntity);
 		UseEntityCallback.EVENT.addPhaseOrdering(WIND_GRAB_PHASE, Event.DEFAULT_PHASE);
 		UseEntityCallback.EVENT.register(WIND_GRAB_PHASE, (player, level, hand, target, hit) ->
-			snatches(player, target) ? onUseEntity(player, level, hand, target, hit) : InteractionResult.PASS);
+			snatches(player, target) || player.isShiftKeyDown() && willing(player, target) ? onUseEntity(player, level, hand, target, hit) : InteractionResult.PASS);
+		// (Andy, 2026-11-27) nobody carried is hurt by the ground they're held against, dragged over, or set down on
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+			!(sheltered(entity) && groundHarm(source)));
 		// a carried player's hands are held: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isCarried(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> isCarried(player) ? InteractionResult.FAIL : InteractionResult.PASS);
@@ -542,7 +613,7 @@ public final class Carry {
 			return false;
 		}
 		return canBeCarried(entity) || GravityWeight.lightens(player) && player.getMainHandItem().isEmpty() && GravityWeight.liftable(entity)
-			|| windCarries(player, entity) || webCarries(player, entity);
+			|| windCarries(player, entity) || webCarries(player, entity) || willing(player, entity);
 	}
 
 	/** A villager: vanilla's, a wandering trader, MCA's, or a Kingdoms settlement's folk. Carried as a person. */
@@ -1012,7 +1083,7 @@ public final class Carry {
 		// a web slinger holds whoever it is at its side the whole way, swinging or not (see webHold)
 		int hold = part ? PART : block ? BLOCK : overhead ? OVERHEAD : Powers.of(carrier) == WebPower.INSTANCE ? SHOULDER
 			: carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
-		boolean outside = !block && !canBeCarried(target);
+		boolean outside = !block && !canBeCarried(target) && !willing(carrier, target);
 		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), outside && !windCarries(carrier, target) && !webCarries(carrier, target),
 			outside && windCarries(carrier, target));
 		entry.webOnly = outside && !windCarries(carrier, target) && webCarries(carrier, target);
@@ -1032,7 +1103,7 @@ public final class Carry {
 			mob.setTarget(null);
 		}
 		carrier.sendOverlayMessage(Component.translatable(part ? "message.jaymospowers.carry.part" : block ? (CarryBlock.holdsContents(target) ? "message.jaymospowers.carry.container" : "message.jaymospowers.carry.block")
-			: overhead ? "message.jaymospowers.carry.lifting" : "message.jaymospowers.carry.carrying")
+			: overhead ? "message.jaymospowers.carry.lifting" : keptSafe(target) ? "message.jaymospowers.carry.carrying_person" : "message.jaymospowers.carry.carrying")
 			.withStyle(ChatFormatting.GRAY));
 		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
 		// a Gravity user feels no weight at all, and a head or a limb weighs nothing much
@@ -1077,6 +1148,10 @@ public final class Carry {
 					DownedLie.prop(body, true);
 				}
 			}
+			return;
+		}
+		if (!toss && keptSafe(entry.carried) && !settingDown(carrier, entry)) {
+			// (Andy, 2026-11-27: "you shouldnt be able to drop them") a person is set down with a held right-click, feet on the ground
 			return;
 		}
 		if (!toss && CarryBlock.is(entry.carried)) {
@@ -1132,8 +1207,86 @@ public final class Carry {
 				return;
 			}
 		}
-		// a chest is only ever set down, never thrown
-		end(carrier, entry, toss && !CarryBlock.holdsContents(entry.carried) ? Let.THROW : Let.DROP);
+		// a chest is only ever set down, never thrown; a person is laid down, never dropped
+		end(carrier, entry, toss && !CarryBlock.holdsContents(entry.carried) ? Let.THROW : keptSafe(entry.carried) ? Let.LAY : Let.DROP);
+	}
+
+	/**
+	 * (Andy, 2026-11-27) One more beat of plain right-click held while carrying a person ({@link #keptSafe}): true once it's
+	 * been held {@link #SET_DOWN_TICKS} with the carrier's feet on the ground. In the air (flying, in Vapour Form, mid-jump)
+	 * they're kept hold of, and told so. Until then a bar fills.
+	 */
+	private static boolean settingDown(ServerPlayer carrier, Entry entry) {
+		long now = carrier.level().getGameTime();
+		if (!carrier.onGround() && !carrier.isInWater() && !carrier.isPassenger()) {
+			SETTING_DOWN.remove(carrier.getUUID());
+			carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.land_first", entry.carried.getDisplayName())
+				.withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		long[] hold = SETTING_DOWN.get(carrier.getUUID());
+		if (hold == null || now - hold[1] > WIND_UP_GRACE) {
+			hold = new long[] {now, now};
+			SETTING_DOWN.put(carrier.getUUID(), hold);
+		}
+		hold[1] = now;
+		long held = now - hold[0];
+		if (held >= SET_DOWN_TICKS) {
+			SETTING_DOWN.remove(carrier.getUUID());
+			return true;
+		}
+		HudBar.hold(carrier, "carry_set_down", held / (float) SET_DOWN_TICKS, HudBar.GREY,
+			Component.translatable("bar.jaymospowers.setting_down", entry.carried.getDisplayName()), true);
+		return false;
+	}
+
+	/** Whether {@code entity} is held clear of harm from the ground: carried, dragged or slung, or still settling after ({@link #keptSafe} only). */
+	public static boolean sheltered(Entity entity) {
+		return isCarried(entity) && keptSafe(entity) || SETTLING.containsKey(entity.getUUID());
+	}
+
+	/** Harm a body takes from the ground and the world around it: a fall, being pressed into a block or a crowd, hitting a wall flying. */
+	static boolean groundHarm(net.minecraft.world.damagesource.DamageSource source) {
+		return source.is(net.minecraft.world.damagesource.DamageTypes.FALL) || source.is(net.minecraft.world.damagesource.DamageTypes.IN_WALL)
+			|| source.is(net.minecraft.world.damagesource.DamageTypes.CRAMMING) || source.is(net.minecraft.world.damagesource.DamageTypes.FLY_INTO_WALL);
+	}
+
+	/**
+	 * (Andy, 2026-11-27) The carrier was moved some other way than walking (teleported, through a portal, a sudden lurch past
+	 * the leash): whoever they carry comes along to their feet, into the other world too. False if they couldn't be.
+	 */
+	private static boolean bringAlong(ServerPlayer carrier, Entry entry) {
+		Entity carried = entry.carried;
+		ServerLevel to = carrier.level();
+		Vec3 at = carrier.position();
+		if (carried instanceof ServerPlayer player) {
+			player.teleportTo(to, at.x, at.y, at.z, Set.of(), player.getYRot(), player.getXRot(), false);
+			GRACE.put(player.getUUID(), to.getGameTime() + RELEASE_GRACE_TICKS);
+			return player.level() == to;
+		}
+		if (carried.level() == to) {
+			carried.setPos(at.x, at.y, at.z);
+			carried.setDeltaMovement(Vec3.ZERO);
+			carried.resetFallDistance();
+			return true;
+		}
+		Entity moved = carried.teleport(new net.minecraft.world.level.portal.TeleportTransition(to, at, Vec3.ZERO, carried.getYRot(), 0.0F,
+			net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING));
+		if (moved == null || moved.level() != to) {
+			return false;
+		}
+		if (moved != carried) {
+			entry.carried = moved;
+			moved.setAttached(CARRIED_BY, carrier.getId());
+			carrier.setAttached(CARRYING, new Carrying(moved.getId(), entry.hold));
+		}
+		moved.resetFallDistance();
+		return true;
+	}
+
+	/** (Andy, 2026-11-27) The carrier can't hold them any more (gone, downed, their power gone): a person is laid down, anything else dropped. */
+	private static Let letFall(Entry entry) {
+		return keptSafe(entry.carried) ? Let.LAY : Let.DROP;
 	}
 
 	/**
@@ -1231,7 +1384,7 @@ public final class Carry {
 	public static void slip(ServerPlayer carrier) {
 		Entry entry = CARRIES.get(carrier.getUUID());
 		if (entry != null) {
-			end(carrier, entry, Let.DROP);
+			end(carrier, entry, letFall(entry));
 		}
 	}
 
@@ -1261,6 +1414,13 @@ public final class Carry {
 		}
 		long now = level.getGameTime();
 		REGRAB.put(carried.getUUID(), now + REGRAB_TICKS);
+		if (carrier != null) {
+			SETTING_DOWN.remove(carrier.getUUID());
+		}
+		if (how != Let.THROW && how != Let.ESCAPE && keptSafe(carried)) {
+			// (Andy, 2026-11-27) set down, let go or slipped: no fall or wall hurts them till they've lain on the ground a moment
+			SETTLING.put(carried.getUUID(), new long[] {now, 0L});
+		}
 		Vec3 at = carried.position();
 		Vec3 velocity = Vec3.ZERO;
 		// ((0.19.55) a dragged body is let go where it lies)
@@ -1338,6 +1498,7 @@ public final class Carry {
 		switch (how) {
 			case THROW -> level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7F, 0.8F);
 			case DROP -> level.playSound(null, at.x, at.y, at.z, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.6F, 1.0F);
+			case LAY -> level.playSound(null, at.x, at.y, at.z, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.5F, 0.8F);
 			case ESCAPE -> level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.6F, 1.2F);
 			default -> {
 			}
@@ -1353,12 +1514,62 @@ public final class Carry {
 				tickCarry(server, entry);
 			}
 		}
+		if (!SETTLING.isEmpty()) {
+			settle(server);
+		}
+		if (!SETTING_DOWN.isEmpty()) {
+			long now = server.overworld().getGameTime();
+			SETTING_DOWN.values().removeIf(hold -> now - hold[1] > WIND_UP_GRACE);
+		}
 		if (!GRACE.isEmpty() || !REGRAB.isEmpty() || !STRUGGLE_READY.isEmpty()) {
 			long now = server.overworld().getGameTime();
 			GRACE.values().removeIf(until -> until < now);
 			REGRAB.values().removeIf(until -> until < now);
 			STRUGGLE_READY.values().removeIf(until -> until < now);
 		}
+	}
+
+	/**
+	 * (Andy, 2026-11-27) Those set down or let go: settled once they've lain on the ground {@link #SETTLE_TICKS} (any fall
+	 * that ended there was spared them), or after {@link #SETTLE_MOST} at the longest.
+	 */
+	private static void settle(MinecraftServer server) {
+		for (var it = SETTLING.entrySet().iterator(); it.hasNext();) {
+			var e = it.next();
+			Entity body = null;
+			for (ServerLevel level : server.getAllLevels()) {
+				body = level.getEntity(e.getKey());
+				if (body != null) {
+					break;
+				}
+			}
+			long[] settling = e.getValue();
+			if (body == null || !body.isAlive() || isCarried(body) || body.level().getGameTime() - settling[0] > SETTLE_MOST) {
+				it.remove();
+				continue;
+			}
+			if (body.onGround() || body.isInWater()) {
+				if (++settling[1] >= SETTLE_TICKS) {
+					it.remove();
+				}
+			} else {
+				settling[1] = 0L;
+			}
+		}
+	}
+
+	/**
+	 * Where a dragged body lies at {@code at} without being in the ground: raised a little at a time, up to
+	 * {@link #DRAG_CLIMB}, till its box is clear of blocks (as it was, if nothing nearby is).
+	 */
+	static Vec3 clearOfGround(Entity body, Vec3 at) {
+		AABB box = body.getBoundingBox().move(at.subtract(body.position()));
+		for (double up = 0.0; up <= DRAG_CLIMB; up += DRAG_CLIMB_STEP) {
+			if (body.level().noCollision(body, box.move(0.0, up, 0.0))) {
+				return at.add(0.0, up, 0.0);
+			}
+		}
+		return at;
 	}
 
 	private static void tickCarry(MinecraftServer server, Entry entry) {
@@ -1372,17 +1583,27 @@ public final class Carry {
 			end(carrier, entry, Let.SET_DOWN);
 			return;
 		}
-		if (!carrier.isAlive() || carrier.isSpectator() || carrier.isSleeping() || carrier.isPassenger()
+		boolean safe = keptSafe(carried);
+		if (!carrier.isAlive() || carrier.isSpectator() || carrier.isSleeping() || carrier.isPassenger() && !(safe && entry.hold != DRAG)
 			|| entry.gravityOnly && !GravityWeight.lightens(carrier) || entry.windOnly && Powers.of(carrier) != WindPower.INSTANCE
 			|| entry.webOnly && Powers.of(carrier) != WebPower.INSTANCE) {
-			end(carrier, entry, Let.DROP);
+			// ((Andy, 2026-11-27) a person in your arms stays there when you mount up; dragged, they're let go where they lie)
+			end(carrier, entry, entry.hold == DRAG ? Let.SET_DOWN : letFall(entry));
 			return;
 		}
 		Vec3 here = carrier.position();
 		double moved = here.distanceTo(entry.lastCarrierPos);
-		if (carried.level() != carrier.level() || moved > TELEPORT_JUMP
-			|| carried.position().distanceTo(here) > LEASH + moved * LEASH_PER_SPEED
-			|| carried.isPassenger() || carried instanceof Player p && (p.isSleeping() || p.isSpectator())) {
+		boolean apart = carried.level() != carrier.level() || moved > TELEPORT_JUMP || carried.position().distanceTo(here) > LEASH + moved * LEASH_PER_SPEED;
+		if (apart && safe && bringAlong(carrier, entry)) {
+			// (Andy, 2026-11-27: "you shouldnt be able to drop them") moved by a teleport, a portal or a lurch: they come too
+			carried = entry.carried;
+			if (entry.hold == DRAG) {
+				entry.dragShoulders = null;
+				entry.dragHips = null;
+			}
+			apart = false;
+		}
+		if (apart || carried.isPassenger() || carried instanceof Player p && (p.isSleeping() || p.isSpectator())) {
 			// teleported, changed dimension, or came apart some other way
 			end(carrier, entry, Let.SET_DOWN);
 			return;
@@ -1395,7 +1616,9 @@ public final class Carry {
 			entry.dragShoulders = lay[0];
 			entry.dragHips = lay[1];
 			if (!(carried instanceof Player)) {
-				carried.setPos(lay[0].x, lay[0].y, lay[0].z);
+				// (Andy, 2026-11-27) pulled over the ground, not through it: dragged down a hillside, the body lay in the slope behind
+				Vec3 clear = clearOfGround(carried, lay[0]);
+				carried.setPos(clear.x, clear.y, clear.z);
 				carried.setDeltaMovement(Vec3.ZERO);
 				float yaw = dragYaw(lay[0], lay[1]);
 				carried.setYRot(yaw);
@@ -1406,9 +1629,20 @@ public final class Carry {
 					mob.getNavigation().stop();
 				}
 			}
-			if (flying(carrier) || !Downed.isDowned(carried)) {
-				// taken off into the air, or they're up again: let go
+			if (!Downed.isDowned(carried)) {
+				// they're up again: let go
 				end(carrier, entry, Let.SET_DOWN);
+			} else if (flying(carrier)) {
+				// (Andy, 2026-11-27) taken off into the air: up into your arms with you, not left behind (too heavy in their
+				// armour for that, they're let go where they lie, still on the ground)
+				if (overloaded(carrier, carried) > 0) {
+					end(carrier, entry, Let.SET_DOWN);
+				} else {
+					CARRIES.remove(entry.carrier);
+					carrier.removeAttached(CARRYING);
+					carried.removeAttached(CARRIED_BY);
+					pickUp(carrier, carried);
+				}
 			}
 			return;
 		}

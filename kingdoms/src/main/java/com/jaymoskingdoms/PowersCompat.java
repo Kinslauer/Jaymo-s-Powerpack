@@ -4216,6 +4216,54 @@ public final class PowersCompat {
 	}
 
 	/**
+	 * Adds {@code check} to Powers' {@code Carry.WILLING_CHECKS} (Andy, 2026-11-27: "you should be able to carry prisoners and
+	 * anyone willing"): someone it says is willing to be carried by that player can be lifted standing, as a player can.
+	 * Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void willingCheck(java.util.function.BiPredicate<net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity> check) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.Carry").getField("WILLING_CHECKS").get(null);
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity>>)list).add(check);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Carry.WILLING_CHECKS (older Powers?)", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle liftChosen;
+	private static boolean lookedForLift;
+
+	/**
+	 * {@code player} takes {@code body} up into their arms at once (Powers' {@code Carry.liftChosen}: close enough, light enough
+	 * in their armour). False if they couldn't, or without Powers.
+	 */
+	public static boolean liftChosen(net.minecraft.server.level.ServerPlayer player, LivingEntity body) {
+		if (!lookedForLift) {
+			lookedForLift = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					liftChosen = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Carry"), "liftChosen",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					liftChosen = null;
+				}
+			}
+		}
+		if (liftChosen == null) {
+			return false;
+		}
+		try {
+			return (boolean) liftChosen.invokeExact(player, body);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't lift {} through Jaymo's Powers", body, e);
+			return false;
+		}
+	}
+
+	/**
 	 * Andy (2026-11-20): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying".
 	 * Whether Powers' body menu is there ({@code core.BodyMenu}): a tap of use on a body opens it, and what Kingdoms does to
 	 * a body (untying, cutting free, pockets, weapons) is chosen from it instead of being a click or a hold of its own.

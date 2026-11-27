@@ -53,7 +53,8 @@ final class WindFumble {
 			slip(player);
 		}
 		ServerPlayer carried = Carry.carriedPlayer(player);
-		if (carried != null && !player.isCreative() && Powers.has(player, WindPower.INSTANCE)) {
+		// (Andy, 2026-11-27: "you shouldnt be able to drop them") a person in your arms never slips out in flight
+		if (carried != null && !Carry.keptSafe(carried) && !player.isCreative() && Powers.has(player, WindPower.INSTANCE)) {
 			int mastery = Math.clamp(Mastery.unlocked(player), 0, CARRY_DROP_CHANCE_PER_SECOND.length - 1);
 			if (player.getRandom().nextFloat() < CARRY_DROP_CHANCE_PER_SECOND[mastery]) {
 				Carry.slip(player);

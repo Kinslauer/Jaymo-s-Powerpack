@@ -105,6 +105,9 @@ public final class Followers {
 
 	static void register() {
 		JaymosKingdoms.LOGGER.debug("follower attachment: {}", ORDER);
+		// (Andy, 2026-11-27: "you should be able to carry ... anyone willing") anyone who takes your orders lets you carry them
+		// (Powers' Carry: sneak + hold use)
+		PowersCompat.willingCheck((player, entity) -> player instanceof ServerPlayer sp && takesOrders(entity, sp));
 		PayloadTypeRegistry.serverboundPlay().register(Give.TYPE, Give.CODEC);
 		if (!McaCompat.LOADED) {
 			return;
