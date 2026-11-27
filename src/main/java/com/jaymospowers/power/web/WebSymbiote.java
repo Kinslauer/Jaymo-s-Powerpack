@@ -3520,11 +3520,16 @@ public final class WebSymbiote {
 		if (rhythm != null) {
 			long age = now - rhythm;
 			long pulse = Math.floorDiv(age + BEAT_WINDOW, BEAT_PERIOD);
-			if (!sneak || live.rhythmLevel != player.level() || !beat(age) || pulse == live.lastBeat) {
+			if (!sneak || live.rhythmLevel != player.level() || pulse == live.lastBeat) {
 				return;
 			}
 			live.lastBeat = pulse;
-			live.struggle += BEAT_PRESS;
+			if (!beat(age)) {
+				// off-beat press costs a pulse: tapping Shift can't score the same as timing the beat
+				live.struggle = Math.max(0.0F, live.struggle - BEAT_PRESS);
+			} else {
+				live.struggle += BEAT_PRESS;
+			}
 		} else {
 			// The red hunt's hold is stronger.
 			live.struggle += live.redHunt ? RED_HUNT_STRUGGLE : 1.0F;
