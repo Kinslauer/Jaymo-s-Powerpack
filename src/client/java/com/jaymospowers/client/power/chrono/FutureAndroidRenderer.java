@@ -5,16 +5,18 @@ import com.jaymospowers.power.chrono.future.FutureAndroid;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.EyesLayer;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.HumanoidArm;
 
-/** The future's androids on the humanoid model, in one of three shells (tools/gen_future_machines.py), eyes aglow; a gun is held up to aim. */
+/** The future's androids on the humanoid model, in one of three shells (tools/gen_future_machines.py) under gunmetal Rig plate, eyes aglow; a gun is held up to aim. */
 public class FutureAndroidRenderer extends HumanoidMobRenderer<FutureAndroid, HumanoidRenderState, HumanoidModel<HumanoidRenderState>> {
 	static final String[] SHELLS = {"synthetic", "security", "torn"};
 	static final Identifier[] SKINS = new Identifier[SHELLS.length];
@@ -30,6 +32,9 @@ public class FutureAndroidRenderer extends HumanoidMobRenderer<FutureAndroid, Hu
 
 	public FutureAndroidRenderer(EntityRendererProvider.Context context) {
 		super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ZOMBIE)), 0.5F);
+		// the gunmetal Tinker plate they wear (FutureAndroid#outfit)
+		this.addLayer(new HumanoidArmorLayer<>(this, ArmorModelSet.bake(ModelLayers.ZOMBIE_ARMOR, context.getModelSet(), HumanoidModel::new),
+			context.getEquipmentRenderer()));
 		this.addLayer(new EyesLayer<>(this) {
 			@Override
 			public RenderType renderType() {

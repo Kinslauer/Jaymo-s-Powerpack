@@ -99,6 +99,12 @@ public final class TalkBusy {
 		return null;
 	}
 
+	/** {@code player} has a weapon in their main hand (a melee one, as {@link Blows#weapon} counts, or a bow or crossbow): no talking then. */
+	public static boolean armed(net.minecraft.world.entity.player.Player player) {
+		net.minecraft.world.item.ItemStack held = player.getMainHandItem();
+		return Blows.weapon(held) || held.getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
+	}
+
 	/** Whether {@code mob} is busy with something that can't wait (as {@link #why} has it, with anyone at all). */
 	static boolean occupied(PathfinderMob mob) {
 		LivingEntity target = mob.getTarget();

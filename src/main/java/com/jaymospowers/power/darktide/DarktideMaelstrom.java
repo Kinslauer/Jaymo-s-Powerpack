@@ -81,7 +81,8 @@ final class DarktideMaelstrom {
 		DarktideGuard.drop(player);
 		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, center, null, AbilityPower.size(player, RADIUS) * 2.0);
 		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 2);
-		MagicFx.ring(level, center.add(0.0, 0.1, 0.0), (float) AbilityPower.size(player, RADIUS), FOAM);
+		MagicFx.spectacle(level, center.add(0.0, 0.1, 0.0), "andrewfm01/actionlines_shockwave", 2.5F, FOAM, FILM_TICKS,
+			MagicFx.RING, Vec3.ZERO, (float) AbilityPower.size(player, RADIUS));
 		// the sea comes in from every side and closes over you, and the ground under the dome is water while it stands
 		MagicFx.pool(level, center, (float) AbilityPower.size(player, RADIUS), DarktideLooks.WATER, TICKS, SWELL_TICKS);
 		waves(level, center, true, player);

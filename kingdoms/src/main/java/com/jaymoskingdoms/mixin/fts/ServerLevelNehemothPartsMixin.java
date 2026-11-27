@@ -17,6 +17,11 @@ abstract class ServerLevelNehemothPartsMixin {
 			NehemothPart part = NehemothPart.byId((ServerLevel)(Object)this, id);
 			if (part != null) {
 				cir.setReturnValue(part);
+				return;
+			}
+			com.jaymoskingdoms.dragons.DragonPart dragonPart = com.jaymoskingdoms.dragons.DragonPart.byId((ServerLevel)(Object)this, id);
+			if (dragonPart != null) {
+				cir.setReturnValue(dragonPart);
 			}
 		}
 	}

@@ -112,6 +112,9 @@ public class ForgeHearthBlock extends HorizontalDirectionalBlock implements Enti
 		int fuel = state.getValue(FUEL);
 		if (stack.is(ItemTags.COALS)) {
 			if (fuel >= HEARTH_FUEL_MAX) {
+				if (!level.isClientSide()) {
+					com.jaymospowers.core.StationHints.tell(player, "forge_hearth.full");
+				}
 				return InteractionResult.FAIL;
 			}
 			if (!level.isClientSide()) {
@@ -151,6 +154,11 @@ public class ForgeHearthBlock extends HorizontalDirectionalBlock implements Enti
 			return takeHeld(level, pos, player);
 		}
 		if (state.getValue(LIT) || !player.entityTags().contains(EMBERBORN_TAG)) {
+			if (!level.isClientSide() && com.jaymospowers.core.StationHints.idle(player)) {
+				// nothing in the coals: say what's missing (fuel, a light, or metal to heat)
+				com.jaymospowers.core.StationHints.tell(player, state.getValue(LIT) ? "forge_hearth.lit"
+					: state.getValue(FUEL) == 0 ? "forge_hearth.no_fuel" : "forge_hearth.unlit");
+			}
 			return InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {

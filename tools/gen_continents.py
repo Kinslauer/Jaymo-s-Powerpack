@@ -11,6 +11,12 @@ Writes kingdoms/src/main/resources/data:
   tools/gen_mohknee.py uses it as the home world's shape everywhere off Mohknee and its sea.
 - jaymoskingdoms/worldgen/density_function/continents/{latitude,temperature,vegetation}.json: the home world's climate,
   a heat map over the continents (see the climate section below); gen_mohknee.py uses them off Mohknee.
+- jaymoskingdoms/worldgen/density_function/continents/{open,erosion}.json: open country, wide flat grassland inland for
+  roads, horses and carriages (Andy, 2026-11-26: "large flat plains ... better roads and horse/carriage travel"; the
+  idea from Tectonic, MIT, by Apollo, which pins its biome erosion to the flat band over whole regions). A broad noise
+  marks out regions a few thousand blocks across; inside them, away from the coast, the erosion is held in the flat
+  band (the game's lowland erosion, where plains and the like lie level) and the land is a little drier, so grass
+  wins over woods. gen_mohknee.py uses the erosion off Mohknee.
 - minecraft/worldgen/density_function/{overworld,overworld_large_biomes,overworld_amplified}/offset.json: the game's
   own land height, RAISE higher. The higher sea (seas/HighSea, +8 in new worlds) drowned every low plain and river flat
   into thousands of islets and pools (measured: 25% land in over 5,000 pieces); with the ground lifted as far as the
@@ -120,27 +126,54 @@ write('jaymoskingdoms/worldgen/density_function/continents/shape.json',
 # noise bend the bands, and the land's middle is harsher than its coasts (hotter in the south, colder in the north).
 # Wet coasts and dry interiors, a dry belt (deserts) on the equator's side of the temperate band, a wet equator
 # (jungle). Biomes follow these numbers, and the settlements, their buildings, dress, coin and blood follow the biomes.
+# The game makes jungle only where it's warm (temperature 0.2 to 0.55) and wet, and desert wherever it's hotter, so the
+# heat peaks in the dry belt and eases off to warm at the wet equator (Andy, 2026-11-26: a jungle equator; with the heat
+# rising all the way to the equator its rain fell on desert, and jungles, gorillas and the rest were all but missing).
 LATITUDE = 6000            # blocks from the origin to a pole (north) or to the equator (south); a whole band is twice this
-LATITUDE_HEAT = 0.8        # how hot the equator is and how cold a pole is (the game's temperature runs -1 to 1)
+# heat by latitude (-1 pole, 0 the origin's band, 1 equator): cold to the north, the dry belt hottest, a warm equator
+LATITUDE_HEAT = [(-1.0, -0.8), (0.0, 0.0), (0.25, 0.2), (0.5, 0.62), (0.72, 0.68), (0.88, 0.42), (1.0, 0.34)]
 INLAND_EXTREMES = 0.35     # how much harsher the heat or cold is deep inland (by continentalness 0 to 1)
 HEAT_WOBBLE = 0.5          # the large temperature noise (continent-sized) bending the bands
 HEAT_LOCAL = 0.15          # the game's own temperature noise, for local variety
 WET_WOBBLE = 0.5           # the large vegetation noise
 WET_LOCAL = 0.15           # the game's own vegetation noise
+LOCAL_SCALE = 0.125        # the local variety noises' xz scale: half the game's 0.25, so each biome patch is twice as wide
 # rain by continentalness (coasts wet, interiors dry) and by latitude (-1 pole, 0 the origin's band, 1 equator)
 COAST_RAIN = [(-1.2, 0.15), (-0.11, 0.2), (0.1, 0.05), (0.35, -0.15), (0.7, -0.35), (1.0, -0.4)]
 LATITUDE_RAIN = [(-1.0, -0.15), (-0.3, 0.12), (0.15, 0.0), (0.45, -0.35), (0.75, 0.0), (0.92, 0.55), (1.0, 0.6)]
 
 SHAPE = 'jaymoskingdoms:continents/shape'
+
+# ---- open country ----
+OPEN_SCALE = 0.25          # the open country noise's xz scale (base octave -9: regions about 2,000 blocks across)
+OPEN_FROM = -0.15         # open country where the noise passes this (about two fifths of the land well inland)
+OPEN_STEEP = 8.0           # how quickly it turns open past OPEN_FROM (the edge's width)
+OPEN_INLAND = (0.0, 0.2)   # continentalness over which it fades in from the coast (coasts and beaches stay as they were)
+FLAT = 0.3                 # the erosion held there: the game's flat lowland band runs 0.05 to 0.45
+FLAT_SWING = 0.12          # the erosion noise's own swing round FLAT (gentle rises, never hills)
+OPEN_DRY = 0.15            # how much drier open country is (grassland and savanna over woods)
+FLAT_FACTOR = 25.0         # the land's squash factor there (the game's runs about 3 to 7 inland; the higher, the less the
+                           # ground's own 3D noise lifts it into knolls, so level ground)
+write('jaymoskingdoms/worldgen/noise/continents/open.json', {'base_octave': -9, 'octave_count': 2, 'amplitude_modifiers': [1.0, 0.5]})
+inland = clamp(mul(1.0 / (OPEN_INLAND[1] - OPEN_INLAND[0]), add(SHAPE, -OPEN_INLAND[0])), 0.0, 1.0)
+openness = mul(clamp(mul(OPEN_STEEP, add(noise('jaymoskingdoms:continents/open', OPEN_SCALE), -OPEN_FROM)), 0.0, 1.0), inland)
+openness = mul(openness, add(1.0, mul(-1.0, 'jaymoskingdoms:mohknee/climate')))   # none on Mohknee (gen_mohknee.py), whose land is its own
+write('jaymoskingdoms/worldgen/density_function/continents/open.json', {'type': 'minecraft:cache', 'input': openness})
+OPEN = 'jaymoskingdoms:continents/open'
+erosion = noise('minecraft:erosion_large', 0.25)
+erosion = {'type': 'minecraft:lerp', 'alpha': OPEN, 'first': erosion, 'second': add(FLAT, mul(FLAT_SWING, erosion))}
+write('jaymoskingdoms/worldgen/density_function/continents/erosion.json', {'type': 'minecraft:cache', 'input': erosion})
+
 latitude = {'type': 'minecraft:gradient', 'axis': 'z', 'tiling': 'mirrored_repeat', 'from_coordinate': -LATITUDE,
             'to_coordinate': LATITUDE, 'from_value': -1.0, 'to_value': 1.0}
 write('jaymoskingdoms/worldgen/density_function/continents/latitude.json', {'type': 'minecraft:cache', 'input': latitude})
 LAT = 'jaymoskingdoms:continents/latitude'
-heat = mul(LATITUDE_HEAT, mul(LAT, add(1.0, mul(INLAND_EXTREMES, clamp(SHAPE, 0.0, 1.0)))))
-heat = add(add(heat, mul(HEAT_WOBBLE, noise('minecraft:temperature_large', 0.25))), mul(HEAT_LOCAL, noise('minecraft:temperature', 0.25)))
+heat = mul(spline(LAT, LATITUDE_HEAT), add(1.0, mul(INLAND_EXTREMES, clamp(SHAPE, 0.0, 1.0))))
+heat = add(add(heat, mul(HEAT_WOBBLE, noise('minecraft:temperature_large', 0.25))), mul(HEAT_LOCAL, noise('minecraft:temperature', LOCAL_SCALE)))
 write('jaymoskingdoms/worldgen/density_function/continents/temperature.json', {'type': 'minecraft:cache', 'input': clamp(heat, -1.0, 1.0)})
 wet = add(spline(SHAPE, COAST_RAIN), spline(LAT, LATITUDE_RAIN))
-wet = add(add(wet, mul(WET_WOBBLE, noise('minecraft:vegetation_large', 0.25))), mul(WET_LOCAL, noise('minecraft:vegetation', 0.25)))
+wet = add(add(wet, mul(WET_WOBBLE, noise('minecraft:vegetation_large', 0.25))), mul(WET_LOCAL, noise('minecraft:vegetation', LOCAL_SCALE)))
+wet = add(wet, mul(-OPEN_DRY, OPEN))
 write('jaymoskingdoms/worldgen/density_function/continents/vegetation.json', {'type': 'minecraft:cache', 'input': clamp(wet, -1.0, 1.0)})
 
 # ---- the land lifted with the sea ----
@@ -155,4 +188,9 @@ with zipfile.ZipFile(game_jar()) as jar:
             world + ': the game\'s offset is not what this tool was written for'
         land_height['left'] = round(OFFSET_BASE + lift, 6)
         write('minecraft/worldgen/density_function/%s/offset.json' % world, offset)
+        # open country: the squash factor raised toward FLAT_FACTOR, so it lies level (blending with old chunks as before)
+        factor = json.loads(jar.read('data/minecraft/worldgen/density_function/%s/factor.json' % world))
+        assert factor['type'] == 'minecraft:cache' and factor['input']['type'] == 'minecraft:lerp', world + ': the game\'s factor is not what this tool was written for'
+        factor['input']['second'] = {'type': 'minecraft:lerp', 'alpha': OPEN, 'first': factor['input']['second'], 'second': FLAT_FACTOR}
+        write('minecraft/worldgen/density_function/%s/factor.json' % world, factor)
 print('continents: shore at', SHORE, 'land scale', LAND_SCALE, '; land lifted', RAISE, 'blocks (offset +%g)' % lift)

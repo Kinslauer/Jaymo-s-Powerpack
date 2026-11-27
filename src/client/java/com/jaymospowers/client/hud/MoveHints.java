@@ -65,7 +65,7 @@ public final class MoveHints {
 	private static void tick(Minecraft minecraft) {
 		lastFade = fade;
 		LocalPlayer player = minecraft.player;
-		List<Hint> now = player == null || minecraft.gui.screen() != null || !player.isAlive() ? List.of() : hints(minecraft, player);
+		List<Hint> now = player == null || !TipCard.enabled() || minecraft.gui.screen() != null || !player.isAlive() ? List.of() : hints(minecraft, player);
 		StringBuilder sig = new StringBuilder();
 		for (Hint hint : now) {
 			sig.append(hint.id()).append(';');

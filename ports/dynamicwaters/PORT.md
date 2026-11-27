@@ -116,6 +116,34 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   regions they look at (`getWatershedRegion`, on the worker thread that places the start; on the server thread it still
   only reads, as before). Built; not played.
 
+- **Gorges only in high ground, gentle banks in the lowlands**: Dynamic Waters set its lowland river heights as fixed
+  Ys for vanilla's sea at 63: a river cut a gorge (sheer stepped rock walls) where its ground stood over Y 76, kept
+  wide valley banks only under Y 80, sealed caves under ground over Y 90, and gave the river biome only under Y 80.
+  The pack's higher sea (`HighSea`, 8 blocks up, the land lifted as much) put Y 76 only 5 blocks over the water, so
+  nearly every lowland river through plains cut a ravine with a river at its foot (Andy's clip, 2026-11-26, "ravine
+  river hybrids"). Those heights now move with the world's sea (`HydrologyManager.aboveSea`): a gorge starts 13
+  blocks over the water as Dynamic Waters meant. And in open-gorge mode (the default) a lowland river's banks climb
+  at most one block for every two out from the water, out to the gorge's reach (`BANK_GENTLE_RUN`), so low ground
+  eases down to a river as a valley; the drainage routing's ground (`lowlandRouteGround`) takes the same slope.
+  Mountain streams running through low ground (under the gorge height, not in a ravine, at a gorge rim or in a
+  tunnel) get the same gentle banks (Andy, 2026-11-26, "yes soften": their 1:1 cuts were dressed as bare stone faces).
+  Built; not played; new chunks only.
+
+- **The river planner reads the ground, not the caves under it**: `CoarseHeightField` finds each column's ground by
+  walking down the router's final density to the first solid block. Near the surface the overworld's final density is
+  `min(sloped_cheese, 5 * caves/entrances)`, so over a cave entrance the walk fell through and read the cave's floor:
+  on Andy's seed a meadow at Y 77 read as Y 19-42, a mountain stream was routed into that "hollow" and cut down to it,
+  a sheer plain-stone slot with dripstone and a lava fall at the bottom (2026-11-26, the same "ravine river hybrids").
+  The walk now reads `WiredRouter.withoutCaves(finalDensity)`: every density function the router takes from a
+  `caves/` file stands in as solid rock. Built; not played; new chunks only.
+
+- **Bank guard** (`BankGuard`, `BankGuardMixin`, ours): wraps `wythers:stony_cliffs` (William Wyther's Overhauled
+  Overworld) during decoration and puts back the top 6 blocks of low banks next to inland water (within 5 blocks, at most
+  8 over it), which that feature read as cliffs and turned to bare stone. Gorges, mountain cliffs and coasts are untouched.
+- **Column watch** (`ColumnWatch`, `/dynamicwaters watch|column`, ours): a test tool that notes each carving step (pool fill,
+  hollow refill, cuts, fills, dressing, surface rules, repair pass, bank skin, boulders) for the columns in a box as
+  their chunks generate, and reports bare-rock banks with the step that made them. `FeatureWatchMixin`/`StructureWatchMixin` also name each
+  feature or structure that changes a watched grass/dirt top. Costs one check per column (or chunk) when off.
 - **Left clicks in the shore editors**: 26.3 numbers mouse buttons from 1 (`InputConstants.MOUSE_BUTTON_LEFT` is 1,
   right is 3), so the block picker, riverbank palette and water plant set screens, which waited for button 0, never
   took a left click. They compare with `InputConstants.MOUSE_BUTTON_LEFT` now. Built; not played.

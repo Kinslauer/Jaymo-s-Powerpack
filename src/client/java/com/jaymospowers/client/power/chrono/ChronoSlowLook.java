@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.chrono;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.fx.MagicFx;
+import com.jaymospowers.power.chrono.ChronoSkip;
 import com.jaymospowers.power.chrono.ChronoSlowTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,19 +75,22 @@ public final class ChronoSlowLook {
 		}
 		boolean was = on;
 		on = slowed(level, me);
-		if (!on) {
-			LAST.clear();
-			return;
-		}
-		if (!was || ++beat >= BEAT) {
+		if (on && (!was || ++beat >= BEAT)) {
 			beat = 0;
 			// lub... dub
 			level.playLocalSound(me.getX(), me.getEyeY(), me.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.8F, 0.7F, false);
 		}
+		boolean trailing = false;
 		for (Entity entity : level.entitiesForRendering()) {
+			// a time skip's foes (ChronoSkip) wear the same trail in a world that is not slowed
+			boolean outOfStep = entity instanceof LivingEntity && entity.hasAttached(ChronoSkip.OUT_OF_STEP);
+			if (!on && !outOfStep) {
+				continue;
+			}
 			if (entity == me || !(entity instanceof LivingEntity || entity instanceof Projectile) || entity.distanceToSqr(me) > TRAIL_RANGE * TRAIL_RANGE) {
 				continue;
 			}
+			trailing = true;
 			Vec3 now = entity.getBoundingBox().getCenter();
 			Vec3 last = LAST.put(entity.getId(), now);
 			if (last != null && last.distanceToSqr(now) > TRAIL_MOVE * TRAIL_MOVE) {
@@ -96,6 +100,9 @@ public final class ChronoSlowLook {
 				level.addParticle(MagicFx.mote(TRAIL, size), last.x, last.y, last.z, 0.0, 0.0, 0.0);
 				level.addParticle(MagicFx.mote(TRAIL, size * 0.7F), mid.x, mid.y, mid.z, 0.0, 0.0, 0.0);
 			}
+		}
+		if (!on && !trailing) {
+			LAST.clear();
 		}
 	}
 }

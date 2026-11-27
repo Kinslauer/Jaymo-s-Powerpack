@@ -432,7 +432,8 @@ public final class GlowWoodHavens {
 			glow = put(server, f.id(), new Glow(glow.giants(), glow.ring(), since));
 		}
 		boolean over = now - since >= SEASON_TICKS;
-		double chance = ROT_CHANCE * rotSeason(level);
+		// a haven whose allays are still there fades half as fast (Allays)
+		double chance = ROT_CHANCE * rotSeason(level) * (Allays.keeping(level, f) ? 0.5 : 1.0);
 		RandomSource random = level.getRandom();
 		List<Giant> left = new ArrayList<>();
 		for (Giant g : glow.giants()) {

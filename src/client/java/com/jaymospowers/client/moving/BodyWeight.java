@@ -234,6 +234,10 @@ public final class BodyWeight {
 	// ---- drawing ----------------------------------------------------------------------------------------------------
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
+		if (entity instanceof Player player && com.jaymospowers.client.freerun.CoreMotionClient.active(player)) {
+			state.setData(KEY, null);
+			return;
+		}
 		Body body = entity instanceof Player ? BODIES.get(entity.getId()) : null;
 		if (body == null || !(state instanceof AvatarRenderState) || state.deathTime > 0.0F || LowEndMode.on()) {
 			state.setData(KEY, null);

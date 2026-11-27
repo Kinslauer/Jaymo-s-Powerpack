@@ -204,6 +204,21 @@ public final class Frights {
 		flee(level, v, fright);
 	}
 
+	/**
+	 * It runs for cover at {@code to} and stays there until {@code until}: a tornado bearing down ({@code Tornadoes}).
+	 * Unlike {@link #shelter} the place is always the new one (whatever it was running from before, this is worse), and a
+	 * child it was taking along still comes too.
+	 */
+	public static void takeCover(ServerLevel level, Villager v, BlockPos to, long until) {
+		Fright had = FRIGHTS.get(v.getUUID());
+		if (had == null) {
+			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);
+		}
+		Fright fright = new Fright(to, had != null ? had.child() : null, Math.max(until, had != null ? had.until() : 0L));
+		FRIGHTS.put(v.getUUID(), fright);
+		flee(level, v, fright);
+	}
+
 	/** It takes fright: where it'll run (home if that's near and not toward the monster, else away), and with which child. */
 	private static Fright frighten(ServerLevel level, Villager v, LivingEntity monster, long now) {
 		BlockPos to = away(level, v, monster.position());

@@ -1,0 +1,16 @@
+{
+  "message.jaymospowers.station.inscription.empty": "Lay a piece of gear and a gem on the table, then carve it with a chisel.",
+  "message.jaymospowers.station.inscription.takes": "The inscription table takes gear that can be enchanted, a gem, and a chisel to carve with.",
+  "message.jaymospowers.station.blast_furnace.unformed": "The blast furnace isn't built: a firebrick tower 3 wide, 3 deep and 4 high, hollow from the second layer up, with this mouth in the middle of a side.",
+  "message.jaymospowers.station.blast_furnace.takes": "Load it with iron ingots and coal coke. Nothing is ready to take yet.",
+  "message.jaymospowers.station.coke_oven.unformed": "The coke oven isn't built: a 3x3x3 of coke oven bricks round a hollow middle, with this mouth in one wall.",
+  "message.jaymospowers.station.coke_oven.takes": "Load it with coal or logs. Nothing is baked yet.",
+  "message.jaymospowers.station.casting.table": "Set a cast on the table, then pour metal over it from a faucet.",
+  "message.jaymospowers.station.casting.basin": "Pour metal in from a faucet to cast a block.",
+  "message.jaymospowers.station.smithing_anvil.empty": "Lay a hot ingot or a forging blank on the anvil, then strike it with a smithing hammer.",
+  "message.jaymospowers.station.forge_hearth.no_fuel": "The hearth needs coal or charcoal, then a light from flint and steel.",
+  "message.jaymospowers.station.forge_hearth.unlit": "The hearth has fuel but isn't lit: use flint and steel or a fire charge.",
+  "message.jaymospowers.station.forge_hearth.lit": "Put metal in the coals to heat it, and take it out with tongs.",
+  "message.jaymospowers.station.forge_hearth.full": "The hearth can't take more fuel.",
+  "message.jaymospowers.station.chopping_block.empty": "Stand logs on the chopping block, then chop them with an axe."
+}

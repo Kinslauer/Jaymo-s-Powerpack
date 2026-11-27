@@ -16,7 +16,6 @@
 		"ServerPlayerBerthMixin",
 		"LivingBerthMixin",
 		"BlockEntityShipWorksMixin",
-		"SeaLifeSpawnMixin",
 		"HighSeaLevelMixin",
 		"HighSeaStructureMixin",
 		"MohkneeStructureMixin"

@@ -101,7 +101,7 @@ public class MultiNoiseBiomeSourceMixin {
                 double worldY = y * 4.0 + 2.0;
                 double worldZ = z * 4.0 + 2.0;
 
-                if (worldY > 80) {
+                if (worldY > HydrologyManager.aboveSea(80)) {
                     return null;
                 }
 

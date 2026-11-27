@@ -260,7 +260,18 @@ public final class NightLocks {
 	 * (their name on it); otherwise empty.
 	 */
 	static ItemStack pocketKey(ServerLevel level, LivingEntity mark, RandomSource random) {
-		if (!(mark instanceof Villager villager) || random.nextFloat() >= POCKET_KEY_CHANCE) {
+		if (random.nextFloat() >= POCKET_KEY_CHANCE) {
+			return ItemStack.EMPTY;
+		}
+		return houseKeyOf(level, mark);
+	}
+
+	/**
+	 * The house key {@code mark} carries ({@link NpcPockets}): a realm's villager with a door to lock, the key to it with
+	 * their name on it; otherwise empty.
+	 */
+	static ItemStack houseKeyOf(ServerLevel level, LivingEntity mark) {
+		if (!(mark instanceof Villager villager)) {
 			return ItemStack.EMPTY;
 		}
 		Faction law = Theft.lawAt(level, villager.blockPosition());

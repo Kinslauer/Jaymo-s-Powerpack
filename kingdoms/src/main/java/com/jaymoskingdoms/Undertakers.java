@@ -248,9 +248,28 @@ public final class Undertakers {
 		return false;
 	}
 
-	/** The nearest of {@code f}'s guards to {@code corpse} that isn't fighting, asleep, at a fire or already on a duty. */
+	/**
+	 * The nearest of {@code f}'s guards to {@code corpse} that isn't fighting, asleep, at a fire or already on a duty. A
+	 * free sexton ({@link Sextons}) near it goes first, so the guards keep their posts.
+	 */
 	private static @Nullable PathfinderMob freeGuard(ServerLevel level, Faction f, Entity corpse) {
 		AABB box = corpse.getBoundingBox().inflate(GUARD_REACH, 12.0, GUARD_REACH);
+		Villager sexton = null;
+		double sextonD = Double.MAX_VALUE;
+		for (Villager v : level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && !v.isSleeping() && Sextons.is(v))) {
+			Faction theirs = Theft.lawAt(level, v.blockPosition());
+			if (theirs == null || theirs.id() != f.id() || !Bearers.freeVillager(v) || !Routines.idle(v)) {
+				continue;
+			}
+			double d = v.distanceToSqr(corpse);
+			if (d < sextonD) {
+				sextonD = d;
+				sexton = v;
+			}
+		}
+		if (sexton != null) {
+			return sexton;
+		}
 		List<PathfinderMob> guards = new ArrayList<>();
 		for (Worker w : Workers.near(level, box, w -> w.role() == Folk.GUARD && w.factionId() == f.id())) {
 			guards.add(w.mob());

@@ -134,10 +134,17 @@ public final class Corpses {
 	 * {@code ToIntFunction<Entity>} in Fabric Loader's object share (Powers compiles against an older Kitchen jar).
 	 */
 	public static final String SHARE_TAP = "jaymoskitchen:corpse_tap";
+	/**
+	 * Where Powers' context hints ask whether a body is small enough to be picked up like an item
+	 * ({@link CorpseEntity#handSized}): a {@code Predicate<Entity>}, shared the same way.
+	 */
+	public static final String SHARE_HAND_SIZED = "jaymoskitchen:corpse_hand_sized";
 
 	public static void register() {
 		net.fabricmc.loader.api.FabricLoader.getInstance().getObjectShare().put(SHARE_TAP,
 			(java.util.function.ToIntFunction<net.minecraft.world.entity.Entity>) e -> e instanceof CorpseEntity corpse ? corpse.tapDoes() : CorpseEntity.TAP_LOOT);
+		net.fabricmc.loader.api.FabricLoader.getInstance().getObjectShare().put(SHARE_HAND_SIZED,
+			(java.util.function.Predicate<net.minecraft.world.entity.Entity>) e -> e instanceof CorpseEntity corpse && corpse.handSized());
 		ResourceKey<EntityType<?>> corpseKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id("corpse"));
 		CORPSE = Registry.register(BuiltInRegistries.ENTITY_TYPE, corpseKey,
 			EntityType.Builder.<CorpseEntity>of(CorpseEntity::new, MobCategory.MISC)

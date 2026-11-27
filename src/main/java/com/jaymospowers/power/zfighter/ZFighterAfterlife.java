@@ -639,6 +639,11 @@ public final class ZFighterAfterlife {
 		return ZFighterKingdoms.making(player);
 	}
 
+	/** Whether {@code player} can be told the life story anew (Kingdoms there, its story screen on their client). */
+	public static boolean storyAhead(ServerPlayer player) {
+		return ZFighterKingdoms.canReincarnate(player);
+	}
+
 	/** (0.20.83) Born again from nothing (Mortality's end of a life): MCA's creator too, then the whole life story. */
 	public static boolean bornAnew(ServerPlayer player) {
 		return ZFighterKingdoms.reincarnateAnew(player);

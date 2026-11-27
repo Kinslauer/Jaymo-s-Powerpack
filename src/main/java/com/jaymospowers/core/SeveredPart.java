@@ -503,6 +503,21 @@ public class SeveredPart extends Entity {
 	}
 
 	/**
+	 * Whether it's litter a town's sexton may bury (Jaymo's Kingdoms, by name): lying loose (not carried, not in a bird's
+	 * talons, not a kept trophy on a hook or a wall), and not a dead player's head they're still looking out of.
+	 */
+	public boolean litter() {
+		if (this.isRemoved() || this.trophy || this.isPassenger() || Carry.carrierOf(this) != null) {
+			return false;
+		}
+		if (part() == Dismember.HEAD && this.level().getServer() != null) {
+			Optional<UUID> owner = owner();
+			return !(owner.isPresent() && this.level().getServer().getPlayerList().getPlayer(owner.get()) instanceof ServerPlayer player && !player.isAlive());
+		}
+		return true;
+	}
+
+	/**
 	 * {@code eater} bites into it: it's tugged toward the jaws, blood flies, and it's chewed. True when that was the last
 	 * of it: it's gone, and sometimes a bone is left on the ground.
 	 */

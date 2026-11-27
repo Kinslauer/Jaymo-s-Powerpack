@@ -31,7 +31,8 @@ import org.jspecify.annotations.Nullable;
  * nothing else to do picks a guard whose gear (the blade in hand or a piece of armour) is half worn or worse, or a golem
  * hurt past {@link #GOLEM_BELOW} of its health, walks to them, hammers at it with the anvil ringing, and then the piece
  * has {@link #MENDS} of its durability back (or the golem is patched up by {@link #PATCH} health). The iron for it comes out
- * of the settlement's storehouse ({@link #IRON} ingots a job, {@link Storage}); a bare storehouse means no work.
+ * of the settlement's storehouse ({@link #IRON} ingots a job, {@link Storage}); a bare storehouse means no work. A town's
+ * sexton ({@link Sextons}) mends its golems the same way, but leaves the guards' gear to the smiths.
  */
 public final class SmithMending {
 	/** How often smiths think of it (ticks); how far round a seat they are watched. */
@@ -89,7 +90,8 @@ public final class SmithMending {
 	}
 
 	private static boolean smith(Villager v) {
-		return v.getVillagerData().profession().is(VillagerProfession.WEAPONSMITH) || v.getVillagerData().profession().is(VillagerProfession.ARMORER)
+		// (a sexton keeps the golems too: Sextons)
+		return Sextons.is(v) || v.getVillagerData().profession().is(VillagerProfession.WEAPONSMITH) || v.getVillagerData().profession().is(VillagerProfession.ARMORER)
 			|| v.getVillagerData().profession().is(VillagerProfession.TOOLSMITH);
 	}
 
@@ -115,7 +117,8 @@ public final class SmithMending {
 						JOBS.remove(v.getUUID());
 						v.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 					}
-				} else if (t >= FROM && t < TO && random.nextFloat() < START_CHANCE && Routines.idle(v) && !Rulers.is(v) && !Whetting.working(v)) {
+				} else if (t >= FROM && t < TO && random.nextFloat() < START_CHANCE && Routines.idle(v) && !Rulers.is(v) && !Whetting.working(v)
+					&& !Sextons.busy(v)) {
 					start(level, f, v, now);
 				}
 			}
@@ -136,8 +139,10 @@ public final class SmithMending {
 		LivingEntity patient = null;
 		EquipmentSlot slot = null;
 		float worst = WORN - 0.0001F;
+		// a sexton sees to the golems only; the guards' gear is the smiths'
+		boolean sexton = Sextons.is(smith);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, smith.getBoundingBox().inflate(REACH),
-			e -> e != smith && e.isAlive() && (Downed.isGuard(e) || Company.soldier(e) || e instanceof AbstractGolem) && !Downed.isDowned(e) && !claimed(e))) {
+			e -> e != smith && e.isAlive() && (!sexton && (Downed.isGuard(e) || Company.soldier(e)) || e instanceof AbstractGolem) && !Downed.isDowned(e) && !claimed(e))) {
 			if (e instanceof AbstractGolem) {
 				float lost = 1.0F - e.getHealth() / e.getMaxHealth();
 				if (lost > 1.0F - GOLEM_BELOW && lost > worst) {
@@ -181,8 +186,8 @@ public final class SmithMending {
 				return false;
 			}
 			job.arrived = now;
-			// a hammer in hand as they work
-			smith.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
+			// a hammer in hand as they work, of what the town can afford (ToolGrades)
+			smith.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ToolGrades.pickaxe(ToolGrades.of(level, Theft.lawAt(level, smith.blockPosition())))));
 		}
 		smith.getNavigation().stop();
 		smith.getLookControl().setLookAt(patient, 30.0F, 30.0F);

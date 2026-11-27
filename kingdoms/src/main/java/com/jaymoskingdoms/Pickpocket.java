@@ -209,9 +209,7 @@ public final class Pickpocket {
 			start(sp, level, mark, now);
 			return InteractionResult.SUCCESS;
 		});
-		// Andy (2026-11-20): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying".
-		// Someone downed or hogtied has their pockets gone through from Powers' body menu (a tap of use on them)
-		PowersCompat.bodyOption("pickpocket", 50, (player, body) -> searchable(body) && player.getMainHandItem().isEmpty(), Pickpocket::search);
+		// (someone downed or hogtied has their belt and pockets gone through on a screen from Powers' body menu: NpcPockets)
 		ServerTickEvents.END_SERVER_TICK.register(Pickpocket::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LIFTING.clear();
@@ -233,44 +231,10 @@ public final class Pickpocket {
 	/** Has pockets to go through as they lie: a grown villager or a settlement's folk (not its ruler), downed or hogtied. */
 	static boolean searchable(LivingEntity e) {
 		if (!e.isAlive() || e.isBaby() || e.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) != null
-			|| !(e instanceof Villager || e instanceof Folk folk && !folk.leader())) {
+			|| !NpcPockets.has(e)) {
 			return false;
 		}
 		return Downed.isDowned(e) || com.jaymoskingdoms.forms.Lasso.hogtied(e);
-	}
-
-	/**
-	 * One tick of {@code player}'s hand in a helpless {@code mark}'s pockets, chosen from the body menu: the hand goes in as
-	 * a held use would put it, and stays while this goes on. They can't turn to catch it; anyone watching still sees a theft
-	 * ({@link #pick}). True while the hand's in.
-	 */
-	private static boolean search(ServerPlayer player, LivingEntity mark) {
-		if (!(player.level() instanceof ServerLevel level) || !searchable(mark)) {
-			return false;
-		}
-		long now = level.getGameTime();
-		Lift lift = LIFTING.get(player.getUUID());
-		if (lift != null) {
-			if (lift.mark != mark) {
-				return false;
-			}
-			lift.held = now;
-			return true;
-		}
-		Rest rest = RESTING.get(player.getUUID());
-		if (rest != null && rest.until() > now || !player.getMainHandItem().isEmpty()) {
-			return false;
-		}
-		if (!TreeLocks.check(player, TreeLocks.Lock.PICKPOCKET) || !Vows.allows(player, "pickpocket")) {
-			// (learned: Light Fingers; or an oath or a pact that forbids it)
-			return false;
-		}
-		start(player, level, mark, now);
-		Lift started = LIFTING.get(player.getUUID());
-		if (started != null) {
-			started.helpless = true;
-		}
-		return true;
 	}
 
 	/** {@code player} is behind {@code mark}: the way its body faces and the line to them are at least this far apart. */
@@ -514,11 +478,11 @@ public final class Pickpocket {
 		if (!weapon.isEmpty()) {
 			return weapon;
 		}
-		// a villager's house key: their door's night lock opens to it (NightLocks)
-		if (mark.level() instanceof net.minecraft.server.level.ServerLevel level) {
-			ItemStack key = NightLocks.pocketKey(level, mark, random);
-			if (!key.isEmpty()) {
-				return key;
+		// what is really in their pockets (NpcPockets: a purse, a bite to eat, their trade's things, their house key)
+		if (mark instanceof net.minecraft.world.entity.Mob mob && NpcPockets.has(mob) && mark.level() instanceof ServerLevel level) {
+			ItemStack pocketed = NpcPockets.lift(level, mob, random, Skills.carriedShare(player, CARRIED_SHARE));
+			if (!pocketed.isEmpty()) {
+				return pocketed;
 			}
 		}
 		if (mark instanceof Villager v) {
@@ -540,8 +504,10 @@ public final class Pickpocket {
 		for (Pocket p : POCKETS) {
 			total += p.weight();
 		}
-		// (0.5.52, Deep Pockets) another try for each rank at a pocket that turns up empty
-		for (int tries = Skills.pocketTries(player); tries > 0; tries--) {
+		// (0.5.52, Deep Pockets) another try for each rank at a pocket that turns up empty (the first try was at their real
+		// pockets, NpcPockets: what more turns up is a coin or a crust in a seam)
+		boolean real = mark instanceof net.minecraft.world.entity.Mob mob && NpcPockets.has(mob);
+		for (int tries = Skills.pocketTries(player) - (real ? 1 : 0); tries > 0; tries--) {
 			int roll = random.nextInt(total);
 			for (Pocket p : POCKETS) {
 				roll -= p.weight();

@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -54,6 +55,12 @@ import org.jspecify.annotations.Nullable;
  * blows shove harder and its armour stands firmer; bright steel bites the undead as silver does; ash bronze is kind to
  * work but crude, never better than Expertly Forged. Lead is a new ore deep under the mountains (worldgen/feature/ore_lead.json).
  * Art, data and lang: tools/gen_medieval_smithing.py.
+ * <p>
+ * Plain steel takes knowing too (Andy: steel is "a specific crafting blueprint gatekept by the kingdom who has it. it is
+ * very valuable and closely kept"): only a smith who knows steelmaking ({@link #steelKnown}, which Jaymo's Kingdoms
+ * hands over: the realm's steel blueprint carried, or sworn to a realm that keeps it) can hammer steel on the anvil. Its
+ * ingots still come out of the smeltery and the blast furnace for anyone. A realm steel needs only its own knowing, and
+ * Mohknee's folded steel ({@link FoldedSteel}) only the blossom smiths' teaching.
  */
 public final class RealmSteels {
 	// ---- tuning ----
@@ -73,6 +80,8 @@ public final class RealmSteels {
 
 	/** Whether this smith knows how to work this realm steel (its {@link Molten} id). Jaymo's Kingdoms sets it (by reflection); alone, everyone does. */
 	public static BiPredicate<ServerPlayer, String> knows = (smith, metal) -> true;
+	/** Whether this smith knows steelmaking (to hammer plain steel). Jaymo's Kingdoms sets it (by reflection); alone, everyone does. */
+	public static Predicate<ServerPlayer> steelKnown = smith -> true;
 
 	static final Identifier STEADY_ID = JaymosPowers.id("deep_steel_steady");
 	private static boolean biting;
@@ -133,6 +142,11 @@ public final class RealmSteels {
 			Molten metal = of(anvil.work());
 			// (no words: the metal just won't take the hammer for one who doesn't know it)
 			return metal != null && !smith.isCreative() && !knows.test(smith, metal.id) ? Forging.DULL : null;
+		});
+		Forging.CHECKS.add((smith, anvil, option) -> {
+			// (plain steel: the realm's blueprint, else the same dull clank; folded steel is Mohknee's own)
+			return of(anvil.work()) == null && option.metal() == Molten.STEEL && !FoldedSteel.folded(anvil.work()) && !smith.isCreative()
+				&& !steelKnown.test(smith) ? Forging.DULL : null;
 		});
 		Forging.CAPS.add((smith, anvil, option) -> of(anvil.work()) == Molten.ASH_BRONZE ? ASH_CAP : null);
 		Forging.FINISHES.add((smith, anvil, option, made) -> {

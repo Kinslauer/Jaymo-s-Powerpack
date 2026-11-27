@@ -36,6 +36,8 @@ public final class BbModel {
 	public final Identifier texture;
 	private final Map<String, ModelPart> parts = new LinkedHashMap<>();
 	private final Map<String, Anim> anims = new HashMap<>();
+	/** Each bone's box round its own cubes and its children's, in its own frame: {minX, maxX, minY, maxY, minZ, maxZ}. */
+	private final Map<String, float[]> bounds = new HashMap<>();
 
 	private BbModel(ModelPart root, Identifier texture) {
 		this.root = root;
@@ -63,6 +65,8 @@ public final class BbModel {
 		int[] parents = new int[count];
 		List<List<ModelPart.Cube>> cubes = new ArrayList<>();
 		PartPose[] poses = new PartPose[count];
+		float[][] pivots = new float[count][];
+		float[][] boxes = new float[count][];
 		Map<String, Integer> seen = new HashMap<>();
 		for (int i = 0; i < count; i++) {
 			JsonObject bone = bones.get(i).getAsJsonObject();
@@ -73,6 +77,8 @@ public final class BbModel {
 			float[] pivot = floats(bone.getAsJsonArray("pivot"));
 			float[] rot = floats(bone.getAsJsonArray("rot"));
 			poses[i] = PartPose.offsetAndRotation(pivot[0], pivot[1], pivot[2], rot[0], rot[1], rot[2]);
+			pivots[i] = pivot;
+			boxes[i] = box(bone.getAsJsonArray("quads"));
 			cubes.add(cubes(bone.getAsJsonArray("quads")));
 		}
 		// children before parents: build from the leaves up
@@ -106,6 +112,19 @@ public final class BbModel {
 		for (int i = 0; i < count; i++) {
 			model.parts.put(names[i], built[i]);
 		}
+		// a child's box joins its parent's, moved by its pivot (its turn left out: near enough for how far a piece reaches)
+		for (int i = count - 1; i >= 0; i--) {
+			if (boxes[i] != null && parents[i] >= 0) {
+				float[] p = pivots[i];
+				float[] moved = {boxes[i][0] + p[0], boxes[i][1] + p[0], boxes[i][2] + p[1], boxes[i][3] + p[1], boxes[i][4] + p[2], boxes[i][5] + p[2]};
+				boxes[parents[i]] = union(boxes[parents[i]], moved);
+			}
+		}
+		for (int i = 0; i < count; i++) {
+			if (boxes[i] != null) {
+				model.bounds.put(names[i], boxes[i]);
+			}
+		}
 		JsonObject anims = json.getAsJsonObject("anims");
 		if (anims != null) {
 			for (Map.Entry<String, JsonElement> e : anims.entrySet()) {
@@ -113,6 +132,34 @@ public final class BbModel {
 			}
 		}
 		return model;
+	}
+
+	/** The box round a bone's own quads, {minX, maxX, minY, maxY, minZ, maxZ}; null for a bone with none. */
+	private static float @Nullable [] box(JsonArray quads) {
+		float[] out = null;
+		for (JsonElement quad : quads) {
+			float[] f = floats(quad.getAsJsonArray());
+			for (int v = 0; v < 4; v++) {
+				float x = f[v * 5], y = f[v * 5 + 1], z = f[v * 5 + 2];
+				out = union(out, new float[] {x, x, y, y, z, z});
+			}
+		}
+		return out;
+	}
+
+	/** Two boxes ({minX, maxX, minY, maxY, minZ, maxZ}, either may be null) as one. */
+	private static float @Nullable [] union(float @Nullable [] a, float @Nullable [] b) {
+		if (a == null) {
+			return b == null ? null : b.clone();
+		}
+		if (b == null) {
+			return a;
+		}
+		for (int i = 0; i < 6; i += 2) {
+			a[i] = Math.min(a[i], b[i]);
+			a[i + 1] = Math.max(a[i + 1], b[i + 1]);
+		}
+		return a;
 	}
 
 	/** The quads, six to a cube (a vanilla cube's six faces are swapped for ours), the last cube with as many as are left. */
@@ -196,6 +243,15 @@ public final class BbModel {
 
 	public @Nullable ModelPart find(String name) {
 		return this.parts.get(name);
+	}
+
+	/**
+	 * The box round bone {@code name}'s cubes and its children's, in its own frame ({minX, maxX, minY, maxY, minZ, maxZ},
+	 * a child's turn left out); null for a bone with no cubes or none of that name.
+	 */
+	public float @Nullable [] bounds(String name) {
+		float[] box = this.bounds.get(name);
+		return box == null ? null : box.clone();
 	}
 
 	public boolean has(String anim) {
