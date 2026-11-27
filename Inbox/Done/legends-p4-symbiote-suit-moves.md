@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
@@ -37,3 +37,4 @@ PR body: each row, what you built, classes, keys, every deviation from the plan,
 - 2026-11-26 23:01 Held until legends-p3-big-symbiote is merged into claude/project-thread-aaw9tm; the Claude thread sets for=hermes then.
 - 2026-11-27 03:02 Update 2026-11-27: patches 1, 2, 5 are merged into master (#2257): branch from origin/master and PR against master once patch 3 is merged.
 - 2026-11-27 10:27 Andy 2026-11-27: 'finish the entire plan here': the Claude thread builds it.
+- 2026-11-27 06:04 PR #2283 is merged into master; moved to Inbox/Done.
