@@ -139,6 +139,8 @@ final class LifeStoryScreen extends Screen {
 
 	private final boolean forced;
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after, lockedButton;
+	/** The narrator's squelch ({@link NarratorSetting}): in the top right corner, or left of Next on a panel page. */
+	private @Nullable Button squelch;
 	/** (0.7.474) On the greenskin road: a half-orc's skin. */
 	private @Nullable ToneSlider tone;
 	/** The question pages' layout (figure, list, info panel), and whether the footer buttons are placed for it now. */
@@ -852,6 +854,8 @@ final class LifeStoryScreen extends Screen {
 			.bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
 		this.dropFace = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.doppel.drop"), b -> keepFace(false))
 			.bounds(ax + ASK_W / 2 + 4, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+		// Andy: "can you make a button in the story to squelch the narrator?" (placed as the page is drawn)
+		this.squelch = addRenderableWidget(NarratorSetting.button(this.width - 4 - NarratorSetting.SIZE, 4));
 	}
 
 	/**
@@ -1115,6 +1119,12 @@ final class LifeStoryScreen extends Screen {
 	 * quietly.
 	 */
 	private static void narrate(Step s, boolean asking) {
+		// (squelched: nothing is read, and the page isn't marked read, so letting the narrator speak again reads it from the top)
+		if (NarratorSetting.squelched()) {
+			hush();
+			narrated = null;
+			return;
+		}
 		Minecraft minecraft = Minecraft.getInstance();
 		long now = System.currentTimeMillis();
 		// (the character creator is made in silence: there's no tale to read, and every row changed would start one over)
@@ -1603,6 +1613,17 @@ final class LifeStoryScreen extends Screen {
 		if (this.keepFace != null && this.dropFace != null) {
 			this.keepFace.visible = offered != null;
 			this.dropFace.visible = offered != null;
+		}
+		if (this.squelch != null) {
+			// a question page fills the screen and its top right corner is bare; a panel's corner holds its heading, so
+			// there it sits in the footer, left of Next
+			if (picking || this.next == null) {
+				this.squelch.setX(this.width - 4 - NarratorSetting.SIZE);
+				this.squelch.setY(4);
+			} else {
+				this.squelch.setX(this.next.getX() - 4 - NarratorSetting.SIZE);
+				this.squelch.setY(this.next.getY());
+			}
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
