@@ -8946,3 +8946,11 @@ Deviations from the plan:
 - **Cloudbank and every aercloud** drop themselves when mined with Silk Touch (Andy: "they can still be silk touched"). Broken any other way, or burst by a hard landing, they still just go with nothing left behind.
 - **Recipes take either**: the four gliders, the cloud skiff, the updraft vent and cloudwool accept the Silk Touched aercloud block (cold for the cold glider, skiff, vent and cloudwool; blue, golden or purple for their gliders) as well as the bottle of cloud (`tools/gen_aether.py`, `gen_aether_gear.py`, `gen_aether_animals.py`).
 - Built; not played.
+
+## 0.28.30 (2026-11-27): shift-click puts baubles on in the creative inventory and from the harness screen (#2313)
+
+- **Creative inventory**: shift-clicking a bauble in the creative inventory used to do nothing at all (the creative screen moves items on the client only, so the server never saw the click while the client held its own move back). It now tells the server (new packet `baubles_quick_equip`) and the bauble goes on in a free slot just as in the survival inventory, and the bauble screen opens as it does there.
+- **Bauble screen**: shift-clicking a harness piece in the bauble screen's inventory now puts it on in Jaymo's Kingdoms' harness (`KingdomsCompat.quickEquipHarness`); before, nothing happened. The harness screen in turn sends baubles to the bauble slots (Kingdoms side).
+- Survival shift-click on baubles (put on from the inventory, take off in the bauble screen) is unchanged.
+- Classes: `BaublesQuickEquip` (`creativeSend` hook, `creativeShiftClick`), `BaublesNet.QuickEquip`, `BaublesMenu`, `KingdomsCompat`, client `BaublesClient`.
+- Built; not played.

@@ -18388,3 +18388,11 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Raised by the acrobats** (Rubber-folk): you start in the Jester's Motley and Joined Hose in the fool's red and gold, bare-headed (light, for tumbling). **Raised by the ringmaster**: the Jester's Hood and Jester's Motley in crimson and black, over a Landsknecht Doublet and Landsknecht Hose in black and gold (`HeraldryWear.fairWear`, put on by `LifeStory.kit`). Not given on the rags-only, captive, rock-bottom, chained and sentenced starts. Uses the existing jester art; no new textures.
 - The life story's figure wears the same dress once you pick either upbringing (`StoryFigure`).
 - Built; not played.
+
+## 0.13.99 (2026-11-27): shift-click puts harness pieces on (#2313)
+
+- **From the inventory**: shift-clicking a harness piece in the survival inventory (main slots, hotbar or offhand) puts it on in its own place, the same places and rules as the harness screen: the place must be bare, spaulders need a chest piece (or a shirt of mail or padding), a crest needs a helm, and gilded plate is only for royals and lords. One click puts one piece on, with an equip sound. If its place is already filled the click moves the piece as before; if it doesn't fit yet a short line says why ("A crest needs a helm to stand on.").
+- **Creative inventory too**: the creative screen moves items on the client only, so a shift-click there now tells the server (new packet `harness_quick_equip`), and the piece goes on just as in survival.
+- **From the bauble screen**: shift-clicking a harness piece in the bauble screen's inventory puts it on in the harness (Powers calls `HarnessQuickEquip.shiftClick` by reflection). **From the harness screen**: shift-clicking a bauble in its inventory now puts it on in a free bauble slot, as the survival inventory does (`PowersCompat.quickEquipBauble`), before falling back to the old inventory/hotbar move. Shift-clicking a worn piece in the harness screen still takes it off into the inventory.
+- Classes: new `HarnessQuickEquip` (+ `QuickEquip` packet) and `mixin/HarnessQuickEquipMixin` (on `InventoryMenu.quickMoveStack`, in the combat mixin config); `HarnessMenu`, `PowersCompat`, `Harness.register`, client `HeraldryClient` (creative hook); two lines in `lang/parts/heraldry-armour.json`.
+- Built; not played.
