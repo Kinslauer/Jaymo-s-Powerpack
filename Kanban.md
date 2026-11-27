@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 18:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 18:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,12 +22,12 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/gore-5-living-guts|gore-5-living-guts]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for 🔥 Prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · 🔥 Prometheus · claimed
 
 
 ## In review
