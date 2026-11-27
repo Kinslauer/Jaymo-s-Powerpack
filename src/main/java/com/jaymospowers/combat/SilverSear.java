@@ -35,10 +35,18 @@ import org.jspecify.annotations.Nullable;
  * ({@code WoundMarks}) is seared: charred instead of bloody, glowing hot along the swing's line and cooling over
  * {@link #GLOW_TICKS}, and it doesn't drip (the heat closed it). Kingdoms' own silver weaknesses (a vampire's, a
  * werewolf's thick hide, the silver sword against the undead) stay as they were, on top.
+ * <p>Hunter's Road: what silver burns also includes every monster of the kinds {@code corpse_eaters}, {@code dead}, {@code spirits}
+ * and {@code cursed} (Jaymo's Kingdoms' {@code MonsterKinds}: the tags {@code jaymoskingdoms:kind/*}, and a vampire or a werewolf in
+ * beast form), and a steel blade (iron, or a tinker tool with an iron or steel head) adds {@link #STEEL_DAMAGE} to a blow on
+ * {@code people} and {@code beasts} ({@link #steelEdge}): the Witcher's two swords, steel for men and silver for monsters.
  */
 public final class SilverSear {
 	/** Added to a searing blow (health points), before armour. */
 	public static final float SEAR_DAMAGE = 2.0F;
+	/** Added to a steel blade's blow on people and beasts (health points), before armour: small, the silver's is the big one. */
+	public static final float STEEL_DAMAGE = 1.0F;
+	/** The monster kinds silver burns, and the kinds a steel blade bites better (Kingdoms' {@code MonsterKinds}). */
+	private static final String[] SILVER_KINDS = {"corpse_eaters", "dead", "spirits", "cursed"}, STEEL_KINDS = {"people", "beasts"};
 	/** The stun a sear gives (ticks): a mob's, and a player's (shorter, so a vampire player can still fight back). */
 	public static final int STUN_TICKS = 16, PLAYER_STUN_TICKS = 8;
 	/** One body is stunned by a sear no oftener than this (ticks), so a flurry doesn't hold it for good. */
@@ -86,9 +94,50 @@ public final class SilverSear {
 		return silver(weapon != null ? weapon : attacker.getMainHandItem()) && bane(victim);
 	}
 
-	/** {@code damage} on {@code victim} from {@code source}, with the sear's added when it sears. */
+	/** {@code damage} on {@code victim} from {@code source}, with the sear's added when it sears, or the steel edge's when it bites. */
 	public static float dealt(LivingEntity victim, DamageSource source, float damage) {
-		return damage > 0.0F && sears(victim, source) ? damage + SEAR_DAMAGE : damage;
+		if (damage <= 0.0F) {
+			return damage;
+		}
+		if (sears(victim, source)) {
+			return damage + SEAR_DAMAGE;
+		}
+		return steelEdge(victim, source) ? damage + STEEL_DAMAGE : damage;
+	}
+
+	/** Whether a blow from {@code source} on {@code victim} is a steel blade in a hand, into a person or a beast silver doesn't burn. */
+	public static boolean steelEdge(LivingEntity victim, DamageSource source) {
+		Entity by = source.getEntity();
+		if (!(by instanceof LivingEntity attacker) || source.getDirectEntity() != attacker || attacker == victim) {
+			return false;
+		}
+		ItemStack weapon = source.getWeaponItem();
+		return steel(weapon != null ? weapon : attacker.getMainHandItem()) && kind(victim, STEEL_KINDS) && !bane(victim);
+	}
+
+	/** Whether {@code stack} is a steel blade: a blade whose id says iron or steel, or a tinker tool whose head is iron or steel. */
+	public static boolean steel(@Nullable ItemStack stack) {
+		if (stack == null || stack.isEmpty() || !Dismember.blade(stack)) {
+			return false;
+		}
+		if (Tinkering.TOOL_MATERIALS != null) {
+			List<String> parts = stack.get(Tinkering.TOOL_MATERIALS);
+			if (parts != null && !parts.isEmpty()) {
+				return parts.getFirst().contains("iron") || parts.getFirst().contains("steel");
+			}
+		}
+		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+		return path.contains("iron") || path.contains("steel");
+	}
+
+	/** Whether {@code body} is of any of {@code kinds} (Kingdoms' {@code MonsterKinds#is}; false without Kingdoms). */
+	private static boolean kind(LivingEntity body, String[] kinds) {
+		for (String kind : kinds) {
+			if (Boolean.TRUE.equals(KingdomsCompat.call("MonsterKinds", "is", new Class<?>[] {Entity.class, String.class}, Boolean.FALSE, body, kind))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Whether {@code stack} is a silver blade: a blade whose id says silver, or a tinker tool whose head is silver. */
@@ -106,9 +155,9 @@ public final class SilverSear {
 		return Dismember.blade(stack) && BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("silver");
 	}
 
-	/** Whether silver burns {@code body}: the {@link #BANE} tag, or a vampire of Jaymo's Kingdoms that isn't a dhampir. */
+	/** Whether silver burns {@code body}: the {@link #BANE} tag, any of the silver kinds, or a vampire of Jaymo's Kingdoms that isn't a dhampir. */
 	public static boolean bane(LivingEntity body) {
-		if (body.is(BANE)) {
+		if (body.is(BANE) || kind(body, SILVER_KINDS)) {
 			return true;
 		}
 		return Boolean.TRUE.equals(KingdomsCompat.call("Vampires", "isVampire", new Class<?>[] {Entity.class}, Boolean.FALSE, body))
