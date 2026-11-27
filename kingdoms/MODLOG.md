@@ -18055,3 +18055,13 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - **Sun**: out under the day's sky (no rain, sky light 13+ at its head, so a thin canopy doesn't save it) it comes apart into smoke at once, takes no damage and leaves nothing; a peeled shadow gives its Might back. 
 - **Any light**: light unmakes it the same way, at once. That means block light 8+ where it stands (a torch or lantern within about 6 blocks; shadows only spawn at 7 or less), anyone within 6 blocks holding a torch, lantern, glowstone or any other item whose block shines 10+ in either hand. A peeled shadow ignores its own owner's light. A Dawnborn's **Sunflare** unmakes every shadow its flash reaches (its own radius, 6 blocks at base), the caster's own peeled shadow included. This replaces the old slow withering in bright light.
 - Built; not played.
+
+## 0.13.64 (2026-11-27): Guards shout what fits what they face (#2272)
+
+- **Battle cries by foe**: MCA guards shouted from one list whatever they went for ("Stop right here, criminal scum!" at a zombie or a cow). Now the line follows the target: only a player the realm wants or has outlawed, a player with a bounty, a villager crook or a looter hears "Halt!" and "criminal scum"; an unwelcome player, a brawler who just drew blood, another realm's soldiers, raiders and bandits and illagers, the undead, spiders and crawlers, creepers, great brutes, other monsters, dangerous wild beasts and loose livestock each have their own lines (`GuardCries`, `McaGuardCryMixin`).
+- **Distance and numbers**: past 12 blocks a guard warns and calls the others ("Spider! Watch the walls!", "Raiders! Ring the bell!"); close in it's a battle cry; three or more of a kind near the target is a call to hold together against the lot; a guard below 45% health calls for aid instead.
+- **Kills in kind**: a guard who brings down a monster or a beast may say so ("Stay dead this time." over a zombie, "Well, that's supper." over a pig); MCA's one kill list ("Monster down!" for everything) is quiet (`McaGuardKillLineMixin`). People and raiders go down, not dead, so nothing is said over them here.
+- **Camp folk**: raiders, pirates, bandits and greenskins fighting as MCA guards never speak for the law; they get rougher cries of their own.
+- **Disasters**: when a quake, flood, storm (sandstorm, blizzard, hail, hurricane), tornado touchdown, fire from the sky (volcano, meteor, ash), great wave or slide strikes, up to three guards near a player shout the townsfolk to safety. Fires keep their own alarm.
+- **No repeats**: a line anyone said in the last 45 seconds is passed over while fresh ones are left, so a squad doesn't shout the same words. All speech bubbles, nothing in chat.
+- Built; not played.
