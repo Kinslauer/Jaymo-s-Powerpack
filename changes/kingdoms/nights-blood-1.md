@@ -1,0 +1,6 @@
+# Night's Blood 1 - one body of blood (mB reserve, every move on the bar, chains)
+- **Blood reserve**: a full vampire's hunger is now blood, from 0 to 2000 mB, shown as ten dark vials where the food bar was (`VampireBlood`, `VampireBloodHud`). The exact mB shows on hover in the inventory. Bites, the throat grab, lapping, sleeping prey and bottles fill it; a bottle is 250 mB. It drains slowly over time, faster in the open sun, and with exertion: sprinting, fighting, healing and the hunger near people cost 100 mB a food point. Under 200 mB the vampire is starving and stops healing. The vanilla food bar is kept full and ignored. Dhampirs keep the food bar and pay nothing for moves.
+- **Every move on the skill bar**: bat, colony, mist, stare, Rake, Rend, Pounce and the frenzy roar join Feed, Dash, Pound and Gaze, each with its own mB cost. For vampires, O, P, the shape menu and the Claw key are gone. Werewolves keep O, P and U.
+- **Chains** (`NightFlow`): dash into Pounce or Rake, a leap that lands into Feed, Groundpound into Rend, and the end of mist into a leap. A chained move costs half.
+- New H-menu Controls tab for vampires and dhampirs (`VampireControlsScreen`), and loading hints 210 and 211.
+- Built; not played.

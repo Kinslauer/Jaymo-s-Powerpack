@@ -1115,6 +1115,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Lycans.register();
 		// 0.7.0: players as vampires (by a bite) and werewolves (by ritual)
 		VampirePlayers.register();
+		VampireBlood.register();
+		NightFlow.register();
 		WerewolfPlayers.register();
 		Devouring.register();
 		// 0.7.66: the night's gifts for vampire and werewolf players (dash, groundpound, leap, howl, kin-sense, wings...;

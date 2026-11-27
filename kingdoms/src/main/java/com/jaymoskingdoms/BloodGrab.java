@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * throat in one hand ({@link #GRABBING}, synced: the client's {@code BloodGrabPose}) and holds it up in front of them, its
  * feet off the ground, while they walk ({@link #place}). Held, it can't fight back (its AI waits) and is drunk from
  * every {@link #DRAIN_EVERY} ticks, twice the bite's pace, so it dies twice as fast. Letting go of use while it still lives
- * throws it hard the way they look ({@link #THROW_SPEED}); a vampire well fed ({@link #NOURISHED_FOOD}) throws it through
+ * throws it hard the way they look ({@link #THROW_SPEED}); a vampire well fed ({@link VampireBlood#nourished}) throws it through
  * whatever is softer than stone ({@link #breakable}) for the first {@link #BREAK_RANGE} blocks of its flight. It dies in the
  * hold, the vampire is hurt off it or downed, or it's torn away, and it's simply dropped.
  * <p>
@@ -88,8 +88,7 @@ public final class BloodGrab {
 	static final int CARRY_SLOWNESS = 0;
 	/** The throw: speed along the look (blocks a tick) and lift. */
 	static final double THROW_SPEED = 1.7, THROW_LIFT = 0.3;
-	/** Food level from which a vampire is fed enough to throw through what's softer than stone, and how far that lasts (blocks). */
-	static final int NOURISHED_FOOD = 16;
+	/** How far a nourished vampire ({@link VampireBlood#NOURISHED} mB; a dhampir, sixteen food points) throws a body through what's softer than stone (blocks). */
 	static final double BREAK_RANGE = 6.0;
 	/** A thrown body is watched this long (ticks); it's hurt this much for slamming into something at speed (at least this fast, b/t). */
 	static final int THROWN_TICKS = 30;
@@ -313,7 +312,7 @@ public final class BloodGrab {
 		Vec3 look = player.getLookAngle();
 		target.setDeltaMovement(look.scale(THROW_SPEED).add(0.0, THROW_LIFT, 0.0));
 		target.needsSync = true;
-		boolean breaks = player.getFoodData().getFoodLevel() >= NOURISHED_FOOD;
+		boolean breaks = VampireBlood.nourished(player);
 		THROWS.put(target.getUUID(), new Throw(target, player, target.position(), level.getGameTime(), breaks));
 		if (breaks) {
 			// clear its first tick's path now, before it moves into it

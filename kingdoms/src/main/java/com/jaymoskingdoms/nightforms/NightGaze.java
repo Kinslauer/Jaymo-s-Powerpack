@@ -25,10 +25,10 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The stare. Once a vampire player has fixed their eyes (the shape menu, {@link NightForms}; it lasts {@link #ARM_TICKS}), holding
+ * The stare. Once a vampire player has fixed their eyes (the stare on the skill bar, {@link NightForms}; it lasts {@link #ARM_TICKS}), holding
  * the gaze on a weak-willed person ({@link Will#weaker}: a villager, a folk, an illager, a skeleton or a zombie weaker than them)
- * for {@link #NEEDED} ticks makes it walk to them, and it stands by them while the gaze holds. Each second of it costs a point of
- * the gauge. It ends when the gaze breaks, the gauge runs dry, or after {@link #HOLD_MAX} ticks.
+ * for {@link #NEEDED} ticks makes it walk to them, and it stands by them while the gaze holds. Each second of it costs {@link #COST} mB
+ * of blood. It ends when the gaze breaks, the gauge runs dry, or after {@link #HOLD_MAX} ticks.
  */
 public final class NightGaze {
 	// ---- tuning ----
@@ -37,8 +37,8 @@ public final class NightGaze {
 	static final double RANGE = 14.0, STOP_AT = 1.8;
 	/** How long the gaze may wander before it is broken (ticks). */
 	static final int LOOSE_TICKS = 10;
-	/** The gauge points a second of it costs. */
-	static final int COST = 1;
+	/** The blood a second of it costs (mB). */
+	static final int COST = 100;
 
 	/** One fixed gaze: the person's id, the ticks it has held, and when it was last on them. */
 	private static final class Fix {

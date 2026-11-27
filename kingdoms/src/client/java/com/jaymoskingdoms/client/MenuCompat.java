@@ -53,7 +53,7 @@ public final class MenuCompat {
 	static final String MAP_SCREEN = "com.jaymospowers.client.menu.MapScreen";
 	/** Where Kingdoms' tabs sit among Powers' (Character 0, Powers 10, Map 50). */
 	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_FORMS = 22, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60,
-		ORDER_MAGIC = 24, ORDER_VALOR = 26, ORDER_BOONS = 28, ORDER_TIER = 35, ORDER_FOLLOWERS = 62, ORDER_DAILY = 36, ORDER_TITLES = 29, ORDER_REWARDS = 71;
+		ORDER_MAGIC = 24, ORDER_VALOR = 26, ORDER_BOONS = 28, ORDER_TIER = 35, ORDER_FOLLOWERS = 62, ORDER_DAILY = 36, ORDER_TITLES = 29, ORDER_REWARDS = 71, ORDER_CONTROLS = 31;
 	/** The pins' colour for your party. */
 	static final int PARTY_PIN = 0xFFC21A;
 
@@ -92,6 +92,12 @@ public final class MenuCompat {
 				(BooleanSupplier)() -> Minecraft.getInstance().player != null
 					&& (!com.jaymoskingdoms.forms.Forms.book(Minecraft.getInstance().player).practice().isEmpty()
 						|| com.jaymoskingdoms.client.forms.BeltScreen.hasSpells(Minecraft.getInstance().player)));
+			// a vampire's or dhampir's controls: their moves, what each costs, and the inputs that stay on keys
+			register.invoke(null, "controls", ORDER_CONTROLS, (Supplier<ItemStack>)() -> new ItemStack(Items.REDSTONE),
+				Component.translatable("menu.jaymoskingdoms.tab.controls"),
+				(Runnable)() -> Minecraft.getInstance().gui.setScreen(new VampireControlsScreen()),
+				(Predicate<Screen>)s -> s instanceof VampireControlsScreen, (Function<Screen, int[]>)s -> ((VampireControlsScreen)s).corner(),
+				(BooleanSupplier)VampireControlsScreen::available);
 			tab(register, "story", ORDER_STORY, () -> new ItemStack(Items.WRITABLE_BOOK), "menu.jaymoskingdoms.tab.story",
 				() -> Minecraft.getInstance().gui.setScreen(new RetakingScreen()), s -> s instanceof RetakingScreen, s -> ((RetakingScreen)s).corner());
 			tab(register, "growth", ORDER_GROWTH, () -> new ItemStack(Items.ENCHANTED_BOOK), "menu.jaymoskingdoms.tab.growth",
@@ -143,7 +149,7 @@ public final class MenuCompat {
 	private static void arrange(Class<?> menu) {
 		String[][] groups = {{"skills", "you"}, {"class", "you"}, {"growth", "you"}, {"forms", "powers"}, {"magic", "powers"}, {"valor", "powers"},
 			{"boons", "powers"}, {"story", "world"}, {"journal", "world"}, {"tier", "world"}, {"faction", "people"}, {"party", "people"}, {"followers", "people"},
-			{"daily", "world"}, {"titles", "you"}, {"rewards", "notices"}};
+			{"daily", "world"}, {"titles", "you"}, {"rewards", "notices"}, {"controls", "you"}};
 		for (String[] g : groups) {
 			reflect(menu, "group", new Class<?>[] {String.class, String.class}, g[0], g[1]);
 		}
