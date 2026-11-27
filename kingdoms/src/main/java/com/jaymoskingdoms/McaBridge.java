@@ -1569,6 +1569,29 @@ final class McaBridge {
 	}
 
 	/**
+	 * MCA's menu opening on {@code villager} ("root") while they're still shaken from crying out ({@link Outcry}): they bring
+	 * it up first, before any greeting (once per player for each outcry), and go to the main menu, where the reply spoke asks
+	 * "What happened?"; true if so.
+	 */
+	static boolean outcryOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || villager.isBaby() || Outlaws.is(villager) || ZFighterFolk.is(villager)) {
+			return false;
+		}
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (main == null) {
+			return false;
+		}
+		Component line = Outcry.opening(villager, player, Languages.understands(player, villager));
+		if (line == null) {
+			return false;
+		}
+		met(villager, player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/**
 	 * (0.7.380) MCA's menu opening on {@code villager} ("root") just after something passed between you (you carried them
 	 * out, got them up, drew a monster off them, struck them...): they open with that ({@link Recollections#opening}) and
 	 * go to the main menu, whose history option is about the same thing ({@link SharedHistory#current}); true if so.

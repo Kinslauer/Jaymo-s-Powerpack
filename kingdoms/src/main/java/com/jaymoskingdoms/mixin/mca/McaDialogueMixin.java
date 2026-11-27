@@ -71,6 +71,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * asking again ({@link Introductions#shuns}): it closes, and costs hearts ({@link Introductions#shunned}).
  * (0.7.380) Opening the menu just after something passed between you (carried out, got up, a monster drawn off, a blow):
  * they open with that ({@link Recollections#opening}).
+ * Opening it on one still shaken from crying out ({@link com.jaymoskingdoms.Outcry}): they bring that up first.
  * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}): a guard of a town that owes you says what it means.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  * (0.7.270) Asked of a ship's crew ({@link ShipTalk#talk}): your berth aboard, her voyage, your lay.
@@ -108,13 +109,14 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
-		if ("root".equals(question) && (McaCompat.keeperOpening(villager, player) || McaCompat.dealingOpening(villager, player) || McaCompat.storyOpening(villager, player)
+		if ("root".equals(question) && (McaCompat.keeperOpening(villager, player) || McaCompat.dealingOpening(villager, player) || McaCompat.outcryOpening(villager, player)
+			|| McaCompat.storyOpening(villager, player)
 			|| McaCompat.outlawOpening(villager, player) || McaCompat.zfighterOpening(villager, player)
 			|| McaCompat.druidOpening(villager, player) || McaCompat.waryOpening(villager, player))) {
 			// (0.7.380) just after something passed between you: they open with that; (0.7.246) a shipmate, or one who knows
 			// how your story started: they open with that, and never as to a stranger; (0.7.397) an outlaw: a curt word;
 			// (0.7.405) a Z Fighter character: a line of their own; (0.7.597) one wary of you: the same cold word as for your name;
-			// a ruin keeper: the next tale of their city
+			// a ruin keeper: the next tale of their city; one still shaken from crying out: what it was (Outcry)
 			ci.cancel();
 			return;
 		}

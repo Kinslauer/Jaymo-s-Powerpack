@@ -429,6 +429,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
+		// a villager who cried out tells you why if you ask, or brings it up first
+		Outcry.register();
 		NightTrouble.register();
 		NightBurglars.register();
 		SignalBrazier.register();
