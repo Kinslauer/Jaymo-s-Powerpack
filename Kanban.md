@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 12:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 12:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,7 +30,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · 🪶 Quill · #2302 · writing
 
 
 ## In review
@@ -60,7 +59,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-5|hunters-road-5]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/nycto-4|nycto-4]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/black-panther-k2|black-panther-k2]] · for any · blocked
 - [ ] [[Inbox/black-panther-k3|black-panther-k3]] · for any · blocked
 - [ ] [[Inbox/black-panther-k4|black-panther-k4]] · for any · blocked
@@ -89,14 +87,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/nycto-turning|nycto-turning]]
+- [x] [[Inbox/Done/nycto-4|nycto-4]]
+- [x] [[Inbox/Done/nycto-4-models|nycto-4-models]]
 - [x] [[Inbox/Done/nycto-5|nycto-5]]
 - [x] [[Inbox/Done/nycto-6|nycto-6]]
 - [x] [[Inbox/Done/nycto-7|nycto-7]]
 - [x] [[Inbox/Done/nycto-3|nycto-3]]
 - [x] [[Inbox/Done/hunters-road-7|hunters-road-7]]
-- [x] [[Inbox/Done/nycto-2|nycto-2]]
-- [x] [[Inbox/Done/nycto-1|nycto-1]]
-- [x] [[Inbox/Done/hunters-road-2|hunters-road-2]]
 
 
 %% kanban:settings

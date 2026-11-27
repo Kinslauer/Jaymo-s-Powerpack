@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 12:02
+updated: 2026-11-27 13:58
 ---
 # Open PRs
 
-13 open, as of 2026-11-27 12:02. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-27 13:58. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -66,7 +66,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2302](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2302) Night's Blood 4 models: the true shape of the night
-- **Branch:** `claude/nycto-4-models` · **Updated:** 2026-11-27 (today)
-- **Checks:** ⏳ 3 of 4 running
-- **Agent:** [[nycto-4-models]]
+## [#2317](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2317) Magic screen becomes a spell wheel; Abilities window grows to fit long text
+- **Branch:** `claude/project-thread-uptfsr` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note

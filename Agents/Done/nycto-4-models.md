@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: nycto-4-models
 branch: claude/nycto-4-models
 with:
@@ -31,3 +31,4 @@ owns:
 
 ## Done
 - 2026-11-27 16:22 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-27 12:20 PR #2302 is merged into master; moved to Agents/Done.
