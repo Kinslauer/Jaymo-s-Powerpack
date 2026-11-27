@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 13:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 13:52). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,13 +18,13 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/hunters-road-7|hunters-road-7]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · t3 · claimed
 - [ ] [[Inbox/nycto-4-models|nycto-4-models]] · t3 · claimed
 - [ ] [[Inbox/nycto-3|nycto-3]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/nycto-7|nycto-7]] · ☁️ Cloud · claimed
 
 
 ## In review
@@ -38,6 +38,7 @@ kanban-plugin: board
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
+- [ ] [[Inbox/hunters-road-7|hunters-road-7]] · ☁️ Cloud · #2290 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -53,7 +54,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-4|nycto-4]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-5|nycto-5]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/nycto-7|nycto-7]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-5|hunters-road-5]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · ☁️ Cloud · blocked
