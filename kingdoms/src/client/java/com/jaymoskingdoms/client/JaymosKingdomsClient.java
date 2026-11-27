@@ -241,6 +241,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// where a thing came from, stolen marks, heirlooms (Provenance)
 		ProvenanceTooltips.register();
 		FamiliarClient.register();
+		ThrallRideClient.register();
 		// the hanging tree's crows, in the familiar raven's coat
 		EntityRenderers.register(com.jaymoskingdoms.Crow.TYPE, CrowRenderer::new);
 		com.jaymoskingdoms.client.harvest.HarvestClient.register();

@@ -220,7 +220,11 @@ public final class VampirePlayers {
 				// kindling: the noon sun reaches further into the day and burns longer
 				boolean kindling = BloodPage.has(player, BloodPage.Pact.KINDLING);
 				long widen = kindling ? BloodPage.KINDLING_NOON_WIDEN : 0L;
-				if (t >= NOON_FROM - widen && t < NOON_TO + widen && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+				boolean noon = t >= NOON_FROM - widen && t < NOON_TO + widen;
+				if (noon && NightCloaks.up(player)) {
+					// a night-cloak's hood up: the sun stings instead of burning
+					NightCloaks.sting(player);
+				} else if (noon && (player.getItemBySlot(EquipmentSlot.HEAD).isEmpty() || NightCloaks.wears(player))) {
 					player.igniteForSeconds(kindling ? BURN_SECONDS * BloodPage.KINDLING_BURN_TIMES : BURN_SECONDS);
 				}
 			}
@@ -326,6 +330,11 @@ public final class VampirePlayers {
 			return;
 		}
 		LAST_DRINK.put(player.getUUID(), now);
+		if (HunterKit.slips(level, player, target)) {
+			// a garlic wreath or a hunter's coat: the bite slips off, and the grab can't hold
+			BloodGrab.release(player, false);
+			return;
+		}
 		long clock = level.getOverworldClockTime();
 		long nightNo = Vampires.nightIndex(clock);
 		if (quiet) {
@@ -337,6 +346,11 @@ public final class VampirePlayers {
 			}
 			target.hurtServer(level, level.damageSources().playerAttack(player), DRINK_DAMAGE);
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 3, false, false, false));
+		}
+		if (HunterKit.sour(target)) {
+			// sour blood (the garlic draught): they retch, let go, and the bite gives them nothing
+			HunterKit.retch(level, player);
+			return;
 		}
 		player.heal(DRINK_HEAL);
 		// fine palate: only people's blood feeds them; a great one fed upon ages the blood
@@ -354,6 +368,8 @@ public final class VampirePlayers {
 		// (0.7.615) a bite that doesn't infect (a sleeper, the Nether's piglins and Hornkin) never turns its prey
 		if (infect && target.isAlive() && target instanceof PathfinderMob p && !Lycans.cursed(p) && !p.hasAttached(Vampires.BITTEN)) {
 			Vampires.bite(p, clock);
+			// the one who turns them is their sire (Night's Blood: your get)
+			Fledglings.sired(p, player);
 		} else if (infect && target.isAlive() && target instanceof ServerPlayer bitten) {
 			// (0.7.185) a ravenous fever's player prey ({@link BloodFever})
 			bitten(bitten);
@@ -363,6 +379,8 @@ public final class VampirePlayers {
 		if (target instanceof ServerPlayer victim && target.isAlive()) {
 			BloodThralls.drank(player, victim, nightNo);
 		}
+		// a calm drink from a person or beast held by the stare, on one more night, binds a servant (Night's Blood: servants)
+		Servants.drank(level, player, target, nightNo);
 		BloodRequests.fed(player, target);
 		Commandments.act(player, "blood");
 		VampireMask.fed(player);

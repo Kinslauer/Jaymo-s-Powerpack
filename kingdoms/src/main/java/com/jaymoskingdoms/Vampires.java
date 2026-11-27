@@ -408,7 +408,7 @@ public final class Vampires {
 
 	/** A silver weapon (silver as {@link Garlic#bane} has it, without the garlic; a weapon, not an ingot or a nugget). */
 	static boolean silver(net.minecraft.world.item.ItemStack stack) {
-		return stack.has(net.minecraft.core.component.DataComponents.WEAPON) && !stack.is(Garlic.GARLIC) && Garlic.bane(stack);
+		return stack.has(net.minecraft.core.component.DataComponents.WEAPON) && !Garlic.garlic(stack) && Garlic.bane(stack);
 	}
 
 	public static boolean isVampire(Entity e) {
@@ -588,7 +588,7 @@ public final class Vampires {
 			speed(mob, false);
 			return;
 		}
-		if (prey == null && hungry(v, kind, nightNo, now)) {
+		if (prey == null && hungry(level, v, kind, nightNo, now)) {
 			prey = mob.hasAttached(Takers.TAKER) ? Takers.sleptOn(mob, nightNo) ? null : Takers.vampirePrey(level, mob) : findPrey(level, mob, kind);
 			if (prey != null) {
 				hunt = new Hunt(prey.getUUID(), now, TakersCellar.hasRoom(mob) ? Outcome.DRAG : outcome(level.getRandom(), kind));
@@ -712,9 +712,9 @@ public final class Vampires {
 			|| main.has(net.minecraft.core.component.DataComponents.WEAPON) || torch(main) || torch(e.getOffhandItem());
 	}
 
-	private static boolean hungry(Vampire v, Kind kind, long nightNo, long now) {
+	private static boolean hungry(ServerLevel level, Vampire v, Kind kind, long nightNo, long now) {
 		return switch (kind) {
-			case ELDER -> now - v.fedAt() >= ELDER_REST || now < v.fedAt();
+			case ELDER -> now - v.fedAt() >= NewMoon.elderRest(level.getServer()) || now < v.fedAt();
 			case FEEDER, HUNTER -> v.fedNight() < nightNo;
 			case ABSTAINER -> nightNo - v.fedNight() >= THIRST_NIGHTS;
 			case PLAYER, DHAMPIR -> false;
@@ -728,6 +728,7 @@ public final class Vampires {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(kind == Kind.ELDER ? ELDER_PREY_RANGE : PREY_RANGE),
 			e -> e != mob && !e.getUUID().equals(LAST_PREY.get(mob.getUUID())) && !Downed.isDowned(e)
 				&& (kind == Kind.HUNTER ? e.isAlive() && exposed(e) : person(e) || mortal(e) && !(kind == Kind.ELDER && NightbornBlood.kin(e)))
+				&& !Fledglings.spares(mob, e)
 				// (a lone victim: nobody it would go for with several armed about them)
 				&& armedNear(level, e, mob) < GROUP_ARMED)) {
 			double d = e.distanceToSqr(mob);
@@ -757,6 +758,11 @@ public final class Vampires {
 			}
 			return;
 		}
+		if (HunterKit.slips(level, mob, prey)) {
+			// a wreath or a hunter's coat: the bite slips off and it breaks away
+			flee(level, mob, prey, nightNo, now);
+			return;
+		}
 		if (prey.isSleeping()) {
 			prey.stopSleeping();
 		}
@@ -767,6 +773,12 @@ public final class Vampires {
 			return;
 		}
 		prey.hurtServer(level, source, bite);
+		if (HunterKit.sour(prey)) {
+			// sour blood (the garlic draught): it retches, lets go and gets nothing from the bite
+			HunterKit.retch(level, mob);
+			flee(level, mob, prey, nightNo, now);
+			return;
+		}
 		prey.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, HOLD_TICKS, elder ? ELDER_HOLD : HOLD, false, false, false));
 		mob.heal(bite * HEAL_SHARE);
 		HUNTS.computeIfPresent(mob.getUUID(), (id, h) -> {
@@ -801,11 +813,20 @@ public final class Vampires {
 
 	private static void fed(PathfinderMob mob, Vampire v, long nightNo, long now) {
 		mob.setAttached(VAMPIRE, new Vampire(v.kind(), nightNo, now));
+		Fledglings.fed(mob);
 		Hunt had = HUNTS.remove(mob.getUUID());
 		if (had != null) {
 			LAST_PREY.put(mob.getUUID(), had.prey);
 		}
 		release(mob);
+	}
+
+	/** {@code mob} goes after {@code prey} now, as if it had picked it (a fledgling turned on its sire). */
+	static void huntNow(ServerLevel level, PathfinderMob mob, LivingEntity prey) {
+		Hunt had = HUNTS.get(mob.getUUID());
+		if (had == null || !had.prey.equals(prey.getUUID())) {
+			HUNTS.put(mob.getUUID(), new Hunt(prey.getUUID(), level.getGameTime(), Outcome.LEAVE));
+		}
 	}
 
 	/** (Nightfall) A vampire fed raw beef by hand: the hunger's quieted for tonight, as if it had fed. */
@@ -1089,6 +1110,8 @@ public final class Vampires {
 		}
 		mob.removeAttached(BITTEN);
 		mob.setAttached(VAMPIRE, new Vampire(kind.id(), nightIndex(level.getOverworldClockTime()) - (kind == Kind.ABSTAINER ? 0 : 1), 0L));
+		// one a player's bite turned is that player's fledgling
+		Fledglings.turned(level, mob);
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
 			health.removeModifier(HEALTH);
@@ -1104,6 +1127,7 @@ public final class Vampires {
 	static void cure(PathfinderMob mob) {
 		mob.removeAttached(VAMPIRE);
 		mob.removeAttached(BITTEN);
+		Fledglings.freed(mob);
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
 			health.removeModifier(HEALTH);
@@ -1154,6 +1178,7 @@ public final class Vampires {
 	}
 
 	private static void died(LivingEntity entity, DamageSource source) {
+		HunterKit.slew(entity, source);
 		UUID id = entity.getUUID();
 		HUNTS.remove(id);
 		FLEES.remove(id);

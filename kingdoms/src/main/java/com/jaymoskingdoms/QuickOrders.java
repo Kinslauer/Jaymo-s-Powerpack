@@ -132,7 +132,8 @@ public final class QuickOrders {
 		// (class trees: a Commander's orders reach twice as far, Discipline)
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Followers.ALL_RANGE * Discipline.orderReach(player)),
 			v -> !v.isBaby() && !v.isSleeping() && !Downed.isDowned(v) && Followers.takesOrders(v, player) && Company.heeds(v, player))) {
-			if (!Languages.understands(player, v) && !Discipline.commands(player, v)) {
+			// (Night's Blood) a thrall or a fledgling at night knows their master's will without a shared tongue
+			if (!Languages.understands(player, v) && !Discipline.commands(player, v) && !Servants.ownedBy(v, player) && !Fledglings.heeds(v, player)) {
 				Languages.shrug(player, v);
 				continue;
 			}
@@ -140,7 +141,12 @@ public final class QuickOrders {
 		}
 		// one turned on you takes no orders, and one far gone with the Murmur may not (docs/Pawn-Plan.md H1, H2)
 		yours.removeIf(v -> Possession.held(v) || Murmur.ignores(v, player));
+		// (Night's Blood) a vampire's horses and wolves take the order in their own way
+		boolean beasts = Servants.order(player, kind);
 		if (yours.isEmpty()) {
+			if (beasts) {
+				return;
+			}
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.followers.none").withStyle(ChatFormatting.GRAY));
 			return;
 		}

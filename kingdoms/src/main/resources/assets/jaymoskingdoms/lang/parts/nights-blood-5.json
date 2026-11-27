@@ -1,0 +1,22 @@
+{
+  "key.jaymoskingdoms.thrall_wake": "Wake from your thrall (with sneak, ride the next)",
+  "speech.jaymoskingdoms.thrall.bound": "Yes, master.",
+  "speech.jaymoskingdoms.thrall.freed": "What... where have I been?",
+  "speech.jaymoskingdoms.get.turn.0": "You made me. I outgrew you.",
+  "speech.jaymoskingdoms.get.turn.1": "I answer to no one now.",
+  "speech.jaymoskingdoms.get.come.0": "Our blood is hunted. I come.",
+  "speech.jaymoskingdoms.get.come.1": "Hold on. I am coming.",
+  "talk.jaymoskingdoms.gossip.suspect.away.0": "%1$s keeps their company out all night. I do not like it.",
+  "talk.jaymoskingdoms.gossip.suspect.away.1": "Ever since %1$s came by, our own go off at night and come back pale.",
+  "talk.jaymoskingdoms.gossip.suspect.away.2": "Somebody is keeping my kin from their bed. %1$s, I would say.",
+  "talk.jaymoskingdoms.gossip.suspect.away.3": "%1$s has a hold on our people. They are not themselves.",
+  "talk.jaymoskingdoms.gossip.suspect.away.4": "Where does my cousin go at night? Ask %1$s.",
+  "talk.jaymoskingdoms.gossip.suspect.away.5": "They say %1$s has been walking our folk out after dark.",
+  "talk.jaymoskingdoms.gossip.suspect.away.6": "Family should be home by night. %1$s knows why mine is not.",
+  "talk.jaymoskingdoms.gossip.suspect.away.7": "I saw my own kin follow %1$s into the dark. Mark me.",
+  "gui.jaymoskingdoms.story.hint.280": "Hold a villager of the old folk, or a tamed horse or wolf, in your stare and drink from them, calmly, on three separate nights, and they are yours for good. Their kin will notice the nights away.",
+  "gui.jaymoskingdoms.story.hint.281": "A servant of yours takes the same four orders as a companion. Feed them a bottle of blood now and then; one forgotten long enough grows weak, and then is lost.",
+  "gui.jaymoskingdoms.story.hint.282": "Lie in your coffin by day, sneak-use it with a servant near, and you can look out through their eyes, walk them, use their hands, and carry for you. Your own body can still be staked.",
+  "gui.jaymoskingdoms.story.hint.283": "A servant standing in a temple, or near holy things, throws you out of their eyes. A priest's cure, or your death, frees them.",
+  "gui.jaymoskingdoms.story.hint.284": "Those your bite turns are yours: you feel where they are. At night they heed your orders, and may come when you are hunted. One whose blood grows older than yours may turn on you."
+}

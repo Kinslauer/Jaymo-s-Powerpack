@@ -101,6 +101,8 @@ public final class HoodedCloakLayer {
 					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_ranger.png");
 				case "netherite_ranger_armor_head" ->
 					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_netherite_ranger.png");
+				case "night_cloak" ->
+					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak_night.png");
 				default ->
 					texture = JaymosPowers.id("textures/entity/worn/hooded_cloak.png");
 			}
