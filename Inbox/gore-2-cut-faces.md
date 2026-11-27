@@ -29,4 +29,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 **Where to start:** `Dismembered#stubPart`, `SeveredPartRenderer`, `Dismember#halve`, `BladeBlood` (what each body bleeds), `BloodSettings`, Kitchen's corpse renderer (`jaymoskitchen.missing.*`).
 
 ## Notes
-- 
+- 2026-11-27 17:40 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on gore 1-4 (via Claude coordinator, 2026-11-27)
