@@ -427,6 +427,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PatronKeys.register();
 		// the four art keys (Soul, Claw, Wild, Sun)
 		ArtKeysClient.register();
+		com.jaymoskingdoms.client.nightforms.NightFormsClient.register();
 		// the Cleric's medallion board
 		MedallionClient.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)

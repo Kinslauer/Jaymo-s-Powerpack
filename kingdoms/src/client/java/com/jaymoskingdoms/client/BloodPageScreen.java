@@ -110,8 +110,12 @@ final class BloodPageScreen extends Screen {
 			boolean known = b.knows(g), slotted = b.slotted(g);
 			Component name = g.move >= 0 ? Component.translatable("spell.jaymoskingdoms.night_" + g.key() + ".name") : Component.translatable("skill.jaymoskingdoms.perk." + g.key());
 			Component text = g.move >= 0 ? Component.translatable("gui.jaymoskingdoms.blood.gift." + g.key()) : Component.translatable("skill.jaymoskingdoms.perk." + g.key() + ".desc");
-			Component right = Component.translatable(slotted ? "gui.jaymoskingdoms.blood.slotted" : known ? "gui.jaymoskingdoms.blood.learned" : "gui.jaymoskingdoms.blood.cost", g.cost);
-			list.add(new Entry(Kind.GIFT, g.key(), name, text, right, slotted ? Ui.GOOD : known ? Ui.TEXT : b.points() >= g.cost ? Ui.TEXT : Ui.HINT));
+			// a gift that needs another learned first, or an older blood, says so and is dim
+			String blocked = known ? null : BloodPage.blocked(b, g);
+			Component right = blocked != null ? Component.translatable(blocked, g.needs == null ? Component.empty() : Component.translatable(g.needs.move >= 0
+					? "spell.jaymoskingdoms.night_" + g.needs.key() + ".name" : "skill.jaymoskingdoms.perk." + g.needs.key()))
+				: Component.translatable(slotted ? "gui.jaymoskingdoms.blood.slotted" : known ? "gui.jaymoskingdoms.blood.learned" : "gui.jaymoskingdoms.blood.cost", g.cost);
+			list.add(new Entry(Kind.GIFT, g.key(), name, text, right, slotted ? Ui.GOOD : known ? Ui.TEXT : blocked == null && b.points() >= g.cost ? Ui.TEXT : Ui.HINT));
 		}
 		list.add(new Entry(Kind.HEADING, "", Component.translatable("gui.jaymoskingdoms.blood.pacts"), Component.translatable("gui.jaymoskingdoms.blood.pacts.note"),
 			Component.empty(), Ui.GOLD));
