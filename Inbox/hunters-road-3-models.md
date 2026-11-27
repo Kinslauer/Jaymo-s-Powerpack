@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: prometheus
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: hermes-modeller
 pr: 
 thread: t3 mcp:dc4cbd14-749f-4b32-8dea-525553f7418e
 text_pass: 
