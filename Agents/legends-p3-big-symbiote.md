@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: legends-p3-big-symbiote
 branch: hermes/legends-p3
 pr: 2281
@@ -32,3 +32,6 @@ owns:
 
 **Done**
 What a player will see, and what wasn't tested.
+
+## Notes
+- 2026-11-27 10:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
