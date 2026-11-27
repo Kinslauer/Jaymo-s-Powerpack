@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: claude
 from: Andy (Claude thread Rework webs and symbiote from Legends Superheroes)
 asked: 2026-11-26
 claimed_by: claude-thread
-pr: 
+pr: 2283
 ---
 
 # Legends patch 4: symbiote suit moves and the suit-ups (incl. four Rig suit-ups)

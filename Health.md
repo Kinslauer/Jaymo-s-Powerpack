@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 10:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 10:54). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**26 problems.**
+**27 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -47,4 +47,5 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 
 ## Project memory
 
-- 4 index lines are over 300 characters (lines 19, 20, 21, 22): move their detail into topic files.
+- The memory index is 63 KB; only the first 16 KB load in a new thread. Shorten entries to one line and move detail into topic files.
+- 5 index lines are over 300 characters (lines 2, 54, 159, 211, 220): move their detail into topic files.
