@@ -342,6 +342,7 @@ public final class Costume {
 		}
 		SecretIdentity.update(player);
 		rustle(player);
+		com.jaymospowers.power.web.WebSuitUp.costume(player);
 		if (symbioteShape(player)) {
 			// the symbiote has it now: worn when its suit is called
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.7F);

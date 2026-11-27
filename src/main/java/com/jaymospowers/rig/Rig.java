@@ -234,6 +234,7 @@ public final class Rig {
 		RigCall.init();
 		RigFinish.init();
 		RigSentry.init();
+		RigSuitUp.init();
 		RigLimbs.init();
 		RigPicks.init();
 		RigTalk.init();
@@ -263,6 +264,7 @@ public final class Rig {
 				RigTakeover.tick(player);
 			}
 			RigCall.tick(player);
+			RigSuitUp.tick(player);
 			RigHelm.tick(player);
 			RigPassives.tick(player, any && !player.isSpectator());
 			RigActives.tick(player, any && !player.isSpectator());
