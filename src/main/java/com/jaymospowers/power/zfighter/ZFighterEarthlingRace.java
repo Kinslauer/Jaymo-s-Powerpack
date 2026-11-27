@@ -148,6 +148,19 @@ public final class ZFighterEarthlingRace {
 		}
 	}
 
+	/** Side-effect-free check matching {@link #blood}: whether blood-paid ki can cover {@code cost} right now. */
+	static boolean canBleed(ServerPlayer player, ZFighterPower.Live live, float cost) {
+		float need = cost - live.ki;
+		if (need <= 0.0F) {
+			return true;
+		}
+		float hp = (float)Math.ceil(need / BLOOD_KI_PER_HP);
+		long now = player.level().getGameTime();
+		Long last = BLEEDS.get(player.getUUID());
+		return hp <= BLOOD_MAX_HP && player.getHealth() - hp >= BLOOD_FLOOR
+			&& (last == null || now - last >= BLOOD_GAP || now < last);
+	}
+
 	/**
 	 * Part of {@link ZFighterPower#spend}: a technique costs {@code cost} and he has less. Pays the rest in health if the rules
 	 * allow it, topping his ki up to {@code cost} (the caller then spends it). False: he cannot pay it that way.

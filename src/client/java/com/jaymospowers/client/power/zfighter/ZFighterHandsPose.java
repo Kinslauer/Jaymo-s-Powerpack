@@ -40,8 +40,8 @@ import org.jspecify.annotations.Nullable;
  * hangs in the air in front of the fighter. In your own first-person view they sit where FirstPersonArms draws your hands.
  */
 public final class ZFighterHandsPose {
-	/** This frame's hands on one body: whose, the held pose, the aim (radians, + down), the main arm's side, the time. */
-	public record Hands(int id, int pose, float pitch, boolean mainLeft, float time) {
+	/** This frame's hands on one body: whose, the held pose, the beam stage, the aim (radians, + down), the main arm's side, the time. */
+	public record Hands(int id, int pose, int stage, float pitch, boolean mainLeft, float time) {
 	}
 
 	public static final RenderStateDataKey<Hands> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_hands");
@@ -57,6 +57,9 @@ public final class ZFighterHandsPose {
 	static final float CUP_TWIST = 0.3F, CUP_LEAN = 0.1F;
 	/** The charge trembling in the cup (radians, a tick). */
 	static final float CUP_SHAKE = 0.04F, CUP_BEAT = 2.3F;
+	/** Two fingers raised to the brow for Instant Step (right-arm values, mirrored for left). */
+	static final float[] BROW_LEAD = {-2.15F, -0.58F, -0.32F};
+	static final float BROW_HEAD = 0.1F;
 	/** The barrage: palms held out while the balls form (above the aim), and the guard between throws. */
 	static final float PALMS_RAISE = 0.35F, PALMS_IN = -0.15F, GUARD_RAISE = 0.55F, GUARD_IN = -0.1F;
 	/** A tapped blast's arm drawn back while the ball forms in the palm. */
@@ -192,7 +195,8 @@ public final class ZFighterHandsPose {
 			state.setData(KEY, null);
 			return;
 		}
-		state.setData(KEY, new Hands(entity.getId(), pose, entity.getXRot(partialTicks) * Mth.DEG_TO_RAD, entity.getMainArm() == HumanoidArm.LEFT,
+		int stage = entity instanceof Player player ? ZFighterWaveBeam.stage(player) : ZFighterWaveBeam.STAGE_NONE;
+		state.setData(KEY, new Hands(entity.getId(), pose, stage, entity.getXRot(partialTicks) * Mth.DEG_TO_RAD, entity.getMainArm() == HumanoidArm.LEFT,
 			entity.tickCount + partialTicks));
 	}
 
@@ -220,11 +224,14 @@ public final class ZFighterHandsPose {
 		arm(f, d, true, aim);
 		arm(f, d, false, aim);
 		if (d.pose() == ZFighterHands.CUP || d.pose() == ZFighterHands.ART) {
-			// the lead shoulder drawn back with the cup, leaning into it a little
-			f.set(PoseBlend.HIP_YAW, d.mainLeft() ? -CUP_TWIST : CUP_TWIST);
-			f.set(PoseBlend.HIP_PITCH, CUP_LEAN);
+			// the lead shoulder drawn back with the cup, leaning into it a little (tighter once fully held)
+			float holdBoost = d.stage() == ZFighterWaveBeam.STAGE_HOLD ? 1.25F : 1.0F;
+			f.set(PoseBlend.HIP_YAW, (d.mainLeft() ? -CUP_TWIST : CUP_TWIST) * holdBoost);
+			f.set(PoseBlend.HIP_PITCH, CUP_LEAN * holdBoost);
+		} else if (d.pose() == ZFighterHands.BROW) {
+			f.add(PoseBlend.HEAD, BROW_HEAD);
 		}
-		track.apply(h, f, throwing ? THROW_STIFFNESS : 1.0F);
+		track.apply(h, f, throwing || d.pose() == ZFighterHands.BROW ? THROW_STIFFNESS : 1.0F);
 	}
 
 	/** One arm's frame: the held pose, then any throw laid over it. */
@@ -236,6 +243,7 @@ public final class ZFighterHandsPose {
 			case ZFighterHands.POINT -> lead ? new float[] {aim, 0.0F, 0.0F} : null;
 			case ZFighterHands.PALMS -> new float[] {aim + PALMS_RAISE, PALMS_IN, 0.0F};
 			case ZFighterHands.VOLLEY -> new float[] {aim + GUARD_RAISE, GUARD_IN, 0.0F};
+			case ZFighterHands.BROW -> lead ? BROW_LEAD.clone() : null;
 			default -> null;
 		};
 		float[] t = arm(d.id(), right, d.time());
@@ -248,7 +256,8 @@ public final class ZFighterHandsPose {
 		key = lerp(t[1], key, new float[] {aim, t[2] > 0.0F ? PUSH_IN : THRUST_IN, 0.0F});
 		f.set(slot, key[0], side * key[1], side * key[2]);
 		if (d.pose() == ZFighterHands.CUP && t[1] <= 0.0F) {
-			float shake = Mth.sin(d.time() * CUP_BEAT + (right ? 0.0F : 1.3F)) * CUP_SHAKE;
+			float shakeBoost = d.stage() == ZFighterWaveBeam.STAGE_HOLD ? 1.85F : 1.0F;
+			float shake = Mth.sin(d.time() * CUP_BEAT + (right ? 0.0F : 1.3F)) * CUP_SHAKE * shakeBoost;
 			f.shake(slot, shake);
 			f.shake(slot + 2, shake * 0.6F);
 		}

@@ -1,6 +1,8 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -9,11 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +28,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -52,6 +59,10 @@ public final class ZFighterKiSense {
 	/** Someone sensed: when, who they are, and where they were last felt. */
 	record Seen(long time, boolean master, String name, ResourceKey<Level> dimension, Vec3 pos) {
 	}
+
+	/** Set once the fighter has learned Ki Sense (first activation); kept through death, unlocks Instant Step. */
+	public static final AttachmentType<Boolean> LEARNED = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_sense_learned"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
 
 	private static final Set<UUID> ON = new HashSet<>();
 	/** Sensing player → what they have sensed (players and masters), by the sensed one's id. */
@@ -86,12 +97,28 @@ public final class ZFighterKiSense {
 		return RANGE_MIN + (RANGE_MAX - RANGE_MIN) * share;
 	}
 
+	/** Whether Ki Sense is currently switched on for {@code player}. */
+	public static boolean isOn(ServerPlayer player) {
+		return ON.contains(player.getUUID());
+	}
+
+	/** Whether this Z Fighter has learned Ki Sense (used to unlock Instant Step). */
+	public static boolean learned(Player player) {
+		return Boolean.TRUE.equals(player.getAttached(LEARNED))
+			|| (player instanceof ServerPlayer server && ON.contains(server.getUUID()))
+			|| ZFighterTraining.of(player).knows(ZFighterTraining.TELEPORT)
+			|| player.isCreative();
+	}
+
 	/** The key: sense on, or off. Z Fighters only. */
 	static void toggle(ServerPlayer player) {
 		if (!Powers.has(player, ZFighterPower.INSTANCE) || Powers.silenced(player)) {
 			return;
 		}
 		boolean on = ON.add(player.getUUID());
+		if (on && !Boolean.TRUE.equals(player.getAttached(LEARNED))) {
+			player.setAttached(LEARNED, true);
+		}
 		if (!on) {
 			ON.remove(player.getUUID());
 			ZFighterSensesNet.send(player, new ZFighterSensesNet.Sense(false, List.of()));

@@ -63,7 +63,13 @@ public final class CoreMotionPal {
 	public static boolean active(Player player) {
 		return player instanceof AbstractClientPlayer avatar
 			&& PlayerAnimationAccess.getPlayerAnimationLayer(avatar, LAYER) instanceof Layer layer
-			&& layer.shown != null;
+			&& layer.shown != null && !shortLanding(layer.shown);
+	}
+
+	/** The light and medium landing clips (small drops) are a quick knee bend: held weapons and body weight stay on over them. */
+	private static boolean shortLanding(Move move) {
+		String path = move.id().getPath();
+		return path.endsWith("landingposev1") || path.endsWith("landingposev2");
 	}
 
 	private static void tick(Minecraft minecraft) {

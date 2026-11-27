@@ -582,6 +582,7 @@ final class GravityPicks {
 		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), null, (float)radius, BAND_COLOR, 14);
 		MagicFx.blast(level, at.add(0.0, 0.5, 0.0), (float)Math.min(4.0, radius * 0.6), BAND_COLOR);
 		GroundCracks.crack(level, player.blockPosition().below(), level.getRandom(), Mth.clamp((int)(fall * 0.8), 3, 10));
+		com.jaymospowers.freerun.CoreMotion.ownCracks(player);
 		Shakes.around(level, at, 28.0, Math.min(2.2F, 0.6F + fall * 0.08F));
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
 		if (!griefing(level, player)) {

@@ -1,5 +1,6 @@
 package com.jaymospowers.client.freerun;
 
+import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.core.Ledge;
 import com.jaymospowers.freerun.AirFlip;
 import com.jaymospowers.power.web.WebPose;
@@ -12,7 +13,8 @@ import net.minecraft.world.entity.player.Input;
 /**
  * (Motion patch 0) The air flip on this side ({@link AirFlip}): one tap of Sneak in the air, high enough off the ground,
  * flips you. A second tap within {@link #DOUBLE_TAP_TICKS} is the zoom instead ({@code SneakZoom}; it was the dodge's
- * before 0.20.65), so the flip waits out that window before it goes; a held Sneak is never a tap.
+ * before 0.20.65), so the flip waits out that window before it goes; a held Sneak is never a tap, and neither is a Sneak
+ * pressed with (or just before or after) a power key: that is a power's Sneak combo in the air, and the flip stays out of it.
  */
 public final class AirFlipClient {
 	/** The same double-tap window and tap length as {@code SneakZoom}'s. */
@@ -39,6 +41,12 @@ public final class AirFlipClient {
 		}
 		boolean pressed = sneak && !sneakWasDown;
 		sneakWasDown = sneak;
+		if ((sneak || waiting > 0) && JaymosPowersClient.anyPowerKeyDown()) {
+			// Sneak with a power key (Talon's takedown, a tail sweep, Gravity's rocks...) is that power's combo, not a flip
+			waiting = 0;
+			held = sneak ? held + 1 : 0;
+			return;
+		}
 		held = sneak ? held + 1 : 0;
 		if (pressed) {
 			// a second tap inside the window is the zoom's, not ours

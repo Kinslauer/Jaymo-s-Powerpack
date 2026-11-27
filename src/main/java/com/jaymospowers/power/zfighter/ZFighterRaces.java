@@ -65,6 +65,15 @@ final class ZFighterRaces {
 		}
 	}
 
+	/** Side-effect-free check matching {@link #cover}: whether this lineage can cover a {@code cost} shortfall right now. */
+	static boolean canCover(ServerPlayer player, ZFighterPower.Live live, float cost) {
+		return switch (ZFighterLineage.of(player)) {
+			case ZFighterLineage.FROST -> ZFighterFrostReserve.canCover(player, live, cost);
+			case ZFighterLineage.EARTHLING -> ZFighterEarthlingRace.canBleed(player, live, cost);
+			default -> false;
+		};
+	}
+
 	/**
 	 * A technique costs {@code cost} and he has less ki: the Frost-born's reserve, then the Earthling's blood, may make up the
 	 * difference (his ki is topped up to {@code cost}). False: nothing could.

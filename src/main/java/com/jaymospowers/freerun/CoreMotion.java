@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -26,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 /** Transient, server-authored player clips and the shared second jump. */
 public final class CoreMotion {
 	private static final double LIGHT_FALL = 1.75, MEDIUM_FALL = 4.0, HEAVY_FALL = 8.0, HERO_FALL = 14.0;
-	private static final int JUMP_COST = 4;
+	public static final int JUMP_COST = 4;
 	private static final double JUMP_LIFT = 0.35, LEAP_LIFT = 0.45, LEAP_SPEED = 0.48;
 
 	public record Clip(Identifier animation, long until) {
@@ -54,6 +55,11 @@ public final class CoreMotion {
 	public static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Jump.TYPE, Jump.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Jump.TYPE, (payload, ctx) -> jump(ctx.player()));
+		ServerTickEvents.END_SERVER_TICK.register(CoreMotion::resolveLandings);
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			LANDINGS.remove(handler.getPlayer().getUUID());
+			OWN_CRACKS.remove(handler.getPlayer().getUUID());
+		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				if (player.onGround()) {
@@ -80,19 +86,42 @@ public final class CoreMotion {
 			return;
 		}
 		player.setAttached(JUMPED, true);
-		player.resetFallDistance();
+		// the step's lift is taken off the fall, not the whole fall
+		double lift = (vaultAhead(player) ? LEAP_LIFT : JUMP_LIFT);
+		player.fallDistance = Math.max(0.0, player.fallDistance - lift * lift / 0.14);
 		Vec3 forward = Vec3.directionFromRotation(0, player.getYRot());
-		AABB feet = new AABB(player.getX() - 0.24, player.getY() - 0.4, player.getZ() - 0.24,
-			player.getX() + 0.24, player.getY() + 0.2, player.getZ() + 0.24);
-		AABB lip = feet.move(forward.scale(0.8));
-		boolean vault = player.getLastClientInput().forward() && !player.level().noCollision(player, lip)
-			&& player.level().noCollision(player, player.getBoundingBox().move(forward).move(0, 0.65, 0));
+		boolean vault = vaultAhead(player);
 		Vec3 push = vault ? forward.scale(LEAP_SPEED) : player.getKnownMovement();
 		Vec3 motion = new Vec3(push.x, vault ? LEAP_LIFT : JUMP_LIFT, push.z);
 		player.setDeltaMovement(motion);
 		player.connection.send(new ClientboundSetEntityMotionPacket(player.getId(), motion));
 		play(player, vault ? "animation.player.catleap" : "animation.player.double_jump", vault ? 15 : 11);
 	}
+
+	/** A ledge just ahead that the step can clear: the cat leap instead of the straight double jump. */
+	private static boolean vaultAhead(ServerPlayer player) {
+		Vec3 forward = Vec3.directionFromRotation(0, player.getYRot());
+		AABB feet = new AABB(player.getX() - 0.24, player.getY() - 0.4, player.getZ() - 0.24,
+			player.getX() + 0.24, player.getY() + 0.2, player.getZ() + 0.24);
+		AABB lip = feet.move(forward.scale(0.8));
+		return player.getLastClientInput().forward() && !player.level().noCollision(player, lip)
+			&& player.level().noCollision(player, player.getBoundingBox().move(forward).move(0, 0.65, 0));
+	}
+
+	/** A hard landing waiting to be told what it was: its tick, and whether the hero landing took the dust. */
+	private static final class Landing {
+		final long at;
+		boolean heroDust;
+
+		Landing(long at) {
+			this.at = at;
+		}
+	}
+
+	/** Heavy landings whose cracks and dust are still to come, by player (server memory only). */
+	private static final java.util.Map<java.util.UUID, Landing> LANDINGS = new java.util.HashMap<>();
+	/** The tick each player's Gravity landing threw its own cracks. */
+	private static final java.util.Map<java.util.UUID, Long> OWN_CRACKS = new java.util.HashMap<>();
 
 	public static void landed(ServerPlayer player, double fall) {
 		if (fall < LIGHT_FALL || Powers.of(player) == null || !Freerun.canMove(player)
@@ -102,8 +131,64 @@ public final class CoreMotion {
 		int tier = fall >= HERO_FALL ? 4 : fall >= HEAVY_FALL ? 3 : fall >= MEDIUM_FALL ? 2 : 1;
 		play(player, "animation.player.landingposev" + tier, 12);
 		if (tier == 4) {
-			GroundCracks.crack(player.level(), player.getOnPos(), player.getRandom(), 3);
-			LandingRoll.dust(player.level(), player);
+			// the damage rules come after this (LandingRoll): the cracks and dust wait out the roll window (LandingRoll) to hear what the landing was
+			LANDINGS.put(player.getUUID(), new Landing(player.level().getGameTime()));
+		}
+	}
+
+	/** Drops the landing clip, if one is playing (another landing, or a roll, draws the body). */
+	private static void dropClip(ServerPlayer player) {
+		Clip clip = player.getAttached(CLIP);
+		if (clip != null && clip.animation().getPath().startsWith("animation.player.landingposev")) {
+			player.removeAttached(CLIP);
+		}
+	}
+
+	/** The hero landing ({@link LandingRoll#heroLanding}) drew this landing and threw its dust: no clip, no second ring. */
+	static void heroLanded(ServerPlayer player) {
+		dropClip(player);
+		Landing landing = LANDINGS.get(player.getUUID());
+		if (landing != null) {
+			landing.heroDust = true;
+		}
+	}
+
+	/** A roll or the safety tap took this landing, or the fall will kill: no clip over it, and no cracks or dust. */
+	static void landingTaken(ServerPlayer player) {
+		dropClip(player);
+		LANDINGS.remove(player.getUUID());
+	}
+
+	/** Gravity's leap landing threw its own cracks this tick. */
+	public static void ownCracks(ServerPlayer player) {
+		OWN_CRACKS.put(player.getUUID(), player.level().getGameTime());
+	}
+
+	private static void resolveLandings(net.minecraft.server.MinecraftServer server) {
+		if (LANDINGS.isEmpty()) {
+			return;
+		}
+		java.util.Iterator<java.util.Map.Entry<java.util.UUID, Landing>> it = LANDINGS.entrySet().iterator();
+		while (it.hasNext()) {
+			java.util.Map.Entry<java.util.UUID, Landing> entry = it.next();
+			Landing landing = entry.getValue();
+			ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+			if (player == null) {
+				it.remove();
+			} else if (player.level().getGameTime() > landing.at + LandingRoll.LATE_TICKS + LandingRoll.SLACK_TICKS) {
+				it.remove();
+				Long own = OWN_CRACKS.get(player.getUUID());
+				if (player.isAlive() && (own == null || own < landing.at - 1)) {
+					GroundCracks.crack(player.level(), player.getOnPos(), player.getRandom(), 3);
+				}
+				if (player.isAlive() && !landing.heroDust) {
+					LandingRoll.dust(player.level(), player);
+				}
+			}
+		}
+		if (!OWN_CRACKS.isEmpty()) {
+			long now = server.overworld().getGameTime();
+			OWN_CRACKS.values().removeIf(at -> now - at > 30);
 		}
 	}
 }
