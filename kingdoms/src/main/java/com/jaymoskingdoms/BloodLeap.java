@@ -111,7 +111,7 @@ public final class BloodLeap {
 		boolean mist = com.jaymoskingdoms.nightforms.NightForms.inMist(player);
 		boolean chained = mist || NightFlow.within(player, NightFlow.Link.MIST_LEAP);
 		boolean weak = weak(player);
-		double share = (weak ? WEAK_SHARE : 1.0) * (chained ? NightFlow.MIST_LEAP_BOOST : 1.0);
+		double share = (weak ? WEAK_SHARE : 1.0) * (chained ? NightFlow.MIST_LEAP_BOOST : 1.0) * (NewMoon.on(player) ? NewMoon.LEAP_SHARE : 1.0);
 		int slower = weak ? WEAK_COOLDOWN : 1;
 		LivingEntity target = PowersCompat.lockTarget(player);
 		if (target != null && target.isAlive() && player.hasLineOfSight(target)

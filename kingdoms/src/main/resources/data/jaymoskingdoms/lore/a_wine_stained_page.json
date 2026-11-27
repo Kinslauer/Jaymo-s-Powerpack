@@ -1,0 +1,20 @@
+{
+  "title": "A Wine-Stained Page",
+  "author": "unsigned",
+  "pages": [
+    "He says there is a night each month the moon forgets to rise. Nothing is lit, and nothing is watched.\n\nOn that night the cup is not wine.",
+    "I asked him what it costs. Sixty in silver, and that I have seen the other side already. He says I have.",
+    "The stain on this page is not wine."
+  ],
+  "drop": {
+    "entities": [
+      "minecraft:zombie",
+      "minecraft:husk",
+      "minecraft:skeleton"
+    ],
+    "dimensions": [
+      "minecraft:overworld"
+    ],
+    "chance": 0.004
+  }
+}

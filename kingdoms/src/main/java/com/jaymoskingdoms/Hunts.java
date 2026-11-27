@@ -203,7 +203,7 @@ final class Hunts {
 	}
 
 	/** One of {@code from}'s hunters at {@code at}: a realm's guard (MCA's with MCA), or a camp's raider. */
-	private static @Nullable Mob man(ServerLevel level, Faction from, int i, BlockPos at) {
+	static @Nullable Mob man(ServerLevel level, Faction from, int i, BlockPos at) {
 		float yaw = level.getRandom().nextFloat() * 360.0F;
 		if (from.type() == FactionType.BARBARIAN) {
 			return Raids.member(level, from, i, at, at, (int)LOSE, false);

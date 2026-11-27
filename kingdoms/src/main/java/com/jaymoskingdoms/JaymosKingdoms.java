@@ -1140,6 +1140,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		BloodThralls.register();
 		SleepingPrey.register();
 		VampireMask.register();
+		NewMoon.register();
+		CoffinRest.register();
+		LairHunts.register();
+		CoffinKit.register();
+		OldBlood.register();
 		VampireTells.register();
 		Garlic.register();
 		// 0.7.185: losing yourself to the blood or the curse: the blood fever's urges, the wolf's hunts, and the holds that
