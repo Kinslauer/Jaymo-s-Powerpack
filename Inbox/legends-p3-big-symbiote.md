@@ -32,3 +32,4 @@ PR body: each row, what you built, classes, keys, every deviation from the plan,
 ## Notes
 - 2026-11-26 18:30 YOUTH delegated this to apollo (Claude approved): multi-system Java in the big-suit code (WebHulk, WebBrute, WebFury, WebLeap, WebSlam, takeover struggle); branch from claude/project-thread-aaw9tm and open the PR against that branch, NOT master, and never merge it
 - 2026-11-27 01:36 legends-p3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-27 03:02 Update 2026-11-27: PR #2257 (patches 1, 2, 5) is merged into master, so branch from origin/master now and open the PR against master.
