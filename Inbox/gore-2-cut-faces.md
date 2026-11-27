@@ -1,10 +1,10 @@
 ---
-status: claimed
-for: prometheus
+status: open
+for: antigravity
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: Power-pack Supplement
-claimed_by: t3
+claimed_by: 
 pr: 
 suggested_owns:
   - src/client/java/com/jaymospowers/client/Dismembered.java
