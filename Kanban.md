@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:40). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 11:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,10 +12,10 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
-- [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · ☁️ Cloud · open
-- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · ☁️ Cloud · open
-- [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · ☁️ Cloud · open
-- [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · ☁️ Cloud · open
+- [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for 🔥 Prometheus · open
 
 
 ## Being built
@@ -57,11 +57,11 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-3|nycto-3]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-4|nycto-4]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-5|nycto-5]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-6|nycto-6]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/nycto-7|nycto-7]] · ☁️ Cloud · blocked
+- [ ] [[Inbox/nycto-4-models|nycto-4-models]] · for 🔥 Prometheus · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
