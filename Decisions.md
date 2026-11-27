@@ -1210,3 +1210,5 @@ Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start 
 - 2026-11-26: Great Ape keeps R = charge ki (Sneak+R = hold back power); Patch 7's roar moves to another key. Andy: "R should still charge ki" (PR #2255 review).
 
 - 2026-11-26 (Andy, shadows thread, PR #2262 merged): Shadows see-through in the ghost skin, sized 0.6-1.5x, 2 in 5 wispy-tailed, gone between strikes; the sun, lamp light, carried lights and the Dawnborn's Sunflare unmake them at once. Lore "How a shadow walks" approved.
+
+- 2026-11-27 (sexton thread, PR #2273 merged): Andy approved the Lore.md paragraphs "The sexton", "A town's tools" and "The steel blueprint". Rulings: NPC tools are forged by town smiths from storehouse stock, iron only in wealthy realms, else stone, wood without a smith; iron lasts longest (stone 2 days, iron 4); steel gear only for steel realms (wealthy, and the richest or warlike: Conquest creed or waging a war it declared); steel forging gatekept by the realm's steel blueprint.
