@@ -8,9 +8,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
-/** A page of lines the server sent (what an identify found), read and closed. */
+/** A page of lines the server sent (what an identify found), read and closed; it fits under the menu strip, and a page too long scrolls slowly through. */
 final class MagicPageScreen extends Screen {
-	private static final int W = 240, PAD = 10;
+	private static final int W = 300, PAD = 10;
 	private final List<Component> lines;
 	private final List<FormattedCharSequence> wrapped = new ArrayList<>();
 
@@ -25,29 +25,44 @@ final class MagicPageScreen extends Screen {
 	}
 
 	private int height() {
-		return 24 + Math.max(1, this.wrapped.size()) * Ui.LINE + 36;
+		return Math.min(24 + Math.max(1, this.wrapped.size()) * Ui.LINE + 36, this.height - 8 - MenuCompat.STRIP);
+	}
+
+	private int panelW() {
+		return Math.min(W, this.width - 12 - MenuCompat.SIDE);
+	}
+
+	private int left() {
+		return MenuCompat.centre(this.width, panelW());
+	}
+
+	private int top() {
+		return Math.max(4 + MenuCompat.STRIP, (this.height - height()) / 2);
 	}
 
 	@Override
 	protected void init() {
 		this.wrapped.clear();
 		for (Component c : this.lines) {
-			this.wrapped.addAll(this.font.split(c, W - 2 * PAD));
+			this.wrapped.addAll(this.font.split(c, panelW() - 2 * PAD - 4));
 		}
-		int left = (this.width - W) / 2, top = (this.height - height()) / 2;
-		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.magic.close"), b -> onClose()).bounds(left + W / 2 - 40, top + height() - 24, 80, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.magic.close"), b -> onClose())
+			.bounds(left() + panelW() / 2 - 40, top() + height() - 24, 80, 16).build());
 	}
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		int left = (this.width - W) / 2, top = (this.height - height()) / 2;
-		Ui.panel(graphics, left, top, W, height(), Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, left + PAD, top + 8, W - 2 * PAD, Ui.GOLD);
-		int y = top + 24;
-		for (FormattedCharSequence line : this.wrapped) {
-			graphics.text(this.font, line, left + PAD, y, Ui.TEXT);
-			y += Ui.LINE;
+		int left = left(), top = top(), w = panelW();
+		Ui.window(graphics, left, top, w, height());
+		Ui.line(graphics, this.font, this.title, left + PAD, top + 8, w - 2 * PAD, Ui.GOLD);
+		int y = top + 24, room = Math.max(1, (height() - 60) / Ui.LINE), over = Math.max(0, this.wrapped.size() - room) * Ui.LINE;
+		int shift = over > 0 ? Ui.slide(over, Ui.SCROLL_MS_PER_LINE / Ui.LINE, Ui.SCROLL_PAUSE_MS) : 0;
+		graphics.enableScissor(left, y - 1, left + w, y + room * Ui.LINE);
+		for (int i = 0; i < this.wrapped.size(); i++) {
+			graphics.text(this.font, this.wrapped.get(i), left + PAD, y + i * Ui.LINE - shift, Ui.TEXT);
 		}
+		graphics.disableScissor();
+		Ui.scrollbar(graphics, left + w - PAD + 2, y, room * Ui.LINE - 1, room * Ui.LINE, room * Ui.LINE + over, shift);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 }

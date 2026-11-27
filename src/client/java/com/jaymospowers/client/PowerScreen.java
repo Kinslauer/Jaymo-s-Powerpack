@@ -42,7 +42,8 @@ import org.jspecify.annotations.Nullable;
  * The inventory has a tab that opens it too ({@link PowerInventoryTab}).
  */
 public class PowerScreen extends Screen {
-	static final int W = 176, H = 186;
+	/** The window's least and most size: it grows with the screen so a long description has room and needs no scrolling. */
+	static final int MIN_W = 176, MIN_H = 186, MAX_W = 340, MAX_H = 250;
 	/**
 	 * The tabs along the top edge (0.21.60: the character menu's tabs have the left edge now): a tab's width, how far it
 	 * sticks up, the step between tabs, and where the first one starts from the left.
@@ -63,7 +64,7 @@ public class PowerScreen extends Screen {
 	public static final int COLOR_GOLD = 0xFFFFD54A;
 	public static final int COLOR_BAR_BACK = 0xFF141418;
 	/** The inner canvas: inset from the window's edges, below the title. */
-	private static final int CANVAS_X = 7, CANVAS_Y = 18, CANVAS_W = W - 14, CANVAS_H = H - 25;
+	private static final int CANVAS_X = 7, CANVAS_Y = 18;
 	private static final int ROW = 18;
 
 	enum Tab {
@@ -155,13 +156,31 @@ public class PowerScreen extends Screen {
 		return tabs;
 	}
 
+	/** The window's width: as wide as the screen allows, clear of the menu's side list, between the least and most. */
+	private int w() {
+		return Mth.clamp(this.width - com.jaymospowers.client.menu.MenuTabs.SIDE - 24, MIN_W, MAX_W);
+	}
+
+	/** The window's height: as tall as fits under its tabs and the menu strip, between the least and most. */
+	private int h() {
+		return Mth.clamp(this.height - TAB_OUT - com.jaymospowers.client.menu.MenuTabs.ROOM - 8, MIN_H, MAX_H);
+	}
+
+	private int canvasW() {
+		return w() - 14;
+	}
+
+	private int canvasH() {
+		return h() - 25;
+	}
+
 	private int left() {
-		return com.jaymospowers.client.menu.MenuTabs.centreX(this.width, W);
+		return com.jaymospowers.client.menu.MenuTabs.centreX(this.width, w());
 	}
 
 	private int top() {
 		// room above for the tabs, and for the character menu's strip above them
-		return Math.max(TAB_OUT + com.jaymospowers.client.menu.MenuTabs.ROOM, (this.height - H + TAB_OUT) / 2);
+		return Math.max(TAB_OUT + com.jaymospowers.client.menu.MenuTabs.ROOM, (this.height - h() + TAB_OUT) / 2);
 	}
 
 	private int cx() {
@@ -184,16 +203,16 @@ public class PowerScreen extends Screen {
 		this.useButton = null;
 		this.chooseButton = null;
 		this.clearButton = null;
-		int bottom = cy() + CANVAS_H - 20;
+		int bottom = cy() + canvasH() - 20;
 		if (this.tab == Tab.ABILITIES) {
 			this.useButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.use"), b -> use(this.picked))
-				.bounds(cx() + CANVAS_W - 64, bottom, 60, 16).build());
+				.bounds(cx() + canvasW() - 64, bottom, 60, 16).build());
 		} else if (this.tab == Tab.POWERS) {
 			this.chooseButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.choose"), b -> {
 				if (this.selected != null) {
 					choose(this.selected.id().toString());
 				}
-			}).bounds(cx() + CANVAS_W - 64, bottom, 60, 16).build());
+			}).bounds(cx() + canvasW() - 64, bottom, 60, 16).build());
 			this.clearButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.clear"), b -> choose(""))
 				.bounds(cx() + 4, bottom, 90, 16).build());
 		}
@@ -291,7 +310,7 @@ public class PowerScreen extends Screen {
 			case POWERS -> {
 				for (int i = 0; i < listRows(); i++) {
 					int n = i + this.scroll;
-					if (n < this.powers.size() && over(mx, my, cx() + 2, cy() + 2 + i * ROW, CANVAS_W - 4, ROW)) {
+					if (n < this.powers.size() && over(mx, my, cx() + 2, cy() + 2 + i * ROW, canvasW() - 4, ROW)) {
 						this.selected = this.powers.get(n);
 						this.picked = 0;
 						return true;
@@ -328,8 +347,8 @@ public class PowerScreen extends Screen {
 				tab(graphics, tabs.get(i), i, false, mouseX, mouseY);
 			}
 		}
-		frame(graphics, x, y, W, H);
-		recess(graphics, cx(), cy(), CANVAS_W, CANVAS_H);
+		frame(graphics, x, y, w(), h());
+		recess(graphics, cx(), cy(), canvasW(), canvasH());
 		int picked = tabs.indexOf(this.tab);
 		if (picked >= 0) {
 			tab(graphics, this.tab, picked, true, mouseX, mouseY);
@@ -337,7 +356,7 @@ public class PowerScreen extends Screen {
 		graphics.text(this.font, Component.translatable("screen.jaymospowers.tab." + this.tab.id()), x + 8, y + 6, COLOR_TEXT, false);
 		Power power = this.selected;
 		if (power == null && this.tab != Tab.POWERS) {
-			wrapped(graphics, Component.translatable("screen.jaymospowers.dormant"), cx() + 4, cy() + 4, CANVAS_W - 8, 6, COLOR_DIM);
+			wrapped(graphics, Component.translatable("screen.jaymospowers.dormant"), cx() + 4, cy() + 4, canvasW() - 8, 6, COLOR_DIM);
 		} else {
 			switch (this.tab) {
 				case OVERVIEW -> overview(graphics, power, mouseX, mouseY);
@@ -434,7 +453,7 @@ public class PowerScreen extends Screen {
 	// ---------------------------------------------------------------- overview
 
 	private void overview(GuiGraphicsExtractor graphics, Power power, int mouseX, int mouseY) {
-		int x = cx() + 4, y = cy() + 4, w = CANVAS_W - 8;
+		int x = cx() + 4, y = cy() + 4, w = canvasW() - 8;
 		Player player = owner(power);
 		well(graphics, x, y);
 		graphics.item(power.icon(), x + 1, y + 1);
@@ -487,7 +506,7 @@ public class PowerScreen extends Screen {
 			PowerClient extra = i == 3 ? extraClient() : null;
 			Component label = i == 3 && extra != null ? extra.extraToggleName(this.minecraft.player) : i == 0 ? modeLabel() : Component.translatable("screen.jaymospowers.toggle." + id);
 			// (0.16.6) a power's Mode is named for what it does, so cut a long name to the slot's room
-			int room = (CANVAS_W - 3 * SLOT) / 4 + SLOT - 2;
+			int room = (canvasW() - 3 * SLOT) / 4 + SLOT - 2;
 			lineCentred(graphics, label, tx + SLOT / 2, ty + SLOT + 2, room, open ? COLOR_TEXT : COLOR_DIM);
 			if (over(mouseX, mouseY, tx, ty, SLOT, SLOT)) {
 				hover = i == 3 && extra != null ? extra.extraToggleDesc(this.minecraft.player) : i == 0 ? modeHover(open)
@@ -510,12 +529,12 @@ public class PowerScreen extends Screen {
 	}
 
 	private int toggleX(int i) {
-		int gap = (CANVAS_W - toggleCount() * SLOT) / (toggleCount() + 1);
+		int gap = (canvasW() - toggleCount() * SLOT) / (toggleCount() + 1);
 		return cx() + gap + i * (SLOT + gap);
 	}
 
 	private int toggleY() {
-		return cy() + CANVAS_H - SLOT - 14;
+		return cy() + canvasH() - SLOT - 14;
 	}
 
 	/** (0.16.6) The power's own name for the screen's Mode slot (lang {@code power.<id>.toggle.mode}), or null. */
@@ -664,11 +683,11 @@ public class PowerScreen extends Screen {
 		}
 		// the picked (or hovered) key in full
 		KeyGuide.Line line = lines.get(shown);
-		int x = cx() + 4, y = bottom + 2, w = CANVAS_W - 8;
+		int x = cx() + 4, y = bottom + 2, w = canvasW() - 8;
 		graphics.fill(x, y - 3, x + w, y - 2, COLOR_WELL_LIGHT);
 		Component name = line.name() != null ? line.name() : line.key();
 		line(graphics, Component.literal("[").append(line.key()).append("] ").append(name), x, y, w, line.color());
-		int room = (cy() + CANVAS_H - 24 - (y + 11)) / 9;
+		int room = (cy() + canvasH() - 24 - (y + 11)) / 9;
 		wrapped(graphics, line.text(), x, y + 11, w, room, COLOR_TEXT);
 		if (this.useButton != null) {
 			this.useButton.active = tapKey(this.picked) >= 0;
@@ -728,7 +747,7 @@ public class PowerScreen extends Screen {
 	}
 
 	private void chrono(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		int x = cx() + 4, w = CANVAS_W - 8;
+		int x = cx() + 4, w = canvasW() - 8;
 		if (!commanding()) {
 			Player player = this.minecraft.player;
 			String why = current() != ChronoPower.INSTANCE || player == null || player.isCreative() ? "screen.jaymospowers.chrono.not_yours"
@@ -803,7 +822,7 @@ public class PowerScreen extends Screen {
 		Component now = recording ? Component.translatable("screen.jaymospowers.chrono.recording", slot + 1)
 			: Component.translatable("screen.jaymospowers.chrono.now",
 				Component.translatable("screen.jaymospowers.order." + ChronoDirectives.Directive.values()[Math.min(directive, 3)].name().toLowerCase(Locale.ROOT)));
-		wrapped(graphics, hover != null ? hover : now, x, y, w, (cy() + CANVAS_H - 4 - y) / 9, hover != null ? COLOR_TEXT : COLOR_DIM);
+		wrapped(graphics, hover != null ? hover : now, x, y, w, (cy() + canvasH() - 4 - y) / 9, hover != null ? COLOR_TEXT : COLOR_DIM);
 	}
 
 	// ---------------------------------------------------------------- mastery
@@ -825,7 +844,7 @@ public class PowerScreen extends Screen {
 	}
 
 	private void mastery(GuiGraphicsExtractor graphics, Power power) {
-		int x = cx() + 4, y = cy() + 4, w = CANVAS_W - 8;
+		int x = cx() + 4, y = cy() + 4, w = canvasW() - 8;
 		Player player = owner(power);
 		if (player == null || player.isCreative()) {
 			wrapped(graphics, Component.translatable("screen.jaymospowers.mastery.creative"), x, y, w, 6, COLOR_DIM);
@@ -871,7 +890,7 @@ public class PowerScreen extends Screen {
 	// ---------------------------------------------------------------- powers (creative)
 
 	private int listRows() {
-		return (CANVAS_H - 26) / ROW;
+		return (canvasH() - 26) / ROW;
 	}
 
 	private void list(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
@@ -882,14 +901,14 @@ public class PowerScreen extends Screen {
 			Power power = this.powers.get(i + this.scroll);
 			int x = cx() + 2, y = cy() + 2 + i * ROW;
 			boolean shown = power == this.selected;
-			if (shown || over(mouseX, mouseY, x, y, CANVAS_W - 4, ROW)) {
-				graphics.fill(x, y, x + CANVAS_W - 4, y + ROW, shown ? 0x40FFFFFF : 0x20FFFFFF);
+			if (shown || over(mouseX, mouseY, x, y, canvasW() - 4, ROW)) {
+				graphics.fill(x, y, x + canvasW() - 4, y + ROW, shown ? 0x40FFFFFF : 0x20FFFFFF);
 			}
 			if (shown) {
 				graphics.fill(x, y, x + 2, y + ROW, accent(power));
 			}
 			graphics.item(power.icon(), x + 3, y + 1);
-			line(graphics, power.name(), x + 22, y + 5, CANVAS_W - 30, power == current ? accent(power) : shown ? COLOR_TEXT : COLOR_DIM);
+			line(graphics, power.name(), x + 22, y + 5, canvasW() - 30, power == current ? accent(power) : shown ? COLOR_TEXT : COLOR_DIM);
 		}
 		if (this.chooseButton != null) {
 			boolean active = this.selected == current;
