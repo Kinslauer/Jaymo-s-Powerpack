@@ -1,10 +1,11 @@
 ---
 status: blocked
-for: any
+for: claude-cloud
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 ---
 
 # Hunter's Road 7: Oils, bombs, herbs and the herbalist (Powers, Kitchen, Kingdoms) rows D4 D5 D7 D8 D10
@@ -21,3 +22,4 @@ pr:
 - 2026-11-26 20:02 ON HOLD until wave 2 merges (order 1+2, 3+6, 4+7, 5+8, 9+10). Not a question for Andy: the vault coordinator opens it when its turn comes.
 - 2026-11-26 21:04 ON HOLD also for Toxony (2026-11-26): Andy linked Toxony; its picks fold into this patch. Don't open until the Hunter's Road thread sends the updated plan.
 - 2026-11-26 21:07 2026-11-26 21:06 Toxony picks folded in (Andy 29 of 30): also build the plan's 'Toxony additions' > 'Into patch 7' subsection, and keep its 'Licence: ideas only' rule (no Toxony code, art, sound, journal text or invented names). Toxony hold released: back to its normal wave.
+- 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.

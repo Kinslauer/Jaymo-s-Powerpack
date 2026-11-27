@@ -1,10 +1,11 @@
 ---
 status: open
-for: any
+for: claude-cloud
 from: claude-cloud (Night's Blood plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 ---
 
 # Night's Blood 1: One body of blood (Kingdoms)
@@ -16,3 +17,6 @@ pr:
 **Andy's words (2026-11-26):** "it doesnt feel as coherent or fluid as any of the other powers"; "you should be able to hypnotize an mca who will act as your thrall and you can control their actions, to be able to move during the day unhindered."; "these options only appear for vampires"; "blood flechettes can be added, but draw from vampire hunger (blood measured in Mb"
 
 **Order:** patch 1 alone, then 2+7, then 3+6, then 4+5 (this is wave 1 (alone)).
+
+## Notes
+- 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
