@@ -20,4 +20,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 
 ## Notes
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
-- 2026-11-27 08:10 PR #2287 is merged into master; moved to Inbox/Done.
+- 2026-11-27 13:20 Merged #2287 on Andy's "merge everything" (2026-11-27).
