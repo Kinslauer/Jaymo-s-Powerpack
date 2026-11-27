@@ -36,6 +36,7 @@ final class HeraldryClient {
 	static void register() {
 		MenuScreens.register(Harness.MENU, HarnessScreen::new);
 		HarnessTab.init();
+		MountTab.init();
 		visor = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.visor", InputConstants.KEY_HOME, ClassKeys.category()));
 		harness = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.harness", InputConstants.UNKNOWN.getValue(), ClassKeys.category()));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
