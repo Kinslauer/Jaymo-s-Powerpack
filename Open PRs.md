@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-28 13:29
+updated: 2026-11-28 14:28
 ---
 # Open PRs
 
-16 open, as of 2026-11-28 13:29. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+18 open, as of 2026-11-28 14:28. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -85,3 +85,13 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `t3/gore-2-cut-faces` · **Updated:** 2026-11-28 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[gore-2-cut-faces]]
+
+## [#2360](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2360) Fix quadruped legs detaching while carried/dragged; add visible drag arm (3rd/1st person); diggers drag corpses into pits
+- **Branch:** `claude/corpse-limbs-drag-arm-digger-pits` · **Updated:** 2026-11-28 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2361](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2361) block-choice-box: Remove cooking blocks from Carry On no-lift and add choice box
+- **Branch:** `claude/block-choice-box` · **Updated:** 2026-11-28 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
