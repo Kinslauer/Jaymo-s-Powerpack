@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:35). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -60,6 +60,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2335 reincarnation forgets bonded animals - horses, pets and mounts are strangers to a new life (Kingdoms, 2026-11-28)
 - [ ] #2334 Combo Clash in the pack: its 4-hit strings and dashes, with our combat stepping aside (Powers, Kingdoms, 2026-11-27)
 - [ ] #2333 Lance couch works with a shield; locked-on swings hit only the locked foe (Powers, Kingdoms, 2026-11-27)
 - [ ] #2330 country speech - most townsfolk talk rough, as few could read (Kingdoms, 2026-11-27)
@@ -119,8 +120,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2271 hoods and over-garments fit what is under them (Kingdoms, 2026-11-27)
 - [ ] #2270 Greetings fit the moment (Kingdoms, 2026-11-27)
 - [ ] #2269 Tables say what's missing; /hints off (Powers, Kingdoms, Kitchen, 2026-11-27)
-- [ ] #2268 Reply to what a villager says - first spoke on the talk wheel (Kingdoms, 2026-11-27)
-- …and 690 older ones.
+- …and 691 older ones.
 
 ## Health
 
