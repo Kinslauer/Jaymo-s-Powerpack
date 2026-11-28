@@ -159,11 +159,11 @@ public final class BlastGore {
 	/**
 	 * A player or an NPC (built like a person) a crushing blow throws is floored this often, as the throw is real knockback
 	 * (Andy, "lower that chance by 80% and require targeted hits to the legs, knockback or explosions", then "npcs can get
-	 * the same resilience"). Only when Kitchen's own heavy-blow roll didn't
+	 * the same resilience", then "players 1 in 5, npcs 1 in 2"). Only when Kitchen's own heavy-blow roll didn't
 	 * count the blow as knockback already ({@link #kitchenCounts}), so no blow gets two rolls. The topple is small: the
 	 * throw itself is in their speed, which Kitchen's limp carries on.
 	 */
-	public static final float THROW_FLOOR_CHANCE = 0.5F;
+	public static final float PLAYER_THROW_FLOOR_CHANCE = 0.2F, NPC_THROW_FLOOR_CHANCE = 0.5F;
 	private static final double THROW_TOPPLE = 0.1, THROW_TOPPLE_LIFT = 0.04;
 	/** A player blown apart → the parts they'd lost before it (all they come back without). */
 	private static final Map<UUID, Integer> BEFORE = new HashMap<>();
@@ -372,7 +372,7 @@ public final class BlastGore {
 			}
 			body.setDeltaMovement(t[0] * t[2], Math.max(v.y, CRUSH_LIFT * t[3]), t[1] * t[2]);
 			body.needsSync = true;
-			if (t[4] > 0.0 && body.getRandom().nextFloat() < THROW_FLOOR_CHANCE) {
+			if (t[4] > 0.0 && body.getRandom().nextFloat() < (body instanceof Player ? PLAYER_THROW_FLOOR_CHANCE : NPC_THROW_FLOOR_CHANCE)) {
 				if (body instanceof ServerPlayer player) {
 					com.jaymospowers.power.web.KitchenCompat.knockLimp(player, t[0] * THROW_TOPPLE, THROW_TOPPLE_LIFT, t[1] * THROW_TOPPLE);
 				} else if (body instanceof net.minecraft.world.entity.Mob mob) {

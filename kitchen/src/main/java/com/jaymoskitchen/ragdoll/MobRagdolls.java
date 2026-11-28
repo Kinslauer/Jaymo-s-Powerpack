@@ -143,7 +143,8 @@ public final class MobRagdolls {
 	 * A heavy blow floors an NPC (a body built like a person) only as it does a player (LivingRagdolls): a blast, or a blow
 	 * that knocks it back ({@link LivingRagdolls#knocksBack}), and then this often. Andy: "Players are knocked on the
 	 * ground far too easily. lower that chance by 80% and require targeted hits to the legs, knockback or explosions",
-	 * then "npcs can get the same resilience". Animals and other bodies go down on any heavy blow, as before.
+	 * then "npcs can get the same resilience", then "players 1 in 5, npcs 1 in 2". Animals and other bodies go down on
+	 * any heavy blow, as before.
 	 */
 	public static final float NPC_FLOOR_CHANCE = 0.5F;
 

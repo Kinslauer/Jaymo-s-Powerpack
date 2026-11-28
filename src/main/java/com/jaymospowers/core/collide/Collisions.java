@@ -76,7 +76,7 @@ public final class Collisions {
 	/** A slam this hard (damage) knocks a player limp, bounced off the wall this fast... */
 	public static final float SLAM_LIMP = 6.0F;
 	/** ...this often (every time before): Andy, "Players are knocked on the ground far too easily. lower that chance by 80%". */
-	public static final float SLAM_LIMP_CHANCE = 0.5F;
+	public static final float SLAM_LIMP_CHANCE = 0.2F;
 	public static final double SLAM_BOUNCE = 0.15;
 	/** The stagger after a slam (Slowness II, ticks). */
 	public static final int STAGGER_TICKS = 20;
