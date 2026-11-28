@@ -18583,3 +18583,11 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - Not kept: on settled logs, chopping is ordinary log breaking (no three-stroke chop).
 - `SettledTrees` (kept per chunk, indexed while loaded), `FallingTree.settle`/`wake`/`SETTLE_AFTER`, `Trees.natural`, `Tornadoes`.
 - Built; not played.
+
+## 0.14.23 (2026-11-28): The Cordon are MCA people, at a person's pace (#2350)
+
+- **Who they are now**: with MCA, every one of the Cordon (Sentinel, Stalker, Enforcer, Overseer and the Arbiter) is an MCA guard of no realm, with their own name, face, talk and memory, in their rank's ash robes with the black band of the blindfolded over their eyes (new MCA outfits, four of each rank, drawn by `kingdoms/tools/gen_cordon_outfits.py`). Before, they were their own monster bodies, the only humanoid foes never swapped for MCA people (`CordonMen`, `Uniforms.cordon`, `McaBridge.cordonGuard`).
+- **Why they crawled**: their speed was 0.23-0.30, about half an MCA person's 0.5, and a person's pace (`NpcPace`, -30%) and the spear's weight then came off that. A mob's walk goes with the square of its speed, so a Sentinel walked at about 60% of a zombie. As MCA people they walk at MCA's pace like everyone else (each rank keeps its old share of it: a Stalker quicker, an Enforcer a little slower). The old bodies, still used without MCA, are a third faster too.
+- **What each rank does, kept**: they go after a heretic they see (within 32 blocks) and fight on the Cordon's own side, not a town's. A Stalker goes unseen until close or struck, and its blow lays Rot. An Enforcer's blow binds your gift. An Overseer rallies the Cordon near once badly hurt, and the summons falls from it when it goes down. The Arbiter stands a head taller with its boss bar, learns the harm dealt it, overloads and staggers; its court is judged when it goes down.
+- A patrol with no player within 96 blocks leaves the world, as the old bodies despawned; a court's Arbiter and guards keep to the court.
+- Built; not played.
