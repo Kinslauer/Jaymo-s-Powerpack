@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: antigravity
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
@@ -7,6 +7,7 @@ claimed_by: hermes-b
 pr: 2356
 thread: t3 mcp:e7b29b66-499d-478c-8315-6f5702c83489
 writer: hermes-writer
+text_pass: none
 ---
 
 # Hunter's Road 4 models: The drowned, hags and fog (Kingdoms `monsters/`) rows B2 B3 B4
