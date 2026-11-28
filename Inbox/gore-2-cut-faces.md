@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: antigravity
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: t3 mcp:4d286911-da95-4fbc-bfe4-2296ec667153
-claimed_by: t3
+claimed_by: 
 pr: 
 suggested_owns:
   - src/client/java/com/jaymospowers/client/Dismembered.java
@@ -32,3 +32,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 - 2026-11-27 17:40 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on gore 1-4 (via Claude coordinator, 2026-11-27)
 - 2026-11-27 18:28 hermes-modeller's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-27 18:57 Andy (2026-11-27): 'Use t3'. Moved from Prometheus to Antigravity (Gemini) in T3 Code; Codex is at its usage limit until Dec 1.
+- 2026-11-27 20:20 t3's claim had no sign of work for 30 min: handed back as open.
