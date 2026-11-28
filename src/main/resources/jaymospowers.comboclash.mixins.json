@@ -3,7 +3,8 @@
 	"package": "com.jaymospowers.mixin.comboclash",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"CombatEventsMixin"
+		"CombatEventsMixin",
+		"CombatManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0

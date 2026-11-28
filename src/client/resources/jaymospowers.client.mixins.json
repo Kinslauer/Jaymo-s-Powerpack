@@ -3,6 +3,10 @@
 	"package": "com.jaymospowers.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"VertexBufferGrowthMixin",
+		"ByteBufferBuilderAccessor",
+		"StagedVertexBufferAccessor",
+		"SharedBufferLeakMixin",
 		"DarkSightGlowMixin",
 		"SpectacleRenderMixin",
 		"FastLeavesMixin",

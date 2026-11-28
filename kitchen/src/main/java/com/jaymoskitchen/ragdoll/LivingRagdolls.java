@@ -22,6 +22,11 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -50,6 +55,12 @@ public final class LivingRagdolls {
 	 * (the blow's, a blast's, a power's) is already in their speed on their client, which adds it (LimpController).
 	 */
 	private static final double HIT_FLING = 0.1, HIT_LIFT = 0.04;
+	/**
+	 * A heavy blow floors a player only this often, and only a blast or one that knocks them back
+	 * ({@link #knocksBack}). Andy (2026-11-28): "Players are knocked on the ground far too easily. lower that chance by 80%
+	 * and require targeted hits to the legs, knockback or explosions" (blows to the legs are Powers' LegFell).
+	 */
+	public static final float PLAYER_FLOOR_CHANCE = 0.2F;
 	/** A hard landing tips them forward this fast (their own speed is added on their client). */
 	private static final double LANDING_TIP = 0.2;
 
@@ -217,6 +228,10 @@ public final class LivingRagdolls {
 			// small hits, and anything that comes from nowhere (fire, drowning, starving, magic)
 			return;
 		}
+		if (!source.is(DamageTypeTags.IS_EXPLOSION) && !knocksBack(player, source) || player.getRandom().nextFloat() >= PLAYER_FLOOR_CHANCE) {
+			// a heavy blow that doesn't throw them back only staggers them; and even a throwing one floors them seldom
+			return;
+		}
 		double dx = from == null ? 0.0 : player.getX() - from.x, dz = from == null ? 0.0 : player.getZ() - from.z;
 		double flat = Math.hypot(dx, dz);
 		if (flat < 1.0E-4) {
@@ -224,6 +239,29 @@ public final class LivingRagdolls {
 		} else {
 			knock(player, dx / flat * HIT_FLING, HIT_LIFT, dz / flat * HIT_FLING);
 		}
+	}
+
+	/**
+	 * Whether a blow throws {@code player} back past a plain hit's push: from a body that hits for knockback (a ravager,
+	 * a hoglin), a weapon or shot that adds it (Knockback, Punch), or a player's sprinting swing.
+	 */
+	static boolean knocksBack(LivingEntity player, DamageSource source) {
+		float knock = 0.0F;
+		Entity by = source.getEntity();
+		if (by instanceof LivingEntity attacker && source.getDirectEntity() == attacker) {
+			AttributeInstance attribute = attacker.getAttribute(Attributes.ATTACK_KNOCKBACK);
+			if (attribute != null) {
+				knock += (float) attribute.getValue();
+			}
+			if (attacker instanceof Player hitter && hitter.isSprinting()) {
+				knock += 1.0F;
+			}
+		}
+		ItemStack weapon = source.getWeaponItem();
+		if (weapon != null && !weapon.isEmpty() && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			knock = EnchantmentHelper.modifyKnockback(level, weapon, player, source, knock);
+		}
+		return knock > 0.0F;
 	}
 
 	/** Another mod's say: any veto that returns true keeps that player from going limp (and lets them up if they are). */

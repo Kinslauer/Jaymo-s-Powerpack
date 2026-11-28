@@ -156,6 +156,15 @@ public final class BlastGore {
 	private static final Map<LivingEntity, Long> CRUSHING = new WeakHashMap<>();
 	/** Bodies a crushing blow throws at the end of this tick: the way across (a unit vector) and how fast. */
 	private static final Map<LivingEntity, double[]> THROWS = new WeakHashMap<>();
+	/**
+	 * A player or an NPC (built like a person) a crushing blow throws is floored this often, as the throw is real knockback
+	 * (Andy, "lower that chance by 80% and require targeted hits to the legs, knockback or explosions", then "npcs can get
+	 * the same resilience"). Only when Kitchen's own heavy-blow roll didn't
+	 * count the blow as knockback already ({@link #kitchenCounts}), so no blow gets two rolls. The topple is small: the
+	 * throw itself is in their speed, which Kitchen's limp carries on.
+	 */
+	public static final float THROW_FLOOR_CHANCE = 0.2F;
+	private static final double THROW_TOPPLE = 0.1, THROW_TOPPLE_LIFT = 0.04;
 	/** A player blown apart → the parts they'd lost before it (all they come back without). */
 	private static final Map<UUID, Integer> BEFORE = new HashMap<>();
 
@@ -339,7 +348,10 @@ public final class BlastGore {
 		double speed = CRUSH_THROW * Mth.clamp(base / CRUSH_DAMAGE, 1.0F, 1.5F) * (1.0 - resist);
 		// (the way across, how fast, and how much of the lift: what it doesn't resist)
 		if (speed > 0.05) {
-			THROWS.put(entity, new double[] {dx / length, dz / length, speed, 1.0 - resist});
+			boolean person = entity instanceof ServerPlayer
+				|| entity instanceof net.minecraft.world.entity.Mob && com.jaymospowers.core.wounds.Wounds.plan(entity) == BodyPlan.HUMANOID;
+			boolean floor = person && !source.is(DamageTypeTags.IS_EXPLOSION) && !kitchenCounts(entity, source);
+			THROWS.put(entity, new double[] {dx / length, dz / length, speed, 1.0 - resist, floor ? 1.0 : 0.0});
 		}
 	}
 
@@ -360,8 +372,39 @@ public final class BlastGore {
 			}
 			body.setDeltaMovement(t[0] * t[2], Math.max(v.y, CRUSH_LIFT * t[3]), t[1] * t[2]);
 			body.needsSync = true;
+			if (t[4] > 0.0 && body.getRandom().nextFloat() < THROW_FLOOR_CHANCE) {
+				if (body instanceof ServerPlayer player) {
+					com.jaymospowers.power.web.KitchenCompat.knockLimp(player, t[0] * THROW_TOPPLE, THROW_TOPPLE_LIFT, t[1] * THROW_TOPPLE);
+				} else if (body instanceof net.minecraft.world.entity.Mob mob) {
+					// (floored from the way the blow came: the throw it's already taking carries the body on)
+					com.jaymospowers.power.web.KitchenCompat.floorMob(mob, mob.position().subtract(t[0], 0.0, t[1]));
+				}
+			}
 		}
 		THROWS.clear();
+	}
+
+	/**
+	 * Whether Kitchen's heavy-blow check (its LivingRagdolls.knocksBack) already counts this blow as knockback: the
+	 * attacker's own attack knockback, a player's sprinting swing, or a Knockback weapon. Kept the same as Kitchen's.
+	 */
+	private static boolean kitchenCounts(LivingEntity target, DamageSource source) {
+		float knock = 0.0F;
+		if (source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker) {
+			net.minecraft.world.entity.ai.attributes.AttributeInstance attribute =
+				attacker.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_KNOCKBACK);
+			if (attribute != null) {
+				knock += (float) attribute.getValue();
+			}
+			if (attacker instanceof Player hitter && hitter.isSprinting()) {
+				knock += 1.0F;
+			}
+		}
+		net.minecraft.world.item.ItemStack weapon = source.getWeaponItem();
+		if (weapon != null && !weapon.isEmpty() && target.level() instanceof ServerLevel level) {
+			knock = net.minecraft.world.item.enchantment.EnchantmentHelper.modifyKnockback(level, weapon, target, source, knock);
+		}
+		return knock > 0.0F;
 	}
 
 	/** A WeaponMod blunderbuss's shot, fired by someone (the closeness is measured from them). */

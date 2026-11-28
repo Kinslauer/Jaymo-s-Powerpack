@@ -379,10 +379,41 @@ public final class CombatArts {
 	// ---- active skills ---------------------------------------------------------------------------------------------
 
 	/** The {@code Y} key: Charge, or War Cry (sneaking, or when it's the only one known). */
+	/** Combo Clash's {@code ComboAPI.giveWay}, by reflection (null: not installed, or not found). */
+	private static java.lang.reflect.@org.jspecify.annotations.Nullable Method giveWay;
+	private static boolean giveWayLooked;
+
+	/**
+	 * A Combo Clash string under way for {@code sp} (the shipped "Combo Clash" by HanHoYoung) gives way at once, so a move
+	 * made now plays clean. Nothing without Combo Clash.
+	 */
+	public static void comboClashGiveWay(ServerPlayer sp) {
+		if (!giveWayLooked) {
+			giveWayLooked = true;
+			if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("comboclash")) {
+				try {
+					giveWay = Class.forName("com.comboclash.api.ComboAPI").getMethod("giveWay", ServerPlayer.class);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't reach Combo Clash's giveWay; combat arts won't cut its strings short", e);
+				}
+			}
+		}
+		if (giveWay == null) {
+			return;
+		}
+		try {
+			giveWay.invoke(null, sp);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			giveWay = null;
+		}
+	}
+
 	static void use(ServerPlayer sp, boolean sneaking) {
 		if (!(sp.level() instanceof ServerLevel level) || sp.isSpectator() || !sp.isAlive()) {
 			return;
 		}
+		// (Andy, 2026-11-28: "ways to cancel your string into combos using moves") a combat art cuts a Combo Clash string short
+		comboClashGiveWay(sp);
 		// (0.7.550) a spear out pinning a foe: the tap tugs it back (its forms are on the skill bar, so there's no stance to tap in)
 		if (com.jaymoskingdoms.forms.Forms.tug(sp)) {
 			return;

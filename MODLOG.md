@@ -9157,3 +9157,59 @@ Deviations from the plan:
   be used yet. A click on a bare group keeps the menu open.
 - `RigMenuScreen` (groups, two-ring layout and picking); lang `gui.jaymospowers.rig_menu.group.*` and `group_hint`.
 - Built; not played.
+
+## 0.28.48 (2026-11-28): Combo Clash's air game is ours; moves cut a string short (#2345)
+
+- **Air combat** (Andy: "i like everything about except the air combos ... along with or enemy step for air combat").
+  Combo Clash's server now counts every blow of its string as a blow on the ground: no hovering in the air, no string in
+  the air, no downslam (`mixin/comboclash/CombatManagerMixin`, on `CombatManager.startM1`). Its uppercut (jump held as
+  the fourth blow lands) is now our launcher: the foe goes up with you after it, as the Air Combo's launch does
+  (`AirCombo.finisherLaunch`, through Combo Clash's M1 hook `landed`, `ComboClashCompat.variant`). It works for those
+  who can fight in the air and have learned the Air Combo (or a web slinger's Agility); for anyone else it's a plain
+  fourth blow. Three ticks off the ground, or flying, the attack key is vanilla's and our air combo's
+  (`ComboClashClient.yieldsAttack`). Up there the juggle, the sneaking slam, the enemy step and the web's pull-ups work
+  as before.
+- **String cancels** (Andy: "there should also be ways to cancel your string into combos using moves"). A Combo Clash
+  string under way gives way at once, through its public `ComboAPI.giveWay` (`ComboClashCompat.giveWay`), so the move
+  plays clean. This happens on any power key press (`Powers.key`; the moves anyone has without a power too), the Air
+  Combo's launch, a pull-up and an enemy step. Kingdoms' combat arts do the same.
+- Built; not played. Not tested: the launcher's timing against Combo Clash's own fourth-blow knockback, which it
+  replaces on that blow, and how the give-way motion looks into each power's move.
+
+## 0.28.49 (2026-11-28): smoother frames: the shared vertex buffer no longer regrows every frame (#2344)
+
+- Andy's spark profile (2026-11-28, after a graveyard horde) spent 58% of the render thread copying the world's one shared vertex buffer as it grew, and the share rose through the capture: the buffer was still growing every frame.
+- **Let go at frame end** (`SharedBufferLeakMixin`, on `RenderBuffers.endFrame`): whatever is still held in the shared buffer after the frame (a vertex builder left open, slices never handed back) is let go, so the buffer empties every frame as vanilla means it to. The first time it happens the log says how much was held ("the shared vertex buffer still held ..."), and the log warns if the buffer ever passes 512 MB.
+- **Grows by half** (`VertexBufferGrowthMixin`): a vertex buffer that runs out of room grows by half its size instead of vanilla's flat 2 MB, so a big frame reaches its size in a few copies instead of dozens.
+- Accessors: `ByteBufferBuilderAccessor`, `StagedVertexBufferAccessor`.
+- Built; not played.
+
+## 0.28.50 (2026-11-28): quieter hurt lines and rarer leg knockdowns (#2347)
+
+- **"I'm hit!" once a fight**: a blow from someone or something (a swing, an arrow, a bite, a blast) no longer names who did it or how. The first blow of a fight says "I'm hit!" under the crosshair with the red side mark; the blows after it show nothing. A blow after 20 s with none starts a new fight. Our features that strike without a named attacker (colossi, drunk goblins, claws, thrown things and the like: `HurtCauseHud.BLOW_FEATURES`) count as blows too.
+- **Other hurts once each**: a hurt nobody dealt (the sun, fire, poison, hunger, cold, a fall, drowning, our own afflictions) shows its own line once, when it starts; the same cause shows again only after 10 s without it. At most two lines at once.
+- **Shorter lines**: every "X hit me / got me from range / blew me up" line is gone (`hurt_cause.jaymospowers.hit` is "I'm hit!"), and 49 wordy cause lines are cut down ("The sun! I need shade", "The gloom...", "Too much ki!").
+- `HurtCause.Hurt` now carries `fight` instead of the attacker's name and the ranged flag; the server log still names the attacker.
+- **Leg knockdowns**: a heavy blow to a player's leg or foot (`LegFell`) fells them one time in five (`PLAYER_CHANCE` 0.2), down 80%. Mobs still always go down.
+- Built; not played.
+
+## 0.28.51 (2026-11-28): Players and NPCs floored less by sweeps, leg blows, wall slams and throws (#2346)
+
+- Follows "quieter hurt lines and rarer leg knockdowns" (Andy: "Players are knocked on the ground far too easily. lower
+  that chance by 80% and require targeted hits to the legs, knockback or explosions", then "npcs can get the same
+  resilience") to the other ways a body is put on the ground. NPCs here are mobs built like a person.
+- **Leg sweeps** (`Tripped.sweep`: the Mortal Kit kick, the boxing leg sweep, the slide tackle, the Web Slinger brute
+  lunge): a player or NPC goes on its back 20% of the time (`SWEEP_CHANCE`; was 100%); when it keeps its feet the move's
+  fallback applies (the kick's and the lunge's slow). The boxing sweep's stamina is still spent on a miss; its cooldown
+  only starts on a hit. The bolas' bind still always trips.
+- **Leg blows on NPCs** (`LegFell`): an NPC hit on a leg or foot for 35% of its health, or a broken leg, now goes down
+  20% of the time too (through its sweep; was 100%), as players already do.
+- **Falling fist attack**: no longer puts anyone on their back (a blow from above on the body, not the legs).
+- **Wall slams** (`Collisions`: knocked back into a wall for 6+ damage): ragdolls a player 20% of the time (was 100%).
+  The slam's damage, stagger and shake are unchanged. (Mobs never ragdolled from slams.)
+- **Crushing-blow throws** (`BlastGore`): the throw is knockback, so a thrown player or NPC is floored 20% of the time
+  (`THROW_FLOOR_CHANCE`), only when Kitchen's heavy-blow roll didn't already count the blow as knockback (no blow gets
+  two rolls).
+- Unchanged: the downed state from losing hearts, both legs broken or lost, fainting, hard landings, horse crashes, head
+  bumps, being carried or thrown by another player, your own forms' moves, Air Combo launches and wrestling takedowns.
+- Built; not played.

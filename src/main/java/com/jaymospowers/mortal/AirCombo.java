@@ -220,16 +220,39 @@ public final class AirCombo {
 			}
 			return;
 		}
-		if (player.isShiftKeyDown() && player.onGround() && target.onGround() && can(player) && now >= READY.getOrDefault(player.getUUID(), 0L)
-			&& takes(target) && (WebUptilt.unlocked(player) || com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.AIR_COMBO))) {
-			READY.put(player.getUUID(), now + LAUNCH_WAIT);
-			UP.put(target, new Up(player.getUUID(), now, now + AIRBORNE, 0));
-			target.setAttached(STEPPABLE, true);
-			throwBody(target, 0.0, LAUNCH, 0.0);
-			fling(player, new Vec3(player.getDeltaMovement().x, FOLLOW, player.getDeltaMovement().z));
-			level.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY() + 0.1, target.getZ(), 10, 0.3, 0.05, 0.3, 0.05);
-			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2F, 1.2F);
+		if (player.isShiftKeyDown() && player.onGround() && target.onGround()) {
+			launch(level, player, target, now);
 		}
+	}
+
+	/**
+	 * Andy (2026-11-28), of Combo Clash: "i like everything about except the air combos ... along with or enemy step for
+	 * air combat". Its uppercut (jump held as a string's fourth blow lands) is our launcher now, from {@code
+	 * ComboClashCompat}: off the ground with {@code player} after it, the juggle, slam and enemy step to follow. For
+	 * those who can't fight in the air (or haven't learned it) it stays a plain fourth blow.
+	 */
+	public static void finisherLaunch(ServerPlayer player, LivingEntity target) {
+		if (player.onGround() && target != player && player.level() instanceof ServerLevel level && !UP.containsKey(target)) {
+			launch(level, player, target, level.getGameTime());
+		}
+	}
+
+	/** The launcher, if {@code player} can and has it ready: {@code target} thrown up and {@code player} after it. */
+	private static boolean launch(ServerLevel level, ServerPlayer player, LivingEntity target, long now) {
+		if (!can(player) || now < READY.getOrDefault(player.getUUID(), 0L) || !takes(target)
+			|| !(WebUptilt.unlocked(player) || com.jaymospowers.core.TreeLocks.check(player, com.jaymospowers.core.TreeLocks.AIR_COMBO))) {
+			return false;
+		}
+		// a Combo Clash string under way gives way to it
+		com.jaymospowers.compat.ComboClashCompat.giveWay(player);
+		READY.put(player.getUUID(), now + LAUNCH_WAIT);
+		UP.put(target, new Up(player.getUUID(), now, now + AIRBORNE, 0));
+		target.setAttached(STEPPABLE, true);
+		throwBody(target, 0.0, LAUNCH, 0.0);
+		fling(player, new Vec3(player.getDeltaMovement().x, FOLLOW, player.getDeltaMovement().z));
+		level.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY() + 0.1, target.getZ(), 10, 0.3, 0.05, 0.3, 0.05);
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2F, 1.2F);
+		return true;
 	}
 
 	/**
@@ -267,6 +290,7 @@ public final class AirCombo {
 			}
 			level.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY() + 0.1, target.getZ(), 6, 0.3, 0.05, 0.3, 0.03);
 		}
+		com.jaymospowers.compat.ComboClashCompat.giveWay(player);
 		Up up = UP.get(target);
 		int juggles = up != null && up.by().equals(player.getUUID()) ? up.juggles() : 0;
 		UP.put(target, new Up(player.getUUID(), now + ticks, now + ticks + AIRBORNE, juggles));
@@ -287,6 +311,7 @@ public final class AirCombo {
 			return;
 		}
 		long now = level.getGameTime();
+		com.jaymospowers.compat.ComboClashCompat.giveWay(player);
 		UP.put(foe, new Up(up.by(), up.since(), now + AIRBORNE, 0));
 		foe.removeAttached(STEPPABLE);
 		player.resetFallDistance();

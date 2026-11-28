@@ -530,6 +530,9 @@ public final class Trees {
 
 	/** Living (not placed) leaves round a log: it's a tree, not a building. */
 	static boolean natural(ServerLevel level, BlockPos log) {
+		if (SettledTrees.settled(level, log)) {
+			return false;
+		}
 		for (BlockPos q : BlockPos.betweenClosed(log.offset(-2, -2, -2), log.offset(2, 2, 2))) {
 			BlockState state = level.getBlockState(q);
 			if (state.getBlock() instanceof LeavesBlock && !state.getValue(LeavesBlock.PERSISTENT)) {

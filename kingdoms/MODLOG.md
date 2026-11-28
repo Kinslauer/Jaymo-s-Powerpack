@@ -18555,3 +18555,31 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
   short Alt dash held into a long roll, F to block or perfect block, digging as ever with no fight about, and ` for the
   old way. The click on the Sun now runs before Combo Clash's (`SunMoonClient`).
 - Built; not played.
+
+## 0.14.20 (2026-11-28): Combat arts cut a Combo Clash string short; loading hint 299 updated (#2345)
+
+- A combat art (Charge, War Cry, the shield throw) now cuts a Combo Clash string under way short, so the art plays
+  clean (`CombatArts.comboClashGiveWay`, Combo Clash's public `ComboAPI.giveWay` by reflection).
+- Hint 299: jump held on the fourth blow launches the foe, if you can fight in the air, for the juggle, slam and enemy
+  step. A power's move or a combat art cuts a string short.
+- Built; not played.
+
+## 0.14.21 (2026-11-28): Hunter's Road 3 - corpse-eater models, textures and animations (#2331)
+
+- **Grave-gnawer and pack leader**: hunched, long-armed corpse-eaters with lowered scavenging skulls and jaws, crouching hind legs, and animations for prowling, sprinting, raking, lunging, feeding, and knitting a broken body back together; the bigger pack leader carries a rack of jagged back spines in a darker coat.
+- **Bloated dead and spined variant**: staggering gas-swollen corpses whose split ribcages and distended bellies visibly pulse, swell before bursting, and rupture apart, plus a palette-swapped spined variant bristling with bone quills.
+- **Grave-brute**: a heavy, broad-shouldered deep-cave miniboss with ossified shoulder plates, a sloped battering-ram skull and forward horns, club-like fists, and animations for slams, roars, and its block-breaking charge.
+- **Bone-burrower and heavy burrower**: low subterranean corpse-eaters with segmented bone-plate backs and splayed spade-clawed forelimbs that leap, curl into an armoured ball, dive underground, and burst up from cave floors, alongside a bulkier rot-sick variant.
+- **Nests and old bones**: a charnel nest mound of filth, ribs, and skulls with a pulsing burrow vent, plus slumped cave-skeleton and kneeling fallen-warrior remains that can hold an ancient blade.
+- Built; not played yet. The creature and block code for these assets lands in the Hunter's Road 3 patch.
+
+## 0.14.22 (2026-11-28): fallen trees settle into real blocks, and wake when moved (#2348)
+
+- A fallen tree lying still for 30 seconds (nobody pushing it, holding it or chopping at it) becomes real blocks where it lies: its logs turned the way they lie, its leaves dropping off (giving what they would only when a player brought it down and is near, as before). Drawn with the land, a felled forest no longer costs a quarter of every frame (Andy's spark profile, 2026-11-28, 96 fallen trees about).
+- It wakes back into a lying tree, every log where it was, when someone strong enough to shove it (brawn 2+) walks into one of its logs, when a giant's hand closes on it, when a tornado's winds reach it, or when a player breaks one of its logs or the block under one (broken through, it comes apart in two; with what held it gone, it falls). It settles again 30 seconds after it's left alone.
+- A log with no room where it lay (sunk in the ground) is kept with it out of sight and comes back when it wakes.
+- Settled logs are never taken for a standing tree (felling, giants, tornado uprooting).
+- Anyone too weak to shove it still puts both hands to a settled log and braces against it (Andy); only the strong wake it.
+- Not kept: on settled logs, chopping is ordinary log breaking (no three-stroke chop).
+- `SettledTrees` (kept per chunk, indexed while loaded), `FallingTree.settle`/`wake`/`SETTLE_AFTER`, `Trees.natural`, `Tornadoes`.
+- Built; not played.
