@@ -1,5 +1,5 @@
 ---
-status: stopped
+status: running
 task: Andy's clip 2026-11-23 9:53 AM (sheep limbs float, no drag arm, diggers take bodies)
 branch: corpse-limbs-drag-arm-digger-pits
 with: Claude (side session of the project thread)

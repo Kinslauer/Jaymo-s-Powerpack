@@ -30,3 +30,5 @@ Andy asked for a sneak-click choice box (Use (verb) / Lift) in PR 2035, then han
 
 ## Notes
 - 2026-11-23 15:08 PR #2035 is merged into master; moved to Agents/Done.
+## Choice box (2026-11-28)
+PR 2035 was merged. The box went to Codex in T3 (thread mcp:35079ab1-967b-4f41-a979-64796368d661, branch block-choice-box off origin/master). Brief: scratchpad codex-brief.md. Claude reviews when it is done.
