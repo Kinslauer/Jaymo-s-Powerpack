@@ -710,6 +710,14 @@ public final class RigOctoClient {
 		player.resetFallDistance();
 	}
 
+	/**
+	 * Carried on the arm walk, held up off the ground between the arms (not gripping a wall), on any client: the body
+	 * hangs limp between them (WebHangPose).
+	 */
+	public static boolean carried(Player player) {
+		return !RigOcto.clinging(player) && RigOctoWalk.striding(player);
+	}
+
 	/** On the arm walk: held up between the arms and walked along (the symbiote's stride; see {@link #STRIDE_HEIGHT}). */
 	private static void stride(LocalPlayer player) {
 		Input input = player.input.keyPresses;
