@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 22:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 22:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,7 +28,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · 🪶 Quill · #2356 · writing
 
 
 ## In review
@@ -44,6 +43,7 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for antigravity · #2337 · in-review
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · t3 · #2355 · in-review
+- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · 🍇 Bacchus · #2356 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
