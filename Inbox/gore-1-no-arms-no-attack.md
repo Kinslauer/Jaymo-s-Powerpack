@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: antigravity
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: t3 mcp:d1eafde0-5f2c-40dd-a1a7-566531ded9c2
-claimed_by: 
-pr: 
+claimed_by: t3
+pr: 2355
 suggested_owns:
   - src/main/java/com/jaymospowers/core/Dismember.java (a small hook, or a new mixin)
 ---
