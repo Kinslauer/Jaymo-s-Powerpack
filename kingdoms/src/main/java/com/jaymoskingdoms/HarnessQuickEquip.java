@@ -18,10 +18,10 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Shift-click a harness piece in an inventory to put it on: it goes in its own place of the harness when that place is
- * bare and the harness screen would take it there (spaulders after a chest piece, a crest on a helm, gilded plate only
- * on a royal or lord). Otherwise the click moves it as it always did, and a short line says why when it was the fit
- * and not a full place. Works from the survival inventory ({@code mixin.HarnessQuickEquipMixin}) and from the bauble
+ * Shift-click a harness piece in an inventory to put it on: it goes in its own place of the harness when the harness
+ * screen would take it there (spaulders after a chest piece, a crest on a helm, gilded plate only on a royal or lord).
+ * A place already filled gives up what it held, which goes back where the new piece came from (a tabard over a worn
+ * cloak). Otherwise the click moves it as it always did, and a short line says why when it was the fit. Works from the survival inventory ({@code mixin.HarnessQuickEquipMixin}) and from the bauble
  * screen's inventory (Jaymo's Powers calls {@link #shiftClick} by reflection). Shift-click on a worn piece in the
  * harness screen takes it off, as before ({@link HarnessMenu}).
  * <p>
@@ -69,7 +69,8 @@ public final class HarnessQuickEquip {
 
 	/**
 	 * Shift-click on {@code slot}, an inventory slot: true when one piece from it went on (or, on the client, when one
-	 * will), so the old move is skipped. On the server it takes the piece from the slot itself, so a repeated or late
+	 * will), so the old move is skipped. A piece already in its place comes off into {@code slot}, so only a lone piece
+	 * (not one of a stack) is put on over another. On the server it takes the piece from the slot itself, so a repeated or late
 	 * click can only put on what is still there.
 	 */
 	public static boolean shiftClick(Player player, Slot slot) {
@@ -78,18 +79,19 @@ public final class HarnessQuickEquip {
 		if (place == null || player.isSpectator()) {
 			return false;
 		}
-		boolean bare = Harness.get(player, place).isEmpty();
+		ItemStack worn = Harness.get(player, place);
+		boolean bare = worn.isEmpty();
+		if (!bare && stack.getCount() != 1) {
+			return false;
+		}
 		boolean fits = Harness.fits(player, place);
 		boolean mayWear = HeraldryWear.mayWear(player, stack);
 		if (!(player instanceof ServerPlayer server)) {
-			boolean will = bare && fits && mayWear;
+			boolean will = fits && mayWear;
 			if (will && creativeSend != null && player.inventoryMenu.slots.contains(slot)) {
 				creativeSend.accept(slot.index);
 			}
 			return will;
-		}
-		if (!bare) {
-			return false;
 		}
 		if (!fits) {
 			server.sendOverlayMessage(Component.translatable(place == Harness.Slot.CREST ? "message.jaymoskingdoms.harness.needs_helm"
@@ -100,10 +102,11 @@ public final class HarnessQuickEquip {
 			HeraldryWear.refused(server);
 			return false;
 		}
+		ItemStack off = worn.copy();
 		Harness.set(server, place, stack.copyWithCount(1));
 		stack.shrink(1);
 		if (stack.isEmpty()) {
-			slot.setByPlayer(ItemStack.EMPTY);
+			slot.setByPlayer(off);
 		} else {
 			slot.setChanged();
 		}
