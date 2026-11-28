@@ -3045,3 +3045,8 @@ Andy: "there should be a way to dismember them from the inventory screen so you 
   burn a full bar now lasts about 12 seconds sprinting instead of 11.
 - `Stamina.SPRINT_COST` 0.075 to 0.05 a tick.
 - Built; not played.
+
+## 0.7.15 (2026-11-28): Body rot clock shared for Kingdoms' flies (#2339)
+
+- `CorpseEntity.decayTicks()`: how long a body has lain rotting (its saved rot clock), so Kingdoms' flies can wait 3 minutes of rot even across a reload.
+- Built; not played.
