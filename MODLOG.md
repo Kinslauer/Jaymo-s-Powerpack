@@ -9128,3 +9128,32 @@ Deviations from the plan:
 - Built; not played. Not tested: how its dash motion and our roll's tumble look one after the other, its first-person
   look with combat mode on in first person, and whether every power's left click got onto the list above (anything left
   off throws Combo Clash's string as well as its own).
+
+## 0.28.46 (2026-11-28): Limp body in the Octo arms (#2342)
+
+- **Carried on the Octo Core's arm walk** (held up off the ground between the four arms, not gripping a wall), the
+  wearer now hangs limp between them instead of walking the air (Andy: "the player should ragdoll within the arms the
+  same way their legs hang when using the tendrils"). The legs dangle and swing like Wall Crawl's tendril hang, the arms
+  hang loose at the sides and swing a beat behind the legs, both trail back while you move and settle over a few
+  seconds after you stop, and the knees and elbows give a little. The head keeps to the look, so first person still
+  follows it. A swing, a drawn bow or anything held up in use keeps the arms. Every client sees it.
+- `WebHangPose` (new `limp` on its record, `bendLimbs`), `RigOctoClient.carried`, `TendModelFeatureRendererMixin`.
+- Built; not played.
+
+## 0.28.47 (2026-11-28): Rig menu (Sneak+J) in groups (#2343)
+
+- **Rig menu, two rings** (Andy: "the shift J menu is way too cluttered"): the menu had grown to 43 tiles on one ring
+  (52 with an Octo Core), packed so tight they overlapped. The inner ring now holds groups: **Flight** (Hover, Take Off
+  Into Flight, Thruster Dash, Pull Up, Hyper Thrust, Banking, Meteor Dive, Smooth Others), **Blasts** (Palm Blast,
+  Launcher, Barrage, Unibeam, Unibeam Slow Beat), **Guns** (Palm Charge, Gatling Arm, Railgun, Sonic Cannon, Twin Beam,
+  Siege Mode), **Arm Forms** (Arm Blade, Mace Arm, Pile Bunker, Drill Breaker, Thruster Lance, Energy Lash, Weapon
+  Mimic), **Back Rig** (Wing Slash, Spear Legs, Pincers, Grapple Claw, Horn Lightning), **Helm** (Faceplate, Night
+  Vision, Scan, Mark Route, Wrist Table, Bank Shot), **Suit and Drones** (Suit park/call, Sentry, Failsafe, Drones,
+  Decoy, Storing Field) and **Octo Arms** (its nine, only while an Octo Core is worn, as before).
+- Point at a group and its entries fan out on the outer ring around it; carry on out to one and let go of J (or
+  click). Nothing was cut: every entry is in exactly one group (the screen checks this when it loads). The tiles,
+  cooldown shading, "Lv" locks, lit "on" strips and the panel under the rings work as before. A group's tile has a lit
+  rim when it holds what J uses now, a lit strip when one of its switches is on, and goes dark when nothing in it can
+  be used yet. A click on a bare group keeps the menu open.
+- `RigMenuScreen` (groups, two-ring layout and picking); lang `gui.jaymospowers.rig_menu.group.*` and `group_hint`.
+- Built; not played.
