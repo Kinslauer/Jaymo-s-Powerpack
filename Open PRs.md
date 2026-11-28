@@ -1,23 +1,23 @@
 ---
-updated: 2026-11-27 20:44
+updated: 2026-11-28 03:06
 ---
 # Open PRs
 
-15 open, as of 2026-11-27 20:44. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+16 open, as of 2026-11-28 03:06. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
-- **Branch:** `claude/structures-1-siege-camps` · **Updated:** 2026-11-27 (today)
+- **Branch:** `claude/structures-1-siege-camps` · **Updated:** 2026-11-27 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
 ## [#2216](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2216) Structures 5: faction table and relations
-- **Branch:** `claude/structures-5-faction-table` · **Updated:** 2026-11-27 (today)
+- **Branch:** `claude/structures-5-faction-table` · **Updated:** 2026-11-27 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
 ## [#2217](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2217) Structures 6: stable, mine and farm (Kingdoms)
-- **Branch:** `claude/structures-6-stable-mine-farm` · **Updated:** 2026-11-27 (today)
+- **Branch:** `claude/structures-6-stable-mine-farm` · **Updated:** 2026-11-27 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[structures-6-stable-mine-farm]]
 
@@ -57,12 +57,12 @@ Andy merges only on "merge", one at a time.
 - **Agent:** no agent note
 
 ## [#2259](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2259) Small Armies Picks: plan doc (4 rows)
-- **Branch:** `claude/small-armies-picks` · **Updated:** 2026-11-27 (today)
+- **Branch:** `claude/small-armies-picks` · **Updated:** 2026-11-27 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
 ## [#2280](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2280) Hand of God: Celestial Hold and Celestial Turn
-- **Branch:** `claude/small-armies-picks-4` · **Updated:** 2026-11-27 (today)
+- **Branch:** `claude/small-armies-picks-4` · **Updated:** 2026-11-27 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
@@ -76,7 +76,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** [[gore-3-cauterized]]
 
-## [#2349](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2349) Knock-downs 1 in 2, not 1 in 5 (players and NPCs)
-- **Branch:** `claude/project-thread-tvq8oz` · **Updated:** 2026-11-28 (today)
-- **Checks:** ⏳ 1 of 4 running
+## [#2355](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2355) Gore 1: a body with no arms cannot hold a weapon or swing
+- **Branch:** `t3/gore-1-no-arms-no-attack` · **Updated:** 2026-11-28 (today)
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
+
+## [#2356](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2356) Hunter's Road 4: the drowned, hags and fog models, textures and animations
+- **Branch:** `t3/hunters-road-4-models-v2` · **Updated:** 2026-11-28 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[hunters-road-4-models]]
