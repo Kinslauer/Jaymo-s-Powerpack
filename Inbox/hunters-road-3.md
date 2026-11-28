@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: claimed
 for: claude-cloud
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
@@ -23,3 +23,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gnawer leader, fog-wight, imp warrior; whichever are this patch's) so its brew can be made.
 - 2026-11-27 13:20 hunters-road-2 merged (#2287); still waits on hunters-road-3-models.
+- 2026-11-28 01:31 Hold lifted 2026-11-28: hr2 and hr3-models merged; Hunter's Road thread building it.
