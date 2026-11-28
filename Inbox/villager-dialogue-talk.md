@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: Andy
 asked: 2026-11-28
 thread:
-claimed_by:
+claimed_by: YOUTH
 pr:
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/McaCompat.java
