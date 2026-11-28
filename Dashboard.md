@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:49). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 01:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -29,7 +29,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 2026-11-27 04:46 Text pass content is complete (reviewed captain-ground.json lang keys and changes/kingdoms/hollow-captains-fix.md; all player-facing, no rewri…
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
-- [[Inbox/hunters-road-3|hunters-road-3]] · 2026-11-27 13:20 hunters-road-2 merged (#2287); still waits on hunters-road-3-models.
 - [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-27 14:11 hunters-road-7 merged (#2290); still waits on hunters-road-4-models.
 - [[Inbox/hunters-road-5|hunters-road-5]] · 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gn…
 - [[Inbox/hunters-road-8|hunters-road-8]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
@@ -45,8 +44,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/gore-2-cut-faces|gore-2-cut-faces]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/gore-2-cut-faces|gore-2-cut-faces]]: stalled, last change 2026-11-28. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hunters-road-3-models|hunters-road-3-models]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -54,12 +53,20 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-13 waiting for a bot, 3 being built, 11 in review: see [[Kanban]].
+15 waiting for a bot, 2 being built, 10 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2347 quieter hurt lines and rarer leg knockdowns (Powers, Kitchen, 2026-11-28)
+- [ ] #2345 Combo Clash's air game is ours; moves cut a string short (Powers, Kingdoms, 2026-11-28)
+- [ ] #2344 smoother frames: the shared vertex buffer no longer regrows every frame (Powers, 2026-11-28)
+- [ ] #2343 Rig menu (Sneak+J) in groups (Powers, 2026-11-28)
+- [ ] #2342 Limp body in the Octo arms (Powers, 2026-11-28)
+- [ ] #2341 Combo Clash combat for everyone: block and counters on F, a short dash that holds into the long roll (Powers, Kingdoms, 2026-11-28)
+- [ ] #2340 Vanilla spears held out again (Powers, 2026-11-28)
+- [ ] #2339 Flies only at bodies rotting 3 minutes, or at piles of the dead (Kingdoms, Kitchen, 2026-11-28)
 - [ ] #2338 horse keys only in the saddle (Kingdoms, 2026-11-28)
 - [ ] #2336 NPC hip lanterns, held lanterns for NPCs, lantern clink (Powers, 2026-11-28)
 - [ ] #2335 reincarnation forgets bonded animals - horses, pets and mounts are strangers to a new life (Kingdoms, 2026-11-28)
@@ -112,19 +119,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2282 Legends patch 6 fixes - air flips, air step, landings, katana forms (Powers, 2026-11-27)
 - [ ] #2281 Big symbiote combat (Powers, 2026-11-27)
 - [ ] #2279 Guards grow suspicious of what they half see or hear, light up and go to look (Kingdoms, 2026-11-27)
-- [ ] #2278 NPCs' carried weapons hang on their bodies like a player's (Powers, Kingdoms, 2026-11-27)
-- [ ] #2277 spectate viewcone shows the NPC's focus, or that it's thinking or stuck (Kingdoms, 2026-11-27)
-- [ ] #2276 Villages' overgrown rooms tidied, forest trees kept off buildings, stuck walkers push through (Kingdoms, 2026-11-27)
-- [ ] #2275 Quests on the talk wheel's first ring, with a tip (Kingdoms, 2026-11-27)
-- [ ] #2274 Buildings put up over old ruins take the whole ruin down; no trench round new buildings (Kingdoms, 2026-11-27)
-- [ ] #2273 Kingdoms' sextons can wash and bury (Powers, Kingdoms, 2026-11-27)
-- [ ] #2272 Guards shout what fits what they face (Kingdoms, 2026-11-27)
-- [ ] #2271 hoods and over-garments fit what is under them (Kingdoms, 2026-11-27)
-- …and 693 older ones.
+- …and 701 older ones.
 
 ## Health
 
-34 problems in the notes: [[Health]].
+35 problems in the notes: [[Health]].
 
 ## Last week
 
