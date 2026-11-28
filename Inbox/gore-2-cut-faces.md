@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: antigravity
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: t3 mcp:4d286911-da95-4fbc-bfe4-2296ec667153
 claimed_by: t3
-pr: 
+pr: 2358
 suggested_owns:
   - src/client/java/com/jaymospowers/client/Dismembered.java
   - src/client/java/com/jaymospowers/client/SeveredPartRenderer.java
