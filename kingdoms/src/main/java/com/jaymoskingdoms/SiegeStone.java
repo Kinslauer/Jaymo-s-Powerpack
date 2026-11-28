@@ -113,7 +113,7 @@ public final class SiegeStone extends Projectile implements ItemSupplier {
 		EntityHitResult entityHit = this.life <= GRACE_TICKS ? null : ProjectileUtil.getEntityHitResult(level, this, pos, next, new AABB(pos, next).inflate(0.6),
 			e -> e instanceof LivingEntity living && e.isAlive() && !e.isSpectator() && SiegeTrain.harms(thrower, living), 0.3F);
 		if (entityHit != null) {
-			this.burst(level, thrower, entityHit.getLocation(), entityHit.getEntity());
+			this.burst(level, thrower, entityHit.getLocation(), entityHit.getEntity(), null);
 			return;
 		}
 		if (hit.getType() != HitResult.Type.MISS) {
@@ -121,14 +121,14 @@ public final class SiegeStone extends Projectile implements ItemSupplier {
 			if (!(thrower instanceof Worker own) || !Cannonball.ownLand(level, own, struck)) {
 				Bombardment.crater(level, Vec3.atCenterOf(struck), BREACH, thrower);
 			}
-			this.burst(level, thrower, hit.getLocation(), null);
+			this.burst(level, thrower, hit.getLocation(), null, struck);
 			return;
 		}
 		this.setPos(next);
 		this.setDeltaMovement(move.add(0.0, -GRAVITY, 0.0));
 	}
 
-	private void burst(ServerLevel level, PathfinderMob thrower, Vec3 at, @Nullable Entity direct) {
+	private void burst(ServerLevel level, PathfinderMob thrower, Vec3 at, @Nullable Entity direct, @Nullable BlockPos struck) {
 		DamageSource source = this.damageSources().thrown(this, thrower);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS),
 			e -> e.isAlive() && !e.isSpectator())) {
@@ -146,10 +146,11 @@ public final class SiegeStone extends Projectile implements ItemSupplier {
 				victim.syncVelocity = true;
 			}
 		}
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COBBLESTONE.defaultBlockState()), at.x, at.y + 0.2, at.z, 40, 0.5, 0.3, 0.5, 0.2);
-		level.sendParticles(ParticleTypes.POOF, at.x, at.y + 0.2, at.z, 10, 0.5, 0.2, 0.5, 0.03);
+		// it shatters (rubble, stone dust, the ground thrown up: drawn by each client) and is felt round about
+		com.jaymoskingdoms.sailing.ImpactFx.hit(level, at, com.jaymoskingdoms.sailing.ImpactFx.Look.STONE, BURST_RADIUS, struck);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 3.0F, 0.5F);
-		PowersCompat.shakeAround(level, at, 8.0, 0.8F);
+		// and a deep thud under the crack
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.HOSTILE, 2.0F, 0.6F);
 		this.discard();
 	}
 

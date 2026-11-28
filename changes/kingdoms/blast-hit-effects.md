@@ -1,0 +1,12 @@
+# cannon, mortar and mangonel hit effects
+- **Hit effects** (Andy, 2026-11-28: "i especially want better fx for cannon and catapult impacts"; ideas from Creeper's Dislikes, which is All Rights Reserved, so our own code, no art or sound of it). Every hit of a wall cannon, field gun, mortar shell, musketoon ball, ship's gun or mangonel stone now sends one small packet (`sailing.ImpactFx`) and each nearby player's client draws it (`client.ImpactFxClient`), in place of the old server particle bursts:
+  - a plume of smoke that keeps rising and spreading for a second or so, mostly white with grey and black streaks: tall for an Explosive Shell or a mortar shell, a short puff for round and heavy shot;
+  - a fireball of flame and sparks at the heart of a shell or mortar shell's blast (and a small one for a fire ball);
+  - a dust cloud rolling out along the ground, coloured by the block that was hit (dirt, sand, stone, snow...);
+  - chunks of the struck block thrown out on arcs with a faint smoke trail, bouncing as they land. They are only particles: nothing to pick up, no entities, no lag. The crater is still `Bombardment`'s;
+  - a mangonel stone shatters into rubble that rolls on, with a ring of stone dust and a deep thud under the crack;
+  - a dirt, sand or gravel hit within 8 blocks puts a soft brown haze over your screen that fades in about a second.
+- Screen shake on every hit, by kind and distance: shells felt out to about 24 blocks, mangonel stones 20, round shot only close (cannon hits had none before; the mangonel's was 8 blocks).
+- The particle setting (All / Decreased / Minimal) scales it all, and at most 120 chunks and 16 plumes are in the air at once.
+- Grape and chain shot keep their old look for now (their own looks, water hits, shell fires and underwater blasts are the next patches in docs/BlastFx-Plan.md).
+- Built; not played.

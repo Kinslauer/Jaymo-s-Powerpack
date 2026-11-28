@@ -70,6 +70,8 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 	private com.jaymoskingdoms.sailing.Bombardment.@Nullable Crater pit;
 	/** Out of a hand gun: its owner needn't be a gunner at a cannon. */
 	private boolean hand;
+	/** A field mortar's shell ({@link #shell}): it bursts with a shell's fireball and plume. */
+	private boolean mortar;
 	/** How long it may fly (ticks). */
 	private int lifespan = MAX_LIFE;
 	/** Its burst's reach, its shove and its fall per tick (a shot kind's own, else a plain ball's). */
@@ -140,6 +142,7 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 		ball.damage = damage;
 		ball.pit = pit;
 		ball.lifespan = lifespan;
+		ball.mortar = true;
 		ball.setPos(muzzle);
 		ball.setDeltaMovement(velocity);
 		level.addFreshEntity(ball);
@@ -209,7 +212,7 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 				com.jaymoskingdoms.sailing.Bombardment.crater(level, Vec3.atCenterOf(struck),
 					this.pit == null ? com.jaymoskingdoms.sailing.Bombardment.FIELD : this.pit, gunner);
 			}
-			this.burst(level, gunner, ((BlockHitResult) hit).getLocation(), null);
+			this.burst(level, gunner, ((BlockHitResult) hit).getLocation(), null, struck);
 			return;
 		}
 		this.setPos(next);
@@ -233,6 +236,11 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 	}
 
 	private void burst(ServerLevel level, LivingEntity gunner, Vec3 at, @Nullable Entity direct) {
+		this.burst(level, gunner, at, direct, null);
+	}
+
+	/** As above; {@code struck}, when it hit a block, is that block (its dust and chunks are what the hit throws up). */
+	private void burst(ServerLevel level, LivingEntity gunner, Vec3 at, @Nullable Entity direct, net.minecraft.core.@Nullable BlockPos struck) {
 		Deafened.blast(level, at, Deafened.BLAST);
 		DamageSource source = this.damageSources().explosion(this, gunner);
 		double radius = this.burstRadius;
@@ -261,21 +269,16 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 			}
 		}
 		ShotKind kind = this.kind();
+		com.jaymoskingdoms.sailing.ImpactFx.Look look = this.mortar ? com.jaymoskingdoms.sailing.ImpactFx.Look.MORTAR
+			: com.jaymoskingdoms.sailing.ImpactFx.Look.of(kind);
+		com.jaymoskingdoms.sailing.ImpactFx.hit(level, at, look, radius, struck);
 		if (kind == ShotKind.SHELL) {
-			level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 24, 1.0, 0.8, 1.0, 0.06);
-			level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 16, 0.8, 0.5, 0.8, 0.08);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 3.0F, 0.8F);
 		} else if (kind == ShotKind.GRAPE) {
-			level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 30, 1.6, 0.8, 1.6, 0.4);
-			level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 14, 1.2, 0.6, 1.2, 0.05);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.HOSTILE, 1.2F, 1.5F);
 		} else if (kind == ShotKind.CHAIN) {
-			level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 10, 0.4, 0.4, 0.4, 0.2);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_BREAK, SoundSource.HOSTILE, 1.5F, 0.7F);
 		} else {
-			level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 10, 0.4, 0.4, 0.4, 0.04);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.6F, kind == ShotKind.HEAVY ? 0.8F : 1.0F);
 		}
 		this.discard();

@@ -762,6 +762,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.333) rogue clockwork golems as dungeon mini-bosses (and their attachment)
 		GolemLairs.register();
 		Cannonball.register();
+		com.jaymoskingdoms.sailing.ImpactFx.register();
 		// the caravan guards' hand gun, firing the same ball
 		Musketoon.register();
 		// the guns before the musket (handgonne, arquebus) and the realms' gunners, by their purse
