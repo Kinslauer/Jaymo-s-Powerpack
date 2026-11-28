@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-28 04:01
+updated: 2026-11-28 08:52
 ---
 # Open PRs
 
-16 open, as of 2026-11-28 04:01. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+16 open, as of 2026-11-28 08:52. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -22,7 +22,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[structures-6-stable-mine-farm]]
 
 ## [#2220](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2220) Realistic and pathable archery positions
-- **Branch:** `claude/realistic-pathable-archery` · **Updated:** 2026-11-27 (today)
+- **Branch:** `claude/realistic-pathable-archery` · **Updated:** 2026-11-27 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[realistic-pathable-archery-positions]]
 
@@ -32,7 +32,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** no agent note
 
 ## [#2245](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2245) Hollow captains: 12 per player, own ladders, intersecting captains
-- **Branch:** `claude/hollow-captains-fix` · **Updated:** 2026-11-27 (today)
+- **Branch:** `claude/hollow-captains-fix` · **Updated:** 2026-11-27 (1 day ago)
 - **Checks:** ❌ failing: Build Kingdoms
 - **Agent:** [[hollow-captains-fix]]
 
