@@ -33,37 +33,41 @@ public final class DragPose {
 	}
 
 	/** {@code player}'s hold on the body they drag this frame, or null if they drag none (or it isn't drawn yet). */
-	public static @Nullable Hold of(Player player, AvatarRenderState state, float partialTicks) {
-		CorpseEntity corpse = CorpseEntity.draggedBy(player);
-		if (corpse == null) {
-			return null;
+		public static @Nullable Hold of(Player player, AvatarRenderState state, float partialTicks) {
+			CorpseEntity corpse = CorpseEntity.draggedBy(player);
+			if (corpse == null) {
+				return null;
+			}
+			ClientRagdolls.Track track = ClientRagdolls.get(corpse.getId());
+			int hands = corpse.dragHands();
+			float[] angles = new float[4];
+			double[] at = new double[3];
+			float yaw = state.bodyRot * Mth.DEG_TO_RAD;
+			double forwardX = -Mth.sin(yaw), forwardZ = Mth.cos(yaw);
+			double rightX = -Mth.cos(yaw), rightZ = -Mth.sin(yaw);
+			float scale = state.scale;
+			// (0.5.45) one point held, by one hand or by both together
+			if (track != null) {
+				track.point(CorpseEntity.gripPoint(track.rig), partialTicks, at, 0);
+			} else {
+				// fallback: use the corpse's position (the grip point is near the hind leg/foot)
+				at[0] = corpse.getX();
+				at[1] = corpse.getY() + corpse.getBbHeight() * 0.2;
+				at[2] = corpse.getZ();
+			}
+			for (int h = 0; h < hands; h++) {
+				double side = (h == 0 ? 1.0 : -1.0) * CorpseEntity.DRAG_SHOULDER_SPREAD * scale;
+				double dx = at[0] - (state.x + rightX * side);
+				double dy = at[1] - (state.y + CorpseEntity.DRAG_SHOULDER * scale);
+				double dz = at[2] - (state.z + rightZ * side);
+				double ahead = dx * forwardX + dz * forwardZ;
+				double right = dx * rightX + dz * rightZ;
+				// swung back (or forward) toward it from hanging down, then out to its side
+				angles[h * 2] = (float) Mth.atan2(-ahead, -dy);
+				angles[h * 2 + 1] = Mth.clamp((float) Mth.atan2(right, Math.sqrt(ahead * ahead + dy * dy)), -SPREAD_MAX, SPREAD_MAX);
+			}
+			return new Hold(hands, angles[0], angles[1], angles[2], angles[3]);
 		}
-		ClientRagdolls.Track track = ClientRagdolls.get(corpse.getId());
-		if (track == null) {
-			return null;
-		}
-		int hands = corpse.dragHands();
-		float[] angles = new float[4];
-		double[] at = new double[3];
-		float yaw = state.bodyRot * Mth.DEG_TO_RAD;
-		double forwardX = -Mth.sin(yaw), forwardZ = Mth.cos(yaw);
-		double rightX = -Mth.cos(yaw), rightZ = -Mth.sin(yaw);
-		float scale = state.scale;
-		// (0.5.45) one point held, by one hand or by both together
-		track.point(CorpseEntity.gripPoint(track.rig), partialTicks, at, 0);
-		for (int h = 0; h < hands; h++) {
-			double side = (h == 0 ? 1.0 : -1.0) * CorpseEntity.DRAG_SHOULDER_SPREAD * scale;
-			double dx = at[0] - (state.x + rightX * side);
-			double dy = at[1] - (state.y + CorpseEntity.DRAG_SHOULDER * scale);
-			double dz = at[2] - (state.z + rightZ * side);
-			double ahead = dx * forwardX + dz * forwardZ;
-			double right = dx * rightX + dz * rightZ;
-			// swung back (or forward) toward it from hanging down, then out to its side
-			angles[h * 2] = (float) Mth.atan2(-ahead, -dy);
-			angles[h * 2 + 1] = Mth.clamp((float) Mth.atan2(right, Math.sqrt(ahead * ahead + dy * dy)), -SPREAD_MAX, SPREAD_MAX);
-		}
-		return new Hold(hands, angles[0], angles[1], angles[2], angles[3]);
-	}
 
 	public static void apply(Model<?> model, Object state) {
 		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> humanoid)) {

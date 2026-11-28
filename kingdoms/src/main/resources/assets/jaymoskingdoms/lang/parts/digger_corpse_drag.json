@@ -1,0 +1,7 @@
+{
+  "message.jaymoskingdoms.digger.dragging_corpse": "A digger drags a %s toward its pit.",
+  "message.jaymoskingdoms.digger.feeding": "The diggers are feeding on a corpse in their pit.",
+  "message.jaymoskingdoms.digger.warren_sated": "The warren is sated; its diggers won't hunt for a while.",
+  "message.jaymoskingdoms.digger.corpse_pulled_in": "A dragged corpse was pulled into a digger pit!",
+  "message.jaymoskingdoms.digger.pit_bones": "Bones and scraps lie in the digger pit, marking a recent meal."
+}

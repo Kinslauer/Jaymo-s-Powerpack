@@ -1,0 +1,5 @@
+# corpse limbs stay on body, visible drag arm, first person drag pose
+- **Carried/dragged quadrupeds**: legs now hang from their hip/shoulder pivots instead of floating loose. The `Limp.dangle` method now rotates legs relative to their initial pose (pointing down) rather than setting absolute rotations.
+- **Third-person drag arm**: the player's arm(s) now visibly reach to and hold the dragged body's leg. `DragPose.of` falls back to the corpse's position when the ragdoll track isn't ready yet, so the arm appears immediately when dragging starts.
+- **First-person drag pose**: added a drag pose in `FirstPersonHandsMixin` where the holding arm reaches down and back toward the body behind the player. Two-handed for large bodies.
+- Not tested in game: first-person drag pose angles, two-handed drag visual, quadruped leg swing while carried/dragged.
