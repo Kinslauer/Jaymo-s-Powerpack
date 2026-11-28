@@ -285,6 +285,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.sound.ImmersiveSounds.init();
 		LeafRustle.init();
 		CarryClient.init();
+		BlockChoiceScreen.init();
 		SlingPose.init();
 		PerchClient.init();
 		com.jaymospowers.client.stamina.DodgeClient.init();

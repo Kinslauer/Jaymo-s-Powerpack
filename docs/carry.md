@@ -137,8 +137,8 @@ Each pickup rolls a hold (synced in the carrier's `jaymospowers:carry_carrying` 
 # Blocks: Carry On (0.20.17)
 
 Blocks are carried by **Carry On** (LGPL-3.0, Tschipp; shipped unchanged in `packMods`): sneak + right-click a chest,
-furnace, barrel or any other block with something in it, empty hands, to lift it with everything inside; right-click to
-set it down. Its own settings are in `config/carryon-common.json` / `carryon-client.json`. It replaced our own block
+furnace, barrel or any other block with something in it, empty hands, and a small box asks what you mean (below); pick
+Lift to lift it with everything inside; right-click to set it down. Its own settings are in `config/carryon-common.json` / `carryon-client.json`. It replaced our own block
 lifting (crafting tables, anvils and single chests, 0.13.11 to 0.20.15).
 
 What's still ours:
@@ -151,23 +151,35 @@ How the two get along (`core/CarryOnCompat`, `mixin/carryon/CarryOnPickupMixin` 
 - Carry On's `tryPickupEntity` always says no; its `canCarryGeneral` and `tryPickUpBlock` say no while our carry, a
   Kitchen corpse, being carried, a throw's tumble or being downed has your arms, and for any block in
   `#jaymospowers:carry_on_no_lift` (pod parts, salvage rack, smeltery controller and drain, kiln load, sentry spawner,
-  infusion matrix, Kingdoms' bounty board, pulley and plot stake, Kitchen's windmill and waterwheel, and every cooking
-  block: campfires, furnace, smoker, blast furnace, Cooking for Blockheads' ovens, counters, cooking tables and cutting
-  board, Kitchen's stove, cutting board, cooking pot, frying pan, spits, hearth, brewing keg, cask, still, tea
-  kettle and sushi mat). A refused lift passes the click on, so sneak + right-click there opens the cooking screen or
-  does the block's own use.
+  infusion matrix, Kingdoms' bounty board, pulley and plot stake, Kitchen's windmill and waterwheel).
+- **The sneak-click box** (Andy: "a context box for blocks like these, with use (and the specific in parentheses, for
+  example a furnace would say "Use(bake)") lift"; `core/BlockChoice`, `client/BlockChoiceScreen`). Carry On's own
+  sneak-click never lifts: `tryPickUpBlock` says no unless `CarryOnCompat.liftChosen` is running. Instead, on the
+  client, Carry On's lift key (sneak) + right-click with empty hands, carrying nothing, on a block Carry On could lift
+  (`CarryOnCompat.couldLift`: a block entity, not in the tag above, not a door half, breakable, allowed by Carry On's
+  block lists) stops the click and opens a small box right of the crosshair:
+  - **Use (...)**: the sneak-click as it would have gone, replayed on the server (`gameMode.useItemOn`, every use hook,
+    counted as sneaking since the box let go of the keys): Kitchen's cooking screen, a chest opening. The word is the
+    block's: campfire cook, furnace bake, smoker smoke, blast furnace smelt, CfB oven bake, counter prep, cooking table
+    cook, cutting boards chop, stove cook, cooking pot stew, frying pan fry, spits roast, hearth warm, brewing keg brew,
+    cask age, still distill, tea kettle brew tea, sushi mat roll; anything else with an inventory "open"; otherwise
+    plain "Use" (lang `screen.jaymospowers.block_choice.*`).
+  - **Open door** (Cooking for Blockheads ovens): the oven's own sneak-click on its front, past Kitchen's.
+  - **Lift**: Carry On lifts it (its key and same-tick checks skipped, the rest kept). If it can't: "Can't lift that".
+  Escape closes the box. The server checks reach, the clicked spot, spawn protection and empty hands again.
 - With a block in Carry On's arms (`CarryOnCompat.isCarrying`, read by reflection from its synced data, both sides): no
   picking up a body or a corpse (a `UseEntityCallback` phase that runs first), no ledge grab, no taking a part off a
   salvage rack, and `FirstPersonArms` leaves the hands to Carry On. It counts as carrying for Z Fighter training.
 - While our carry has your arms, the right-click lets go (`CarryUseMixin`), so Carry On never sees it.
 
 ## Testing (blocks)
-1. Empty hands, sneak + right-click a chest with items in it: it's lifted in Carry On's hold; set it down elsewhere and
-   the items are still in it. A barrel, Kitchen's cabinet: the same.
-2. A crafting table lifts too (Kitchen gives it a block entity, with its grid). An anvil or stone: nothing lifts (Carry
-   On only takes blocks with a block entity).
-2b. Sneak + right-click a lit campfire, a furnace, a lit oven or a cutting board, empty hands: nothing lifts; the
-   cooking screen opens (or the block's own sneak use).
+1. Empty hands, sneak + right-click a chest with items in it: the box shows "Use (open)" and "Lift". Lift: it's in
+   Carry On's hold; set it down elsewhere and the items are still in it. Use: the chest opens. Escape: nothing.
+   A barrel, Kitchen's cabinet: the same.
+2. A crafting table gets the box too (Kitchen gives it a block entity, with its grid). An anvil or stone: no box, the
+   click goes on as usual (Carry On only takes blocks with a block entity).
+2b. Sneak + right-click a lit campfire: "Use (cook)" opens Kitchen's cooking screen, "Lift" lifts it. A furnace: "Use
+   (bake)". A lit CfB oven: "Use (bake)" opens the cooking screen, "Open door" opens its door, "Lift" lifts it.
 3. Pod parts: sneak + right-click a part, it goes into our hold; set it onto a pod. Carry On never takes one, nor a
    salvage rack, a smeltery controller, a bounty board.
 4. Carry a player, then sneak + right-click a chest: you let the player go (no chest lifted). Carry a Kitchen corpse:

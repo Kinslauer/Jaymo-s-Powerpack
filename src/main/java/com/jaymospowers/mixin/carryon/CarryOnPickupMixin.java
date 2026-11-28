@@ -18,7 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.20.17) Carry On (LGPL-3.0, Tschipp; optional, shipped unchanged, nothing of it copied) carries blocks; bodies stay
  * ours ({@link CarryOnCompat}). Its pick-ups all go through {@code PickupHandler}: no entity is ever lifted by it, nothing is
  * lifted while our carry, a Kitchen corpse or being down has your arms, and the {@code jaymospowers:carry_on_no_lift}
- * blocks stay put. Skipped when Carry On isn't there.
+ * blocks stay put. A block is lifted only when the player picked Lift in the sneak-click box ({@code core/BlockChoice});
+ * a plain sneak + right-click passes on to the block's own use. Skipped when Carry On isn't there.
  */
 @Pseudo
 @Mixin(targets = "tschipp.carryon.common.carry.PickupHandler", remap = false)
@@ -27,13 +28,15 @@ abstract class CarryOnPickupMixin {
 	private static void jaymospowers$armsBusy(ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
 		if (CarryOnCompat.armsBusy(player)) {
 			cir.setReturnValue(false);
+		} else if (CarryOnCompat.chosen()) {
+			cir.setReturnValue(CarryOnCompat.canLiftNow(player));
 		}
 	}
 
 	@Inject(method = "tryPickUpBlock", at = @At("HEAD"), cancellable = true, require = 0)
 	private static void jaymospowers$noLift(ServerPlayer player, BlockPos pos, Level level, BiFunction<BlockState, BlockPos, Boolean> pickupCallback,
 		CallbackInfoReturnable<Boolean> cir) {
-		if (CarryOnCompat.armsBusy(player) || CarryOnCompat.noLift(level.getBlockState(pos))) {
+		if (!CarryOnCompat.chosen() || CarryOnCompat.armsBusy(player) || CarryOnCompat.noLift(level.getBlockState(pos))) {
 			cir.setReturnValue(false);
 		}
 	}
