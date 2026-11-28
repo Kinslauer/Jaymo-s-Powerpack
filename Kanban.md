@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 03:42). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 03:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,7 +28,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · t3 · claimed
 
 
 ## In review
@@ -44,6 +43,7 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for antigravity · #2337 · in-review
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · t3 · #2355 · in-review
+- [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · t3 · #2358 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
