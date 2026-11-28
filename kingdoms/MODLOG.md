@@ -18515,3 +18515,13 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - New loading hint 299 (lang part `combo-clash.json`; `StoryHoldScreen.HINTS` 299). It covers the ` key, the 4-hit
   string, the uppercut and the slam, Alt to dash or break free, and F to block or perfect block.
 - Built; not played.
+
+## 0.14.16 (2026-11-28): reincarnation forgets bonded animals - horses, pets and mounts are strangers to a new life (#2335)
+
+- **Animals forget an ended life** (Andy: "reincarnating didnt seem to forget my bonded horses"): the final Reincarnate wiped the player but never touched the animals, whose bond and owner live on the animal itself. Now, when a life ends for good (LifeStory#reincarnateAnew, new ForgottenLives):
+  - **Horses and every horse-like mount** (Icy's Better Horses, our breeds, war elephant, great goat, wind dragons, zebras): their trust in the old life goes (Bond#without; what the horse learnt stays its own). One that was theirs is no one's again: untamed, rider thrown, follow/stay/home orders and home cleared (Herd), off the horse roster (Herding#forgetOwner). Icy's Better Horses gets its own disown (bh_disown) and its tracker forgets the player's stored horses (the ones not loaded are queued for Icy's release on load), dead horses waiting on a revival, active horse and trust lists (IcysHorses#forgetOwner). A Horseman copper-horn binding to them is cleared too (reflection).
+  - **Tamed pets of every kind** (any TamableAnimal: wolves, cats, parrots, Powers' dinosaurs, aerbunnies, beavers, sporelings, other mods' tames): owner cleared, untamed, made to stand.
+  - Parrots on their shoulders get down (PlayerShoulderInvoker), and anything on their lead is let go.
+- Animals loaded at the time forget at once; the rest forget when they next load: the Overworld keeps when each player's life ended (`lives_ended`) and each horse or tamable animal keeps when it was last checked (`lives_seen`), so a pet tamed in the new life is never forgotten by mistake.
+- Not covered: Horseman's own summoning storage (copper horns are uncraftable in the pack, and carried ones are wiped); the lead of an animal that was unloaded at the time; non-animal followers (servants, blood thralls, rig sentries) weren't checked here.
+- Built (kingdoms build); not played.
