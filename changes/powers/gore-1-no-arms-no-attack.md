@@ -1,0 +1,4 @@
+# armless mobs and NPCs stop hand and weapon attacks
+- **No arms, no hand or weapon blows**: a mob or NPC that has lost both arms (`Dismember.armless`) can no longer hold, pick up, draw or swing weapons or hands (`ArmlessMobs`, `ArmlessMobMixin`, `ArmlessLivingMixin`, `ArmlessRangedGoalMixin`), and brain-driven villager archers and fighters stop bow shots and punch/slash combos (`ArmlessBehaviorMixin`). One arm left keeps its existing half-damage attacks.
+- **Bites and kicks**: headed zombies missing both arms still bite (`ArmlessMobs.BITE`) and anyone with a leg left still kicks (`ArmlessMobs.NO_ARMS`) at low damage through `AttackTells`; a body with both arms gone, both legs gone, and no bite stops attacking altogether (`Dismember.canAttack`, `BlindHead`, `LungeGoal`, `MobExecutions`).
+- Built; not tested in game.

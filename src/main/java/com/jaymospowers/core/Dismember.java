@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -44,6 +45,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -81,6 +83,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Dismember {
 	public static final int HEAD = 1, RIGHT_ARM = 2, LEFT_ARM = 4, RIGHT_LEG = 8, LEFT_LEG = 16;
+	public static final int ARMS = RIGHT_ARM | LEFT_ARM, LEGS = RIGHT_LEG | LEFT_LEG;
 	public static final int[] PARTS = {HEAD, RIGHT_ARM, LEFT_ARM, RIGHT_LEG, LEFT_LEG};
 	/** Chances per blow: any blade against a humanoid mob, the katana slash, any blow against a player. */
 	public static final float BLADE_CHANCE = 0.05F, KATANA_CHANCE = 0.20F, PLAYER_CHANCE = 0.05F;
@@ -278,6 +281,68 @@ public final class Dismember {
 
 	public static boolean headless(Entity entity) {
 		return (missing(entity) & HEAD) != 0;
+	}
+
+	private static boolean frostFittedLooked;
+	private static @Nullable AttachmentType<Integer> frostFitted;
+
+	/**
+	 * The lost limbs {@code entity} has a stand-in fitted on: a {@link Prosthetics} limb, or a smith's limb on a Kingdoms
+	 * villager ({@code FrostTech.FITTED}, read once by reflection when Kingdoms is loaded).
+	 */
+	@SuppressWarnings("unchecked")
+	public static int standIn(Entity entity) {
+		int mask = Prosthetics.fitted(entity);
+		if (!frostFittedLooked) {
+			frostFittedLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
+				try {
+					frostFitted = (AttachmentType<Integer>) Class.forName("com.jaymoskingdoms.FrostTech").getField("FITTED").get(null);
+				} catch (ReflectiveOperationException | LinkageError ignored) {
+				}
+			}
+		}
+		if (frostFitted != null) {
+			Integer raw = entity.getAttached(frostFitted);
+			if (raw != null) {
+				mask |= (raw | raw >> 8 | raw >> 16) & LIMBS;
+			}
+		}
+		return mask;
+	}
+
+	/** Whether {@code entity} (a mob or NPC, never a player) has lost both arms with nothing fitted in their place. */
+	public static boolean armless(LivingEntity entity) {
+		return !(entity instanceof Player) && (missing(entity) & ~standIn(entity) & ARMS) == ARMS;
+	}
+
+	/** Whether an armless creature can still bite: a zombie that still has its head. */
+	public static boolean biter(LivingEntity entity) {
+		return !headless(entity) && (zombie(entity) || entity instanceof Zombie);
+	}
+
+	/** Whether {@code entity} still has at least one leg (or stand-in leg) to kick with. */
+	public static boolean hasLegs(LivingEntity entity) {
+		return (missing(entity) & ~standIn(entity) & LEGS) != LEGS;
+	}
+
+	/**
+	 * Whether {@code entity} can make a melee attack at all: anyone with an arm left attacks as before; with both arms
+	 * gone, only biters (headed zombies) may bite and only those with a leg left may kick.
+	 */
+	public static boolean canAttack(LivingEntity entity) {
+		return !armless(entity) || biter(entity) || hasLegs(entity);
+	}
+
+	/** The sound of an armless mob's blow landing: a zombie's bite, or a kick. */
+	public static void armlessBlow(ServerLevel level, Mob mob, LivingEntity target) {
+		if (biter(mob)) {
+			level.playSound(null, target.getX(), target.getY(0.5), target.getZ(), SoundEvents.GENERIC_EAT.value(),
+				mob.getSoundSource(), 0.7F, 0.7F + level.getRandom().nextFloat() * 0.2F);
+		} else {
+			level.playSound(null, target.getX(), target.getY(0.4), target.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK,
+				mob.getSoundSource(), 0.7F, 0.85F);
+		}
 	}
 
 	public static boolean canLoseParts(LivingEntity entity) {
@@ -879,6 +944,9 @@ public final class Dismember {
 		}
 		legs(target, now);
 		Prosthetics.sync(target);
+		if (target instanceof Mob mob) {
+			com.jaymospowers.core.wounds.ArmlessMobs.sync(mob);
+		}
 		com.jaymospowers.core.wounds.Breaks.regrown(target, back);
 	}
 
@@ -964,6 +1032,9 @@ public final class Dismember {
 		}
 		if (part == RIGHT_ARM || part == LEFT_ARM) {
 			emptyHand(level, target, part);
+			if (target instanceof Mob mob) {
+				com.jaymospowers.core.wounds.ArmlessMobs.sync(mob);
+			}
 		} else {
 			legs(target, mask);
 		}
@@ -1057,6 +1128,9 @@ public final class Dismember {
 				}
 			}
 		}
+		if (target instanceof Mob mob) {
+			com.jaymospowers.core.wounds.ArmlessMobs.sync(mob);
+		}
 		return true;
 	}
 
@@ -1102,6 +1176,9 @@ public final class Dismember {
 		legs(target, mask);
 		// (0.18.82) a wooden or iron limb comes off when the real one is back
 		Prosthetics.sync(target);
+		if (target instanceof Mob mob) {
+			com.jaymospowers.core.wounds.ArmlessMobs.sync(mob);
+		}
 		// (0.14.2) what grew back heals from where it is
 		com.jaymospowers.core.wounds.Breaks.regrown(target, before & ~mask);
 		if (target.level() instanceof ServerLevel level) {
