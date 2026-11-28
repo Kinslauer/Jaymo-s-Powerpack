@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 17:09
+updated: 2026-11-27 20:30
 ---
 # Open PRs
 
-13 open, as of 2026-11-27 17:09. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+16 open, as of 2026-11-27 20:30. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -66,7 +66,22 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2329](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2329) Knight quips: rare easter-egg lines in an old knight's voice
-- **Branch:** `claude/project-thread-hopke3` · **Updated:** 2026-11-27 (today)
-- **Checks:** ⏳ 1 of 5 running
+## [#2331](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2331) Hunter's Road 3: corpse-eaters (models)
+- **Branch:** `t3/hunters-road-3-models-v2` · **Updated:** 2026-11-27 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2332](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2332) feat: add corpse-eater models (grave_gnawer, bloated_dead, grave_brute, bone_burrower)
+- **Branch:** `claude/hunters-road-3-models` · **Updated:** 2026-11-27 (today)
+- **Checks:** ❌ failing: Change notes, libs jars, item models
+- **Agent:** no agent note
+
+## [#2337](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2337) Powers: cauterized cut overlay and particle sprites
+- **Branch:** `claude/gore-3-cauterized` · **Updated:** 2026-11-28 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[gore-3-cauterized]]
+
+## [#2346](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2346) Players knocked down far less often: 20% of the old chance, only from leg hits, knockback or blasts (draft)
+- **Branch:** `claude/project-thread-tvq8oz` · **Updated:** 2026-11-28 (today)
+- **Checks:** ❌ failing: Build Powers
 - **Agent:** no agent note
