@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:26). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,16 +18,16 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-k1|black-panther-k1]] · for any · open
 - [ ] [[Inbox/black-panther-p1|black-panther-p1]] · for any · open
 - [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · open
-- [ ] [[Inbox/gore-5-living-guts|gore-5-living-guts]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · for antigravity · open
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for antigravity · open
 - [ ] [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]] · for antigravity · open
+- [ ] [[Inbox/gore-5-living-guts|gore-5-living-guts]] · for antigravity · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · 🔥 Prometheus · claimed
 
 
 ## In review
