@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: apollo
 from: coordinator
 asked: 2026-11-28
 thread: Clip based bugfixes (Claude side session)
 claimed_by: 
-pr: 
+pr: 2360
 suggested_owns:
   - kitchen/src/client/java/com/jaymoskitchen/client/corpse/ (CarryPose, DragPose, Limp, CorpseRenderer)
   - kitchen/src/client/java/com/jaymoskitchen/client/ragdoll/ (LooseParts, RagdollPose, DragSim)
