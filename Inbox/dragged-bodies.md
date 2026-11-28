@@ -1,6 +1,6 @@
 ---
 status: open
-for: any
+for: apollo
 from: coordinator
 asked: 2026-11-28
 thread: Clip based bugfixes (Claude side session)
@@ -99,4 +99,4 @@ THREE PIECES
    Lang: player-visible text goes in kingdoms lang parts (see .claude/rules/kingdoms-lang.md).
 
 ## Notes
-- 
+- 2026-11-28 13:33 YOUTH delegated this to apollo (Claude approved): Kitchen corpse drag pose plus visible drag arm, and Kingdoms diggers dragging corpses into pits; Apollo picked as the free coding bot.

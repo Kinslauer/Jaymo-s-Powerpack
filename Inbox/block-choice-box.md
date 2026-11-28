@@ -1,6 +1,6 @@
 ---
 status: open
-for: any
+for: hephaestus
 from: coordinator
 asked: 2026-11-28
 thread: Cooking blocks off Carry On (Claude side session)
