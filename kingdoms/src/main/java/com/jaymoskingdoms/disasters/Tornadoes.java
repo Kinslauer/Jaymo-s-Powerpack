@@ -362,6 +362,14 @@ public final class Tornadoes {
 				continue;
 			}
 			double nx = (x - t.x) / Math.max(0.5, r), nz = (z - t.z) / Math.max(0.5, r);
+			if (state.is(BlockTags.LOGS) && trees.size() < TREES_MOST[t.size] && com.jaymoskingdoms.SettledTrees.settled(level, pos)) {
+				// a fallen tree lying settled as blocks: it wakes, and the winds take it as they take any fallen tree
+				FallingTree woken = com.jaymoskingdoms.SettledTrees.wake(level, pos);
+				if (woken != null) {
+					trees.add(woken);
+					continue;
+				}
+			}
 			if ((state.is(BlockTags.LOGS) || state.is(BlockTags.LEAVES)) && trees.size() < TREES_MOST[t.size]
 				&& random.nextFloat() < UPROOT[t.size] * t.formed()) {
 				FallingTree tree = uproot(level, t, pos, nx, nz, random);
