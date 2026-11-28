@@ -180,6 +180,12 @@ public final class DodgeClient {
 			wanted = false;
 			landingRoll = 0;
 		}
+		if (wanted && com.jaymospowers.core.Crawl.crawling(player)) {
+			// (Andy, 2026-11-28: "you shouldnt be able to dash while prone") lying prone, Alt is no dash, roll or dive
+			// (a leg blow's roll back up is above, and stays)
+			wanted = false;
+			landingRoll = 0;
+		}
 		boolean clash = com.jaymospowers.client.compat.ComboClashClient.active();
 		if (wanted && clash) {
 			// Combo Clash's combat mode: Alt is its dash and evasive (it sits on the same key, and the server cuts the dash

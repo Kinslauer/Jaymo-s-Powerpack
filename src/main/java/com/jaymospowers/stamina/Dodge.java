@@ -5,6 +5,7 @@ import com.jaymospowers.combat.Armed;
 import com.jaymospowers.compat.KingdomsCompat;
 import com.jaymospowers.core.ArmourEase;
 import com.jaymospowers.core.ArmourKind;
+import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Ledge;
 import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.tinkering.smithing.LightArmour;
@@ -314,10 +315,12 @@ public final class Dodge {
 
 	/**
 	 * Whether {@code player} may dodge now (both sides): on their own feet on the ground, in none of the powers' own
-	 * moves, and not on a broken leg out of a splint (Wounds' {@link Breaks#legsUsable}, synced).
+	 * moves, and not on a broken leg out of a splint (Wounds' {@link Breaks#legsUsable}, synced). Never lying prone
+	 * ({@link Crawl#crawling}; Andy, 2026-11-28: "you shouldnt be able to dash while prone").
 	 */
 	public static boolean canDodge(Player player) {
-		return player.onGround() && Ledge.canHang(player) && !Ledge.onLedge(player) && !player.isUsingItem() && Breaks.legsUsable(player);
+		return player.onGround() && Ledge.canHang(player) && !Ledge.onLedge(player) && !player.isUsingItem() && Breaks.legsUsable(player)
+			&& !Crawl.crawling(player);
 	}
 
 	/**
@@ -398,7 +401,8 @@ public final class Dodge {
 	private static void clashRoll(ServerPlayer player, ClashRoll roll) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		if (!player.onGround() || player.isInWater() || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))) {
+		if (!player.onGround() || player.isInWater() || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))
+			|| Crawl.crawling(player)) {
 			return;
 		}
 		Vec3 dir = new Vec3(roll.x(), 0.0, roll.z());
@@ -417,7 +421,9 @@ public final class Dodge {
 		long now = level.getGameTime();
 		Long last = LAST.get(player.getUUID());
 		// the client checked the ground as it hopped; by now the server may already have it in the air
-		if (last != null && now - last < COOLDOWN - COOLDOWN_SLACK || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))) {
+		if (last != null && now - last < COOLDOWN - COOLDOWN_SLACK || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))
+			|| Crawl.crawling(player)) {
+			// (never from prone: no dash while lying down)
 			return;
 		}
 		if (!Feathers.spend(player, COST)) {

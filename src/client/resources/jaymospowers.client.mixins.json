@@ -124,6 +124,8 @@
 		"BeamCinematicCameraMixin",
 		"UltimateCinematicCameraMixin",
 		"UltimateCinematicFovMixin",
+		"ZoomFovMixin",
+		"ZoomMouseMixin",
 		"CarryFirstPersonMixin",
 		"MusketSightsMixin",
 		"OldGunSwapMixin",
