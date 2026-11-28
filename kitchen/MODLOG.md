@@ -3050,3 +3050,8 @@ Andy: "there should be a way to dismember them from the inventory screen so you 
 
 - `CorpseEntity.decayTicks()`: how long a body has lain rotting (its saved rot clock), so Kingdoms' flies can wait 3 minutes of rot even across a reload.
 - Built; not played.
+
+## 0.7.16 (2026-11-28): heavy blows floor players far less (#2347)
+
+- A heavy blow (`HeavyHits`) knocks a player limp only if it is a blast or it throws them back (the attacker's attack knockback, a Knockback or Punch weapon, a player's sprinting swing: `LivingRagdolls.knocksBack`), and then only one time in five (`PLAYER_FLOOR_CHANCE` 0.2), down 80%. Blows to the legs fell through Powers' LegFell. Hard landings and mobs' ragdolls are unchanged.
+- Built; not played.
