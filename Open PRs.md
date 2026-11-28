@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-28 03:06
+updated: 2026-11-28 03:41
 ---
 # Open PRs
 
-16 open, as of 2026-11-28 03:06. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+16 open, as of 2026-11-28 03:41. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -27,7 +27,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[realistic-pathable-archery-positions]]
 
 ## [#2222](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2222) Court wizard creeper ward: prevents, rewinds, weakens and repels creepers over a kingdom's plot
-- **Branch:** `claude/court-wizard-creeper-ward` · **Updated:** 2026-11-27 (today)
+- **Branch:** `claude/court-wizard-creeper-ward` · **Updated:** 2026-11-27 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
