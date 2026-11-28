@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,34 +29,22 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/block-choice-box|block-choice-box]] · 🔨 Hephaestus · claimed
 
 
 ## In review
 
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · #2248 · in-review
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
-- [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
-- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
-- [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
-- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
-- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
-- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
-- [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for antigravity · #2337 · in-review
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · t3 · #2355 · in-review
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · t3 · #2358 · in-review
-- [ ] [[Inbox/dragged-bodies|dragged-bodies]] · for ☀️ Apollo · #2360 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
-- [ ] [[Agents/zoom-still-broken|zoom-still-broken]] · 💻 Odysseus · #2359 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · blocked
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
-- [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · ☀️ Apollo · blocked
-- [ ] [[Inbox/hollow-captains-fix|hollow-captains-fix]] · ☀️ Apollo · #2245 · blocked
 - [ ] [[Inbox/hunters-road-10|hunters-road-10]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-11|hunters-road-11]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · ☁️ Cloud · blocked
@@ -86,9 +74,7 @@ kanban-plugin: board
 - [ ] [[Inbox/blastfx-4|blastfx-4]] · for any · blocked
 - [ ] [[Inbox/blastfx-5|blastfx-5]] · for any · blocked
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/wrist-table-ui-mockup|wrist-table-ui-mockup]] · for 🔥 Prometheus · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
-- [ ] [[Agents/corpse-limbs-drag-arm-digger-pits|corpse-limbs-drag-arm-digger-pits]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/hunters-road-3-models|hunters-road-3-models]] · 💻 Odysseus · #'2332' · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
