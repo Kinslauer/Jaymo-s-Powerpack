@@ -950,6 +950,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
+		ForgottenLives.register();
 		SharedHistory.register();
 		// 0.7.523: hidden trust, respect and warmth; talks that matter; promises villagers hold you to
 		LOGGER.debug("promise attachment: {}", Promises.PROMISES);

@@ -622,6 +622,17 @@ public final class Herding {
 			&& a.pos.dimension().equals(b.pos.dimension()) && a.pos.pos().closerThan(b.pos.pos(), 8.0);
 	}
 
+	/** Takes every horse {@code owner} had off the roster, wherever it is (a life ended: {@link Bonding#forgetLife}). */
+	static void forgetOwner(MinecraftServer server, UUID owner) {
+		Map<UUID, Stall> all = stalls(server);
+		if (all.values().stream().noneMatch(s -> s.owner.equals(owner))) {
+			return;
+		}
+		Map<UUID, Stall> map = new HashMap<>(all);
+		map.values().removeIf(s -> s.owner.equals(owner));
+		server.overworld().setAttached(ROSTER, Map.copyOf(map));
+	}
+
 	static void forget(MinecraftServer server, UUID horse) {
 		Map<UUID, Stall> all = stalls(server);
 		if (all.containsKey(horse)) {

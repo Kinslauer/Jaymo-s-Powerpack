@@ -1,7 +1,9 @@
 package com.jaymoskingdoms.equestrian;
 
 import icy.betterhorses.net.HorseBreed;
+import icy.betterhorses.net.HorseTracker;
 import icy.betterhorses.net.IHorseData;
+import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -80,6 +82,47 @@ final class IcysHorses {
 	/** Whether {@code id} is its owner by Icy's reckoning (vanilla's owner is checked by the caller too). */
 	static boolean owner(AbstractHorse horse, UUID id) {
 		return id.equals(data(horse).bh_getOwner());
+	}
+
+	/**
+	 * {@code player}'s life is over: if this horse was theirs by Icy's reckoning it is let go the way Icy's own "disown" does it
+	 * (no owner, not tamed, no bond, no home, its own commands forgotten), and Icy's tracker stops keeping it for them.
+	 */
+	static boolean disown(AbstractHorse horse, UUID player) {
+		if (!owner(horse, player)) {
+			return false;
+		}
+		data(horse).bh_disown();
+		HorseTracker.disown(horse);
+		return true;
+	}
+
+	/**
+	 * Everything else Icy's keeps for {@code player}, wherever their horses are: horses not loaded now are queued for Icy's
+	 * own release when they next load, the dead ones waiting on a revival are forgotten, and so are their active horse and
+	 * who they let ride and who let them. Run after the loaded horses were let go ({@link #disown}), so only those away get
+	 * queued.
+	 */
+	static void forgetOwner(UUID player) {
+		for (UUID horse : List.copyOf(HorseTracker.findAllStoredHorsesOwnedBy(player))) {
+			AbstractHorse loaded = HorseTracker.getLoaded(horse);
+			if (loaded != null) {
+				disown(loaded, player);
+			} else {
+				HorseTracker.markPendingDisown(horse);
+			}
+			HorseTracker.forgetStoredHorse(horse);
+		}
+		for (UUID horse : List.copyOf(HorseTracker.findDeadHorsesOwnedBy(player))) {
+			HorseTracker.forgetDeadHorse(horse);
+		}
+		HorseTracker.clearActiveHorse(player);
+		for (UUID trusted : List.copyOf(HorseTracker.getTrusted(player).keySet())) {
+			HorseTracker.untrust(player, trusted);
+		}
+		for (UUID owner : List.copyOf(HorseTracker.getTrustingOwners(player))) {
+			HorseTracker.untrust(owner, player);
+		}
 	}
 
 	/** Its bond with its owner, 0 to 100 (Icy's; what a later patch reads for a fully bonded horse). */
