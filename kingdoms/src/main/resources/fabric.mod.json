@@ -70,6 +70,7 @@
 		{ "config": "jaymoskingdoms.horseexpert.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.foliage.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.xaero.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.icyhorses.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.iris.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.tomes.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.nightforms.client.mixins.json", "environment": "client" },

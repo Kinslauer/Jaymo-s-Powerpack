@@ -1,0 +1,7 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.client.mixin.icyhorses",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["IcySaddleOnlyKeysMixin"],
+	"injectors": { "defaultRequire": 0 }
+}
