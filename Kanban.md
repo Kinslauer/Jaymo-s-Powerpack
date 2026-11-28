@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 21:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 21:51). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,8 +21,8 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-5-living-guts|gore-5-living-guts]] · for antigravity · open
 - [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for antigravity · open
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · for antigravity · open
-- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for antigravity · open
 - [ ] [[Inbox/blastfx-2|blastfx-2]] · for any · open
+- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for antigravity · open
 
 
 ## Being built
