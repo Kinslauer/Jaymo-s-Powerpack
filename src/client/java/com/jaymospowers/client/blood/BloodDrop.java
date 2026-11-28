@@ -221,7 +221,7 @@ final class BloodDrop extends SingleQuadParticle {
 
 	@Override
 	public void extract(QuadParticleRenderState state, Camera camera, float partialTick) {
-		if (ownDrip(camera, partialTick)) {
+		if (ownDrip(camera, partialTick) || atTheEye(camera, partialTick)) {
 			return;
 		}
 		if (this.directional) {
@@ -255,6 +255,44 @@ final class BloodDrop extends SingleQuadParticle {
 		double x = Mth.lerp(partialTick, this.xo, this.x), y = Mth.lerp(partialTick, this.yo, this.y), z = Mth.lerp(partialTick, this.zo, this.z);
 		double dx = x - eye.x, dz = z - eye.z;
 		return y < eye.y + 0.1 && dx * dx + dz * dz < OWN_DRIP_REACH * OWN_DRIP_REACH;
+	}
+
+	/** Whether it has already landed on the screen ({@link BloodScreen}): it lands once. */
+	private boolean onScreen;
+
+	/**
+	 * Whether it's within {@link BloodScreen#NEAR} of a first-person eye: not drawn there (its 16-pixel picture, that
+	 * close, filled the bottom of the view with red blocks). One in front of the eye and flying at it lands on the screen
+	 * where it would have hit, once; it still flies on and leaves its stain where it falls.
+	 */
+	private boolean atTheEye(Camera camera, float partialTick) {
+		if (camera.isDetached()) {
+			return false;
+		}
+		Vec3 eye = camera.position();
+		double dx = Mth.lerp(partialTick, this.xo, this.x) - eye.x, dy = Mth.lerp(partialTick, this.yo, this.y) - eye.y,
+			dz = Mth.lerp(partialTick, this.zo, this.z) - eye.z;
+		double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+		if (distance >= BloodScreen.NEAR) {
+			return false;
+		}
+		if (!this.onScreen && !this.underwater && comingAtTheEye(dx, dy, dz)) {
+			this.onScreen = true;
+			BloodScreen.drop(camera, dx, dy, dz, this.getQuadSize(partialTick), this.color);
+		}
+		return true;
+	}
+
+	/** Whether, {@code (dx, dy, dz)} from the eye, it's flying at it: closing in, on a line passing within {@link BloodScreen#EYE_MISS}. */
+	private boolean comingAtTheEye(double dx, double dy, double dz) {
+		double speed = this.xd * this.xd + this.yd * this.yd + this.zd * this.zd;
+		double closing = this.xd * dx + this.yd * dy + this.zd * dz;
+		if (speed < 1.0E-6 || closing >= 0.0) {
+			return false;
+		}
+		// (how far the line it flies on passes from the eye: what's left of the way to it once its run toward the eye is taken off)
+		double miss = dx * dx + dy * dy + dz * dz - closing * closing / speed;
+		return miss < BloodScreen.EYE_MISS * BloodScreen.EYE_MISS;
 	}
 
 	@Override

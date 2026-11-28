@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.blood.BloodScreen;
 import com.jaymospowers.client.hud.HudZones;
 import com.jaymospowers.core.wounds.HurtCause;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -100,6 +101,11 @@ public final class HurtCauseHud {
 	private static void received(HurtCause.Hurt hurt) {
 		Component text;
 		if (blow(hurt)) {
+			// every blow that hurts throws its blood on the screen, on the side it came from (told or not)
+			LocalPlayer self = Minecraft.getInstance().player;
+			if (self != null) {
+				BloodScreen.blow(hurt.amount(), self.getMaxHealth(), hurt.at().orElse(null));
+			}
 			boolean starts = now - lastBlow > FIGHT_GAP_TICKS;
 			lastBlow = now;
 			if (!starts) {
