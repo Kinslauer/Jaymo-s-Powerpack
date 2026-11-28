@@ -45,8 +45,6 @@ public final class PainHud {
 	 */
 	static final int HEADACHE = 0xE8E0D8, HEADACHE_ALPHA = 0x70;
 	static final float HEADACHE_THROB = 0.12F;
-	/** The sides are drawn in this many fading bands (the top and bottom are smooth gradients). */
-	private static final int BANDS = 8;
 
 	private static int ticks;
 	private static int hitTicks;
@@ -145,11 +143,14 @@ public final class PainHud {
 		int solid = alpha << 24 | colour;
 		graphics.fillGradient(0, 0, w, edge, solid, colour);
 		graphics.fillGradient(0, h - edge, w, h, colour, solid);
-		int band = Mth.ceil(edge / (float) BANDS);
-		for (int i = 0; i < BANDS; i++) {
-			int a = (int) (alpha * (1.0F - i / (float) BANDS) * 0.8F);
-			graphics.fill(i * band, 0, i * band + band, h, a << 24 | colour);
-			graphics.fill(w - i * band - band, 0, w - i * band, h, a << 24 | colour);
+		// (the sides fade a pixel at a time, as smooth as the top and bottom: wider bands showed as red steps)
+		for (int i = 0; i < edge; i++) {
+			int a = (int) (alpha * (1.0F - i / (float) edge) * 0.8F);
+			if (a <= 0) {
+				break;
+			}
+			graphics.fill(i, 0, i + 1, h, a << 24 | colour);
+			graphics.fill(w - i - 1, 0, w - i, h, a << 24 | colour);
 		}
 	}
 }
