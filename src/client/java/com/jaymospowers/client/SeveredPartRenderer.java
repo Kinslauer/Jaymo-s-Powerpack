@@ -44,7 +44,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * A severed head or limb: the body it came off is drawn (by its own renderer, or a player's model in their skin) with
  * only that part showing (see {@link Dismembered#ONLY}), moved so the part's middle sits on this entity and turned
- * over as it tumbles. Not drawn for the player looking out from it.
+ * over as it tumbles, with its cut end capped by the body's cross-section ({@link Dismembered.CutKind}). Not drawn for
+ * the player looking out from it.
  */
 public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, SeveredPartRenderer.State> {
 	public static final class State extends EntityRenderState {
@@ -54,6 +55,7 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		boolean hidden;
 		/** The part itself, for the blood and dirt laid over a player's (BloodCoatLayer#submitSeveredPlayer). */
 		@Nullable SeveredPart part;
+		Dismembered.@Nullable CutKind cutKind;
 		float yaw;
 		float spin;
 		float spinAxis;
@@ -94,6 +96,7 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		state.body = null;
 		state.bodyRenderer = null;
 		state.part = entity;
+		state.cutKind = null;
 		int part = entity.part();
 		String first = Dismembered.names(part)[0];
 		state.player = entity.owner().isPresent() || entity.look().contains("\"minecraft:player\"");
@@ -111,6 +114,7 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 			avatar.xRot = 0.0F;
 			avatar.nameTag = null;
 			avatar.setData(Dismembered.ONLY, part);
+			state.cutKind = Dismembered.markSevered(entity, null, avatar);
 			dressAsBody(entity, avatar);
 			PlayerModel model = avatar.skin.model() == PlayerModelType.SLIM ? this.slim : this.wide;
 			// a player is drawn flipped and lifted (see submit): the part's middle, as it ends up
@@ -135,6 +139,7 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		bodyState.nameTag = null;
 		bodyState.displayFireAnimation = false;
 		bodyState.setData(Dismembered.ONLY, part);
+		state.cutKind = Dismembered.markSevered(entity, body, bodyState);
 		com.jaymospowers.client.blood.BloodCoatLayer.severed(entity, bodyState);
 		dressAsBody(entity, bodyState);
 		if (look != null) {
@@ -374,9 +379,18 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 			if (state.part != null) {
 				com.jaymospowers.client.blood.BloodCoatLayer.submitSeveredPlayer(state.part, model, state.avatar, skin, poseStack, collector,
 					state.lightCoords);
+				if (state.cutKind != null) {
+					Dismembered.submitSeveredPlayer(state.cutKind, model, state.avatar, poseStack, collector, state.lightCoords);
+				}
 			}
 		} else {
 			submitBody(state.bodyRenderer, state.body, poseStack, collector, camera);
+			if (!(state.bodyRenderer instanceof LivingEntityRenderer<?, ?, ?>) && state.part != null && state.cutKind != null) {
+				poseStack.pushPose();
+				poseStack.translate(state.centre.x, state.centre.y, state.centre.z);
+				Dismembered.submitLooseSevered(state.cutKind, state.part.part(), poseStack, collector, state.lightCoords);
+				poseStack.popPose();
+			}
 		}
 		poseStack.popPose();
 	}
