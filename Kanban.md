@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 13:59). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:05). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,13 +25,12 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
 - [ ] [[Inbox/villager-dialogue-talk|villager-dialogue-talk]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/block-choice-box|block-choice-box]] · for 🔨 Hephaestus · open
+- [ ] [[Inbox/dragged-bodies|dragged-bodies]] · for ☀️ Apollo · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/dragged-bodies|dragged-bodies]] · ☀️ Apollo · claimed
-- [ ] [[Agents/corpse-limbs-drag-arm-digger-pits|corpse-limbs-drag-arm-digger-pits]] · 💻 Odysseus · running
 
 
 ## In review
@@ -89,6 +88,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/wrist-table-ui-mockup|wrist-table-ui-mockup]] · for 🔥 Prometheus · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
+- [ ] [[Agents/corpse-limbs-drag-arm-digger-pits|corpse-limbs-drag-arm-digger-pits]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/hunters-road-3-models|hunters-road-3-models]] · 💻 Odysseus · #'2332' · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
