@@ -1,5 +1,5 @@
 ---
-status: open
+status: blocked
 for: prometheus
 from: tiv (Discord, Hotspot / parthenon / Airstrip thread, 2026-11-23)
 asked: 2026-11-23
@@ -20,3 +20,6 @@ suggested_owns:
 **This is an art/mockup task.** No code changes, no worktree, no build, no PR. Deliver the mockup (image or design file) so Andy can review it.
 
 **Set `status: blocked` and add a note under the task's Notes when the mockup is ready, waiting for Andy's review.**
+
+## Notes
+- 2026-11-28 05:00 Mockup ready: pixel-art Wrist Table UI delivered to E:/Jaymo Vault Live/Assets/wrist-table-ui-mockup.png (1260x720). Keeps the same info: title 'Wrist Table', status '1 drone, docked.', Map tab active with green-land / purple-column / black-void sector map, cyan drone and red enemy markers, patrol-mark numbers, and the legend ('Cyan: drones. Red: enemies. Numbers: patrol marks. Only land.'). No worktree/build/PR per task scope; no reference picture was available (Discord attachment), built from the written description. Waiting for Andy's review.
