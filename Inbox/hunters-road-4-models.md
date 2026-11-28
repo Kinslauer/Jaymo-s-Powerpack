@@ -21,3 +21,4 @@ thread: t3 mcp:e7b29b66-499d-478c-8315-6f5702c83489
 - 2026-11-27 08:55 Codex out of usage (weekly limit, resets Dec 1 10:47 AM); moved to Antigravity gemini-4-carbon, T3 thread mcp:398bb09e-1f3f-4d3d-b57f-fdee68183413
 - 2026-11-27 09:06 Antigravity quota reached 2026-11-27 9:05 AM (resets about 1:30 PM); thread failed with no work done. Still claimed by t3, waiting on Andy: retry on Antigravity after the reset, or hand to Hermes.
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-27 20:39 Andy 2026-11-27: models on Antigravity, one at a time. HR 3 merged as #2331; HR 4 started on Antigravity gemini-4-carbon, T3 thread mcp:e7b29b66, branch t3/hunters-road-4-models-v2 off origin/master.
