@@ -18,7 +18,8 @@ import org.jspecify.annotations.Nullable;
  * (0.7.110) Free rein in the saddle ({@link FreeRein}), in third person: the mouse turns the camera
  * ({@code MouseHandlerMixin}, {@code FreeReinViewMixin}) and the movement keys turn the rider toward where the camera
  * looks, a little each tick, and the horse after them. Aiming a bow or the like turns you to the camera at once. Back in
- * first person, or out of the saddle, you look where the camera looked. A key (unbound at first) switches it off and on.
+ * first person, or out of the saddle, you look where the camera looked. A key (unbound at first) switches it off and on,
+ * in the saddle only.
  */
 public final class FreeReinClient {
 	/** How much of the way to the wanted heading the rider turns each tick (Better Mount Steering's mountTurnSpeed). */
@@ -73,8 +74,9 @@ public final class FreeReinClient {
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		while (toggleKey != null && toggleKey.consumeClick()) {
-			enabled = !enabled;
-			if (player != null) {
+			// only in the saddle, so the key can do something else on foot
+			if (player != null && player.getVehicle() != null) {
+				enabled = !enabled;
 				player.sendOverlayMessage(Component.translatable(enabled ? "message.jaymoskingdoms.free_rein.on" : "message.jaymoskingdoms.free_rein.off"));
 			}
 		}
