@@ -33,7 +33,8 @@ import org.jspecify.annotations.Nullable;
  * tree lying still for {@link FallingTree#SETTLE_AFTER} becomes its logs as real blocks where they lie (drawn with the land,
  * for free), its leaves dropping off, and that it wakes, every log back where it was, when:
  * <ul>
- * <li>someone strong enough to shove it ({@link FallingTree#SHOVE_BRAWN}) walks into one of its logs ({@link #shoves}),</li>
+ * <li>someone strong enough to shove it ({@link FallingTree#SHOVE_BRAWN}) walks into one of its logs ({@link #shoves}; the
+ * weak still put their hands to it and brace),</li>
  * <li>a giant's hand closes on it ({@link FallingTree#take}),</li>
  * <li>a player breaks one of its logs or the block under one ({@link #broken}): broken through, it comes apart in two as a
  * lying tree does, and with what held it up gone, it falls,</li>
@@ -212,7 +213,10 @@ public final class SettledTrees {
 		}
 	}
 
-	/** Those strong enough to shove a fallen tree, walking into a settled log: it wakes, to be shoved. */
+	/**
+	 * Anyone walking into a settled log puts both hands to it and braces against it, as against a lying tree (Andy: "the
+	 * weak should still place and brace"); those strong enough to shove it wake it, to be shoved.
+	 */
 	private static void shoves(ServerLevel level) {
 		Long2ObjectMap<Key> index = INDEX.get(level);
 		if (index == null || index.isEmpty()) {
@@ -224,17 +228,23 @@ public final class SettledTrees {
 				continue;
 			}
 			Vec3 way = FallingTree.pushing(e);
-			if (way == null || FallingTree.brawn(e) < FallingTree.SHOVE_BRAWN) {
+			if (way == null) {
 				continue;
 			}
 			double ahead = e.getBbWidth() * 0.5 + 0.4;
 			double x = e.getX() + way.x * ahead, z = e.getZ() + way.z * ahead;
 			for (int dy = 0; dy <= 1; dy++) {
 				BlockPos at = BlockPos.containing(x, e.getY() + 0.5 + dy, z);
-				if (index.containsKey(at.asLong())) {
-					wake(level, at);
-					break;
+				if (!index.containsKey(at.asLong())) {
+					continue;
 				}
+				if (FallingTree.brawn(e) >= FallingTree.SHOVE_BRAWN) {
+					wake(level, at);
+				} else {
+					// (held until the next look, so their hands stay on it between)
+					FallingTree.brace(e, Vec3.atCenterOf(at), level.getGameTime() + SHOVE_CHECK);
+				}
+				break;
 			}
 		}
 	}

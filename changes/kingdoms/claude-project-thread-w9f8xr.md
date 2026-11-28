@@ -3,6 +3,7 @@
 - It wakes back into a lying tree, every log where it was, when someone strong enough to shove it (brawn 2+) walks into one of its logs, when a giant's hand closes on it, when a tornado's winds reach it, or when a player breaks one of its logs or the block under one (broken through, it comes apart in two; with what held it gone, it falls). It settles again 30 seconds after it's left alone.
 - A log with no room where it lay (sunk in the ground) is kept with it out of sight and comes back when it wakes.
 - Settled logs are never taken for a standing tree (felling, giants, tornado uprooting).
-- Not kept: on settled logs, chopping is ordinary log breaking (no three-stroke chop), and someone too weak to shove it no longer leans both hands on it (it only wakes for the strong).
+- Anyone too weak to shove it still puts both hands to a settled log and braces against it (Andy); only the strong wake it.
+- Not kept: on settled logs, chopping is ordinary log breaking (no three-stroke chop).
 - `SettledTrees` (kept per chunk, indexed while loaded), `FallingTree.settle`/`wake`/`SETTLE_AFTER`, `Trees.natural`, `Tornadoes`.
 - Built; not played.

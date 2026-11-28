@@ -1079,6 +1079,18 @@ public final class FallingTree extends Entity {
 		return sunk;
 	}
 
+	/**
+	 * {@code e} puts both hands to the log whose middle is {@code at} and strains at it until tick {@code until} (a settled
+	 * tree too weak to wake: {@link SettledTrees#shoves}). Their hands come off once they stop.
+	 */
+	static void brace(LivingEntity e, Vec3 at, long until) {
+		PUSHERS.put(e, until);
+		Vec3 was = e.getAttached(PUSHING);
+		if (was == null || was.distanceToSqr(at) > PUSH_RESYNC * PUSH_RESYNC) {
+			e.setAttached(PUSHING, at);
+		}
+	}
+
 	/** How strong {@code e} is: Kitchen's hauling brawn for a player; for anything else its Strength and its size. */
 	static int brawn(LivingEntity e) {
 		if (e instanceof Player player) {
