@@ -1030,6 +1030,15 @@ public class CorpseEntity extends Entity {
 		return age;
 	}
 
+	/**
+	 * Ticks it has lain decaying: its rot clock, which is saved with it and stands still while it is kept fresh (a rite, a
+	 * wrap), hung up or frozen. Kingdoms' flies wait on this ({@code SmallLife}), not on {@link #sinceDeath}, which forgets
+	 * a body's death on a reload.
+	 */
+	public int decayTicks() {
+		return age;
+	}
+
 	int burnTicks() {
 		return burnTicks;
 	}

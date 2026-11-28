@@ -30,6 +30,8 @@ public final class KitchenCompat {
 	private static final @Nullable Method SEASON_NAME, DAY_OF_YEAR, TEMPERATE;
 	/** For the Unburied coming apart: Kitchen's {@code CorpseEntity.spill(Vec3)}, a body let fall turning over as it drops. */
 	private static final @Nullable Method SPILL;
+	/** For the flies: Kitchen's {@code CorpseEntity.decayTicks()}, how long a body has lain rotting (saved with it). */
+	private static final @Nullable Method DECAY_TICKS;
 
 	static {
 		Class<?> corpse = null;
@@ -121,6 +123,15 @@ public final class KitchenCompat {
 			}
 		}
 		SPILL = spill;
+		Method decayTicks = null;
+		if (corpse != null) {
+			try {
+				decayTicks = corpse.getMethod("decayTicks");
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to tell how long a body has rotted; flies go by its death instead: {}", e.toString());
+			}
+		}
+		DECAY_TICKS = decayTicks;
 		DAY_OF_YEAR = dayOfYear;
 		TEMPERATE = temperate;
 	}
@@ -833,6 +844,14 @@ public final class KitchenCompat {
 	/** (0.7.132) Ticks since it died (very large for a body that was lying there before a reload). */
 	static long sinceDeath(Entity corpse) {
 		return call(SINCE_DEATH, corpse) instanceof Long ticks ? ticks : Long.MAX_VALUE;
+	}
+
+	/**
+	 * Ticks the body has lain decaying (Kitchen's rot clock: kept with the body over a reload, and still while it is kept
+	 * fresh, hung or frozen). A Kitchen too old for it: {@link #sinceDeath}.
+	 */
+	static long decayTicks(Entity corpse) {
+		return call(DECAY_TICKS, corpse) instanceof Integer ticks ? ticks : sinceDeath(corpse);
 	}
 
 	/** (0.7.132) The body {@code player} is carrying in their arms, if any. */

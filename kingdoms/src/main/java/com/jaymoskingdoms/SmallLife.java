@@ -49,7 +49,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Crickets</b> chirp in the grass of warm lands at night, and are gone at dawn.</li>
  * <li><b>Snails</b> come out after rain onto grass and earth, draw into their shells when you come near, nibble the short
  * grass at their feet, and go back under when the ground dries.</li>
- * <li><b>Flies</b> come to a body left lying (Jaymo's Kitchen's corpses, {@link KitchenCompat}) and <b>maggots</b> to one left
+* <li><b>Flies</b> come to a body left rotting a while, or to a pile of the dead (Jaymo's Kitchen's corpses, {@link KitchenCompat}) and <b>maggots</b> to one left
  * longer, and the maggots eat it ({@link Devouring#bite}), so a body left out is soon gone. A body being seen to (a
  * bearer's duty, {@link Bearers#claimed}) or kept by a rite or a wrap ({@link BodyKeeping#isPreserved}) draws none: the
  * stewardship is burying the dead.</li>
@@ -78,8 +78,16 @@ public final class SmallLife {
 	 * spawn in less number").
 	 */
 	static final int FLIES_AT_BODY = 1, MAGGOTS_AT_BODY = 1, FLIES_NEAR = 4, MAGGOTS_NEAR = 4;
-	/** How long a body lies before flies come, and maggots (ticks since death). */
+	/**
+	 * Flies come only to a body that has lain rotting {@link #FLY_AFTER} ticks (3 minutes, Kitchen's rot clock, see
+	 * {@link KitchenCompat#decayTicks}), or to a pile: more than {@link #PILE_MORE_THAN} bodies within {@link #PILE_REACH}
+	 * blocks across ({@link #PILE_UP} up and down) of it, fresh or not. Tiny bodies (a dead fly, a mouse, under
+	 * {@link #TINY} blocks) make no pile. Andy, 2026-11-28: "they should only come around bodies that are decaying for over
+	 * 3m, and to piles of over 6 bodies." Maggots still come {@link #MAGGOT_AFTER} ticks after death.
+	 */
 	static final long FLY_AFTER = 3600L, MAGGOT_AFTER = 12000L;
+	static final int PILE_MORE_THAN = 6;
+	static final double PILE_REACH = 4.0, PILE_UP = 2.0, TINY = 0.5;
 	/** How long after rain the snails are out (ticks); the night's hours (day time). */
 	static final long SNAIL_WINDOW = 6000L;
 	static final int NIGHT_FROM = 13000, NIGHT_TO = 23000;
@@ -218,7 +226,8 @@ public final class SmallLife {
 				continue;
 			}
 			long since = KitchenCompat.sinceDeath(body);
-			if (since < FLY_AFTER) {
+			boolean fly = KitchenCompat.decayTicks(body) >= FLY_AFTER || pile(level, body);
+			if (!fly && since < MAGGOT_AFTER) {
 				continue;
 			}
 			BlockPos at = body.blockPosition();
@@ -232,13 +241,24 @@ public final class SmallLife {
 					maggots++;
 				}
 			}
-			if (flies < FLIES_AT_BODY && fliesNear < FLIES_NEAR && put(level, MocWild.FLY, at.above(), at) != null) {
+			if (fly && flies < FLIES_AT_BODY && fliesNear < FLIES_NEAR && put(level, MocWild.FLY, at.above(), at) != null) {
 				fliesNear++;
 			}
 			if (since >= MAGGOT_AFTER && maggots < MAGGOTS_AT_BODY && maggotsNear < MAGGOTS_NEAR && put(level, MocWild.MAGGOT, at, at) != null) {
 				maggotsNear++;
 			}
 		}
+	}
+
+	/** Whether {@code body} lies in a pile: more than {@link #PILE_MORE_THAN} bodies (itself among them) close round it. */
+	private static boolean pile(ServerLevel level, Entity body) {
+		AABB round = body.getBoundingBox().inflate(PILE_REACH, PILE_UP, PILE_REACH);
+		return level.getEntities((Entity) null, round, e -> KitchenCompat.isCorpse(e) && !tiny(e)).size() > PILE_MORE_THAN;
+	}
+
+	/** A body too small to count towards a pile. */
+	private static boolean tiny(Entity body) {
+		return body.getBbWidth() <= TINY && body.getBbHeight() < TINY;
 	}
 
 	/** Roaches at blood on a settlement's floor, or at rotten flesh lying indoors. */
