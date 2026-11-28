@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:03). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:10). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**30 problems.**
+**31 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -41,6 +41,7 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/gore-2-cut-faces|gore-2-cut-faces]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/gore-3-cauterized|gore-3-cauterized]]: `for: antigravity` matches no bot or agent, so no one will claim it.
+- [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/hunters-road-3-models|hunters-road-3-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/hunters-road-4-models|hunters-road-4-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/hunters-road-5-models|hunters-road-5-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
