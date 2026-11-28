@@ -33,3 +33,6 @@ owns:
 - Modeller-only: no Java gameplay code; this branch supplies assets the gameplay PR will wire.
 
 ## Done
+- Delivered the orange-to-black cauterized cut overlay and spark/smoke particle sprites as PR #2337.
+- All new particle sprites pass texture_lint.py; the 64x64 overlay matches the existing cut texture.
+- Build passes; not tested in game (art-only branch, gameplay wiring separate).
