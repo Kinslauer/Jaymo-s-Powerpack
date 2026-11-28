@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: gore-2-cut-faces
 branch: t3/gore-2-cut-faces
 with: 
@@ -28,3 +28,4 @@ owns:
 - Claimed by Antigravity in T3 Code (`t3`).
 
 ## Done
+- 2026-11-27 19:20 No sign of work for 30 min: marked stalled (whoever ran it stopped).
