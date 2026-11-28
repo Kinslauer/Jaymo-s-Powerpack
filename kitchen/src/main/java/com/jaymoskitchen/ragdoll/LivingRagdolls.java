@@ -245,7 +245,7 @@ public final class LivingRagdolls {
 	 * Whether a blow throws {@code player} back past a plain hit's push: from a body that hits for knockback (a ravager,
 	 * a hoglin), a weapon or shot that adds it (Knockback, Punch), or a player's sprinting swing.
 	 */
-	static boolean knocksBack(ServerPlayer player, DamageSource source) {
+	static boolean knocksBack(LivingEntity player, DamageSource source) {
 		float knock = 0.0F;
 		Entity by = source.getEntity();
 		if (by instanceof LivingEntity attacker && source.getDirectEntity() == attacker) {
@@ -258,8 +258,8 @@ public final class LivingRagdolls {
 			}
 		}
 		ItemStack weapon = source.getWeaponItem();
-		if (weapon != null && !weapon.isEmpty()) {
-			knock = EnchantmentHelper.modifyKnockback(player.level(), weapon, player, source, knock);
+		if (weapon != null && !weapon.isEmpty() && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			knock = EnchantmentHelper.modifyKnockback(level, weapon, player, source, knock);
 		}
 		return knock > 0.0F;
 	}

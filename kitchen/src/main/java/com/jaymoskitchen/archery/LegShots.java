@@ -67,6 +67,12 @@ public final class LegShots {
 	public static final int LONG_CRAWL_TICKS = 600;
 	public static final TagKey<EntityType<?>> DOWNED_LONG = TagKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id("downed_long"));
 	private static final int CRAWL_AMPLIFIER = 3;
+	/**
+	 * A player or an NPC (a body built like a person) hit so only goes down to crawl this often (else they only limp):
+	 * Andy, "Players are knocked on the ground far too easily. lower that chance by 80%", then "npcs can get the same
+	 * resilience". Every time before; animals and other creatures still always go down.
+	 */
+	public static final float PERSON_DOWN_CHANCE = 0.2F;
 	/** (0.5.13) The tags Powers' Wounds puts on a body for each broken leg (any of its legs). */
 	public static final List<String> BROKEN_LEG_TAGS = List.of("jaymoskitchen.broken.left_leg", "jaymoskitchen.broken.right_leg",
 		"jaymoskitchen.broken.front_legs", "jaymoskitchen.broken.hind_legs", "jaymoskitchen.broken.legs");
@@ -182,7 +188,9 @@ public final class LegShots {
 			return;
 		}
 
-		int crawlTicks = target.is(DOWNED_LONG) ? LONG_CRAWL_TICKS : CRAWL_TICKS;
+		boolean person = target instanceof Player || com.jaymoskitchen.ragdoll.MobRagdolls.humanoid(target);
+		boolean down = !person || target.getRandom().nextFloat() < PERSON_DOWN_CHANCE;
+		int crawlTicks = !down ? 0 : target.is(DOWNED_LONG) ? LONG_CRAWL_TICKS : CRAWL_TICKS;
 		int amplifier = crit ? CRIT_AMPLIFIER : AMPLIFIER;
 		int ticks = crit ? CRIT_TICKS : TICKS;
 		MobEffectInstance current = target.getEffect(MobEffects.SLOWNESS);
@@ -194,12 +202,16 @@ public final class LegShots {
 		// the limp it's left with, starting once it's back on its feet...
 		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, crawlTicks + ticks, amplifier), attacker);
 		// ...and first, down on the ground dragging itself along (the effect system keeps the limp underneath)
-		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, crawlTicks, CRAWL_AMPLIFIER), attacker);
-		target.setAttached(CRAWL, (level.getGameTime() + crawlTicks) << 12 | crawlTicks);
+		if (down) {
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, crawlTicks, CRAWL_AMPLIFIER), attacker);
+			target.setAttached(CRAWL, (level.getGameTime() + crawlTicks) << 12 | crawlTicks);
+		}
 
 		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, 10, 0.15, 0.1, 0.15, 0.25);
 		level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.7F, 0.8F);
-		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.HOSTILE, 0.6F, 0.9F);
+		if (down) {
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.HOSTILE, 0.6F, 0.9F);
+		}
 	}
 
 	/** Whether it's down on the ground right now (it can't shoot or draw a bow while it is). */

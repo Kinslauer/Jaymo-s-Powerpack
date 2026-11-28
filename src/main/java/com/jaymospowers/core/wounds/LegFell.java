@@ -35,7 +35,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>A blow ({@link Downed#attack}: something struck it, not a fall, fire or bleeding) that lands on a leg or foot and
  * takes {@link #BLOW_SHARE} of the most health, or breaks that leg, takes the legs out from under a body on its feet: a
- * mob's every time, a player's one time in five ({@link #PLAYER_CHANCE}).</li>
+ * player's one time in five ({@link #PLAYER_CHANCE}), an NPC's one time in five too (its sweep, {@link Tripped#SWEEP_CHANCE}).</li>
  * <li>A player goes limp into Kitchen's ragdoll, flung a little away from the blow, and once the body comes to rest lies
  * prone ({@link Crawl#CRAWLING}): no standing up by Jump or the crawl key. A roll (a double tap of Left or Right, or the
  * Dodge key) gets them back on their feet as it ends. Two broken legs still keep them crawling ({@link Breaks#crawlOnly}).
@@ -49,7 +49,7 @@ public final class LegFell {
 	public static final float BLOW_SHARE = 0.35F;
 	/**
 	 * Such a blow fells a player only this often. Andy (2026-11-28): "Players are knocked on the ground far too easily.
-	 * lower that chance by 80% and require targeted hits to the legs, knockback or explosions". Mobs still always go down.
+	 * lower that chance by 80% and require targeted hits to the legs, knockback or explosions". NPCs roll the same through their sweep ({@link Tripped#SWEEP_CHANCE}).
 	 */
 	public static final float PLAYER_CHANCE = 0.2F;
 	/** The fling away from the blow (blocks a tick), and its lift. */

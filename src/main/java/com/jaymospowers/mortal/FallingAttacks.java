@@ -2,7 +2,6 @@ package com.jaymospowers.mortal;
 
 import com.jaymospowers.core.FlightRoll;
 import com.jaymospowers.core.finisher.Finishers;
-import com.jaymospowers.core.wounds.Tripped;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -29,7 +28,7 @@ import net.minecraft.world.item.Items;
  * <li>blunt and flail: the bonus, and a shock through the ground that hurts and lifts everyone within {@link #WIDE};</li>
  * <li>spear and polearm: the bonus, and the struck is pinned where it stands for a moment;</li>
  * <li>staff: half the bonus and a long shove;</li>
- * <li>bare hands: half the bonus, and the struck goes down on its back (the sweep).</li>
+ * <li>bare hands: half the bonus. It no longer puts the struck on its back: a blow from above isn't at the legs.</li>
  * </ul>
  * The vanilla mace keeps its own smash and gets nothing here; bows and guns have no falling attack.
  */
@@ -38,7 +37,7 @@ public final class FallingAttacks {
 	static final float PER_BLOCK = 1.0F, MOST = 8.0F;
 	static final double WIDE = 2.8;
 	static final float SHOCK_DAMAGE = 3.0F;
-	static final int STAGGER = 40, PIN = 30, FLOOR = 40;
+	static final int STAGGER = 40, PIN = 30;
 
 	static boolean landing;
 
@@ -100,9 +99,8 @@ public final class FallingAttacks {
 			}
 			case FIST -> {
 				extra(level, player, target, bonus * 0.5F, false);
-				if (target.isAlive()) {
-					Tripped.sweep(target, FLOOR);
-				}
+				// (a blow from above on the body, not the legs: it floors no one; Andy, "require targeted hits to the legs,
+				// knockback or explosions")
 			}
 			default -> {
 				return;
