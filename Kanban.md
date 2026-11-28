@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 04:58). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 05:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
-- [ ] [[Inbox/wrist-table-ui-mockup|wrist-table-ui-mockup]] · for 🔥 Prometheus · open
 
 
 ## Being built
@@ -83,6 +82,7 @@ kanban-plugin: board
 - [ ] [[Inbox/blastfx-4|blastfx-4]] · for any · blocked
 - [ ] [[Inbox/blastfx-5|blastfx-5]] · for any · blocked
 - [ ] [[Inbox/hunters-road-4|hunters-road-4]] · ☁️ Cloud · blocked
+- [ ] [[Inbox/wrist-table-ui-mockup|wrist-table-ui-mockup]] · for 🔥 Prometheus · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/hunters-road-3-models|hunters-road-3-models]] · 💻 Odysseus · #'2332' · stalled
