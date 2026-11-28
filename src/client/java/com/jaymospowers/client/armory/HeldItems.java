@@ -14,12 +14,14 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -37,7 +39,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Shears:</b> brought in towards the middle of the view, snipping as they're used.</li>
  * <li><b>Compass and clock:</b> held up in front of you to read, as Not Enough Animations holds a map; in third person
  * the arm comes up when you look down at it.</li>
- * <li><b>Lantern</b> (any lantern block): held out a little, hanging and swinging with your step.</li>
+ * <li><b>Lantern</b> (any lantern block): held out a little, hanging and swinging with your step. NPCs on a humanoid
+ * body (MCA villagers, folk, zombies and the like) hold a lantern in the main hand the same way; one in their off hand
+ * hangs at the hip instead ({@code WornLanterns#extractNpc}).</li>
  * </ul>
  * Third person is worked out from what each player holds, how they swing and walk (all synced), so everyone sees the same.
  */
@@ -84,16 +88,17 @@ public final class HeldItems {
 		return stack.is(Items.COMPASS) || stack.is(Items.RECOVERY_COMPASS) || stack.is(Items.CLOCK);
 	}
 
-	static boolean lantern(ItemStack stack) {
+	public static boolean lantern(ItemStack stack) {
 		return stack.getItem() instanceof BlockItem item && item.getBlock() instanceof LanternBlock;
 	}
 
-	static HumanoidArm arm(Player player, InteractionHand hand) {
-		return hand == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite();
+	static HumanoidArm arm(LivingEntity entity, InteractionHand hand) {
+		return hand == InteractionHand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite();
 	}
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		state.setData(KEY, entity instanceof Player player && state instanceof AvatarRenderState ? held(player, state, partialTicks) : null);
+		state.setData(KEY, entity instanceof Player player && state instanceof AvatarRenderState ? held(player, state, partialTicks)
+			: entity instanceof Mob mob && state instanceof HumanoidRenderState ? npcLantern(mob, state) : null);
 		// (0.20.90) the off hand rock throw
 		RockThrowPose.extract(entity, state, partialTicks);
 	}
@@ -123,6 +128,15 @@ public final class HeldItems {
 			}
 		}
 		return null;
+	}
+
+	/** An NPC on a humanoid body with a lantern in its main hand: held out and swinging with its step, as a player holds one. */
+	private static @Nullable Held npcLantern(Mob mob, LivingEntityRenderState state) {
+		if (mob.isSleeping() || mob.isVisuallySwimming() || mob.isSwinging() || mob.isUsingItem() || !lantern(mob.getMainHandItem())) {
+			return null;
+		}
+		float sway = Mth.sin(state.walkAnimationPos * 0.6662F) * Math.min(1.0F, state.walkAnimationSpeed);
+		return new Held(Hold.LANTERN, arm(mob, InteractionHand.MAIN_HAND), sway, 1.0F);
 	}
 
 	static boolean strikes(ItemStack stack) {

@@ -3,26 +3,31 @@ package com.jaymospowers.client.baubles;
 import com.jaymospowers.baubles.Baubles;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import com.jaymospowers.client.armory.HeldItems;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
+import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -30,8 +35,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Avatar;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.BlockItem;
@@ -53,6 +63,13 @@ import org.jspecify.annotations.Nullable;
  * Both hang straight down whatever the body does (crouching included) and swing on a spring as you start, stop, turn,
  * jump and fall, rocking with each step; the hip lantern is nudged forward out of the way of the leg. With
  * LambDynamicLights installed they light the way around you too ({@code LdlWornLanternMixin}).
+ * <p>
+ * NPCs wear theirs the same way (Andy, 2026-11-27, pointing at Traveler's Lantern: "npcs and players should have this
+ * animation when a lantern is equipped"). An NPC on a humanoid body (MCA villagers and the folk, guards, zombies and the
+ * like) with a lantern in its off hand, which is where {@code NightLights} puts the light it carries at night, has it
+ * hung at the off-hand hip on the same spring instead of in the hand ({@link #extractNpc}); the hand is drawn empty.
+ * <p>
+ * A hip lantern gives a quiet clink as the leg knocks it on the stride ({@link #clinks}).
  */
 public final class WornLanterns {
 	// ===== the knobs ================================================================================================
@@ -76,6 +93,8 @@ public final class WornLanterns {
 	 * chestplate.
 	 */
 	static final float PURSE_OVER_ARMOUR = 1.0F, PURSE_ROLL_IN = 0.1F;
+	/** The clink: how loud, the strides (0 to 1) it needs, how often a knock clinks, and how far away it's heard (blocks). */
+	static final float CLINK_VOLUME = 0.12F, CLINK_STRIDE = 0.45F, CLINK_CHANCE = 0.6F, CLINK_RANGE = 16.0F;
 	/** The pole's wood. */
 	static final Identifier POLE_TEXTURE = Identifier.withDefaultNamespace("textures/block/stripped_spruce_log.png");
 	// ================================================================================================================
@@ -86,7 +105,9 @@ public final class WornLanterns {
 	}
 
 	static final RenderStateDataKey<Worn> KEY = RenderStateDataKey.create(() -> "jaymospowers:worn_lanterns");
-	private static final Map<Avatar, Swing[]> SWINGS = new WeakHashMap<>();
+	private static final Map<LivingEntity, Swing[]> SWINGS = new WeakHashMap<>();
+	/** Per entity id: the stride the off-hand leg last knocked the hip lantern on. */
+	private static final Map<Integer, Integer> KNOCKS = new HashMap<>();
 	private static @Nullable ModelPart pole;
 
 	private WornLanterns() {
@@ -95,9 +116,12 @@ public final class WornLanterns {
 	public static void init() {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
-				helper.register(new Layer(avatar));
+				helper.register(new Layer<>(avatar));
+			} else if (renderer instanceof HumanoidMobRenderer<?, ?, ?> mob) {
+				helper.register(npcLayer(mob));
 			}
 		});
+		ClientTickEvents.END_CLIENT_TICK.register(WornLanterns::clinks);
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
 			if (stack.is(Baubles.LANTERN_POLE)) {
 				lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.lantern_pole").withStyle(ChatFormatting.GRAY));
@@ -141,6 +165,15 @@ public final class WornLanterns {
 			}
 			return;
 		}
+		state.setData(KEY, worn(entity, state, partialTicks, hip, purse, onPole, com.jaymospowers.client.backpack.BackpackClient.worn(state)));
+		if (onPole != null) {
+			state.showCape = false;
+		}
+	}
+
+	/** What {@code entity} wears, swung on its springs as it moves now. */
+	private static Worn worn(LivingEntity entity, HumanoidRenderState state, float partialTicks, @Nullable BlockState hip, @Nullable ItemStackRenderState purse,
+		@Nullable BlockState onPole, boolean backpack) {
 		Swing[] swings;
 		synchronized (SWINGS) {
 			swings = SWINGS.computeIfAbsent(entity, e -> new Swing[] {new Swing(1.0F), new Swing(0.7F)});
@@ -151,12 +184,85 @@ public final class WornLanterns {
 		for (Swing swing : swings) {
 			swing.update(now, yaw, state.ageInTicks);
 		}
-		state.setData(KEY, new Worn(hip, purse, onPole,
+		return new Worn(hip, purse, onPole,
 			swings[0].swing, swings[0].roll + Swing.STEP_ROLL * Mth.sin(step) * stride,
 			swings[1].swing, swings[1].roll + Swing.STEP_ROLL * 0.6F * Mth.sin(step) * stride,
-			com.jaymospowers.client.backpack.BackpackClient.worn(state)));
-		if (onPole != null) {
-			state.showCape = false;
+			backpack);
+	}
+
+	/**
+	 * From {@code HumanoidMobRenderer.extractRenderState}, once the hands' items and arm poses are in the state: an NPC's
+	 * off-hand lantern hung at its hip, and the hand drawn empty.
+	 */
+	public static void extractNpc(LivingEntity entity, HumanoidRenderState state, float partialTicks) {
+		if (entity instanceof Player) {
+			return;
+		}
+		BlockState hip = npcHip(entity);
+		if (hip == null || state.isVisuallySwimming || state.isFallFlying) {
+			state.setData(KEY, null);
+			return;
+		}
+		state.setData(KEY, worn(entity, state, partialTicks, hip, null, null, false));
+		// the off hand's side, now empty
+		if (entity.getMainArm() == HumanoidArm.RIGHT) {
+			state.leftHandItemState.clear();
+			state.leftHandItemStack = ItemStack.EMPTY;
+			state.leftArmPose = HumanoidModel.ArmPose.EMPTY;
+		} else {
+			state.rightHandItemState.clear();
+			state.rightHandItemStack = ItemStack.EMPTY;
+			state.rightArmPose = HumanoidModel.ArmPose.EMPTY;
+		}
+	}
+
+	/** An NPC's off-hand lantern, hanging; null if it carries none there (or is using that hand). */
+	private static @Nullable BlockState npcHip(LivingEntity entity) {
+		if (entity instanceof Player || !(entity instanceof Mob) || entity.isSleeping() || entity.isUsingItem() && entity.getUsedItemHand() == InteractionHand.OFF_HAND) {
+			return null;
+		}
+		ItemStack off = entity.getOffhandItem();
+		return HeldItems.lantern(off) ? hanging(off) : null;
+	}
+
+	/** Whether {@code entity} has a lantern hung at its hip: a player's belt slot, an NPC's off hand. */
+	private static boolean hipLantern(LivingEntity entity) {
+		if (entity instanceof Player player) {
+			return Baubles.hipLantern(Baubles.shown(player, 0));
+		}
+		// an NPC only where it is drawn hung (a humanoid body: an illager's still holds it)
+		return npcHip(entity) != null && Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity) instanceof HumanoidMobRenderer<?, ?, ?>;
+	}
+
+	/**
+	 * Each tick: a hip lantern near you clinks when the leg on its side swings forward into it on a walk or run (yours too,
+	 * in first person). Heard, like a step, only close by.
+	 */
+	private static void clinks(Minecraft minecraft) {
+		ClientLevel level = minecraft.level;
+		if (level == null || minecraft.isPaused() || minecraft.getCameraEntity() == null) {
+			KNOCKS.clear();
+			return;
+		}
+		Vec3 eye = minecraft.getCameraEntity().position();
+		for (Entity e : level.entitiesForRendering()) {
+			if (!(e instanceof LivingEntity living) || e.distanceToSqr(eye) > CLINK_RANGE * CLINK_RANGE || living.isInvisible() || !hipLantern(living)) {
+				continue;
+			}
+			float speed = living.walkAnimation.speed();
+			// the leg on the lantern's side is forward-most once a stride (the walk's sine at its trough for that leg)
+			float side = living.getMainArm() == HumanoidArm.RIGHT ? 0.0F : Mth.PI;
+			int knock = Mth.floor((living.walkAnimation.position() * 0.6662F + side + Mth.HALF_PI) / Mth.TWO_PI);
+			Integer last = KNOCKS.put(living.getId(), knock);
+			if (last == null || last == knock || speed < CLINK_STRIDE || !living.onGround() || level.getRandom().nextFloat() > CLINK_CHANCE) {
+				continue;
+			}
+			float volume = CLINK_VOLUME * Math.min(1.0F, speed) * (living instanceof Player ? 1.0F : 0.8F);
+			level.playLocalSound(living.getX(), living.getY() + living.getBbHeight() * 0.4, living.getZ(), SoundEvents.LANTERN_HIT,
+				living.getSoundSource(), volume, 1.3F + level.getRandom().nextFloat() * 0.3F, false);
+		}
+		if (level.getGameTime() % 600 == 0) {
+			KNOCKS.keySet().removeIf(id -> level.getEntity(id) == null);
 		}
 	}
 
@@ -229,20 +335,25 @@ public final class WornLanterns {
 		return pole;
 	}
 
-	/** Draws the hip lantern and the lantern pole on the body as it is posed now. */
-	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
-		Layer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static Layer<?, ?> npcLayer(HumanoidMobRenderer<?, ?, ?> renderer) {
+		return new Layer((RenderLayerParent)renderer);
+	}
+
+	/** Draws the hip lantern and the lantern pole on the body as it is posed now (a player's, or an NPC's hip lantern). */
+	static final class Layer<S extends HumanoidRenderState, M extends HumanoidModel<S>> extends RenderLayer<S, M> {
+		Layer(RenderLayerParent<S, M> renderer) {
 			super(renderer);
 		}
 
 		@Override
-		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
+		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
 			Worn worn = state.getData(KEY);
 			ClientLevel level = Minecraft.getInstance().level;
 			if (worn == null || state.isInvisible || level == null) {
 				return;
 			}
-			PlayerModel body = this.getParentModel();
+			M body = this.getParentModel();
 			poseStack.pushPose();
 			body.root().translateAndRotate(poseStack);
 			body.body.translateAndRotate(poseStack);
@@ -291,7 +402,7 @@ public final class WornLanterns {
 		 * A lantern hung from here: turned back upright by {@code upright} (radians about x) so it hangs straight down, swung,
 		 * and drawn as its hanging block with the top of its chain at the hook.
 		 */
-		private static void hang(PoseStack poseStack, SubmitNodeCollector collector, ClientLevel level, AvatarRenderState state, BlockState block,
+		private static void hang(PoseStack poseStack, SubmitNodeCollector collector, ClientLevel level, HumanoidRenderState state, BlockState block,
 			float size, float upright, float swing, float roll) {
 			poseStack.rotateDegrees(Axis.XP, (upright + swing) * Mth.RAD_TO_DEG);
 			poseStack.rotateDegrees(Axis.ZP, roll * Mth.RAD_TO_DEG);
