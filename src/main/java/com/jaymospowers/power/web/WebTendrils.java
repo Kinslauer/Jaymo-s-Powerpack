@@ -275,13 +275,17 @@ public final class WebTendrils {
 				cancelTug(player, hand);
 				return;
 			}
+			if (machine(player) && com.jaymospowers.rig.RigOcto.heldId(player) >= 0) {
+				// the Octo Core's arms already hold something from the Rig menu's grab: nothing free to take more
+				return;
+			}
 			if (payload.entityId() == GRAB_BLOCK) {
-				if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator() && WebStamina.pay(player, WebStamina.GRAB)) {
+				if (keys(player) && player.isAlive() && !player.isSpectator() && WebStamina.pay(player, WebStamina.GRAB)) {
 					rip(player, hand);
 				}
 			} else if (payload.entityId() < 0) {
 				release(player, hand, true);
-			} else if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator()) {
+			} else if (keys(player) && player.isAlive() && !player.isSpectator()) {
 				Entity target = player.level().getEntity(payload.entityId());
 				if (target != null && target.distanceTo(player) <= GRAB_RANGE + 2.5 && grabbable(player, target) && WebStamina.pay(player, WebStamina.GRAB)) {
 					grab(player, hand, target, -1L);
@@ -311,6 +315,7 @@ public final class WebTendrils {
 			}
 			HOLDS.clear();
 			THROWN.clear();
+			TICKED.clear();
 			SLAMS.clear();
 			TUGS.clear();
 			CROSSES.clear();
@@ -398,6 +403,10 @@ public final class WebTendrils {
 
 	/** That tendril's key (R for the right, G for the left) is still held down: a tug only tears loose held through to the end. */
 	private static boolean tugKeyHeld(ServerPlayer player, int hand) {
+		if (machine(player)) {
+			// the Octo Core's arms: their keys aren't reported as a power's are; letting go sends the release itself
+			return true;
+		}
 		return com.jaymospowers.core.PowerInput.isDown(player, hand == WebNet.OFF ? com.jaymospowers.api.PowerKey.ABILITY_2 : com.jaymospowers.api.PowerKey.ABILITY_1);
 	}
 
@@ -417,7 +426,7 @@ public final class WebTendrils {
 			if (tug == null) {
 				continue;
 			}
-			if (!player.isAlive() || player.isSpectator() || !WebSymbiote.tendrilKeys(player) || !tugKeyHeld(player, hand)
+			if (!player.isAlive() || player.isSpectator() || !keys(player) || !tugKeyHeld(player, hand)
 				|| tug.hit().getLocation().distanceTo(player.getEyePosition()) > GRAB_RANGE + 3.0) {
 				// (its key let go before it tore loose, however that news reached us: nothing comes, the wall stays whole)
 				cancelTug(player, hand);
@@ -443,7 +452,8 @@ public final class WebTendrils {
 				}
 				if (t % 8 == 0) {
 					com.jaymospowers.core.Shakes.send(player, 0.35F + 0.4F * t / total, null);
-					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.5F);
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), machine(player) ? SoundEvents.PISTON_CONTRACT : SoundEvents.SLIME_SQUISH,
+						SoundSource.PLAYERS, 0.6F, 0.5F);
 				}
 				if (t == total / 2) {
 					WebSymbiote.narrate(player, "tug");
@@ -475,7 +485,7 @@ public final class WebTendrils {
 	/** Left or right click while that tendril holds a chunk: a heavy cross (see {@link #CROSS_WINDUP}). */
 	static void smash(ServerPlayer player, int hand) {
 		Grips grips = player.getAttached(GRIPS);
-		if (grips == null || !WebSymbiote.tendrilKeys(player) || !player.isAlive() || CROSSES.containsKey(player.getUUID())) {
+		if (grips == null || !keys(player) || !player.isAlive() || CROSSES.containsKey(player.getUUID())) {
 			return;
 		}
 		if (player.level().getEntity(grips.get(hand)) instanceof com.jaymospowers.core.BlockCluster chunk && reached(player, hand)) {
@@ -759,8 +769,14 @@ public final class WebTendrils {
 		Grips grips = player.getAttachedOrElse(GRIPS, Grips.NONE);
 		player.setAttached(GRIPS, grips.with(hand, target.getId()));
 		ServerLevel level = player.level();
-		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 1.0F, 0.5F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.8F, 0.7F);
+		if (machine(player)) {
+			// the Octo Core's claw closing on it, and the pistons
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 1.0F, 1.4F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PISTON_EXTEND, SoundSource.PLAYERS, 0.6F, 1.2F);
+		} else {
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 1.0F, 0.5F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.8F, 0.7F);
+		}
 		if (target instanceof LivingEntity living) {
 			// grabbed from mid-air, it's hauled up into your air combo (hit it out of the grip)
 			com.jaymospowers.mortal.AirCombo.pullUp(player, living, false);
@@ -915,10 +931,36 @@ public final class WebTendrils {
 		}
 	}
 
+	/** The last game tick each player's tendrils were run ({@link #tick}). */
+	private static final java.util.Map<UUID, Long> TICKED = new java.util.HashMap<>();
+
+	/**
+	 * R and G work the tendrils: the symbiote's are out (or you hang off a wall on them), or the Octo Core's arms are out
+	 * (Andy: the arms' controls "should be the same as the tendrils"), which grab, hold, tear and throw on the same keys.
+	 */
+	public static boolean keys(Player player) {
+		return WebSymbiote.tendrilKeys(player) || com.jaymospowers.rig.RigOcto.out(player);
+	}
+
+	/** R and G are the Octo Core's arms, not the symbiote's tendrils: the grips are drawn as the arms, with no cords. */
+	public static boolean machine(Player player) {
+		return !WebSymbiote.tendrilKeys(player) && com.jaymospowers.rig.RigOcto.out(player);
+	}
+
+	/** Every tick, for an Octo Core wearer (from RigOcto): what the arms hold on R and G, run as the tendrils' holds. */
+	public static void tickArms(ServerPlayer player) {
+		tick(player);
+	}
+
 	/** Every tick, per web slinger: whatever the tendrils hold hangs where it's held (and the radial grab throws). */
 	static void tick(ServerPlayer player) {
-		WebTendrilCombos.tick(player);
 		long gameTime = player.level().getGameTime();
+		Long ticked = TICKED.put(player.getUUID(), gameTime);
+		if (ticked != null && ticked == gameTime) {
+			// already run this tick (a web slinger wearing the Octo Core is ticked by both)
+			return;
+		}
+		WebTendrilCombos.tick(player);
 		tickTugs(player, gameTime);
 		tickCross(player, gameTime);
 		if (player.getAttached(CLIMB) != null && (!WebSymbiote.crawlTendrils(player) || !player.isAlive())) {
@@ -930,7 +972,7 @@ public final class WebTendrils {
 			return;
 		}
 		if (!player.isAlive() || player.isSpectator()
-			|| !WebSymbiote.armored(player) && WebSymbiote.tendrilsOut(player) < player.level().getGameTime()) {
+			|| !WebSymbiote.armored(player) && WebSymbiote.tendrilsOut(player) < player.level().getGameTime() && !com.jaymospowers.rig.RigOcto.out(player)) {
 			releaseAll(player, false);
 			return;
 		}
@@ -1063,6 +1105,7 @@ public final class WebTendrils {
 
 	static void forget(ServerPlayer player) {
 		HOLDS.remove(player.getUUID());
+		TICKED.remove(player.getUUID());
 		TUGS.remove(player.getUUID());
 		CROSSES.remove(player.getUUID());
 		WebHeldGrab.forget(player);

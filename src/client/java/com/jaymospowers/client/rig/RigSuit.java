@@ -125,6 +125,23 @@ public final class RigSuit {
 	static final RenderStateDataKey<Boolean> FLY = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_fly");
 	/** Which suit-up the plates fly in as ({@link com.jaymospowers.rig.RigSuitUp}'s styles; 0 for the plain call). */
 	static final RenderStateDataKey<Integer> STYLE = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_style");
+	/**
+	 * The Octo Core hidden with the inventory's eye button: its plates come off as they do when it's taken off, but its
+	 * reactor stays on the chest, lit, and the arms are mounted on it (Andy: "the reactor core stays visible drawn and the
+	 * arms should extend from that too").
+	 */
+	static final RenderStateDataKey<Boolean> REACTOR = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_reactor");
+	/** The reactor's plate (RigSuitMesh.PLATES). */
+	private static final int REACTOR_PLATE = plate("core");
+
+	private static int plate(String name) {
+		for (int i = 0; i < RigSuitMesh.PLATES.length; i++) {
+			if (RigSuitMesh.PLATES[i][1].equals(name)) {
+				return i;
+			}
+		}
+		return -1;
+	}
 	/** A called suit: how far (pixels) each plate starts from its place, how high above, and how much it tumbles on the way. */
 	static final float FLY_SPREAD = 110.0F, FLY_HEIGHT = 70.0F, FLY_TUMBLE = 4.0F;
 	/** The shortest a plate's flight takes (ticks). */
@@ -208,7 +225,7 @@ public final class RigSuit {
 			// first seen: as it is, nothing building
 			track = new Track();
 			for (int i = 0; i < PIECES.length; i++) {
-				track.worn[i] = Rig.wears(player, PIECES[i]);
+				track.worn[i] = on(player, PIECES[i]);
 				track.base[i] = track.worn[i] ? done(i) : -1.0F;
 				track.mark[i] = now;
 				track.heard[i] = track.base[i];
@@ -218,7 +235,7 @@ public final class RigSuit {
 			return track;
 		}
 		for (int i = 0; i < PIECES.length; i++) {
-			boolean worn = Rig.wears(player, PIECES[i]);
+			boolean worn = on(player, PIECES[i]);
 			if (worn != track.worn[i]) {
 				// turn round from wherever it had got to
 				track.base[i] = Mth.clamp(track.age(i, now), 0.0F, done(i));
@@ -227,6 +244,15 @@ public final class RigSuit {
 			}
 		}
 		return track;
+	}
+
+	/**
+	 * Whether a piece is on the body: worn and not hidden with the inventory's eye button. Hiding one takes its plates off
+	 * as taking it off does, running its build backwards with every hiss (Andy: "retract like the suit removal animation
+	 * when players choose to hide it"); showing it again builds it back on.
+	 */
+	private static boolean on(Player player, Rig.Piece piece) {
+		return Rig.wears(player, piece) && !com.jaymospowers.core.HiddenArmor.hidden(player, piece.slot);
 	}
 
 	private static void tick(Minecraft minecraft) {
@@ -320,6 +346,7 @@ public final class RigSuit {
 		state.setData(FINISH, null);
 		state.setData(FLY, null);
 		state.setData(STYLE, null);
+		state.setData(REACTOR, null);
 		state.setData(BODY, null);
 		state.setData(PARENT, null);
 		state.setData(RigBackClient.BACK, null);
@@ -337,8 +364,11 @@ public final class RigSuit {
 		for (int i = 0; i < PIECES.length; i++) {
 			Rig.Piece piece = PIECES[i];
 			boolean onState = piece.item() != null && equipment(state, piece).is(piece.item());
-			if (onState) {
-				ItemStack stack = equipment(state, piece);
+			// hidden with the eye button (it's left the state's equipment): its paint still colours the plates coming off
+			boolean hiddenWorn = !onState && piece.item() != null && Rig.wears(player, piece)
+				&& com.jaymospowers.core.HiddenArmor.hidden(player, piece.slot);
+			if (onState || hiddenWorn) {
+				ItemStack stack = onState ? equipment(state, piece) : player.getItemBySlot(piece.slot);
 				if (frame == null || piece == Rig.Piece.CORE) {
 					frame = RigFrame.of(stack);
 				}
@@ -357,14 +387,15 @@ public final class RigSuit {
 				if (lit != null && (lights < 0 || piece == Rig.Piece.CORE)) {
 					lights = lit & 0xFFFFFF;
 				}
-				DyedItemColor dye = equipment(state, piece).get(DataComponents.DYED_COLOR);
+				DyedItemColor dye = stack.get(DataComponents.DYED_COLOR);
 				if (dye != null) {
 					if (colors == null) {
 						colors = new int[] {-1, -1, -1, -1};
 					}
 					colors[i] = dye.rgb() & 0xFFFFFF;
 				}
-				switch (piece) {
+				// (a hidden piece's is already gone)
+				if (onState) switch (piece) {
 					case HELM -> {
 						state.headEquipment = ItemStack.EMPTY;
 						state.headItem.clear();
@@ -406,7 +437,14 @@ public final class RigSuit {
 			state.legsEquipment = ItemStack.EMPTY;
 			state.feetEquipment = ItemStack.EMPTY;
 		}
+		boolean preview = previewFrame != null && player == net.minecraft.client.Minecraft.getInstance().player;
+		boolean reactor = !preview && !state.isInvisible && RigOctoClient.onReactor(player);
+		if (reactor && ages == null) {
+			// every plate off, the reactor (and the arms on it) still drawn
+			ages = new float[] {-1.0F, -1.0F, -1.0F, -1.0F};
+		}
 		state.setData(AGES, ages);
+		state.setData(REACTOR, reactor ? Boolean.TRUE : null);
 		state.setData(FRAME, ages == null || frame == null ? null : frame.ordinal());
 		state.setData(TRIM, ages == null || trim < 0 ? null : trim);
 		state.setData(UNDER, ages == null || under < 0 ? null : under);
@@ -417,7 +455,7 @@ public final class RigSuit {
 		state.setData(COLORS, ages == null ? null : colors);
 		state.setData(POD, ages == null ? null : RigPose.pods(player, partialTicks));
 		state.setData(FACE, ages == null ? null : face(player, (float)time));
-		state.setData(GLOW, ages == null ? null : glow(ages[Rig.Piece.CORE.ordinal()], (float)time));
+		state.setData(GLOW, ages == null ? null : glow(reactor ? HAND_AGE : ages[Rig.Piece.CORE.ordinal()], (float)time));
 		state.setData(CHARGE, ages == null ? null : charge(player, (float)time));
 		if (ages != null) {
 			// the back rig's vanes, legs and pincers (RigBackClient)
@@ -803,7 +841,7 @@ public final class RigSuit {
 			}
 			hideSkinLayers();
 			this.style = state.getData(STYLE) == null ? 0 : Math.min(DOWN, Math.max(0, state.getData(STYLE)));
-			assemble(state.getData(AGES), Boolean.TRUE.equals(state.getData(FLY)));
+			assemble(state.getData(AGES), Boolean.TRUE.equals(state.getData(FLY)), Boolean.TRUE.equals(state.getData(REACTOR)));
 			Float face = state.getData(FACE);
 			if (face != null && face > 0.0F) {
 				// (0.11.110) the faceplate swung up off the face
@@ -831,7 +869,7 @@ public final class RigSuit {
 			bone.loadPose(arm.storePose());
 			bone.visible = true;
 			hideSkinLayers();
-			assemble(BUILT, false);
+			assemble(BUILT, false, false);
 			for (int i = 0; i < this.plates.length; i++) {
 				if (this.pod[i]) {
 					this.plates[i].visible = false;
@@ -840,11 +878,17 @@ public final class RigSuit {
 			return bone;
 		}
 
-		/** Each plate as far as its piece's build has brought it: hidden, swinging in, locking, or on. */
-		private void assemble(float[] ages, boolean fly) {
+		/**
+		 * Each plate as far as its piece's build has brought it: hidden, swinging in, locking, or on. With {@code reactor}
+		 * (see {@link #REACTOR}), the Core's reactor plate stays on, whatever the rest are doing.
+		 */
+		private void assemble(float[] ages, boolean fly, boolean reactor) {
 			for (int i = 0; i < this.plates.length; i++) {
 				ModelPart part = this.plates[i];
 				float age = ages == null || this.only >= 0 && RigSuitMesh.PIECE[i] != this.only ? -1.0F : ages[RigSuitMesh.PIECE[i]];
+				if (reactor && i == REACTOR_PLATE && (this.only < 0 || this.only == RigSuitMesh.PIECE[i])) {
+					age = HAND_AGE;
+				}
 				float[] time = RigSuitMesh.TIME[i];
 				float p = age < 0.0F ? -1.0F : (age - time[0]) / time[1];
 				if (this.style == DOWN && age > 0.0F && age < time[0] + time[1]) {

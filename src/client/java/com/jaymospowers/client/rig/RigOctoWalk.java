@@ -118,7 +118,8 @@ final class RigOctoWalk {
 	 * climbing. The upper pair is null while the arms hold something (they're busy).
 	 */
 	static Vec3 @Nullable [] claws(Player player, float partial, boolean busyUpper) {
-		Vec3 normal = RigOcto.clinging(player) ? surface(player) : null;
+		// up on a ceiling, all four claws hold it overhead; on a wall, the wall
+		Vec3 normal = RigOcto.onCeiling(player) ? new Vec3(0.0, -1.0, 0.0) : RigOcto.clinging(player) ? surface(player) : null;
 		boolean stride = false;
 		if (normal == null) {
 			if (!striding(player)) {

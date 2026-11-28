@@ -175,7 +175,8 @@ public final class WebPowerClient implements PowerClient {
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			LocalPlayer player = minecraft.player;
 			// (any symbiote host's tendrils, web slinger or not)
-			if (player == null || !isActive(player) && !com.jaymospowers.power.web.WebSymbiote.isBonded(player) || minecraft.gui.screen() != null
+			if (player == null || !isActive(player) && !com.jaymospowers.power.web.WebSymbiote.isBonded(player) && !com.jaymospowers.rig.RigOcto.out(player)
+				|| minecraft.gui.screen() != null
 				|| WebSymbioteClient.inputLocked() || com.jaymospowers.power.web.KitchenCompat.isCarryingCorpse(player)) {
 				return;
 			}
@@ -445,6 +446,16 @@ public final class WebPowerClient implements PowerClient {
 	private boolean heldGrabKey;
 
 	/** What a tendril would grab: the creature, player, item or corpse under the crosshair, close by. */
+	/** What R or G's grab would take for {@code player} (the tendrils' aim; the Octo Core's arms aim the same way). */
+	public static net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity tendrilTarget(LocalPlayer player) {
+		return grabTarget(player);
+	}
+
+	/** A block within a grab's reach under the crosshair, for Sneak + R or G's tear. */
+	public static boolean tendrilBlock(LocalPlayer player) {
+		return aimedBlock(player);
+	}
+
 	private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity grabTarget(LocalPlayer player) {
 		net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
 		net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0F);

@@ -304,7 +304,8 @@ final class WebTendrilBundle {
 
 	private static void held(List<Draw> draws, Minecraft minecraft, ClientLevel level, Player player, float partial, int light) {
 		WebTendrils.Grips grips = player.getAttached(WebTendrils.GRIPS);
-		if (grips == null) {
+		if (grips == null || WebTendrils.machine(player)) {
+			// (the Octo Core's arms hold with their claws: RigOctoClient draws them)
 			return;
 		}
 		WebTendrils.Combo combo = player.getAttached(WebTendrils.COMBO);

@@ -213,7 +213,8 @@ public final class RigClient {
 		// no power: the four power keys are the Rig's
 		boolean volleyKey = free && powerless && level >= Rig.LOCK_LEVEL && Rig.wears(player, Rig.Piece.HELM);
 		for (PowerKey key : PowerKey.values()) {
-			boolean down = free && powerless && JaymosPowersClient.keyMapping(key).isDown();
+			// (the Octo Core's arms out: R and G are theirs, RigOctoClient; hover and the palm blast are in the Rig menu)
+			boolean down = free && powerless && JaymosPowersClient.keyMapping(key).isDown() && !RigOctoClient.armKey(player, key);
 			boolean volley = key == PowerKey.ABILITY_3 && volleyKey;
 			if (down && !powerKeysDown[key.ordinal()]) {
 				if (volley) {

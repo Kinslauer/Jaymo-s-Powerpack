@@ -516,7 +516,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 			// a symbiote host who isn't a web slinger: with the tendrils out, R and G are theirs
 			boolean tendrils = !avatar && !sensing
 				&& com.jaymospowers.client.power.web.WebPowerClient.routeHostKey(player, key, physical, wasDown[key.ordinal()]);
-			boolean down = power != null && physical && !avatar && !sensing && !tendrils
+			// the Octo Core's arms out (and no symbiote tendrils): R and G are the upper arms, as the tendrils' keys
+			boolean arms = !avatar && !sensing && !tendrils
+				&& com.jaymospowers.client.rig.RigOctoClient.routeKey(player, key, physical, wasDown[key.ordinal()]);
+			boolean down = power != null && physical && !avatar && !sensing && !tendrils && !arms
 				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null)
 				// (0.15.53) steering a Kingdoms dragon, ability 1's key (R) is its breath
 				&& !(key == PowerKey.ABILITY_1 && steeringDragon(player));
