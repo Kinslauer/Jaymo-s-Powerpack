@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: hunters-road-4-models
 branch: t3/hunters-road-4-models-v2
 with: the HR 4 art set - river drowned, mire hag + mud scoop block, grave hag, fog-wight + decoy wisp (models, textures, animations)
@@ -35,3 +35,4 @@ owns:
 
 ## Done
 What a player will see: nothing until the Hunter's Road 4 patch lands; then four new Kingdoms monsters (river drowned, mire hag with her mud scoop block, grave hag, fog-wight with decoy wisp) with our own models, textures and move sets. Not tested in game: assets only, nothing references them yet.
+- 2026-11-28 08:41 PR #2356 is merged into master; moved to Agents/Done.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: antigravity
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
@@ -25,3 +25,4 @@ text_pass: none
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-27 20:39 Andy 2026-11-27: models on Antigravity, one at a time. HR 3 merged as #2331; HR 4 started on Antigravity gemini-4-carbon, T3 thread mcp:e7b29b66, branch t3/hunters-road-4-models-v2 off origin/master.
 - 2026-11-28 03:35 t3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-28 08:41 Merged #2356 (Antigravity) on Andy's "merge" 08:40Z.
