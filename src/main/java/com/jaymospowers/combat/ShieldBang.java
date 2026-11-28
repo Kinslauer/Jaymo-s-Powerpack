@@ -63,6 +63,9 @@ import net.minecraft.world.phys.Vec3;
  * and letting go throws the shield forward: you step in, and what's in front of you within reach is struck, shoved back,
  * staggered, and a raised shield knocked aside, all growing with the charge. It costs {@link #BASH_FEATHERS} feathers;
  * with none left you only bang.</li>
+ * <li>Andy (2026-11-28): "the shield bash should work without a weapon by holding m1 while f is held". With nothing in
+ * the main hand the held click bashes all the same; a short one is the shield throw ({@code gear.shield.ShieldMoves}),
+ * as it was, since there's no weapon to bang with.</li>
  * <li>A metal weapon banged on a metal shield ({@link #metal}: iron, steel, gold, copper, netherite and the like by name,
  * or the {@link #CLANGING_METAL} tag, which holds the iron-rimmed vanilla shield) is a noise the symbiote can't bear:
  * every host within {@link #SYMBIOTE_RANGE} flinches as from a bell, and loose symbiotes run from it.</li>
@@ -143,12 +146,18 @@ public final class ShieldBang {
 	}
 
 	/**
-	 * Whether {@code player} can bang right now (both sides): a shield (something that blocks and isn't a weapon) raised in
-	 * the off hand, a weapon in the main hand.
+	 * Whether the attack key is the shield's right now (both sides): a shield (something that blocks and isn't a weapon)
+	 * raised in the off hand, and a weapon or nothing in the main hand. A bare hand only bashes ({@link #bangs}).
 	 */
 	public static boolean ready(Player player) {
+		ItemStack main = player.getMainHandItem();
 		return !player.isSpectator() && player.isUsingItem() && player.getUsedItemHand() == InteractionHand.OFF_HAND
-			&& Guard.raised(player) && !Guard.weaponGuard(player.getUseItem()) && player.getMainHandItem().has(DataComponents.WEAPON);
+			&& Guard.raised(player) && !Guard.weaponGuard(player.getUseItem()) && (main.isEmpty() || main.has(DataComponents.WEAPON));
+	}
+
+	/** Whether a short click bangs (the taunt): {@link #ready}, with a weapon to bang the shield with. */
+	public static boolean bangs(Player player) {
+		return ready(player) && player.getMainHandItem().has(DataComponents.WEAPON);
 	}
 
 	/** Whether {@code stack} rings as metal: the {@link #CLANGING_METAL} tag, or a metal's name in its id. */
@@ -181,7 +190,7 @@ public final class ShieldBang {
 
 	private static void bang(ServerPlayer player) {
 		ServerLevel level = player.level();
-		if (!ready(player) || !take(player, level.getGameTime())) {
+		if (!bangs(player) || !take(player, level.getGameTime())) {
 			return;
 		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);

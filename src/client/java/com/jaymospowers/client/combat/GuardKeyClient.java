@@ -32,8 +32,9 @@ import org.jspecify.annotations.Nullable;
  * The powers' own guards and counters read it too, in place of right click ({@link #down}, {@link #pressed}): Chrono's
  * Time Flow counter, Spider-Sense's counter and the webbed fists' web shield, the Z Fighter's bare-handed guard (sneak
  * for the Full Counter), the Darktide guard. While one of them has it ({@link #powerOwns}) no weapon comes up, and Combo
- * Clash's own block (also on F) stands aside ({@code ComboClashClient}). In Combo Clash's combat mode its block is F's,
- * and ours stays down.
+ * Clash's own block (also on F) stands aside ({@code ComboClashClient}). In Combo Clash's combat mode its block is F's
+ * for fists and weapons, and ours stays down; a shield is ours in every mode ({@link GuardKey#shieldGuard}), so it's held
+ * up in front and the shield bang, bash and shield moves work on it.
  */
 public final class GuardKeyClient {
 	private static @Nullable KeyMapping key;
@@ -105,7 +106,7 @@ public final class GuardKeyClient {
 			return;
 		}
 		boolean held = down() && minecraft.gui.screen() == null && !player.isSpectator() && player.isAlive()
-			&& !ComboClashClient.active() && !powerOwns(player);
+			&& (!ComboClashClient.active() || GuardKey.shieldGuard(player)) && !powerOwns(player);
 		if (held != sent && ClientPlayNetworking.canSend(GuardKey.Held.TYPE)) {
 			sent = held;
 			// told before the raise below, so the server's use goes the same way
