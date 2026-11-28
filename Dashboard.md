@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:38). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -45,8 +45,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/gore-2-cut-faces|gore-2-cut-faces]]: stalled, last change 2026-11-28. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/gore-2-cut-faces|gore-2-cut-faces]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hunters-road-3-models|hunters-road-3-models]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -60,6 +60,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2336 NPC hip lanterns, held lanterns for NPCs, lantern clink (Powers, 2026-11-28)
 - [ ] #2335 reincarnation forgets bonded animals - horses, pets and mounts are strangers to a new life (Kingdoms, 2026-11-28)
 - [ ] #2334 Combo Clash in the pack: its 4-hit strings and dashes, with our combat stepping aside (Powers, Kingdoms, 2026-11-27)
 - [ ] #2333 Lance couch works with a shield; locked-on swings hit only the locked foe (Powers, Kingdoms, 2026-11-27)
@@ -119,12 +120,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2272 Guards shout what fits what they face (Kingdoms, 2026-11-27)
 - [ ] #2271 hoods and over-garments fit what is under them (Kingdoms, 2026-11-27)
 - [ ] #2270 Greetings fit the moment (Kingdoms, 2026-11-27)
-- [ ] #2269 Tables say what's missing; /hints off (Powers, Kingdoms, Kitchen, 2026-11-27)
-- …and 691 older ones.
+- …and 692 older ones.
 
 ## Health
 
-35 problems in the notes: [[Health]].
+34 problems in the notes: [[Health]].
 
 ## Last week
 
