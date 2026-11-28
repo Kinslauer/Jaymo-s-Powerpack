@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: open
 for: antigravity
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: hermes-b
-pr: 2356
+claimed_by: 
+pr: 
 thread: t3 mcp:e7b29b66-499d-478c-8315-6f5702c83489
 writer: hermes-writer
 text_pass: none
@@ -24,7 +24,4 @@ text_pass: none
 - 2026-11-27 09:06 Antigravity quota reached 2026-11-27 9:05 AM (resets about 1:30 PM); thread failed with no work done. Still claimed by t3, waiting on Andy: retry on Antigravity after the reset, or hand to Hermes.
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-27 20:39 Andy 2026-11-27: models on Antigravity, one at a time. HR 3 merged as #2331; HR 4 started on Antigravity gemini-4-carbon, T3 thread mcp:e7b29b66, branch t3/hunters-road-4-models-v2 off origin/master.
-- 2026-11-27 21:36 t3's claim had no sign of work for 30 min: handed back as open.
-- 2026-11-27 21:44 2026-11-27 ~9:55 PM: Antigravity committed the HR 4 models locally (a606ad843f on t3/hunters-road-4-models-v2, worktree E:/t3-worktrees/Origins Mod/t3-hunters-road-4-model-152ad8cdfce07495) and then hit its weekly quota (resets in ~131 h) before pushing. Claude reviewed the commit: passes (art_audit, pr_checks, 9-25 bones, all plan moves, river mob named river_drowned). Waiting on Andy to push/open the PR.
-- 2026-11-27 10:08 PM: hermes-b takeover (Andy: "takeover"): re-verified a606ad843f (sh ./gradlew build at the root and in kingdoms/, tools/pr_checks.py, tools/art_audit.py; check_data_refs' 130 local findings are Windows-only path false positives in the tags/worldgen/lostcities files CI excludes), pushed t3/hunters-road-4-models-v2, opened PR #2356, set in-review.
-- 2026-11-27 22:24 Text pass: reviewed change note 'Hunter's Road 4 - the drowned, hags and fog models, textures and animations'; descriptions are plain, brief, no modern slang; no rewrites needed — change note already matches speaker's voice
+- 2026-11-28 03:35 t3's claim had no sign of work for 30 min: handed back as open.
