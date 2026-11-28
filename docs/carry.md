@@ -161,6 +161,20 @@ How the two get along (`core/CarryOnCompat`, `mixin/carryon/CarryOnPickupMixin` 
   salvage rack, and `FirstPersonArms` leaves the hands to Carry On. It counts as carrying for Z Fighter training.
 - While our carry has your arms, the right-click lets go (`CarryUseMixin`), so Carry On never sees it.
 
+## Block choice box (0.20.18)
+
+Sneak + right-click a block that Carry On *can* lift (i.e. not in `#jaymospowers:carry_on_no_lift`) with empty main hand
+opens a small box near the crosshair with the following choices:
+
+- **Use (...)**: performs the block's normal sneak-use action (e.g. furnace Use (bake), campfire Use (cook),
+  cutting board Use (chop)). The label describes what the click does.
+- **Lift**: Carry On lifts the block with its contents, as before.
+- **Open door** (CfB oven only): the oven's own sneak-click (its door), skipping Kitchen's station handler.
+
+Escape closes the box without action. A plain sneak-click must never lift straight away any more. Without Carry On
+installed, nothing changes (no box). Every other click stays as it is: not sneaking, holding something, while carrying
+(our Carry, Carry On, a Kitchen corpse, being downed), and pod parts (our own carry takes those).
+
 ## Testing (blocks)
 1. Empty hands, sneak + right-click a chest with items in it: it's lifted in Carry On's hold; set it down elsewhere and
    the items are still in it. A barrel, Kitchen's cabinet: the same.
