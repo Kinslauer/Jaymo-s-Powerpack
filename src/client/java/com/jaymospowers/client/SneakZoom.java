@@ -7,10 +7,10 @@ import com.jaymospowers.power.web.WebParkour;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
-import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -20,30 +20,29 @@ import org.jspecify.annotations.Nullable;
  * <p>Kept from the old double-tap gesture: no zoom from Sneak while clinging to a wall or hanging from a bar (Sneak lets go
  * there) nor until {@link #CLING_SETTLE} ticks after, none from Web's double-Sneak yank, and none in a slide (a held
  * Sneak in a fast run is the slide's).
- * <p>The zoom is OK Zoomer's, driven through its own Zoom key (left unbound by {@code KeyConflicts}). OK Zoomer reads that
- * key at the start of each tick, so it's held down again then too ({@link #BEFORE_ZOOMER}), not only at the end of the last
- * one: a key event or focus change in between that lets go of it can't drop the zoom. Sneak and Alt are both read off the
- * keyboard as well as their mappings. Combo Clash's dash, on the same Left Alt, stays still for the zoom ({@link #ownsAlt}).
- * If the gesture is held and no zoom comes of it, the log says why once ("Zoom:"), for the next time it fails in play.
+ * <p>The zoom is our own, not OK Zoomer's. Andy's clip (2026-11-28) showed OK Zoomer turned on by its Zoom key (the HUD
+ * blown up past the screen edges, its "zoomed interface") while the world's field of view never narrowed: something in
+ * the pack after OK Zoomer's own change to {@code Camera#calculateFov} put the plain field of view back. So the zoom
+ * here is applied last of all ({@code ZoomFovMixin}, a late priority): it eases in over {@link #EASE_TICKS} to
+ * {@link #ZOOM} times and out again the same way, and the mouse turns slower by the same amount while it's on
+ * ({@code ZoomMouseMixin}), as OK Zoomer's did. OK Zoomer's own key (unbound by {@code KeyConflicts}) is left alone.
+ * Combo Clash's dash, on the same Left Alt, stays still for the zoom ({@link #ownsAlt}).
  */
 public final class SneakZoom {
-	/** A first press held longer than this (ticks) is a hold, not a tap (a freerunner's slide is a held Sneak). */
-	private static final int TAP_HOLD_TICKS = 3;
 	/** After a cling or bar hang, ticks on the ground before Sneak taps zoom again. */
 	private static final int CLING_SETTLE = 10;
-	private static final String OK_ZOOMER_KEY = "key.ok_zoomer.zoom";
-	/** A phase of the client's tick start that runs before OK Zoomer's (in the default phase), which reads its Zoom key. */
-	private static final net.minecraft.resources.Identifier BEFORE_ZOOMER = JaymosPowers.id("before_ok_zoomer");
+	/** How far the view zooms in (the field of view is divided by this), OK Zoomer's default. */
+	static final float ZOOM = 4.0F;
+	/** Ticks the zoom takes to ease in, and out (OK Zoomer's default transition length). */
+	static final float EASE_TICKS = 8.0F;
 
-	private static boolean sneakWasDown;
 	private static int held;
 	private static boolean afterCling;
 	private static int groundedAfterCling;
-	/** The zoom is Shift + Alt's: it ends when either is let go. */
+	/** The zoom is Shift + Alt's: it ends when Alt is let go. */
 	private static boolean zooming;
-	private static boolean byAlt;
-	private static @Nullable KeyMapping zoomKey;
-	private static boolean looked;
+	/** How far in the zoom is (0 out, 1 all the way in), now and a tick ago, before easing. */
+	private static float progress, progressOld;
 	/** Why the last held Shift + Alt didn't zoom, already put in the log (null: nothing to say). */
 	private static @Nullable String told;
 
@@ -52,15 +51,6 @@ public final class SneakZoom {
 
 	public static void init() {
 		ClientTickEvents.END_CLIENT_TICK.register(SneakZoom::tick);
-		ClientTickEvents.START_CLIENT_TICK.addPhaseOrdering(BEFORE_ZOOMER, Event.DEFAULT_PHASE);
-		ClientTickEvents.START_CLIENT_TICK.register(BEFORE_ZOOMER, minecraft -> {
-			if (zooming && minecraft.player != null && minecraft.gui.screen() == null) {
-				KeyMapping key = zoomKey(minecraft);
-				if (key != null) {
-					key.setDown(true);
-				}
-			}
-		});
 	}
 
 	/**
@@ -86,13 +76,37 @@ public final class SneakZoom {
 		return player != null && (sneakDown(minecraft) || lineOut(player));
 	}
 
+	/**
+	 * What the field of view is multiplied by for the zoom this frame (1 with no zoom): eased in and out, so the view
+	 * glides rather than jumps.
+	 */
+	public static float fovFactor(float partialTicks) {
+		float shown = Mth.lerp(partialTicks, progressOld, progress);
+		if (shown <= 0.0F) {
+			return 1.0F;
+		}
+		// smoothstep: slow at both ends
+		float eased = shown * shown * (3.0F - 2.0F * shown);
+		return 1.0F / Mth.lerp(eased, 1.0F, ZOOM);
+	}
+
+	/** What the mouse's turning is multiplied by while zoomed (1 with no zoom): slower the further in the view is. */
+	public static float turnFactor() {
+		return fovFactor(1.0F);
+	}
+
 	private static void tick(Minecraft minecraft) {
+		tickZoom(minecraft);
+		progressOld = progress;
+		progress = zooming ? Math.min(1.0F, progress + 1.0F / EASE_TICKS) : Math.max(0.0F, progress - 1.0F / EASE_TICKS);
+	}
+
+	private static void tickZoom(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		boolean sneak = sneakDown(minecraft);
-		if (player == null || minecraft.gui.screen() != null) {
-			sneakWasDown = false;
+		if (player == null || minecraft.gui.screen() != null || UltimateCinematic.filming()) {
 			held = 0;
-			setZoom(minecraft, false);
+			zooming = false;
 			return;
 		}
 		Integer move = player.getAttached(WebParkour.MOVE);
@@ -112,9 +126,8 @@ public final class SneakZoom {
 				tell(afterCling ? "just off a wall or bar" : player.hasAttached(Slide.SLIDING) || FreerunClient.active() ? "in a freerun move"
 					: "a web yank");
 			}
-			sneakWasDown = sneak;
 			held = sneak ? held + 1 : 0;
-			setZoom(minecraft, false);
+			zooming = false;
 			return;
 		}
 		held = sneak ? held + 1 : 0;
@@ -123,27 +136,16 @@ public final class SneakZoom {
 			// (0.20.98) Andy: "releasing shift shouldnt stop your zoom but alt does": Shift + Alt's zoom lasts while Alt is
 			// held, Shift or not
 			if (!alt) {
-				setZoom(minecraft, false);
+				zooming = false;
 			}
 		} else if (sneak && alt || alt && lineOut(player)) {
 			// (0.20.74) Shift + Left Alt zooms too, for as long as both are held (Alt with Shift down doesn't dodge);
 			// (Andy, 2026-11-26) with a fishing line out, Alt alone zooms, and DodgeClient throws no dash or roll
-			setZoom(minecraft, true);
-			byAlt = true;
+			zooming = true;
 		}
-		if (zooming) {
-			// held down again every tick: vanilla lets go of every key when a screen opens or the window loses focus
-			KeyMapping key = zoomKey(minecraft);
-			if (key != null) {
-				key.setDown(true);
-				told = null;
-			} else {
-				tell("OK Zoomer's Zoom key isn't there");
-			}
-		} else if (!(sneak && alt)) {
+		if (zooming || !(sneak && alt)) {
 			told = null;
 		}
-		sneakWasDown = sneak;
 	}
 
 	/**
@@ -154,37 +156,11 @@ public final class SneakZoom {
 		return player.fishing != null && !player.fishing.isRemoved();
 	}
 
-	private static void setZoom(Minecraft minecraft, boolean on) {
-		if (zooming == on) {
-			return;
-		}
-		zooming = on;
-		byAlt = false;
-		KeyMapping key = zoomKey(minecraft);
-		if (key != null) {
-			key.setDown(on);
-		}
-	}
-
 	/** Shift + Alt is held and no zoom comes of it: the log says why, once a hold. */
 	private static void tell(String why) {
 		if (!why.equals(told)) {
 			told = why;
 			JaymosPowers.LOGGER.info("Zoom: Shift + Alt held but no zoom ({})", why);
 		}
-	}
-
-	/** OK Zoomer's Zoom key, found by name (null without OK Zoomer). */
-	private static @Nullable KeyMapping zoomKey(Minecraft minecraft) {
-		if (!looked) {
-			// looked for until found: a look made before OK Zoomer's keys were in the list would otherwise stay empty
-			for (KeyMapping mapping : minecraft.options.keyMappings) {
-				if (OK_ZOOMER_KEY.equals(mapping.getName())) {
-					zoomKey = mapping;
-					looked = true;
-				}
-			}
-		}
-		return zoomKey;
 	}
 }

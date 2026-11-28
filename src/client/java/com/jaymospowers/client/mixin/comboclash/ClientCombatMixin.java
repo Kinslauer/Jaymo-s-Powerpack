@@ -43,17 +43,24 @@ abstract class ClientCombatMixin {
 
 	/**
 	 * Its dash (Left Alt here) holds off while Alt is the zoom's ({@code SneakZoom#ownsAlt}: Shift held with it, or a
-	 * fishing line out); the press is spent, not kept for later. Its other keys' presses go through as ever.
+	 * fishing line out), and while you lie prone (Andy, 2026-11-28: "you shouldnt be able to dash while prone"); the press
+	 * is spent, not kept for later. Its other keys' presses go through as ever.
 	 */
 	@WrapOperation(method = "tickStart()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z"))
 	private static boolean jaymospowers$zoomNotDash(KeyMapping key, Operation<Boolean> original) {
-		if (DASH.equals(key.getName()) && com.jaymospowers.client.SneakZoom.ownsAlt()) {
+		if (DASH.equals(key.getName()) && (com.jaymospowers.client.SneakZoom.ownsAlt() || prone())) {
 			while (original.call(key)) {
 				// spent
 			}
 			return false;
 		}
 		return original.call(key);
+	}
+
+	/** The local player is lying prone (their own crawl, the stance wheel, a leg blow or downed). */
+	private static boolean prone() {
+		net.minecraft.client.player.LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+		return player != null && com.jaymospowers.core.Crawl.crawling(player);
 	}
 
 	/** Combo Clash's dash key. */
