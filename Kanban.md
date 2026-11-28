@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:26). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -38,6 +38,7 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for antigravity · #2337 · in-review
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · t3 · #2355 · in-review
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · t3 · #2358 · in-review
+- [ ] [[Inbox/block-choice-box|block-choice-box]] · 🔨 Hephaestus · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
