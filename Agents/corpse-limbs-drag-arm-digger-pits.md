@@ -29,6 +29,11 @@ holding the dragged body; diggers should drag corpses near their pits down into 
   "The brood's larder" (~2244) says diggers won't take from a spider larder. Client classes: `DragPose`, `CarryPose`,
   `Limp`, `ragdoll/LooseParts`, `RagdollPose`, `DragSim`, `FirstPersonHandsMixin`.
 
+- 2026-11-28: Andy, via the coordinator: "Finish what was stopped". Claude coordinates only (CLAUDE.md "Who does the
+  work"). Codex hit its usage limit (back Dec 1, 10:47 AM); Gemini (all models) is out for about 115 hours. So the work
+  went to the bots: Inbox task `dragged-bodies` (full brief in it), and YOUTH was asked to assign Apollo or Bacchus.
+  Lore.md has the (new) paragraph "What falls into a warren's pits". Claude reviews the bot's PR.
+
 ## Done
-Nothing built.
+Nothing built yet.
 
