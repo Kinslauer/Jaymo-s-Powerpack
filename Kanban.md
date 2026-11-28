@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 22:15). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 22:24). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,13 +21,13 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-5-living-guts|gore-5-living-guts]] · for antigravity · open
 - [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for antigravity · open
 - [ ] [[Inbox/blastfx-2|blastfx-2]] · for any · open
+- [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for antigravity · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · t3 · claimed
 - [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · 🪶 Quill · #2356 · writing
 
 
