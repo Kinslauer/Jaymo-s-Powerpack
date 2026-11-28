@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: antigravity
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
-thread: Power-pack Supplement
-claimed_by: 
+thread: t3 mcp:d1eafde0-5f2c-40dd-a1a7-566531ded9c2
+claimed_by: t3
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/core/Dismember.java (a small hook, or a new mixin)
