@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 03:39). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 08:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -32,7 +32,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 2026-11-27 04:46 Text pass content is complete (reviewed captain-ground.json lang keys and changes/kingdoms/hollow-captains-fix.md; all player-facing, no rewri…
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
-- [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-27 14:11 hunters-road-7 merged (#2290); still waits on hunters-road-4-models.
+- [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-28 08:41 ON HOLD (2026-11-28): hr7 and hr4-models merged, so its deps are done; now waits only on Andy's harness pick (Codex out till Dec 1, Antigravit…
 - [[Inbox/hunters-road-5|hunters-road-5]] · 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gn…
 - [[Inbox/hunters-road-8|hunters-road-8]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-9|hunters-road-9]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
@@ -47,8 +47,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/gore-2-cut-faces|gore-2-cut-faces]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/gore-2-cut-faces|gore-2-cut-faces]]: stalled, last change 2026-11-28. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hunters-road-3-models|hunters-road-3-models]]: still `stalled`, but its task `hunters-road-3-models` is in Inbox/Done/.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -56,12 +56,14 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-16 waiting for a bot, 1 being built, 12 in review: see [[Kanban]].
+16 waiting for a bot, 1 being built, 11 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2357 A shield on F is held up in front again; shield bash and bang are back, and bash works bare-handed (Powers, 2026-11-28)
+- [ ] #2356 Hunter's Road 4 - the drowned, hags and fog models, textures and animations (Kingdoms, 2026-11-28)
 - [ ] #2354 Shift + Left Alt zooms again, and never dashes in Combo Clash's combat mode (Powers, 2026-11-28)
 - [ ] #2353 cannon, mortar and mangonel hit effects (Kingdoms, 2026-11-28)
 - [ ] #2352 Smoother blood on your screen (Powers, 2026-11-28)
@@ -120,13 +122,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2293 Villagers going in at night aren't "Running scared" (Kingdoms, 2026-11-27)
 - [ ] #2292 spectate viewcone label trimmed - no coordinates, no Running line (Kingdoms, 2026-11-27)
 - [ ] #2291 Night's Blood 3 - blood worth drinking (Kingdoms, Kitchen, 2026-11-27)
-- [ ] #2290 Hunter's Road 7A: oils, oil pot, sash, bombs, acid, slick (Powers, Kingdoms, Kitchen, 2026-11-27)
-- [ ] #2289 Hunter's Road 6, part A: toxicity, tolerance, the gauge, five harms, hunter's eyes (Powers, Kingdoms, Kitchen, 2026-11-27)
-- …and 710 older ones.
+- …and 712 older ones.
 
 ## Health
 
-33 problems in the notes: [[Health]].
+34 problems in the notes: [[Health]].
 
 ## Last week
 
