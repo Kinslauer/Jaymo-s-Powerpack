@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-27 20:30
+updated: 2026-11-27 20:44
 ---
 # Open PRs
 
-16 open, as of 2026-11-27 20:30. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+15 open, as of 2026-11-27 20:44. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2209](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2209) Structures 1: siege camps spawn in groups; muster period; supply-dependent sieges; victor takes all
@@ -66,11 +66,6 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2331](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2331) Hunter's Road 3: corpse-eaters (models)
-- **Branch:** `t3/hunters-road-3-models-v2` · **Updated:** 2026-11-27 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
 ## [#2332](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2332) feat: add corpse-eater models (grave_gnawer, bloated_dead, grave_brute, bone_burrower)
 - **Branch:** `claude/hunters-road-3-models` · **Updated:** 2026-11-27 (today)
 - **Checks:** ❌ failing: Change notes, libs jars, item models
@@ -81,7 +76,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** [[gore-3-cauterized]]
 
-## [#2346](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2346) Players knocked down far less often: 20% of the old chance, only from leg hits, knockback or blasts (draft)
+## [#2349](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2349) Knock-downs 1 in 2, not 1 in 5 (players and NPCs)
 - **Branch:** `claude/project-thread-tvq8oz` · **Updated:** 2026-11-28 (today)
-- **Checks:** ❌ failing: Build Powers
+- **Checks:** ⏳ 1 of 4 running
 - **Agent:** no agent note
