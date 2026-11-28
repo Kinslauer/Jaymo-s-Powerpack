@@ -164,6 +164,51 @@ public final class RigCall {
 		return false;
 	}
 
+	/**
+	 * The Octo Core's "Core only" switch (Andy: "you can now choose to have only the chest piece equipped, and still use the
+	 * arms"): every other worn Rig piece blasts off and parks, as a plain park sends them, and the Core stays on with its
+	 * arms. Picked again (or the call key), the parked pieces come back as any call brings them. A slot whose parked piece
+	 * is already waiting sends the worn one to the inventory instead (or drops it), so nothing parked is lost. Needs no
+	 * Mind level: the arms are the Core's own.
+	 */
+	static void coreOnly(ServerPlayer player) {
+		if (CALLING.containsKey(player.getUUID()) || PARKING.containsKey(player.getUUID()) || Rig.core(player).isEmpty()) {
+			return;
+		}
+		boolean others = false;
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			others |= piece != Rig.Piece.CORE && Rig.wears(player, piece);
+		}
+		if (!others) {
+			if (parked(player)) {
+				call(player);
+			} else {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_octo.core_only_already"));
+			}
+			return;
+		}
+		List<ItemStack> parked = new ArrayList<>(player.getAttachedOrElse(PARKED, List.of()));
+		while (parked.size() < Rig.Piece.values().length) {
+			parked.add(ItemStack.EMPTY);
+		}
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			if (piece == Rig.Piece.CORE || !Rig.wears(player, piece)) {
+				continue;
+			}
+			ItemStack worn = player.getItemBySlot(piece.slot).copy();
+			player.setItemSlot(piece.slot, ItemStack.EMPTY);
+			if (parked.get(piece.ordinal()).isEmpty()) {
+				parked.set(piece.ordinal(), worn);
+			} else {
+				// (its parked spot already full) into the pack, or dropped at your feet with no room
+				player.getInventory().placeItemBackInInventory(worn, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+		}
+		player.setAttached(PARKED, parked);
+		parkFx(player);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_octo.core_only"));
+	}
+
 	/** The call key: call the parked suit, else park the worn one. */
 	static void use(ServerPlayer player) {
 		if (CALLING.containsKey(player.getUUID()) || PARKING.containsKey(player.getUUID())) {

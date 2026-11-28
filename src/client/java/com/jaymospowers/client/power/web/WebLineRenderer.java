@@ -396,7 +396,9 @@ final class WebLineRenderer {
 			}
 			// whatever the tendrils hold, held up on its cords
 			com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
-			if (grips != null) {
+			// (the Octo Core's arms hold on R and G with their claws: no cords, the arms are drawn reaching for it)
+			boolean machine = com.jaymospowers.power.web.WebTendrils.machine(player);
+			if (grips != null && !machine) {
 				for (int handIndex = WebNet.MAIN; handIndex <= WebNet.OFF; handIndex++) {
 					net.minecraft.world.entity.Entity held = grips.get(handIndex) < 0 ? null : level.getEntity(grips.get(handIndex));
 					if (held != null) {
@@ -410,7 +412,9 @@ final class WebLineRenderer {
 			if (player == minecraft.player && minecraft.options.getCameraType().isFirstPerson() && !FirstPersonCompat.bodyShown()) {
 				latchCords(context, minecraft, player, player.getAttached(com.jaymospowers.power.web.WebTendrils.CLIMB), camera, partialTick);
 			}
-			latchCords(context, minecraft, player, player.getAttached(com.jaymospowers.power.web.WebTendrils.TUG), camera, partialTick);
+			if (!machine) {
+				latchCords(context, minecraft, player, player.getAttached(com.jaymospowers.power.web.WebTendrils.TUG), camera, partialTick);
+			}
 			float spread = WebArms.wings(player, partialTick);
 			if (spread > 0.02F && !(player == minecraft.player && minecraft.options.getCameraType().isFirstPerson())) {
 				for (int side = -1; side <= 1; side += 2) {

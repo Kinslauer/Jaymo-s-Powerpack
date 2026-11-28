@@ -1,6 +1,12 @@
 package com.jaymospowers.client.rig;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.client.power.web.WebPowerClient;
+import com.jaymospowers.core.HiddenArmor;
+import com.jaymospowers.power.web.WebCracks;
+import com.jaymospowers.power.web.WebTendrilCombos;
+import com.jaymospowers.power.web.WebTendrils;
 import com.jaymospowers.client.power.web.FirstPersonCompat;
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigMoves;
@@ -11,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
@@ -29,11 +36,15 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
@@ -42,6 +53,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -64,16 +76,46 @@ import org.jspecify.annotations.Nullable;
  * <p>The arms never pass through the wearer (Andy: "does it clip through the body in game?"): each elbow goes out a way
  * that keeps the arm clear ({@link #clear}), the upper pair back and out over the shoulders and the lower pair out past
  * the hips, and every move's claw points sit where the forearms reach them around the body, not through it.
- * <p>Also here, on the wearer's own client (movement is the client's): the wall climb (the arms grip, and you go up a wall
- * as on a ladder) and the arm walk (carried on the four arms, held up off the ground between them, the symbiote's stride).
+ * <p>Folded, they draw all the way into their mounts, nothing left sticking out (Andy: "they should also collapse
+ * completely"). With the Core hidden (the inventory's eye button), the suit's plates come off but the reactor stays, and the
+ * arms are mounted on it ({@link #MOUNT_FRONT}), reaching out from the chest (Andy: "the reactor core stays visible drawn
+ * and the arms should extend from that too, still visible").
+ * <p>Also here, on the wearer's own client (movement is the client's): R and G as the upper arms ({@link #routeKey}: the
+ * symbiote's tendril keys, sent as the tendrils' grabs), and on the arm walk, the arms' Wall Crawl ({@link #move}: walls,
+ * ceilings, ledges, the coiled leap) and the stride (carried on the four arms, held up off the ground between them).
  * Drawn on the body bone, after the suit ({@link RigSuit}).
  */
 public final class RigOctoClient {
 	// ---- tuning ----
 	/** How quickly each angle eases toward its target (share a frame), with a claw placed in the world, and how quickly the arms unfold. */
 	static final float EASE = 0.22F, EASE_PLACED = 0.55F, UNFOLD_EASE = 0.12F;
-	/** Climbing: the rate up a wall (blocks a tick) and the slide when nothing is held (blocks a tick, down). */
-	static final double CLIMB_UP = 0.2, SLIDE = 0.06;
+	/**
+	 * The arms' Wall Crawl: how fast they crawl you along a wall or a ceiling (blocks a tick), how quickly you take that
+	 * speed (share a tick), and how hard you're held against the wall or up into the ceiling (blocks a tick).
+	 */
+	static final double CRAWL_SPEED = 0.2, CRAWL_GRIP = 0.45, WALL_PRESS = 0.04, CEILING_PRESS = 0.1;
+	/**
+	 * Sneak at a wall (or under a ceiling, within {@code CEILING_LATCH_REACH}, {@code CEILING_LATCH_GROUND} from the
+	 * ground): all four slam into it. You're thrown at it ({@code LATCH_SLAM}, {@code CEILING_SLAM_EXTRA} more up into a
+	 * ceiling), lifted off the ground ({@code LATCH_LIFT}) and pinned for {@code LATCH_HOLD_TICKS}. By a wall, the ceiling
+	 * wins only looking up more than {@code CEILING_LATCH_LOOK} degrees.
+	 */
+	static final double LATCH_SLAM = 0.35, LATCH_LIFT = 0.3, CEILING_LATCH_REACH = 1.8, CEILING_LATCH_GROUND = 0.9, CEILING_SLAM_EXTRA = 0.15;
+	static final int LATCH_HOLD_TICKS = 8;
+	static final float CEILING_LATCH_LOOK = 30.0F;
+	/** How deep a slam cracks the blocks the claws hit (0-9). */
+	static final int SLAM_CRACK = 5;
+	/** Over the top of a wall: the hop onto the ledge (up, forward). */
+	static final double LEDGE_HOP = 0.35, LEDGE_FORWARD = 0.18;
+	/**
+	 * The coiled leap: holding Jump on the walk where there's no climbing to be had (fewer than {@code STRIDE_RISE_ANCHORS}
+	 * grips round you) or sprinting, the arms sink you to {@code STRIDE_COIL} of your height on them; let go after at least
+	 * {@code COIL_MIN} ticks and they fling you down the look, harder the longer they coiled (full at {@code COIL_FULL}),
+	 * from {@code LEAP_MIN} to {@code LEAP_MAX} along it and {@code LEAP_UP_MIN} to {@code LEAP_UP_MAX} up; they let you
+	 * fly for {@code LEAP_GRACE_TICKS} before they take hold again.
+	 */
+	static final double STRIDE_COIL = 0.55, LEAP_MIN = 0.6, LEAP_MAX = 1.5, LEAP_UP_MIN = 0.45, LEAP_UP_MAX = 0.95;
+	static final int COIL_MIN = 4, COIL_FULL = 20, LEAP_GRACE_TICKS = 8;
 	/**
 	 * The arm walk: held {@code STRIDE_HEIGHT} blocks off the ground (eased there at {@code STRIDE_LIFT} of the gap a tick),
 	 * walked along at {@code STRIDE_SPEED} ({@code STRIDE_SPRINT} sprinting), the grip taking {@code STRIDE_GRIP} of the
@@ -101,6 +143,10 @@ public final class RigOctoClient {
 
 	/** Arm order: upper right, upper left, lower right, lower left. Where each meets the back (body bone pixels). */
 	private static final float[][] MOUNT = {{-2.5F, 2.5F, 3.0F}, {2.5F, 2.5F, 3.0F}, {-2.5F, 8.5F, 3.0F}, {2.5F, 8.5F, 3.0F}};
+	/** With the suit hidden, where each meets the reactor on the chest instead (the suit's {@code core} plate, at 0, 3, -3). */
+	private static final float[][] MOUNT_FRONT = {{-1.3F, 2.0F, -3.9F}, {1.3F, 2.0F, -3.9F}, {-1.3F, 4.0F, -3.9F}, {1.3F, 4.0F, -3.9F}};
+	/** Whether the pose being worked out (or drawn) is on the reactor ({@link #MOUNT_FRONT}): set by {@link #pose} for its own run. */
+	private static boolean front;
 	/** The arm's lengths (pixels): the shoulder strut (to the elbow, at rest), the forearm (to the claw), the claw to its prongs' tips. */
 	private static final float UPPER = 10.0F, FORE = 9.0F, CLAW_TIP = 4.2F;
 	/** How much each strut grows (pixels) for every unit of reach past 1: the rods sliding out. */
@@ -113,6 +159,8 @@ public final class RigOctoClient {
 
 	private static final Map<UUID, float[]> POSE = new HashMap<>();
 	private static final Map<UUID, Float> UNFOLD = new HashMap<>();
+	/** Whether each wearer's arms were on the reactor last frame (a change snaps them over rather than swinging round). */
+	private static final Map<UUID, Boolean> FRONT = new HashMap<>();
 	/** Where each wearer's anchor bit (worked out once, when the move starts): the move's start, and the point. */
 	private static final Map<UUID, Anchor> ANCHORS = new HashMap<>();
 
@@ -231,13 +279,15 @@ public final class RigOctoClient {
 	 * arm turns in its socket (yaw, pitch and roll) to point at the elbow with the forearm's bend toward the point.
 	 */
 	static void reach(float[] t, int i, Vec3 tip, float open, float maxReach, float[] way) {
-		Vec3 mount = new Vec3(MOUNT[i][0], MOUNT[i][1], MOUNT[i][2]);
+		float[] m = mount(i);
+		Vec3 mount = new Vec3(m[0], m[1], m[2]);
 		double far = tip.distanceTo(mount);
 		if (far < 1.0E-3) {
 			return;
 		}
 		double strut = Mth.clamp(way[3] * far, UPPER, Math.min(ELBOW_MAX, UPPER + UPPER_ROD * (maxReach - 1.0)));
-		Vec3 elbow = mount.add(new Vec3(way[0], way[1], way[2]).normalize().scale(strut));
+		// on the reactor, the elbows go out ahead of the chest rather than back past the spine
+		Vec3 elbow = mount.add(new Vec3(way[0], way[1], front ? -way[2] : way[2]).normalize().scale(strut));
 		// the forearm can't fold shorter than itself: back the elbow off along the line from the point
 		double shortest = FORE + CLAW_TIP;
 		if (tip.distanceTo(elbow) < shortest) {
@@ -279,11 +329,34 @@ public final class RigOctoClient {
 		set(t, 3, -0.55F, 0.95F, -0.7F - sway, 1.0F, 0.3F);
 	}
 
-	/** Folded down the spine. */
+	/** Folded all the way into the mounts: drawn down to nothing (see {@link #draw}), so none of it sticks out. */
 	private static void folded(float[] t) {
 		for (int i = 0; i < 4; i++) {
-			set(t, i, -1.45F, 0.12F, 2.7F, 0.35F, 0.0F);
+			set(t, i, -1.45F, 0.12F, 2.7F, 0.0F, 0.0F);
 		}
+	}
+
+	/** Where arm {@code i} meets the body in the pose being worked out: the spine, or the reactor with the suit hidden. */
+	private static float[] mount(int i) {
+		return (front ? MOUNT_FRONT : MOUNT)[i];
+	}
+
+	/**
+	 * A pose set by hand ({@link #set}, pointing back off the spine) turned to point ahead off the reactor: each arm takes
+	 * its partner's angles turned half round, which puts its claw where its own would be, mirrored front to back.
+	 */
+	private static void faceFront(float[] t) {
+		float[] c = t.clone();
+		for (int i = 0; i < 4; i++) {
+			int o = i * VALUES, p = (i ^ 1) * VALUES;
+			System.arraycopy(c, p, t, o, VALUES);
+			t[o + 1] += Mth.PI;
+		}
+	}
+
+	/** The Octo Core is hidden (the inventory's eye button): the reactor stays, and the arms come from it. */
+	static boolean onReactor(Player player) {
+		return RigOcto.wears(player) && HiddenArmor.hidden(player, EquipmentSlot.CHEST);
 	}
 
 	/**
@@ -293,7 +366,7 @@ public final class RigOctoClient {
 	private static Vec3 tip(float[] t, int i) {
 		int o = i * VALUES;
 		float upperReach = t[o + 4], foreReach = t[o + 5];
-		double shrink = Mth.clamp(upperReach, 0.2F, 1.0F);
+		double shrink = Mth.clamp(upperReach, 0.0F, 1.0F);
 		double a = (UPPER + UPPER_ROD * (Math.max(1.0F, upperReach) - 1.0)) * shrink;
 		double b = (FORE + FORE_ROD * (Math.max(1.0F, foreReach) - 1.0) + CLAW_TIP) * shrink;
 		double ca = Math.cos(t[o]), sa = Math.sin(t[o]), cb = Math.cos(t[o + 1]), sb = Math.sin(t[o + 1]);
@@ -301,7 +374,8 @@ public final class RigOctoClient {
 		Vec3 y = new Vec3(cc * sb * sa - sc * ca, sc * sb * sa + cc * ca, cb * sa);
 		Vec3 z = new Vec3(cc * sb * ca + sc * sa, sc * sb * ca - cc * sa, cb * ca);
 		Vec3 w = z.scale(Math.cos(bend)).subtract(y.scale(Math.sin(bend)));
-		return new Vec3(MOUNT[i][0], MOUNT[i][1], MOUNT[i][2]).add(z.scale(a)).add(w.scale(b));
+		float[] m = mount(i);
+		return new Vec3(m[0], m[1], m[2]).add(z.scale(a)).add(w.scale(b));
 	}
 
 	/** {@code player} is you, seen from your own eyes. */
@@ -365,6 +439,9 @@ public final class RigOctoClient {
 	/** What the arms want to look like on {@code player} now; returns {@link #PLACED} and {@link #SNAP}. */
 	private static int target(Player player, float partial, float[] t, float now) {
 		rest(t, now);
+		if (front) {
+			faceFront(t);
+		}
 		RigMoves.Move move = RigMoves.get(player);
 		int held = RigOcto.heldId(player);
 		int kind = 0;
@@ -378,8 +455,13 @@ public final class RigOctoClient {
 			}
 		}
 		int flags = 0;
+		// R and G's grips and tears (the tendrils' own, worked by the upper arms)
+		boolean machine = WebTendrils.machine(player);
+		WebTendrils.Grips grips = machine ? player.getAttached(WebTendrils.GRIPS) : null;
+		WebTendrils.Latch tug = machine ? player.getAttached(WebTendrils.TUG) : null;
+		boolean gripping = grips != null && (grips.right() >= 0 || grips.left() >= 0) || tug != null;
 		// walking or climbing: the claws on whatever they planted on (the upper pair stays free while a move needs it)
-		Vec3[] claws = RigOctoWalk.claws(player, partial, held >= 0 || kind != 0 && kind != RigOcto.MOVE_WATCH);
+		Vec3[] claws = RigOctoWalk.claws(player, partial, held >= 0 || gripping || kind != 0 && kind != RigOcto.MOVE_WATCH);
 		if (claws != null) {
 			for (int i = 0; i < 4; i++) {
 				if (claws[i] != null) {
@@ -397,7 +479,7 @@ public final class RigOctoClient {
 			double side = (hold.getBbWidth() * 0.5 + 0.1) * 16.0 / player.getScale();
 			flags |= at(t, 0, point.add(-side, 0.0, 0.0), reaching ? 0.9F : 0.0F);
 			flags |= at(t, 1, point.add(side, 0.0, 0.0), reaching ? 0.9F : 0.0F);
-		} else if (kind == 0 && held < 0 && ownView(player)) {
+		} else if (kind == 0 && held < 0 && !gripping && ownView(player)) {
 			// your own first person, at rest: the upper claws hover at the top corners of your view, so you see they're out
 			float bob = Mth.sin(now * 0.08F) * 0.6F;
 			for (int i = 0; i < 2; i++) {
@@ -410,6 +492,32 @@ public final class RigOctoClient {
 			boolean reaching = kind == RigOcto.MOVE_GRAB && k < 0.5F;
 			for (int i = 0; i < 2; i++) {
 				flags |= at(t, i, v(side(i) * 3.0F, -2.0, reaching ? -30.0 : -20.0), reaching ? 0.9F : 0.0F);
+			}
+		}
+		if (gripping) {
+			// each upper claw closed on what its key holds (R the right, G the left), or dug into the wall it's tearing at
+			for (int hand = 0; hand < 2; hand++) {
+				Entity e = grips == null || grips.get(hand) < 0 ? null : player.level().getEntity(grips.get(hand));
+				if (e != null) {
+					// on its near side, so the claw closes on it rather than inside it
+					Vec3 centre = e.getBoundingBox().getCenter();
+					Vec3 toward = player.getEyePosition(partial).subtract(centre);
+					toward = toward.lengthSqr() < 1.0E-4 ? Vec3.ZERO : toward.normalize().scale(e.getBbWidth() * 0.5);
+					flags |= at(t, hand, model(player, partial, centre.add(toward)), 0.1F);
+				} else if (tug != null && tug.has(hand)) {
+					flags |= at(t, hand, model(player, partial, tug.get(hand)), 0.8F);
+				}
+			}
+			WebTendrils.Combo combo = player.getAttached(WebTendrils.COMBO);
+			Entity pinned = combo != null && combo.kind() == WebTendrilCombos.BARRAGE ? player.level().getEntity(combo.first()) : null;
+			if (pinned != null) {
+				// the barrage: the lower pair stabs the pinned creature over and over, one then the other
+				float every = Math.max(1, WebTendrilCombos.barrageEvery(player));
+				Vec3 point = model(player, partial, pinned.getBoundingBox().getCenter());
+				for (int i = 2; i < 4; i++) {
+					float s = ((now - combo.start()) / every + (i == 3 ? 0.5F : 0.0F)) % 1.0F;
+					flags |= at(t, i, tip(base, i).lerp(point, bump(s)), 0.0F);
+				}
 			}
 		}
 		if (kind != RigOcto.MOVE_ANCHOR) {
@@ -438,7 +546,8 @@ public final class RigOctoClient {
 				float[] start = {-0.75F * Mth.PI, -0.25F * Mth.PI, 0.75F * Mth.PI, 0.25F * Mth.PI};
 				for (int i = 0; i < 4; i++) {
 					float c = Mth.cos(start[i] + spin), s = Mth.sin(start[i] + spin);
-					reach(t, i, v(c * 18.0F, 6.0F + s * 18.0F, 10.0), 0.8F, EXT_FAR, new float[] {c, s, 1.2F, 0.5F});
+					// (behind the back off the spine, ahead of the chest off the reactor)
+					reach(t, i, v(c * 18.0F, 6.0F + s * 18.0F, front ? -10.0 : 10.0), 0.8F, EXT_FAR, new float[] {c, s, 1.2F, 0.5F});
 				}
 				flags |= PLACED | SNAP;
 			}
@@ -536,8 +645,24 @@ public final class RigOctoClient {
 			POSE.remove(id);
 			UNFOLD.remove(id);
 			ANCHORS.remove(id);
+			FRONT.remove(id);
 			return null;
 		}
+		boolean reactor = onReactor(player);
+		Boolean wasReactor = FRONT.put(id, reactor);
+		front = reactor;
+		try {
+			float[] pose = pose(player, partialTicks, id, wasReactor != null && wasReactor != reactor);
+			// the last value says which mount it's drawn from
+			float[] out = java.util.Arrays.copyOf(pose, pose.length + 1);
+			out[pose.length] = reactor ? 1.0F : 0.0F;
+			return out;
+		} finally {
+			front = false;
+		}
+	}
+
+	private static float[] pose(Player player, float partialTicks, UUID id, boolean moved) {
 		float now = player.level().getGameTime() + partialTicks;
 		boolean out = RigOcto.out(player);
 		float unfold = UNFOLD.getOrDefault(id, 0.0F);
@@ -550,14 +675,20 @@ public final class RigOctoClient {
 			flags = target(player, partialTicks, want, now);
 		} else {
 			rest(want, now);
+			if (front) {
+				faceFront(want);
+			}
 		}
 		folded(fold);
+		if (front) {
+			faceFront(fold);
+		}
 		for (int i = 0; i < want.length; i++) {
 			// the three turns of the socket go the short way round
 			want[i] = i % VALUES < 3 ? fold[i] + turn(fold[i], want[i]) * unfold : Mth.lerp(unfold, fold[i], want[i]);
 		}
 		float[] pose = POSE.get(id);
-		if (pose == null || (flags & SNAP) != 0) {
+		if (pose == null || (flags & SNAP) != 0 || moved) {
 			pose = want.clone();
 			POSE.put(id, pose);
 		} else {
@@ -594,16 +725,24 @@ public final class RigOctoClient {
 	/** The arms in pose {@code p}, from the body's model space, in {@code paint} with lights in {@code lights} (-1 for their own). */
 	private static void draw(PoseStack poseStack, SubmitNodeCollector collector, int light, float[] p, int paint, int lights) {
 		bake();
+		float[][] mounts = p.length > 4 * VALUES && p[4 * VALUES] > 0.5F ? MOUNT_FRONT : MOUNT;
 		for (int i = 0; i < 4; i++) {
 			int o = i * VALUES;
 			ModelPart arm = ARM[i];
+			arm.x = mounts[i][0];
+			arm.y = mounts[i][1];
+			arm.z = mounts[i][2];
 			// a part points back out of the spine (+z), turned in its socket
 			arm.xRot = p[o];
 			arm.yRot = p[o + 1];
 			arm.zRot = p[o + 2];
 			float upperReach = p[o + 4], foreReach = p[o + 5];
-			// short of full length the whole arm draws in (folded); past it the rods slide out of each strut
-			arm.zScale = Mth.clamp(upperReach, 0.2F, 1.0F);
+			// short of full length the whole arm draws into its mount (folded, down to nothing); past it the rods slide out of each strut
+			float size = Mth.clamp(upperReach, 0.0F, 1.0F);
+			arm.visible = size > 0.02F;
+			arm.xScale = size;
+			arm.yScale = size;
+			arm.zScale = size;
 			float upper = Math.max(1.0F, upperReach), fore = Math.max(1.0F, foreReach);
 			UPPER_RODS[i].zScale = upper;
 			FORE_PART[i].z = UPPER + UPPER_ROD * (upper - 1.0F);
@@ -679,77 +818,356 @@ public final class RigOctoClient {
 		poseStack.popPose();
 	}
 
-	// ---- the climb and the walk ---------------------------------------------------------------------------------------------
+	// ---- R and G ------------------------------------------------------------------------------------------------------------
 
-	/** On the wearer's own client: the arms carry you, up a wall or along on the arm walk. */
-	private static void move(Minecraft minecraft) {
-		LocalPlayer player = minecraft.player;
-		if (player == null || !player.isAlive() || player.isSpectator() || player.getAbilities().flying || player.isPassenger()
-			|| player.isFallFlying() || !RigOcto.out(player) || player.isInWater()) {
-			return;
-		}
-		if (player.horizontalCollision) {
-			climb(player);
-		} else if (RigOcto.walking(player)) {
-			stride(player);
-		}
+	/** R and G on the upper arms: whether each key is the arms' now, whether it was down last tick, and which arm holds a grab. */
+	private static final boolean[] KEY_HELD = new boolean[2], KEY_WAS = new boolean[2], GRABBING = new boolean[2];
+
+	/** Whether R and G are the arms' for {@code player}: the arms out, and no symbiote tendrils out to take them. */
+	static boolean armKeys(Player player) {
+		return WebTendrils.machine(player);
 	}
 
-	/** Against a wall, the arms grip it. Forward or Jump climbs, Sneak holds still. */
-	private static void climb(LocalPlayer player) {
-		Vec3 v = player.getDeltaMovement();
-		double y;
-		if (player.input.keyPresses.jump() || player.input.keyPresses.forward() && !player.isShiftKeyDown()) {
-			y = CLIMB_UP;
-		} else if (player.isShiftKeyDown()) {
-			y = 0.0;
-		} else {
-			y = Math.max(v.y, -SLIDE);
-		}
-		player.setDeltaMovement(v.x, y, v.z);
-		player.resetFallDistance();
+	/** Whether {@code key} is held by the arms right now (so the Rig's own use of it, with no power, stays quiet). */
+	public static boolean armKey(Player player, PowerKey key) {
+		int i = key == PowerKey.ABILITY_1 ? 0 : key == PowerKey.ABILITY_2 ? 1 : -1;
+		return i >= 0 && (KEY_HELD[i] || armKeys(player));
 	}
 
 	/**
-	 * Carried on the arm walk, held up off the ground between the arms (not gripping a wall), on any client: the body
-	 * hangs limp between them (WebHangPose).
+	 * From the power keys' tick, before they're reported (as the symbiote host's tendril keys): with the arms out, R is the
+	 * upper right arm and G the upper left, as the tendrils' keys (Andy: the arms' controls "should be the same as the
+	 * tendrils"). Held on something grabbable, the arm grabs it, and letting go hurls it; Sneak at a block rips a chunk out.
+	 * {@code physical} is whether the key is down, {@code powerHeld} whether the wearer's own power already holds it.
+	 * Returns whether the arms hold it now (then the power is told it's up).
 	 */
-	public static boolean carried(Player player) {
-		return !RigOcto.clinging(player) && RigOctoWalk.striding(player);
+	public static boolean routeKey(LocalPlayer player, PowerKey key, boolean physical, boolean powerHeld) {
+		if (key != PowerKey.ABILITY_1 && key != PowerKey.ABILITY_2) {
+			return false;
+		}
+		int i = key == PowerKey.ABILITY_1 ? 0 : 1;
+		boolean pressed = physical && !KEY_WAS[i];
+		KEY_WAS[i] = physical;
+		if (KEY_HELD[i]) {
+			if (!physical) {
+				KEY_HELD[i] = false;
+				grabKey(player, i, false);
+			}
+			return KEY_HELD[i];
+		}
+		if (pressed && !powerHeld && !player.isSpectator() && armKeys(player)) {
+			KEY_HELD[i] = true;
+			grabKey(player, i, true);
+		}
+		return KEY_HELD[i];
 	}
 
-	/** On the arm walk: held up between the arms and walked along (the symbiote's stride; see {@link #STRIDE_HEIGHT}). */
-	private static void stride(LocalPlayer player) {
+	/** One upper arm's key pressed or let go: the tendrils' grab, sent for that arm (WebNet's MAIN is R, OFF is G). */
+	private static void grabKey(LocalPlayer player, int hand, boolean down) {
+		if (!ClientPlayNetworking.canSend(WebTendrils.Grab.TYPE)) {
+			return;
+		}
+		if (!down) {
+			if (GRABBING[hand]) {
+				// let go: what it holds is hurled down the look
+				GRABBING[hand] = false;
+				ClientPlayNetworking.send(new WebTendrils.Grab(hand, -1));
+			}
+			return;
+		}
+		if (RigOcto.heldId(player) >= 0) {
+			// the arms already carry someone (the Rig menu's grab): that's their hold
+			return;
+		}
+		Entity target = WebPowerClient.tendrilTarget(player);
+		if (target != null) {
+			GRABBING[hand] = true;
+			ClientPlayNetworking.send(new WebTendrils.Grab(hand, target.getId()));
+		} else if (player.isShiftKeyDown() && WebPowerClient.tendrilBlock(player)) {
+			// sneaking at a wall or the ground: the claw rips a chunk of it loose
+			GRABBING[hand] = true;
+			ClientPlayNetworking.send(new WebTendrils.Grab(hand, WebTendrils.GRAB_BLOCK));
+		}
+	}
+
+	// ---- the crawl and the walk ---------------------------------------------------------------------------------------------
+
+	/** The crawl, on the wearer's own client: on a wall, on a ceiling, ticks left of a slam's pin and of a leap's flight, the coil's ticks. */
+	private static boolean wallClinging, ceilingClinging, sneakWas;
+	private static int latchHold, leapGrace, coil;
+
+	/**
+	 * On the wearer's own client, with the arm walk on: the arms' Wall Crawl, as the symbiote's (Andy: "the same as the
+	 * tendrils"). Against a wall, forward or Jump climbs, Sneak or back goes down and strafing goes along it; Jump under a
+	 * ceiling (or a Sneak press under it) takes you up onto it, where the movement keys crawl you about upside down, and
+	 * another Sneak press drops you. A Sneak press at a wall slams all four into it. Over the top of a wall, a hop onto the
+	 * ledge. Anywhere else the stride, and the coiled leap. Water doesn't stop them.
+	 */
+	private static void move(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		if (player == null || minecraft.isPaused()) {
+			return;
+		}
+		if (leapGrace > 0) {
+			// just flung off the arms: they let you fly
+			leapGrace--;
+			letGo();
+			return;
+		}
+		if (!player.isAlive() || player.isSpectator() || player.getAbilities().flying || player.isPassenger() || player.isFallFlying()
+			|| player.isInLava() || !RigOcto.walking(player)) {
+			letGo();
+			sneakWas = false;
+			return;
+		}
+		AABB box = player.getBoundingBox();
+		boolean wall = !player.level().noCollision(player, box.inflate(0.12, -0.1, 0.12));
+		boolean ceiling = !player.onGround() && !player.level().noCollision(player, box.move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05));
 		Input input = player.input.keyPresses;
+		Vec3 move = wish(player, input);
+		boolean sneakPressed = input.shift() && !sneakWas;
+		sneakWas = input.shift();
+		if (ceilingClinging && sneakPressed && latchHold <= 0) {
+			// Sneak again on the ceiling: they let go and you drop
+			letGo();
+			return;
+		}
+		if (sneakPressed && !ceilingClinging && !wallClinging) {
+			// Sneak by a ceiling (looking up, or with no wall to hand): slammed up into it, just as into a wall
+			double reach = (player.onGround() ? CEILING_LATCH_GROUND : CEILING_LATCH_REACH) * player.getScale();
+			Vec3 overhead = ceilingOver(player, reach);
+			if (overhead != null && (!wall || player.getXRot() < -CEILING_LATCH_LOOK)) {
+				slamCeiling(player, overhead);
+				return;
+			}
+		}
+		if (latchHold > 0) {
+			latchHold--;
+		}
+		if (ceilingClinging && !ceiling && latchHold > 0) {
+			// slammed in, still flying up to it
+			Vec3 v = player.getDeltaMovement();
+			player.setDeltaMovement(v.x * 0.5, Math.max(v.y, LATCH_SLAM), v.z * 0.5);
+			player.resetFallDistance();
+			return;
+		}
+		if (ceiling && (input.jump() && !input.shift() || ceilingClinging)) {
+			// on the ceiling: crawled about upside down (pinned still just after a slam)
+			ceilingClinging = true;
+			wallClinging = false;
+			coil = 0;
+			crawl(player, latchHold > 0 ? Vec3.ZERO : move, new Vec3(0.0, -1.0, 0.0));
+			return;
+		}
+		ceilingClinging = false;
+		if (wall && sneakPressed && !wallClinging) {
+			slamWall(player);
+			return;
+		}
+		if (wall && (!player.onGround() || input.forward() && player.horizontalCollision || latchHold > 0)) {
+			Vec3 out = wallNormal(player);
+			// the way you want to go along the wall: up or down, and sideways (pinned still just after a slam)
+			double vertical = latchHold > 0 ? 0.0 : (input.jump() || input.forward() ? 1.0 : 0.0) - (input.shift() || input.backward() ? 1.0 : 0.0);
+			Vec3 along = out.cross(new Vec3(0.0, 1.0, 0.0));
+			along = along.lengthSqr() < 1.0E-4 ? Vec3.ZERO : along.normalize();
+			Vec3 want = new Vec3(0.0, vertical, 0.0).add(along.scale(latchHold > 0 ? 0.0 : move.dot(along)));
+			wallClinging = true;
+			coil = 0;
+			crawl(player, want, out);
+			return;
+		}
+		boolean wasClinging = wallClinging;
+		if (wallClinging && !player.onGround() && player.getDeltaMovement().y > 0.0) {
+			// over the top: a hop onto the ledge
+			Vec3 forward = player.getLookAngle().horizontal();
+			forward = forward.lengthSqr() < 1.0E-4 ? Vec3.ZERO : forward.normalize();
+			player.setDeltaMovement(forward.x * LEDGE_FORWARD, LEDGE_HOP, forward.z * LEDGE_FORWARD);
+		}
+		wallClinging = false;
+		if (!wasClinging) {
+			stride(player, input, move);
+		}
+	}
+
+	private static void letGo() {
+		wallClinging = false;
+		ceilingClinging = false;
+		latchHold = 0;
+		coil = 0;
+	}
+
+	/**
+	 * One tick of the crawl: the arms haul you along the surface facing {@code out} toward {@code want} (zero: you hang
+	 * where you are), at {@link #CRAWL_SPEED}, held to the wall or up into the ceiling.
+	 */
+	private static void crawl(LocalPlayer player, Vec3 want, Vec3 out) {
+		boolean ceiling = out.y < -0.5;
+		Vec3 go = want.lengthSqr() < 1.0E-4 ? Vec3.ZERO : want.normalize().scale(CRAWL_SPEED * player.getScale());
+		Vec3 v = player.getDeltaMovement();
+		Vec3 next = new Vec3(Mth.lerp(CRAWL_GRIP, v.x, go.x), Mth.lerp(CRAWL_GRIP, v.y, go.y), Mth.lerp(CRAWL_GRIP, v.z, go.z));
+		if (ceiling) {
+			next = new Vec3(next.x, CEILING_PRESS, next.z);
+		} else {
+			next = next.subtract(out.scale(WALL_PRESS));
+		}
+		player.setDeltaMovement(next);
+		player.resetFallDistance();
+	}
+
+	/** Sneak at a wall: all four slam into it at once, throwing you against it, and you hang there. */
+	private static void slamWall(LocalPlayer player) {
+		Vec3 out = wallNormal(player);
+		Vec3 center = player.getBoundingBox().getCenter();
+		BlockHitResult hit = player.level().clip(new ClipContext(center, center.subtract(out.scale(1.5)), ClipContext.Block.COLLIDER,
+			ClipContext.Fluid.NONE, player));
+		Vec3 at = hit.getType() == HitResult.Type.BLOCK ? hit.getLocation() : center.subtract(out.scale(0.4));
+		wallClinging = true;
+		ceilingClinging = false;
+		latchHold = LATCH_HOLD_TICKS;
+		coil = 0;
+		player.setDeltaMovement(out.scale(-LATCH_SLAM).add(0.0, player.onGround() ? LATCH_LIFT : 0.0, 0.0));
+		player.resetFallDistance();
+		Vec3 side = out.cross(new Vec3(0.0, 1.0, 0.0));
+		side = side.lengthSqr() < 1.0E-4 ? new Vec3(0.45, 0.0, 0.0) : side.normalize().scale(0.45);
+		slamFx(player, at, side, new Vec3(0.0, 0.45, 0.0), at.subtract(out.scale(0.05)));
+	}
+
+	/** Sneak under a ceiling: all four slam up into it at once, yanking you up against it, and you hang there. */
+	private static void slamCeiling(LocalPlayer player, Vec3 at) {
+		ceilingClinging = true;
+		wallClinging = false;
+		latchHold = LATCH_HOLD_TICKS;
+		coil = 0;
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x * 0.3, LATCH_SLAM + CEILING_SLAM_EXTRA, v.z * 0.3);
+		player.resetFallDistance();
+		Vec3 ahead = player.getLookAngle().horizontal();
+		ahead = ahead.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : ahead.normalize();
+		Vec3 side = ahead.cross(new Vec3(0.0, 1.0, 0.0)).normalize().scale(0.45);
+		slamFx(player, at, side, ahead.scale(0.45), at.add(0.0, 0.05, 0.0));
+	}
+
+	/** A slam's four claws biting in round {@code at} (a pair each way along {@code side} and {@code up}): cracks and a clank. */
+	private static void slamFx(LocalPlayer player, Vec3 at, Vec3 side, Vec3 up, Vec3 block) {
+		for (int i = 0; i < 4; i++) {
+			Vec3 claw = at.add(side.scale((i & 1) == 0 ? 1.0 : -1.0)).add(up.scale(i < 2 ? 1.0 : -1.0));
+			WebCracks.crackAt(player.level(), claw, SLAM_CRACK);
+		}
+		player.level().playLocalSound(at.x, at.y, at.z, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS, 0.35F, 1.3F, false);
+		player.level().playLocalSound(at.x, at.y, at.z, player.level().getBlockState(BlockPos.containing(block)).getSoundType().getHitSound(),
+			SoundSource.PLAYERS, 1.0F, 0.6F, false);
+	}
+
+	/** The ceiling point straight over your head within {@code reach} (blocks above the top of your head), or null. */
+	private static @Nullable Vec3 ceilingOver(LocalPlayer player, double reach) {
+		AABB box = player.getBoundingBox();
+		Vec3 top = new Vec3(box.getCenter().x, box.maxY - 0.05, box.getCenter().z);
+		BlockHitResult hit = player.level().clip(new ClipContext(top, top.add(0.0, reach + 0.05, 0.0), ClipContext.Block.COLLIDER,
+			ClipContext.Fluid.NONE, player));
+		return hit.getType() == HitResult.Type.BLOCK && hit.getDirection() == Direction.DOWN ? hit.getLocation() : null;
+	}
+
+	/** Which way the wall you're on faces (out of it, toward you): the side your box is pressed against, the one you face winning. */
+	private static Vec3 wallNormal(LocalPlayer player) {
+		AABB box = player.getBoundingBox().deflate(0.0, 0.1, 0.0);
+		Vec3 look = player.getLookAngle().horizontal();
+		Vec3 best = Vec3.ZERO;
+		double bestDot = -2.0;
+		for (Direction dir : Direction.Plane.HORIZONTAL) {
+			Vec3 d = dir.getUnitVec3();
+			if (!player.level().noCollision(player, box.move(d.scale(0.15)))) {
+				double dot = d.dot(look);
+				if (dot > bestDot) {
+					bestDot = dot;
+					best = d.reverse();
+				}
+			}
+		}
+		if (best.lengthSqr() < 1.0E-4) {
+			best = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, -1.0) : look.normalize().reverse();
+		}
+		return best;
+	}
+
+	/**
+	 * Carried on the arm walk, held up off the ground between the arms (not on a wall or a ceiling), on any client: the
+	 * body hangs limp between them (WebHangPose).
+	 */
+	public static boolean carried(Player player) {
+		return !RigOcto.clinging(player) && !RigOcto.onCeiling(player) && RigOctoWalk.striding(player);
+	}
+
+	/**
+	 * On the arm walk, off any wall: held up between the arms and walked along (the symbiote's stride; see
+	 * {@link #STRIDE_HEIGHT}). Holding Jump with nothing to climb (or sprinting) coils them low; let go and they fling you
+	 * down the look ({@link #STRIDE_COIL}).
+	 */
+	private static void stride(LocalPlayer player, Input input, Vec3 move) {
 		if (input.shift() && player.onGround()) {
 			// on your own feet
+			coil = 0;
 			return;
 		}
 		double scale = player.getScale();
 		int anchors = RigOctoWalk.anchors(player, RigOctoWalk.STRIDE_REACH * scale);
 		if (anchors < 2) {
 			// nothing to grab: you fall
+			coil = 0;
 			return;
 		}
 		double ground = RigOctoWalk.groundBelow(player, RigOctoWalk.STRIDE_GROUND * scale);
-		Vec3 move = wish(player, input);
+		boolean coiling = input.jump() && ground >= 0.0 && (coil > 0 || anchors < STRIDE_RISE_ANCHORS || player.isSprinting());
 		double vy;
-		if (input.jump()) {
-			vy = anchors >= STRIDE_RISE_ANCHORS ? STRIDE_CLIMB : 0.0;
-		} else if (input.shift()) {
-			vy = -STRIDE_CLIMB;
-		} else if (ground >= 0.0) {
-			// held up on them, rising and dipping a touch with each stride
-			double bob = move.lengthSqr() > 0.0 ? Mth.sin(player.tickCount * 0.45F) * 0.06 : 0.0;
-			vy = Mth.clamp((STRIDE_HEIGHT * scale + bob - ground) * STRIDE_LIFT, -STRIDE_CLIMB, STRIDE_CLIMB);
+		if (coiling) {
+			// coiling: they sink you low on bent arms, ready to fling you (let go of Jump to leap)
+			coil++;
+			if (coil == 1) {
+				player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.PISTON_CONTRACT, SoundSource.PLAYERS,
+					0.5F, 0.8F, false);
+			}
+			vy = Mth.clamp((STRIDE_HEIGHT * STRIDE_COIL * scale - ground) * STRIDE_LIFT, -STRIDE_CLIMB, STRIDE_CLIMB);
 		} else {
-			// hanging between whatever they hold
-			vy = 0.0;
+			if (coil >= COIL_MIN) {
+				leap(player, coil);
+				coil = 0;
+				return;
+			}
+			coil = 0;
+			if (input.jump()) {
+				vy = anchors >= STRIDE_RISE_ANCHORS ? STRIDE_CLIMB : 0.0;
+			} else if (input.shift()) {
+				vy = -STRIDE_CLIMB;
+			} else if (ground >= 0.0) {
+				// held up on them, rising and dipping a touch with each stride
+				double bob = move.lengthSqr() > 0.0 ? Mth.sin(player.tickCount * 0.45F) * 0.06 : 0.0;
+				vy = Mth.clamp((STRIDE_HEIGHT * scale + bob - ground) * STRIDE_LIFT, -STRIDE_CLIMB, STRIDE_CLIMB);
+			} else {
+				// hanging between whatever they hold
+				vy = 0.0;
+			}
 		}
-		Vec3 want = move.scale(player.isSprinting() ? STRIDE_SPRINT : STRIDE_SPEED);
+		Vec3 want = move.scale(coiling ? STRIDE_SPEED * 0.5 : player.isSprinting() ? STRIDE_SPRINT : STRIDE_SPEED);
 		Vec3 v = player.getDeltaMovement();
 		player.setDeltaMovement(Mth.lerp(STRIDE_GRIP, v.x, want.x), vy, Mth.lerp(STRIDE_GRIP, v.z, want.z));
 		player.resetFallDistance();
+	}
+
+	/** The coil let go after {@code ticks}: the arms fling you down the look, harder the longer they coiled. */
+	private static void leap(LocalPlayer player, int ticks) {
+		float k = Mth.clamp((ticks - COIL_MIN) / (float)(COIL_FULL - COIL_MIN), 0.0F, 1.0F);
+		Vec3 look = player.getLookAngle();
+		Vec3 flat = look.horizontal();
+		flat = flat.lengthSqr() < 1.0E-4 ? Vec3.ZERO : flat.normalize();
+		// looking up, more of the fling goes up and less along
+		double lift = Math.max(0.0, look.y);
+		double along = Mth.lerp(k, LEAP_MIN, LEAP_MAX) * (1.0 - 0.5 * lift);
+		double up = Mth.lerp(k, LEAP_UP_MIN, LEAP_UP_MAX) * (1.0 + 0.5 * lift);
+		player.setDeltaMovement(flat.x * along, up, flat.z * along);
+		player.resetFallDistance();
+		leapGrace = LEAP_GRACE_TICKS;
+		letGo();
+		player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.PISTON_EXTEND, SoundSource.PLAYERS,
+			0.8F, 0.7F + 0.4F * k, false);
 	}
 
 	/** The way the movement keys point, flat. */

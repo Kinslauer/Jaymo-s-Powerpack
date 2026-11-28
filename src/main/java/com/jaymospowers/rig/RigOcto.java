@@ -60,9 +60,16 @@ import org.jspecify.annotations.Nullable;
  * is a Rig menu entry (Sneak + J, then J), shown only while one is worn; each needs the Octo Core worn (not the whole set:
  * the arms carry themselves) and costs the Core's charge:
  * <ul>
- * <li><b>Arms out</b> ({@link #ARMS}): unfold the four arms, or fold them away. While they are out the two lower arms grip
- * walls (you climb as on a ladder: the symbiote's wall crawl) and every full-strength blow you land is followed by one of the
- * arms ({@link #flurry}: lance, crescent, clamp, launch in turn, the tendril whip's combo).</li>
+ * <li><b>Arms out</b> ({@link #ARMS}): unfold the four arms, or fold them away (all the way in, nothing left out). While
+ * they are out every full-strength blow you land is followed by one of the arms ({@link #flurry}: lance, crescent, clamp,
+ * launch in turn, the tendril whip's combo), and R and G are the upper arms, worked as the symbiote's tendrils are (Andy:
+ * "they should be the same as the tendrils"; the grips, tears, throws and combos are the tendrils' own, run in
+ * {@code WebTendrils}): hold R (upper right) or G (upper left) on a creature, a player, an item or a corpse and the claw
+ * takes it and holds it up ahead; let go and it is hurled where you look. Sneak + R or G at a wall or the ground tears a
+ * chunk loose. Each arm holds its own, so two at once, and left click with them full is a combo (clap, crush, shatter,
+ * thrash, barrage). Rig hover and the palm blast stay in the Rig menu.</li>
+ * <li><b>Core only</b> ({@link #CORE_ONLY}): every other Rig piece worn blasts off and parks, leaving the Core and its arms
+ * (Andy: "choose to have only the chest piece equipped, and still use the arms"); again, they're called back.</li>
  * <li><b>Arm grab</b> ({@link #GRAB}): the upper arms snatch what you look at (a creature, a player, an item, a corpse) and
  * hold it up in front of you; pressed again, they hurl it, and it hurts what it hits. With Sneak, aimed at a wall or the
  * ground, they tear a chunk loose to hold and throw instead (the symbiote's rip). Someone downed (Andy's pick from the
@@ -79,10 +86,14 @@ import org.jspecify.annotations.Nullable;
  * creature it hauls it to you (the tendril zip).</li>
  * <li><b>Arm watch</b> ({@link #WATCH}): a switch: the arms fight on their own, striking the nearest monster in reach and
  * batting away shots, each for a little charge, until the Core runs low.</li>
- * <li><b>Arm walk</b> ({@link #WALK}): a switch (Andy: "they can do wall climbing and walking like the tendrils"): the four
- * arms telescope out to the ground, walls and ceilings round you and carry you along between them, the way the symbiote's
- * Wall Crawl strides (client RigOctoWalk). Jump climbs, Sneak lowers, Sneak on the ground stands you on your feet. It
- * drains a little charge while it holds you up.</li>
+ * <li><b>Arm walk</b> ({@link #WALK}): a switch, the arms' Wall Crawl (Andy: "they can do wall climbing and walking like the
+ * tendrils"): the four arms telescope out to the ground, walls and ceilings round you and carry you along between them,
+ * the way the symbiote's Wall Crawl strides (client RigOctoWalk), and on a wall or a ceiling they crawl you about on it as
+ * Wall Crawl does (client RigOctoClient): forward or Jump up, Sneak or back down, strafe along; Sneak at a wall slams you
+ * onto it, Jump or Sneak under a ceiling sticks you there and Sneak again drops you; over the top they haul you onto the
+ * ledge. Walking, Jump climbs, Sneak lowers, Sneak on the ground stands you on your feet, and holding Jump in the open
+ * (or sprinting) coils them for a leap you let go of. Water doesn't stop them. It drains a little charge while it holds
+ * you up.</li>
  * <li><b>Jab, cross, blast</b> ({@link #COMBO}; Andy: "a strong jab cross and blast combo"): the upper right arm telescopes
  * out in a jab, the upper left follows with a heavier cross, then all four claws close on one point and fire a focused
  * blast down the look (an instant beam, like the palm blast, paid for in charge).</li>
@@ -92,7 +103,7 @@ import org.jspecify.annotations.Nullable;
 public final class RigOcto {
 	// ---- tuning ----
 	/** Rig menu entries ({@link RigPicks}). */
-	public static final int ARMS = 80, GRAB = 81, SKEWER = 82, PINWHEEL = 83, VAULT = 84, ANCHOR = 85, WATCH = 86, WALK = 87, COMBO = 88;
+	public static final int ARMS = 80, GRAB = 81, SKEWER = 82, PINWHEEL = 83, VAULT = 84, ANCHOR = 85, WATCH = 86, WALK = 87, COMBO = 88, CORE_ONLY = 89;
 	/** Synced moves ({@link RigMoves}). */
 	public static final int MOVE_GRAB = 80, MOVE_HOLD = 81, MOVE_HURL = 82, MOVE_SKEWER = 83, MOVE_PINWHEEL = 84, MOVE_VAULT = 85,
 		MOVE_DIVE = 86, MOVE_ANCHOR = 87, MOVE_LANCE = 88, MOVE_CRESCENT = 89, MOVE_CLAMP = 90, MOVE_LAUNCH = 91, MOVE_WATCH = 92,
@@ -307,20 +318,47 @@ public final class RigOcto {
 		return id == null ? -1 : id;
 	}
 
-	/** Whether the lower arms have a wall to grip: arms out and a wall within {@link #WALL_GAP} to the side. */
+	/** Whether the arms have a wall to crawl on: the arm walk on and a wall within {@link #WALL_GAP} to the side. */
 	public static boolean clinging(Player player) {
-		if (!out(player) || player.onGround() || player.isPassenger()) {
+		if (!walking(player) || player.onGround() || player.isPassenger()) {
 			return false;
 		}
 		AABB box = player.getBoundingBox();
 		return !player.level().noCollision(player, box.inflate(WALL_GAP, -0.1, 0.0)) || !player.level().noCollision(player, box.inflate(0.0, -0.1, WALL_GAP));
 	}
 
+	/** Whether the arms are crawling you along a ceiling: the arm walk on, off the ground, a ceiling right over your head. */
+	public static boolean onCeiling(Player player) {
+		if (!walking(player) || player.onGround() || player.isPassenger()) {
+			return false;
+		}
+		return !player.level().noCollision(player, player.getBoundingBox().move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05));
+	}
+
+	/** Whether only the Octo Core is worn of the Rig (the "Core only" switch is on). */
+	public static boolean coreOnly(Player player) {
+		if (!wears(player)) {
+			return false;
+		}
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			if (piece != Rig.Piece.CORE && Rig.wears(player, piece)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Whether R or G's arms hold anything (or are tearing at a wall). */
+	private static boolean gripping(Player player) {
+		com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
+		return grips != null && (grips.right() >= 0 || grips.left() >= 0) || player.getAttached(com.jaymospowers.power.web.WebTendrils.TUG) != null;
+	}
+
 	// ---- the menu ---------------------------------------------------------------------------------------------------------
 
 	/** Whether {@code action} is one of these menu entries. */
 	public static boolean is(int action) {
-		return action >= ARMS && action <= COMBO;
+		return action >= ARMS && action <= CORE_ONLY;
 	}
 
 	/** How long one of these moves plays (ticks), or 0. */
@@ -356,6 +394,7 @@ public final class RigOcto {
 			case VAULT -> VAULT_LEVEL;
 			case ANCHOR -> ANCHOR_LEVEL;
 			case WALK -> WALK_LEVEL;
+			case CORE_ONLY -> 1;
 			case COMBO -> COMBO_LEVEL;
 			default -> WATCH_LEVEL;
 		};
@@ -364,6 +403,10 @@ public final class RigOcto {
 		}
 		if (action == ARMS) {
 			toggleArms(player);
+			return;
+		}
+		if (action == CORE_ONLY) {
+			RigCall.coreOnly(player);
 			return;
 		}
 		if (!out(player)) {
@@ -447,6 +490,11 @@ public final class RigOcto {
 	// ---- arm grab ---------------------------------------------------------------------------------------------------------
 
 	private static void grabOrHurl(ServerPlayer player) {
+		if (com.jaymospowers.power.web.WebTendrils.machine(player) && gripping(player)) {
+			// R and G's claws are busy
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_octo.full").withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		Entity held = held(player);
 		if (held != null) {
 			if (ON_BACK.contains(player.getUUID()) && !player.isShiftKeyDown()) {
@@ -813,7 +861,7 @@ public final class RigOcto {
 
 	/** After a full-strength blow with the arms out: the next arm in the chain follows it (lance, crescent, clamp, launch). */
 	static void flurry(ServerPlayer player, LivingEntity target) {
-		if (!out(player) || !target.isAlive() || player.isSpectator() || held(player) != null) {
+		if (!out(player) || !target.isAlive() || player.isSpectator() || held(player) != null || gripping(player)) {
 			return;
 		}
 		if (!Rig.spend(player, FLURRY_COST)) {
@@ -1078,6 +1126,10 @@ public final class RigOcto {
 			if (player.getAttached(HELD) != null) {
 				letGo(player, true);
 			}
+			if (gripping(player)) {
+				// what R and G's claws held drops (the tendrils' tick lets go once the arms are gone)
+				com.jaymospowers.power.web.WebTendrils.tickArms(player);
+			}
 			HOISTS.remove(id);
 			SPINS.remove(id);
 			COMBO_READY.remove(id);
@@ -1087,6 +1139,10 @@ public final class RigOcto {
 		long now = player.level().getGameTime();
 		if (player.getAttached(HELD) != null) {
 			tickHeld(player, now);
+		}
+		if (out(player) || gripping(player)) {
+			// R and G's holds, tears, throws and combos (the tendrils' own; once a tick, however many ask)
+			com.jaymospowers.power.web.WebTendrils.tickArms(player);
 		}
 		Hoist hoist = HOISTS.get(id);
 		if (hoist != null) {
