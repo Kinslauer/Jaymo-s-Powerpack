@@ -18548,3 +18548,10 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
 - Maggots, their bait, rot and the bearers are unchanged (maggots still come 10 minutes after death, as before).
 - `SmallLife.bodies`/`pile`, `KitchenCompat.decayTicks` (falls back to time since death on an older Kitchen).
 - Built; not played.
+
+## 0.14.19 (2026-11-28): Loading hint 299 for combat that's on by default (#2341)
+
+- Hint 299 now says the close fighting is how everyone fights. It covers the string, the uppercut and the slam, the
+  short Alt dash held into a long roll, F to block or perfect block, digging as ever with no fight about, and ` for the
+  old way. The click on the Sun now runs before Combo Clash's (`SunMoonClient`).
+- Built; not played.
