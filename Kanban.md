@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:05). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,7 +25,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
 - [ ] [[Inbox/villager-dialogue-talk|villager-dialogue-talk]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/block-choice-box|block-choice-box]] · for 🔨 Hephaestus · open
-- [ ] [[Inbox/dragged-bodies|dragged-bodies]] · for ☀️ Apollo · open
 
 
 ## Being built
@@ -47,6 +46,7 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for antigravity · #2337 · in-review
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · t3 · #2355 · in-review
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · t3 · #2358 · in-review
+- [ ] [[Inbox/dragged-bodies|dragged-bodies]] · for ☀️ Apollo · #2360 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 - [ ] [[Agents/zoom-still-broken|zoom-still-broken]] · 💻 Odysseus · #2359 · in-review
 
