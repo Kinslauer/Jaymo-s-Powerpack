@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 04:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 04:52). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,12 +23,12 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
-- [ ] [[Inbox/wrist-table-ui-mockup|wrist-table-ui-mockup]] · for 🔥 Prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/wrist-table-ui-mockup|wrist-table-ui-mockup]] · 🔥 Prometheus · claimed
 
 
 ## In review
