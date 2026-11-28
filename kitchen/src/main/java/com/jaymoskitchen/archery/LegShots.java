@@ -70,9 +70,9 @@ public final class LegShots {
 	/**
 	 * A player or an NPC (a body built like a person) hit so only goes down to crawl this often (else they only limp):
 	 * Andy, "Players are knocked on the ground far too easily. lower that chance by 80%", then "npcs can get the same
-	 * resilience". Every time before; animals and other creatures still always go down.
+	 * resilience", then "players 1 in 5, npcs 1 in 2". Every time before; animals and other creatures still always go down.
 	 */
-	public static final float PERSON_DOWN_CHANCE = 0.2F;
+	public static final float PLAYER_DOWN_CHANCE = 0.2F, NPC_DOWN_CHANCE = 0.5F;
 	/** (0.5.13) The tags Powers' Wounds puts on a body for each broken leg (any of its legs). */
 	public static final List<String> BROKEN_LEG_TAGS = List.of("jaymoskitchen.broken.left_leg", "jaymoskitchen.broken.right_leg",
 		"jaymoskitchen.broken.front_legs", "jaymoskitchen.broken.hind_legs", "jaymoskitchen.broken.legs");
@@ -189,7 +189,7 @@ public final class LegShots {
 		}
 
 		boolean person = target instanceof Player || com.jaymoskitchen.ragdoll.MobRagdolls.humanoid(target);
-		boolean down = !person || target.getRandom().nextFloat() < PERSON_DOWN_CHANCE;
+		boolean down = !person || target.getRandom().nextFloat() < (target instanceof Player ? PLAYER_DOWN_CHANCE : NPC_DOWN_CHANCE);
 		int crawlTicks = !down ? 0 : target.is(DOWNED_LONG) ? LONG_CRAWL_TICKS : CRAWL_TICKS;
 		int amplifier = crit ? CRIT_AMPLIFIER : AMPLIFIER;
 		int ticks = crit ? CRIT_TICKS : TICKS;

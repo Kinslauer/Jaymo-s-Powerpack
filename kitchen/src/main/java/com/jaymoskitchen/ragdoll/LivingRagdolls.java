@@ -59,6 +59,7 @@ public final class LivingRagdolls {
 	 * A heavy blow floors a player only this often, and only a blast or one that knocks them back
 	 * ({@link #knocksBack}). Andy (2026-11-28): "Players are knocked on the ground far too easily. lower that chance by 80%
 	 * and require targeted hits to the legs, knockback or explosions" (blows to the legs are Powers' LegFell).
+	 * Then (same day): "players 1 in 5, npcs 1 in 2" (NPCs: MobRagdolls).
 	 */
 	public static final float PLAYER_FLOOR_CHANCE = 0.2F;
 	/** A hard landing tips them forward this fast (their own speed is added on their client). */
