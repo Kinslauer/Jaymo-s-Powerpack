@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,7 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · for antigravity · open
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for antigravity · open
-- [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for antigravity · open
 - [ ] [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]] · for antigravity · open
 
 
@@ -43,6 +42,7 @@ kanban-plugin: board
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/hunters-road-3-models|hunters-road-3-models]] · t3 · #2331 · in-review
+- [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for antigravity · #2337 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
