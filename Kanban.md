@@ -24,12 +24,12 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
 - [ ] [[Inbox/villager-dialogue-talk|villager-dialogue-talk]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/block-choice-box|block-choice-box]] · for 🔨 Hephaestus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/block-choice-box|block-choice-box]] · 🔨 Hephaestus · claimed
 
 
 ## In review
