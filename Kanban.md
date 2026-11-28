@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 05:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 07:59). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,6 +23,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for ☁️ Cloud · open
 - [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
+- [ ] [[Inbox/villager-dialogue-talk|villager-dialogue-talk]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
