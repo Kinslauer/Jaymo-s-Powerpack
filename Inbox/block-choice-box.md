@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hephaestus
 from: coordinator
 asked: 2026-11-28
 thread: Cooking blocks off Carry On (Claude side session)
-claimed_by: 
+claimed_by: hermes-fixer
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/core/CarryOnCompat.java
