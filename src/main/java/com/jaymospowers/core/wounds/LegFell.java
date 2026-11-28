@@ -34,7 +34,8 @@ import org.jspecify.annotations.Nullable;
  * happens after losing your hearts".
  * <ul>
  * <li>A blow ({@link Downed#attack}: something struck it, not a fall, fire or bleeding) that lands on a leg or foot and
- * takes {@link #BLOW_SHARE} of the most health, or breaks that leg, takes the legs out from under a body on its feet.</li>
+ * takes {@link #BLOW_SHARE} of the most health, or breaks that leg, takes the legs out from under a body on its feet: a
+ * mob's every time, a player's one time in five ({@link #PLAYER_CHANCE}).</li>
  * <li>A player goes limp into Kitchen's ragdoll, flung a little away from the blow, and once the body comes to rest lies
  * prone ({@link Crawl#CRAWLING}): no standing up by Jump or the crawl key. A roll (a double tap of Left or Right, or the
  * Dodge key) gets them back on their feet as it ends. Two broken legs still keep them crawling ({@link Breaks#crawlOnly}).
@@ -46,6 +47,11 @@ import org.jspecify.annotations.Nullable;
 public final class LegFell {
 	/** A blow to a leg or foot taking at least this share of the most health fells (a player's 7 of 20). */
 	public static final float BLOW_SHARE = 0.35F;
+	/**
+	 * Such a blow fells a player only this often. Andy (2026-11-28): "Players are knocked on the ground far too easily.
+	 * lower that chance by 80% and require targeted hits to the legs, knockback or explosions". Mobs still always go down.
+	 */
+	public static final float PLAYER_CHANCE = 0.2F;
 	/** The fling away from the blow (blocks a tick), and its lift. */
 	public static final double FLING = 0.18, LIFT = 0.12;
 	/** Ticks after the fall before the body may be found at rest (Kitchen's client takes a moment to go limp). */
@@ -91,7 +97,9 @@ public final class LegFell {
 			return;
 		}
 		if (victim instanceof ServerPlayer player) {
-			fell(level, player, source);
+			if (player.getRandom().nextFloat() < PLAYER_CHANCE) {
+				fell(level, player, source);
+			}
 		} else if (Tripped.sweepable(victim)) {
 			Tripped.sweep(victim, MOB_TICKS);
 		}
