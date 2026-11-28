@@ -259,25 +259,12 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 			// (0.7.490) it struck land: the crater, centred on the block it hit
 			Bombardment.crater(level, Vec3.atCenterOf(land), kind.crater, gunner != null ? gunner : this);
 		}
+		ImpactFx.hit(level, at, ImpactFx.Look.of(kind), radius, land != null ? land : struck);
 		switch (kind) {
-			case SHELL -> {
-				level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-				level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 24, 1.0, 0.8, 1.0, 0.06);
-				level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 16, 0.8, 0.5, 0.8, 0.08);
-				level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 3.0F, 0.8F);
-			}
-			case GRAPE -> {
-				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 30, 1.6, 0.8, 1.6, 0.4);
-				level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 14, 1.2, 0.6, 1.2, 0.05);
-				level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 1.2F, 1.5F);
-			}
-			case CHAIN -> {
-				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 10, 0.4, 0.4, 0.4, 0.2);
-				level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_BREAK, SoundSource.BLOCKS, 1.5F, 0.7F);
-			}
+			case SHELL -> level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 3.0F, 0.8F);
+			case GRAPE -> level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 1.2F, 1.5F);
+			case CHAIN -> level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_BREAK, SoundSource.BLOCKS, 1.5F, 0.7F);
 			default -> {
-				level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-				level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 8, 0.3, 0.3, 0.3, 0.03);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 1.6F, 0.7F);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.0F, kind == ShotKind.HEAVY ? 0.8F : 1.2F);
 			}

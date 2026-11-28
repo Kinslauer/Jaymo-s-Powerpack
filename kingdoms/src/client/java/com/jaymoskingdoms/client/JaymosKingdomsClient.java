@@ -60,6 +60,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		BoardTermsClient.register();
 		// (ff-kit) Peterwolf's firefighter readout on our HUD layout, only while carrying the kit
 		ForestFireHud.register();
+		ImpactFxClient.register();
 		// (0.7.329) the second batch of Blockbench Workshop creatures
 		com.jaymoskingdoms.client.beasts.BeastsClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
