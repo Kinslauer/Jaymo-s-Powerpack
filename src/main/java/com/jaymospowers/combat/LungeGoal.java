@@ -1,6 +1,7 @@
 package com.jaymospowers.combat;
 
 import java.util.EnumSet;
+import com.jaymospowers.core.Dismember;
 import com.jaymospowers.power.darktide.DarktideStatus;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -50,7 +51,8 @@ public final class LungeGoal extends Goal {
 	public boolean canUse() {
 		LivingEntity target = this.mob.getTarget();
 		if (target == null || !target.isAlive() || this.mob.level().getGameTime() < this.readyAt || !this.mob.onGround()
-			|| this.mob.isPassenger() || this.mob.isInWater() || DarktideStatus.stunned(this.mob) || Pounce.sprawled(this.mob)
+			|| this.mob.isPassenger() || this.mob.isInWater() || !Dismember.canAttack(this.mob) || !Dismember.hasLegs(this.mob)
+			|| DarktideStatus.stunned(this.mob) || Pounce.sprawled(this.mob)
 			|| HuskBurrow.hidden(this.mob) || Crowds.waiting(this.mob)) {
 			return false;
 		}

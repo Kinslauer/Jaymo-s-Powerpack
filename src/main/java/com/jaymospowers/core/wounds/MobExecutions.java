@@ -263,7 +263,7 @@ public final class MobExecutions {
 	 * slimes, water mobs or bosses), not ridden or riding.
 	 */
 	public static boolean fit(Mob mob) {
-		if (!mob.isAlive() || mob.isNoAi() || Downed.isDowned(mob) || mob.isPassenger() || mob.isVehicle() && !(mob instanceof Spider)
+		if (!mob.isAlive() || mob.isNoAi() || Downed.isDowned(mob) || !Dismember.canAttack(mob) || mob.isPassenger() || mob.isVehicle() && !(mob instanceof Spider)
 			|| Carry.isCarried(mob) || mob.isSleeping() || mob.isBaby() && !(mob instanceof Enemy)) {
 			return false;
 		}
@@ -298,13 +298,13 @@ public final class MobExecutions {
 		if (mob instanceof Evoker) {
 			return Move.FANGS;
 		}
-		if (mob instanceof Witch) {
+		if (mob instanceof Witch && !Dismember.armless(mob)) {
 			return Move.POTION;
 		}
 		if (mob instanceof Ravager || mob instanceof Warden) {
 			return Move.CRUSH;
 		}
-		if (!mob.getMainHandItem().isEmpty()) {
+		if (!mob.getMainHandItem().isEmpty() && !Dismember.armless(mob)) {
 			return switch (Finishers.kind(mob.getMainHandItem())) {
 				case AXE, GREATSWORD -> Move.CHOP;
 				case SWORD, DAGGER, SPEAR, POLEARM -> Move.STAB;
@@ -321,7 +321,7 @@ public final class MobExecutions {
 			// a bear, a wolf, a big cat: it mauls them and feeds, however big it is (no ravager's crush)
 			return Move.FEED;
 		}
-		if (mob instanceof Zombie || mob instanceof Spider || BodyPlan.of(mob) != BodyPlan.HUMANOID) {
+		if (mob instanceof Zombie && !Dismember.headless(mob) || mob instanceof Spider || BodyPlan.of(mob) != BodyPlan.HUMANOID) {
 			return mob.getBbWidth() >= 1.3F ? Move.CRUSH : Move.FEED;
 		}
 		return Move.STAMP;

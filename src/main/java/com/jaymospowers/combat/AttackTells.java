@@ -5,6 +5,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Dismember;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -148,8 +149,13 @@ public final class AttackTells {
 	 * (nothing landed yet); the callers drop the result, as vanilla does.
 	 */
 	public static boolean windUp(Mob mob, ServerLevel level, Entity target) {
+		if (!Dismember.canAttack(mob)) {
+			return false;
+		}
 		if (!(target instanceof LivingEntity living)) {
-			mob.swingForAttack(InteractionHand.MAIN_HAND);
+			if (!Dismember.armless(mob)) {
+				mob.swingForAttack(InteractionHand.MAIN_HAND);
+			}
 			return mob.doHurtTarget(level, target);
 		}
 		if (PENDING.containsKey(mob) || Crowds.waiting(mob)) {
@@ -161,7 +167,9 @@ public final class AttackTells {
 		tell(level, mob, heavy, windup);
 		IncomingBlows.aimed(mob, living, windup, heavy);
 		PENDING.put(mob, new Pending(living, level.getGameTime() + windup, heavy));
-		mob.setAggressive(true);
+		if (!Dismember.armless(mob)) {
+			mob.setAggressive(true);
+		}
 		return false;
 	}
 
@@ -170,6 +178,9 @@ public final class AttackTells {
 	 * reach. A weapon with a near limit to its reach (a spear) keeps vanilla's check, and so does a rider.
 	 */
 	public static boolean closeEnough(Mob mob, LivingEntity target) {
+		if (!Dismember.canAttack(mob)) {
+			return false;
+		}
 		if (mob.isPassenger()) {
 			return true;
 		}
@@ -213,9 +224,11 @@ public final class AttackTells {
 	private static Vec3 tellAt(LivingEntity mob) {
 		Vec3 facing = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
 		Vec3 at;
-		if (!mob.getMainHandItem().isEmpty()) {
+		if (!mob.getMainHandItem().isEmpty() && !Dismember.armless(mob)) {
 			Vec3 side = new Vec3(-facing.z, 0.0, facing.x).scale(mob.getMainArm() == HumanoidArm.RIGHT ? -0.35 : 0.35);
 			at = mob.getEyePosition().add(facing.scale(0.4)).add(side).add(0.0, -0.2, 0.0);
+		} else if (Dismember.armless(mob) && !Dismember.biter(mob)) {
+			at = mob.position().add(0.0, mob.getBbHeight() * 0.45, 0.0).add(facing.scale(mob.getBbWidth() * 0.5 + 0.15));
 		} else {
 			at = mob.getEyePosition().add(facing.scale(mob.getBbWidth() * 0.5 + 0.15));
 		}
@@ -315,7 +328,9 @@ public final class AttackTells {
 	 * {@link #LUNGE_LEAD} ticks before the blow, on the ground and not already touching.
 	 */
 	private static void hold(Mob mob, LivingEntity target, long left) {
-		mob.setAggressive(true);
+		if (!Dismember.armless(mob)) {
+			mob.setAggressive(true);
+		}
 		if (left != LUNGE_LEAD || !mob.onGround() || mob.isPassenger()
 			|| mob.getBoundingBox().inflate(REACH_SLACK).intersects(target.getBoundingBox())) {
 			return;

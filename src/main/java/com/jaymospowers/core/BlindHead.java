@@ -158,7 +158,7 @@ public final class BlindHead {
 		mob.setYBodyRot(yaw);
 		mob.setYHeadRot(yaw);
 		double flat = Math.sqrt(dx * dx + dz * dz);
-		boolean archer = mob instanceof AbstractSkeleton && mob.getMainHandItem().is(Items.BOW);
+		boolean archer = !Dismember.armless(mob) && mob instanceof AbstractSkeleton && mob.getMainHandItem().is(Items.BOW);
 		if (archer && bumped == null) {
 			// a blind archer stands where it is and looses arrows at the sound
 			mob.setZza(0.0F);
@@ -181,7 +181,7 @@ public final class BlindHead {
 			mob.setZza(0.0F);
 		}
 		mob.setXxa(0.0F);
-		if (mob.tickCount % SWING_EVERY == 0 && (bumped != null || flat <= SWING_REACH + ARRIVED)) {
+		if (Dismember.canAttack(mob) && mob.tickCount % SWING_EVERY == 0 && (bumped != null || flat <= SWING_REACH + ARRIVED)) {
 			mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT);
 			LivingEntity victim = bumped;
 			if (victim == null) {
