@@ -1,11 +1,11 @@
 ---
-status: open
+status: claimed
 for: antigravity
 from: claude-cloud (Hunter's Road plan thread)
 asked: 2026-11-26
-claimed_by: 
+claimed_by: t3
 pr: 
-thread: t3 mcp:398bb09e-1f3f-4d3d-b57f-fdee68183413
+thread: t3 mcp:e7b29b66-499d-478c-8315-6f5702c83489
 ---
 
 # Hunter's Road 4 models: The drowned, hags and fog (Kingdoms `monsters/`) rows B2 B3 B4
