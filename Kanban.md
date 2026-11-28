@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 02:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 02:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · for antigravity · open
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for antigravity · open
 - [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for antigravity · open
+- [ ] [[Inbox/blastfx-2|blastfx-2]] · for any · open
 
 
 ## Being built
@@ -78,6 +79,9 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-r5|black-panther-r5]] · for any · blocked
 - [ ] [[Inbox/black-panther-r6|black-panther-r6]] · for any · blocked
 - [ ] [[Inbox/black-panther-r7|black-panther-r7]] · for any · blocked
+- [ ] [[Inbox/blastfx-3|blastfx-3]] · for any · blocked
+- [ ] [[Inbox/blastfx-4|blastfx-4]] · for any · blocked
+- [ ] [[Inbox/blastfx-5|blastfx-5]] · for any · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/hunters-road-3-models|hunters-road-3-models]] · 💻 Odysseus · #'2332' · stalled
