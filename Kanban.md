@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for antigravity · open
 - [ ] [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]] · for antigravity · open
 - [ ] [[Inbox/gore-5-living-guts|gore-5-living-guts]] · for antigravity · open
+- [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · for antigravity · open
 
 
 ## Being built
@@ -78,7 +79,6 @@ kanban-plugin: board
 - [ ] [[Inbox/black-panther-r5|black-panther-r5]] · for any · blocked
 - [ ] [[Inbox/black-panther-r6|black-panther-r6]] · for any · blocked
 - [ ] [[Inbox/black-panther-r7|black-panther-r7]] · for any · blocked
-- [ ] [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · 🔥 Prometheus · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
