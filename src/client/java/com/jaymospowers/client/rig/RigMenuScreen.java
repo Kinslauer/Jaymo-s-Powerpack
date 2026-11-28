@@ -26,8 +26,13 @@ import net.minecraft.world.item.Items;
 /**
  * (0.11.110) The Rig's radial menu (Andy: "make j menu radial"): hold Sneak + J, point the mouse toward an entry, let go
  * (or click). An active (Hover, Palm Blast, Launcher, Unibeam, Scan, Suit) becomes what a tap of J uses, and is used
- * now; the Helm's switches (Faceplate, Night Vision) just flip. Nine tiles clockwise from the top, each with its icon,
- * cooldown, and the Mind level it waits for; a lit strip on what's on. Like the symbiote's menu, it doesn't pause.
+ * now; the switches (Faceplate, Night Vision, the flight helpers...) just flip. Like the symbiote's menu, it doesn't pause.
+ * <p>
+ * Two rings (Andy: "the shift J menu is way too cluttered"; it had grown to 43 tiles on one ring, 52 with the Octo
+ * Core). The inner ring holds the groups ({@link #GROUPS}): Flight, Blasts, Guns, Arm Forms, Back Rig, Helm, Suit and
+ * Drones, and the Octo Arms while an Octo Core is worn. Point at a group and its entries fan out on the outer ring
+ * around it; carry on out to one and let go. Every entry is still there, each in one group. A group's tile has a lit rim
+ * when it holds what J uses now, and a lit strip when one of its switches is on.
  */
 final class RigMenuScreen extends Screen {
 	/** Ring radius, tile size, and the dead zone in the middle (no pick). */
@@ -71,10 +76,56 @@ final class RigMenuScreen extends Screen {
 		RigForms.BLADE_COOLDOWN, RigForms.MACE_COOLDOWN, RigForms.PILE_COOLDOWN, RigForms.DRILL_COOLDOWN, RigForms.LANCE_COOLDOWN, RigForms.LASH_COOLDOWN, RigForms.MIMIC_COOLDOWN,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0};
-	/** The entries on the ring now (indices into {@link #ACTIONS}): the Octo Core's only while one is worn. */
+	/**
+	 * The groups on the inner ring, clockwise from the top: a lang key (gui.jaymospowers.rig_menu.group.*), the icon, and
+	 * its entries by {@link #NAMES}. Every entry is in exactly one group (checked when the class loads).
+	 */
+	private record Group(String key, Item icon, int[] entries) {
+	}
+
+	private static final Group[] GROUPS = {
+		groupOf("flight", Items.ELYTRA, "hover", "jet_start", "dash", "pullup", "hyper", "bank_turn", "meteor", "smooth"),
+		groupOf("blasts", Items.FIREWORK_ROCKET, "palm", "launcher", "barrage", "unibeam", "slow_beat"),
+		groupOf("guns", Items.CROSSBOW, "palm_charge", "gatling", "railgun", "sonic", "twin", "siege"),
+		groupOf("forms", Items.IRON_SWORD, "blade", "mace", "pile", "drill", "lance", "lash", "mimic"),
+		groupOf("back", Items.PHANTOM_MEMBRANE, "wingslash", "spears", "pincer", "grapple", "horns"),
+		groupOf("helm", Items.SPYGLASS, "faceplate", "night", "scan", "mark", "table", "bank"),
+		groupOf("suit", Items.ARMOR_STAND, "call", "sentry", "failsafe", "drones", "decoy", "field"),
+		groupOf("octo", Items.PISTON, "octo_arms", "octo_grab", "octo_skewer", "octo_pinwheel", "octo_vault", "octo_anchor", "octo_watch", "octo_walk", "octo_combo")};
+
+	static {
+		int[] seen = new int[NAMES.length];
+		for (Group g : GROUPS) {
+			for (int i : g.entries()) {
+				seen[i]++;
+			}
+		}
+		for (int i = 0; i < seen.length; i++) {
+			if (seen[i] != 1) {
+				throw new IllegalStateException("Rig menu entry " + NAMES[i] + " is in " + seen[i] + " groups");
+			}
+		}
+	}
+
+	private static Group groupOf(String key, Item icon, String... names) {
+		int[] entries = new int[names.length];
+		for (int k = 0; k < names.length; k++) {
+			entries[k] = java.util.Arrays.asList(NAMES).indexOf(names[k]);
+			if (entries[k] < 0) {
+				throw new IllegalStateException("No Rig menu entry " + names[k]);
+			}
+		}
+		return new Group(key, icon, entries);
+	}
+
+	/** The groups on the inner ring now (indices into {@link #GROUPS}): the Octo Arms only while an Octo Core is worn. */
 	private int[] shown = new int[0];
 	private double slice = 360.0;
+	/** The inner ring's radius: the groups' tiles. ({@link #radius} is the outer ring's: the entries'.) */
+	private int inner = RADIUS / 2;
 
+	/** The group pointed at (index into {@link #GROUPS}), or -1; and the entry (index into {@link #ACTIONS}), or -1. */
+	private int group = -1;
 	private int selected = -1;
 	private boolean chosen;
 
@@ -82,15 +133,55 @@ final class RigMenuScreen extends Screen {
 		super(Component.translatable("screen.jaymospowers.rig_menu"));
 		LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
 		boolean octo = player != null && RigOcto.wears(player);
-		int[] list = new int[ACTIONS.length];
+		int[] list = new int[GROUPS.length];
 		int n = 0;
-		for (int i = 0; i < ACTIONS.length; i++) {
-			if (octo || !RigOcto.is(ACTIONS[i])) {
-				list[n++] = i;
+		for (int g = 0; g < GROUPS.length; g++) {
+			if (octo || !"octo".equals(GROUPS[g].key())) {
+				list[n++] = g;
 			}
 		}
 		this.shown = java.util.Arrays.copyOf(list, n);
 		this.slice = 360.0 / Math.max(1, n);
+	}
+
+	/** The inner-ring slot of this group (its place clockwise from the top), or -1 if it isn't shown. */
+	private int slot(int g) {
+		for (int k = 0; k < shown.length; k++) {
+			if (shown[k] == g) {
+				return k;
+			}
+		}
+		return -1;
+	}
+
+	/** A group's angle (radians, 0 = right, clockwise), from its slot on the inner ring. */
+	private double groupAngle(int g) {
+		return Math.toRadians(slot(g) * slice - 90.0);
+	}
+
+	/** The angle between the outer ring's entries (radians): a tile and a small gap along the ring. */
+	private double step() {
+		return (tile + 4) / (double)radius;
+	}
+
+	/** The angle of the {@code k}th of a group's {@code n} entries: fanned out on the outer ring, centred on the group. */
+	private double entryAngle(int g, int k, int n) {
+		return groupAngle(g) + (k - (n - 1) / 2.0) * step();
+	}
+
+	/** The group whose slice holds this angle (radians, as {@link Math#atan2}). */
+	private int groupAt(double angle) {
+		if (shown.length == 0) {
+			return -1;
+		}
+		double degrees = Math.toDegrees(angle) + 90.0;
+		return shown[Math.floorMod((int)Math.round(degrees / slice), shown.length)];
+	}
+
+	/** The shortest turn between two angles (radians), 0 to pi. */
+	private static double apart(double a, double b) {
+		double d = Math.abs(Math.IEEEremainder(a - b, Math.PI * 2.0));
+		return Math.min(d, Math.PI * 2.0 - d);
 	}
 
 	private static Item icon(int i) {
@@ -185,6 +276,10 @@ final class RigMenuScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
+		if (selected < 0 && group >= 0) {
+			// a click on a group just keeps it open: its entries are already fanned out
+			return true;
+		}
 		choose();
 		return true;
 	}
@@ -273,66 +368,103 @@ final class RigMenuScreen extends Screen {
 		}
 		int room = height - INFO_H - 8;
 		tile = Math.max(16, Math.min(TILE, (int)(Math.min(RADIUS, room / 2 - 19) * 0.4) - 1));
-		radius = Math.max(DEAD_ZONE + tile, Math.min(RADIUS, room / 2 - tile / 2 - 6));
+		radius = Math.max(DEAD_ZONE + 2 * tile + 8, Math.min(RADIUS, room / 2 - tile / 2 - 6));
+		inner = Math.max(DEAD_ZONE + tile / 2 + 4, radius / 2);
 		int cx = width / 2;
 		int cy = height / 2;
 		int dx = mouseX - cx;
 		int dy = mouseY - cy;
-		int before = selected;
-		if (dx * dx + dy * dy < DEAD_ZONE * DEAD_ZONE) {
+		double angle = Math.atan2(dy, dx);
+		int dist2 = dx * dx + dy * dy;
+		int split = (inner + radius) / 2;
+		int beforeGroup = group, before = selected;
+		if (dist2 < DEAD_ZONE * DEAD_ZONE) {
+			group = -1;
+			selected = -1;
+		} else if (dist2 < split * split) {
+			// on the inner ring: the group under the pointer, no entry yet
+			group = groupAt(angle);
 			selected = -1;
 		} else {
-			double angle = Math.toDegrees(Math.atan2(dy, dx)) + 90.0;
-			selected = this.shown.length == 0 ? -1 : this.shown[Math.floorMod((int)Math.round(angle / this.slice), this.shown.length)];
+			// out past it: the group stays, unless the pointer has swung well clear of its fan (or came straight out)
+			if (group >= 0) {
+				int n = GROUPS[group].entries().length;
+				if (apart(angle, groupAngle(group)) > (n / 2.0 + 1.0) * step()) {
+					group = groupAt(angle);
+				}
+			} else {
+				group = groupAt(angle);
+			}
+			selected = -1;
+			if (group >= 0) {
+				int[] entries = GROUPS[group].entries();
+				double best = Double.MAX_VALUE;
+				for (int k = 0; k < entries.length; k++) {
+					double d = apart(angle, entryAngle(group, k, entries.length));
+					if (d < best) {
+						best = d;
+						selected = entries[k];
+					}
+				}
+			}
 		}
-		if (selected != before && selected >= 0) {
+		if ((selected != before && selected >= 0) || (group != beforeGroup && group >= 0)) {
 			player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,
-				0.15F, 1.6F + selected * 0.04F, false);
+				0.15F, selected >= 0 ? 1.6F + selected * 0.01F : 1.2F + group * 0.05F, false);
 		}
 
-		// a dark disc behind the ring, a thin ring, and the pointer
+		// the dark disc out to the entries, a darker hub under the groups, and the pointer
 		int outer = radius + tile / 2 + 6;
 		UiStyle.wheel(graphics, cx, cy, radius, tile);
+		UiStyle.wheel(graphics, cx, cy, inner, tile);
 		if (selected >= 0) {
-			double t = Math.atan2(dy, dx);
-			UiStyle.wheelPointer(graphics, cx, cy, radius, tile, t, ACCENT);
+			UiStyle.wheelPointer(graphics, cx, cy, radius, tile, angle, ACCENT);
+		} else if (group >= 0) {
+			UiStyle.wheelPointer(graphics, cx, cy, inner, tile, angle, ACCENT);
 		}
 
-		for (int k = 0; k < this.shown.length; k++) {
-			int i = this.shown[k];
-			double t = Math.toRadians(k * this.slice - 90.0);
-			int x = cx + (int)Math.round(Math.cos(t) * radius) - tile / 2;
-			int y = cy + (int)Math.round(Math.sin(t) * radius) - tile / 2;
-			int left = left(i);
-			boolean blocked = blocker(player, i) != null;
-			boolean picked = i == selected;
-			boolean jKey = ACTIONS[i] == RigClient.selected;
-			UiStyle.wheelTile(graphics, x, y, tile, k, picked, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
-			graphics.item(new ItemStack(icon(i)), x + (tile - 16) / 2, y + (tile - 16) / 2);
-			if (left > 0 && COOLDOWN[i] > 0) {
-				int shade = (int)Math.ceil((tile - 2) * Math.min(1.0, left / (double)COOLDOWN[i]));
-				graphics.fill(x + 1, y + 1 + (tile - 2) - shade, x + tile - 1, y + tile - 1, 0xB0000000);
-				String seconds = left >= 200 ? Integer.toString((left + 19) / 20) : String.format(Locale.ROOT, "%.1f", left / 20.0);
-				graphics.text(font, seconds, x + tile / 2 - font.width(seconds) / 2, y + tile / 2 - 4, 0xFFFFFFFF);
+		// the groups
+		for (int k = 0; k < shown.length; k++) {
+			int g = shown[k];
+			double t = Math.toRadians(k * slice - 90.0);
+			int x = cx + (int)Math.round(Math.cos(t) * inner) - tile / 2;
+			int y = cy + (int)Math.round(Math.sin(t) * inner) - tile / 2;
+			boolean open = g == group;
+			boolean holdsJ = false, anyOn = false, anyReady = false;
+			for (int i : GROUPS[g].entries()) {
+				holdsJ |= ACTIONS[i] == RigClient.selected;
+				anyOn |= on(player, i);
+				anyReady |= blocker(player, i) == null;
 			}
-			if (Rig.level(player) < LEVEL[i]) {
-				// not yet: nearly black, with the Mind level it waits for
-				graphics.fill(x + 1, y + 1, x + tile - 1, y + tile - 1, 0xD8000000);
-				String need = "Lv" + LEVEL[i];
-				graphics.text(font, need, x + tile / 2 - font.width(need) / 2, y + tile / 2 - 4, 0xFF70A0B0);
-			} else if (blocked) {
+			UiStyle.wheelTile(graphics, x, y, tile, k, open, open ? ACCENT : holdsJ ? 0xA05FE6FF : anyReady ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			graphics.item(new ItemStack(GROUPS[g].icon()), x + (tile - 16) / 2, y + (tile - 16) / 2);
+			if (!anyReady) {
 				graphics.fill(x + 1, y + 1, x + tile - 1, y + tile - 1, 0x90000000);
 			}
-			if (on(player, i)) {
+			if (anyOn) {
 				graphics.fill(x + 2, y + tile - 3, x + tile - 2, y + tile - 1, ACCENT);
 			}
 		}
 
-		// the middle: the pick's name; under the ring, what it does or what's stopping it
-		Component name = selected >= 0 ? Component.translatable("gui.jaymospowers.rig_menu." + NAMES[selected]) : null;
-		if (name != null) {
-			UiStyle.lineCentred(graphics, font, name, cx, cy - 4, 2 * DEAD_ZONE + 20, UiStyle.TEXT);
+		// the open group's entries, fanned out on the outer ring around it
+		if (group >= 0) {
+			int[] entries = GROUPS[group].entries();
+			for (int k = 0; k < entries.length; k++) {
+				int i = entries[k];
+				double t = entryAngle(group, k, entries.length);
+				int x = cx + (int)Math.round(Math.cos(t) * radius) - tile / 2;
+				int y = cy + (int)Math.round(Math.sin(t) * radius) - tile / 2;
+				entryTile(graphics, player, i, k, x, y);
+			}
 		}
+
+		// the middle: the group's name; under the rings, the entry (or group) and what it does or what's stopping it
+		if (group >= 0) {
+			UiStyle.lineCentred(graphics, font, Component.translatable("gui.jaymospowers.rig_menu.group." + GROUPS[group].key()), cx, cy - 4,
+				2 * (inner - tile / 2) - 8, UiStyle.TEXT);
+		}
+		Component name = selected >= 0 ? Component.translatable("gui.jaymospowers.rig_menu." + NAMES[selected])
+			: group >= 0 ? Component.translatable("gui.jaymospowers.rig_menu.group." + GROUPS[group].key()) : null;
 		int ix = cx - INFO_W / 2;
 		int iy = Math.min(cy + outer + 4, height - 4 - INFO_H);
 		UiStyle.panel(graphics, ix, iy, INFO_W, INFO_H, ACCENT);
@@ -340,9 +472,36 @@ final class RigMenuScreen extends Screen {
 		UiStyle.line(graphics, font, status(player), ix + 8, iy + 17, INFO_W - 16, name != null ? UiStyle.DIM : UiStyle.HINT);
 	}
 
+	/** One entry's tile: its icon, cooldown shading, the Mind level it waits for, and a lit strip when it's on. */
+	private void entryTile(GuiGraphicsExtractor graphics, LocalPlayer player, int i, int k, int x, int y) {
+		int left = left(i);
+		boolean blocked = blocker(player, i) != null;
+		boolean picked = i == selected;
+		boolean jKey = ACTIONS[i] == RigClient.selected;
+		UiStyle.wheelTile(graphics, x, y, tile, k, picked, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
+		graphics.item(new ItemStack(icon(i)), x + (tile - 16) / 2, y + (tile - 16) / 2);
+		if (left > 0 && COOLDOWN[i] > 0) {
+			int shade = (int)Math.ceil((tile - 2) * Math.min(1.0, left / (double)COOLDOWN[i]));
+			graphics.fill(x + 1, y + 1 + (tile - 2) - shade, x + tile - 1, y + tile - 1, 0xB0000000);
+			String seconds = left >= 200 ? Integer.toString((left + 19) / 20) : String.format(Locale.ROOT, "%.1f", left / 20.0);
+			graphics.text(font, seconds, x + tile / 2 - font.width(seconds) / 2, y + tile / 2 - 4, 0xFFFFFFFF);
+		}
+		if (Rig.level(player) < LEVEL[i]) {
+			// not yet: nearly black, with the Mind level it waits for
+			graphics.fill(x + 1, y + 1, x + tile - 1, y + tile - 1, 0xD8000000);
+			String need = "Lv" + LEVEL[i];
+			graphics.text(font, need, x + tile / 2 - font.width(need) / 2, y + tile / 2 - 4, 0xFF70A0B0);
+		} else if (blocked) {
+			graphics.fill(x + 1, y + 1, x + tile - 1, y + tile - 1, 0x90000000);
+		}
+		if (on(player, i)) {
+			graphics.fill(x + 2, y + tile - 3, x + tile - 2, y + tile - 1, ACCENT);
+		}
+	}
+
 	private Component status(LocalPlayer player) {
 			if (selected < 0) {
-				return Component.translatable("gui.jaymospowers.rig_menu.hint");
+				return Component.translatable(group >= 0 ? "gui.jaymospowers.rig_menu.group_hint" : "gui.jaymospowers.rig_menu.hint");
 			}
 			Component blocker = blocker(player, selected);
 			if (blocker != null) {
