@@ -185,6 +185,12 @@ public final class FallingTree extends Entity {
 	static final double SHOVE_SPEED = 0.08, SHOVE_SLOWEST = 0.006;
 	/** A person's height (blocks): each half again as tall as this is a point of brawn, as for hauling. */
 	static final float MAN_HEIGHT = 1.8F, HEIGHT_PER_BRAWN = 0.5F;
+	/**
+	 * Lying (not propped) and left alone this long (ticks: nobody pushing it, held or chopping at it), its logs become real
+	 * blocks where they lie and its leaves drop off ({@link #settle}, {@link SettledTrees}); it wakes again when shoved,
+	 * grabbed or broken under.
+	 */
+	static final int SETTLE_AFTER = 600;
 
 	/** One block of the tree: its state, and where it stood relative to the cut. */
 	public record Piece(int state, int x, int y, int z) {
@@ -256,6 +262,8 @@ public final class FallingTree extends Entity {
 	private boolean hurled;
 	/** (0.7.588) Axe strokes each of its logs has taken. */
 	private final Map<Piece, Integer> chops = new HashMap<>();
+	/** The last tick anything stirred it (it came down, someone pushed it or took an axe to it): it settles {@link #SETTLE_AFTER} after. */
+	private int stirredAt;
 	/** (0.7.588) What its bounding box was last worked out from. */
 	private @Nullable List<Piece> boxPieces;
 	private float boxLean = Float.NaN, boxHeading = Float.NaN;
@@ -273,6 +281,7 @@ public final class FallingTree extends Entity {
 			.clientTrackingRange(10)
 			.updateInterval(1)
 			.build(key));
+		SettledTrees.register();
 		// those who stopped pushing take their hands off
 		ServerTickEvents.END_SERVER_TICK.register(server -> PUSHERS.entrySet().removeIf(e -> {
 			LivingEntity who = e.getKey();
@@ -578,6 +587,7 @@ public final class FallingTree extends Entity {
 	private void comeDown(ServerLevel level) {
 		this.down = true;
 		this.downAt = this.tickCount;
+		this.stirredAt = this.tickCount;
 		if (this.sink == null) {
 			this.snapLeaves(level);
 		}
@@ -610,7 +620,116 @@ public final class FallingTree extends Entity {
 			this.fallOn();
 		} else if (!this.rests(level, pieces)) {
 			hurl(this, Vec3.ZERO, lean >= 0.0F && lean < FLAT ? SPLIT_TUMBLE : 0.0F, null);
+		} else if (!this.propped && lean >= LYING && this.tickCount - this.stirredAt >= SETTLE_AFTER) {
+			this.settle(level, pieces);
 		}
+	}
+
+	/**
+	 * Lain still long enough: its logs become real blocks where they lie, turned the way they lie, and its leaves drop off
+	 * (giving what they would only as {@link #shedLeaves} does). A log with no room there (sunk in the ground, or sharing a
+	 * block with another) is kept with it but not put. Nothing put, it stays as it is. Kept by {@link SettledTrees}.
+	 */
+	private void settle(ServerLevel level, List<Piece> pieces) {
+		Quaternionf turn = turn(this.lean(), this.heading());
+		List<SettledTrees.Log> logs = new ArrayList<>();
+		Set<BlockPos> taken = new HashSet<>();
+		List<Piece> leaves = new ArrayList<>();
+		for (Piece p : pieces) {
+			if (!p.blockState().is(BlockTags.LOGS)) {
+				leaves.add(p);
+				continue;
+			}
+			BlockPos pos = this.cell(this.where(p, turn));
+			boolean room = !taken.contains(pos) && room(level, pos);
+			if (room) {
+				taken.add(pos);
+			}
+			logs.add(new SettledTrees.Log(p, pos, room ? lying(p.blockState(), turn) : null));
+		}
+		if (taken.isEmpty()) {
+			return;
+		}
+		boolean gives = this.byPlayer && level.getNearestPlayer(this, DEBRIS_WATCH) != null;
+		for (int i = 0; i < leaves.size(); i++) {
+			Piece p = leaves.get(i);
+			if (gives) {
+				BlockPos pos = BlockPos.containing(this.where(p, turn));
+				for (ItemStack drop : Block.getDrops(p.blockState(), level, pos, null, null, ItemStack.EMPTY)) {
+					Block.popResource(level, pos, drop);
+				}
+			}
+			if (i % 4 == 0) {
+				Vec3 at = this.where(p, turn);
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, p.blockState()), at.x, at.y, at.z, 4, 0.3, 0.3, 0.3, 0.05);
+			}
+		}
+		for (SettledTrees.Log log : logs) {
+			if (log.placed() != null) {
+				level.setBlock(log.pos(), log.placed(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+			}
+		}
+		SettledTrees.keep(level, this.position(), this.heading(), this.lean(), this.lift, this.reach, this.byPlayer, logs);
+		this.discard();
+	}
+
+	/** Whether a settling log can be put at {@code pos}: nothing solid there (water will do). */
+	private static boolean room(ServerLevel level, BlockPos pos) {
+		BlockState there = level.getBlockState(pos);
+		return there.canBeReplaced() && (there.getFluidState().isEmpty() || there.getFluidState().is(FluidTags.WATER));
+	}
+
+	/** A log's block turned the way it lies: its grain along whichever way its own grain now points most. */
+	private static BlockState lying(BlockState state, Quaternionf turn) {
+		if (state.hasProperty(BlockStateProperties.AXIS)) {
+			Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
+			Vector3f grain = turn.transform(new Vector3f(axis == Direction.Axis.X ? 1 : 0, axis == Direction.Axis.Y ? 1 : 0, axis == Direction.Axis.Z ? 1 : 0));
+			float ax = Math.abs(grain.x), ay = Math.abs(grain.y), az = Math.abs(grain.z);
+			state = state.setValue(BlockStateProperties.AXIS, ax >= ay && ax >= az ? Direction.Axis.X : az >= ay ? Direction.Axis.Z : Direction.Axis.Y);
+		}
+		if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
+			state = state.setValue(BlockStateProperties.WATERLOGGED, false);
+		}
+		return state;
+	}
+
+	/**
+	 * A settled tree wakes ({@link SettledTrees}): its logs leave the world and it lies there again as it lay, down and at
+	 * rest. A log since broken or changed is gone from it, and broken through it comes apart ({@link #split}); a log that had
+	 * no room comes back as it was, unless none of those put is left. With what held it gone, it falls on its next look ({@link #rest}).
+	 */
+	static @Nullable FallingTree wake(ServerLevel level, SettledTrees.Tree settled) {
+		List<Piece> kept = new ArrayList<>();
+		boolean seen = false;
+		for (SettledTrees.Log log : settled.logs()) {
+			if (log.placed() == null) {
+				kept.add(log.piece());
+			} else if (level.getBlockState(log.pos()) == log.placed()) {
+				level.setBlock(log.pos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+				kept.add(log.piece());
+				seen = true;
+			}
+		}
+		// (every log you could see is gone: what was sunk out of sight goes with them)
+		if (!seen) {
+			return null;
+		}
+		FallingTree tree = new FallingTree(TYPE, level);
+		tree.setPos(settled.at());
+		tree.setAttached(PIECES, List.copyOf(kept));
+		tree.setAttached(HEADING, settled.heading());
+		tree.entityData.set(LEAN, settled.lean());
+		tree.leanO = settled.lean();
+		tree.lift = settled.lift();
+		tree.reach = settled.reach();
+		tree.byPlayer = settled.byPlayer();
+		tree.down = true;
+		tree.downAt = 0;
+		level.addFreshEntity(tree);
+		if (kept.size() < settled.logs().size()) {
+			tree.split(level, kept, turn(settled.lean(), settled.heading()));
+		}
+		return tree;
 	}
 
 	/**
@@ -894,6 +1013,7 @@ public final class FallingTree extends Entity {
 			}
 			// hands on it: everyone strains at it, and only the strong move it
 			PUSHERS.put(e, level.getGameTime());
+			this.stirredAt = this.tickCount;
 			Vec3 was = e.getAttached(PUSHING);
 			if (was == null || was.distanceToSqr(touched) > PUSH_RESYNC * PUSH_RESYNC) {
 				e.setAttached(PUSHING, touched);
@@ -973,7 +1093,7 @@ public final class FallingTree extends Entity {
 	}
 
 	/** The way (level, of length 1) {@code e} is trying to go: a player's keys as they face, a mob's walk; null standing. */
-	private static @Nullable Vec3 pushing(LivingEntity e) {
+	static @Nullable Vec3 pushing(LivingEntity e) {
 		double x, z;
 		if (e instanceof ServerPlayer player) {
 			Input in = player.getLastClientInput();
@@ -1159,8 +1279,8 @@ public final class FallingTree extends Entity {
 
 	/** Whether a giant's hand at {@code at} could close on a tree within {@code reach}: a fallen one, or one standing. */
 	public static boolean treeNear(ServerLevel level, Vec3 at, double reach, int mostLogs) {
-		return fallenNear(level, at, reach, mostLogs) != null || FelledCompat.near(level, at, reach, mostLogs) != null
-			|| standingNear(level, at, reach) != null;
+		return fallenNear(level, at, reach, mostLogs) != null || SettledTrees.near(level, at, reach, mostLogs) != null
+			|| FelledCompat.near(level, at, reach, mostLogs) != null || standingNear(level, at, reach) != null;
 	}
 
 	/**
@@ -1169,6 +1289,11 @@ public final class FallingTree extends Entity {
 	 */
 	public static @Nullable Entity take(ServerLevel level, Vec3 at, double reach, Entity giant, int mostLogs) {
 		FallingTree tree = fallenNear(level, at, reach, mostLogs);
+		if (tree == null) {
+			// one lying settled as blocks wakes in the giant's hand
+			BlockPos settled = SettledTrees.near(level, at, reach, mostLogs);
+			tree = settled == null ? null : SettledTrees.wake(level, settled);
+		}
 		if (tree == null) {
 			// (0.7.628) one Felled brought down: it becomes ours in the giant's hand
 			Entity felled = FelledCompat.near(level, at, reach, mostLogs);
@@ -1377,6 +1502,7 @@ public final class FallingTree extends Entity {
 	private void chop(ServerLevel level, Player player) {
 		// (an axe taken to it: what falls off it from now on is the player's doing)
 		this.byPlayer = true;
+		this.stirredAt = this.tickCount;
 		List<Piece> pieces = this.pieces();
 		Quaternionf turn = turn(this.lean(), this.heading());
 		Vec3 eye = player.getEyePosition();
