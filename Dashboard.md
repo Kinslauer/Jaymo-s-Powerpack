@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:22). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:28). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -26,6 +26,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/black-panther-r5|black-panther-r5]] · 2026-11-27 ON HOLD until black-panther-r4 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-r6|black-panther-r6]] · 2026-11-27 ON HOLD until black-panther-r5 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
 - [[Inbox/black-panther-r7|black-panther-r7]] · 2026-11-27 ON HOLD until black-panther-r6 merged. Not a question for Andy: the vault coordinator opens it when its turn comes.
+- [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]] · 2026-11-27 19:26 Prometheus (hermes-modeller) is art-only. I can draw the ash crumble/drift particle sprites and any ash-pile overlay, but this task needs a ne…
 - [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 2026-11-27 04:46 Text pass content is complete (reviewed captain-ground.json lang keys and changes/kingdoms/hollow-captains-fix.md; all player-facing, no rewri…
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
@@ -54,7 +55,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-15 waiting for a bot, 1 being built, 11 in review: see [[Kanban]].
+14 waiting for a bot, 1 being built, 11 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -124,7 +125,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-32 problems in the notes: [[Health]].
+33 problems in the notes: [[Health]].
 
 ## Last week
 
