@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: cancelled
 for: apollo
 from: coordinator
 asked: 2026-11-24
@@ -25,3 +25,5 @@ First find which mod places the Overworld aqueduct (ours, Veradexian, is Aether 
 - 2026-11-26 00:31 YOUTH delegated this to Apollo (Claude approved): draft the four aqueduct-curse quests and the cursed-village lift from Lore.md; Andy's yes before any building.
 - 2026-11-26 02:38 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-26 07:21 Design draft complete: Overworld aqueduct structure, SettlementCurse system, 4 board quests (Stem the Flow, Clear the Pillars, Purify the Stones, Break the Anchor), and lifted village state. Awaiting Andy's approval before implementation. See Inbox/structures-3-aqueduct-curse-design.md for full specification.
+
+- 2026-11-28: cancelled (Andy: "Cancel all youth/hermes tasks"); was blocked.

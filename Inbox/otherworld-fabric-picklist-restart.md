@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: cancelled
 for: apollo
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
@@ -20,3 +20,5 @@ Andy asked to port Otherworld DnD to Fabric and, before he moves its models and 
 - 2026-11-26 16:34 2026-11-26 15:52 apollo: pick list written and synced. 26 rows across 8 mods: Tectonic (3), Ice and Fire Dragons (4), JustLeveling Fork (4), Otherworld Apotheosis (4), Luki's Grand Capitals (2), Integrated Villages (3), Oh The Biomes We've Gone (3), Otherworld Origins (3). Page: E:/Jaymo Vault Live/Picklists/Otherworld DnD pick-list.html
 - 2026-11-26 16:38 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
 - 2026-11-26 16:52 Text pass: verified the Otherworld DnD pick page, no rewrites needed. Picklists/Otherworld DnD pick-list.html is a complete tickable pick page (26 rows across 8 mods: Tectonic, Ice and Fire: Dragons, JustLeveling Fork, Otherworld Apotheosis, Luki's Grand Capitals, Integrated Villages, Oh The Biomes We've Gone, Otherworld Origins, plus an Already-ours block), matching the markdown. Source line (CurseForge 1418133, Otherworld v8 HF2, Forge 1.20.1) and per-project licences in meta match the Assets manifest. Every 'we already have' claim cross-checked against docs/codemap (ClassTrees, Heritage, GrowthScreen, Feats, Paths, Cantrips, Spell Engine, DeedTitles, GearDemands, FoundQuality, GearSalvage, WorldTiers, BandForge, Epic Structures, ATi Structures, Moog's Voyager Structures, PurseIcon, Banks, Strongbox, BoardTerms, goblins, orcs, Geophilic, Biome Blends, Naturalist, Cube) — all present. Voice is plain and complete; no game files changed.
+
+- 2026-11-28: cancelled (Andy: "Cancel all youth/hermes tasks"); was in-review.

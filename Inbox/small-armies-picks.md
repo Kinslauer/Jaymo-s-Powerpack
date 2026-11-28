@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: cancelled
 for: apollo
 from: Andy (Waiting on Andy page, 2026-11-26)
 asked: 2026-11-26
@@ -44,3 +44,5 @@ Not picked: clay soldiers, Clay Warfare colours/buffs/remote/book.
 - 2026-11-27 11:45 apollo: PR #2280 (Hand of God: Celestial Hold and Celestial Turn) — all GitHub checks green. Plan doc + change note + code (CelestialCommand, HandOfGodPower). Built, not played. Set in-review.
 - 2026-11-27 00:28 Text pass: reviewed PR #2280 (Hand of God: Celestial Hold and Celestial Turn). Player-visible strings: src/main/resources/assets/jaymospowers/lang/parts/handofgod.json (power name/desc, Celestial Hold/Turn ability keys, hold_taken/hold_cooldown/turn_cooldown messages); in-game system messages in src/main/java/com/jaymospowers/power/handofgod/CelestialCommand.java (same message keys, %s seconds); registration only in JaymosPowers.java; HandOfGodPower.java has no player-visible strings. All strings already plain, brief and in-voice, matching chrono/web cooldown phrasing and the documented ability-key convention, so no rewrite was needed. changes/powers/small-armies-picks-4.md already has the player-facing description, cause (power/handofgod/), changes and the 'Built; not played.' line.
 - 2026-11-27 00:28 hermes-a's last text pass stopped before finishing; handed back as in-review.
+
+- 2026-11-28: cancelled (Andy: "Cancel all youth/hermes tasks"); was in-review.

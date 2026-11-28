@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: zoom still broken (Shift + Left Alt)
 branch: claude/zoom-prone-dash
 with: 
@@ -32,3 +32,4 @@ owns:
 - Fix in PR 2359: our own eased zoom (4x, 8 ticks), applied last (ZoomFovMixin priority 3000), mouse slowed to match; OK Zoomer's key isn't pressed any more. Prone: no dash/roll/dive, Combo Clash's dash held off, server refuses both. ProneTransition not touched.
 - No game log from the clip's session exists on this PC. Built in CI only; not played.
 - Correction (Andy: "I ran the game on prism not curseforge"): the clip's game is Prism's Jaymos-Powers instance (E:\Moved-from-C\Users\toopo\AppData\Roaming\PrismLauncher\instances\Jaymos-Powers\.minecraft). Its latest.log (9:17-9:24 AM) has Powers 0.28.56 (with #2354), no "Zoom:" lines, and no camera FOV mixin warnings. Same OK Zoomer settings. The CurseForge findings above don't apply.
+- Merged as PR #2359 (26ff226e52), 2026-11-28.

@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: cancelled
 task: Andy's clip 2026-11-23 9:53 AM (sheep limbs float, no drag arm, diggers take bodies)
 branch: corpse-limbs-drag-arm-digger-pits
 with: Claude (side session of the project thread)
@@ -37,3 +37,4 @@ holding the dragged body; diggers should drag corpses near their pits down into 
 ## Done
 Nothing built yet.
 - 2026-11-28 14:05 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-28: Andy cancelled all YOUTH/Hermes tasks ("Cancel all youth/hermes tasks"); the dragged-bodies Inbox task is cancelled and Apollo won't build it. Not re-delegated. Nothing built; the Lore.md (new) paragraph stays for Andy to approve or drop.

@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: cancelled
 for: hephaestus
 from: coordinator
 asked: 2026-11-28
@@ -94,3 +94,5 @@ Sources: no decompiled MC sources on this PC. Use javap on E:/gradle-home/caches
 
 ## Notes
 - 2026-11-28 13:36 YOUTH delegated this to hephaestus (Claude approved): choice box for sneak-click on liftable blocks; Codex and Gemini out
+
+- 2026-11-28: cancelled (Andy: "Cancel all youth/hermes tasks"); was claimed.

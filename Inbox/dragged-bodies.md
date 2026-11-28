@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: cancelled
 for: apollo
 from: coordinator
 asked: 2026-11-28
@@ -101,3 +101,5 @@ THREE PIECES
 ## Notes
 - 2026-11-28 13:33 YOUTH delegated this to apollo (Claude approved): Kitchen corpse drag pose plus visible drag arm, and Kingdoms diggers dragging corpses into pits; Apollo picked as the free coding bot.
 - 2026-11-28 14:05 hermes-a's claim had no sign of work for 30 min: handed back as open.
+
+- 2026-11-28: cancelled (Andy: "Cancel all youth/hermes tasks"); was in-review.
