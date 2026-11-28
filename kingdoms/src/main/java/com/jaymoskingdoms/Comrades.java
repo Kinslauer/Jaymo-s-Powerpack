@@ -194,6 +194,11 @@ public final class Comrades {
 		if (turned != null) {
 			return turned;
 		}
+		// one of the Cordon, who hunt the awakened together (CordonMen)
+		String cordon = CordonMen.side(e);
+		if (cordon != null) {
+			return cordon;
+		}
 		String lost = Masterless.side(e);
 		if (lost != null) {
 			return lost;
