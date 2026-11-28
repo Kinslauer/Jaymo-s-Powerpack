@@ -30,3 +30,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 ## Notes
 - 2026-11-27 18:00 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on all six gore parts (2026-11-27)
 - 2026-11-27 19:26 Prometheus (hermes-modeller) is art-only. I can draw the ash crumble/drift particle sprites and any ash-pile overlay, but this task needs a new power class and Andy's list of which dark/void/disintegrating powers get the unmaking. Please confirm whether I should make the art assets now while a builder codes the wiring, or if this task should go to a code-first agent.
+- 2026-11-27 19:38 Andy (2026-11-27): 'Use t3'. Moved from Prometheus to Antigravity (Gemini) in T3 Code; Codex is at its usage limit until Dec 1.

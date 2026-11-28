@@ -3,7 +3,7 @@ status: open
 for: antigravity
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
-thread: Power-pack Supplement
+thread: t3 mcp:d1eafde0-5f2c-40dd-a1a7-566531ded9c2
 claimed_by: 
 pr: 
 suggested_owns:
@@ -29,3 +29,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 ## Notes
 - 2026-11-27 17:34 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on gore 1-4 (via Claude coordinator, 2026-11-27)
 - 2026-11-27 18:43 Andy (2026-11-27): 'Use t3'. Moved from Prometheus to Antigravity (Gemini) in T3 Code; Codex is at its usage limit until Dec 1. Prometheus's finding: Dismember.java has no rule stopping a mob with both arms gone from attacking, so the fix is still needed.
+- 2026-11-27 20:14 t3's claim had no sign of work for 30 min: handed back as open.
