@@ -6,7 +6,6 @@
 		"jaymospowers:pod_bell",
 		"jaymospowers:pod_tank",
 		"jaymospowers:pod_plate",
-		"jaymospowers:pod_canopy",
 		"jaymospowers:pod_mast",
 		"jaymospowers:salvage_rack",
 		"jaymospowers:smeltery_controller",
@@ -32,74 +31,6 @@
 		},
 		{
 			"id": "jaymoskitchen:waterwheel",
-			"required": false
-		},
-		"#minecraft:campfires",
-		"minecraft:furnace",
-		"minecraft:smoker",
-		"minecraft:blast_furnace",
-		{
-			"id": "#cookingforblockheads:ovens",
-			"required": false
-		},
-		{
-			"id": "#cookingforblockheads:counters",
-			"required": false
-		},
-		{
-			"id": "#cookingforblockheads:cooking_tables",
-			"required": false
-		},
-		{
-			"id": "cookingforblockheads:cutting_board",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:stove",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:cutting_board",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:cooking_pot",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:frying_pan",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:spit",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:great_spit",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:brewing_keg",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:tea_kettle",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:sushi_mat",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:hearth",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:cask",
-			"required": false
-		},
-		{
-			"id": "jaymoskitchen:still",
 			"required": false
 		}
 	]
