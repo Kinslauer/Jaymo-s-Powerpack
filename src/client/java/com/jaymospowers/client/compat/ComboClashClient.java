@@ -53,7 +53,9 @@ import net.minecraft.world.phys.HitResult;
  * While it's on its 4-hit strings, dash and block are the fight, and the rest of ours steps around it:
  * <ul>
  * <li>The attack key is still ours (and vanilla's) where its string has nothing to do ({@link #yieldsAttack}, asked by
- * {@code ClientCombatMixin} both for the click and for the key held): digging a block with no fight about, sneaking (a
+ * {@code ClientCombatMixin} both for the click and for the key held): in the air (the air combo's juggle, slam and enemy
+ * step are the air game; its server keeps every blow of its string on the ground, {@code CombatManagerMixin}), digging a
+ * block with no fight about, sneaking (a
  * takedown, a Quiet Word), at someone downed or helpless (the finishers), a flail or whip, boxing, an item in use or a
  * guard up, riding a dinosaur, a gravity grip, a ledge, the symbiote's hold, and the powers' own held moves (a Z Fighter's
  * grab, ape smash, race hold and hold combo, Chrono's overclocked flurry and Time Flow's lunges, the Staff Surge). Our own
@@ -75,6 +77,13 @@ public final class ComboClashClient {
 		ClientTickEvents.START_CLIENT_TICK.addPhaseOrdering(BEFORE_CLASH, Event.DEFAULT_PHASE);
 		ClientPreAttackCallback.EVENT.addPhaseOrdering(BEFORE_CLASH, Event.DEFAULT_PHASE);
 	}
+
+	/**
+	 * Off the ground this many ticks (or flying), the attack key is vanilla's and our air combo's (Andy, 2026-11-28: "i
+	 * like everything about except the air combos ... along with or enemy step for air combat"); a hop over a step stays its.
+	 */
+	private static final int AIR_TICKS = 3;
+	private static int airTicks;
 
 	/** How near a foe makes a click at a block the string's rather than a dig (blocks). */
 	private static final double FIGHT_NEAR = 6.0;
@@ -181,7 +190,7 @@ public final class ComboClashClient {
 
 	private static boolean yields(Minecraft minecraft, LocalPlayer player) {
 		ItemStack main = player.getMainHandItem();
-		return player.isShiftKeyDown() || digging(minecraft, player, main) || FinisherClient.aimingAtHelpless(minecraft)
+		return player.isShiftKeyDown() || airTicks >= AIR_TICKS || player.getAbilities().flying || digging(minecraft, player, main) || FinisherClient.aimingAtHelpless(minecraft)
 			|| Lash.isFlail(main) || Lash.isWhip(main) || Boxing.boxing(player) || player.isUsingItem() || Guard.raised(player)
 			|| DinoClient.riddenDino() != null || player.getAttached(GravityPower.GRIP) != null || Ledge.onLedge(player)
 			|| WebSymbioteClient.inputLocked()
@@ -209,6 +218,7 @@ public final class ComboClashClient {
 		if (player == null || combatMode == null) {
 			return;
 		}
+		airTicks = player.onGround() || player.isInWater() || player.isPassenger() || player.onClimbable() ? 0 : airTicks + 1;
 		boolean mode = active();
 		if (mode != seen && togglePressed) {
 			// its own key: the player's choice for the rest of the session

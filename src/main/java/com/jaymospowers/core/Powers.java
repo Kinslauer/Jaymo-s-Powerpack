@@ -314,6 +314,10 @@ public final class Powers {
 		}
 		// no power at all: the four keys are the moves anyone has
 		if (power == null) {
+			if (down) {
+				// (Andy, 2026-11-28: "ways to cancel your string into combos using moves") a Combo Clash string gives way
+				com.jaymospowers.compat.ComboClashCompat.giveWay(player);
+			}
 			com.jaymospowers.mortal.MortalKit.key(player, key, down);
 		}
 		if (power != null && !Mastery.isUsable(player, key)) {
@@ -335,6 +339,10 @@ public final class Powers {
 			return;
 		}
 		PowerInput.set(player, key, down);
+		if (down && power != null) {
+			// a power's move cuts a Combo Clash string short, so it plays clean
+			com.jaymospowers.compat.ComboClashCompat.giveWay(player);
+		}
 		if (power != null && player.isAlive() && !player.isSpectator()) {
 			// a broken one throws the aim off
 			acting++;
