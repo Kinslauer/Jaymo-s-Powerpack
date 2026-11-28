@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 20:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 20:46). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -59,7 +59,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2348 fallen trees settle into real blocks, and wake when moved (Kingdoms, 2026-11-28)
 - [ ] #2347 quieter hurt lines and rarer leg knockdowns (Powers, Kitchen, 2026-11-28)
+- [ ] #2346 Players and NPCs floored less by sweeps, leg blows, wall slams and throws (Powers, Kitchen, 2026-11-28)
 - [ ] #2345 Combo Clash's air game is ours; moves cut a string short (Powers, Kingdoms, 2026-11-28)
 - [ ] #2344 smoother frames: the shared vertex buffer no longer regrows every frame (Powers, 2026-11-28)
 - [ ] #2343 Rig menu (Sneak+J) in groups (Powers, 2026-11-28)
@@ -117,9 +119,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2285 Night's Blood 1 - one body of blood (mB reserve, every move on the bar, chains) (Kingdoms, 2026-11-27)
 - [ ] #2284 Hunter's Road 1 - yellow tells, zombie and husk lunges, buried husks (Powers, Kingdoms, 2026-11-27)
 - [ ] #2283 Symbiote suit moves and the suit-up pose (Powers, 2026-11-27)
-- [ ] #2282 Legends patch 6 fixes - air flips, air step, landings, katana forms (Powers, 2026-11-27)
-- [ ] #2281 Big symbiote combat (Powers, 2026-11-27)
-- …and 702 older ones.
+- …and 704 older ones.
 
 ## Health
 
