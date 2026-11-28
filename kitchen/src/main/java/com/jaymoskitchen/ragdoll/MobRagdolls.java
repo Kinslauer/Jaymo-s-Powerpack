@@ -17,6 +17,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
@@ -104,10 +105,14 @@ public final class MobRagdolls {
 			if (!(entity instanceof Mob mob) || blocked || damageTaken <= 0.0F || !mob.isAlive()) {
 				return;
 			}
-			if (isLimp(mob) || !(HeavyHits.heavy(mob, source, baseDamage, damageTaken) || hardLanding(mob, source, damageTaken)) || !may(mob)) {
+			if (isLimp(mob) || !may(mob)) {
 				return;
 			}
-			knock(mob, source);
+			if (hardLanding(mob, source, damageTaken)) {
+				knock(mob, source);
+			} else if (HeavyHits.heavy(mob, source, baseDamage, damageTaken) && npcFloored(mob, source)) {
+				knock(mob, source);
+			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			Iterator<Map.Entry<Mob, Limp>> it = LIMPS.entrySet().iterator();
@@ -132,6 +137,28 @@ public final class MobRagdolls {
 				}
 			}
 		});
+	}
+
+	/**
+	 * A heavy blow floors an NPC (a body built like a person) only as it does a player (LivingRagdolls): a blast, or a blow
+	 * that knocks it back ({@link LivingRagdolls#knocksBack}), and then this often. Andy: "Players are knocked on the
+	 * ground far too easily. lower that chance by 80% and require targeted hits to the legs, knockback or explosions",
+	 * then "npcs can get the same resilience", then "players 1 in 5, npcs 1 in 2". Animals and other bodies go down on
+	 * any heavy blow, as before.
+	 */
+	public static final float NPC_FLOOR_CHANCE = 0.5F;
+
+	private static boolean npcFloored(Mob mob, DamageSource source) {
+		if (!humanoid(mob)) {
+			return true;
+		}
+		return (source.is(DamageTypeTags.IS_EXPLOSION) || LivingRagdolls.knocksBack(mob, source)) && mob.getRandom().nextFloat() < NPC_FLOOR_CHANCE;
+	}
+
+	/** Whether {@code entity} is built like a person (its ragdoll is a humanoid's): an NPC, for the floor rules. */
+	public static boolean humanoid(LivingEntity entity) {
+		EntityDimensions size = entity.getDimensions(Pose.STANDING);
+		return RagdollShapes.rig(entity.getType(), size.width(), size.height()).shape == RagdollRig.Shape.HUMANOID;
 	}
 
 	/** A fall that hurt this much (or took this share of its health) knocks a mob limp, as it does a player. */
