@@ -166,7 +166,18 @@ public final class PoseTakeover {
 			// worn fist gear (the Fang Gauntlets, boxing's wraps, cestus and bracers), whether in the guard or not: the gear
 			// is drawn on the arms as our poses leave them, so Fresh Animations may not move the arms out from under it
 			|| com.jaymospowers.client.armory.FangGauntletsClient.worn(s)
-			|| s.getData(com.jaymospowers.client.combat.ParryPose.KEY) != null || com.jaymospowers.client.combat.ArmedPose.on(s);
+			|| s.getData(com.jaymospowers.client.combat.ParryPose.KEY) != null || com.jaymospowers.client.combat.ArmedPose.on(s)
+			|| spearHeldOut(s);
+	}
+
+	/**
+	 * A spear held out in the game's own spear pose. Fresh Animations' player pack doesn't know that pose and would hang
+	 * the spear from a walking arm like any held item, so it steps aside as it does for our armed stance (which leaves a
+	 * vanilla spear to this pose: {@code ArmedPose.heldOut}).
+	 */
+	static boolean spearHeldOut(AvatarRenderState s) {
+		return s.rightArmPose == net.minecraft.client.model.HumanoidModel.ArmPose.SPEAR
+			|| s.leftArmPose == net.minecraft.client.model.HumanoidModel.ArmPose.SPEAR;
 	}
 
 	/**
