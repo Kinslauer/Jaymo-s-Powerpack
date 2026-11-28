@@ -145,7 +145,7 @@ public final class MobRagdolls {
 	 * ground far too easily. lower that chance by 80% and require targeted hits to the legs, knockback or explosions",
 	 * then "npcs can get the same resilience". Animals and other bodies go down on any heavy blow, as before.
 	 */
-	public static final float NPC_FLOOR_CHANCE = 0.2F;
+	public static final float NPC_FLOOR_CHANCE = 0.5F;
 
 	private static boolean npcFloored(Mob mob, DamageSource source) {
 		if (!humanoid(mob)) {

@@ -163,7 +163,7 @@ public final class BlastGore {
 	 * count the blow as knockback already ({@link #kitchenCounts}), so no blow gets two rolls. The topple is small: the
 	 * throw itself is in their speed, which Kitchen's limp carries on.
 	 */
-	public static final float THROW_FLOOR_CHANCE = 0.2F;
+	public static final float THROW_FLOOR_CHANCE = 0.5F;
 	private static final double THROW_TOPPLE = 0.1, THROW_TOPPLE_LIFT = 0.04;
 	/** A player blown apart → the parts they'd lost before it (all they come back without). */
 	private static final Map<UUID, Integer> BEFORE = new HashMap<>();

@@ -72,7 +72,7 @@ public final class LegShots {
 	 * Andy, "Players are knocked on the ground far too easily. lower that chance by 80%", then "npcs can get the same
 	 * resilience". Every time before; animals and other creatures still always go down.
 	 */
-	public static final float PERSON_DOWN_CHANCE = 0.2F;
+	public static final float PERSON_DOWN_CHANCE = 0.5F;
 	/** (0.5.13) The tags Powers' Wounds puts on a body for each broken leg (any of its legs). */
 	public static final List<String> BROKEN_LEG_TAGS = List.of("jaymoskitchen.broken.left_leg", "jaymoskitchen.broken.right_leg",
 		"jaymoskitchen.broken.front_legs", "jaymoskitchen.broken.hind_legs", "jaymoskitchen.broken.legs");

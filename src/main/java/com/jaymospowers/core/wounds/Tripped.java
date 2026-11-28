@@ -57,10 +57,10 @@ public final class Tripped {
 	public static final int GET_UP_TICKS = 14;
 	/**
 	 * A sweep puts a player or an NPC on its back only this often (every time before): Andy, "Players are knocked on the
-	 * ground far too easily. lower that chance by 80%", then "npcs can get the same resilience". Every sweep is at the legs
+	 * ground far too easily. lower that chance by 80%", then "npcs can get the same resilience", then "make it 1 in 2. not THAT rare". Every sweep is at the legs
 	 * already. Only sweeps: the bolas' bind ({@link #bind}) still always trips.
 	 */
-	public static final float SWEEP_CHANCE = 0.2F;
+	public static final float SWEEP_CHANCE = 0.5F;
 	/** Speed and jump lost while tripped (shares), so a shove doesn't send it skating. */
 	public static final double SPEED = -0.9, JUMP = -1.0;
 

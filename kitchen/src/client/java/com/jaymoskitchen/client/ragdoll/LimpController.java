@@ -49,7 +49,7 @@ public final class LimpController {
 	 * lower that chance by 80%". One roll per run-over: after it, being run into doesn't roll again for
 	 * {@link #RUN_OVER_ROLL_TICKS}, so a cart pressed against you for a second doesn't get twenty tries.
 	 */
-	private static final float RUN_OVER_CHANCE = 0.2F;
+	private static final float RUN_OVER_CHANCE = 0.5F;
 	private static final int RUN_OVER_ROLL_TICKS = 20;
 	/** Ticks limp at the least and the most, and how still (blocks a tick, for how many ticks) counts as stopped. */
 	private static final int MIN_LIMP = 30, MAX_LIMP = 140;
