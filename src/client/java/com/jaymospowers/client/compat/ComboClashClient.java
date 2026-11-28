@@ -14,6 +14,7 @@ import com.jaymospowers.client.power.zfighter.ApeSmashClient;
 import com.jaymospowers.client.power.zfighter.RaceHoldClient;
 import com.jaymospowers.client.power.zfighter.ZFighterPowerClient;
 import com.jaymospowers.combat.Guard;
+import com.jaymospowers.combat.GuardKey;
 import com.jaymospowers.compat.ComboClashCompat;
 import com.jaymospowers.core.Ledge;
 import com.jaymospowers.power.chrono.ChronoFlow;
@@ -61,7 +62,9 @@ import net.minecraft.world.phys.HitResult;
  * grab, ape smash, race hold and hold combo, Chrono's overclocked flurry and Time Flow's lunges, the Staff Surge). Our own
  * attack callbacks also run first ({@link #BEFORE_CLASH}).</li>
  * <li>Q drops what's in hand as ever (Combo Clash's dash is on Left Alt here, so it no longer needs Q).</li>
- * <li>F is its block, unless one of the powers has it for a guard or counter ({@link GuardKeyClient#powerOwns}).</li>
+ * <li>F is its block, unless one of the powers has it for a guard or counter ({@link GuardKeyClient#powerOwns}) or a
+ * shield is in hand ({@link GuardKey#shieldGuard}): its shield block drew the arm end-on to the camera with the shield
+ * turned aside, and left the shield bang, bash and shield moves nothing to work on, so a shield raises our guard.</li>
  * <li>Better Combat's swings and our region swings: Better Combat sees no weapon in the hand ({@code ToolSwingGateMixin}).</li>
  * <li>Alt is its dash, cut short on the server ({@link ComboClashCompat}); held, it goes on into our long roll, crouch
  * and prone ({@code DodgeClient}).</li>
@@ -164,10 +167,10 @@ public final class ComboClashClient {
 		}
 	}
 
-	/** Whether Combo Clash's block (on F) stands aside for a power's own guard or counter just now. */
+	/** Whether Combo Clash's block (on F) stands aside for a power's own guard or counter, or our shield guard, just now. */
 	public static boolean blockYields() {
 		LocalPlayer player = Minecraft.getInstance().player;
-		return player != null && GuardKeyClient.powerOwns(player);
+		return player != null && (GuardKeyClient.powerOwns(player) || GuardKey.shieldGuard(player));
 	}
 
 	/**

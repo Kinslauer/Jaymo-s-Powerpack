@@ -32,7 +32,8 @@ import net.minecraft.world.item.ItemUseAnimation;
  * Right click still does everything else a blocking item does on it (a warhammer's smash, Sora's Dagger's Flurry, a
  * knife's sneaking throw, a lance's couch, the off hand's turn). A guard that comes up any other way than from F (an
  * item's own use putting it up while its move cools down, say) is let down again on both sides ({@link #held}).
- * In Combo Clash's combat mode F is its block, and ours stays down.
+ * In Combo Clash's combat mode F is its block for fists and weapons, and ours stays down; a shield is always ours
+ * ({@link #shieldGuard}), held up in front as a shield should be, with the shield bang, bash and shield moves on it.
  */
 public final class GuardKey {
 	/** Who holds the guard key down (server side; the client keeps its own in {@code GuardKeyClient}). */
@@ -93,6 +94,16 @@ public final class GuardKey {
 			return InteractionHand.MAIN_HAND;
 		}
 		return blocks(off) ? InteractionHand.OFF_HAND : null;
+	}
+
+	/**
+	 * Whether F raises a shield ({@link #guardHand}'s item blocks and isn't a weapon) rather than a weapon's guard. Andy
+	 * (2026-11-28), on Combo Clash's block with a shield: "the shield is not held infront of the player". A shield on F is
+	 * our raise in every mode, never its block.
+	 */
+	public static boolean shieldGuard(Player player) {
+		InteractionHand hand = guardHand(player);
+		return hand != null && !player.getItemInHand(hand).has(DataComponents.WEAPON);
 	}
 
 	/**

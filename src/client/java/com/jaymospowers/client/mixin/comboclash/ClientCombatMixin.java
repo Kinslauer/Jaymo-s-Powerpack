@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Combo Clash's combat mode is on for everyone now ({@code ComboClashClient}), so its client steps around ours where its
  * string has nothing to do. Its attack click ({@code attackKey}, from its pre-attack callback) and its attack held (the
  * string it sends every tick the key is down, in {@code tickStart}) give way when {@link ComboClashClient#yieldsAttack}
- * says so; its block (F held) gives way to a power's own guard or counter ({@link ComboClashClient#blockYields}); and it
+ * says so; its block (F held) gives way to a power's own guard or counter and to our shield guard
+ * ({@link ComboClashClient#blockYields}); and it
  * no longer swallows Q and the swap key every tick (its dash is on Left Alt here, not Q). Combo Clash is "Combo Clash" by
  * HanHoYoung, shipped unmodified; nothing of it is copied. Without it this applies to nothing.
  */

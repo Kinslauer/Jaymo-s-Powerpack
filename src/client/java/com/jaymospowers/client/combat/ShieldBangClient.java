@@ -3,6 +3,8 @@ package com.jaymospowers.client.combat;
 import com.jaymospowers.client.hud.HudBars;
 import com.jaymospowers.combat.ShieldBang;
 import com.jaymospowers.core.HudBar;
+import com.jaymospowers.gear.GearNet;
+import com.jaymospowers.gear.shield.ShieldMoves;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
@@ -11,8 +13,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.20.3) The shield bang and bash on this side ({@link ShieldBang}): the attack key while a shield is raised in the off
- * hand and a weapon is in the main hand. Vanilla eats attack clicks while you block, so the key is read directly. A short
- * click bangs; held past {@link ShieldBang#BASH_MIN} ticks a charge bar fills (the usual {@code |||...} bar, so
+ * hand and a weapon, or nothing, is in the main hand. Vanilla eats attack clicks while you block, so the key is read
+ * directly. A short click bangs (bare-handed, it throws the shield instead); held past {@link ShieldBang#BASH_MIN} ticks a charge bar fills (the usual {@code |||...} bar, so
  * {@code HeldInput} keeps every other swing off it), and letting go steps you in and throws the bash.
  */
 public final class ShieldBangClient {
@@ -63,7 +65,12 @@ public final class ShieldBangClient {
 		holding = false;
 		wait = ShieldBang.COOLDOWN;
 		if (held < ShieldBang.BASH_MIN) {
-			ClientPlayNetworking.send(ShieldBang.Bang.INSTANCE);
+			if (ShieldBang.bangs(player)) {
+				ClientPlayNetworking.send(ShieldBang.Bang.INSTANCE);
+			} else {
+				// bare-handed, a short click throws the shield (the hold was the bash's to wait for)
+				ClientPlayNetworking.send(new GearNet.Shield(ShieldMoves.THROW));
+			}
 			return;
 		}
 		ClientPlayNetworking.send(new ShieldBang.Bash(false));
