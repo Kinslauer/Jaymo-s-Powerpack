@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:26). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,6 +29,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Agents/harness-shift-click-swap|harness-shift-click-swap]] · 💻 Odysseus · running
 
 
 ## In review
