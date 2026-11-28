@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 20:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 20:36). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**34 problems.**
+**33 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -18,13 +18,13 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/gore-2-cut-faces|gore-2-cut-faces]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/hunters-road-3-models|hunters-road-3-models]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/structures-1-siege-camps|structures-1-siege-camps]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## Agent notes whose task is done
 
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
+- [[Agents/hunters-road-3-models|hunters-road-3-models]]: still `stalled`, but its task `hunters-road-3-models` is in Inbox/Done/.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 
 ## Missing PR numbers
@@ -45,7 +45,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/gore-4-head-to-toe-split|gore-4-head-to-toe-split]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/gore-5-living-guts|gore-5-living-guts]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/gore-6-ash-unmaking|gore-6-ash-unmaking]]: `for: antigravity` matches no bot or agent, so no one will claim it.
-- [[Inbox/hunters-road-3-models|hunters-road-3-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/hunters-road-4-models|hunters-road-4-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/hunters-road-5-models|hunters-road-5-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
 - [[Inbox/hunters-road-8-models|hunters-road-8-models]]: `for: antigravity` matches no bot or agent, so no one will claim it.
