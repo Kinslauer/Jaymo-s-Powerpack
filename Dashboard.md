@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 02:34). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 21:46). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -47,8 +47,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-bleed-out-coma|codex-bleed-out-coma]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex|codex]]: still `stalled`, but its task `legends-p6-core-animations` is in Inbox/Done/.
 - [[Agents/court-wizard-creeper-ward|court-wizard-creeper-ward]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-27. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/gore-2-cut-faces|gore-2-cut-faces]]: stalled, last change 2026-11-28. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/effekseer-hd|effekseer-hd]]: stalled, last change 2026-11-26. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hunters-road-3-models|hunters-road-3-models]]: still `stalled`, but its task `hunters-road-3-models` is in Inbox/Done/.
 - [[Agents/legends-p3|legends-p3]]: still `stalled`, but its task `legends-p3-big-symbiote` is in Inbox/Done/.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -62,6 +61,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2354 Shift + Left Alt zooms again, and never dashes in Combo Clash's combat mode (Powers, 2026-11-28)
 - [ ] #2353 cannon, mortar and mangonel hit effects (Kingdoms, 2026-11-28)
 - [ ] #2352 Smoother blood on your screen (Powers, 2026-11-28)
 - [ ] #2351 Rig Octo Core: the tendrils' controls, Core Only, a full fold, hidden plates come off (Powers, 2026-11-28)
@@ -121,12 +121,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2291 Night's Blood 3 - blood worth drinking (Kingdoms, Kitchen, 2026-11-27)
 - [ ] #2290 Hunter's Road 7A: oils, oil pot, sash, bombs, acid, slick (Powers, Kingdoms, Kitchen, 2026-11-27)
 - [ ] #2289 Hunter's Road 6, part A: toxicity, tolerance, the gauge, five harms, hunter's eyes (Powers, Kingdoms, Kitchen, 2026-11-27)
-- [ ] #2288 Night's Blood 2 - the Blood page, the shrine and the pacts (Kingdoms, 2026-11-27)
-- …and 709 older ones.
+- …and 710 older ones.
 
 ## Health
 
-34 problems in the notes: [[Health]].
+32 problems in the notes: [[Health]].
 
 ## Last week
 
