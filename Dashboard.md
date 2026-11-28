@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:43). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-27 19:47). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -60,6 +60,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2338 horse keys only in the saddle (Kingdoms, 2026-11-28)
 - [ ] #2336 NPC hip lanterns, held lanterns for NPCs, lantern clink (Powers, 2026-11-28)
 - [ ] #2335 reincarnation forgets bonded animals - horses, pets and mounts are strangers to a new life (Kingdoms, 2026-11-28)
 - [ ] #2334 Combo Clash in the pack: its 4-hit strings and dashes, with our combat stepping aside (Powers, Kingdoms, 2026-11-27)
@@ -119,8 +120,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2273 Kingdoms' sextons can wash and bury (Powers, Kingdoms, 2026-11-27)
 - [ ] #2272 Guards shout what fits what they face (Kingdoms, 2026-11-27)
 - [ ] #2271 hoods and over-garments fit what is under them (Kingdoms, 2026-11-27)
-- [ ] #2270 Greetings fit the moment (Kingdoms, 2026-11-27)
-- …and 692 older ones.
+- …and 693 older ones.
 
 ## Health
 
