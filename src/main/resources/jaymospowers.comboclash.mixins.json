@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.comboclash",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"CombatEventsMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

@@ -136,6 +136,13 @@ public final class KnifeGuard {
 		return InteractionResult.CONSUME;
 	}
 
+	/** The guard key raises a knife as the guard, sneaking or not (never the throw: that stays sneak + right click). */
+	public static InteractionResult raise(Player player, InteractionHand hand) {
+		player.setAttached(THROW, false);
+		player.startUsingItem(hand);
+		return InteractionResult.CONSUME;
+	}
+
 	/** {@code entity} holds a knife up as a guard (not drawn back for WeaponMod's throw). */
 	public static boolean guarding(LivingEntity entity) {
 		return entity.isUsingItem() && guards(entity.getUseItem().getItem()) && raisedAsGuard(entity);

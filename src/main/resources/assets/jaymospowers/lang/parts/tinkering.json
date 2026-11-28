@@ -292,7 +292,7 @@
   "trait.jaymospowers.charge_attack": "Charge Attack",
   "trait.jaymospowers.charge_attack.desc": "Hits hard while you sprint.",
   "trait.jaymospowers.blocking": "Blocking",
-  "trait.jaymospowers.blocking.desc": "Hold right mouse to block half the damage that comes at your front.",
+  "trait.jaymospowers.blocking.desc": "Hold F to block half the damage that comes at your front.",
   "trait.jaymospowers.bonking": "Bonking",
   "trait.jaymospowers.bonking.desc": "Hold the guard up, then let go to bonk what's in front of you away.",
   "trait.jaymospowers.timber": "Timber",

@@ -151,6 +151,27 @@ public final class Dodge {
 	}
 
 	/**
+	 * Client → server: in Combo Clash's combat mode, its dash (on the same key) held {@link #CLASH_ROLL_HOLD_TICKS}: our
+	 * long roll takes over from it along {@code (x, z)} (a unit vector on the ground), as a held dash of ours goes on into one.
+	 */
+	public record ClashRoll(float x, float z) implements CustomPacketPayload {
+		public static final Type<ClashRoll> TYPE = new Type<>(JaymosPowers.id("dodge_clash_roll"));
+		public static final StreamCodec<ByteBuf, ClashRoll> CODEC = StreamCodec.composite(ByteBufCodecs.FLOAT, ClashRoll::x, ByteBufCodecs.FLOAT, ClashRoll::z, ClashRoll::new);
+
+		@Override
+		public Type<ClashRoll> type() {
+			return TYPE;
+		}
+	}
+
+	/**
+	 * Andy (2026-11-28): "the dash i want should be quick and short, and holding the button should extend it into the long
+	 * roll, good for covering distance and escaping aoe attacks or groups". Combo Clash's dash (cut to 3 ticks,
+	 * {@code ComboClashCompat}) held this long goes on into our long roll, just as it ends.
+	 */
+	public static final int CLASH_ROLL_HOLD_TICKS = 3;
+
+	/**
 	 * A dodge's roll: when it started, which way it went (a unit vector on the ground), whether it's the flip in the air,
 	 * whether the key was held into it so it's the long roll ({@link #LONG_ROLL_TICKS}), whether it's the upright dash
 	 * (no tumble, the body stays standing: nothing drawn, not low), and whether it's a long roll a held dash went on
@@ -253,6 +274,8 @@ public final class Dodge {
 		ServerPlayNetworking.registerGlobalReceiver(Flip.TYPE, (payload, ctx) -> flip(ctx.player(), payload));
 		PayloadTypeRegistry.serverboundPlay().register(Extend.TYPE, Extend.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Extend.TYPE, (payload, ctx) -> extend(ctx.player()));
+		PayloadTypeRegistry.serverboundPlay().register(ClashRoll.TYPE, ClashRoll.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(ClashRoll.TYPE, (payload, ctx) -> clashRoll(ctx.player(), payload));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && evades(player, source)));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			LAST.remove(handler.player.getUUID());
@@ -365,6 +388,28 @@ public final class Dodge {
 		if (now - rolling.start() < LONG_ROLL_TICKS) {
 			player.setAttached(ROLLING, new Rolling(rolling.start(), rolling.x(), rolling.z(), false, true, false, false));
 		}
+	}
+
+	/**
+	 * Combo Clash's dash held into our long roll ({@link ClashRoll}): a dodge like our own (its cost, its evasion window,
+	 * its cooldown), long from its first tick and drawn coming out of a dash's stance, so everyone sees the tumble and
+	 * the body goes low.
+	 */
+	private static void clashRoll(ServerPlayer player, ClashRoll roll) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (!player.onGround() || player.isInWater() || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))) {
+			return;
+		}
+		Vec3 dir = new Vec3(roll.x(), 0.0, roll.z());
+		dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : dir.normalize();
+		if (!Feathers.canSpend(player, COST) || !dodgeBy(player, dir)) {
+			return;
+		}
+		Feathers.spend(player, COST);
+		BACKWARD.put(player.getUUID(), dir.dot(Vec3.directionFromRotation(0.0F, player.getYRot())) < BACKWARD_COS);
+		player.setAttached(ROLLING, new Rolling(now, (float)dir.x, (float)dir.z, false, true, false, true));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WOOL_STEP, SoundSource.PLAYERS, 0.6F, 0.8F);
 	}
 
 	private static void start(ServerPlayer player, Start start) {

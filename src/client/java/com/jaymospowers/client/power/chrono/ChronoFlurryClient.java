@@ -14,6 +14,11 @@ import net.minecraft.world.phys.HitResult;
  */
 public final class ChronoFlurryClient {
 	private static int held;
+
+	/** Whether the overclocked flurry is under way (Combo Clash's string stands aside for it, {@code ComboClashClient}). */
+	public static boolean flurrying() {
+		return held >= ChronoFlurry.HOLD_TICKS;
+	}
 	private static boolean sent;
 
 	private ChronoFlurryClient() {

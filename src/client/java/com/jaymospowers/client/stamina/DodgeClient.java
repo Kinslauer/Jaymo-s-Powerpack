@@ -75,6 +75,8 @@ public final class DodgeClient {
 	static long dashDrawStart = Long.MIN_VALUE;
 	/** The Dodge key was down last tick: a press is the key going down, once, however long it's held. */
 	private static boolean keyWasDown;
+	/** Client game time of a press that started Combo Clash's dash on the ground (it may go on into our long roll), or MIN_VALUE. */
+	private static long clashPress = Long.MIN_VALUE;
 	/** Forgets our last own roll, so the next roll drawn for us is the server's copy (a leap off a mount ends in one the server throws). */
 	public static void forgetRoll() {
 		rollStart = Long.MIN_VALUE;
@@ -181,9 +183,11 @@ public final class DodgeClient {
 		}
 		boolean clash = com.jaymospowers.client.compat.ComboClashClient.active();
 		if (wanted && clash) {
-			// Combo Clash's combat mode: Alt is its dash and evasive (it sits on the same key), not ours
+			// Combo Clash's combat mode: Alt is its dash and evasive (it sits on the same key, and the server cuts the dash
+			// short); held on the ground, our long roll takes over from it ({@link #tickClashHold})
 			wanted = false;
 			landingRoll = 0;
+			clashPress = player.onGround() && !player.isInWater() && !player.isPassenger() ? player.level().getGameTime() : Long.MIN_VALUE;
 		}
 		if (wanted && com.jaymospowers.client.power.chrono.ChronoFlickerClient.step(player)) {
 			// a Chrono overclocked in a low gear, with left, right, back or jump held: a blur step instead of the dash
@@ -233,7 +237,57 @@ public final class DodgeClient {
 				landingRoll--;
 			}
 		}
-		tickHold(player, down && !clash);
+		tickClashHold(player, down);
+		tickHold(player, down);
+	}
+
+	/**
+	 * Andy (2026-11-28): "the dash i want should be quick and short, and holding the button should extend it into the long
+	 * roll, good for covering distance and escaping aoe attacks or groups". Combo Clash's dash held
+	 * {@link Dodge#CLASH_ROLL_HOLD_TICKS}, as it ends: our long roll goes on from it the way it went (its motion), and the
+	 * server's told ({@link Dodge.ClashRoll}). From there it's our held roll: let go and it finishes and you stand, held
+	 * through it you come up into the crouch, and on into prone at {@link Dodge#PRONE_HOLD_TICKS} from the press ({@link #tickHold}).
+	 */
+	private static void tickClashHold(LocalPlayer player, boolean down) {
+		if (clashPress == Long.MIN_VALUE) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		if (!down) {
+			clashPress = Long.MIN_VALUE;
+			return;
+		}
+		if (now - clashPress < Dodge.CLASH_ROLL_HOLD_TICKS) {
+			return;
+		}
+		long press = clashPress;
+		clashPress = Long.MIN_VALUE;
+		if (cooldown > 0 || player.isSpectator() || !player.onGround() || player.isInWater() || player.isPassenger() || FreerunClient.active()
+			|| !Dodge.canDodge(player) || !Feathers.canSpend(player, Dodge.COST) || !ClientPlayNetworking.canSend(Dodge.ClashRoll.TYPE)) {
+			return;
+		}
+		Vec3 motion = player.getDeltaMovement();
+		Vec3 dir = motion.horizontalDistanceSqr() > 0.01 ? new Vec3(motion.x, 0.0, motion.z).normalize()
+			: Vec3.directionFromRotation(0.0F, player.getYRot());
+		player.setSprinting(false);
+		sinceDodge = 0;
+		rollStart = now;
+		rollX = (float)dir.x;
+		rollZ = (float)dir.z;
+		rollFlip = false;
+		rollLong = true;
+		rollFromDash = true;
+		proneAtEnd = true;
+		holdPending = false;
+		dashStart = Long.MIN_VALUE;
+		crouchHold = false;
+		holdStart = press;
+		Dodge.localRollTicks = Dodge.LONG_ROLL_TICKS;
+		// the body is the low one for the roll (Dodge#rollingLow), at once
+		Dodge.localRollId = player.getId();
+		Dodge.localRollStart = now;
+		cooldown = Dodge.LONG_ROLL_TICKS;
+		ClientPlayNetworking.send(new Dodge.ClashRoll(rollX, rollZ));
 	}
 
 	/**

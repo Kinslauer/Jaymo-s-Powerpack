@@ -25,7 +25,7 @@ public final class TakedownClient {
 	}
 
 	public static void init() {
-		ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> clicks > 0 && !ChronoFlow.on(player) && tryTakedown(minecraft, player));
+		ClientPreAttackCallback.EVENT.register(com.jaymospowers.client.compat.ComboClashClient.BEFORE_CLASH, (minecraft, player, clicks) -> clicks > 0 && !ChronoFlow.on(player) && tryTakedown(minecraft, player));
 	}
 
 	/** If this click is a takedown, asks for it and swallows the click. */

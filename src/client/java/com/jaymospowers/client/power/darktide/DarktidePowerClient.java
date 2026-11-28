@@ -100,8 +100,8 @@ public final class DarktidePowerClient implements PowerClient {
 
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
-		// the guard: right click held, with hands that can guard
-		boolean guard = minecraft.options.keyUse.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
+		// the guard: the guard key (F) held, with hands that can guard (Andy, 2026-11-28: blocking on F)
+		boolean guard = com.jaymospowers.client.combat.GuardKeyClient.down() && minecraft.gui.screen() == null && !player.isSpectator()
 			&& DarktideWeapons.canGuard(player) && !(player.isShiftKeyDown() && DarktideWeapons.isKnife(player.getMainHandItem()));
 		if (guard != guardWasUp) {
 			guardWasUp = guard;

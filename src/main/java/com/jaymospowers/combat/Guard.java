@@ -327,11 +327,23 @@ public final class Guard {
 	}
 
 	/**
-	 * Right click with a guarding weapon in the main hand (both sides). It stands aside, so the off hand gets its turn
-	 * (a torch, food, a shield, a bow), when the off hand holds something that isn't a weapon; and for a Darktide's own
-	 * guard.
+	 * Right click (both sides), and the guard key's raise ({@link GuardKey}, asked first). Andy (2026-11-28): "move
+	 * blocking to f". With the guard key held, the hand it chose raises its guard. Without it, nothing that blocks comes
+	 * up on right click: a shield stands aside, and so does a guarding weapon whose only right click was the guard, so the
+	 * other hand gets its turn (a torch, food, a bow). A blocking item with a right click of its own (a warhammer's smash,
+	 * Sora's Dagger, the glass gauntlet's turn, a knife's sneaking throw, a lance's couch) keeps it; a guard that comes up
+	 * from one is let down again ({@link GuardKey#strayGuard}). A Darktide's own guard stands aside as before.
 	 */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand) {
+		InteractionResult keyed = GuardKey.use(player, hand);
+		if (keyed != null) {
+			return keyed;
+		}
+		ItemStack inHand = player.getItemInHand(hand);
+		if (!player.isSpectator() && GuardKey.blocks(inHand) && !ownUse(inHand.getItem()) && !HammerSlam.isWarhammer(inHand.getItem())) {
+			// a shield, or a weapon whose only right click is the guard, in either hand: it comes up on the guard key only
+			return InteractionResult.FAIL;
+		}
 		if (com.jaymospowers.armory.LanceCouch.couches(player, hand)) {
 			// a lance from the saddle couches (LanceCouch), whatever is in the off hand: a rider's shield mustn't stop it
 			return InteractionResult.PASS;
@@ -367,10 +379,20 @@ public final class Guard {
 			return InteractionResult.FAIL;
 		}
 		if (knife) {
-			// (0.18.64) a WeaponMod knife's own use throws it; here it raises the guard instead
-			return KnifeGuard.use(player, hand);
+			// (0.18.64) a WeaponMod knife's own use throws it (sneaking, above); its guard is the guard key's now
+			return InteractionResult.FAIL;
 		}
-		return InteractionResult.PASS;
+		// a weapon whose only right click was the guard stands aside; one with its own (Sora's Dagger, the gauntlet) keeps it
+		return ownUse(player.getMainHandItem().getItem()) ? InteractionResult.PASS : InteractionResult.FAIL;
+	}
+
+	/** Whether {@code item}'s class has a right click of its own (not just vanilla's, which for a blocking item is the block). */
+	private static boolean ownUse(Item item) {
+		try {
+			return item.getClass().getMethod("use", Level.class, Player.class, InteractionHand.class).getDeclaringClass() != Item.class;
+		} catch (NoSuchMethodException | SecurityException e) {
+			return true;
+		}
 	}
 
 	/**

@@ -51,6 +51,11 @@ public final class ZFighterPowerClient implements PowerClient {
 	/** The hold combo: how long the attack key has been held bare-handed, and whether the string is on. */
 	private static int attackHeld;
 	private static boolean comboOn;
+
+	/** Whether the bare-handed hold combo is going (Combo Clash's string stands aside for it, {@code ComboClashClient}). */
+	public static boolean holdCombo() {
+		return comboOn;
+	}
 	/** Held this long (ticks) before a click becomes the hold combo: a tap stays an ordinary punch. */
 	private static final int COMBO_HOLD_TICKS = 4;
 
@@ -150,11 +155,10 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterSensesClient.tick(minecraft, player);
 		ZFighterApeHaul.tick(minecraft, player);
 		ApeSmashClient.tick(minecraft, player);
-		// the guard: right click held, bare-handed
-		boolean guard = minecraft.options.keyUse.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
-			&& player.getMainHandItem().isEmpty()
-			// (0.17.7) right-click held on someone downed is the revive
-			&& !(minecraft.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit && com.jaymospowers.core.wounds.Downed.isDowned(hit.getEntity()));
+		// the guard: the guard key (F) held, bare-handed (Andy, 2026-11-28: blocking and the counters on F; right click held
+		// on someone downed is still the revive)
+		boolean guard = com.jaymospowers.client.combat.GuardKeyClient.down() && minecraft.gui.screen() == null && !player.isSpectator()
+			&& player.getMainHandItem().isEmpty();
 		ZFighterGammaClient.guardTick(minecraft, guard);
 		if (guard != guardWasUp) {
 			guardWasUp = guard;

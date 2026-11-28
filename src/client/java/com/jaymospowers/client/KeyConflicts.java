@@ -39,8 +39,10 @@ final class KeyConflicts {
 	 * v14: Combo Clash (shipped unchanged) puts its combat mode on G, the second ability key, so it goes on the grave key
 	 * (`, left of 1); its dash and evasive go from Q (drop) on to Left Alt, our dodge key, which steps aside in its combat
 	 * mode ({@code ComboClashClient}); its "Move HUD" key comes off H, the character menu (unbound, Controls can set it).
+	 * v15: Andy (2026-11-28): "move blocking to f as well". F is the guard key now ({@code GuardKeyClient}, with Combo
+	 * Clash's block on it too), so vanilla's swap-hands comes off F (unbound, Controls can set it again).
 	 */
-	private static final String MARKER = "jaymospowers-keys-v14";
+	private static final String MARKER = "jaymospowers-keys-v15";
 
 	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from} (or one of several, split by |). */
 	private record Move(String from, String to) {
@@ -71,7 +73,8 @@ final class KeyConflicts {
 		Map.entry("key.dibs.locate_owner", new Move("key.keyboard.v", "key.keyboard.unknown")),
 		Map.entry("key.comboclash.toggle", new Move("key.keyboard.g", "key.keyboard.grave.accent")),
 		Map.entry("key.comboclash.dash", new Move("key.keyboard.q", "key.keyboard.left.alt")),
-		Map.entry("key.comboclash.hud", new Move("key.keyboard.h", "key.keyboard.unknown")));
+		Map.entry("key.comboclash.hud", new Move("key.keyboard.h", "key.keyboard.unknown")),
+		Map.entry("key.swapOffhand", new Move("key.keyboard.f", "key.keyboard.unknown")));
 
 	/**
 	 * Bump to set JEI's hover keys again. v1 (0.11.15): showRecipe had come unbound in Andy's profile. v2 (0.11.31):
