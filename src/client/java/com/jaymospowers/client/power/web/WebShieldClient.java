@@ -30,7 +30,6 @@ import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
-import net.minecraft.world.phys.HitResult;
 
 /**
  * The web shield (see {@link WebShield}) on the client: a round web disc strapped to the forearm of your main arm
@@ -60,9 +59,9 @@ public final class WebShieldClient {
 		ClientTickEvents.END_CLIENT_TICK.register(WebShieldClient::tick);
 	}
 
-	/** A fresh right click, empty main hand, webbed fists on, no shield yet, not a counter, not at a creature: ask for the shield. */
+	/** A fresh press of the guard key (F), empty main hand, webbed fists on, no shield yet, not a counter: ask for the shield. */
 	private static void tick(Minecraft minecraft) {
-		boolean down = minecraft.options.keyUse.isDown();
+		boolean down = com.jaymospowers.client.combat.GuardKeyClient.down();
 		boolean pressed = down && !useWasDown;
 		useWasDown = down;
 		LocalPlayer player = minecraft.player;
@@ -70,7 +69,7 @@ public final class WebShieldClient {
 			return;
 		}
 		if (player.getMainHandItem().isEmpty() && player.getAttachedOrElse(WebStrength.FISTS, false) && !WebShield.on(player)
-			&& !WebCounter.ready(player) && (minecraft.hitResult == null || minecraft.hitResult.getType() != HitResult.Type.ENTITY)) {
+			&& !WebCounter.ready(player)) {
 			ClientPlayNetworking.send(new WebShield.Spin());
 		}
 	}

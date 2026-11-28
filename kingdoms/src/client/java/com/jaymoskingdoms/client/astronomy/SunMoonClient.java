@@ -14,7 +14,8 @@ public final class SunMoonClient {
 	}
 
 	public static void register() {
-		ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+		// (in Powers' phase before Combo Clash's, so its combat mode doesn't take the click first)
+		ClientPreAttackCallback.EVENT.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "before_combo_clash"), (minecraft, player, clicks) -> {
 			if (clicks > 0 && minecraft.level != null && (minecraft.hitResult == null || minecraft.hitResult.getType() == HitResult.Type.MISS)
 				&& !SunMoon.blinded(player) && SunMoon.lookingAtSun(minecraft.level, player)) {
 				ClientPlayNetworking.send(new SunMoon.Glance());

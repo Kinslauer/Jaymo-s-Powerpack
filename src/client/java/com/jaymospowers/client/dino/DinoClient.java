@@ -47,7 +47,7 @@ public final class DinoClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, Dino.id("dino_status"), DinoHud::extract);
 		ClientTickEvents.END_CLIENT_TICK.register(client -> keys());
 		// a rider's attack goes to the dinosaur, not a swing of their own arm
-		ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+		ClientPreAttackCallback.EVENT.register(com.jaymospowers.client.compat.ComboClashClient.BEFORE_CLASH, (minecraft, player, clicks) -> {
 			if (riddenDino() == null) {
 				return false;
 			}
@@ -58,7 +58,7 @@ public final class DinoClient {
 		});
 	}
 
-	static Dinosaur riddenDino() {
+	public static Dinosaur riddenDino() {
 		Minecraft mc = Minecraft.getInstance();
 		return mc.player != null && mc.player.getVehicle() instanceof Dinosaur d && d.getControllingPassenger() == mc.player ? d : null;
 	}

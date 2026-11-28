@@ -55,6 +55,8 @@
 		{ "config": "jaymospowers.weaponmaster.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.sodium.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.xaero.client.mixins.json", "environment": "client" },
+		"jaymospowers.comboclash.mixins.json",
+		{ "config": "jaymospowers.comboclash.client.mixins.json", "environment": "client" },
 		"jaymospowers.smoke.mixins.json",
 		"jaymospowers.freerun.mixins.json",
 		{ "config": "jaymospowers.freerun.client.mixins.json", "environment": "client" },

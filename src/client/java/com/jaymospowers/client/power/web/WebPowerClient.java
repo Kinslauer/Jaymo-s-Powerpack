@@ -56,7 +56,7 @@ public final class WebPowerClient implements PowerClient {
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.powerWants(com.jaymospowers.power.web.WebMorph::usable);
 		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's; with the
 		// tendrils full (two creatures, debris and a creature, two clumps), left click is a combo instead
-		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register(com.jaymospowers.client.compat.ComboClashClient.BEFORE_CLASH, (minecraft, player, clicks) -> {
 			if (WebSymbioteClient.inputLocked()) {
 				// the symbiote has the body: a click only struggles against it
 				if (clicks > 0) {
@@ -160,18 +160,14 @@ public final class WebPowerClient implements PowerClient {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrilCombos.Release());
 			}
 		});
-		// just after a Spider-Sense dodge, right click is a counter (and nothing else)
+		// just after a Spider-Sense dodge, the guard key (F) is a counter (and nothing else)
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			LocalPlayer player = minecraft.player;
 			if (!isActive(player) || minecraft.gui.screen() != null || WebSymbioteClient.inputLocked()
 				|| !com.jaymospowers.power.web.WebCounter.ready(player)) {
 				return;
 			}
-			boolean pressed = false;
-			while (minecraft.options.keyUse.consumeClick()) {
-				pressed = true;
-			}
-			if (pressed) {
+			if (com.jaymospowers.client.combat.GuardKeyClient.pressed()) {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebCounter.Strike());
 			}
 		});

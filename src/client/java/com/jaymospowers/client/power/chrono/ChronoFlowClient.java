@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Time Flow on the client: an attack aimed toward an enemy picks it (the one nearest where you look, within
- * {@link ChronoFlow#RANGE}) and carries you to it for the blow (movement is the client's); right click is the counter;
+ * {@link ChronoFlow#RANGE}) and carries you to it for the blow (movement is the client's); the guard key (F) is the counter;
  * the combo count shows over the crosshair. While the mode is on the view is held over your shoulder in third person
  * (so you see the fight), and goes back to what it was when the mode ends. A counter or the barrage plays through before
  * another strike; the barrage holds you on its target.
@@ -67,7 +67,7 @@ public final class ChronoFlowClient {
 
 	static void init() {
 		// ((0.21.23) sneak + attack bare-handed is a takedown or the blink: combat/Takedowns)
-		ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> clicks > 0 && ChronoFlow.on(player)
+		ClientPreAttackCallback.EVENT.register(com.jaymospowers.client.compat.ComboClashClient.BEFORE_CLASH, (minecraft, player, clicks) -> clicks > 0 && ChronoFlow.on(player)
 			&& (com.jaymospowers.client.combat.TakedownClient.tryTakedown(minecraft, player) || strike(minecraft, player)));
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			view(minecraft);
@@ -79,12 +79,9 @@ public final class ChronoFlowClient {
 			if (player.isShiftKeyDown()) {
 				return;
 			}
-			// right click is the counter: always sent (mid-move it answers a blow held on you); the guard is only shown when free
-			boolean pressed = false;
-			while (minecraft.options.keyUse.consumeClick()) {
-				pressed = true;
-			}
-			if (pressed) {
+			// the guard key is the counter (Andy, 2026-11-28: "the counters should move to f as well"): always sent (mid-move it
+			// answers a blow held on you); the guard is only shown when free
+			if (com.jaymospowers.client.combat.GuardKeyClient.pressed()) {
 				ClientPlayNetworking.send(new ChronoFlow.Parry());
 				long now = player.level().getGameTime();
 				if (now >= busyUntil && counter == null && barrage == null) {
@@ -177,6 +174,28 @@ public final class ChronoFlowClient {
 			&& ChronoFlow.on(minecraft.player) && minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK;
 	}
 
+	/**
+	 * Andy (2026-11-28): Combo Clash's combat mode is "what chrono drops into when he uses time flow". With it on, a
+	 * foe within this reach (blocks, along the ground) takes Combo Clash's string; one further off, the flow carries you
+	 * to it for its blow as ever.
+	 */
+	static final double CLASH_REACH = 3.0;
+
+	/**
+	 * Whether the attack key is Time Flow's own just now (both its click and its hold): a blow, counter or barrage still
+	 * playing, or a foe past {@link #CLASH_REACH} to carry you to. Combo Clash's string stands aside for it ({@code ComboClashClient}).
+	 */
+	public static boolean ownsAttack(LocalPlayer player) {
+		if (!ChronoFlow.on(player) || player.isShiftKeyDown()) {
+			return false;
+		}
+		if (player.level().getGameTime() < busyUntil || counter != null || barrage != null || !com.jaymospowers.client.compat.ComboClashClient.active()) {
+			return true;
+		}
+		LivingEntity target = pick(player);
+		return target != null && target.position().subtract(player.position()).horizontalDistance() > CLASH_REACH;
+	}
+
 	/** Movement keys are dead while the barrage holds you on its target. */
 	public static boolean inputLocked() {
 		return barrage != null;
@@ -262,6 +281,10 @@ public final class ChronoFlowClient {
 		}
 		Vec3 to = target.position().subtract(player.position());
 		double distance = to.horizontalDistance();
+		if (distance <= CLASH_REACH && com.jaymospowers.client.compat.ComboClashClient.active()) {
+			// close in, in Combo Clash's combat mode: the blow is its string's
+			return false;
+		}
 		int style = ChronoFlow.styleFor(distance, closeBlows);
 		if (style <= ChronoFlow.UPPERCUT) {
 			closeBlows++;

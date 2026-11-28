@@ -73,7 +73,7 @@ public final class GravityPowerClient implements PowerClient {
 			liftMark = liftMark(player);
 		});
 		// left click while Lift holds a chunk of the world (or anything else that can't be choked): it's thrown
-		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register(com.jaymospowers.client.compat.ComboClashClient.BEFORE_CLASH, (minecraft, player, clicks) -> {
 			Integer grip = player.getAttached(GravityPower.GRIP);
 			if (clicks <= 0 || grip == null || !Powers.has(player, GravityPower.INSTANCE)) {
 				return false;

@@ -86,7 +86,7 @@ public final class BoxingClient {
 		// punch too (Boxing.AirPunch), so shadowboxing runs the string; a click on a living thing goes the usual way
 		// (Boxing's attack event). Holding the button throws nothing more: the held attack is swallowed, except on a
 		// block, where it digs as ever.
-		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register(com.jaymospowers.client.compat.ComboClashClient.BEFORE_CLASH, (minecraft, player, clicks) -> {
 			if (player.isUsingItem() || !Boxing.boxing(player)) {
 				return false;
 			}

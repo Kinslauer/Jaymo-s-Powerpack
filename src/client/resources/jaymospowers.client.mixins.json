@@ -115,6 +115,7 @@
 		"GiantCameraMixin",
 		"GiantPickMixin",
 		"FrontCameraCycleMixin",
+		"GuardKeyHoldMixin",
 		"BeamCinematicCameraMixin",
 		"UltimateCinematicCameraMixin",
 		"UltimateCinematicFovMixin",

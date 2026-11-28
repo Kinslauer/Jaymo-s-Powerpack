@@ -29,7 +29,7 @@ public final class WebCutClient {
 	}
 
 	public static void register() {
-		ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> clicks > 0 && tryCut(minecraft, player));
+		ClientPreAttackCallback.EVENT.register(com.jaymospowers.client.compat.ComboClashClient.BEFORE_CLASH, (minecraft, player, clicks) -> clicks > 0 && tryCut(minecraft, player));
 	}
 
 	private record Hit(byte kind, int entity, Vec3 a, Vec3 b, double along) {

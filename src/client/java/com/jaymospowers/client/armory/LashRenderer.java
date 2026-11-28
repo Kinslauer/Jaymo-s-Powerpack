@@ -124,7 +124,7 @@ public final class LashRenderer {
 		// (0.19.73) every swing starts from where the head really is, and goes the way the mouse was moving
 		Lash.clientPress = (player, kind) -> press(player, kind == Lash.FLAIL);
 		FlailSwingClient.init();
-		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register(com.jaymospowers.client.compat.ComboClashClient.BEFORE_CLASH, (minecraft, player, clicks) -> {
 			if (FlailSwingClient.takes(player)) {
 				// Balkon's flail's left click is its wind-up and jab: no plain swing, hit or digging with it
 				return true;
