@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 13:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 13:59). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -49,6 +49,7 @@ kanban-plugin: board
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · t3 · #2355 · in-review
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · t3 · #2358 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
+- [ ] [[Agents/zoom-still-broken|zoom-still-broken]] · 💻 Odysseus · #2359 · in-review
 
 
 ## Needs Andy
@@ -91,7 +92,6 @@ kanban-plugin: board
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/hunters-road-3-models|hunters-road-3-models]] · 💻 Odysseus · #'2332' · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
-- [ ] [[Agents/zoom-still-broken|zoom-still-broken]] · 💻 Odysseus · blocked
 
 
 ## Done
