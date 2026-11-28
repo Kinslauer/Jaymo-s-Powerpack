@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 13:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 14:35). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -29,7 +29,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/blastfx-3|blastfx-3]] · ON HOLD: opens when blastfx-2 merges (one at a time on Kingdoms; no parallel merges on one mod).
 - [[Inbox/blastfx-4|blastfx-4]] · ON HOLD: opens when blastfx-3 merges (one at a time on Kingdoms; no parallel merges on one mod).
 - [[Inbox/blastfx-5|blastfx-5]] · ON HOLD: opens when blastfx-4 merges (one at a time on Kingdoms; no parallel merges on one mod).
-- [[Inbox/hollow-captains-fix|hollow-captains-fix]] · 2026-11-27 04:46 Text pass content is complete (reviewed captain-ground.json lang keys and changes/kingdoms/hollow-captains-fix.md; all player-facing, no rewri…
 - [[Inbox/hunters-road-10|hunters-road-10]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-11|hunters-road-11]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/hunters-road-4|hunters-road-4]] · 2026-11-28 08:41 ON HOLD (2026-11-28): hr7 and hr4-models merged, so its deps are done; now waits only on Andy's harness pick (Codex out till Dec 1, Antigravit…
@@ -38,9 +37,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/hunters-road-9|hunters-road-9]] · 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-25 11:01 PM: Approved cleanup: excluded from automatic bot pickup, reserved for cloud Claude. Existing Lore-rewritten.md and backup do not establish co…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-26 09:59 Andy's picks 2026-11-26 09:56 on the Waiting on Andy page (https://claude.ai/artifact/16LbvMbbHXJuH2qUMngRP4, db picks/andy): Andy kept this o…
-- [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · 2026-11-26 07:21 Design draft complete: Overworld aqueduct structure, SettlementCurse system, 4 board quests (Stem the Flow, Clear the Pillars, Purify the Ston…
-- [[Inbox/wrist-table-ui-mockup|wrist-table-ui-mockup]] · 2026-11-28 05:00 Mockup ready: pixel-art Wrist Table UI delivered to E:/Jaymo Vault Live/Assets/wrist-table-ui-mockup.png (1260x720). Keeps the same info: titl…
-- [[Agents/zoom-still-broken|zoom-still-broken]] · see the note
 
 ## Stuck
 
@@ -57,12 +53,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-18 waiting for a bot, 1 being built, 12 in review: see [[Kanban]].
+16 waiting for a bot, 1 being built, 6 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2359 Shift + Left Alt zooms for real, and no dash while prone (Powers, 2026-11-28)
 - [ ] #2357 A shield on F is held up in front again; shield bash and bang are back, and bash works bare-handed (Powers, 2026-11-28)
 - [ ] #2356 Hunter's Road 4 - the drowned, hags and fog models, textures and animations (Kingdoms, 2026-11-28)
 - [ ] #2354 Shift + Left Alt zooms again, and never dashes in Combo Clash's combat mode (Powers, 2026-11-28)
@@ -122,12 +119,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2294 Rotting bodies bare bone in patches, not checks (Kitchen, 2026-11-27)
 - [ ] #2293 Villagers going in at night aren't "Running scared" (Kingdoms, 2026-11-27)
 - [ ] #2292 spectate viewcone label trimmed - no coordinates, no Running line (Kingdoms, 2026-11-27)
-- [ ] #2291 Night's Blood 3 - blood worth drinking (Kingdoms, Kitchen, 2026-11-27)
-- …and 712 older ones.
+- …and 713 older ones.
 
 ## Health
 
-30 problems in the notes: [[Health]].
+42 problems in the notes: [[Health]].
 
 ## Last week
 
