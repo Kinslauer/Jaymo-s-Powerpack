@@ -19,13 +19,12 @@ owns:
 **Task:** Show vanilla-style cross-section cut faces (meat, bone ring, torso organ, or the body's own material: bone, stone, iron, slime, etc.) on severed stumps, both ends of a `SeveredPart`, the top half of a waist halving, and Kitchen corpses, at every blood setting except Off.
 
 ## Plan
-- Inspect how `Dismembered`, `SeveredPartRenderer`, `BladeBlood`, `BloodSettings`, and `CorpseDressing` / `CorpseRenderer` draw stumps, severed parts, waist halvings, and corpses.
-- Paint clean vanilla-style 16x16 cross-section textures (`tools/gen_cut_faces.py`) following `docs/Vanilla-Style.md` (discrete shade ramps, no noise or soft gradients, no pixel splats).
-- Draw cross-section faces on living body stumps, waist halvings, `SeveredPart` cut ends, and Kitchen corpses at every blood setting except Off (and hidden under Streamer safe).
+- Paint clean vanilla-style 16x16 cross-section textures (`tools/gen_cut_faces.py` -> `textures/entity/wounds/cut_face_*.png`) following `docs/Vanilla-Style.md` (discrete shade ramps, light from top-left, no noise or soft gradients, no pixel splats).
+- Draw cross-section faces on living body stumps, headless necks, waist halvings, `SeveredPart` cut ends, and Kitchen corpses (`CorpseDressing`) at every blood setting except Off (and hidden under Streamer safe), matched to each body's material (`BladeBlood`, tags, heritages).
 - Verify with `sh ./gradlew build` and `python tools/pr_checks.py`.
 
 ## Notes
-- Claimed by Antigravity in T3 Code (`t3`).
+- Claimed and actively being built by Antigravity in T3 Code (`t3`).
 
 ## Done
-- 2026-11-27 19:20 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-27 21:51 No sign of work for 30 min: marked stalled (whoever ran it stopped).
