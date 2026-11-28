@@ -29,3 +29,4 @@ out in about 8-10 s; ragdolls drop where they stand (#1020).
 
 ## Notes
 - 2026-11-27 17:54 YOUTH delegated this to prometheus (Claude approved): Andy asked for Prometheus on all six gore parts (2026-11-27)
+- 2026-11-27 19:31 Andy (2026-11-27): 'Use t3'. Moved from Prometheus to Antigravity (Gemini) in T3 Code; Codex is at its usage limit until Dec 1.
