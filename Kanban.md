@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 02:40). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 03:09). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/blastfx-2|blastfx-2]] · for any · open
 - [ ] [[Inbox/gore-2-cut-faces|gore-2-cut-faces]] · for antigravity · open
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for ☁️ Cloud · open
-- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · for antigravity · open
 
 
 ## Being built
@@ -44,6 +43,7 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for antigravity · #2337 · in-review
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · t3 · #2355 · in-review
+- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · t3 · #2356 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
