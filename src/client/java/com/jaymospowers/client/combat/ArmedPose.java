@@ -11,6 +11,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
@@ -26,7 +27,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>The stance.</b> Standing still: the weapon shoulder turned forward, the blade held out ahead, the other hand
  * back, the feet set apart, the weight shifting slowly ({@link #BREATH_TICKS}). Walking, the blade is carried low at the
  * side; running, it trails behind and the body leans into it. A two-handed weapon is held in both hands before the
- * body; a polearm stands upright at the side and comes across the body on the move.</li>
+ * body; a polearm stands upright at the side and comes across the body on the move. A vanilla spear is left in the
+ * game's own held-out spear pose ({@link #heldOut}).</li>
  * <li><b>The draw.</b> Taking a weapon into the hand plays a short draw ({@link #DRAW_TICKS}): from the far hip for a
  * one-handed blade, from over the shoulder for the big ones, swept up and round into the stance, with a ring of steel.
  * A swing or a guard cuts it short: it never costs a blow.</li>
@@ -126,7 +128,9 @@ public final class ArmedPose {
 			return;
 		}
 		ItemStack main = entity.getMainHandItem();
-		Armed.Kind kind = Armed.kind(main);
+		// a vanilla spear keeps the game's own pose, held out ahead (and Better Combat's two-handed polearm hold over it):
+		// our polearm stance stood it upright at the side like any held stick
+		Armed.Kind kind = heldOut(main) ? null : Armed.kind(main);
 		if (kind == null && entity instanceof net.minecraft.world.entity.player.Player zf && com.jaymospowers.power.zfighter.ZFighterKiWeapon.wielded(zf)
 			&& !com.jaymospowers.power.zfighter.ZFighterGuard.guarding(zf)) {
 			// a Z Fighter's ki weapon is a weapon in the hand: the blade one-handed, the scythe and the lance as polearms
@@ -170,6 +174,11 @@ public final class ArmedPose {
 		}
 		float draw = drawn == Long.MIN_VALUE ? -1.0F : (now - drawn + partialTicks) / DRAW_TICKS;
 		state.setData(KEY, new Held(kind, entity.getMainArm() == HumanoidArm.RIGHT, draw < 0.0F || draw >= 1.0F ? -1.0F : draw, -1, 0.0F, 0, Armed.dual(entity)));
+	}
+
+	/** A weapon the game itself holds out ahead as a spear ({@code HumanoidMobRenderer.usesSpearPose}): the stance leaves it be. */
+	public static boolean heldOut(ItemStack stack) {
+		return stack.is(ItemTags.SPEARS);
 	}
 
 	/** Whether the stance is on this state (for {@link PoseTakeover}: Entity Model Features pauses so it holds). */
