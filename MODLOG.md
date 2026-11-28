@@ -9213,3 +9213,11 @@ Deviations from the plan:
 - Unchanged: the downed state from losing hearts, both legs broken or lost, fainting, hard landings, horse crashes, head
   bumps, being carried or thrown by another player, your own forms' moves, Air Combo launches and wrestling takedowns.
 - Built; not played.
+
+## 0.28.52 (2026-11-28): NPCs knocked down 1 in 2, players stay 1 in 5 (#2349)
+
+- Andy: "players 1 in 5, npcs 1 in 2". NPCs (mobs built like a person) now go down half the time from leg sweeps and
+  leg blows (`Tripped.NPC_SWEEP_CHANCE` 0.5, was 0.2) and crushing-blow throws (`BlastGore.NPC_THROW_FLOOR_CHANCE` 0.5,
+  was 0.2). Players stay at 1 in 5 (`PLAYER_SWEEP_CHANCE`, `PLAYER_THROW_FLOOR_CHANCE`, `LegFell.PLAYER_CHANCE`, wall
+  slams). What can knock anyone down is unchanged: a leg hit, real knockback or a blast.
+- Built; not played.
