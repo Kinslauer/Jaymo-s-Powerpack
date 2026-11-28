@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-28 10:05). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-28 13:23). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -88,6 +88,7 @@ kanban-plugin: board
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/hunters-road-3-models|hunters-road-3-models]] · 💻 Odysseus · #'2332' · stalled
 - [ ] [[Agents/legends-p3|legends-p3]] · 💻 Odysseus · stalled
+- [ ] [[Agents/zoom-still-broken|zoom-still-broken]] · 💻 Odysseus · blocked
 
 
 ## Done
