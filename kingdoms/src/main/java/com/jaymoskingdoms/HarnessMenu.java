@@ -88,6 +88,11 @@ public class HarnessMenu extends AbstractContainerMenu {
 					moved = moveItemStackTo(stack, i, i + 1, false);
 				}
 			}
+			// its place already filled (a tabard over a worn cloak, another helm): it goes on all the same, and what was
+			// there comes off into the slot it came from
+			if (!moved && swap(player, slot, stack)) {
+				return ItemStack.EMPTY;
+			}
 			// a bauble goes on in a free bauble slot, as it does from the survival inventory (with Jaymo's Powers)
 			if (!moved && PowersCompat.quickEquipBauble(player, slot)) {
 				return ItemStack.EMPTY;
@@ -105,6 +110,30 @@ public class HarnessMenu extends AbstractContainerMenu {
 			slot.setChanged();
 		}
 		return copy;
+	}
+
+	/**
+	 * Shift-click on {@code from}, an inventory slot holding one piece ({@code stack}) whose place in the harness, or
+	 * armour slot, is already filled: the two change places. Only when the worn one may come off (no curse of binding)
+	 * and the new one may go on as the place's own check says (it fits how the wearer is dressed, they may wear it).
+	 */
+	private boolean swap(Player player, Slot from, ItemStack stack) {
+		if (stack.getCount() != 1) {
+			return false;
+		}
+		for (int i = 0; i < OWN; i++) {
+			Slot own = this.slots.get(i);
+			if (own.hasItem() && own.mayPlace(stack) && own.mayPickup(player)) {
+				ItemStack off = own.getItem().copy();
+				if (!from.mayPlace(off)) {
+					continue;
+				}
+				own.setByPlayer(stack.copy());
+				from.setByPlayer(off);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** The harness as a container, kept on the wearer ({@link Harness#WORN}). */
