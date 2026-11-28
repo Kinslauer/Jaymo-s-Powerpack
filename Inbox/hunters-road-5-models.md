@@ -21,3 +21,4 @@ thread: t3 mcp:396c0d08-53dc-4178-ad46-0e0eb1278dbe
 - 2026-11-27 08:55 Codex out of usage (weekly limit, resets Dec 1 10:47 AM); moved to Antigravity gemini-4-carbon, T3 thread mcp:396c0d08-53dc-4178-ad46-0e0eb1278dbe
 - 2026-11-27 09:06 Antigravity quota reached 2026-11-27 9:05 AM (resets about 1:30 PM); thread failed with no work done. Still claimed by t3, waiting on Andy: retry on Antigravity after the reset, or hand to Hermes.
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-28 08:41 Held for Codex from Dec 1 (Hunter's Road thread, 2026-11-28).

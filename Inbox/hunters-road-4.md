@@ -23,3 +23,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 - 2026-11-27 11:01 Andy 2026-11-27: build in the Hunter's Road thread (cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX), not by bots. Wave holds unchanged.
 - 2026-11-27 12:22 Kitchen now has a `monster_organs` data table (from #2289, hunters-road-6): add one entry per monster this patch adds (mire hag, grave hag, gnawer leader, fog-wight, imp warrior; whichever are this patch's) so its brew can be made.
 - 2026-11-27 14:11 hunters-road-7 merged (#2290); still waits on hunters-road-4-models.
+- 2026-11-28 08:41 ON HOLD (2026-11-28): hr7 and hr4-models merged, so its deps are done; now waits only on Andy's harness pick (Codex out till Dec 1, Antigravity till ~Dec 3).

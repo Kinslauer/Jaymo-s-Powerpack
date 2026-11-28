@@ -25,3 +25,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWGpfuaQdriP8NJiY6HrB9HX
 - 2026-11-27 13:20 hunters-road-2 merged (#2287); still waits on hunters-road-3-models.
 - 2026-11-28 01:31 Hold lifted 2026-11-28: hr2 and hr3-models merged; Hunter's Road thread building it.
 - 2026-11-27 22:38 claude-cloud's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-28 08:41 2026-11-28: cloud build stopped 01:45Z with nothing committed; waits on Andy's harness pick. Kept open with claimed_by claude-cloud (no bot takes it); don't hand back.

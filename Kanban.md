@@ -8,12 +8,10 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
+- [ ] [[Inbox/bleed-out-npc-items|bleed-out-npc-items]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-per-blood-build|blood-awakening-per-blood-build]] · for gemini · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for gemini · open
-- [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
-- [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
 - [ ] [[Inbox/black-panther-k1|black-panther-k1]] · for any · open
 - [ ] [[Inbox/black-panther-p1|black-panther-p1]] · for any · open
 - [ ] [[Inbox/black-panther-r1|black-panther-r1]] · for any · open
@@ -23,6 +21,9 @@ kanban-plugin: board
 - [ ] [[Inbox/blastfx-2|blastfx-2]] · for any · open
 - [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for ☁️ Cloud · open
 - [ ] [[Inbox/youth-delegate-t3|youth-delegate-t3]] · for 💻 Odysseus · open
+- [ ] [[Inbox/hunters-road-3|hunters-road-3]] · for ☁️ Cloud · open
+- [ ] [[Inbox/hunters-road-5-models|hunters-road-5-models]] · for antigravity · open
+- [ ] [[Inbox/hunters-road-8-models|hunters-road-8-models]] · for antigravity · open
 
 
 ## Being built
@@ -36,15 +37,14 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · codex · #2248 · in-review
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · codex · #2249 · in-review
 - [ ] [[Inbox/otherworld-fabric-picklist-restart|otherworld-fabric-picklist-restart]] · ☀️ Apollo · in-review
-- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
 - [ ] [[Inbox/small-armies-picks|small-armies-picks]] · ☀️ Apollo · #2280 · in-review
+- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for 🍇 Bacchus · #2217 · in-review
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · ☀️ Apollo · #2209 · in-review
-- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · ☀️ Apollo · #2222 · in-review
+- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · ☀️ Apollo · #2216 · in-review
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · ☀️ Apollo · #2220 · in-review
 - [ ] [[Inbox/gore-3-cauterized|gore-3-cauterized]] · for antigravity · #2337 · in-review
 - [ ] [[Inbox/gore-1-no-arms-no-attack|gore-1-no-arms-no-attack]] · t3 · #2355 · in-review
-- [ ] [[Inbox/hunters-road-4-models|hunters-road-4-models]] · t3 · #2356 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
@@ -59,7 +59,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hunters-road-8|hunters-road-8]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-9|hunters-road-9]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/hunters-road-5|hunters-road-5]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/hunters-road-4|hunters-road-4]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/black-panther-k2|black-panther-k2]] · for any · blocked
 - [ ] [[Inbox/black-panther-k3|black-panther-k3]] · for any · blocked
 - [ ] [[Inbox/black-panther-k4|black-panther-k4]] · for any · blocked
@@ -83,6 +82,7 @@ kanban-plugin: board
 - [ ] [[Inbox/blastfx-3|blastfx-3]] · for any · blocked
 - [ ] [[Inbox/blastfx-4|blastfx-4]] · for any · blocked
 - [ ] [[Inbox/blastfx-5|blastfx-5]] · for any · blocked
+- [ ] [[Inbox/hunters-road-4|hunters-road-4]] · ☁️ Cloud · blocked
 - [ ] [[Agents/codex|codex]] · 💻 Odysseus · stalled
 - [ ] [[Agents/effekseer-hd|effekseer-hd]] · 💻 Odysseus · stalled
 - [ ] [[Agents/hunters-road-3-models|hunters-road-3-models]] · 💻 Odysseus · #'2332' · stalled
@@ -95,8 +95,8 @@ kanban-plugin: board
 - [x] [[Inbox/Done/hunters-road-3-models|hunters-road-3-models]]
 - [x] [[Inbox/Done/combo-clash|combo-clash]]
 - [x] [[Inbox/Done/nycto-turning|nycto-turning]]
-- [x] [[Inbox/Done/nycto-4|nycto-4]]
 - [x] [[Inbox/Done/nycto-4-models|nycto-4-models]]
+- [x] [[Inbox/Done/nycto-4|nycto-4]]
 - [x] [[Inbox/Done/nycto-5|nycto-5]]
 - [x] [[Inbox/Done/nycto-6|nycto-6]]
 - [x] [[Inbox/Done/nycto-7|nycto-7]]
