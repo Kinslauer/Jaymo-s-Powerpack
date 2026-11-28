@@ -1,8 +1,9 @@
 package com.jaymospowers.client.wounds;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.hud.HudZones;
@@ -24,17 +25,28 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Why you're hurt, on your screen ({@link HurtCause}): every hurt puts a short red line under the crosshair in your
- * character's voice ("The sun! My skin's rotting...", "Maiko hit me!"), and one from somewhere puts a red mark round
- * the crosshair on that side (top: in front of you, bottom: behind), outside the incoming-blow dots. The same cause again
- * keeps its line up instead of adding another; a few causes at once stack, newest on top. Shown downed too. Like the hurt
- * flash, it's up only while it matters, so Auto HUD's hiding never keeps it from you.
+ * Why you're hurt, on your screen ({@link HurtCause}), told once and kept short. Andy (2026-11-28): "the hit indicators
+ * should only tell you once if you are hit and that should be at the very start of combat. it should NOT be naming the
+ * attackers, nor should it be as descriptive. 'im hit' instead of a skeleton got me from afar."
+ * <ul>
+ * <li>A blow from someone or something (a swing, an arrow, a bite, a blast): "I'm hit!" under the crosshair, and a red
+ * mark round the crosshair on the side it came from (top: in front of you, bottom: behind), only for the first blow of a
+ * fight: one after {@link #FIGHT_GAP_TICKS} with no blow. The blows after it in that fight show nothing.</li>
+ * <li>A hurt nobody dealt (the sun, fire, poison, hunger, cold, a fall, drowning): its own short line, in your
+ * character's voice, once when it starts; the same cause shows again only after {@link #CAUSE_GAP_TICKS} without it.
+ * So a player can always tell why they're hurt, without a line on every tick of it.</li>
+ * </ul>
+ * Shown downed too. Like the hurt flash, it's up only while it matters, so Auto HUD's hiding never keeps it from you.
  */
 public final class HurtCauseHud {
-	/** A line stays this long after its last hurt, the last {@link #FADE_TICKS} of it fading (ticks). */
+	/** A line stays this long, the last {@link #FADE_TICKS} of it fading (ticks). */
 	static final int LINE_TICKS = 70, FADE_TICKS = 15;
 	/** At most this many lines at once (the oldest go). */
-	static final int MAX_LINES = 3;
+	static final int MAX_LINES = 2;
+	/** A blow after this long with none (ticks: 20 s) starts a new fight, and says "I'm hit!" again. */
+	static final int FIGHT_GAP_TICKS = 400;
+	/** A cause that's let up this long (ticks: 10 s) is said again when it comes back. */
+	static final int CAUSE_GAP_TICKS = 200;
 	/** The lines' row in the zone under the crosshair ({@link HudZones#BELOW}: after the hold bars' 21), and how far apart they are (pixels). */
 	static final int ROW = 30, LINE_GAP = 10;
 	/** Their colour. */
@@ -45,13 +57,18 @@ public final class HurtCauseHud {
 	static final int MARK_DOTS = 9, MARK_SIZE = 2, MARK_RGB = 0xE01818;
 	/** Vanilla damage types whose own line says nothing: the feature that dealt one names it instead. */
 	static final Set<String> UNSPECIFIC = Set.of("generic", "magic", "genericKill", "indirectMagic");
+	/**
+	 * Our features that deal a blow without saying who struck it (an untyped hurt with no attacker): these count as a
+	 * fight's blow ("I'm hit!" once), not a cause of their own, so no line names the colossus or the goblin that did it.
+	 */
+	static final Set<String> BLOW_FEATURES = Set.of("Carousing", "AetherShot", "NadirSnap", "WindKick", "StoneSwords", "RelicWeapons",
+		"ClawArts", "InvokerFangs", "GolemRock", "ElementSpells", "Slaves", "Colossi", "KingWeapons", "Farmers", "DrunkGoblins",
+		"Throwables", "ThrowingCards", "FluxWisp", "MatrixEntity", "AirCombo", "RootSpikeEntity", "GravityMeteor", "Grue",
+		"HeritagePaths", "ZFighterKiThrow", "WebSpit", "VenomSpit");
 
 	private static final String KEY = "hurt_cause.jaymospowers.";
 
-	private static final class Line {
-		Component text;
-		String said;
-		long at;
+	private record Line(Component text, long at) {
 	}
 
 	private record Mark(int attacker, Vec3 at, long since) {
@@ -59,6 +76,9 @@ public final class HurtCauseHud {
 
 	private static final List<Line> LINES = new ArrayList<>();
 	private static final List<Mark> MARKS = new ArrayList<>();
+	/** When each cause (by its line) last hurt, and when the last blow of a fight landed. */
+	private static final Map<String, Long> CAUSES = new HashMap<>();
+	private static long lastBlow = Long.MIN_VALUE / 2;
 	private static long now;
 
 	private HurtCauseHud() {
@@ -70,50 +90,52 @@ public final class HurtCauseHud {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			LINES.clear();
 			MARKS.clear();
+			CAUSES.clear();
+			lastBlow = Long.MIN_VALUE / 2;
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> tick());
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosPowers.id("hurt_cause"), HurtCauseHud::draw);
 	}
 
 	private static void received(HurtCause.Hurt hurt) {
-		Component text = line(hurt);
-		String said = text.getString();
-		Line line = null;
-		for (Iterator<Line> it = LINES.iterator(); it.hasNext(); ) {
-			Line l = it.next();
-			if (l.said.equals(said)) {
-				line = l;
-				it.remove();
-				break;
+		Component text;
+		if (blow(hurt)) {
+			boolean starts = now - lastBlow > FIGHT_GAP_TICKS;
+			lastBlow = now;
+			if (!starts) {
+				return;
+			}
+			text = Component.translatable(KEY + "hit");
+		} else {
+			text = line(hurt);
+			Long last = CAUSES.put(text.getString(), now);
+			if (last != null && now - last <= CAUSE_GAP_TICKS) {
+				return;
 			}
 		}
-		if (line == null) {
-			line = new Line();
-			line.text = text;
-			line.said = said;
-		}
-		line.at = now;
-		LINES.add(0, line);
+		String said = text.getString();
+		LINES.removeIf(line -> line.text().getString().equals(said));
+		LINES.add(0, new Line(text, now));
 		while (LINES.size() > MAX_LINES) {
 			LINES.remove(LINES.size() - 1);
 		}
 		if (hurt.at().isPresent()) {
-			MARKS.removeIf(mark -> hurt.attacker() >= 0 && mark.attacker() == hurt.attacker());
+			MARKS.clear();
 			MARKS.add(new Mark(hurt.attacker(), hurt.at().get(), now));
 		}
 	}
 
+	/** A blow from someone or something: a fight's, told once as "I'm hit!". */
+	static boolean blow(HurtCause.Hurt hurt) {
+		return hurt.fight() || !hurt.kind().startsWith("jaymos") && BLOW_FEATURES.contains(hurt.from());
+	}
+
 	/**
-	 * What the character says: who did it, when someone did; else the feature of ours that dealt it
-	 * ({@code from.<Class>}); else the damage type's own line; else the type (or the feature) as words.
+	 * What the character says of a hurt nobody dealt: the feature of ours that dealt it ({@code from.<Class>}); else the
+	 * damage type's own line; else the type (or the feature) as words.
 	 */
 	static Component line(HurtCause.Hurt hurt) {
 		Language language = Language.getInstance();
-		if (hurt.who().isPresent()) {
-			String typed = KEY + "by." + hurt.kind();
-			String key = language.has(typed) ? typed : KEY + (hurt.shot() ? "shot_by" : "hit_by");
-			return Component.translatable(key, hurt.who().get());
-		}
 		boolean unspecific = UNSPECIFIC.contains(hurt.kind());
 		// (one of our own damage types names itself; a vanilla one a feature borrowed is named by the feature)
 		if (!hurt.from().isEmpty() && !hurt.kind().startsWith("jaymos")) {
@@ -131,7 +153,8 @@ public final class HurtCauseHud {
 
 	private static void tick() {
 		now++;
-		LINES.removeIf(line -> now - line.at > LINE_TICKS);
+		LINES.removeIf(line -> now - line.at() > LINE_TICKS);
+		CAUSES.values().removeIf(at -> now - at > CAUSE_GAP_TICKS);
 		MARKS.removeIf(mark -> now - mark.since() > MARK_TICKS);
 	}
 
@@ -147,16 +170,16 @@ public final class HurtCauseHud {
 		if (!LINES.isEmpty()) {
 			int width = 0;
 			for (Line line : LINES) {
-				width = Math.max(width, font.width(line.text));
+				width = Math.max(width, font.width(line.text()));
 			}
 			// (the zone under the crosshair, after the hold bars: it keeps clear of the bars, the guard and the rest)
 			int[] at = HudZones.place(HudZones.BELOW, "jaymospowers:hurt_cause", ROW, width, LINES.size() * LINE_GAP - 1);
 			if (at != null) {
 				int mid = at[0] + width / 2, y = at[1];
 				for (Line line : LINES) {
-					int alpha = alpha(now - line.at + partial, LINE_TICKS);
+					int alpha = alpha(now - line.at() + partial, LINE_TICKS);
 					if (alpha > 8) {
-						graphics.text(font, line.text, mid - font.width(line.text) / 2, y, alpha << 24 | LINE_RGB, true);
+						graphics.text(font, line.text(), mid - font.width(line.text()) / 2, y, alpha << 24 | LINE_RGB, true);
 					}
 					y += LINE_GAP;
 				}

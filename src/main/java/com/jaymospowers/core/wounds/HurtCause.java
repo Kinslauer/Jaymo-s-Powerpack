@@ -10,27 +10,29 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Why you're hurt, every time. Andy's clips "stop hitting me" and "what is hitting me here?": hearts fell and nothing
- * on screen said why ("the player needs to always know why they are taking damage so they can prevent it"). Every hurt
- * a player takes goes to their screen ({@link Hurt}; the client's {@code HurtCauseHud} draws it): a short line under the
- * crosshair in the character's own voice (Andy: instead of "Hurt: fire", "that BURNS"), naming the one who did it when
- * someone did, and a red mark round the crosshair on the side it came from when it came from somewhere. Downed too.
+ * Why you're hurt. Andy's clips "stop hitting me" and "what is hitting me here?": hearts fell and nothing on screen said
+ * why ("the player needs to always know why they are taking damage so they can prevent it"). Every hurt a player takes
+ * goes to their client ({@link Hurt}); the client's {@code HurtCauseHud} decides what to show. Andy (2026-11-28): "the hit
+ * indicators should only tell you once if you are hit and that should be at the very start of combat. it should NOT be
+ * naming the attackers, nor should it be as descriptive". So a blow from someone ({@code fight}) only says "I'm hit!"
+ * at the start of a fight, and never who did it; a hurt nobody dealt (the sun, fire, hunger, a fall) says its short cause
+ * once, when it starts.
  *
  * <p>A hurt whose damage type says nothing (vanilla {@code generic}, {@code magic}, {@code genericKill}, or any vanilla
  * type one of our features borrows) is named by the feature that dealt it: the first of our classes on the stack
- * ({@link #from}), whose line is {@code hurt_cause.jaymospowers.from.<Class>}. The server log names the damage type and
- * that class too, so a hurt nobody can name can still be traced.
+ * ({@link #from}), whose line is {@code hurt_cause.jaymospowers.from.<Class>}. The server log names the damage type, that
+ * class and the attacker, so a hurt nobody can name can still be traced.
  */
 public final class HurtCause {
 	/** The same cause is logged again after this long (ticks). */
@@ -46,19 +48,18 @@ public final class HurtCause {
 
 	/**
 	 * Server → the player hurt: {@code kind} the damage type's message id; {@code from} the class of ours that dealt it
-	 * (simple name, "" if none); {@code who} the one who did it, if anyone; {@code attacker} their entity id (-1: none);
-	 * {@code shot} hit from range (an arrow, a spell, a thrown thing); {@code at} where it came from, if anywhere;
-	 * {@code amount} the health it took.
+	 * (simple name, "" if none); {@code fight} a blow someone or something dealt (a swing, an arrow, a bite, a blast);
+	 * {@code attacker} the one who did it, by entity id (-1: none), for the side mark to follow, never named; {@code at}
+	 * where it came from, if anywhere; {@code amount} the health it took.
 	 */
-	public record Hurt(String kind, String from, Optional<Component> who, int attacker, boolean shot, Optional<Vec3> at, float amount)
+	public record Hurt(String kind, String from, boolean fight, int attacker, Optional<Vec3> at, float amount)
 		implements CustomPacketPayload {
 		public static final Type<Hurt> TYPE = new Type<>(JaymosPowers.id("hurt_cause"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Hurt> CODEC = StreamCodec.composite(
 			ByteBufCodecs.STRING_UTF8, Hurt::kind,
 			ByteBufCodecs.STRING_UTF8, Hurt::from,
-			ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), Hurt::who,
+			ByteBufCodecs.BOOL, Hurt::fight,
 			ByteBufCodecs.VAR_INT, Hurt::attacker,
-			ByteBufCodecs.BOOL, Hurt::shot,
 			ByteBufCodecs.optional(Vec3.STREAM_CODEC), Hurt::at,
 			ByteBufCodecs.FLOAT, Hurt::amount,
 			Hurt::new);
@@ -93,12 +94,12 @@ public final class HurtCause {
 			// (a hurt "from" where you stand has no side)
 			at = null;
 		}
-		boolean shot = by != null && source.getDirectEntity() != null && source.getDirectEntity() != source.getEntity();
+		Entity direct = source.getDirectEntity();
+		boolean fight = by != null || direct != null && direct != player || source.is(DamageTypeTags.IS_EXPLOSION);
 		log(player, by, id, from, taken);
 		if (ServerPlayNetworking.canSend(player, Hurt.TYPE)) {
-			ServerPlayNetworking.send(player, new Hurt(id, from, Optional.ofNullable(by).map(Entity::getDisplayName), by == null ? -1 : by.getId(),
-				shot, Optional.ofNullable(at), taken));
-		} else if (by == null && !Downed.isDowned(player)) {
+			ServerPlayNetworking.send(player, new Hurt(id, from, fight, by == null ? -1 : by.getId(), Optional.ofNullable(at), taken));
+		} else if (!fight && !Downed.isDowned(player)) {
 			// (a client without the mod: the action bar, as before)
 			player.sendOverlayMessage(Component.translatableWithFallback("hurt_cause.jaymospowers." + id, "Ugh... " + plain(id) + "!")
 				.withStyle(ChatFormatting.RED));
