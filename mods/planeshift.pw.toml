@@ -1,0 +1,13 @@
+name = "Planeshift"
+filename = "planeshift-1714620-9083764.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "92e4ab6f2b15789aa7077e1723b33b28a8c51021"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9083764
+project-id = 1714620

@@ -1,0 +1,13 @@
+name = "Windy"
+filename = "Windy-1.1.1+26.1.jar"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/EwYg6C78/versions/qKwLQacO/Windy-1.1.1%2B26.1.jar"
+hash-format = "sha512"
+hash = "953d568f15c5d82dbb12d6dee12dd4947fa977f560dab155b1fd2201ad559c259ce4d93ca589fc30f80aa9332231483d2116742639eab9a9df01c962938fbcf6"
+
+[update]
+[update.modrinth]
+mod-id = "EwYg6C78"
+version = "qKwLQacO"

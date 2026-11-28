@@ -1,0 +1,13 @@
+name = "Just Better Forest"
+filename = "just-better-forest-1.3.5.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/PxFU96NN/versions/UGEQIFPX/just-better-forest-1.3.5.jar"
+hash-format = "sha512"
+hash = "42f7ef231f3051c7d3d5f75e4d0c123145c27328fb0c6110d274819a7ee11645fef12c6f766961c515ab14956cabc508aab1362767c4e518690d36d75e2f5f18"
+
+[update]
+[update.modrinth]
+mod-id = "PxFU96NN"
+version = "UGEQIFPX"

@@ -1,0 +1,13 @@
+name = "stupid block animations"
+filename = "stupid-block-animations-0.1.3+26.3-fabric.jar"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/yG5lGWim/versions/6JJXDxg7/stupid-block-animations-0.1.3%2B26.3-fabric.jar"
+hash-format = "sha512"
+hash = "465d32ca90f61f220d8f93ed86a4ead368ff128fdf621e41ad47becf21765480da62192c2c73882d7e37274370cdee28a59deee82707f62a19ef743479608652"
+
+[update]
+[update.modrinth]
+mod-id = "yG5lGWim"
+version = "6JJXDxg7"

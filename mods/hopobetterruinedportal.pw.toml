@@ -1,0 +1,13 @@
+name = "Hopo Better Ruined Portal"
+filename = "hopobetterruinedportals-26-3-1-5-2.zip"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/hIpLSyga/versions/lHhDooco/hopobetterruinedportals-26-3-1-5-2.zip"
+hash-format = "sha512"
+hash = "a9c7eca2222d9e62308774faa609841ce7524eecd77c564a4a486a3317e8a70262dee8ac056deb260c9925f2d9fc036eba6b1a0a0664eb84ebfa69b5cac9c3ce"
+
+[update]
+[update.modrinth]
+mod-id = "hIpLSyga"
+version = "lHhDooco"

@@ -1,0 +1,13 @@
+name = "Modonomicon"
+filename = "modonomicon-26.3-fabric-2.23.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/692GClaE/versions/z8ESky23/modonomicon-26.3-fabric-2.23.1.jar"
+hash-format = "sha512"
+hash = "7e63b9b4d638a3ff46a15bf9e91e15ead06879e1ba79ac9e79d8913c549a3ee2ec94c381634a37d1a0234451ec467d22357c1cfad09155b757c5b5ae93b74cfb"
+
+[update]
+[update.modrinth]
+mod-id = "692GClaE"
+version = "z8ESky23"

@@ -1,0 +1,13 @@
+name = "Combo Clash"
+filename = "combo-clash-1823955-9844958.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "ac7a814be03457774b82f3fd2485b985e8b43768"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9844958
+project-id = 1823955

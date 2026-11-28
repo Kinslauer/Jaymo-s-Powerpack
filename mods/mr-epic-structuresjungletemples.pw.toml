@@ -1,0 +1,13 @@
+name = "Epic Structures: Jungle Temples"
+filename = "Epic Jungle Temples v1.0.3 (26.3).jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/Zs1qzXyd/versions/ImFhV10j/Epic%20Jungle%20Temples%20v1.0.3%20%2826.3%29.jar"
+hash-format = "sha512"
+hash = "e776d2f77f474588dd18039e49006684a9a55f26314232c2a14e09b219c4e99e0782476ad32052b721681151f795b2b7a52c2a869fa7e9bb3ffd7f4bc15d94ad"
+
+[update]
+[update.modrinth]
+mod-id = "Zs1qzXyd"
+version = "ImFhV10j"

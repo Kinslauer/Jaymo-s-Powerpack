@@ -1,0 +1,13 @@
+name = "Seaworthy Boats"
+filename = "seaworthyboats-26.3.0-2.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/AoaYKREU/versions/29sIHp7D/seaworthyboats-26.3.0-2.0.jar"
+hash-format = "sha512"
+hash = "ae9d530205009387e44c1960651ad87b5a8c3ee249ae91f822056254c3554c9abe3b46be763a46fd2ff6f76c99268cf9cee642b7d198f25a134b8d12508df01b"
+
+[update]
+[update.modrinth]
+mod-id = "AoaYKREU"
+version = "29sIHp7D"

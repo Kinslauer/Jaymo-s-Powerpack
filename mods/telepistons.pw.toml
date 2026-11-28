@@ -1,0 +1,13 @@
+name = "Telepistons"
+filename = "Telepistons-1.1.4-26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/23PBx0DP/versions/geiPkx5u/Telepistons-1.1.4-26.3.jar"
+hash-format = "sha512"
+hash = "83c21f5518c77f663f6e832f49fd1fe6f42918771935f53fdc8dade0893dc65a6eea206077eda5cd9a38eebdbab298fb70afdf2ece1ffc9c805f80f0c7116fe6"
+
+[update]
+[update.modrinth]
+mod-id = "23PBx0DP"
+version = "geiPkx5u"

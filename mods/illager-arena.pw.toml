@@ -1,0 +1,13 @@
+name = "Illager Arena"
+filename = "illager_arena-1.0.0 Fabric 26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/6Eq86tCy/versions/fVj7sO1D/illager_arena-1.0.0%20Fabric%2026.3.jar"
+hash-format = "sha512"
+hash = "76bd9341ae9d19638fdfe1da19822e03d73f68ff79c1ac73d3f85aa80cb72a1c50283d0007717e6ff2590b2f186be658da3d1f427fac06b50226b721d4f2056e"
+
+[update]
+[update.modrinth]
+mod-id = "6Eq86tCy"
+version = "fVj7sO1D"

@@ -1,0 +1,13 @@
+name = "Bag Of Holding"
+filename = "bagofholding-v26.3.5-mc26.3.x+fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/qbqWvc0D/versions/Kz2iNqzF/bagofholding-v26.3.5-mc26.3.x%2Bfabric.jar"
+hash-format = "sha512"
+hash = "e987b8aac19c305ba3abfe31ae32d18b835f45c50523453df0c76d43a965658beb2c8ae63d624ca990df50fc1f674d05631d643572fe0c9e258c2a0bb887711b"
+
+[update]
+[update.modrinth]
+mod-id = "qbqWvc0D"
+version = "Kz2iNqzF"

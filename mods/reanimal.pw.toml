@@ -1,0 +1,13 @@
+name = "Re:Animal"
+filename = "reanimal-fabric-0.6.12+26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/4Q5qctHv/versions/dcNJpLZ7/reanimal-fabric-0.6.12%2B26.3.jar"
+hash-format = "sha512"
+hash = "594a9388e3a89c02a8c366150e8ea9c8fd269f7ccad17a143da38b069ff860dd361018f6c21ddf251c82db450800ed88a367e3d97f615f8ea5827a4ba219d7ce"
+
+[update]
+[update.modrinth]
+mod-id = "4Q5qctHv"
+version = "dcNJpLZ7"

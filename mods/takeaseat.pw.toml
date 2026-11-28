@@ -1,0 +1,13 @@
+name = "Take a Seat"
+filename = "takeaseat-1.0.4-26.3-fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/Gg7qMzxE/versions/Rw0pkzPu/takeaseat-1.0.4-26.3-fabric.jar"
+hash-format = "sha512"
+hash = "b40c5abd44f584d776f5ede7d2d32894f925aa6359e1c65277b608bc6466881d734c13ffe0a2c06d4498fb3dfde16b2303ed66752142bfc84fda88b75b9de438"
+
+[update]
+[update.modrinth]
+mod-id = "Gg7qMzxE"
+version = "Rw0pkzPu"

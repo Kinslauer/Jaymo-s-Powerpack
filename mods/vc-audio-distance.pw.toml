@@ -1,0 +1,13 @@
+name = "Voice Physics"
+filename = "voice-physics-1712556-9251110.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "4552a1940ca13d1fb57c2bbec5fc1ae2a6bcbde5"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9251110
+project-id = 1712556

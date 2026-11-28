@@ -1,0 +1,13 @@
+name = "Shared Advancements"
+filename = "sharedadvancements-fabric-26.3-6.1.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/78EIgPlj/versions/cbhS9PTE/sharedadvancements-fabric-26.3-6.1.0.jar"
+hash-format = "sha512"
+hash = "82586fb946592b0a92b059bc8617ccfc86f2084a0f17f717794850a55ea6e64a99f8ba8c0075220aa4ac1f260be0254dbcd22a36224d68c3db68058371f6d90f"
+
+[update]
+[update.modrinth]
+mod-id = "78EIgPlj"
+version = "cbhS9PTE"

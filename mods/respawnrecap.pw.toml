@@ -1,0 +1,13 @@
+name = "Respawn Recap"
+filename = "respawnrecap-fabric-1.2.1-26.3.jar"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/rgcja1LM/versions/QGg6TlsS/respawnrecap-fabric-1.2.1-26.3.jar"
+hash-format = "sha512"
+hash = "5e748372c5ffbbeaf6586dccfba3593991dac1926f3492fe3bf3ebc496c6fba6ddb71f598191a87cdaee5cd87ccc20ec09faccbd91bfe10ace2a413c1f9f554a"
+
+[update]
+[update.modrinth]
+mod-id = "rgcja1LM"
+version = "QGg6TlsS"

@@ -1,0 +1,13 @@
+name = "One Dimension"
+filename = "one-dimension-1633224-9101534.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "3ad275eda2047943acc65353485e18a148058055"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9101534
+project-id = 1633224

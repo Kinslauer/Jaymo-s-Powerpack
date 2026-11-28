@@ -1,0 +1,13 @@
+name = "Felled"
+filename = "felled-1715901-9305152.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "e6216424a030401cfb1d47a401abcdf495c2fc10"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9305152
+project-id = 1715901

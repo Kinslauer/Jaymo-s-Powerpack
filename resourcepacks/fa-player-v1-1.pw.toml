@@ -1,0 +1,13 @@
+name = "FA+Player-v1.1"
+filename = "FA+Player-v1.1.zip"
+side = "client"
+
+[download]
+mode = "metadata:curseforge"
+hash-format = "sha1"
+hash = "122e397af111e3dc5fb6b60004aad9464980f13a"
+
+[update]
+[update.curseforge]
+file-id = 8245230
+project-id = 1281029

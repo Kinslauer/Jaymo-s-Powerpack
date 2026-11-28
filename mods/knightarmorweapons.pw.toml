@@ -1,0 +1,13 @@
+name = "Knight Armor and Weapons"
+filename = "KnightArmorWeapons-1.1.1-Fabric-mc26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/3CliBIfd/versions/WqwhtagO/KnightArmorWeapons-1.1.1-Fabric-mc26.3.jar"
+hash-format = "sha512"
+hash = "e62be1c551ada69660e2b8ef2c22f4fb9ab3a3f15884330ebc0a620edc490616e19098b7cadef417d63d4547f5db07600898ea230c599cb4fef06feb52dd1c2c"
+
+[update]
+[update.modrinth]
+mod-id = "3CliBIfd"
+version = "WqwhtagO"

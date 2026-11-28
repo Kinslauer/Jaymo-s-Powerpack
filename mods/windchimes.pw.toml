@@ -1,0 +1,13 @@
+name = "Wind Chimes Rebuild"
+filename = "windchimes-1.11.0-26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/WCrhl0ep/versions/tZFQMiMH/windchimes-1.11.0-26.3.jar"
+hash-format = "sha512"
+hash = "a618cee4bd5c326e71e2387029376c0791c0dd0e7a672a10c3afd0fc6c34da5eb907500545b57fa9c888007003066af9cbb3b4817f1789ad0ce2348a5caad664"
+
+[update]
+[update.modrinth]
+mod-id = "WCrhl0ep"
+version = "tZFQMiMH"

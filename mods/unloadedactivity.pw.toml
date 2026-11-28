@@ -1,0 +1,13 @@
+name = "Unloaded Activity"
+filename = "unloadedactivity-0.8.0-SNAPSHOT.1+mc26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/Oo4rJCDP/versions/1FrNgzRc/unloadedactivity-0.8.0-SNAPSHOT.1%2Bmc26.3.jar"
+hash-format = "sha512"
+hash = "e0028bba6a36b54c6a5acbb2fb9b8e52cda80588977fb11907121d111cf681dbc0fdb5c19c01aa71ca5c30a81cf87759fe3c672d647f55756d2aef26eecb9262"
+
+[update]
+[update.modrinth]
+mod-id = "Oo4rJCDP"
+version = "1FrNgzRc"

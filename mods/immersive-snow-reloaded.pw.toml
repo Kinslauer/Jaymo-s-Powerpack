@@ -1,0 +1,13 @@
+name = "Immersive Snow Reloaded"
+filename = "immersive_snow_reloaded-fabric-2.2.1+26.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/kuvkkZCQ/versions/HBnBf0gs/immersive_snow_reloaded-fabric-2.2.1%2B26.1.jar"
+hash-format = "sha512"
+hash = "a61fa5e1938b0997c790f6dfe06bdb3e0e0c231802b38bece094ab7348b57d3c87080a15a7286d20a6b53ecdf89440f1fd4020c0d11d5b4dab63c1b0a83569f2"
+
+[update]
+[update.modrinth]
+mod-id = "kuvkkZCQ"
+version = "HBnBf0gs"

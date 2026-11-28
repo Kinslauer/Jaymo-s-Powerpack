@@ -1,0 +1,12 @@
+name = "Reason"
+version = "0.28.57"
+pack-format = "packwiz:1.1.0"
+
+[index]
+file = "index.toml"
+hash-format = "sha256"
+hash = "109986bd59ef5bc3debc3ac6851992d49f06f8882085ccc910706340e7ea4c61"
+
+[versions]
+minecraft = "26.3"
+fabric = "0.20.1"

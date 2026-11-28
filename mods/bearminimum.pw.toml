@@ -1,0 +1,13 @@
+name = "Bear Minimum"
+filename = "bearminimum-fabric-26.3-1.0.5.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/nD7u3UoQ/versions/L6rn1t3T/bearminimum-fabric-26.3-1.0.5.jar"
+hash-format = "sha512"
+hash = "5662dab3d0a61009c63c82ea99e44fc2ad97c1ba1354c837d19014fe7d7f42201cdf406d2cf8a113b3648104266db627916ca9bedfb346dd09d191db9c6e5449"
+
+[update]
+[update.modrinth]
+mod-id = "nD7u3UoQ"
+version = "L6rn1t3T"

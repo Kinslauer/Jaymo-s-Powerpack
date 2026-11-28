@@ -1,0 +1,13 @@
+name = "Direbats"
+filename = "direbats-4.0.0+26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/epF1CjCx/versions/HAesXjW7/direbats-4.0.0%2B26.3.jar"
+hash-format = "sha512"
+hash = "8fad67d820bde3bbe30f45e03ce0a70a0d0515d3c52afe848e75c183f7dd76d4f32020affff70ee7ee01172cc748bd8d69fa5316633ce250fc64511086d577af"
+
+[update]
+[update.modrinth]
+mod-id = "epF1CjCx"
+version = "HAesXjW7"

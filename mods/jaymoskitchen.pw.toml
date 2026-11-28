@@ -1,0 +1,8 @@
+name = "Jaymo's Kitchen"
+filename = "jaymos-kitchen-0.7.18.jar"
+side = "both"
+
+[download]
+url = "https://github.com/Kinslauer/jaymo-s-powerpack/releases/download/tester-pack-files/jaymos-kitchen-0.7.18-74578a0fa489.jar"
+hash-format = "sha256"
+hash = "16ac7d544d7cb8ec9d6b967d8d688ceff07a4e058a72e62f3cb96a776558527d"

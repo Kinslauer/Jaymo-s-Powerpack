@@ -1,0 +1,13 @@
+name = "Leashes"
+filename = "panda-lead-break-1.4.0+26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/U70bU2rq/versions/juXFEalK/panda-lead-break-1.4.0%2B26.3.jar"
+hash-format = "sha512"
+hash = "8eeba7cb6ad214eea58167cc149c33587dd3391ebc8c0bd9a6c7839e03e1ffe18df665aa9cc739da4e2b53931726fdb2614ca2a0be132170b034e0d969c3d8ed"
+
+[update]
+[update.modrinth]
+mod-id = "U70bU2rq"
+version = "juXFEalK"

@@ -1,0 +1,13 @@
+name = "Cube Animals"
+filename = "cube-animals-1550917-9411257.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "e1fbcd16dbf99fb6f7a74e0dd3eac39a564ff177"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9411257
+project-id = 1550917

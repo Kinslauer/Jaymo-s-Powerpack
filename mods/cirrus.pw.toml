@@ -1,0 +1,13 @@
+name = "Cirrus"
+filename = "cirrus-fabric-26.3-1.4.2.jar"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/SJDzFJH7/versions/eYWl8ES1/cirrus-fabric-26.3-1.4.2.jar"
+hash-format = "sha512"
+hash = "1bb83e682c42a10af95103d5597c8a2f1f3fcb33574a257cd6ee75134817ff2d95a7a61bc57aed56985cb703d6e46c67ddadc99b8b2540000c18888cc4fb62fd"
+
+[update]
+[update.modrinth]
+mod-id = "SJDzFJH7"
+version = "eYWl8ES1"

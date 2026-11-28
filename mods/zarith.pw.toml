@@ -1,0 +1,13 @@
+name = "Zarith"
+filename = "zarith-1720181-9284445.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "a57ed83224f9d982bf29db6703892682c3e18805"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9284445
+project-id = 1720181

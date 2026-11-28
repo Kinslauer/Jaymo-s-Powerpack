@@ -1,0 +1,13 @@
+name = "William Wythers' Overhauled Overworld"
+filename = "wwoo-fabric-26.3-3.0.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/II7t6llZ/versions/23VeM3qz/wwoo-fabric-26.3-3.0.1.jar"
+hash-format = "sha512"
+hash = "7e5aa11034a6ded04ece168c031753b3e464a55835b73fd46815fb2833b2d541cf362d5d0dc384f89dc8dc5afe7fbb7848d264c42928fb865a48f4e6b233cc4f"
+
+[update]
+[update.modrinth]
+mod-id = "II7t6llZ"
+version = "23VeM3qz"

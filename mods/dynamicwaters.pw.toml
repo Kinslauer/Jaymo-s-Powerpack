@@ -1,0 +1,8 @@
+name = "Dynamic Waters"
+filename = "dynamicwaters-13.1.1-26.3-jaymo.1.jar"
+side = "both"
+
+[download]
+url = "https://github.com/Kinslauer/jaymo-s-powerpack/releases/download/tester-pack-files/dynamicwaters-13.1.1-26.3-jaymo.1-c906db9a6289.jar"
+hash-format = "sha256"
+hash = "255d97ae3189c613bd49b27c549e690b4f053ad273b93f422b41db062393153e"

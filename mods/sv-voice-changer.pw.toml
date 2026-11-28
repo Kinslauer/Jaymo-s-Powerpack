@@ -1,0 +1,13 @@
+name = "Simple Voice Voice Changer"
+filename = "sv-voice-changer-fabric-1.2.5+26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/LLsfORx9/versions/acFxvUQp/sv-voice-changer-fabric-1.2.5%2B26.3.jar"
+hash-format = "sha512"
+hash = "cf0620cdeddb9704535532a57c6b1764ac69741779c7ef5d8ef9d114e9e7b4ff4a88f576be45e097f4181d28b7e787ca2948565b19589a719849866569000cac"
+
+[update]
+[update.modrinth]
+mod-id = "LLsfORx9"
+version = "acFxvUQp"

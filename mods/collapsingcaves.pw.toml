@@ -1,0 +1,13 @@
+name = "CollapsingCaves"
+filename = "CollapsingCaves-26.3-Fabric-1.7.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/te88FGOp/versions/n2jAyNkE/CollapsingCaves-26.3-Fabric-1.7.jar"
+hash-format = "sha512"
+hash = "0abb93261ec855fa2d0364d0de6571fab6f4693e69cc80aecce35d6409c9ab670efd26d109f89b2e8221a144adb829c22d04eb7b137d8bd126ef352d5aebd81a"
+
+[update]
+[update.modrinth]
+mod-id = "te88FGOp"
+version = "n2jAyNkE"

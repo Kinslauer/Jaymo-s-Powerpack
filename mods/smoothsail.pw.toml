@@ -1,0 +1,13 @@
+name = "Smooth Sail"
+filename = "smoothsail-26.3-2.2.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/eizpkLwb/versions/sY8WzbqM/smoothsail-26.3-2.2.0.jar"
+hash-format = "sha512"
+hash = "672355694976d45e29bbd2743bbb356a24465464394d1d8eb96db9c1d6c573207621fc76cf6291bcd28c86e38bce0e95d2c331d4d97dd93f66f8e77d3b6c44fd"
+
+[update]
+[update.modrinth]
+mod-id = "eizpkLwb"
+version = "sY8WzbqM"

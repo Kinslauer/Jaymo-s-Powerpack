@@ -1,0 +1,13 @@
+name = "Hot Air Balloons"
+filename = "hot-air-balloons-1776121-9405501.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "9fc3c6051dae2332fb52c0b0b2706342cdefbf26"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9405501
+project-id = 1776121

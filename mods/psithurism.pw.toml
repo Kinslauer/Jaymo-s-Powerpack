@@ -1,0 +1,13 @@
+name = "Psithurism"
+filename = "psithurism-1533119-9374201.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "55330e17fae89db97257244be2b623f8393ed2db"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9374201
+project-id = 1533119

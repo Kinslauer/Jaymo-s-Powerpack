@@ -1,0 +1,13 @@
+name = "Respawning Animals"
+filename = "respawninganimals-v26.3.0-mc26.3.x+fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/WnwcSeWc/versions/IwgPloQF/respawninganimals-v26.3.0-mc26.3.x%2Bfabric.jar"
+hash-format = "sha512"
+hash = "6c55d1d34c44dde0844925b402353425a91afb0a1c638eb243a463afe13522ffa47a035ad206cd7421a59d358eddaad159ae1b4030147812b4c9d2e7ea91d7b7"
+
+[update]
+[update.modrinth]
+mod-id = "WnwcSeWc"
+version = "IwgPloQF"

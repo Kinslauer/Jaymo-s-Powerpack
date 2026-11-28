@@ -1,0 +1,13 @@
+name = "Earth & Water"
+filename = "earth-and-water-1.0.6-26.3-hotfix-2.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/QZBq3KMs/versions/mjHxn13r/earth-and-water-1.0.6-26.3-hotfix-2.jar"
+hash-format = "sha512"
+hash = "0bd46a7d38c0f500bee61669181354f67c10107ca4571d604bf4ffec0f5ef5cd06fa695b66c6cabebb0d6e05b0b07aeddedf91bd1a0c014ab85620653102e61f"
+
+[update]
+[update.modrinth]
+mod-id = "QZBq3KMs"
+version = "mjHxn13r"

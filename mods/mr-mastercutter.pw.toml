@@ -1,0 +1,13 @@
+name = "MasterCutter"
+filename = "mastercutter-1.8.1-mc26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/DuUMFIfX/versions/iKLtSp2g/mastercutter-1.8.1-mc26.3.jar"
+hash-format = "sha512"
+hash = "4ec315e62f2eb8b463d56786e57cf3a6e10bc1648c9636a1a8697c4cb256851dedd7cfd88b1578529f17dfb1d700b628b2f0497055522ae4f536bdc06091050f"
+
+[update]
+[update.modrinth]
+mod-id = "DuUMFIfX"
+version = "iKLtSp2g"

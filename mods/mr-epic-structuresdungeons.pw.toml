@@ -1,0 +1,13 @@
+name = "Epic Structures: Dungeons"
+filename = "Epic Dungeons v1.2.6 (26.3).jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/t0YT91nL/versions/NK6Uptyi/Epic%20Dungeons%20v1.2.6%20%2826.3%29.jar"
+hash-format = "sha512"
+hash = "aafefcbea2d4fea22e15af95ab617d3e5e4a20524f44eb36861262d43f2183205f2bdaba1bb13f055ca38bb9c54cbbb7bea852240ad23369f5ac1e4c77d0a197"
+
+[update]
+[update.modrinth]
+mod-id = "t0YT91nL"
+version = "NK6Uptyi"

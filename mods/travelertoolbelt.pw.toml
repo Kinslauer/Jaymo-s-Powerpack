@@ -1,0 +1,13 @@
+name = "Traveler Tool Belt"
+filename = "travelertoolbelt-fabric-26.3-1.0.6.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/oQxD3huq/versions/r5bfVDn1/travelertoolbelt-fabric-26.3-1.0.6.jar"
+hash-format = "sha512"
+hash = "a55dad4811fc8dea178e943f9197ec677e9e62ad4e1e4a91d902cdcf79d782e9eed2054ed4aef26a8a88f6dc32eec46f2e82661b3ae2a4e2c7100fa7f7510f07"
+
+[update]
+[update.modrinth]
+mod-id = "oQxD3huq"
+version = "r5bfVDn1"

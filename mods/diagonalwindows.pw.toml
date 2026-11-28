@@ -1,0 +1,13 @@
+name = "Diagonal Windows"
+filename = "diagonalwindows-v26.3.0-mc26.3.x+fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/oOi0CKes/versions/orlnUKLD/diagonalwindows-v26.3.0-mc26.3.x%2Bfabric.jar"
+hash-format = "sha512"
+hash = "5d400267e40bd95e87e1329d7d8c2126637f564f324e0f1c690a59246cf652c5b34a805e9c92148aac18131d51f77b78a7fb1723a2c1fc242d9d23e3e03ae231"
+
+[update]
+[update.modrinth]
+mod-id = "oOi0CKes"
+version = "orlnUKLD"

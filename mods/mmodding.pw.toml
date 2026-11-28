@@ -1,0 +1,13 @@
+name = "MModding Library"
+filename = "mmodding-library-694928-9374057.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "5790aff06820395eb09ac32567b5f33b0f69020a"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9374057
+project-id = 694928

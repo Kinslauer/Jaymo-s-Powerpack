@@ -1,0 +1,13 @@
+name = "CodxLib"
+filename = "codxlib-1633207-8893340.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "c1911ed38eed1f824809d2f38798342da5ee81ba"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 8893340
+project-id = 1633207

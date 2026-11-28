@@ -1,0 +1,13 @@
+name = "Timeless & Classics Guns: Zero Refabricated"
+filename = "TACZ-Refabricated-26.3-0.8.5-beta1+fabric26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/lLryDmIs/versions/3BP2Kc1r/TACZ-Refabricated-26.3-0.8.5-beta1%2Bfabric26.3.jar"
+hash-format = "sha512"
+hash = "e787e95f792dd8929d1d838982260e666293dc5f0e09e548127b6f42c4cde61553bf28fce52e4dc036d6f8dff44a601bad617a80e359b07063b6e2b5c1228843"
+
+[update]
+[update.modrinth]
+mod-id = "lLryDmIs"
+version = "3BP2Kc1r"

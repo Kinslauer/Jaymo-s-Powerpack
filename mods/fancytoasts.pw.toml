@@ -1,0 +1,13 @@
+name = "FancyToasts"
+filename = "fancytoasts-1.5.1-fabric-26.3.jar"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/eUziWqPC/versions/wG7aMfVG/fancytoasts-1.5.1-fabric-26.3.jar"
+hash-format = "sha512"
+hash = "69c42d6e70126025f9363e18e95384ed6ccb26e272e074807599dcdb936cc2a042bed92ecc405b73487bce1851b40de59b1631c71624835064b0b9a9ce5d128c"
+
+[update]
+[update.modrinth]
+mod-id = "eUziWqPC"
+version = "wG7aMfVG"

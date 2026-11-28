@@ -1,0 +1,13 @@
+name = "CustomChunks"
+filename = "customchunks-1727847-9101536.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "a5526e3d78576554c36b210425717128a3e964fa"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9101536
+project-id = 1727847

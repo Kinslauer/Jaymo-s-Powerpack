@@ -1,0 +1,13 @@
+name = "Advanced Chimneys"
+filename = "adchimneys-26.3.0.1-fabric-build.0125.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/r2rWUhnP/versions/ASEt7Igg/adchimneys-26.3.0.1-fabric-build.0125.jar"
+hash-format = "sha512"
+hash = "3cc0c45cdb151cd84baae3af58ed0ee5cff57af025290862eab9e5069767cc70dfd1ae0642a5164ba31594aac50e7d51affbfa23628155cd8647af0e4ed5918e"
+
+[update]
+[update.modrinth]
+mod-id = "r2rWUhnP"
+version = "ASEt7Igg"

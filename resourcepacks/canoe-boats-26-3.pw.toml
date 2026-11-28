@@ -1,0 +1,13 @@
+name = "Canoe boats 26.3"
+filename = "Canoe boats 26.3.zip"
+side = "client"
+
+[download]
+mode = "metadata:curseforge"
+hash-format = "sha1"
+hash = "b324c1097659ecf79a0d29fe057ed363f4914823"
+
+[update]
+[update.curseforge]
+file-id = 8944107
+project-id = 1086847

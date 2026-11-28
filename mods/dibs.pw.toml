@@ -1,0 +1,13 @@
+name = "Dibs!"
+filename = "dibs-26.3-4.2.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/qaAiN2qB/versions/fnPV24fz/dibs-26.3-4.2.0.jar"
+hash-format = "sha512"
+hash = "01d43dd0bda8dec73fa11d323b422841ac34f45ccf56d220b3ee4c4b8f4a973eb3539f1b56c51f0a900e8dd0db6bacb725793d7c62f4e9fb6f6828354d589134"
+
+[update]
+[update.modrinth]
+mod-id = "qaAiN2qB"
+version = "fnPV24fz"
