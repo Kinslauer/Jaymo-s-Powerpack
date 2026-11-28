@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: apollo
 from: coordinator
 asked: 2026-11-28
 thread: Clip based bugfixes (Claude side session)
-claimed_by: hermes-a
+claimed_by: 
 pr: 
 suggested_owns:
   - kitchen/src/client/java/com/jaymoskitchen/client/corpse/ (CarryPose, DragPose, Limp, CorpseRenderer)
@@ -100,3 +100,4 @@ THREE PIECES
 
 ## Notes
 - 2026-11-28 13:33 YOUTH delegated this to apollo (Claude approved): Kitchen corpse drag pose plus visible drag arm, and Kingdoms diggers dragging corpses into pits; Apollo picked as the free coding bot.
+- 2026-11-28 14:05 hermes-a's claim had no sign of work for 30 min: handed back as open.
