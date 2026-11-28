@@ -40,6 +40,24 @@ abstract class ClientCombatMixin {
 		return original.call(key) && !ComboClashClient.yieldsAttack();
 	}
 
+	/**
+	 * Its dash (Left Alt here) holds off while Alt is the zoom's ({@code SneakZoom#ownsAlt}: Shift held with it, or a
+	 * fishing line out); the press is spent, not kept for later. Its other keys' presses go through as ever.
+	 */
+	@WrapOperation(method = "tickStart()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z"))
+	private static boolean jaymospowers$zoomNotDash(KeyMapping key, Operation<Boolean> original) {
+		if (DASH.equals(key.getName()) && com.jaymospowers.client.SneakZoom.ownsAlt()) {
+			while (original.call(key)) {
+				// spent
+			}
+			return false;
+		}
+		return original.call(key);
+	}
+
+	/** Combo Clash's dash key. */
+	private static final String DASH = "key.comboclash.dash";
+
 	/** Its third drain is the swap and drop keys', in combat mode. */
 	@WrapOperation(method = "tickStart()V", at = @At(value = "INVOKE", target = "Lcom/comboclash/client/ClientCombat;drain([Lnet/minecraft/client/KeyMapping;)V", ordinal = 2))
 	private static void jaymospowers$keepDrop(KeyMapping[] keys, Operation<Void> original) {
