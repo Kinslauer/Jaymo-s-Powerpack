@@ -3,6 +3,7 @@ package com.jaymoskitchen.client.corpse;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.util.Mth;
 
@@ -90,12 +91,13 @@ public record Limp(float back, float left) {
 	}
 
 	/** A leg hanging from the hip under a body carried belly down (sideways across the arms), swung by the carrier. */
-	private static void dangle(ModelPart root, String name, Limp limp, float give) {
-		if (root.hasChild(name)) {
-			ModelPart leg = root.getChild(name);
-			leg.xRot = -limp.left() * give;
-			leg.yRot = 0.0F;
-			leg.zRot = limp.back() * give;
+		private static void dangle(ModelPart root, String name, Limp limp, float give) {
+			if (root.hasChild(name)) {
+				ModelPart leg = root.getChild(name);
+				PartPose rest = leg.getInitialPose();
+				leg.xRot = rest.xRot() - limp.left() * give;
+				leg.yRot = rest.yRot();
+				leg.zRot = rest.zRot() + limp.back() * give;
+			}
 		}
-	}
 }

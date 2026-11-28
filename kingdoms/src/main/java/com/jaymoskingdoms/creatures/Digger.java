@@ -1,15 +1,29 @@
 package com.jaymoskingdoms.creatures;
 
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.StreamSupport;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -34,7 +48,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -71,17 +87,36 @@ public class Digger extends Monster {
 	static final int PACK_STANDS = 3;
 	static final double PACK_NEAR = 12.0, WARREN_GROUND = 10.0;
 	/** A pit's digger: how near its nook (blocks, flat) and how far above the nook's floor a player counts as in its pit, and how often (ticks) it looks. */
-	static final double PIT_NEAR = 1.6, PIT_TOP = 2.0;
-	static final int PIT_LOOK = 5;
+		static final double PIT_NEAR = 1.6, PIT_TOP = 2.0;
+		static final int PIT_LOOK = 5;
 
-	private static final EntityDataAccessor<Boolean> CLIMBING = SynchedEntityData.defineId(Digger.class, EntityDataSerializers.BOOLEAN);
+		/** Corpse dragging: how far (blocks) a digger smells a corpse, how near a pit it must be to drag it there, and how long (ticks) feeding sates the warren. */
+			static final double CORPSE_SMELL = 16.0, DRAG_TO_PIT = 8.0, SATIATED_TICKS = 24000.0;
+		/** How often (ticks) a digger takes a bite from a corpse in a pit. */
+		static final int FEED_EVERY = 200;
+		/** A digger dragging a corpse: the corpse's entity type id (Kitchen's CorpseEntity). */
+			private static final String CORPSE_TYPE_ID = "jaymoskitchen:corpse";
 
-	/** The warren's chamber it runs to, if it has one. */
-	private @Nullable BlockPos home;
-	/** Game time until which it stands and fights instead of running. */
-	private long boldUntil;
-	/** Whether it waits in a pit's nook ({@link #home}) instead of roaming. */
-	private boolean lurks;
+		private static final EntityDataAccessor<Boolean> CLIMBING = SynchedEntityData.defineId(Digger.class, EntityDataSerializers.BOOLEAN);
+		/** Whether this digger is currently dragging a corpse. */
+		private static final EntityDataAccessor<Boolean> DRAGGING = SynchedEntityData.defineId(Digger.class, EntityDataSerializers.BOOLEAN);
+		/** The corpse being dragged (by UUID), or empty. */
+		private static final EntityDataAccessor<String> DRAG_CORPSE_UUID = SynchedEntityData.defineId(Digger.class, EntityDataSerializers.STRING);
+		/** Game time until which the warren is sated (diggers won't attack). */
+		private static final EntityDataAccessor<Long> WARREN_SATED_UNTIL = SynchedEntityData.defineId(Digger.class, EntityDataSerializers.LONG);
+
+		/** The warren's chamber it runs to, if it has one. */
+		private @Nullable BlockPos home;
+		/** Game time until which it stands and fights instead of running. */
+		private long boldUntil;
+		/** Whether it waits in a pit's nook ({@link #home}) instead of roaming. */
+		private boolean lurks;
+		/** The corpse this digger is dragging, if any (client side). */
+		private @Nullable UUID dragCorpseId;
+		/** Game time when it started feeding on the current corpse, or 0. */
+		private long feedStart;
+		/** The pit it's dragging the corpse to, if any. */
+		private @Nullable BlockPos targetPit;
 
 	public Digger(EntityType<? extends Digger> type, Level level) {
 		super(type, level);
@@ -94,27 +129,28 @@ public class Digger extends Monster {
 	}
 
 	@Override
-	protected void registerGoals() {
-		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(1, new HideGoal());
-		this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.1, false));
-		this.goalSelector.addGoal(4, new ReturnGoal());
-		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8) {
-			@Override
-			public boolean canUse() {
-				// a pit's digger keeps to its nook
-				return !Digger.this.lurks && super.canUse();
-			}
-		});
-		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
-		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
-		// players when it has the nerve (fights: a pack, close, struck, cornered, or bold); otherwise they are run from
-		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true, (target, level) -> level.getDifficulty() != Difficulty.PEACEFUL
-			&& this.fights(target)));
-		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
-		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
-	}
+		protected void registerGoals() {
+			this.goalSelector.addGoal(0, new FloatGoal(this));
+			this.goalSelector.addGoal(1, new HideGoal());
+			this.goalSelector.addGoal(2, new DragCorpseGoal());
+			this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.1, false));
+			this.goalSelector.addGoal(4, new ReturnGoal());
+			this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8) {
+				@Override
+				public boolean canUse() {
+					// a pit's digger keeps to its nook
+					return !Digger.this.lurks && super.canUse();
+				}
+			});
+			this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
+			this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+			this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
+			// players when it has the nerve (fights: a pack, close, struck, cornered, or bold); otherwise they are run from
+			this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true, (target, level) -> level.getDifficulty() != Difficulty.PEACEFUL
+					&& this.fights(target)));
+			this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
+			this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+		}
 
 	@Override
 	protected PathNavigation createNavigation(Level level) {
@@ -123,21 +159,44 @@ public class Digger extends Monster {
 	}
 
 	@Override
-	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
-		super.defineSynchedData(entityData);
-		entityData.define(CLIMBING, false);
-	}
+		protected void defineSynchedData(SynchedEntityData.Builder entityData) {
+			super.defineSynchedData(entityData);
+			entityData.define(CLIMBING, false);
+			entityData.define(DRAGGING, false);
+			entityData.define(DRAG_CORPSE_UUID, "");
+			entityData.define(WARREN_SATED_UNTIL, 0L);
+		}
 
-	@Override
-	public void tick() {
-		super.tick();
-		if (!this.level().isClientSide()) {
-			this.entityData.set(CLIMBING, this.horizontalCollision);
-			if (this.lurks && this.home != null && this.tickCount % PIT_LOOK == 0 && !this.bold()) {
-				this.watchPit();
+		@Override
+		public void tick() {
+			super.tick();
+			if (!this.level().isClientSide()) {
+				this.entityData.set(CLIMBING, this.horizontalCollision);
+				// update warren sated time from the entity data (synced from the warren's oldest digger)
+				long satedUntil = this.entityData.get(WARREN_SATED_UNTIL);
+				if (satedUntil > 0 && this.level().getGameTime() >= satedUntil) {
+					this.entityData.set(WARREN_SATED_UNTIL, 0L);
+				}
+				if (this.lurks && this.home != null && this.tickCount % PIT_LOOK == 0 && !this.bold()) {
+					this.watchPit();
+				}
+				// handle corpse dragging and feeding
+				this.tickCorpseDrag();
+			} else {
+				// client side: sync dragging state
+				boolean dragging = this.entityData.get(DRAGGING);
+				String corpseUuidStr = this.entityData.get(DRAG_CORPSE_UUID);
+				if (dragging && !corpseUuidStr.isEmpty()) {
+					try {
+						this.dragCorpseId = UUID.fromString(corpseUuidStr);
+					} catch (IllegalArgumentException e) {
+						this.dragCorpseId = null;
+					}
+				} else {
+					this.dragCorpseId = null;
+				}
 			}
 		}
-	}
 
 	/** A pit's digger: anyone who has dropped into its pit (lid or no lid) is set on. */
 	private void watchPit() {
@@ -174,27 +233,30 @@ public class Digger extends Monster {
 	}
 
 	/**
-	 * Whether it stands and fights {@code who} rather than run: bold; or, unless it is a lone one that has lost its nerve,
-	 * struck by them lately, cornered by them in its hole, or out of its hole with them within {@link #BITES} or with
-	 * another digger at hand (a pack hunts).
-	 */
-	boolean fights(LivingEntity who) {
-		if (this.bold()) {
-			return true;
+		 * Whether it stands and fights {@code who} rather than run: bold; or, unless it is a lone one that has lost its nerve,
+		 * struck by them lately, cornered by them in its hole, or out of its hole with them within {@link #BITES} or with
+		 * another digger at hand (a pack hunts). A sated warren doesn't fight.
+		 */
+		boolean fights(LivingEntity who) {
+			if (this.isWarrenSated()) {
+				return false;
+			}
+			if (this.bold()) {
+				return true;
+			}
+			boolean lone = this.lone();
+			if (lone && this.getHealth() < this.getMaxHealth() * LOSES_NERVE) {
+				return false;
+			}
+			if (this.getLastHurtByMob() == who && this.tickCount - this.getLastHurtByMobTimestamp() < BITES_BACK_TICKS) {
+				return true;
+			}
+			double d2 = this.distanceToSqr(who);
+			if (this.atHome()) {
+				return d2 < CORNERED * CORNERED;
+			}
+			return d2 < BITES * BITES || !lone;
 		}
-		boolean lone = this.lone();
-		if (lone && this.getHealth() < this.getMaxHealth() * LOSES_NERVE) {
-			return false;
-		}
-		if (this.getLastHurtByMob() == who && this.tickCount - this.getLastHurtByMobTimestamp() < BITES_BACK_TICKS) {
-			return true;
-		}
-		double d2 = this.distanceToSqr(who);
-		if (this.atHome()) {
-			return d2 < CORNERED * CORNERED;
-		}
-		return d2 < BITES * BITES || !lone;
-	}
 
 	/** Bold for a while ({@link Warrens#alarm}, or a pack set on at home). */
 	void embolden() {
@@ -213,20 +275,246 @@ public class Digger extends Monster {
 	}
 
 	@Override
-	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
-		boolean hurt = super.hurtServer(level, source, damage);
-		// set on in its own warren with a pack about it: they all stand together for a while
-		if (hurt && this.isAlive() && source.getEntity() instanceof Player && this.home != null
-			&& this.home.distToCenterSqr(this.position()) < WARREN_GROUND * WARREN_GROUND) {
-			var pack = level.getEntitiesOfClass(Digger.class, this.getBoundingBox().inflate(PACK_NEAR), Digger::isAlive);
-			if (pack.size() >= PACK_STANDS) {
-				for (Digger d : pack) {
-					d.embolden();
+		public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+			boolean hurt = super.hurtServer(level, source, damage);
+			// set on in its own warren with a pack about it: they all stand together for a while
+			if (hurt && this.isAlive() && source.getEntity() instanceof Player && this.home != null
+					&& this.home.distToCenterSqr(this.position()) < WARREN_GROUND * WARREN_GROUND) {
+				var pack = level.getEntitiesOfClass(Digger.class, this.getBoundingBox().inflate(PACK_NEAR), Digger::isAlive);
+				if (pack.size() >= PACK_STANDS) {
+					for (Digger d : pack) {
+						d.embolden();
+					}
 				}
 			}
+			return hurt;
 		}
-		return hurt;
-	}
+
+		/** Server: handle corpse dragging and feeding in pits. */
+			private void tickCorpseDrag() {
+				if (!(this.level() instanceof ServerLevel level)) {
+					return;
+				}
+				if (this.entityData.get(DRAGGING)) {
+					// currently dragging a corpse: move it toward the target pit
+					String corpseUuidStr = this.entityData.get(DRAG_CORPSE_UUID);
+					if (corpseUuidStr.isEmpty()) {
+						this.stopDragging();
+						return;
+					}
+					UUID corpseUuid;
+					try {
+						corpseUuid = UUID.fromString(corpseUuidStr);
+					} catch (IllegalArgumentException e) {
+						this.stopDragging();
+						return;
+					}
+					// find the corpse entity by UUID
+								Optional<Entity> corpseOpt = StreamSupport.stream(level.getAllEntities().spliterator(), false)
+										.filter(entity -> entity.getUUID().equals(corpseUuid))
+										.findFirst();
+					if (corpseOpt.isEmpty()) {
+						this.stopDragging();
+						return;
+					}
+					Entity corpse = corpseOpt.get();
+					// check if it's a player corpse (don't drag player corpses)
+					if (this.isPlayerCorpse(corpse)) {
+						this.stopDragging();
+						return;
+					}
+					// check if we're at the target pit
+					if (this.targetPit != null && this.targetPit.distToCenterSqr(this.position()) < 2.0 * 2.0) {
+						// drop the corpse into the pit
+						this.dropCorpseInPit(level, corpse);
+						this.stopDragging();
+						return;
+					}
+					// move toward the target pit
+					if (this.targetPit != null) {
+						this.getNavigation().moveTo(this.targetPit.getX() + 0.5, this.targetPit.getY(), this.targetPit.getZ() + 0.5, 1.0);
+					}
+				} else if (this.feedStart > 0) {
+					// currently feeding on a corpse in a pit
+					if (this.level().getGameTime() - this.feedStart >= FEED_EVERY) {
+						this.takeBiteFromCorpse(level);
+						this.feedStart = this.level().getGameTime();
+					}
+				}
+			}
+
+		/** Check if an entity is a player corpse (by Kitchen's CorpseEntity logic). */
+		private boolean isPlayerCorpse(Entity entity) {
+			try {
+				// Kitchen's CorpseEntity has a static method isPlayerCorpse or we check the entity type
+				Class<?> corpseClass = Class.forName("com.jaymoskitchen.corpse.CorpseEntity");
+				if (corpseClass.isInstance(entity)) {
+					java.lang.reflect.Method method = corpseClass.getMethod("isPlayerCorpse");
+					return (boolean) method.invoke(entity);
+				}
+			} catch (ReflectiveOperationException ignored) {
+			}
+			return false;
+		}
+
+		/** Start dragging a corpse toward the nearest pit. */
+		private void startDragging(Entity corpse, BlockPos pit) {
+			this.entityData.set(DRAGGING, true);
+			this.entityData.set(DRAG_CORPSE_UUID, corpse.getUUID().toString());
+			this.targetPit = pit;
+			this.getNavigation().moveTo(pit.getX() + 0.5, pit.getY(), pit.getZ() + 0.5, 1.0);
+			// use Kitchen's drag mechanism via reflection (CorpseEntity.carryBy or similar)
+			try {
+				Class<?> corpseClass = Class.forName("com.jaymoskitchen.corpse.CorpseEntity");
+				if (corpseClass.isInstance(corpse)) {
+					java.lang.reflect.Method method = corpseClass.getMethod("carryBy", Entity.class);
+					method.invoke(corpse, this);
+				}
+			} catch (ReflectiveOperationException ignored) {
+			}
+		}
+
+		/** Drop the corpse into the pit and start feeding. */
+			private void dropCorpseInPit(ServerLevel level, Entity corpse) {
+				// release the corpse at the pit
+				try {
+					Class<?> corpseClass = Class.forName("com.jaymoskitchen.corpse.CorpseEntity");
+					if (corpseClass.isInstance(corpse)) {
+						java.lang.reflect.Method method = corpseClass.getMethod("stopDrag");
+						method.invoke(corpse);
+					}
+				} catch (ReflectiveOperationException ignored) {
+				}
+				// start feeding
+				this.feedStart = level.getGameTime();
+				// sate the warren
+				this.sateWarren(level);
+				level.playSound(null, this.targetPit.getX() + 0.5, this.targetPit.getY(), this.targetPit.getZ() + 0.5,
+						SoundEvents.ZOMBIE_HURT, SoundSource.HOSTILE, 0.8F, 1.2F);
+			}
+
+			/** Take a bite from the corpse in the pit (using Kitchen's eatPart/nextPart). */
+			private void takeBiteFromCorpse(ServerLevel level) {
+				if (this.targetPit == null) {
+					this.feedStart = 0;
+					return;
+				}
+				// find the corpse in the pit
+				List<Entity> corpses = level.getEntitiesOfClass(Entity.class, new AABB(this.targetPit).inflate(3.0),
+						e -> {
+							try {
+								Class<?> corpseClass = Class.forName("com.jaymoskitchen.corpse.CorpseEntity");
+								return corpseClass.isInstance(e) && !this.isPlayerCorpse(e);
+							} catch (ReflectiveOperationException ex) {
+								return false;
+							}
+						});
+				if (corpses.isEmpty()) {
+					this.feedStart = 0;
+					return;
+				}
+				Entity corpse = corpses.get(0);
+				try {
+					Class<?> corpseClass = Class.forName("com.jaymoskitchen.corpse.CorpseEntity");
+					if (corpseClass.isInstance(corpse)) {
+						// call nextPart to get the next part to eat
+						java.lang.reflect.Method nextPartMethod = corpseClass.getMethod("nextPart", Entity.class);
+						int part = (int) nextPartMethod.invoke(corpse, this);
+						if (part != 0) {
+							// call eatPart to consume it
+							java.lang.reflect.Method eatPartMethod = corpseClass.getMethod("eatPart", ServerLevel.class, int.class);
+							eatPartMethod.invoke(corpse, level, part);
+							level.playSound(null, this.targetPit.getX() + 0.5, this.targetPit.getY(), this.targetPit.getZ() + 0.5,
+									SoundEvents.ZOMBIE_HURT, SoundSource.HOSTILE, 0.6F, 1.0F);
+						} else {
+							// nothing left to eat
+							this.feedStart = 0;
+						}
+					}
+				} catch (ReflectiveOperationException ignored) {
+				}
+			}
+
+			/** Sate the warren: all diggers in this warren won't attack for SATIATED_TICKS. */
+			private void sateWarren(ServerLevel level) {
+				if (this.home == null) {
+					return;
+				}
+				long satedUntil = level.getGameTime() + (long) SATIATED_TICKS;
+				for (Digger d : level.getEntitiesOfClass(Digger.class, new AABB(this.home).inflate(WARREN_GROUND), Digger::isAlive)) {
+					d.entityData.set(WARREN_SATED_UNTIL, satedUntil);
+				}
+			}
+
+		/** Stop dragging the current corpse. */
+			private void stopDragging() {
+				this.entityData.set(DRAGGING, false);
+				this.entityData.set(DRAG_CORPSE_UUID, "");
+				this.targetPit = null;
+				this.getNavigation().stop();
+			}
+
+			/** Whether the warren is currently sated (diggers won't attack). */
+			boolean isWarrenSated() {
+				return this.entityData.get(WARREN_SATED_UNTIL) > this.level().getGameTime();
+			}
+
+			/** Check if a player is dragging a corpse near a pit edge - the digger can pull it in. */
+			private void checkPlayerDraggedCorpse(ServerLevel level) {
+				if (this.home == null || this.lurks) {
+					return;
+				}
+				// find pits near this warren
+				for (BlockPos pit : this.getPitsNearWarren(level)) {
+					// check for player-dragged corpses near the pit
+					List<Entity> draggedCorpses = level.getEntitiesOfClass(Entity.class, new AABB(pit).inflate(3.0),
+							e -> {
+								try {
+									Class<?> corpseClass = Class.forName("com.jaymoskitchen.corpse.CorpseEntity");
+									if (!corpseClass.isInstance(e) || this.isPlayerCorpse(e)) {
+										return false;
+									}
+									// check if it's being dragged by a player
+									java.lang.reflect.Method draggedByMethod = corpseClass.getMethod("draggedBy", Player.class);
+									for (Player player : level.getEntitiesOfClass(Player.class, new AABB(pit).inflate(5.0))) {
+										if ((boolean) draggedByMethod.invoke(null, player)) {
+											return true;
+										}
+									}
+								} catch (ReflectiveOperationException ex) {
+								}
+								return false;
+							});
+					if (!draggedCorpses.isEmpty()) {
+						// pull the corpse into the pit
+						Entity corpse = draggedCorpses.get(0);
+						this.dropCorpseInPit(level, corpse);
+						break;
+					}
+				}
+			}
+
+			/** Get the pit positions near this warren. */
+			private List<BlockPos> getPitsNearWarren(ServerLevel level) {
+				List<BlockPos> pits = new java.util.ArrayList<>();
+				if (this.home == null) {
+					return pits;
+				}
+				// pits are at ring distance from the warren center
+				for (int dx = -Warrens.RING - 3; dx <= Warrens.RING + 3; dx++) {
+					for (int dz = -Warrens.RING - 3; dz <= Warrens.RING + 3; dz++) {
+						BlockPos pos = this.home.offset(dx, 0, dz);
+						if (pos.distToCenterSqr(Vec3.atCenterOf(this.home)) >= (Warrens.RING - 2) * (Warrens.RING - 2)
+								&& pos.distToCenterSqr(Vec3.atCenterOf(this.home)) <= (Warrens.RING + 3) * (Warrens.RING + 3)) {
+							BlockPos top = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, pos).below();
+							if (level.getBlockState(top).getBlock() instanceof TrapCoverBlock) {
+								pits.add(top);
+							}
+						}
+					}
+				}
+				return pits;
+			}
 
 	@Override
 	protected void addAdditionalSaveData(ValueOutput output) {
@@ -372,7 +660,105 @@ public class Digger extends Monster {
 	}
 
 	@Override
-	public float getVoicePitch() {
-		return 1.5F;
+		public float getVoicePitch() {
+			return 1.5F;
+		}
+
+		/**
+		 * AI goal: find a corpse near a pit and drag it into the pit to feed the warren.
+		 */
+		final class DragCorpseGoal extends Goal {
+			private @Nullable Entity targetCorpse;
+			private @Nullable BlockPos targetPit;
+			private int searchCooldown;
+
+			DragCorpseGoal() {
+				this.setFlags(EnumSet.of(Flag.MOVE));
+			}
+
+			@Override
+			public boolean canUse() {
+				if (Digger.this.isWarrenSated() || Digger.this.bold() || Digger.this.lurks || Digger.this.home == null) {
+					return false;
+				}
+				if (Digger.this.entityData.get(DRAGGING)) {
+					return false;
+				}
+				if (Digger.this.feedStart > 0) {
+					return false;
+				}
+				if (Digger.this.getTarget() != null) {
+					return false;
+				}
+				if (searchCooldown > 0) {
+					searchCooldown--;
+					return false;
+				}
+				searchCooldown = 40; // search every 2 seconds
+				if (!(Digger.this.level() instanceof ServerLevel level)) {
+					return false;
+				}
+				// find corpses near pits
+				for (BlockPos pit : Digger.this.getPitsNearWarren(level)) {
+					List<Entity> corpses = level.getEntitiesOfClass(Entity.class, new AABB(pit).inflate(CORPSE_SMELL),
+							e -> {
+								try {
+									Class<?> corpseClass = Class.forName("com.jaymoskitchen.corpse.CorpseEntity");
+									if (!corpseClass.isInstance(e) || Digger.this.isPlayerCorpse(e)) {
+										return false;
+									}
+									// not already being dragged or carried
+									java.lang.reflect.Method draggerMethod = corpseClass.getMethod("dragger");
+									java.lang.reflect.Method carrierMethod = corpseClass.getMethod("carrier");
+									if (draggerMethod.invoke(e) != null || carrierMethod.invoke(e) != null) {
+										return false;
+									}
+									// not in a spider brood's larder (check for tag)
+									if (e.entityTags().contains("jaymoskitchen_spider_larder")) {
+										return false;
+									}
+									return true;
+								} catch (ReflectiveOperationException ex) {
+									return false;
+								}
+							});
+					if (!corpses.isEmpty()) {
+						this.targetCorpse = corpses.get(0);
+						this.targetPit = pit;
+						return true;
+					}
+				}
+				return false;
+			}
+
+			@Override
+			public void start() {
+				if (this.targetCorpse != null && this.targetPit != null) {
+					Digger.this.startDragging(this.targetCorpse, this.targetPit);
+				}
+			}
+
+			@Override
+			public boolean canContinueToUse() {
+				return Digger.this.entityData.get(DRAGGING) && this.targetCorpse != null && this.targetCorpse.isAlive()
+						&& this.targetPit != null;
+			}
+
+			@Override
+			public void stop() {
+				this.targetCorpse = null;
+				this.targetPit = null;
+			}
+
+			@Override
+			public void tick() {
+				// check for player-dragged corpses near pits
+				if (Digger.this.tickCount % 20 == 0 && !(Digger.this.level() instanceof ServerLevel)) {
+					return;
+				}
+				if (Digger.this.tickCount % 20 == 0 && Digger.this.level() instanceof ServerLevel level) {
+					Digger.this.checkPlayerDraggedCorpse(level);
+				}
+			}
+		}
 	}
-}
