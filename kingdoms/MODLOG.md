@@ -18555,3 +18555,11 @@ Every realm now keeps a patron of its own. A Faith realm keeps the Truth and a h
   short Alt dash held into a long roll, F to block or perfect block, digging as ever with no fight about, and ` for the
   old way. The click on the Sun now runs before Combo Clash's (`SunMoonClient`).
 - Built; not played.
+
+## 0.14.20 (2026-11-28): Combat arts cut a Combo Clash string short; loading hint 299 updated (#2345)
+
+- A combat art (Charge, War Cry, the shield throw) now cuts a Combo Clash string under way short, so the art plays
+  clean (`CombatArts.comboClashGiveWay`, Combo Clash's public `ComboAPI.giveWay` by reflection).
+- Hint 299: jump held on the fourth blow launches the foe, if you can fight in the air, for the juggle, slam and enemy
+  step. A power's move or a combat art cuts a string short.
+- Built; not played.
