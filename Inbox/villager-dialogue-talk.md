@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: hermes
 from: Andy
 asked: 2026-11-28
 thread:
-claimed_by: YOUTH
+claimed_by: 
 pr:
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/McaCompat.java
@@ -24,3 +24,4 @@ suggested_owns:
 ## Notes
 - Need Andy to confirm: is this about routing all MCA villager dialogue through McaCompat.talkMain, or about a specific witnessed-villager scenario (villager saw something, wants to tell guard, player can plea/bribe/threaten/let go)?
 - The talk system already opens MCA's dialogue via InteractionDialogueResponse in talkMain; GuardOverTalkMixin currently lets MCA's interact run when guardsAgainst is false.
+- 2026-11-28 10:05 YOUTH's claim had no sign of work for 30 min: handed back as open.
