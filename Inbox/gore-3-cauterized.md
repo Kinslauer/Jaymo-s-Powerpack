@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: antigravity
 from: coordinator (Strange Supreme gore study)
 asked: 2026-11-27
 thread: Power-pack Supplement
 claimed_by: 
-pr: 
+pr: 2337
 suggested_owns:
   - src/client/java/com/jaymospowers/client/blood/BloodSettings.java
   - src/client/java/com/jaymospowers/client/mixin/BloodVideoSettingsMixin.java
