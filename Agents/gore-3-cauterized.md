@@ -1,17 +1,21 @@
 ---
-status: running
+status: in-review
 task: gore-3-cauterized
 branch: claude/gore-3-cauterized
 with: cauterized cut face texture + spark/smoke particle sprites
-pr: 
+pr: 2337
 mods: jaymospowers
 versions: 
 started: 2026-11-27
 owns:
-  - src/main/resources/assets/jaymospowers/textures/particle/cauterized_spark.png
-  - src/main/resources/assets/jaymospowers/textures/particle/cauterized_smoke.png
-  - src/main/resources/assets/jaymospowers/textures/entity/cut_face_cauterized.png
-  - src/main/resources/assets/jaymospowers/models/entity/cut_face_cauterized.bbmodel
+  - src/main/resources/assets/jaymospowers/textures/entity/wounds/cut_cauterized.png
+  - src/main/resources/assets/jaymospowers/textures/particle/air/cauterized_spark_0.png
+  - src/main/resources/assets/jaymospowers/textures/particle/air/cauterized_spark_1.png
+  - src/main/resources/assets/jaymospowers/textures/particle/air/cauterized_spark_2.png
+  - src/main/resources/assets/jaymospowers/textures/particle/air/cauterized_spark_3.png
+  - src/main/resources/assets/jaymospowers/textures/particle/air/cauterized_smoke_0.png
+  - src/main/resources/assets/jaymospowers/textures/particle/air/cauterized_smoke_1.png
+  - src/main/resources/assets/jaymospowers/textures/particle/air/cauterized_smoke_2.png
 ---
 # Cauterized cuts: art for heat blows and the Cauterized gore preset
 
