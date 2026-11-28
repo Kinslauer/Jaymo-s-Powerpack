@@ -70,6 +70,14 @@ public final class Uniforms {
 		return ids("zfighter/" + kind);
 	}
 
+	/**
+	 * The Cordon's ash robes for a rank ({@link CordonMen}): its old body's robes, the black band of the blindfolded on the
+	 * hat layer over their eyes (drawn by {@code kingdoms/tools/gen_cordon_outfits.py}).
+	 */
+	static List<String> cordon(String rank) {
+		return ids("cordon/" + rank);
+	}
+
 	private static String id(String path) {
 		return PREFIX + path + ".png";
 	}
@@ -122,6 +130,11 @@ public final class Uniforms {
 			return List.of();
 		}
 		int role = villager instanceof Worker w ? w.role() : -1;
+		List<String> cordon = CordonMen.outfits(villager);
+		if (cordon != null) {
+			// one of the Cordon, in their rank's robes
+			return cordon;
+		}
 		List<String> zfighter = ZFighterFolk.outfits(villager);
 		if (zfighter != null) {
 			// (0.7.319) one of Powers' Z Fighter characters

@@ -30,6 +30,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -84,10 +85,14 @@ public final class Cordon {
 	/** Ash grey, and the binding red of their seals. */
 	public static final int ASH = 0x8A8580, BINDING = 0xB0202A;
 
-	/** Their ranks, one entity type each: health, harm, armour, speed. */
+	/**
+	 * Their ranks, one entity type each: health, harm, armour, speed. The speed is the body's without MCA ({@link CordonFolk});
+	 * with MCA they walk at MCA's pace, each rank's share of it set by its speed against the Sentinel's ({@link CordonMen}).
+	 * (A person's pace, {@link NpcPace}, comes off both: these were 0.23-0.30 before, and with it the Cordon crawled.)
+	 */
 	public enum Rank {
-		SENTINEL(26.0, 5.0, 4.0, 0.25), STALKER(22.0, 4.0, 2.0, 0.30), ENFORCER(36.0, 6.0, 8.0, 0.23), OVERSEER(60.0, 7.0, 8.0, 0.25),
-		ARBITER(320.0, 11.0, 12.0, 0.26);
+		SENTINEL(26.0, 5.0, 4.0, 0.35), STALKER(22.0, 4.0, 2.0, 0.42), ENFORCER(36.0, 6.0, 8.0, 0.32), OVERSEER(60.0, 7.0, 8.0, 0.35),
+		ARBITER(320.0, 11.0, 12.0, 0.36);
 
 		final double health, damage, armour, speed;
 
@@ -239,12 +244,12 @@ public final class Cordon {
 		if (tier >= OVERSEER_FROM) {
 			ranks.add(0, Rank.OVERSEER);
 		}
-		CordonFolk first = null;
+		Mob first = null;
 		for (Rank rank : ranks) {
 			BlockPos spot = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2));
-			CordonFolk folk = spawn(level, rank, spot);
+			Mob folk = spawn(level, rank, spot);
 			if (folk != null) {
-				folk.setTarget(player);
+				Comrades.aim(folk, player);
 				if (first == null) {
 					first = folk;
 				}
@@ -258,8 +263,14 @@ public final class Cordon {
 		return true;
 	}
 
-	/** One of the Cordon of {@code rank}, at {@code at}, in the world; null if it couldn't be made. */
-	static @Nullable CordonFolk spawn(ServerLevel level, Rank rank, BlockPos at) {
+	/**
+	 * One of the Cordon of {@code rank}, at {@code at}, in the world; null if it couldn't be made. With MCA an MCA guard of
+	 * theirs ({@link CordonMen#make}), else the Cordon's own body ({@link CordonFolk}).
+	 */
+	static @Nullable Mob spawn(ServerLevel level, Rank rank, BlockPos at) {
+		if (McaCompat.LOADED) {
+			return CordonMen.make(level, rank, at);
+		}
 		CordonFolk folk = TYPES.get(rank).create(level, EntitySpawnReason.EVENT);
 		if (folk == null) {
 			return null;
@@ -446,15 +457,22 @@ public final class Cordon {
 				}
 			}
 		}
-		CordonFolk arbiter = spawn(level, Rank.ARBITER, dais.above(2));
+		Mob arbiter = spawn(level, Rank.ARBITER, dais.above(2));
+		if (arbiter instanceof CordonFolk folk) {
+			folk.setCourt(marked.asLong());
+		} else if (arbiter != null) {
+			CordonMen.keepCourt(arbiter, marked.asLong());
+		}
 		if (arbiter != null) {
-			arbiter.setCourt(marked.asLong());
 			arbiter.setPersistenceRequired();
 		}
 		for (int i = 0; i < COURT_GUARDS; i++) {
-			CordonFolk guard = spawn(level, Rank.SENTINEL, new BlockPos(marked.getX() + (i == 0 ? -3 : 3), y, marked.getZ() - r + 7));
+			Mob guard = spawn(level, Rank.SENTINEL, new BlockPos(marked.getX() + (i == 0 ? -3 : 3), y, marked.getZ() - r + 7));
 			if (guard != null) {
 				guard.setPersistenceRequired();
+				if (!(guard instanceof CordonFolk)) {
+					CordonMen.keepCourt(guard, marked.asLong());
+				}
 			}
 		}
 		level.playSound(null, marked.getX(), y, marked.getZ(), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 2.0F, 0.5F);

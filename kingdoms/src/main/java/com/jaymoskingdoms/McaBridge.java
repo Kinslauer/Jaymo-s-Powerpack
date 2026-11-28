@@ -1072,6 +1072,24 @@ final class McaBridge {
 		return make.spawn(EntitySpawnReason.EVENT);
 	}
 
+	/** {@link CordonMen#make}: a grown MCA guard of no realm at {@code at}, already in the world, or null. */
+	static @Nullable Villager cordonGuard(ServerLevel level, Vec3 at) {
+		VillagerEntityMCA v = VillagerFactory.newVillager(level).withPosition(at).withAge(0).withProfession(ProfessionsMCA.GUARD)
+			.spawn(EntitySpawnReason.EVENT);
+		if (v != null) {
+			v.setPersistenceRequired();
+		}
+		return v;
+	}
+
+	/** {@code villager} holds or wears {@code stack} in {@code slot}, and carries a copy (MCA's guards dress from what they carry). */
+	static void arm(LivingEntity villager, EquipmentSlot slot, net.minecraft.world.item.ItemStack stack) {
+		villager.setItemSlot(slot, stack.copy());
+		if (villager instanceof VillagerEntityMCA v && slot != EquipmentSlot.OFFHAND) {
+			v.getInventory().addItem(stack.copy());
+		}
+	}
+
 	/** {@link McaCompat#woman}: a grown woman of no job at {@code at}, already in the world. */
 	static @Nullable Villager woman(ServerLevel level, Vec3 at) {
 		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).withGender(Gender.FEMALE).spawn(EntitySpawnReason.EVENT);

@@ -78,7 +78,7 @@ public final class BossBars {
 			// a horde's grave-captain
 			|| ZombieHordes.captain(entity)
 			// (Awakening pick) the Cordon's Arbiter in its Court of Judgment
-			|| entity instanceof CordonFolk cordon && cordon.rank() == Cordon.Rank.ARBITER;
+			|| entity instanceof CordonFolk cordon && cordon.rank() == Cordon.Rank.ARBITER || CordonMen.arbiter(entity);
 	}
 
 	/** Whether {@code player} has struck {@code boss} (or met it) and not left it since: they are in its fight. */
