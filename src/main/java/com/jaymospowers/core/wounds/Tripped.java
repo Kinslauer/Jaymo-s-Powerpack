@@ -55,6 +55,12 @@ public final class Tripped {
 	public static final int WRAP_TICKS = 6, FALL_TICKS = 8;
 	/** How long it takes to work the cord off and get up once the trip's over (ticks; still stunned meanwhile). */
 	public static final int GET_UP_TICKS = 14;
+	/**
+	 * A sweep puts a player or an NPC on its back only this often (every time before): Andy, "Players are knocked on the
+	 * ground far too easily. lower that chance by 80%", then "npcs can get the same resilience". Every sweep is at the legs
+	 * already. Only sweeps: the bolas' bind ({@link #bind}) still always trips.
+	 */
+	public static final float SWEEP_CHANCE = 0.2F;
 	/** Speed and jump lost while tripped (shares), so a shove doesn't send it skating. */
 	public static final double SPEED = -0.9, JUMP = -1.0;
 
@@ -134,11 +140,15 @@ public final class Tripped {
 
 	/**
 	 * A sweep of the legs ({@code ticks} on the ground, kept to {@link #MIN_TICKS}-{@link #MAX_TICKS}): {@code target} goes
-	 * flat on its back, and nothing is broken. Players too, and anything built like a person. False if it can't be swept
-	 * (not a person, downed, carried, or down already).
+	 * flat on its back, and nothing is broken. Players too, and anything built like a person, {@link #SWEEP_CHANCE} of the
+	 * time. False if it can't be swept (not a person, downed, carried, or down already) or it kept its feet.
 	 */
 	public static boolean sweep(LivingEntity target, int ticks) {
 		if (!sweepable(target) || !(target.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		if (target.getRandom().nextFloat() >= SWEEP_CHANCE) {
+			// (kept their feet: the caller's fallback, a slow or nothing, has them)
 			return false;
 		}
 		down(target, level, ticks, true);

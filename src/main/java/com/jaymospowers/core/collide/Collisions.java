@@ -73,8 +73,10 @@ public final class Collisions {
 	public static final double SLAM_MIN = 0.55;
 	/** A slam's damage: impact x this, less {@link #SLAM_OFFSET}, between the bounds (health points). */
 	public static final float SLAM_PER_SPEED = 10.0F, SLAM_OFFSET = 4.5F, SLAM_DAMAGE_MIN = 1.0F, SLAM_DAMAGE_MAX = 20.0F;
-	/** A slam this hard (damage) knocks a player limp, bounced off the wall this fast. */
+	/** A slam this hard (damage) knocks a player limp, bounced off the wall this fast... */
 	public static final float SLAM_LIMP = 6.0F;
+	/** ...this often (every time before): Andy, "Players are knocked on the ground far too easily. lower that chance by 80%". */
+	public static final float SLAM_LIMP_CHANCE = 0.2F;
 	public static final double SLAM_BOUNCE = 0.15;
 	/** The stagger after a slam (Slowness II, ticks). */
 	public static final int STAGGER_TICKS = 20;
@@ -225,7 +227,7 @@ public final class Collisions {
 			body.getSoundSource(), Mth.clamp(0.5F + damage * 0.08F, 0.5F, 1.5F), 0.8F);
 		if (body instanceof ServerPlayer player) {
 			Shakes.send(player, Mth.clamp(damage * 0.8F, 1.5F, 8.0F), wall);
-			if (damage >= SLAM_LIMP && player.isAlive()) {
+			if (damage >= SLAM_LIMP && player.isAlive() && player.getRandom().nextFloat() < SLAM_LIMP_CHANCE) {
 				KitchenCompat.knockLimp(player, -ux * SLAM_BOUNCE, 0.05, -uz * SLAM_BOUNCE);
 			}
 		}

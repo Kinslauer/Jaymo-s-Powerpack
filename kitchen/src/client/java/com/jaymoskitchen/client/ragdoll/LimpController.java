@@ -44,6 +44,13 @@ public final class LimpController {
 	private static final double RUN_OVER_SPEED = 0.35, RUN_OVER_FLING = 1.3, RUN_OVER_LIFT = 0.25;
 	/** How far past your box a runner-over counts. */
 	private static final double RUN_OVER_REACH = 0.1;
+	/**
+	 * A run-over floors you this often (every time before): Andy, "Players are knocked on the ground far too easily.
+	 * lower that chance by 80%". One roll per run-over: after it, being run into doesn't roll again for
+	 * {@link #RUN_OVER_ROLL_TICKS}, so a cart pressed against you for a second doesn't get twenty tries.
+	 */
+	private static final float RUN_OVER_CHANCE = 0.2F;
+	private static final int RUN_OVER_ROLL_TICKS = 20;
 	/** Ticks limp at the least and the most, and how still (blocks a tick, for how many ticks) counts as stopped. */
 	private static final int MIN_LIMP = 30, MAX_LIMP = 140;
 	private static final double STILL_SPEED = 0.02;
@@ -74,6 +81,8 @@ public final class LimpController {
 	private static @Nullable ClientLevel level;
 	private static @Nullable RagdollBody body;
 	private static int ticks, still, cooldown;
+	/** Ticks until being run over may roll again ({@link #RUN_OVER_ROLL_TICKS}). */
+	private static int runOverWait;
 	/** The velocity at the start of this tick, and at the end of the last. */
 	private static Vec3 startVelocity = Vec3.ZERO, lastEndVelocity = Vec3.ZERO;
 	/** The player object seen last tick (a new one after joining, respawning or a portal). */
@@ -154,6 +163,9 @@ public final class LimpController {
 			if (cooldown > 0) {
 				cooldown--;
 			}
+			if (runOverWait > 0) {
+				runOverWait--;
+			}
 			check(minecraft, player);
 		}
 		forgetOthers(minecraft);
@@ -211,10 +223,13 @@ public final class LimpController {
 		if (startGliding && startFlat >= CRASH_SPEED && startFlat - endFlat >= CRASH_LOSS && player.horizontalCollision) {
 			begin(minecraft, player, new Vec3(startVelocity.x, startVelocity.y * 0.5, startVelocity.z));
 		} else {
-			Vec3 run = runOver(player, end);
+			Vec3 run = runOverWait > 0 ? null : runOver(player, end);
 			if (run != null) {
-				// run over while walking: their own way and the vehicle's both
-				begin(minecraft, player, run.add(end));
+				runOverWait = RUN_OVER_ROLL_TICKS;
+				if (player.getRandom().nextFloat() < RUN_OVER_CHANCE) {
+					// run over while walking: their own way and the vehicle's both
+					begin(minecraft, player, run.add(end));
+				}
 			}
 		}
 	}
