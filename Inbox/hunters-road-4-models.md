@@ -23,3 +23,4 @@ thread: t3 mcp:e7b29b66-499d-478c-8315-6f5702c83489
 - 2026-11-27 14:56 t3's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-27 20:39 Andy 2026-11-27: models on Antigravity, one at a time. HR 3 merged as #2331; HR 4 started on Antigravity gemini-4-carbon, T3 thread mcp:e7b29b66, branch t3/hunters-road-4-models-v2 off origin/master.
 - 2026-11-27 21:36 t3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-27 21:44 2026-11-27 ~9:55 PM: Antigravity committed the HR 4 models locally (a606ad843f on t3/hunters-road-4-models-v2, worktree E:/t3-worktrees/Origins Mod/t3-hunters-road-4-model-152ad8cdfce07495) and then hit its weekly quota (resets in ~131 h) before pushing. Claude reviewed the commit: passes (art_audit, pr_checks, 9-25 bones, all plan moves, river mob named river_drowned). Waiting on Andy to push/open the PR.
